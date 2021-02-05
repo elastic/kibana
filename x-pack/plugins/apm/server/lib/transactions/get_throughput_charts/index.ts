@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
@@ -100,9 +102,7 @@ export async function getThroughputCharts({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end } = setup;
-  const { bucketSize, intervalString } = getBucketSize({ start, end });
-  const durationAsMinutes = (end - start) / 1000 / 60;
+  const { bucketSize, intervalString } = getBucketSize(setup);
 
   const response = await searchThroughput({
     serviceName,
@@ -117,7 +117,7 @@ export async function getThroughputCharts({
     throughputTimeseries: getThroughputBuckets({
       throughputResultBuckets: response.aggregations?.throughput.buckets,
       bucketSize,
-      durationAsMinutes,
+      setupTimeRange: setup,
     }),
   };
 }

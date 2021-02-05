@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useVisibilityState } from '../../../utils/use_visibility_state';
-import { getTraceUrl } from '../../../../../apm/public';
+import { getApmTraceUrl } from '../../../../../observability/public';
 import { useLinkProps, LinkDescriptor } from '../../../hooks/use_link_props';
 import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 
@@ -136,6 +137,6 @@ const getAPMLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
 
   return {
     app: 'apm',
-    hash: getTraceUrl({ traceId, rangeFrom, rangeTo }),
+    pathname: getApmTraceUrl({ traceId, rangeFrom, rangeTo }),
   };
 };

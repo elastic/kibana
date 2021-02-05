@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
@@ -80,6 +81,7 @@ export const getThreatListSearchResponseMock = (): SearchResponse<ThreatListItem
         _id: '123',
         _score: 0,
         _source: getThreatListItemMock(),
+        fields: getThreatListItemFieldsMock(),
       },
     ],
   },
@@ -99,6 +101,16 @@ export const getThreatListItemMock = (): ThreatListItem => ({
     ip: '127.0.0.1',
     port: 1,
   },
+});
+
+export const getThreatListItemFieldsMock = () => ({
+  '@timestamp': ['2020-09-09T21:59:13Z'],
+  'host.name': ['host-1'],
+  'host.ip': ['192.168.0.0.1'],
+  'source.ip': ['127.0.0.1'],
+  'source.port': [1],
+  'destination.ip': ['127.0.0.1'],
+  'destination.port': [1],
 });
 
 export const getFilterThreatMapping = (): ThreatMapping => [

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
       after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
       describe('/api/metrics/source/default/metrics', () => {
-        it('should just work', () => {
+        it('should just work', async () => {
           const resp = fetchSource();
           return resp.then((data) => {
             expect(data).to.have.property('source');
@@ -50,14 +51,14 @@ export default function ({ getService }: FtrProviderContext) {
               tiebreaker: '_doc',
               timestamp: '@timestamp',
             });
-            expect(data).to.have.property('status');
-            expect(data?.status.metricIndicesExist).to.equal(true);
-            expect(data?.status.logIndicesExist).to.equal(true);
+            expect(data?.source).to.have.property('status');
+            expect(data?.source.status?.metricIndicesExist).to.equal(true);
+            expect(data?.source.status?.logIndicesExist).to.equal(true);
           });
         });
       });
       describe('/api/metrics/source/default/metrics/hasData', () => {
-        it('should just work', () => {
+        it('should just work', async () => {
           const resp = fetchHasData('metrics');
           return resp.then((data) => {
             expect(data).to.have.property('hasData');
@@ -66,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
       describe('/api/metrics/source/default/logs/hasData', () => {
-        it('should just work', () => {
+        it('should just work', async () => {
           const resp = fetchHasData('logs');
           return resp.then((data) => {
             expect(data).to.have.property('hasData');

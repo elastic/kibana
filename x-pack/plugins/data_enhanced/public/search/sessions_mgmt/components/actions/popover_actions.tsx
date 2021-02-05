@@ -1,13 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -95,7 +90,7 @@ export const PopoverActionsMenu = ({ api, onActionComplete, session }: PopoverAc
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
-      if (actions.length > 1 && actionType === ACTION.CANCEL) {
+      if (actions.length > 1 && actionType === ACTION.DELETE) {
         itemSet.push({ isSeparator: true, key: 'separadorable' });
       }
 

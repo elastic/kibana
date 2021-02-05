@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -23,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { Loading } from '../../../shared/loading';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { useDecodedParams } from '../../utils/encode_path_params';
 import { ResultFieldValue } from '../result';
 
 import { DocumentDetailLogic } from './document_detail_logic';
@@ -43,6 +45,7 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
   const { deleteDocument, getDocumentDetails, setFields } = useActions(DocumentDetailLogic);
 
   const { documentId } = useParams() as { documentId: string };
+  const { documentId: documentTitle } = useDecodedParams();
 
   useEffect(() => {
     getDocumentDetails(documentId);
@@ -74,13 +77,11 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
 
   return (
     <>
-      <SetPageChrome
-        trail={[...engineBreadcrumb, DOCUMENTS_TITLE, decodeURIComponent(documentId)]}
-      />
+      <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE, documentTitle]} />
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>{DOCUMENT_DETAIL_TITLE(decodeURIComponent(documentId))}</h1>
+            <h1>{DOCUMENT_DETAIL_TITLE(documentTitle)}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
         <EuiPageHeaderSection>
