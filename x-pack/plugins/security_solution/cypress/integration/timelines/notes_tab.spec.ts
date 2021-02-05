@@ -5,50 +5,59 @@
  */
 import { timeline } from '../../objects/timeline';
 
-import { NOTES_TAB_BUTTON, NOTES_TEXT, NOTES_TEXT_AREA } from '../../screens/timeline';
+import { NOTES_TEXT, NOTES_TEXT_AREA } from '../../screens/timeline';
+import { addNoteToTimeline } from '../../tasks/api_calls/notes';
+import { createTimeline } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
+import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
-  addFilter,
-  addNameAndDescriptionToTimeline,
-  addNotesToTimeline,
   closeTimeline,
-  markAsFavorite,
-  pinFirstEvent,
-  populateTimeline,
-  waitForTimelineChanges,
+  getNotePreviewByNoteId,
+  goToNotesTab,
+  openTimelineById,
+  waitForEventsPanelToBeLoaded,
 } from '../../tasks/timeline';
+import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline notes tab', () => {
+  let timelineId: string | null = null;
+  let noteId: string | null = null;
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(OVERVIEW_URL);
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
 
-    openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(timeline);
-
-    populateTimeline();
-    addFilter(timeline.filter);
-    pinFirstEvent();
-    addNotesToTimeline(timeline.notes);
-    markAsFavorite();
-    waitForTimelineChanges();
-    closeTimeline();
+    createTimeline(timeline)
+      .then((response) => {
+        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+      })
+      .then(() => {
+        const note = timeline.notes;
+        addNoteToTimeline(note, timelineId!).should((response) => {
+          expect(response.status).to.equal(200);
+          noteId = response.body.data.persistNote.note.noteId;
+          waitForTimelinesPanelToBeLoaded();
+          openTimelineById(timelineId!)
+            .click({ force: true })
+            .then(() => {
+              waitForEventsPanelToBeLoaded();
+            });
+        });
+      });
   });
 
-  describe('Notes tab', () => {
-    before(() => {
-      openTimelineUsingToggle();
-      cy.get(NOTES_TAB_BUTTON).click({ force: true });
-    });
-
+  describe('render', () => {
     after(() => {
       closeTimeline();
+    });
+
+    before(() => {
+      goToNotesTab();
+      getNotePreviewByNoteId(noteId!).should('exist');
     });
 
     it('should contain notes', () => {

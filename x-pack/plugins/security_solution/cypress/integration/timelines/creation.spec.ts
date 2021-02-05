@@ -25,6 +25,7 @@ import {
   addNotesToTimeline,
   closeTimeline,
   createNewTimeline,
+  goToQueryTab,
   markAsFavorite,
   pinFirstEvent,
   populateTimeline,
@@ -46,6 +47,7 @@ describe('Timelines', (): void => {
 
     it('toggle create timeline ', () => {
       createNewTimeline();
+      cy.get('[data-test-subj="timeline-flyout-header-panel"]').should('be.visible');
     });
   });
 
@@ -58,6 +60,10 @@ describe('Timelines', (): void => {
       openTimelineUsingToggle();
       addNameAndDescriptionToTimeline(timeline);
       populateTimeline();
+    });
+
+    beforeEach(() => {
+      goToQueryTab();
     });
 
     it('can be added filter', () => {
@@ -78,9 +84,7 @@ describe('Timelines', (): void => {
 
     it('can be added notes', () => {
       addNotesToTimeline(timeline.notes);
-      cy.get(NOTES_TAB_BUTTON).click({ force: true });
       cy.get(NOTES_TEXT).should('have.text', timeline.notes);
-      cy.get(QUERY_TAB_BUTTON).click({ force: true });
     });
 
     it('can be marked as favorite', () => {
