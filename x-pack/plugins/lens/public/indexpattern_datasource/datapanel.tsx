@@ -23,13 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  DataPublicPluginStart,
-  EsQueryConfig,
-  Query,
-  Filter,
-  KBN_FIELD_TYPES,
-} from 'src/plugins/data/public';
+import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
