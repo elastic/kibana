@@ -63,7 +63,7 @@
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "ingest-agent-policies": "9326f99c977fd2ef5ab24b6336a0675c",
           "url": "c7f66a0df8b1b52f17c28c4adb111105",
-          "endpoint:user-artifact-manifest": "67c28185da541c1404e7852d30498cd6",
+          "endpoint:user-artifact-manifest": "a0d7b04ad405eed54d76e279c3727862",
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "fleet-agents": "034346488514b7058a79140b19ddf631",
