@@ -29,6 +29,7 @@ import {
   getTrustedAppsSummaryRouteHandler,
 } from './handlers';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { TrustedAppNotFoundError } from './errors';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -145,7 +146,7 @@ describe('handlers', () => {
         mockResponse
       );
 
-      assertResponse(mockResponse, 'notFound', 'trusted app id [123] not found');
+      assertResponse(mockResponse, 'notFound', new TrustedAppNotFoundError('123'));
     });
 
     it('should return internalError when errors happen', async () => {
