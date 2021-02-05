@@ -21,7 +21,6 @@ export interface DocTableLegacyProps {
   indexPattern: IIndexPattern;
   minimumVisibleRows: number;
   onAddColumn?: (column: string) => void;
-  onBackToTop: () => void;
   onSort?: (sort: string[][]) => void;
   onMoveColumn?: (columns: string, newIdx: number) => void;
   onRemoveColumn?: (column: string) => void;
