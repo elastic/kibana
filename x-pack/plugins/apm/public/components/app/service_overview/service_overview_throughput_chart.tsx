@@ -15,7 +15,7 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
+import { useTimeRangeComparison } from '../../shared/time_comparison/use_time_range_comparison';
 
 export function ServiceOverviewThroughputChart({
   height,
@@ -27,11 +27,13 @@ export function ServiceOverviewThroughputChart({
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const { start, end, comparisonEnabled, comparisonType } = urlParams;
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-  });
+  const { comparisonStart, comparisonEnd, chartTheme } = useTimeRangeComparison(
+    {
+      start,
+      end,
+      comparisonType,
+    }
+  );
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -79,9 +81,10 @@ export function ServiceOverviewThroughputChart({
         height={height}
         showAnnotations={false}
         fetchStatus={status}
+        customTheme={chartTheme}
         timeseries={[
           {
-            data: data?.timeseries ?? [],
+            data: data?.currentPeriod.throughput ?? [],
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
@@ -92,13 +95,13 @@ export function ServiceOverviewThroughputChart({
           ...(comparisonEnabled
             ? [
                 {
-                  data: data?.comparisonTimeseries ?? [],
+                  data: data?.previousPeriod.throughput ?? [],
                   type: 'area',
-                  color: 'red',
+                  color: theme.eui.euiColorLightestShade,
                   title: i18n.translate(
-                    'xpack.apm.serviceOverview.comparisonLabel',
+                    'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
                     {
-                      defaultMessage: 'Comparison',
+                      defaultMessage: 'Previous period',
                     }
                   ),
                 },
