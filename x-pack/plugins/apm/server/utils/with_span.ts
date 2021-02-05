@@ -43,6 +43,7 @@ export function withSpan<T>(
   const resource = new asyncHooks.AsyncResource('fake_async');
 
   return resource.runInAsyncScope(() => {
+    // set the active span for the newly created async context
     // @ts-ignore
     agent._instrumentation.activeSpan = span;
     if (type) {
