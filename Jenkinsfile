@@ -1,21 +1,10 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library'
+library 'kibana-pipeline-library@fix-test-urls'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
-        }
-      }
-    }
-  }
-
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
-  }
+node('flyweight') {
+  sh "curl 'https://00f74ba44ba1062d02833c7577660e6d59742b6310-apidata.googleusercontent.com/download/storage/v1/b/kibana-ci-artifacts/o/jobs%2Felastic%2Bkibana%2Bmaster%2F11681%2Fci-worker%2Fparallel%2F24%2Fkibana%2Ftarget%2Fjunit%2Fxpack-kibana-ciGroup6%2FTEST-job-xpack-kibana-ciGroup6-worker-24-X-Pack%20API%20Integration%20Tests.xml?jk=AFshE3UxAJPd_BXfObxSXfCHHK1WYFshOiI-P_lA4L7QWh4lGMlwdTxX9LNgjRHVJOK2qZBA94T4F6rl7aKG4kiuZN6Br6rdlUa_605476vnYxUWABGHIX-ca_gGYVGiuN1yUhgcxL7jYySVfLfM-0NRrad47FO217ts2YfdpgYM1mJ5blEy4hu5l75qwXiF0gV17BfEUP5_8D1jaodMSwOxoRv5v0fEgRXWuw07CwQa5dlYULeO31hQwMXwjG7fb1HxSfa1LJUuC9ZRSVCNvYUgPDzv9sBUSrAR4wxl-DsrsbkSpPQg_S59um1wVEeojhKALxiPRj1bnb8-c-jJWcX1uReYbFCe8aCxqBDdM4x0wf9Q8QFU4D1L9YTzbHbn9Wy7rhBYY64SXj5NxG_txgBsR4bymbMvr2DI5lFbPXAT-FQHIW84o3z5uGHd3xphJR4INdBZKyaQkAqrLbsXn1LWM-XiYVbwVEKJlzMC0BLS6p_39DdM0S-U4jbGk2z319yqhF-RRU5EOWLuqe1SoabjnsNHWDMLFOzOu5IMAGXCafA1A0UDjsRE8hxSt73ifx7BOZgkobdkd_w1ULLU-jjujtXTfJdjiRaF86HRcjpQLHkxE1OQRrmcm5M1VKeUyD7qH27B_XOjzqoSA3RR7ofAPSK1SJ0_bEH29sbKL5sjSCVQGdJtte5blzOsaDgMHWzfR9farnyQPZrbj14UI21E849kbHlsA6bX32K75e3O83_alw7P4xlPrQe4yDq0XHU1JAHMEEIRzktBjufpr20MDijHW2kdlM-GeKzN6L6LI_lDi7Krd9fPjcKwvEaUrJkN7fPnms-pFXq92rymKkoN5y2kQUop5lNd-aSqvRmzel32hjvaXyELWhpkhZq9khyGiJc7WMm6CyL6t3OYB7IFnOd1bTU8JOk-I9rTb4URMqaXioFsWUEuUcbvaK9hz52WNxz2qqOqcaDPGfTtSGegaime8NY7yocqaHGmvySbKGe_RGzE02CJyo7IUo5KRSpfwEPGbxUOi93yivFxSxXLqqG3jP63Iy5ZKmh1QkKckuxpRnICRVH32Ud1VgkV2bzcxIonIU_dc0gY4eEW9VWaZiWcHH508lKnFzdmjPJqTPKEt8YZ-DPRjZP92Ol3kAbcIV5nEyNXgdQgTUmXYT_-KzRir-Y&isca=1' > junit.xml"
+  junit 'junit.xml'
+  print testUtils.getFailures()
 }
