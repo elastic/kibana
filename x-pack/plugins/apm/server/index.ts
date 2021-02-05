@@ -57,13 +57,14 @@ export function mergeConfigs(
 ) {
   return {
     /* eslint-disable @typescript-eslint/naming-convention */
-    'apm_oss.transactionIndices': apmOssConfig.transactionIndices,
-    'apm_oss.spanIndices': apmOssConfig.spanIndices,
-    'apm_oss.errorIndices': apmOssConfig.errorIndices,
-    'apm_oss.metricsIndices': apmOssConfig.metricsIndices,
+    // TODO: Remove all apm_oss options by 8.0
+    'apm_oss.transactionIndices': `traces-apm*,${apmOssConfig.transactionIndices}`,
+    'apm_oss.spanIndices': `traces-apm*,${apmOssConfig.spanIndices}`,
+    'apm_oss.errorIndices': `logs-apm*,${apmOssConfig.errorIndices}`,
+    'apm_oss.metricsIndices': `metrics-apm*,${apmOssConfig.metricsIndices}`,
     'apm_oss.sourcemapIndices': apmOssConfig.sourcemapIndices,
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
-    'apm_oss.indexPattern': apmOssConfig.indexPattern,
+    'apm_oss.indexPattern': apmOssConfig.indexPattern, // TODO: add data stream indices: traces-apm*,logs-apm*,metrics-apm*. Blocked by https://github.com/elastic/kibana/issues/87851
     /* eslint-enable @typescript-eslint/naming-convention */
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
     'xpack.apm.serviceMapFingerprintBucketSize':

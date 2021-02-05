@@ -25,25 +25,13 @@ const processorEventIndexMap: Record<ProcessorEvent, ApmIndicesName> = {
   [ProcessorEvent.error]: 'apm_oss.errorIndices',
 };
 
-const dataStreamsIndexMap: Record<ProcessorEvent, string> = {
-  [ProcessorEvent.transaction]: 'traces-apm*',
-  [ProcessorEvent.span]: 'traces-apm*',
-  [ProcessorEvent.metric]: 'metrics-apm*',
-  [ProcessorEvent.error]: 'logs-apm*',
-};
-
 export function unpackProcessorEvents(
   request: APMEventESSearchRequest,
   indices: ApmIndicesConfig
 ) {
   const { apm, ...params } = request;
-
   const events = uniq(apm.events);
-
-  const index = events.flatMap((event) => [
-    dataStreamsIndexMap[event],
-    indices[processorEventIndexMap[event]],
-  ]);
+  const index = events.map((event) => indices[processorEventIndexMap[event]]);
 
   const withFilterForProcessorEvent: ESSearchRequest & {
     body: { query: { bool: { filter: ESFilter[] } } };
