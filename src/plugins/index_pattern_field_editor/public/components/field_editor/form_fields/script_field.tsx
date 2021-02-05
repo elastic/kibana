@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
@@ -46,13 +46,14 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
   }
 };
 
-const typeConfig = schema.type! as FieldConfig<RuntimeType>;
-const defaultType = typeConfig.defaultValue!;
+export const ScriptField = React.memo(({ existingConcreteFields = [], links }: Props) => {
+  const editorValidationTimeout = useRef<ReturnType<typeof setTimeout>>();
 
-export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
   const [painlessContext, setPainlessContext] = useState<PainlessContext>(
-    mapReturnTypeToPainlessContext(defaultType)
+    mapReturnTypeToPainlessContext(schema.type.defaultValue[0].value!)
   );
+
+  const [editorId, setEditorId] = useState<string | undefined>();
 
   const suggestionProvider = PainlessLang.getSuggestionProvider(
     painlessContext,
@@ -61,12 +62,52 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
 
   const [{ type }] = useFormData<FieldFormInternal>({ watch: 'type' });
 
+  const sourceFieldConfig: FieldConfig<string> = useMemo(() => {
+    return {
+      ...schema.script.source,
+      validations: [
+        ...schema.script.source.validations,
+        {
+          validator: () => {
+            if (editorValidationTimeout.current) {
+              clearTimeout(editorValidationTimeout.current);
+            }
+
+            return new Promise((resolve) => {
+              // monaco waits 500ms before validating, so we also add a delay
+              // before checking if there are any syntax errors
+              editorValidationTimeout.current = setTimeout(() => {
+                const painlessSyntaxErrors = PainlessLang.getSyntaxErrors();
+                // It is possible for there to be more than one editor in a view,
+                // so we need to get the syntax errors based on the editor (aka model) ID
+                const editorHasSyntaxErrors = editorId && painlessSyntaxErrors[editorId].length > 0;
+
+                if (editorHasSyntaxErrors) {
+                  return resolve({
+                    message: i18n.translate(
+                      'indexPatternFieldEditor.editor.form.scriptEditorValidationMessage',
+                      {
+                        defaultMessage: 'Invalid Painless syntax.',
+                      }
+                    ),
+                  });
+                }
+
+                resolve(undefined);
+              }, 600);
+            });
+          },
+        },
+      ],
+    };
+  }, [editorId]);
+
   useEffect(() => {
     setPainlessContext(mapReturnTypeToPainlessContext(type[0]!.value!));
   }, [type]);
 
   return (
-    <UseField<string> path="script.source">
+    <UseField<string> path="script.source" config={sourceFieldConfig}>
       {({ value, setValue, label, isValid, getErrorsMessages }) => {
         return (
           <EuiFormRow
@@ -106,6 +147,7 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
               height="300px"
               value={value}
               onChange={setValue}
+              editorDidMount={(editor) => setEditorId(editor.getModel()?.id)}
               options={{
                 fontSize: 12,
                 minimap: {
@@ -132,4 +174,4 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
       }}
     </UseField>
   );
-};
+});

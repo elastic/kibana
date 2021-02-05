@@ -137,7 +137,7 @@ export const DatavisualizerSelector: FC = () => {
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
-                      defaultMessage="Upload file"
+                      defaultMessage="Select file"
                     />
                   </EuiButton>
                 }
@@ -167,7 +167,7 @@ export const DatavisualizerSelector: FC = () => {
                   >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
-                      defaultMessage="Select index"
+                      defaultMessage="Select index pattern"
                     />
                   </EuiButton>
                 }

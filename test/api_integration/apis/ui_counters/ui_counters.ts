@@ -22,7 +22,8 @@ export default function ({ getService }: FtrProviderContext) {
     count,
   });
 
-  describe('UI Counters API', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/85086
+  describe.skip('UI Counters API', () => {
     const dayDate = moment().format('DDMMYYYY');
 
     it('stores ui counter events in savedObjects', async () => {
