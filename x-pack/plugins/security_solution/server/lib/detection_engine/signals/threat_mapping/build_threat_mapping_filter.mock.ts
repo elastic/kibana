@@ -98,7 +98,18 @@ export const getThreatListItemMock = (overrides: Partial<ThreatListItem> = {}): 
       port: 1,
     },
   },
+  fields: getThreatListItemFieldsMock(),
   ...overrides,
+});
+
+export const getThreatListItemFieldsMock = () => ({
+  '@timestamp': ['2020-09-09T21:59:13Z'],
+  'host.name': ['host-1'],
+  'host.ip': ['192.168.0.0.1'],
+  'source.ip': ['127.0.0.1'],
+  'source.port': [1],
+  'destination.ip': ['127.0.0.1'],
+  'destination.port': [1],
 });
 
 export const getFilterThreatMapping = (): ThreatMapping => [
