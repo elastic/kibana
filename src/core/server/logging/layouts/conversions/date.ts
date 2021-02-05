@@ -28,11 +28,8 @@ function formatDate(
   timezone?: string
 ): string {
   const momentDate = moment(date);
-  if (timezone) {
-    momentDate.tz(timezone);
-  } else {
-    momentDate.tz(moment.tz.guess());
-  }
+  momentDate.tz(timezone ?? moment.tz.guess());
+
   switch (dateFormat) {
     case formats.ISO8601:
       return momentDate.toISOString();
