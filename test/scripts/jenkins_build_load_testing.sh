@@ -35,8 +35,8 @@ while [ 1 ]; do
 
 # Install Metricbeat
 tar -xzf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz --directory "$KIBANA_DIR"
-mv "$KIBANA_DIR"/metricbeat-* "$KIBANA_DIR"/metricbeat-install
 ls -l
+mv "$KIBANA_DIR"/metricbeat-${MB_BUILD}-linux-x86_64 "$KIBANA_DIR"/metricbeat-install
 
 # Configure Metricbeat
 pushd ../kibana-load-testing
