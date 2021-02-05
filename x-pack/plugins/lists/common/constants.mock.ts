@@ -72,6 +72,34 @@ export const ENDPOINT_ENTRIES: EndpointEntriesArray = [
   },
   { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
 ];
+// ENTRIES_WITH_IDS should only be used to mock out functionality of a collection of transforms
+// that are UI specific and useful for UI concerns that are inserted between the
+// API and the actual user interface. In some ways these might be viewed as
+// technical debt or to compensate for the differences and preferences
+// of how ReactJS might prefer data vs. how we want to model data.
+export const ENTRIES_WITH_IDS: EntriesArray = [
+  {
+    entries: [
+      {
+        field: 'nested.field',
+        id: '123',
+        operator: 'included',
+        type: 'match',
+        value: 'some value',
+      },
+    ],
+    field: 'some.parentField',
+    id: '123',
+    type: 'nested',
+  },
+  {
+    field: 'some.not.nested.field',
+    id: '123',
+    operator: 'included',
+    type: 'match',
+    value: 'some value',
+  },
+];
 export const ITEM_TYPE = 'simple';
 export const OS_TYPES: OsTypeArray = ['windows'];
 export const TAGS = [];

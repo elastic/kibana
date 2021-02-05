@@ -12,6 +12,7 @@ import { HttpStart } from '../../../../../../src/core/public';
 import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
 import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps, ApiListExportProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
+import { transformInput } from '../transforms';
 
 export interface ExceptionsApi {
   deleteExceptionItem: (arg: ApiCallMemoProps) => Promise<void>;
@@ -100,12 +101,14 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
         const abortCtrl = new AbortController();
 
         try {
-          const item = await Api.fetchExceptionListItemById({
-            http,
-            id,
-            namespaceType,
-            signal: abortCtrl.signal,
-          });
+          const item = transformInput(
+            await Api.fetchExceptionListItemById({
+              http,
+              id,
+              namespaceType,
+              signal: abortCtrl.signal,
+            })
+          );
           onSuccess(item);
         } catch (error) {
           onError(error);
@@ -163,7 +166,10 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               signal: abortCtrl.signal,
             });
             onSuccess({
-              exceptions: data,
+              // This data transform is UI specific and useful for UI concerns
+              // to compensate for the differences and preferences of how ReactJS might prefer
+              // data vs. how we want to model data. View `transformInput` for more details
+              exceptions: data.map((item) => transformInput(item)),
               pagination: {
                 page,
                 perPage,
