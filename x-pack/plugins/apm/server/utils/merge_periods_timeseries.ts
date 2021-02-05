@@ -15,7 +15,7 @@ export function mergePeriodsTimeseries({
   previousPeriodTimeseries?: Coordinate[];
 }) {
   if (!currentPeriodTimeseries.length || !previousPeriodTimeseries?.length) {
-    return;
+    return [];
   }
   return currentPeriodTimeseries?.map(({ x, y }, index) => {
     const yComparison = previousPeriodTimeseries[index].y;
