@@ -232,6 +232,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         },
         instanceB: {
           status: 'OK',
+          activeStartDate: actualInstances.instanceB.activeStartDate,
           muted: false,
         },
         instanceC: {

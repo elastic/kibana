@@ -346,6 +346,7 @@ export class ClusterClientAdapter {
                             'kibana.saved_objects.id': ids,
                           },
                         },
+                        namespaceQuery,
                       ],
                     },
                   },
@@ -365,7 +366,6 @@ export class ClusterClientAdapter {
                   },
                 },
               },
-              namespaceQuery,
             ],
             isUndefined
           ),
