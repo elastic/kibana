@@ -10,13 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiFieldText,
-  EuiFlexItem,
-  EuiCallOut,
-  EuiSpacer,
+  EuiButtonEmpty,
+  EuiCode,
   EuiDescriptionList,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import type { AlertingApiService } from '../application/services/ml_api_service/alerting';
 import { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../common/types/alerts';
@@ -50,7 +54,7 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
         }),
         description: score,
       },
-      ...(topInfluencers
+      ...(topInfluencers && topInfluencers.length > 0
         ? [
             {
               title: i18n.translate('xpack.ml.previewAlert.topInfluencersLabel', {
@@ -60,7 +64,8 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
                 <ul>
                   {topInfluencers.map((i) => (
                     <li key={i.unique_key}>
-                      {i.influencer_field_name} = {i.influencer_field_value} [{i.score}]
+                      <EuiCode transparentBackground>{i.influencer_field_name}</EuiCode> ={' '}
+                      {i.influencer_field_value} [{i.score}]
                     </li>
                   ))}
                 </ul>
@@ -68,7 +73,7 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
             },
           ]
         : []),
-      ...(topRecords
+      ...(topRecords && topRecords.length > 0
         ? [
             {
               title: i18n.translate('xpack.ml.previewAlert.topRecordsLabel', {
@@ -78,8 +83,10 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
                 <ul>
                   {topRecords.map((i) => (
                     <li key={i.unique_key}>
-                      {i.function}({i.field_name}) {i.by_field_value} {i.over_field_value}{' '}
-                      {i.partition_field_value} [{i.score}]
+                      <EuiCode transparentBackground>
+                        {i.function}({i.field_name})
+                      </EuiCode>{' '}
+                      {i.by_field_value} {i.over_field_value} {i.partition_field_value} [{i.score}]
                     </li>
                   ))}
                 </ul>
@@ -89,7 +96,7 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
         : []),
     ];
 
-    return <EuiDescriptionList type={'column'} compressed={true} listItems={listItems} />;
+    return <EuiDescriptionList type={'row'} compressed={true} listItems={listItems} />;
   }
 );
 export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
@@ -97,6 +104,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   alertParams,
 }) => {
   const [lookBehindInterval, setLookBehindInterval] = useState<string>();
+  const [areResultsVisible, setAreResultVisible] = useState<boolean>(true);
   const [previewResponse, setPreviewResponse] = useState<PreviewResponse | undefined>();
 
   const validators = useMemo(
@@ -182,31 +190,61 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       {previewResponse && sampleHits && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            size="s"
-            title={
-              <FormattedMessage
-                id="xpack.ml.previewAlert.previewMessage"
-                defaultMessage="Triggers {alertsCount, plural, one {# time} other {# times}} in the last {interval}"
-                values={{
-                  alertsCount: previewResponse.count,
-                  interval: lookBehindInterval,
-                }}
-              />
-            }
-            iconType="alert"
-            data-test-subj={'mlAnomalyAlertPreviewCallout'}
-          >
-            <ul>
-              {sampleHits.map((v) => {
-                return (
-                  <li key={v.key}>
-                    <AlertInstancePreview {...v} />
-                  </li>
-                );
-              })}
-            </ul>
-          </EuiCallOut>
+          <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
+            <EuiFlexItem grow={false}>
+              <EuiText size={'xs'}>
+                <strong>
+                  <FormattedMessage
+                    id="xpack.ml.previewAlert.previewMessage"
+                    defaultMessage="Triggers {alertsCount, plural, one {# time} other {# times}} in the last {interval}"
+                    values={{
+                      alertsCount: previewResponse.count,
+                      interval: lookBehindInterval,
+                    }}
+                  />
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color={'primary'}
+                size="xs"
+                onClick={setAreResultVisible.bind(null, !areResultsVisible)}
+              >
+                {areResultsVisible ? (
+                  <FormattedMessage
+                    id="xpack.ml.previewAlert.hideResultsButtonLabel"
+                    defaultMessage="Hide results"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.previewAlert.showResultsButtonLabel"
+                    defaultMessage="Show results"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          {areResultsVisible ? (
+            <EuiPanel
+              color="subdued"
+              borderRadius="none"
+              hasShadow={false}
+              data-test-subj={'mlAnomalyAlertPreviewCallout'}
+            >
+              <ul>
+                {sampleHits.map((v, i) => {
+                  return (
+                    <li key={v.key}>
+                      <AlertInstancePreview {...v} />
+                      {i !== sampleHits.length - 1 ? <EuiHorizontalRule margin="xs" /> : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            </EuiPanel>
+          ) : null}
         </>
       )}
     </>

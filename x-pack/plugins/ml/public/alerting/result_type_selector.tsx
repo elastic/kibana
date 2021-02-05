@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
 import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
@@ -73,7 +73,7 @@ export const ResultTypeSelector: FC<ResultTypeSelectorProps> = ({
                 title={title}
                 titleSize={'xs'}
                 paddingSize={'s'}
-                description={<EuiText size={'xs'}>{description}</EuiText>}
+                description={<small>{description}</small>}
                 selectable={{
                   onClick: () => {
                     if (selectedResultType === value) {
