@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { ReadStream } from 'fs';
+import { isPlainObject } from 'lodash';
+import { ReadStream } from 'fs';
 import type { ResponseObject } from '@hapi/hapi';
 
 const isBuffer = (obj: unknown): obj is Buffer => Buffer.isBuffer(obj);
-const isObject = (obj: unknown): obj is Record<string, unknown> =>
-  typeof obj === 'object' && obj !== null;
 const isFsReadStream = (obj: unknown): obj is ReadStream =>
-  typeof obj === 'object' && obj !== null && 'bytesRead' in obj;
+  typeof obj === 'object' && obj !== null && 'bytesRead' in obj && obj instanceof ReadStream;
 const isString = (obj: unknown): obj is string => typeof obj === 'string';
 
 /**
@@ -56,7 +55,7 @@ export function getResponsePayloadBytes(
     return Buffer.byteLength(payload);
   }
 
-  if (isObject(payload)) {
+  if (isPlainObject(payload)) {
     return Buffer.byteLength(JSON.stringify(payload));
   }
 
