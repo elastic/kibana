@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
+import { isString } from 'lodash/fp';
 
 import { FleetServerAgent, isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
@@ -32,7 +33,7 @@ function _joinFilters(filters: string[], operator = 'AND') {
 }
 
 function removeSOAttributes(kuery: string) {
-  return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
+  return kuery.replace ? kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '') : kuery;
 }
 
 export async function listAgents(
