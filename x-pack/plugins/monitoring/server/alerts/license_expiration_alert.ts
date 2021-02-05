@@ -87,12 +87,7 @@ export class LicenseExpirationAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const licenses = await fetchLicenses(
-      callCluster,
-      clusters,
-      esIndexPattern,
-      Globals.app.config.ui.max_bucket_size
-    );
+    const licenses = await fetchLicenses(callCluster, clusters, esIndexPattern);
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;

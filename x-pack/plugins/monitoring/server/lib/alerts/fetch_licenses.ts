@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { AlertLicense, AlertCluster } from '../../../common/types/alerts';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 export async function fetchLicenses(
   callCluster: any,
   clusters: AlertCluster[],
-  index: string,
-  size: number
+  index: string
 ): Promise<AlertLicense[]> {
   const params = {
     index,
@@ -20,7 +20,7 @@ export async function fetchLicenses(
       'hits.hits._index',
     ],
     body: {
-      size,
+      size: clusters.length,
       sort: [
         {
           timestamp: {
@@ -58,16 +58,18 @@ export async function fetchLicenses(
     },
   };
 
-  const response = await callCluster('search', params);
-  return response.hits.hits.map((hit: any) => {
-    const rawLicense: any = hit._source.license;
-    const license: AlertLicense = {
-      status: rawLicense.status,
-      type: rawLicense.type,
-      expiryDateMS: rawLicense.expiry_date_in_millis,
-      clusterUuid: hit._source.cluster_uuid,
-      ccs: hit._index,
-    };
-    return license;
-  });
+  const response: ElasticsearchResponse = await callCluster('search', params);
+  return (
+    response?.hits?.hits.map((hit) => {
+      const rawLicense = hit._source.license ?? {};
+      const license: AlertLicense = {
+        status: rawLicense.status ?? '',
+        type: rawLicense.type ?? '',
+        expiryDateMS: rawLicense.expiry_date_in_millis ?? 0,
+        clusterUuid: hit._source.cluster_uuid,
+        ccs: hit._index,
+      };
+      return license;
+    }) ?? []
+  );
 }

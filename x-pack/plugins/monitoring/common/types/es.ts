@@ -173,6 +173,7 @@ export interface ElasticsearchLegacySource {
   license?: {
     status?: string;
     type?: string;
+    expiry_date_in_millis?: number;
   };
   logstash_state?: {
     pipeline?: {
