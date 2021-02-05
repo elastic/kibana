@@ -34,7 +34,6 @@ import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapCenter } from './map_center';
-import { mapColumn } from './mapColumn';
 import { math } from './math';
 import { metric } from './metric';
 import { neq } from './neq';
@@ -89,7 +88,6 @@ export const functions = [
   lte,
   joinRows,
   mapCenter,
-  mapColumn,
   math,
   metric,
   neq,

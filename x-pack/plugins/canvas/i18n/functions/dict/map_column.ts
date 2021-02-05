@@ -5,34 +5,42 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { mapColumn } from '../../../canvas_plugin_src/functions/common/mapColumn';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
-import { CANVAS, DATATABLE } from '../../constants';
+// import { i18n } from '@kbn/i18n';
+// // import { mapColumn } from '../../../canvas_plugin_src/functions/common/mapColumn';
+// import { FunctionHelp } from '../function_help';
+// import { FunctionFactory } from '../../../types';
+// import { CANVAS, DATATABLE } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
-  help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
-    defaultMessage:
-      'Adds a column calculated as the result of other columns. ' +
-      'Changes are made only when you provide arguments.' +
-      'See also {alterColumnFn} and {staticColumnFn}.',
-    values: {
-      alterColumnFn: '`alterColumn`',
-      staticColumnFn: '`staticColumn`',
-    },
-  }),
-  args: {
-    name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
-      defaultMessage: 'The name of the resulting column.',
-    }),
-    expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
-      defaultMessage:
-        'A {CANVAS} expression that is passed to each row as a single row {DATATABLE}.',
-      values: {
-        CANVAS,
-        DATATABLE,
-      },
-    }),
-  },
-};
+// export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
+//   help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
+//     defaultMessage:
+//       'Adds a column calculated as the result of other columns. ' +
+//       'Changes are made only when you provide arguments.' +
+//       'See also {alterColumnFn} and {staticColumnFn}.',
+//     values: {
+//       alterColumnFn: '`alterColumn`',
+//       staticColumnFn: '`staticColumn`',
+//     },
+//   }),
+//   args: {
+//     id: i18n.translate('xpack.canvas.functions.mapColumn.args.idHelpText', {
+//       defaultMessage:
+//         'An optional id of the resulting column. When `null` the name/column argument is used as id.',
+//     }),
+//     name: i18n.translate('xpack.canvas.functions.mapColumn.args.nameHelpText', {
+//       defaultMessage: 'The name of the resulting column.',
+//     }),
+//     expression: i18n.translate('xpack.canvas.functions.mapColumn.args.expressionHelpText', {
+//       defaultMessage:
+//         'A {CANVAS} expression that is passed to each row as a single row {DATATABLE}.',
+//       values: {
+//         CANVAS,
+//         DATATABLE,
+//       },
+//     }),
+//     copyMetaFrom: i18n.translate('xpack.canvas.functions.mapColumn.args.copyMetaFromHelpText', {
+//       defaultMessage:
+//         "if set, the meta object from the specified column id is copied over to the specified target column. Throws an exception of the column doesn't exist",
+//     }),
+//   },
+// };
