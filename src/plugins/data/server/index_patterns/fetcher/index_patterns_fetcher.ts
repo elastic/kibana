@@ -16,9 +16,6 @@ import {
   getCapabilitiesForRollupIndices,
   mergeCapabilitiesWithFields,
 } from './lib';
-import { convertEsError } from './lib/errors';
-import { callFieldCapsApi, callIndexAliasApi } from './lib/es_api';
-import { timePatternToWildcard } from './lib/time_pattern_to_wildcard';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
