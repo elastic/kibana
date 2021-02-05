@@ -457,16 +457,15 @@ export function alertingServiceProvider(mlClient: MlClient) {
       }
 
       const result = res[0];
+      if (!result) return;
 
       const anomalyExplorerUrl = buildExplorerUrl(result, params.resultType as AnomalyResultType);
 
-      return result
-        ? {
-            ...result,
-            name: result.key_as_string,
-            anomalyExplorerUrl,
-          }
-        : undefined;
+      return {
+        ...result,
+        name: result.key_as_string,
+        anomalyExplorerUrl,
+      };
     },
     /**
      * Checks how often the alert condition will fire an alert instance
