@@ -29,6 +29,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { catchError, map, tap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
@@ -39,12 +41,15 @@ import { PLUGIN_ID } from '../../common';
 import {
   connectToQueryState,
   DataPublicPluginStart,
+  IEsSearchRequest,
+  IEsSearchResponse,
   IndexPattern,
   IndexPatternField,
   isCompleteResponse,
   isErrorResponse,
   QueryState,
   SearchSessionState,
+  TimeRange,
 } from '../../../../src/plugins/data/public';
 import {
   createStateContainer,
@@ -55,26 +60,20 @@ interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  shardDelayEnabled: boolean;
 }
 
-function getNumeric(fields?: IndexPatternField[]) {
-  if (!fields) return [];
-  return fields?.filter((f) => f.type === 'number' && f.aggregatable);
-}
-
-function formatFieldToComboBox(field?: IndexPatternField | null) {
-  if (!field) return [];
-  return formatFieldsToComboBox([field]);
-}
-
-function formatFieldsToComboBox(fields?: IndexPatternField[]) {
-  if (!fields) return [];
-
-  return fields?.map((field) => {
-    return {
-      label: field.displayName || field.name,
-    };
-  });
+/**
+ * This example is an app with a step by step guide
+ * walking through search session lifecycle
+ * These enum represents all important steps in this demo
+ */
+enum DemoStep {
+  ConfigureQuery,
+  RunSession,
+  SaveSession,
+  RestoreSessionOnScreen,
+  RestoreSessionViaManagement,
 }
 
 interface State extends QueryState {
@@ -86,52 +85,35 @@ export const SearchSessionsExampleApp = ({
   notifications,
   navigation,
   data,
+  shardDelayEnabled,
 }: SearchSessionsExampleAppDeps) => {
   const { IndexPatternSelect } = data.ui;
 
-  const stateContainer = useMemo(() => {
-    return createStateContainer<State>({});
-  }, []);
-  const setState = useCallback(
-    (state: Partial<State>) => stateContainer.set({ ...stateContainer.get(), ...state }),
-    [stateContainer]
-  );
-  const state = useContainerState(stateContainer);
-  useEffect(() => {
-    return connectToQueryState(data.query, stateContainer, {
-      time: true,
-      query: true,
-      filters: true,
-      refreshInterval: false,
-    });
-  }, [stateContainer, data.query]);
-
-  const [fields, setFields] = useState<IndexPatternField[]>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
-  const [request, setRequest] = useState<Record<string, any> | null>(null);
-  const [response, setResponse] = useState<Record<string, any> | null>(null);
-
-  const isStarted = !!request;
-  const isLoading = !!request && !response;
-  const isLoaded = !!response;
-
-  const [restoreRequest, setRestoreRequest] = useState<Record<string, any> | null>(null);
-  const [restoreResponse, setRestoreResponse] = useState<Record<string, any> | null>(null);
-
-  const isRestoreStarted = !!restoreRequest;
-  const isRestoreLoading = !!restoreRequest && !restoreResponse;
-  const isRestoreLoaded = !!restoreResponse;
-
-  // const reset = useCallback(() => {
-  //   setRequest(null);
-  //   setResponse(null);
-  //   setRestoreRequest(null);
-  //   setRestoreResponse(null);
-  // }, [setRequest, setResponse, setRestoreRequest, setRestoreResponse]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [request, setRequest] = useState<IEsSearchRequest | null>(null);
+  const [response, setResponse] = useState<IEsSearchResponse | null>(null);
+  const [restoreRequest, setRestoreRequest] = useState<IEsSearchRequest | null>(null);
+  const [restoreResponse, setRestoreResponse] = useState<IEsSearchResponse | null>(null);
 
   const sessionState = useObservable(data.search.session.state$) || SearchSessionState.None;
 
-  useEffect(() => {
+  const demoStep: DemoStep = (() => {
+    switch (sessionState) {
+      case SearchSessionState.None:
+      case SearchSessionState.Canceled:
+        return DemoStep.ConfigureQuery;
+      case SearchSessionState.Loading:
+      case SearchSessionState.Completed:
+        return DemoStep.RunSession;
+      case SearchSessionState.BackgroundCompleted:
+      case SearchSessionState.BackgroundLoading:
+        return DemoStep.SaveSession;
+      case SearchSessionState.Restored:
+        return DemoStep.RestoreSessionOnScreen;
+    }
+  })();
+
+  const enableSessionStorage = useCallback(() => {
     data.search.session.enableStorage({
       getName: async () => 'Search sessions example',
       getUrlGeneratorData: async () => ({
@@ -140,119 +122,68 @@ export const SearchSessionsExampleApp = ({
         urlGeneratorId: 'searchSessionExample',
       }),
     });
+  }, [data.search.session]);
 
+  const reset = useCallback(() => {
+    setRequest(null);
+    setResponse(null);
+    setRestoreRequest(null);
+    setRestoreResponse(null);
+    setIsSearching(false);
+    data.search.session.clear();
+    enableSessionStorage();
+  }, [
+    setRequest,
+    setResponse,
+    setRestoreRequest,
+    setRestoreResponse,
+    setIsSearching,
+    data.search.session,
+    enableSessionStorage,
+  ]);
+
+  useEffect(() => {
+    enableSessionStorage();
     return () => {
       data.search.session.clear();
     };
-  }, [data.search.session]);
+  }, [data.search.session, enableSessionStorage]);
 
-  // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
+  const {
+    numericFieldName,
+    indexPattern,
+    selectedField,
+    fields,
+    setIndexPattern,
+    setNumericFieldName,
+    state,
+  } = useAppState({ data });
+
   useEffect(() => {
-    let canceled = false;
-    const loadIndexPattern = async () => {
-      const loadedIndexPattern = state.indexPatternId
-        ? await data.indexPatterns.get(state.indexPatternId)
-        : await data.indexPatterns.getDefault();
-      if (canceled) return;
-      if (!loadedIndexPattern) return;
-      if (!state.indexPatternId) {
-        setState({
-          indexPatternId: loadedIndexPattern.id,
-        });
-      }
+    reset();
+  }, [reset, state]);
 
-      setIndexPattern(loadedIndexPattern);
-    };
-
-    loadIndexPattern();
-    return () => {
-      canceled = true;
-    };
-  }, [data, setState, state.indexPatternId]);
-
-  // Update the fields list every time the index pattern is modified.
-  useEffect(() => {
-    setFields(indexPattern?.fields);
-  }, [indexPattern]);
-  useEffect(() => {
-    setState({ numericFieldName: fields?.length ? getNumeric(fields)[0]?.name : undefined });
-  }, [setState, fields]);
-
-  const selectedField: IndexPatternField | undefined = useMemo(
-    () => indexPattern?.fields.find((field) => field.name === state.numericFieldName),
-    [indexPattern?.fields, state.numericFieldName]
-  );
-
-  const doAsyncSearch = async (restoreSearchSessionId?: string) => {
-    if (!indexPattern || !state.numericFieldName) return;
-
-    // start a new session or restore an existing one
-    if (restoreSearchSessionId) {
-      data.query.timefilter.timefilter.setTime(data.query.timefilter.timefilter.getAbsoluteTime()); // force absolute time range when restoring a session
-      data.search.session.restore(restoreSearchSessionId);
-    }
-    const sessionId = restoreSearchSessionId ? restoreSearchSessionId : data.search.session.start();
-
-    // Construct the query portion of the search request
-    const query = data.query.getEsQuery(indexPattern);
-
-    // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
-    const aggs = [{ type: 'avg', params: { field: state.numericFieldName } }];
-    const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
-
-    const req = {
-      params: {
-        index: indexPattern.title,
-        body: {
-          aggs: aggsDsl,
-          query,
-        },
-      },
-    };
-
-    // Submit the search request using the `data.search` service.
-    if (restoreSearchSessionId) {
-      setRestoreRequest(req.params.body);
-    } else {
-      setRequest(req.params.body);
-    }
-
-    const searchSubscription$ = data.search.search(req, { sessionId }).subscribe({
-      next: (res) => {
-        if (isCompleteResponse(res)) {
+  const search = useCallback(
+    (restoreSearchSessionId?: string) => {
+      if (!indexPattern) return;
+      if (!numericFieldName) return;
+      setIsSearching(true);
+      doSearch({ indexPattern, numericFieldName, restoreSearchSessionId }, { data, notifications })
+        .then(({ response: res, request: req }) => {
           if (restoreSearchSessionId) {
-            setRestoreResponse(res.rawResponse);
+            setRestoreRequest(req);
+            setRestoreResponse(res);
           } else {
-            setResponse(res.rawResponse);
+            setRequest(req);
+            setResponse(res);
           }
-          const avgResult: number | undefined = res.rawResponse.aggregations
-            ? res.rawResponse.aggregations[1].value
-            : undefined;
-          const message = (
-            <EuiText>
-              Searched {res.rawResponse.hits.total} documents. <br />
-              The average of {state.numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
-              .
-              <br />
-            </EuiText>
-          );
-          notifications.toasts.addSuccess({
-            title: 'Query result',
-            text: mountReactNode(message),
-          });
-
-          searchSubscription$.unsubscribe();
-        } else if (isErrorResponse(res)) {
-          // TODO: Make response error status clearer
-          notifications.toasts.addWarning('An error has occurred');
-          searchSubscription$.unsubscribe();
-        }
-      },
-      error: () => {
-        notifications.toasts.addDanger('Failed to run search');
-      },
-    });
-  };
+        })
+        .finally(() => {
+          setIsSearching(false);
+        });
+    },
+    [data, notifications, indexPattern, numericFieldName]
+  );
 
   return (
     <EuiPageBody>
@@ -291,10 +222,10 @@ export const SearchSessionsExampleApp = ({
                 placeholder={i18n.translate('searchSessionExample.selectIndexPatternPlaceholder', {
                   defaultMessage: 'Select index pattern',
                 })}
-                indexPatternId={state.indexPatternId ?? ''}
-                onChange={async (newIndexPatternId: any) => {
-                  const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
-                  setIndexPattern(newIndexPattern);
+                indexPatternId={indexPattern?.id ?? ''}
+                onChange={(id) => {
+                  if (!id) return;
+                  setIndexPattern(id);
                 }}
                 isClearable={false}
               />
@@ -307,9 +238,8 @@ export const SearchSessionsExampleApp = ({
                 singleSelection={true}
                 onChange={(option) => {
                   const fld = indexPattern?.getFieldByName(option[0].label);
-                  setState({
-                    numericFieldName: fld?.name,
-                  });
+                  if (!fld) return;
+                  setNumericFieldName(fld?.name);
                 }}
                 sortMatchesBy="startsWith"
               />
@@ -328,30 +258,27 @@ export const SearchSessionsExampleApp = ({
             passed into a search request.
             <EuiSpacer />
             <div>
-              {!isStarted && (
+              {demoStep === DemoStep.ConfigureQuery && (
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => doAsyncSearch()}
+                  onClick={() => search()}
                   iconType="play"
-                  disabled={
-                    [
-                      SearchSessionState.BackgroundLoading,
-                      SearchSessionState.BackgroundCompleted,
-                    ].includes(sessionState) || isRestoreStarted
-                  }
+                  disabled={isSearching}
                 >
                   Start the search from low-level client (data.search.search)
                 </EuiButtonEmpty>
               )}
-              {isLoading && <EuiLoadingSpinner />}
+              {isSearching && <EuiLoadingSpinner />}
 
-              {isLoaded && (
-                <SearchInspector accordionId={'1'} request={request!} response={response!} />
+              {response && request && (
+                <SearchInspector accordionId={'1'} request={request} response={response} />
               )}
             </div>
           </EuiText>
           <EuiSpacer size={'xl'} />
-          {isStarted && (
+          {(demoStep === DemoStep.RunSession ||
+            demoStep === DemoStep.RestoreSessionOnScreen ||
+            demoStep === DemoStep.SaveSession) && (
             <>
               <EuiTitle size="s">
                 <h2>3. Save your session</h2>
@@ -376,10 +303,7 @@ export const SearchSessionsExampleApp = ({
               </EuiText>
             </>
           )}
-          {([SearchSessionState.BackgroundLoading, SearchSessionState.BackgroundCompleted].includes(
-            sessionState
-          ) ||
-            isRestoreStarted) && (
+          {(demoStep === DemoStep.RestoreSessionOnScreen || demoStep === DemoStep.SaveSession) && (
             <>
               <EuiSpacer size={'xl'} />
               <EuiTitle size="s">
@@ -389,24 +313,24 @@ export const SearchSessionsExampleApp = ({
                 Now you can restore your saved session. The same search request completes
                 significantly faster because it reuses stored results.
                 <div>
-                  {!isRestoreStarted && (
+                  {!isSearching && (
                     <EuiButtonEmpty
                       size="xs"
                       iconType={'refresh'}
                       onClick={() => {
-                        doAsyncSearch(data.search.session.getSessionId());
+                        search(data.search.session.getSessionId());
                       }}
                     >
                       Restore the search session
                     </EuiButtonEmpty>
                   )}
-                  {isRestoreLoading && <EuiLoadingSpinner />}
+                  {isSearching && <EuiLoadingSpinner />}
 
-                  {isRestoreLoaded && (
+                  {restoreRequest && restoreResponse && (
                     <SearchInspector
                       accordionId={'2'}
-                      request={restoreRequest!}
-                      response={restoreResponse!}
+                      request={restoreRequest}
+                      response={restoreResponse}
                     />
                   )}
                 </div>
@@ -425,12 +349,12 @@ function SearchInspector({
   request,
 }: {
   accordionId: string;
-  response: Record<string, any>;
-  request: Record<string, any>;
+  response: IEsSearchResponse;
+  request: IEsSearchRequest;
 }) {
   return (
     <div>
-      The search took: {response.took}ms
+      The search took: {response.rawResponse.took}ms
       <EuiAccordion id={accordionId} buttonContent="Request / response">
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -456,7 +380,7 @@ function SearchInspector({
               <FormattedMessage
                 id="searchExamples.timestampText"
                 defaultMessage="Took: {time} ms"
-                values={{ time: response.took ?? 'Unknown' }}
+                values={{ time: response.rawResponse.took ?? 'Unknown' }}
               />
             </EuiText>
             <EuiCodeBlock
@@ -473,4 +397,171 @@ function SearchInspector({
       </EuiAccordion>
     </div>
   );
+}
+
+function useAppState({ data }: { data: DataPublicPluginStart }) {
+  const stateContainer = useMemo(() => {
+    return createStateContainer<State>({});
+  }, []);
+  const setState = useCallback(
+    (state: Partial<State>) => stateContainer.set({ ...stateContainer.get(), ...state }),
+    [stateContainer]
+  );
+  const state = useContainerState(stateContainer);
+  useEffect(() => {
+    return connectToQueryState(data.query, stateContainer, {
+      time: true,
+      query: true,
+      filters: true,
+      refreshInterval: false,
+    });
+  }, [stateContainer, data.query]);
+
+  const [fields, setFields] = useState<IndexPatternField[]>();
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
+
+  // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
+  useEffect(() => {
+    let canceled = false;
+    const loadIndexPattern = async () => {
+      const loadedIndexPattern = state.indexPatternId
+        ? await data.indexPatterns.get(state.indexPatternId)
+        : await data.indexPatterns.getDefault();
+      if (canceled) return;
+      if (!loadedIndexPattern) return;
+      if (!state.indexPatternId) {
+        setState({
+          indexPatternId: loadedIndexPattern.id,
+        });
+      }
+
+      setIndexPattern(loadedIndexPattern);
+    };
+
+    loadIndexPattern();
+    return () => {
+      canceled = true;
+    };
+  }, [data, setState, state.indexPatternId]);
+
+  // Update the fields list every time the index pattern is modified.
+  useEffect(() => {
+    setFields(indexPattern?.fields);
+  }, [indexPattern]);
+  useEffect(() => {
+    setState({ numericFieldName: fields?.length ? getNumeric(fields)[0]?.name : undefined });
+  }, [setState, fields]);
+
+  const selectedField: IndexPatternField | undefined = useMemo(
+    () => indexPattern?.fields.find((field) => field.name === state.numericFieldName),
+    [indexPattern?.fields, state.numericFieldName]
+  );
+
+  return {
+    selectedField,
+    indexPattern,
+    numericFieldName: state.numericFieldName,
+    fields,
+    setNumericFieldName: (field: string) => setState({ numericFieldName: field }),
+    setIndexPattern: (indexPatternId: string) => setState({ indexPatternId }),
+    state,
+  };
+}
+
+function doSearch(
+  {
+    indexPattern,
+    numericFieldName,
+    restoreSearchSessionId,
+  }: {
+    indexPattern: IndexPattern;
+    numericFieldName: string;
+    restoreSearchSessionId?: string;
+  },
+  {
+    data,
+    notifications,
+  }: { data: DataPublicPluginStart; notifications: CoreStart['notifications'] }
+): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse }> {
+  if (!indexPattern) return Promise.reject('Select an index patten');
+  if (!numericFieldName) return Promise.reject('Select a field to aggregate on');
+
+  // start a new session or restore an existing one
+  let restoreTimeRange: TimeRange | undefined;
+  if (restoreSearchSessionId) {
+    // when restoring need to make sure we are forcing absolute time range
+    restoreTimeRange = data.query.timefilter.timefilter.getAbsoluteTime();
+    data.search.session.restore(restoreSearchSessionId);
+  }
+  const sessionId = restoreSearchSessionId ? restoreSearchSessionId : data.search.session.start();
+
+  // Construct the query portion of the search request
+  const query = data.query.getEsQuery(indexPattern, restoreTimeRange);
+
+  // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
+  const aggs = [{ type: 'avg', params: { field: numericFieldName } }];
+  const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
+
+  const req = {
+    params: {
+      index: indexPattern.title,
+      body: {
+        aggs: aggsDsl,
+        query,
+      },
+    },
+  };
+
+  // Submit the search request using the `data.search` service.
+  return data.search
+    .search(req, { sessionId })
+    .pipe(
+      tap((res) => {
+        if (isCompleteResponse(res)) {
+          const avgResult: number | undefined = res.rawResponse.aggregations
+            ? res.rawResponse.aggregations[1].value
+            : undefined;
+          const message = (
+            <EuiText>
+              Searched {res.rawResponse.hits.total} documents. <br />
+              The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
+              .
+              <br />
+            </EuiText>
+          );
+          notifications.toasts.addSuccess({
+            title: 'Query result',
+            text: mountReactNode(message),
+          });
+        } else if (isErrorResponse(res)) {
+          notifications.toasts.addWarning('An error has occurred');
+        }
+      }),
+      map((res) => ({ response: res, request: req })),
+      catchError((e) => {
+        notifications.toasts.addDanger('Failed to run search');
+        return of({ request: req, response: e });
+      })
+    )
+    .toPromise();
+}
+
+function getNumeric(fields?: IndexPatternField[]) {
+  if (!fields) return [];
+  return fields?.filter((f) => f.type === 'number' && f.aggregatable);
+}
+
+function formatFieldToComboBox(field?: IndexPatternField | null) {
+  if (!field) return [];
+  return formatFieldsToComboBox([field]);
+}
+
+function formatFieldsToComboBox(fields?: IndexPatternField[]) {
+  if (!fields) return [];
+
+  return fields?.map((field) => {
+    return {
+      label: field.displayName || field.name,
+    };
+  });
 }

@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router, Route, Redirect } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AppMountParameters, CoreStart } from '../../../src/core/public';
-import { AppPluginStartDependencies } from './types';
+import { AppPluginStartDependencies, EnvConfig } from './types';
 import { SearchExamplePage, ExampleLink } from './common/example_page';
 import { SearchExamplesApp } from './search/app';
 import { SearchSessionsExampleApp } from './search_sessions/app';
@@ -31,7 +31,8 @@ const LINKS: ExampleLink[] = [
 export const renderApp = (
   { notifications, savedObjects, http, application }: CoreStart,
   { data, navigation }: AppPluginStartDependencies,
-  { element, history }: AppMountParameters
+  { element, history }: AppMountParameters,
+  { shardDelayEnabled }: EnvConfig
 ) => {
   ReactDOM.render(
     <I18nProvider>
@@ -51,6 +52,7 @@ export const renderApp = (
                 navigation={navigation}
                 notifications={notifications}
                 data={data}
+                shardDelayEnabled={shardDelayEnabled}
               />
             </Route>
             <Route path="/" exact={true}>

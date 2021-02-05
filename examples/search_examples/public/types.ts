@@ -23,3 +23,7 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
 }
+
+export interface EnvConfig {
+  shardDelayEnabled: boolean;
+}

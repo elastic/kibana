@@ -12,6 +12,7 @@ import {
   CoreStart,
   Plugin,
   AppNavLinkStatus,
+  PluginInitializerContext,
 } from '../../../src/core/public';
 import {
   SearchExamplesPluginSetup,
@@ -20,6 +21,7 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_NAME } from '../common';
+import type { ConfigSchema } from '../../../src/plugins/data/config';
 
 export class SearchExamplesPlugin
   implements
@@ -29,6 +31,11 @@ export class SearchExamplesPlugin
       AppPluginSetupDependencies,
       AppPluginStartDependencies
     > {
+  private readonly shardDelayEnabled: boolean = false;
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.shardDelayEnabled = initializerContext.config.get().search.aggs.shardDelay.enabled;
+  }
+
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { developerExamples }: AppPluginSetupDependencies
@@ -38,13 +45,15 @@ export class SearchExamplesPlugin
       id: 'searchExamples',
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart, params);
+        return renderApp(coreStart, depsStart, params, {
+          shardDelayEnabled: this.shardDelayEnabled,
+        });
       },
     });
 
