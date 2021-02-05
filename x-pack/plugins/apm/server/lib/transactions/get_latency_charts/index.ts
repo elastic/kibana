@@ -47,17 +47,17 @@ async function searchLatency({
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { esFilter, start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
+    { range: rangeFilter(start, end) },
     ...getEnvironmentFilter(environment),
-    ...setup.esFilter,
+    ...esFilter,
   ];
 
   if (transactionName) {

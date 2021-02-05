@@ -25,6 +25,7 @@ describe('get buckets', () => {
     });
 
     await getBuckets({
+      environment: 'prod',
       serviceName: 'myServiceName',
       bucketSize: 10,
       setup: {
@@ -42,14 +43,8 @@ describe('get buckets', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFilters: {
-          environment: 'prod',
-        },
-        esFilter: [
-          {
-            term: { 'service.environment': 'prod' },
-          },
-        ],
+        uiFilters: {},
+        esFilter: [],
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'apm-*',

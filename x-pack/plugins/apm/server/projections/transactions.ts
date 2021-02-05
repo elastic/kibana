@@ -47,15 +47,15 @@ export function getTransactionsProjection({
 
   const bool = {
     filter: [
-      { range: rangeFilter(start, end) },
+      ...serviceNameFilter,
       ...transactionNameFilter,
       ...transactionTypeFilter,
-      ...serviceNameFilter,
-      ...esFilter,
-      ...getEnvironmentFilter(environment),
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),
+      { range: rangeFilter(start, end) },
+      ...getEnvironmentFilter(environment),
+      ...esFilter,
     ],
   };
 

@@ -33,8 +33,6 @@ export async function getTraceSampleIds({
 }) {
   const { start, end, apmEventClient, config } = setup;
 
-  const rangeQuery = { range: rangeFilter(start, end) };
-
   const query = {
     bool: {
       filter: [
@@ -43,7 +41,8 @@ export async function getTraceSampleIds({
             field: SPAN_DESTINATION_SERVICE_RESOURCE,
           },
         },
-        rangeQuery,
+        { range: rangeFilter(start, end) },
+        ...getEnvironmentFilter(environment),
       ] as ESFilter[],
     },
   } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
@@ -51,8 +50,6 @@ export async function getTraceSampleIds({
   if (serviceName) {
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
   }
-
-  query.bool.filter.push(...getEnvironmentFilter(environment));
 
   const fingerprintBucketSize = serviceName
     ? config['xpack.apm.serviceMapFingerprintBucketSize']

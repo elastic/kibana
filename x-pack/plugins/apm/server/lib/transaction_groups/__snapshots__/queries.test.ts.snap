@@ -240,12 +240,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -254,8 +250,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
             Object {
@@ -295,12 +295,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -309,8 +305,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
             Object {
@@ -350,12 +350,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -364,8 +360,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
             Object {
@@ -411,12 +411,8 @@ Array [
         "bool": Object {
           "filter": Array [
             Object {
-              "range": Object {
-                "@timestamp": Object {
-                  "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
-                },
+              "term": Object {
+                "service.name": "foo",
               },
             },
             Object {
@@ -425,8 +421,12 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "service.name": "foo",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
             Object {

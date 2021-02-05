@@ -50,17 +50,17 @@ async function fetcher({
   setup,
   transactionType,
 }: Options) {
-  const { start, end, apmEventClient } = setup;
+  const { esFilter, start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
+    { range: rangeFilter(start, end) },
     ...getEnvironmentFilter(environment),
-    ...setup.esFilter,
+    ...esFilter,
   ];
 
   const params = {

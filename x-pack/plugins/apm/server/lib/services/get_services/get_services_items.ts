@@ -7,13 +7,11 @@
 
 import { Logger } from '@kbn/logging';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { getServicesProjection } from '../../../projections/services';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 
 export type ServicesItemsSetup = Setup & SetupTimeRange;
-export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems({
   environment,
@@ -27,18 +25,14 @@ export async function getServicesItems({
   logger: Logger;
 }) {
   const params = {
-    projection: getServicesProjection({
-      environment,
-      setup,
-      searchAggregatedTransactions,
-    }),
+    environment,
     setup,
     searchAggregatedTransactions,
   };
 
   const [transactionStats, healthStatuses] = await Promise.all([
     getServiceTransactionStats(params),
-    getHealthStatuses(params, environment).catch((err) => {
+    getHealthStatuses(params).catch((err) => {
       logger.error(err);
       return [];
     }),

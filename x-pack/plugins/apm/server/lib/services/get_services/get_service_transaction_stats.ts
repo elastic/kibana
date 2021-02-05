@@ -29,8 +29,10 @@ import {
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 interface AggregationParams {
+  environment?: string;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
 }
@@ -38,6 +40,7 @@ interface AggregationParams {
 const MAX_NUMBER_OF_SERVICES = 500;
 
 export async function getServiceTransactionStats({
+  environment,
   setup,
   searchAggregatedTransactions,
 }: AggregationParams) {
@@ -69,11 +72,12 @@ export async function getServiceTransactionStats({
       query: {
         bool: {
           filter: [
-            { range: rangeFilter(start, end) },
-            ...esFilter,
             ...getDocumentTypeFilterForAggregatedTransactions(
               searchAggregatedTransactions
             ),
+            { range: rangeFilter(start, end) },
+            ...getEnvironmentFilter(environment),
+            ...esFilter,
           ],
         },
       },

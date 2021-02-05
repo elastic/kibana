@@ -95,8 +95,8 @@ export async function getServiceInstanceSystemMetricStats({
       query: {
         bool: {
           filter: [
-            { range: rangeFilter(start, end) },
             { term: { [SERVICE_NAME]: serviceName } },
+            { range: rangeFilter(start, end) },
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],

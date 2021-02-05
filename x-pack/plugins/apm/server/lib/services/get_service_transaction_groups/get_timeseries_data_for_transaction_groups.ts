@@ -80,10 +80,10 @@ export async function getTimeseriesDataForTransactionGroups({
             { terms: { [TRANSACTION_NAME]: transactionNames } },
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            { range: rangeFilter(start, end) },
             ...getDocumentTypeFilterForAggregatedTransactions(
               searchAggregatedTransactions
             ),
+            { range: rangeFilter(start, end) },
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],

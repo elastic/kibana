@@ -182,7 +182,7 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: { environment: 'test' },
+    uiFilters: {},
     esFilter: [{ term: { 'service.environment': 'test' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */

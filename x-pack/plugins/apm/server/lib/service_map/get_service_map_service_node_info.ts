@@ -50,21 +50,22 @@ interface TaskParameters {
 }
 
 export async function getServiceMapServiceNodeInfo({
+  environment,
   serviceName,
   setup,
   searchAggregatedTransactions,
 }: Options & { serviceName: string }) {
-  const { start, end, uiFilters } = setup;
+  const { start, end } = setup;
 
   const filter: ESFilter[] = [
-    { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } },
-    ...getEnvironmentFilter(uiFilters.environment),
+    { range: rangeFilter(start, end) },
+    ...getEnvironmentFilter(environment),
   ];
 
   const minutes = Math.abs((end - start) / (1000 * 60));
   const taskParams = {
-    environment: uiFilters.environment,
+    environment,
     filter,
     searchAggregatedTransactions,
     minutes,
@@ -102,13 +103,9 @@ async function getErrorStats({
   environment?: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const setupWithBlankUiFilters = {
-    ...setup,
-    uiFilters: { environment },
-    esFilter: getEnvironmentFilter(environment),
-  };
   const { noHits, average } = await getErrorRate({
-    setup: setupWithBlankUiFilters,
+    environment,
+    setup,
     serviceName,
     searchAggregatedTransactions,
   });

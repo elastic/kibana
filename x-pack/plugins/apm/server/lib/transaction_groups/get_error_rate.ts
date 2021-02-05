@@ -58,15 +58,15 @@ export async function getErrorRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
     {
       terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
     },
+    ...transactionNamefilter,
+    ...transactionTypefilter,
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    ...transactionNamefilter,
-    ...transactionTypefilter,
+    { range: rangeFilter(start, end) },
     ...getEnvironmentFilter(environment),
     ...esFilter,
   ];

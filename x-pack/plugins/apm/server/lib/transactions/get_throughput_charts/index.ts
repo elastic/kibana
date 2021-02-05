@@ -44,17 +44,17 @@ async function searchThroughput({
   searchAggregatedTransactions: boolean;
   intervalString: string;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { esFilter, start, end, apmEventClient } = setup;
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { term: { [TRANSACTION_TYPE]: transactionType } },
+    { range: rangeFilter(start, end) },
     ...getEnvironmentFilter(environment),
-    ...setup.esFilter,
+    ...esFilter,
   ];
 
   if (transactionName) {

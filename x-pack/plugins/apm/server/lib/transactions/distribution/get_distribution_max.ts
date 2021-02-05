@@ -16,6 +16,7 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
+import { rangeFilter } from '../../../../common/utils/range_filter';
 
 export async function getDistributionMax({
   environment,
@@ -50,15 +51,7 @@ export async function getDistributionMax({
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             { term: { [TRANSACTION_NAME]: transactionName } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
-                },
-              },
-            },
+            { range: rangeFilter(start, end) },
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
