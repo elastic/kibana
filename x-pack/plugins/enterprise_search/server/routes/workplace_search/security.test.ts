@@ -45,7 +45,6 @@ describe('security routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/workplace_search/org/security/source_restrictions',
-        payload: 'body',
       });
 
       registerSecuritySourceRestrictionsRoute({
@@ -72,7 +71,6 @@ describe('security routes', () => {
       mockRouter = new MockRouter({
         method: 'patch',
         path: '/api/workplace_search/org/security/source_restrictions',
-        payload: 'body',
       });
 
       registerSecuritySourceRestrictionsRoute({
