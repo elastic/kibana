@@ -8,12 +8,15 @@
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import React from 'react';
-import { LAYER_WIZARD_CATEGORY } from '../../../maps/common/constants';
-import type { LayerWizard, RenderWizardArguments } from '../../../maps/public';
-import { VectorStyle } from '../../../maps/public';
+import uuid from 'uuid';
+import { LAYER_WIZARD_CATEGORY, STYLE_TYPE } from '../../../maps/common/constants';
 import { AnomalySource, AnomalySourceDescriptor } from './anomaly_source';
-import { VectorLayer } from '../../../maps/public';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
+import {
+  VectorLayerDescriptor,
+  VectorStylePropertiesDescriptor,
+} from '../../../maps/common/descriptor_types';
+import type { LayerWizard, RenderWizardArguments } from '../../../maps/public';
 
 export const anomalyLayerWizard: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.SOLUTIONS],
@@ -31,19 +34,34 @@ export const anomalyLayerWizard: LayerWizard = {
     return false;
   },
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<AnomalySourceDescriptor>) => {
+    const onSourceConfigChange = (sourceConfig: Partial<AnomalySourceDescriptor> | null) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
       }
 
-      // remove usage of this.
-      const layerDescriptor = VectorLayer.createDescriptor({
-        sourceDescriptor: AnomalySource.createDescriptor(sourceConfig),
-        style: VectorStyle.createDescriptor({}),
-      });
+      // remove usage of VectorLayer.createDescriptor. should be hardcoded to actual descriptor
+      const anomalyLayerDescriptor: VectorLayerDescriptor = {
+        id: uuid(),
+        type: 'VECTOR',
+        sourceDescriptor: AnomalySource.createDescriptor({
+          jobId: sourceConfig.jobId,
+        }),
+        style: {
+          type: 'VECTOR',
+          properties: ({
+            fillColor: {
+              type: STYLE_TYPE.STATIC,
+              options: {
+                color: 'rgb(255,0,0)',
+              },
+            },
+          } as unknown) as VectorStylePropertiesDescriptor,
+          isTimeAware: false,
+        },
+      };
 
-      previewLayers([layerDescriptor]);
+      previewLayers([anomalyLayerDescriptor]);
     };
 
     return <CreateAnomalySourceEditor onSourceConfigChange={onSourceConfigChange} />;

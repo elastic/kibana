@@ -6,8 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IVectorSource } from '../../../maps/public';
-import { FieldFormatter, MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../maps/common/constants';
+import {
+  FieldFormatter,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  SOURCE_TYPES,
+  VECTOR_SHAPE_TYPE,
+} from '../../../maps/common/constants';
 import {
   AbstractSourceDescriptor,
   MapExtent,
@@ -15,12 +20,18 @@ import {
   MapQuery,
   VectorSourceSyncMeta,
 } from '../../../maps/common/descriptor_types';
-import { Adapters } from '../../../../../src/plugins/inspector/common/adapters';
+import type { Adapters } from '../../../../../src/plugins/inspector/common/adapters';
 import type { GeoJsonWithMeta } from '../../../maps/public';
 import type { IField } from '../../../maps/public';
 import type { Attribution, ImmutableSourceProperty, PreIndexedShape } from '../../../maps/public';
 import type { BoundsFilters } from '../../../maps/public';
-import type { LICENSED_FEATURES } from '../../../maps/public';
+import { LICENSED_FEATURES } from '../../../maps/public';
+import { RecordScoreField } from './record_score_field';
+import type { SourceEditorArgs } from '../../../maps/public';
+import { ITooltipProperty } from '../../../maps/public';
+import type { DataRequest } from '../../../maps/public';
+import type { SourceTooltipConfig } from '../../../maps/public';
+import type { IVectorSource } from '../../../maps/public';
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
@@ -37,7 +48,7 @@ export class AnomalySource implements IVectorSource {
 
   private readonly _descriptor: AnomalySourceDescriptor;
 
-  constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters: Adapters) {
+  constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters?: Adapters) {
     this._descriptor = AnomalySource.createDescriptor(sourceDescriptor);
   }
 
@@ -83,7 +94,10 @@ export class AnomalySource implements IVectorSource {
   }
 
   createField({ fieldName }: { fieldName: string }): IField {
-    return undefined;
+    if (fieldName !== 'record_score') {
+      throw new Error('PEBKAC');
+    }
+    return new RecordScoreField({ source: this });
   }
 
   createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
@@ -100,15 +114,15 @@ export class AnomalySource implements IVectorSource {
     return false;
   }
 
-  getAttributions(): Promise<Attribution[]> {
-    return undefined;
+  async getAttributions(): Promise<Attribution[]> {
+    return [];
   }
 
-  getBoundsForFilters(
+  async getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
-    return undefined;
+    return null;
   }
 
   async getDisplayName(): Promise<string> {
@@ -121,15 +135,18 @@ export class AnomalySource implements IVectorSource {
   }
 
   getFieldByName(fieldName: string): IField | null {
+    if (fieldName === 'record_score') {
+      return new RecordScoreField({ source: this });
+    }
     return null;
   }
 
   getFieldNames(): string[] {
-    return [];
+    return ['record_score'];
   }
 
   async getFields(): Promise<IField[]> {
-    return [];
+    return [new RecordScoreField({ source: this })];
   }
 
   getGeoGridPrecision(zoom: number): number {
@@ -198,12 +215,7 @@ export class AnomalySource implements IVectorSource {
     return undefined;
   }
 
-  getSyncMeta():
-    | ESSearchSourceSyncMeta
-    | ESGeoGridSourceSyncMeta
-    | ESGeoLineSourceSyncMeta
-    | ESTermSourceSyncMeta
-    | null {
+  getSyncMeta(): VectorSourceSyncMeta | null {
     return undefined;
   }
 
@@ -243,12 +255,12 @@ export class AnomalySource implements IVectorSource {
     return false;
   }
 
-  isTimeAware(): Promise<boolean> {
-    return undefined;
+  async isTimeAware(): Promise<boolean> {
+    return true;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): React.ReactElement<any> | null {
-    return undefined;
+    return null;
   }
 
   showJoinEditor(): boolean {

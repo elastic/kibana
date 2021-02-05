@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 import { AnomalySourceDescriptor } from './anomaly_source';
+import { AnomalyJobSelector } from './anomaly_job_selector';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
@@ -19,11 +20,17 @@ interface State {
 }
 
 export class CreateAnomalySourceEditor extends Component<Props, State> {
-  previewLayer = () => {
-    this.props.onSourceConfigChange(null);
+  previewLayer = (jobId: string) => {
+    this.props.onSourceConfigChange({
+      jobId,
+    });
   };
 
   render() {
-    return <EuiPanel>Show dropdown here</EuiPanel>;
+    return (
+      <EuiPanel>
+        <AnomalyJobSelector onJobChange={this.previewLayer} />
+      </EuiPanel>
+    );
   }
 }

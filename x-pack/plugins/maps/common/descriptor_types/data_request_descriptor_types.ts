@@ -25,7 +25,7 @@ export type MapFilters = {
   zoom: number;
 };
 
-type ESSearchSourceSyncMeta = {
+export type ESSearchSourceSyncMeta = {
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -33,16 +33,16 @@ type ESSearchSourceSyncMeta = {
   topHitsSize: number;
 };
 
-type ESGeoGridSourceSyncMeta = {
+export type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-type ESGeoLineSourceSyncMeta = {
+export type ESGeoLineSourceSyncMeta = {
   splitField: string;
   sortField: string;
 };
 
-type ESTermSourceSyncMeta = {
+export type ESTermSourceSyncMeta = {
   size: number;
 };
 

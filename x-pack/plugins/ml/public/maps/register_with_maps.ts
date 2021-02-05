@@ -11,8 +11,6 @@ import { SOURCE_TYPES } from '../../../maps/common/constants';
 import { anomalyLayerWizard } from './anomaly_layer_wizard';
 
 export function registerWithMaps(mapsStartApi: MapsStartApi) {
-  // eslint-disable-next-line no-console
-  console.log('should register API with maps here', mapsStartApi);
   mapsStartApi.registerSource({
     type: SOURCE_TYPES.ML_ANOMALY,
     ConstructorFunction: AnomalySource,
