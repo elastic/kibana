@@ -13,9 +13,6 @@ import { CiStatsMetrics } from '@kbn/dev-utils';
 
 import { Bundle } from '../common';
 
-const flatten = <T>(arr: Array<T | T[]>): T[] =>
-  arr.reduce((acc: T[], item) => acc.concat(item), []);
-
 interface Entry {
   relPath: string;
   stats: Fs.Stats;
@@ -24,8 +21,8 @@ interface Entry {
 const IGNORED_EXTNAME = ['.map', '.br', '.gz'];
 
 const getFiles = (dir: string, parent?: string) =>
-  flatten(
-    Fs.readdirSync(dir).map((name): Entry | Entry[] => {
+  Fs.readdirSync(dir)
+    .map((name): Entry | Entry[] => {
       const absPath = Path.join(dir, name);
       const relPath = parent ? Path.join(parent, name) : name;
       const stats = Fs.statSync(absPath);
@@ -39,19 +36,20 @@ const getFiles = (dir: string, parent?: string) =>
         stats,
       };
     })
-  ).filter((file) => {
-    const filename = Path.basename(file.relPath);
-    if (filename.startsWith('.')) {
-      return false;
-    }
+    .flat()
+    .filter((file) => {
+      const filename = Path.basename(file.relPath);
+      if (filename.startsWith('.')) {
+        return false;
+      }
 
-    const ext = Path.extname(filename);
-    if (IGNORED_EXTNAME.includes(ext)) {
-      return false;
-    }
+      const ext = Path.extname(filename);
+      if (IGNORED_EXTNAME.includes(ext)) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
 
 export function writeBundleMetrics(bundle: Bundle) {
   const outputFiles = getFiles(bundle.outputDir);
