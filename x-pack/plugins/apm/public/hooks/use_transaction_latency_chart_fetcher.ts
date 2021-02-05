@@ -13,15 +13,28 @@ import { useApmServiceContext } from '../context/apm_service/use_apm_service_con
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
+import { useTimeRangeComparison } from '../components/shared/time_comparison/use_time_range_comparison';
 
 export function useTransactionLatencyChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {
-    urlParams: { start, end, transactionName, latencyAggregationType },
+    urlParams: {
+      start,
+      end,
+      transactionName,
+      latencyAggregationType,
+      comparisonType,
+    },
     uiFilters,
   } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = useTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -44,6 +57,8 @@ export function useTransactionLatencyChartsFetcher() {
               transactionName,
               uiFilters: JSON.stringify(uiFilters),
               latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
@@ -57,6 +72,8 @@ export function useTransactionLatencyChartsFetcher() {
       transactionType,
       uiFilters,
       latencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     ]
   );
 

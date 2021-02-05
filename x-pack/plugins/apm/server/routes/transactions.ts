@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -24,6 +24,7 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../common/latency_aggregation_types';
+import { mergePeriodsTimeseries } from '../utils/merge_periods_timeseries';
 
 /**
  * Returns a list of transactions grouped by name
@@ -141,6 +142,7 @@ export const transactionLatencyChatsRoute = createRoute({
       }),
       uiFiltersRt,
       rangeRt,
+      comparisonRangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -152,6 +154,8 @@ export const transactionLatencyChatsRoute = createRoute({
       transactionType,
       transactionName,
       latencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     } = context.params.query;
 
     if (!setup.uiFilters.environment) {
@@ -164,6 +168,8 @@ export const transactionLatencyChatsRoute = createRoute({
       setup
     );
 
+    const { start, end } = setup;
+
     const options = {
       serviceName,
       transactionType,
@@ -173,9 +179,25 @@ export const transactionLatencyChatsRoute = createRoute({
       logger,
     };
 
-    const [latencyData, anomalyTimeseries] = await Promise.all([
+    const comparisonPromise =
+      comparisonStart && comparisonEnd
+        ? getLatencyTimeseries({
+            ...options,
+            start: comparisonStart,
+            end: comparisonEnd,
+            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+          })
+        : undefined;
+
+    const [
+      currentPeriod,
+      anomalyTimeseries,
+      previousPeriod,
+    ] = await Promise.all([
       getLatencyTimeseries({
         ...options,
+        start,
+        end,
         latencyAggregationType: latencyAggregationType as LatencyAggregationType,
       }),
       getAnomalySeries(options).catch((error) => {
@@ -183,13 +205,18 @@ export const transactionLatencyChatsRoute = createRoute({
         logger.error(error);
         return undefined;
       }),
+      comparisonPromise,
     ]);
 
-    const { latencyTimeseries, overallAvgDuration } = latencyData;
-
     return {
-      latencyTimeseries,
-      overallAvgDuration,
+      currentPeriod,
+      previousPeriod: {
+        overallAvgDuration: previousPeriod?.overallAvgDuration,
+        latencyTimeseries: mergePeriodsTimeseries({
+          currentPeriodTimeseries: currentPeriod.latencyTimeseries,
+          previousPeriodTimeseries: previousPeriod?.latencyTimeseries,
+        }),
+      },
       anomalyTimeseries,
     };
   },

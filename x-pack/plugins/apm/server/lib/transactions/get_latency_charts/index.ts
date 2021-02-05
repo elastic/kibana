@@ -36,6 +36,8 @@ async function searchLatency({
   setup,
   searchAggregatedTransactions,
   latencyAggregationType,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -43,8 +45,10 @@ async function searchLatency({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
 
   const filter: ESFilter[] = [
@@ -107,6 +111,8 @@ export async function getLatencyTimeseries({
   setup,
   searchAggregatedTransactions,
   latencyAggregationType,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -114,6 +120,8 @@ export async function getLatencyTimeseries({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
+  start: number;
+  end: number;
 }) {
   const response = await searchLatency({
     serviceName,
@@ -122,6 +130,8 @@ export async function getLatencyTimeseries({
     setup,
     searchAggregatedTransactions,
     latencyAggregationType,
+    start,
+    end,
   });
 
   if (!response.aggregations) {

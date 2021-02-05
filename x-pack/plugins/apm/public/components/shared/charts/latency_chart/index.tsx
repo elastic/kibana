@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTheme } from '../../../../hooks/use_theme';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
@@ -21,6 +22,7 @@ import {
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/Links/url_helpers';
+import { getChartTheme } from '../../time_comparison/use_time_range_comparison';
 
 interface Props {
   height?: number;
@@ -34,8 +36,10 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
 
 export function LatencyChart({ height }: Props) {
   const history = useHistory();
+  const theme = useTheme();
+  const comparisonChartTheme = getChartTheme(theme);
   const { urlParams } = useUrlParams();
-  const { latencyAggregationType } = urlParams;
+  const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
 
   const {
@@ -43,7 +47,12 @@ export function LatencyChart({ height }: Props) {
     latencyChartsStatus,
   } = useTransactionLatencyChartsFetcher();
 
-  const { latencyTimeseries, anomalyTimeseries, mlJobId } = latencyChartsData;
+  const {
+    latencyTimeseries,
+    previousPeriodTimeseries,
+    anomalyTimeseries,
+    mlJobId,
+  } = latencyChartsData;
 
   const latencyMaxY = getMaxY(latencyTimeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
@@ -99,7 +108,13 @@ export function LatencyChart({ height }: Props) {
           height={height}
           fetchStatus={latencyChartsStatus}
           id="latencyChart"
-          timeseries={latencyTimeseries}
+          customTheme={comparisonChartTheme}
+          timeseries={[
+            ...latencyTimeseries,
+            ...(comparisonEnabled && previousPeriodTimeseries
+              ? [previousPeriodTimeseries]
+              : []),
+          ]}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={anomalyTimeseries}
         />

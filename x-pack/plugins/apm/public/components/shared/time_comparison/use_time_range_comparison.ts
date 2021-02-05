@@ -10,7 +10,7 @@ import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
 import { useTheme } from '../../../hooks/use_theme';
 
-function getChartTheme(theme: EuiTheme) {
+export function getChartTheme(theme: EuiTheme) {
   return {
     areaSeriesStyle: {
       area: {

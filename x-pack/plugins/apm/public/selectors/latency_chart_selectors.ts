@@ -17,6 +17,7 @@ export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{servic
 
 interface LatencyChartData {
   latencyTimeseries: Array<APMChartSpec<Coordinate>>;
+  previousPeriodTimeseries?: APMChartSpec<Coordinate>;
   mlJobId?: string;
   anomalyTimeseries?: { boundaries: APMChartSpec[]; scores: APMChartSpec };
 }
@@ -30,18 +31,26 @@ export function getLatencyChartSelector({
   theme: EuiTheme;
   latencyAggregationType?: string;
 }): LatencyChartData {
-  if (!latencyChart?.latencyTimeseries || !latencyAggregationType) {
+  if (
+    !latencyChart?.currentPeriod.latencyTimeseries ||
+    !latencyAggregationType
+  ) {
     return {
       latencyTimeseries: [],
+      previousPeriodTimeseries: undefined,
       mlJobId: undefined,
       anomalyTimeseries: undefined,
     };
   }
   return {
     latencyTimeseries: getLatencyTimeseries({
-      latencyChart,
+      latencyChart: latencyChart.currentPeriod,
       theme,
       latencyAggregationType,
+    }),
+    previousPeriodTimeseries: getPreviousPeriodTimeseries({
+      previousPeriod: latencyChart.previousPeriod,
+      theme,
     }),
     mlJobId: latencyChart.anomalyTimeseries?.jobId,
     anomalyTimeseries: getAnomalyTimeseries({
@@ -51,12 +60,32 @@ export function getLatencyChartSelector({
   };
 }
 
+function getPreviousPeriodTimeseries({
+  previousPeriod,
+  theme,
+}: {
+  previousPeriod: LatencyChartsResponse['previousPeriod'];
+  theme: EuiTheme;
+}) {
+  return {
+    data: previousPeriod.latencyTimeseries ?? [],
+    type: 'area',
+    color: theme.eui.euiColorLightestShade,
+    title: i18n.translate(
+      'xpack.apm.serviceOverview.latencyChartTitle.previousPeriodLabel',
+      {
+        defaultMessage: 'Previous period',
+      }
+    ),
+  };
+}
+
 function getLatencyTimeseries({
   latencyChart,
   theme,
   latencyAggregationType,
 }: {
-  latencyChart: LatencyChartsResponse;
+  latencyChart: LatencyChartsResponse['currentPeriod'];
   theme: EuiTheme;
   latencyAggregationType: string;
 }) {
