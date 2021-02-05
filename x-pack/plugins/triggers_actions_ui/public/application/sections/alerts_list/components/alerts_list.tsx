@@ -280,7 +280,7 @@ export const AlertsList: React.FunctionComponent = () => {
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertsList.fixLicenseLink"
-                defaultMessage="(Fix)"
+                defaultMessage="Fix"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -298,6 +298,7 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
+      width: '35%',
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
         return (
@@ -320,6 +321,7 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: false,
+      width: '150px',
       'data-test-subj': 'alertsTableCell-status',
       render: (executionStatus: AlertExecutionStatus) => {
         return renderAlertExecutionStatus(executionStatus);
