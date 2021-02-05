@@ -16,7 +16,7 @@ import { useBreakPoints } from '../../hooks/use_break_points';
 
 const SearchBarFlexGroup = styled(EuiFlexGroup)`
   margin: ${({ theme }) =>
-    `${theme.eui.euiSizeM} ${theme.eui.euiSizeM} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeM}`};
+    `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeS}`};
 `;
 
 interface Props {
