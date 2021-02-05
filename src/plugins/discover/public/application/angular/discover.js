@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -56,7 +56,6 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
 import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
-import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { getDefaultSort } from './doc_table/lib/get_default_sort';
@@ -198,7 +197,7 @@ function discoverController($route, $scope, Promise) {
     session: data.search.session,
   });
 
-  const state = getState({
+  const stateContainer = getState({
     getStateDefaults,
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
     history,
@@ -213,7 +212,7 @@ function discoverController($route, $scope, Promise) {
     replaceUrlAppState,
     kbnUrlStateStorage,
     getPreviousAppState,
-  } = state;
+  } = stateContainer;
 
   if (appStateContainer.getState().index !== $scope.indexPattern.id) {
     //used index pattern is different than the given by url/state which is invalid
@@ -323,9 +322,23 @@ function discoverController($route, $scope, Promise) {
     )
   );
 
-  const inspectorAdapters = {
-    requests: new RequestAdapter(),
+  $scope.opts = {
+    // number of records to fetch, then paginate through
+    sampleSize: config.get(SAMPLE_SIZE_SETTING),
+    timefield: getTimeField(),
+    savedSearch: savedSearch,
+    indexPatternList: $route.current.locals.savedObjects.ip.list,
+    config: config,
+    setHeaderActionMenu: getHeaderActionMenuMounter(),
+    filterManager,
+    setAppState,
+    data,
+    stateContainer,
   };
+
+  const inspectorAdapters = ($scope.opts.inspectorAdapters = {
+    requests: new RequestAdapter(),
+  });
 
   $scope.timefilterUpdateHandler = (ranges) => {
     timefilter.setTime({
@@ -358,7 +371,7 @@ function discoverController($route, $scope, Promise) {
     unlistenHistoryBasePath();
   });
 
-  const getFieldCounts = async () => {
+  $scope.opts.getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
     if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
@@ -374,20 +387,11 @@ function discoverController($route, $scope, Promise) {
       });
     });
   };
-
-  $scope.topNavMenu = getTopNavLinks({
-    getFieldCounts,
-    indexPattern: $scope.indexPattern,
-    inspectorAdapters,
-    navigateTo: (path) => {
-      $scope.$evalAsync(() => {
-        history.push(path);
-      });
-    },
-    savedSearch,
-    services,
-    state,
-  });
+  $scope.opts.navigateTo = (path) => {
+    $scope.$evalAsync(() => {
+      history.push(path);
+    });
+  };
 
   $scope.searchSource
     .setField('index', $scope.indexPattern)
@@ -446,19 +450,6 @@ function discoverController($route, $scope, Promise) {
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
-  $scope.opts = {
-    // number of records to fetch, then paginate through
-    sampleSize: config.get(SAMPLE_SIZE_SETTING),
-    timefield: getTimeField(),
-    savedSearch: savedSearch,
-    indexPatternList: $route.current.locals.savedObjects.ip.list,
-    config: config,
-    setHeaderActionMenu: getHeaderActionMenuMounter(),
-    filterManager,
-    setAppState,
-    data,
-  };
-
   const shouldSearchOnPageLoad = () => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
@@ -502,13 +493,6 @@ function discoverController($route, $scope, Promise) {
           },
           (error) => addFatalError(core.fatalErrors, error)
         )
-      );
-
-      subscriptions.add(
-        data.search.session.onRefresh$.subscribe(() => {
-          searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-          refetch$.next();
-        })
       );
 
       $scope.changeInterval = (interval) => {

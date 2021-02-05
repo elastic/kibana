@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import numeral from '@elastic/numeral';
-import { EcsOpsMetricsEvent, EcsEventKind, EcsEventCategory, EcsEventType } from '../../logging';
+import { EcsEvent, EcsEventKind, EcsEventCategory, EcsEventType } from '../../logging';
 import { OpsMetrics } from '..';
 
 const ECS_VERSION = '1.7.0';
@@ -16,7 +16,7 @@ const ECS_VERSION = '1.7.0';
  *
  * @internal
  */
-export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsOpsMetricsEvent {
+export function getEcsOpsMetricsLog(metrics: OpsMetrics): EcsEvent {
   const { process, os } = metrics;
   const processMemoryUsedInBytes = process?.memory?.heap?.used_in_bytes;
   const processMemoryUsedInBytesMsg = processMemoryUsedInBytes
