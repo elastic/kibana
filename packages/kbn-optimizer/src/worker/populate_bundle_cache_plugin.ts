@@ -123,6 +123,9 @@ export class PopulateBundleCachePlugin {
           workUnits,
           files,
         });
+
+        // write the cache to the compilation so that it isn't cleaned by clean-webpack-plugin
+        bundle.cache.writeWebpackAsset(compilation);
       }
     );
   }

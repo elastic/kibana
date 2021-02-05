@@ -81,7 +81,7 @@ export class Bundle {
     this.banner = spec.banner;
     this.pageLoadAssetSizeLimit = spec.pageLoadAssetSizeLimit;
 
-    this.cache = new BundleCache(Path.resolve(this.outputDir, '.kbn-optimizer-cache'));
+    this.cache = new BundleCache(this.outputDir);
   }
 
   /**

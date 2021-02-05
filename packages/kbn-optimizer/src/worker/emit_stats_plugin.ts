@@ -17,11 +17,18 @@ export class EmitStatsPlugin {
   constructor(private readonly bundle: Bundle) {}
 
   public apply(compiler: webpack.Compiler) {
-    compiler.hooks.done.tap('EmitStatsPlugin', (stats) => {
-      Fs.writeFileSync(
-        Path.resolve(this.bundle.outputDir, 'stats.json'),
-        JSON.stringify(stats.toJson())
-      );
-    });
+    compiler.hooks.done.tap(
+      {
+        name: 'EmitStatsPlugin',
+        // run at the very end, ensure that it's after clean-webpack-plugin
+        stage: 10,
+      },
+      (stats) => {
+        Fs.writeFileSync(
+          Path.resolve(this.bundle.outputDir, 'stats.json'),
+          JSON.stringify(stats.toJson())
+        );
+      }
+    );
   }
 }
