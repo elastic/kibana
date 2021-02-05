@@ -22,11 +22,13 @@ password: {{password}}
 {{#if password}}
 hidden_password: {{password}}
 {{/if}}
-should_be_text: {{should_be_text}}
+foo: {{bar}}
+some_text_field: {{should_be_text}}
       `;
     const vars = {
       paths: { value: ['/usr/local/var/log/nginx/access.log'] },
       password: { type: 'password', value: '' },
+      bar: { type: 'text', value: 'bar' },
       should_be_text: { type: 'text', value: '1234' },
     };
 
@@ -37,7 +39,8 @@ should_be_text: {{should_be_text}}
       exclude_files: ['.gz$'],
       processors: [{ add_locale: null }],
       password: '',
-      should_be_text: '1234',
+      foo: 'bar',
+      some_text_field: '1234',
     });
   });
 
