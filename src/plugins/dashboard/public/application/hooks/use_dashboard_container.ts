@@ -71,9 +71,9 @@ export const useDashboardContainer = (
     const incomingEmbeddable = embeddable.getStateTransfer().getIncomingEmbeddablePackage(true);
 
     let canceled = false;
-    let newContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
+    let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
-      newContainer = await dashboardFactory.create(
+      pendingContainer = await dashboardFactory.create(
         getDashboardContainerInput({
           dashboardCapabilities,
           dashboardStateManager,
@@ -85,10 +85,11 @@ export const useDashboardContainer = (
       );
 
       // already new container is being created
-      // no longer interested in current one
+      // no longer interested in the pending one
       if (canceled) {
         try {
-          newContainer?.destroy();
+          pendingContainer?.destroy();
+          pendingContainer = null;
         } catch (e) {
           // destroy could throw if something has already destroyed the container
           // eslint-disable-next-line no-console
@@ -98,12 +99,12 @@ export const useDashboardContainer = (
         return;
       }
 
-      if (!newContainer || isErrorEmbeddable(newContainer)) {
+      if (!pendingContainer || isErrorEmbeddable(pendingContainer)) {
         return;
       }
 
       // inject switch view mode callback for the empty screen to use
-      newContainer.switchViewMode = (newViewMode: ViewMode) =>
+      pendingContainer.switchViewMode = (newViewMode: ViewMode) =>
         dashboardStateManager.switchViewMode(newViewMode);
 
       // If the incoming embeddable is newly created, or doesn't exist in the current panels list,
@@ -112,20 +113,20 @@ export const useDashboardContainer = (
         incomingEmbeddable &&
         (!incomingEmbeddable?.embeddableId ||
           (incomingEmbeddable.embeddableId &&
-            !newContainer.getInput().panels[incomingEmbeddable.embeddableId]))
+            !pendingContainer.getInput().panels[incomingEmbeddable.embeddableId]))
       ) {
         dashboardStateManager.switchViewMode(ViewMode.EDIT);
-        newContainer.addNewEmbeddable<EmbeddableInput>(
+        pendingContainer.addNewEmbeddable<EmbeddableInput>(
           incomingEmbeddable.type,
           incomingEmbeddable.input
         );
       }
-      setDashboardContainer(newContainer);
+      setDashboardContainer(pendingContainer);
     })();
     return () => {
       canceled = true;
       try {
-        newContainer?.destroy();
+        pendingContainer?.destroy();
       } catch (e) {
         // destroy could throw if something has already destroyed the container
         // eslint-disable-next-line no-console

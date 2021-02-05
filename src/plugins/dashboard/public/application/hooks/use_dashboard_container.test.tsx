@@ -19,6 +19,7 @@ import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { DashboardCapabilities } from '../types';
 import { EmbeddableFactory } from '../../../../embeddable/public';
 import { HelloWorldEmbeddable } from '../../../../embeddable/public/tests/fixtures';
+import { DashboardContainer } from '../embeddable';
 
 const savedDashboard = getSavedDashboardMock();
 
@@ -28,15 +29,16 @@ function mockHasTaggingCapabilities(obj: any): obj is any {
 }
 
 const history = createBrowserHistory();
-const dashboardState = new DashboardStateManager({
-  savedDashboard,
-  hideWriteControls: false,
-  allowByValueEmbeddables: false,
-  kibanaVersion: '7.0.0',
-  kbnUrlStateStorage: createKbnUrlStateStorage(),
-  history: createBrowserHistory(),
-  hasTaggingCapabilities: mockHasTaggingCapabilities,
-});
+const createDashboardState = () =>
+  new DashboardStateManager({
+    savedDashboard,
+    hideWriteControls: false,
+    allowByValueEmbeddables: false,
+    kibanaVersion: '7.0.0',
+    kbnUrlStateStorage: createKbnUrlStateStorage(),
+    history: createBrowserHistory(),
+    hasTaggingCapabilities: mockHasTaggingCapabilities,
+  });
 
 const defaultCapabilities: DashboardCapabilities = {
   show: false,
@@ -56,7 +58,7 @@ const services = {
   scopedHistory: history,
 };
 
-test('container is destroyed on unmount', async () => {
+const setupEmbeddableFactory = () => {
   const embeddable = new HelloWorldEmbeddable({ id: 'id' });
   const deferEmbeddableCreate = defer();
   services.embeddable.getEmbeddableFactory.mockImplementation(
@@ -67,8 +69,23 @@ test('container is destroyed on unmount', async () => {
   );
   const destroySpy = jest.spyOn(embeddable, 'destroy');
 
+  return {
+    destroySpy,
+    embeddable,
+    createEmbeddable: () => {
+      act(() => {
+        deferEmbeddableCreate.resolve(embeddable);
+      });
+    },
+  };
+};
+
+test('container is destroyed on unmount', async () => {
+  const { createEmbeddable, destroySpy, embeddable } = setupEmbeddableFactory();
+
+  const state = createDashboardState();
   const { result, unmount, waitForNextUpdate } = renderHook(
-    () => useDashboardContainer(dashboardState, history, false),
+    () => useDashboardContainer(state, history, false),
     {
       wrapper: ({ children }) => (
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -78,9 +95,7 @@ test('container is destroyed on unmount', async () => {
 
   expect(result.current).toBeNull(); // null on initial render
 
-  act(() => {
-    deferEmbeddableCreate.resolve(embeddable);
-  });
+  createEmbeddable();
 
   await waitForNextUpdate();
 
@@ -90,4 +105,69 @@ test('container is destroyed on unmount', async () => {
   unmount();
 
   expect(destroySpy).toBeCalled();
+});
+
+test('old container is destroyed on new dashboardStateManager', async () => {
+  const embeddableFactoryOld = setupEmbeddableFactory();
+
+  const { result, waitForNextUpdate, rerender } = renderHook<
+    DashboardStateManager,
+    DashboardContainer | null
+  >((dashboardState) => useDashboardContainer(dashboardState, history, false), {
+    wrapper: ({ children }) => (
+      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+    ),
+    initialProps: createDashboardState(),
+  });
+
+  expect(result.current).toBeNull(); // null on initial render
+
+  embeddableFactoryOld.createEmbeddable();
+
+  await waitForNextUpdate();
+
+  expect(embeddableFactoryOld.embeddable).toBe(result.current);
+  expect(embeddableFactoryOld.destroySpy).not.toBeCalled();
+
+  const embeddableFactoryNew = setupEmbeddableFactory();
+  rerender(createDashboardState());
+
+  embeddableFactoryNew.createEmbeddable();
+
+  await waitForNextUpdate();
+
+  expect(embeddableFactoryNew.embeddable).toBe(result.current);
+
+  expect(embeddableFactoryNew.destroySpy).not.toBeCalled();
+  expect(embeddableFactoryOld.destroySpy).toBeCalled();
+});
+
+test('destroyed if rerendered before resolved', async () => {
+  const embeddableFactoryOld = setupEmbeddableFactory();
+
+  const { result, waitForNextUpdate, rerender } = renderHook<
+    DashboardStateManager,
+    DashboardContainer | null
+  >((dashboardState) => useDashboardContainer(dashboardState, history, false), {
+    wrapper: ({ children }) => (
+      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+    ),
+    initialProps: createDashboardState(),
+  });
+
+  expect(result.current).toBeNull(); // null on initial render
+
+  const embeddableFactoryNew = setupEmbeddableFactory();
+  rerender(createDashboardState());
+  embeddableFactoryNew.createEmbeddable();
+  await waitForNextUpdate();
+  expect(embeddableFactoryNew.embeddable).toBe(result.current);
+  expect(embeddableFactoryNew.destroySpy).not.toBeCalled();
+
+  embeddableFactoryOld.createEmbeddable();
+
+  await act(() => Promise.resolve()); // Can't use waitFor from hooks, because there is no hook update
+  expect(embeddableFactoryNew.embeddable).toBe(result.current);
+  expect(embeddableFactoryNew.destroySpy).not.toBeCalled();
+  expect(embeddableFactoryOld.destroySpy).toBeCalled();
 });
