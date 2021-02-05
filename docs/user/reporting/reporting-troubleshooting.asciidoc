@@ -59,7 +59,6 @@ that {kib} could not connect to the Chromium process.
 To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. See the
 <<reporting-troubleshooting-puppeteer-debug-logs, Puppeteer debug method>> for more information.
 
-
 [float]
 [[reporting-troubleshooting-text-incorrect]]
 === Text rendered incorrectly in generated reports
