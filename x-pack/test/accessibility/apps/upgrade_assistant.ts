@@ -17,19 +17,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
 
-    it('Overview', async () => {
+    it('Overview Tab', async () => {
       await retry.waitFor('Upgrade Assistant overview tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantOverviewTabDetail') ? true : false;
+        return testSubjects.exists('upgradeAssistantOverviewTabDetail');
       });
       await a11y.testAppSnapshot();
     });
 
-    it('List View', async () => {
+    it('Cluster Tab', async () => {
       await testSubjects.click('upgradeAssistantClusterTab');
       await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantOverviewTab') ? true : false;
+        return testSubjects.exists('upgradeAssistantClusterTabDetail');
       });
-      return testSubjects.isDisplayed('pipelineDetails') ? true : false;
+      await a11y.testAppSnapshot();
+    });
+
+    it('Indices Tab', async () => {
+      await testSubjects.click('upgradeAssistantIndicesTab');
+      await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
+        return testSubjects.exists('upgradeAssistantIndexTabDetail');
+      });
       await a11y.testAppSnapshot();
     });
   });
