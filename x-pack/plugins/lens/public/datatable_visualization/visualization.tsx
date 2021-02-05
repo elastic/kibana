@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Ast } from '@kbn/interpreter/common';
@@ -16,13 +17,13 @@ import type {
 import type { DatatableColumnWidth } from './components/types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 
-export interface LayerState {
+export interface DatatableLayerState {
   layerId: string;
   columns: string[];
 }
 
 export interface DatatableVisualizationState {
-  layers: LayerState[];
+  layers: DatatableLayerState[];
   sorting?: {
     columnId: string | undefined;
     direction: 'asc' | 'desc' | 'none';
@@ -30,7 +31,7 @@ export interface DatatableVisualizationState {
   columnWidth?: DatatableColumnWidth[];
 }
 
-function newLayerState(layerId: string): LayerState {
+function newLayerState(layerId: string): DatatableLayerState {
   return {
     layerId,
     columns: [],
@@ -300,7 +301,7 @@ function getDataSourceAndSortedColumns(
   datasourceLayers: Record<string, DatasourcePublicAPI>,
   layerId: string
 ) {
-  const layer = state.layers.find((l: LayerState) => l.layerId === layerId);
+  const layer = state.layers.find((l: DatatableLayerState) => l.layerId === layerId);
   if (!layer) {
     return undefined;
   }
