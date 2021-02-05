@@ -48,7 +48,7 @@ function sleep(ms: number) {
 }
 export class SearchSessionService
   implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
-  private sessionConfig!: SearchSessionsConfig;
+  private sessionConfig: SearchSessionsConfig;
 
   constructor(private readonly logger: Logger, private readonly config: ConfigSchema) {
     this.sessionConfig = this.config.search.sessions;
