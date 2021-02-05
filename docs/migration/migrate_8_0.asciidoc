@@ -191,5 +191,13 @@ All supported operating systems support using systemd service files.  Any system
 *Impact:*
 Any installations using `.deb` or `.rpm` packages using SysV will need to migrate to systemd.
 
+[float]
+=== TLS v1.0 and v1.1 are disabled by default
+
+*Details:*
+Support can be re-enabled by setting the environment variable `NODE_OPTIONS=--tls-min-1.0`.
+
+*Impact:*
+Browser and proxy clients communicating over TLS v1.0 and v1.1.
 
 // end::notable-breaking-changes[]
