@@ -46,7 +46,6 @@ import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay
 interface TableItem {
   id: string;
   dataset: string;
-  datasetName: string;
   anomalyScore: number;
   startTime: number;
   typical: number;
@@ -119,7 +118,6 @@ export const AnomaliesTable: React.FunctionComponent<{
       return {
         id: anomaly.id,
         dataset: anomaly.dataset,
-        datasetName: getFriendlyNameForPartitionId(anomaly.dataset),
         anomalyScore: anomaly.anomalyScore,
         startTime: anomaly.startTime,
         type: anomaly.type,
@@ -184,6 +182,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         sortable: true,
         truncateText: true,
         width: '200px',
+        render: (dataset: string) => getFriendlyNameForPartitionId(dataset),
       },
       {
         align: RIGHT_ALIGNMENT,

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import datemath from '@elastic/datemath';
+import moment from 'moment';
 import * as rt from 'io-ts';
-import { TimeRange } from '../../../../../../../src/plugins/data/public';
+import { TimeRange as KibanaTimeRange } from '../../../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../common/time/time_range';
 import { useUrlState } from '../../../utils/use_url_state';
+import { useInterval } from '../../../hooks/use_interval';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
@@ -52,7 +56,7 @@ export const useLogAnalysisResultsUrlState = () => {
     };
   }, [start, end]);
 
-  const [timeRange, setTimeRange] = useUrlState({
+  const [timeRange, _setTimeRange] = useUrlState({
     defaultState: defaultTimeRangeState,
     decodeUrlState: decodeTimeRangeUrlState,
     encodeUrlState: urlTimeRangeRT.encode,
@@ -60,10 +64,40 @@ export const useLogAnalysisResultsUrlState = () => {
     writeDefaultState: true,
   });
 
+  // Numeric time range for querying APIs
+  const [queryTimeRange, setQueryTimeRange] = useState<{
+    value: TimeRange;
+    lastChangedTime: number;
+  }>(() => ({
+    value: stringToNumericTimeRange({ start: timeRange.startTime, end: timeRange.endTime }),
+    lastChangedTime: Date.now(),
+  }));
+
+  const handleQueryTimeRangeChange = useCallback(
+    ({ start: startTime, end: endTime }: { start: string; end: string }) => {
+      setQueryTimeRange({
+        value: stringToNumericTimeRange({ start: startTime, end: endTime }),
+        lastChangedTime: Date.now(),
+      });
+    },
+    [setQueryTimeRange]
+  );
+
+  const setTimeRange = useCallback(
+    (selectedTime: { start: string; end: string }) => {
+      _setTimeRange({
+        startTime: selectedTime.start,
+        endTime: selectedTime.end,
+      });
+      handleQueryTimeRangeChange(selectedTime);
+    },
+    [_setTimeRange, handleQueryTimeRangeChange]
+  );
+
   const handleTimeFilterChange = useCallback(
-    (newTimeRange: TimeRange) => {
+    (newTimeRange: KibanaTimeRange) => {
       const { from, to } = newTimeRange;
-      setTimeRange({ startTime: from, endTime: to });
+      setTimeRange({ start: from, end: to });
     },
     [setTimeRange]
   );
@@ -82,10 +116,34 @@ export const useLogAnalysisResultsUrlState = () => {
     writeDefaultState: true,
   });
 
+  useInterval(
+    () => {
+      handleQueryTimeRangeChange({
+        start: timeRange.startTime,
+        end: timeRange.endTime,
+      });
+    },
+    autoRefresh.isPaused ? null : autoRefresh.interval
+  );
+
   return {
-    timeRange,
+    timeRange: queryTimeRange,
     setTimeRange,
     autoRefresh,
     setAutoRefresh,
   };
 };
+
+const stringToNumericTimeRange = (timeRange: { start: string; end: string }): TimeRange => ({
+  startTime: moment(
+    datemath.parse(timeRange.start, {
+      momentInstance: moment,
+    })
+  ).valueOf(),
+  endTime: moment(
+    datemath.parse(timeRange.end, {
+      momentInstance: moment,
+      roundUp: true,
+    })
+  ).valueOf(),
+});

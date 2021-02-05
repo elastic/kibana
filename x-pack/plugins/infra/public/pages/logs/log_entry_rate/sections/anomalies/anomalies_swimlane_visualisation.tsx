@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { AutoRefresh, StringTimeRange } from '../../use_log_entry_rate_results_url_state';
+import moment from 'moment';
+import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
@@ -14,45 +15,42 @@ import {
 } from '../../../../../../../ml/public';
 import { EmbeddableRenderer } from '../../../../../../../../../src/plugins/embeddable/public';
 import { partitionField } from '../../../../../../common/infra_ml';
+import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
+import { TimeRange } from '../../../../../../common/time/time_range';
 
 interface Props {
-  stringTimeRange: StringTimeRange;
+  timeRange: TimeRange;
   jobIds: string[];
   selectedDatasets: string[];
   autoRefresh: AutoRefresh;
 }
 
-export const Visualisation: React.FC<Props> = (props) => {
+// Disable refresh, allow our timerange changes to refresh the embeddable.
+const REFRESH_CONFIG = {
+  pause: true,
+  value: 0,
+};
+
+export const AnomaliesSwimlaneVisualisation: React.FC<Props> = (props) => {
   const { embeddable: embeddablePlugin } = useKibanaContextForPlugin().services;
   if (!embeddablePlugin) return null;
   return <VisualisationContent {...props} />;
 };
 
-export const VisualisationContent: React.FC<Props> = ({
-  stringTimeRange,
-  jobIds,
-  selectedDatasets,
-  autoRefresh,
-}) => {
+export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selectedDatasets }) => {
   const { embeddable: embeddablePlugin } = useKibanaContextForPlugin().services;
-  const factory: any = embeddablePlugin!.getEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
-
-  const refreshConfig = useMemo(() => {
-    const { interval, isPaused } = autoRefresh;
-
-    return {
-      pause: isPaused,
-      value: interval,
-    };
-  }, [autoRefresh]);
+  const factory = embeddablePlugin?.getEmbeddableFactory(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
 
   const embeddableInput: AnomalySwimlaneEmbeddableInput = useMemo(() => {
     return {
       id: 'LOG_ENTRY_ANOMALIES_EMBEDDABLE_INSTANCE', // NOTE: This is the only embeddable on the anomalies page, a static string will do.
       jobIds,
       swimlaneType: 'viewBy',
-      timeRange: { from: stringTimeRange.startTime, to: stringTimeRange.endTime },
-      refreshConfig,
+      timeRange: {
+        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+      },
+      refreshConfig: REFRESH_CONFIG,
       viewBy: partitionField,
       filters: [],
       query: {
@@ -62,7 +60,11 @@ export const VisualisationContent: React.FC<Props> = ({
           .join(' or '), // Ensure unknown (those with an empty "" string) datasets are handled correctly.
       },
     };
-  }, [jobIds, stringTimeRange, selectedDatasets, refreshConfig]);
+  }, [jobIds, timeRange.startTime, timeRange.endTime, selectedDatasets]);
+
+  if (!factory) {
+    return <MissingEmbeddableFactoryCallout embeddableType={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE} />;
+  }
 
   return <EmbeddableRenderer input={embeddableInput} factory={factory} />;
 };
