@@ -1118,10 +1118,18 @@ module.exports = {
      * Enterprise Search overrides
      */
     {
+      // All files
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        'react-hooks/exhaustive-deps': 'off',
+        'react/jsx-boolean-value': ['error', 'never'],
+      },
+    },
+    {
+      // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
