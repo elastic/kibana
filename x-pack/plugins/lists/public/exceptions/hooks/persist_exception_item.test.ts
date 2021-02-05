@@ -7,6 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
 import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
@@ -78,12 +79,45 @@ describe('usePersistExceptionItem', () => {
       >(() => usePersistExceptionItem({ http: mockKibanaHttpService, onError }));
 
       await waitForNextUpdate();
-      result.current[1](getUpdateExceptionListItemSchemaMock());
+      // NOTE: Take note here passing in an exception item where it's
+      // entries have been enriched with ids to ensure that they get stripped
+      // before the call goes through
+      result.current[1]({ ...getUpdateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
       await waitForNextUpdate();
 
       expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
       expect(addExceptionItem).not.toHaveBeenCalled();
-      expect(updateExceptionItem).toHaveBeenCalled();
+      expect(updateExceptionItem).toHaveBeenCalledWith({
+        http: mockKibanaHttpService,
+        listItem: getUpdateExceptionListItemSchemaMock(),
+        signal: new AbortController().signal,
+      });
+    });
+  });
+
+  test('it invokes "addExceptionListItem" when payload has "id"', async () => {
+    const updateExceptionItem = jest.spyOn(api, 'updateExceptionListItem');
+    const createExceptionItem = jest.spyOn(api, 'addExceptionListItem');
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<
+        PersistHookProps,
+        ReturnPersistExceptionItem
+      >(() => usePersistExceptionItem({ http: mockKibanaHttpService, onError }));
+
+      await waitForNextUpdate();
+      // NOTE: Take note here passing in an exception item where it's
+      // entries have been enriched with ids to ensure that they get stripped
+      // before the call goes through
+      result.current[1]({ ...getCreateExceptionListItemSchemaMock(), entries: ENTRIES_WITH_IDS });
+      await waitForNextUpdate();
+
+      expect(result.current).toEqual([{ isLoading: false, isSaved: true }, result.current[1]]);
+      expect(updateExceptionItem).not.toHaveBeenCalled();
+      expect(createExceptionItem).toHaveBeenCalledWith({
+        http: mockKibanaHttpService,
+        listItem: getCreateExceptionListItemSchemaMock(),
+        signal: new AbortController().signal,
+      });
     });
   });
 

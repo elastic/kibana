@@ -9,6 +9,7 @@ import { Dispatch, useEffect, useState } from 'react';
 
 import { UpdateExceptionListItemSchema } from '../../../common/schemas';
 import { addExceptionListItem, updateExceptionListItem } from '../api';
+import { transformOutput } from '../transforms';
 import { AddExceptionListItem, PersistHookProps } from '../types';
 
 interface PersistReturnExceptionItem {
@@ -50,13 +51,13 @@ export const usePersistExceptionItem = ({
           if (isUpdateExceptionItem(exceptionListItem)) {
             await updateExceptionListItem({
               http,
-              listItem: exceptionListItem,
+              listItem: transformOutput(exceptionListItem),
               signal: abortCtrl.signal,
             });
           } else {
             await addExceptionListItem({
               http,
-              listItem: exceptionListItem,
+              listItem: transformOutput(exceptionListItem),
               signal: abortCtrl.signal,
             });
           }

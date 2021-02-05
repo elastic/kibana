@@ -12,6 +12,7 @@ import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/reque
 import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
 import { ENTRIES_WITH_IDS } from '../../common/constants.mock';
+import { Entry, EntryMatch, EntryNested } from '../../common/schemas';
 
 import {
   addIdToExceptionItemEntries,
@@ -64,7 +65,7 @@ describe('Exceptions transforms', () => {
 
   describe('addIdToExceptionItemEntries', () => {
     it('returns same output as input with added ids per entry', () => {
-      const mockExceptionItem = {
+      const mockExceptionItem: ExceptionListItemSchema = {
         ...getExceptionListItemSchemaMock(),
         entries: [
           {
@@ -85,7 +86,7 @@ describe('Exceptions transforms', () => {
             operator: 'included',
             type: 'match',
             value: 'some value',
-          },
+          } as Entry & { id: string },
         ],
       };
 
@@ -93,7 +94,7 @@ describe('Exceptions transforms', () => {
     });
 
     it('returns same output as input with added ids per nested entry', () => {
-      const mockExceptionItem = {
+      const mockExceptionItem: ExceptionListItemSchema = {
         ...getExceptionListItemSchemaMock(),
         entries: [
           {
@@ -122,12 +123,12 @@ describe('Exceptions transforms', () => {
                 operator: 'included',
                 type: 'match',
                 value: 'some value',
-              },
+              } as EntryMatch & { id: string },
             ],
             field: 'some.parentField',
             id: '123',
             type: 'nested',
-          },
+          } as EntryNested & { id: string },
         ],
       };
 
@@ -146,7 +147,7 @@ describe('Exceptions transforms', () => {
             operator: 'included',
             type: 'match',
             value: 'some value',
-          },
+          } as Entry & { id: string },
         ],
       };
       const output = removeIdFromExceptionItemsEntries(mockCreateExceptionItem);
@@ -177,12 +178,12 @@ describe('Exceptions transforms', () => {
                 operator: 'included',
                 type: 'match',
                 value: 'some value',
-              },
+              } as EntryMatch & { id: string },
             ],
             field: 'some.parentField',
             id: '123',
             type: 'nested',
-          },
+          } as EntryNested & { id: string },
         ],
       };
       const output = removeIdFromExceptionItemsEntries(mockCreateExceptionItem);
@@ -217,7 +218,7 @@ describe('Exceptions transforms', () => {
             operator: 'included',
             type: 'match',
             value: 'some value',
-          },
+          } as Entry & { id: string },
         ],
       };
       const output = removeIdFromExceptionItemsEntries(mockUpdateExceptionItem);
@@ -248,12 +249,12 @@ describe('Exceptions transforms', () => {
                 operator: 'included',
                 type: 'match',
                 value: 'some value',
-              },
+              } as EntryMatch & { id: string },
             ],
             field: 'some.parentField',
             id: '123',
             type: 'nested',
-          },
+          } as EntryNested & { id: string },
         ],
       };
       const output = removeIdFromExceptionItemsEntries(mockUpdateExceptionItem);
