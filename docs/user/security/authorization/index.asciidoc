@@ -20,14 +20,14 @@ To create a role that grants {kib} privileges, open the menu, then click *Stack 
 The `manage_security` {ref}/security-privileges.html#privileges-list-cluster[cluster privilege] is required to access role management.
 
 [[adding_cluster_privileges]]
-==== Adding cluster privileges
+==== Cluster privileges
 
 Cluster privileges grant access to monitoring and management features within {es}. They also enable certain <<management, Stack Management>> capabilities within {kib}.
 
 Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileges] for a complete description of available options.
 
 [[adding_index_privileges]]
-==== Adding index privileges
+==== Index privileges
 
 Each role can grant access to multiple data indices, and each index can have a different set of privileges.
 We recommend granting the `read` and `view_index_metadata` privileges to each index that you expect your users to work with inside of {kib}.
@@ -70,7 +70,7 @@ NOTE: {kib} automatically surrounds your DLS query with a `query` block, so it i
 image::user/security/images/create-role-dls-example.png[Create role with DLS index privileges]
 
 [[adding_kibana_privileges]]
-==== Adding {kib} privileges
+==== {kib} privileges
 
 To assign {kib} privileges to the role, click **Add {kib} privilege** in the {kib} section.
 
