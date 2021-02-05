@@ -6,11 +6,16 @@
  */
 
 import * as t from 'io-ts';
-import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { dateAsTimestampRt } from '../../common/runtime_types/date_as_timestamp_rt';
 
 export const rangeRt = t.type({
-  start: dateAsStringRt,
-  end: dateAsStringRt,
+  start: dateAsTimestampRt,
+  end: dateAsTimestampRt,
+});
+
+export const comparisonRangeRt = t.partial({
+  comparisonStart: dateAsTimestampRt,
+  comparisonEnd: dateAsTimestampRt,
 });
 
 export const uiFiltersRt = t.type({ uiFilters: t.string });

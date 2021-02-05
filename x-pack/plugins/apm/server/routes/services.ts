@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import * as t from 'io-ts';
 import { uniq } from 'lodash';
-import moment from 'moment';
-import { setupRequest } from '../lib/helpers/setup_request';
-import { getServiceAgentName } from '../lib/services/get_service_agent_name';
-import { getServices } from '../lib/services/get_services';
-import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
-import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
-import { createRoute } from './create_route';
-import { uiFiltersRt, rangeRt } from './default_api_types';
-import { getServiceAnnotations } from '../lib/services/annotations';
-import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
-import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { dateAsTimestampRt } from '../../common/runtime_types/date_as_timestamp_rt';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
-import { getThroughput } from '../lib/services/get_throughput';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
+import { setupRequest } from '../lib/helpers/setup_request';
+import { getServiceAnnotations } from '../lib/services/annotations';
+import { getServices } from '../lib/services/get_services';
+import { getServiceAgentName } from '../lib/services/get_service_agent_name';
+import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
-import { Coordinate } from '../../typings/timeseries';
+import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
+import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
+import { getThroughput } from '../lib/services/get_throughput';
+import { mergePeriodsTimeseries } from '../utils/merge_periods_timeseries';
+import { createRoute } from './create_route';
+import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -214,7 +213,7 @@ export const serviceAnnotationsCreateRoute = createRoute({
     }),
     body: t.intersection([
       t.type({
-        '@timestamp': dateAsStringRt,
+        '@timestamp': dateAsTimestampRt,
         service: t.intersection([
           t.type({
             version: t.string,
@@ -245,6 +244,7 @@ export const serviceAnnotationsCreateRoute = createRoute({
     return annotationsClient.create({
       message: body.service.version,
       ...body,
+      '@timestamp': new Date(body['@timestamp']).toISOString(),
       annotation: {
         type: 'deployment',
       },
@@ -318,10 +318,7 @@ export const serviceThroughputRoute = createRoute({
       t.type({ transactionType: t.string }),
       uiFiltersRt,
       rangeRt,
-      t.partial({
-        comparisonStart: t.string,
-        comparisonEnd: t.string,
-      }),
+      comparisonRangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -346,48 +343,34 @@ export const serviceThroughputRoute = createRoute({
       transactionType,
     };
 
-    const { throughput } = await getThroughput({
+    const throughputPromise = getThroughput({
       ...commonProps,
       start,
       end,
     });
 
-    const comparisonData =
+    const comparisonPromise =
       comparisonStart && comparisonEnd
-        ? await getThroughput({
+        ? getThroughput({
             ...commonProps,
-            start: moment(comparisonStart).valueOf(),
-            end: moment(comparisonEnd).valueOf(),
+            start: comparisonStart,
+            end: comparisonEnd,
           })
         : undefined;
 
-    function mergeComparisonTimeseries({
-      timeseries,
-      comparisonTimeseries,
-    }: {
-      timeseries: Coordinate[];
-      comparisonTimeseries?: Coordinate[];
-    }) {
-      if (!comparisonTimeseries) {
-        return;
-      }
-      return comparisonTimeseries.map(({ x, y }, index) => {
-        const xTimeseries = timeseries[index].x;
-        return {
-          x: xTimeseries,
-          y,
-        };
-      });
-    }
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      throughputPromise,
+      comparisonPromise,
+    ]);
 
-    const mergedComparisonTimeseries = mergeComparisonTimeseries({
-      timeseries: throughput,
-      comparisonTimeseries: comparisonData?.throughput,
+    const previousPeriodTimeseries = mergePeriodsTimeseries({
+      currentPeriodTimeseries: currentPeriod.throughput,
+      previousPeriodTimeseries: previousPeriod?.throughput,
     });
 
     return {
-      timeseries: throughput,
-      comparisonTimeseries: mergedComparisonTimeseries,
+      currentPeriod,
+      previousPeriod: { throughput: previousPeriodTimeseries },
     };
   },
 });

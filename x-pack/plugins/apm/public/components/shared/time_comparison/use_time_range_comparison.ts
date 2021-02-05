@@ -6,9 +6,31 @@
  */
 
 import moment from 'moment';
+import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
+import { useTheme } from '../../../hooks/use_theme';
 
-export function getTimeRangeComparison({
+function getChartTheme(theme: EuiTheme) {
+  return {
+    areaSeriesStyle: {
+      area: {
+        fill: theme.eui.euiColorLightestShade,
+        visible: true,
+        opacity: 1,
+      },
+      line: {
+        stroke: theme.eui.euiColorMediumShade,
+        strokeWidth: 1,
+        visible: true,
+      },
+      point: {
+        visible: false,
+      },
+    },
+  };
+}
+
+export function useTimeRangeComparison({
   comparisonType,
   start,
   end,
@@ -17,6 +39,7 @@ export function getTimeRangeComparison({
   start?: string;
   end?: string;
 }) {
+  const theme = useTheme();
   if (!comparisonType || !start || !end) {
     return {};
   }
@@ -37,5 +60,6 @@ export function getTimeRangeComparison({
   return {
     comparisonStart: startDate.subtract(daysToSubtract, 'days').toISOString(),
     comparisonEnd: endDate.subtract(daysToSubtract, 'days').toISOString(),
+    chartTheme: getChartTheme(theme),
   };
 }

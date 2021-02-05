@@ -9,15 +9,20 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
 // Checks whether a string is a valid ISO timestamp,
-// but doesn't convert it into a Date object when decoding
+// and returns its timestamp value
 
-export const dateAsStringRt = new t.Type<string, string, unknown>(
+export const dateAsTimestampRt = new t.Type<any, string, unknown>(
   'DateAsString',
   t.string.is,
   (input, context) =>
     either.chain(t.string.validate(input, context), (str) => {
       const date = new Date(str);
-      return isNaN(date.getTime()) ? t.failure(input, context) : t.success(str);
+      return isNaN(date.getTime())
+        ? t.failure(input, context)
+        : t.success(date.valueOf());
     }),
-  t.identity
+  (a) => {
+    const d = new Date(a);
+    return d.toISOString();
+  }
 );
