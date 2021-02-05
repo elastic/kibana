@@ -31,14 +31,14 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
       ? i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteSingleTitle',
           {
-            defaultMessage: `Remove runtime field '{name}'?`,
+            defaultMessage: `Remove field '{name}'?`,
             values: { name: fieldsToDelete[0] },
           }
         )
       : i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteMultipleTitle',
           {
-            defaultMessage: `Remove {count} runtime fields?`,
+            defaultMessage: `Remove {count} fields?`,
             values: { count: fieldsToDelete.length },
           }
         );

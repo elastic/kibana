@@ -21,7 +21,7 @@ const createNameNotAllowedValidator = (
       message: i18n.translate(
         'indexPatternFieldEditor.editor.runtimeFieldsEditor.existRuntimeFieldNamesValidationErrorMessage',
         {
-          defaultMessage: 'There is already a field with this name.',
+          defaultMessage: 'A field with this name already exists.',
         }
       ),
     };

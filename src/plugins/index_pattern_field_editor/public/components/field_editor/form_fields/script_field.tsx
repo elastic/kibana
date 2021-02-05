@@ -117,7 +117,7 @@ export const ScriptField = React.memo(({ existingConcreteFields = [], links }: P
             helpText={
               <FormattedMessage
                 id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
-                defaultMessage="Runtime fields without a script retrieve values from a field with the same name in {source}. If a field with the same name doesn’t exist, no values return when a search request includes the runtime field. {learnMoreLink}"
+                defaultMessage="Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink
@@ -129,7 +129,7 @@ export const ScriptField = React.memo(({ existingConcreteFields = [], links }: P
                       {i18n.translate(
                         'indexPatternFieldEditor.editor.form.script.learnMoreLinkText',
                         {
-                          defaultMessage: 'Learn about script syntax.',
+                          defaultMessage: 'Learn script syntax.',
                         }
                       )}
                     </EuiLink>

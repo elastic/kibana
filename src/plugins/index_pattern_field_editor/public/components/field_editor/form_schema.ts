@@ -24,7 +24,7 @@ export const schema = {
           i18n.translate(
             'indexPatternFieldEditor.editor.form.validations.nameIsRequiredErrorMessage',
             {
-              defaultMessage: 'Give a name to the field.',
+              defaultMessage: 'A name is required.',
             }
           )
         ),

@@ -93,7 +93,7 @@ const geti18nTexts = () => ({
       defaultMessage: 'Set custom label',
     }),
     description: i18n.translate('indexPatternFieldEditor.editor.form.customLabelDescription', {
-      defaultMessage: `Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name.`,
+      defaultMessage: `Create a label to display in place of the field name in Discover, Maps, and Visualize. Useful for shortening a long field name.  Queries and filters use the original field name.`,
     }),
   },
   value: {
@@ -101,7 +101,7 @@ const geti18nTexts = () => ({
       defaultMessage: 'Set value',
     }),
     description: i18n.translate('indexPatternFieldEditor.editor.form.valueDescription', {
-      defaultMessage: `Define the value of the field. If you don't set the value, the value of the field will be retrieved from the field with the same name in the _source object.`,
+      defaultMessage: `Set a value for the field instead of retrieving it from _source.`,
     }),
   },
   format: {
@@ -109,7 +109,7 @@ const geti18nTexts = () => ({
       defaultMessage: 'Set format',
     }),
     description: i18n.translate('indexPatternFieldEditor.editor.form.formatDescription', {
-      defaultMessage: `Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working.`,
+      defaultMessage: `Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.`,
     }),
   },
   popularity: {
@@ -117,7 +117,7 @@ const geti18nTexts = () => ({
       defaultMessage: 'Set popularity',
     }),
     description: i18n.translate('indexPatternFieldEditor.editor.form.popularityDescription', {
-      defaultMessage: `By default fields in Discover are ordered from the most used fields to the least used. Each time a field is selected its popularity increases. You can manually set here the popularity of the field.`,
+      defaultMessage: `Adjust the popularity to make the field appear higher or lower in the fields list.  By default, Discover orders fields from most selected to least selected.`,
     }),
   },
 });

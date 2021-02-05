@@ -31,7 +31,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   test('should have the correct title', () => {
     const { exists, find } = setup();
     expect(exists('flyoutTitle')).toBe(true);
-    expect(find('flyoutTitle').text()).toBe('Create new field');
+    expect(find('flyoutTitle').text()).toBe('Create field');
   });
 
   test('should allow a runtime field to be provided', () => {

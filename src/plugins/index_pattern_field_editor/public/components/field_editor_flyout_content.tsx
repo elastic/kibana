@@ -38,7 +38,7 @@ const geti18nTexts = (field?: Field) => {
           },
         })
       : i18n.translate('indexPatternFieldEditor.editor.flyoutDefaultTitle', {
-          defaultMessage: 'Create new field',
+          defaultMessage: 'Create field',
         }),
     closeButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCloseButtonLabel', {
       defaultMessage: 'Close',
