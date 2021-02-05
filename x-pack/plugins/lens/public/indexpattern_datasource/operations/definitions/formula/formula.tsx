@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import React, { useRef, useCallback, useMemo, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { groupBy, isObject } from 'lodash';
-import {
-  parse,
-  TinymathFunction,
-  TinymathVariable,
-  TinymathNamedArgument,
-  TinymathAST,
-} from '@kbn/tinymath';
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { isObject } from 'lodash';
+import { TinymathVariable, TinymathAST } from '@kbn/tinymath';
+import { EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
-import { CodeEditor, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useDebounceWithOptions } from '../helpers';
 import {
   OperationDefinition,
   GenericOperationDefinition,
@@ -35,8 +29,9 @@ import {
   runASTValidation,
   shouldHaveFieldArgument,
   tryToParse,
+  ErrorWrapper,
 } from './validation';
-import { suggest, getSuggestion, LensMathSuggestion } from './math_completion';
+import { suggest, getSuggestion, LensMathSuggestion, SUGGESTION_TYPE } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 import { getOperationParams, getSafeFieldName, groupArgsByType } from './util';
 
@@ -72,12 +67,15 @@ export const formulaOperation: OperationDefinition<
       return;
     }
     const { root, error } = tryToParse(column.params.formula);
+    if (!root) {
+      return [];
+    }
     if (error) {
-      return [error];
+      return [error.message];
     }
 
     const errors = runASTValidation(root, layer, indexPattern, operationDefinitionMap);
-    return errors.length ? errors : undefined;
+    return errors.length ? errors.map(({ message }) => message) : undefined;
   },
   getPossibleOperation() {
     return {
@@ -96,7 +94,7 @@ export const formulaOperation: OperationDefinition<
         function: 'mapColumn',
         arguments: {
           id: [columnId],
-          name: [label],
+          name: [label || ''],
           exp: [
             {
               type: 'expression',
@@ -146,6 +144,7 @@ export const formulaOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern, operationDefinitionMap) => {
     // Basic idea: if it has any math operation in it, probably it cannot be transferable
     const { root, error } = tryToParse(column.params.formula || '');
+    if (!root) return true;
     return Boolean(!error && !hasMathNode(root));
   },
 
@@ -162,7 +161,60 @@ function FormulaEditor({
   operationDefinitionMap,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
+  const editorModel = React.useRef<monaco.editor.ITextModel | null>(null);
   const argValueSuggestions = useMemo(() => [], []);
+
+  useDebounceWithOptions(
+    () => {
+      if (!editorModel.current) return;
+
+      if (!text) {
+        monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
+        return;
+      }
+
+      let errors: ErrorWrapper[] = [];
+
+      const { root, error } = tryToParse(text);
+      if (!root) return;
+      if (error) {
+        errors = [error];
+      } else {
+        const validationErrors = runASTValidation(
+          root,
+          layer,
+          indexPattern,
+          operationDefinitionMap
+        );
+        if (validationErrors.length) {
+          errors = validationErrors;
+        }
+      }
+
+      if (errors.length) {
+        monaco.editor.setModelMarkers(
+          editorModel.current,
+          'LENS',
+          errors.flatMap((innerError) =>
+            innerError.locations.map((location) => ({
+              message: innerError.message,
+              startColumn: location.min + 1,
+              endColumn: location.max + 1,
+              // Fake, assumes single line
+              startLineNumber: 1,
+              endLineNumber: 1,
+              severity: monaco.MarkerSeverity.Error,
+            }))
+          )
+        );
+      } else {
+        monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
+      }
+    },
+    { skipFirstRender: true },
+    256,
+    [text]
+  );
 
   const provideCompletionItems = useCallback(
     async (
@@ -173,7 +225,10 @@ function FormulaEditor({
       const innerText = model.getValue();
       const textRange = model.getFullModelRange();
       let wordRange: monaco.Range;
-      let aSuggestions;
+      let aSuggestions: { list: LensMathSuggestion[]; type: SUGGESTION_TYPE } = {
+        list: [],
+        type: SUGGESTION_TYPE.FIELD,
+      };
 
       const lengthAfterPosition = model.getValueLengthInRange({
         startLineNumber: position.lineNumber,
@@ -198,7 +253,6 @@ function FormulaEditor({
             innerText.substring(0, innerText.length - lengthAfterPosition) + ')',
             innerText.length - lengthAfterPosition,
             context,
-            undefined,
             indexPattern
           );
         }
@@ -214,20 +268,16 @@ function FormulaEditor({
           innerText,
           innerText.length - lengthAfterPosition,
           context,
-          wordUntil,
-          indexPattern
+          indexPattern,
+          wordUntil
         );
       }
 
       return {
-        suggestions: aSuggestions
-          ? aSuggestions.list.map((s: IMathFunction | MathFunctionArgs) =>
-              getSuggestion(s, aSuggestions.type, wordRange)
-            )
-          : [],
+        suggestions: aSuggestions.list.map((s) => getSuggestion(s, aSuggestions.type, wordRange)),
       };
     },
-    [argValueSuggestions]
+    [indexPattern]
   );
 
   return (
@@ -235,7 +285,6 @@ function FormulaEditor({
       <EuiFlexItem grow={true}>
         <CodeEditor
           height={200}
-          // width={200}
           width="100%"
           languageId={LANGUAGE_ID}
           value={text || ''}
@@ -244,7 +293,6 @@ function FormulaEditor({
             triggerCharacters: ['.', ',', '(', '='],
             provideCompletionItems,
           }}
-          // hoverProvider={{ provideHover }}
           options={{
             automaticLayout: false,
             fontSize: 14,
@@ -257,6 +305,13 @@ function FormulaEditor({
             wordBasedSuggestions: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+          }}
+          editorDidMount={(editor) => {
+            const model = editor.getModel();
+            if (model) {
+              editorModel.current = model;
+            }
+            editor.onDidDispose(() => (editorModel.current = null));
           }}
         />
       </EuiFlexItem>
@@ -291,6 +346,9 @@ function parseAndExtract(
 ) {
   try {
     const { root } = tryToParse(text, { shouldThrow: true });
+    if (!root) {
+      return { extracted: [], isValid: false };
+    }
     // before extracting the data run the validation task and throw if invalid
     runASTValidation(root, layer, indexPattern, operationDefinitionMap, { shouldThrow: true });
     /*
@@ -425,13 +483,13 @@ function extractColumns(
       const [referencedOp] = functions;
       const consumedParam = parseNode(referencedOp);
 
-      const subNodeVariables = findVariables(consumedParam);
+      const subNodeVariables = consumedParam ? findVariables(consumedParam) : [];
       const mathColumn = mathOperation.buildColumn({
         layer,
         indexPattern,
       });
-      mathColumn.references = subNodeVariables;
-      mathColumn.params.tinymathAst = consumedParam;
+      mathColumn.references = subNodeVariables.map(({ value }) => value);
+      mathColumn.params.tinymathAst = consumedParam!;
       columns.push(mathColumn);
       mathColumn.customLabel = true;
       mathColumn.label = `${idPrefix}X${columns.length - 1}`;
@@ -462,8 +520,8 @@ function extractColumns(
     layer,
     indexPattern,
   });
-  mathColumn.references = variables;
-  mathColumn.params.tinymathAst = root;
+  mathColumn.references = variables.map(({ value }) => value);
+  mathColumn.params.tinymathAst = root!;
   const newColId = `${idPrefix}X${columns.length}`;
   mathColumn.customLabel = true;
   mathColumn.label = newColId;

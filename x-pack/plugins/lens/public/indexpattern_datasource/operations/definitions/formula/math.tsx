@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { TinymathAST, TinymathFunction } from '@kbn/tinymath';
+import type {
+  TinymathAST,
+  TinymathFunction,
+  TinymathLocation,
+  TinymathVariable,
+} from '@kbn/tinymath';
 import { isObject } from 'lodash';
 import { OperationDefinition, GenericOperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
@@ -131,31 +136,26 @@ function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
 export function hasInvalidOperations(
   node: TinymathAST | string,
   operations: Record<string, GenericOperationDefinition>
-) {
-  // avoid duplicates
-  return Array.from(
-    new Set(
-      findFunctionNodes(node)
-        .filter((v) => !isMathNode(v) && !operations[v.name])
-        .map(({ name }) => name)
-    )
-  );
+): { names: string[]; locations: TinymathLocation[] } {
+  const nodes = findFunctionNodes(node).filter((v) => !isMathNode(v) && !operations[v.name]);
+  return {
+    // avoid duplicates
+    names: Array.from(new Set(nodes.map(({ name }) => name))),
+    locations: nodes.map(({ location }) => location),
+  };
 }
 
 // traverse a tree and find all string leaves
-export function findVariables(node: TinymathAST | string | undefined): string[] {
+export function findVariables(node: TinymathAST): TinymathVariable[] {
   if (node == null) {
     return [];
-  }
-  if (typeof node === 'string') {
-    return [node];
   }
   if (typeof node === 'number' || node.type === 'namedArgument') {
     return [];
   }
   if (node.type === 'variable') {
     // leaf node
-    return [node.value];
+    return [node];
   }
   return node.args.flatMap(findVariables);
 }

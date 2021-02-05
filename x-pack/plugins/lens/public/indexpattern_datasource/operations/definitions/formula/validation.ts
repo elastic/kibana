@@ -8,7 +8,12 @@
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse } from '@kbn/tinymath';
-import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
+import type {
+  TinymathAST,
+  TinymathFunction,
+  TinymathNamedArgument,
+  TinymathLocation,
+} from '@kbn/tinymath';
 import { getOperationParams, getValueOrName, groupArgsByType } from './util';
 import { findVariables, hasInvalidOperations, isMathNode } from './math';
 
@@ -32,80 +37,104 @@ export const errorsLookup = new Set(Object.values(validationErrors));
 
 type ErrorTypes = keyof typeof validationErrors;
 
+export interface ErrorWrapper {
+  message: string;
+  locations: TinymathLocation[];
+}
+
 export function isParsingError(message: string) {
   return message.includes(validationErrors.failedParsing);
 }
 
-function getMessageFromId(messageId: ErrorTypes, values: Record<string, string | number>) {
+function getMessageFromId(
+  messageId: ErrorTypes,
+  values: Record<string, string | number>,
+  locations: TinymathLocation[]
+): ErrorWrapper {
+  let message: string;
   switch (messageId) {
     case 'wrongFirstArgument':
-      return i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
         defaultMessage:
           'The first argument for {operation} should be a {type} name. Found {argument}',
         values,
       });
+      break;
     case 'shouldNotHaveField':
-      return i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
         defaultMessage: 'The operation {operation} does not accept any field as argument',
         values,
       });
+      break;
     case 'cannotAcceptParameter':
-      return i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
         defaultMessage: 'The operation {operation} does not accept any parameter',
         values,
       });
+      break;
     case 'missingParameter':
-      return i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
         defaultMessage:
           'The operation {operation} in the Formula is missing the following parameters: {params}',
         values,
       });
+      break;
     case 'wrongTypeParameter':
-      return i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
         defaultMessage:
           'The parameters for the operation {operation} in the Formula are of the wrong type: {params}',
         values,
       });
+      break;
     case 'missingField':
-      return i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
+      message = i18n.translate('xpack.lens.indexPattern.fieldNotFound', {
         defaultMessage:
           '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
         values,
       });
+      break;
     case 'missingOperation':
-      return i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
+      message = i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
         defaultMessage:
           '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
         values,
       });
+      break;
     case 'fieldWithNoOperation':
-      return i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
+      message = i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
         defaultMessage: 'The field {field} cannot be used without operation',
         values,
       });
+      break;
     case 'failedParsing':
-      return i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
         defaultMessage: 'The Formula {expression} cannot be parsed',
         values,
       });
+      break;
     default:
-      return 'no Error found';
+      message = 'no Error found';
+      break;
   }
+
+  return { message, locations };
 }
 
 function addErrorOrThrow({
   messageId,
   values,
+  locations,
   shouldThrow,
 }: {
   messageId: ErrorTypes;
   values: Record<string, string | number>;
+  locations: TinymathLocation[];
   shouldThrow?: boolean;
 }) {
   if (shouldThrow) {
     throw Error(validationErrors[messageId]);
   }
-  return getMessageFromId(messageId, values);
+  return getMessageFromId(messageId, values, locations);
 }
 
 export function tryToParse(formula: string, { shouldThrow }: { shouldThrow?: boolean } = {}) {
@@ -118,10 +147,8 @@ export function tryToParse(formula: string, { shouldThrow }: { shouldThrow?: boo
       throw e;
     }
     return {
-      root: null,
-      error: getMessageFromId('failedParsing', {
-        expression: formula,
-      }),
+      root: undefined,
+      error: getMessageFromId('failedParsing', { expression: formula }, []),
     };
   }
   return { root, error: null };
@@ -133,7 +160,7 @@ export function runASTValidation(
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
   options: { shouldThrow?: boolean } = {}
-) {
+): ErrorWrapper[] {
   return [
     ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations, options),
     ...runFullASTValidation(ast, indexPattern, operations, options),
@@ -155,6 +182,7 @@ function checkVariableEdgeCases(
           field: ast.value,
         },
         shouldThrow,
+        locations: [ast.location],
       })
     );
   }
@@ -167,25 +195,26 @@ function checkMissingVariableOrFunctions(
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
   { shouldThrow }: { shouldThrow?: boolean } = {}
-) {
-  const missingErrors: string[] = [];
+): ErrorWrapper[] {
+  const missingErrors: ErrorWrapper[] = [];
   const missingOperations = hasInvalidOperations(ast, operations);
 
-  if (missingOperations.length) {
+  if (missingOperations.names.length) {
     missingErrors.push(
       addErrorOrThrow({
         messageId: 'missingOperation',
         values: {
-          operationLength: missingOperations.length,
-          operationsList: missingOperations.join(', '),
+          operationLength: missingOperations.names.length,
+          operationsList: missingOperations.names.join(', '),
         },
         shouldThrow,
+        locations: missingOperations.locations,
       })
     );
   }
   const missingVariables = findVariables(ast).filter(
     // filter empty string as well?
-    (variable) => !indexPattern.getFieldByName(variable) && !layer.columns[variable]
+    ({ value }) => !indexPattern.getFieldByName(value) && !layer.columns[value]
   );
 
   // need to check the arguments here: check only strings for now
@@ -194,14 +223,19 @@ function checkMissingVariableOrFunctions(
       addErrorOrThrow({
         messageId: 'missingField',
         values: {
-          variablesLength: missingOperations.length,
-          variablesList: missingVariables.join(', '),
+          variablesLength: missingVariables.length,
+          variablesList: missingVariables.map(({ value }) => value).join(', '),
         },
         shouldThrow,
+        locations: missingVariables.map(({ location }) => location),
       })
     );
   }
-  const invalidVariableErrors = checkVariableEdgeCases(ast, missingErrors, { shouldThrow });
+  const invalidVariableErrors = checkVariableEdgeCases(
+    ast,
+    missingVariables.map(({ value }) => value),
+    { shouldThrow }
+  );
   return [...missingErrors, ...invalidVariableErrors];
 }
 
@@ -210,8 +244,8 @@ function runFullASTValidation(
   indexPattern: IndexPattern,
   operations: Record<string, GenericOperationDefinition>,
   { shouldThrow }: { shouldThrow?: boolean } = {}
-) {
-  function validateNode(node: TinymathAST): string[] {
+): ErrorWrapper[] {
+  function validateNode(node: TinymathAST): ErrorWrapper[] {
     if (!isObject(node) || node.type !== 'function') {
       return [];
     }
@@ -220,7 +254,7 @@ function runFullASTValidation(
       return [];
     }
 
-    const errors: string[] = [];
+    const errors: ErrorWrapper[] = [];
     const { namedArguments, functions } = groupArgsByType(node.args);
     const [firstArg] = node?.args || [];
 
@@ -236,6 +270,7 @@ function runFullASTValidation(
                 argument: getValueOrName(firstArg),
               },
               shouldThrow,
+              locations: [node.location],
             })
           );
         }
@@ -248,6 +283,7 @@ function runFullASTValidation(
                 operation: node.name,
               },
               shouldThrow,
+              locations: [node.location],
             })
           );
         }
@@ -260,6 +296,7 @@ function runFullASTValidation(
               operation: node.name,
             },
             shouldThrow,
+            locations: [node.location],
           })
         );
       } else {
@@ -273,6 +310,7 @@ function runFullASTValidation(
                 params: missingParams.map(({ name }) => name).join(', '),
               },
               shouldThrow,
+              locations: [node.location],
             })
           );
         }
@@ -286,6 +324,7 @@ function runFullASTValidation(
                 params: wrongTypeParams.map(({ name }) => name).join(', '),
               },
               shouldThrow,
+              locations: [node.location],
             })
           );
         }
@@ -303,6 +342,7 @@ function runFullASTValidation(
               argument: getValueOrName(firstArg),
             },
             shouldThrow,
+            locations: [node.location],
           })
         );
       }
@@ -314,6 +354,7 @@ function runFullASTValidation(
               operation: node.name,
             },
             shouldThrow,
+            locations: [node.location],
           })
         );
       } else {
@@ -327,6 +368,7 @@ function runFullASTValidation(
                 params: missingParameters.map(({ name }) => name).join(', '),
               },
               shouldThrow,
+              locations: [node.location],
             })
           );
         }
@@ -340,6 +382,7 @@ function runFullASTValidation(
                 params: wrongTypeParams.map(({ name }) => name).join(', '),
               },
               shouldThrow,
+              locations: [node.location],
             })
           );
         }
