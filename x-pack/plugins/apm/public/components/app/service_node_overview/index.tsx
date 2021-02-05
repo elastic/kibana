@@ -4,30 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPanel,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiPage, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
-import { Projection } from '../../../../common/projections';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   asDynamicBytes,
   asInteger,
   asPercent,
 } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { px, truncate, unit } from '../../../style/variables';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 import { SearchBar } from '../../shared/search_bar';
 
@@ -46,19 +37,6 @@ interface ServiceNodeOverviewProps {
 function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
   const { uiFilters, urlParams } = useUrlParams();
   const { start, end } = urlParams;
-
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
-    () => ({
-      filterNames: ['host', 'containerId', 'podName'],
-      params: {
-        serviceName,
-      },
-      projection: Projection.serviceNodes,
-    }),
-    [serviceName]
-  );
 
   const { data: items = [] } = useFetcher(
     (callApmApi) => {
@@ -164,27 +142,22 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
     <>
       <SearchBar />
       <EuiPage>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <LocalUIFilters {...localFiltersConfig} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={7}>
-            <EuiPanel>
-              <ManagedTable
-                noItemsMessage={i18n.translate(
-                  'xpack.apm.jvmsTable.noJvmsLabel',
-                  {
-                    defaultMessage: 'No JVMs were found',
-                  }
-                )}
-                items={items}
-                columns={columns}
-                initialPageSize={INITIAL_PAGE_SIZE}
-                initialSortField={INITIAL_SORT_FIELD}
-                initialSortDirection={INITIAL_SORT_DIRECTION}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiPanel>
+            <ManagedTable
+              noItemsMessage={i18n.translate(
+                'xpack.apm.jvmsTable.noJvmsLabel',
+                {
+                  defaultMessage: 'No JVMs were found',
+                }
+              )}
+              items={items}
+              columns={columns}
+              initialPageSize={INITIAL_PAGE_SIZE}
+              initialSortField={INITIAL_SORT_FIELD}
+              initialSortDirection={INITIAL_SORT_DIRECTION}
+            />
+          </EuiPanel>
         </EuiFlexGroup>
       </EuiPage>
     </>
