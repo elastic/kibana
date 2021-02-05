@@ -21,9 +21,6 @@ export type DeleteTrustedAppsRequestParams = TypeOf<typeof DeleteTrustedAppsRequ
 /** API request params for retrieving a list of Trusted Apps */
 export type GetTrustedAppsListRequest = TypeOf<typeof GetTrustedAppsRequestSchema.query>;
 
-/** API request params for updating a Trusted App */
-export type PutTrustedAppsRequestParams = TypeOf<typeof PutTrustedAppUpdateRequestSchema.params>;
-
 export interface GetTrustedListAppsResponse {
   per_page: number;
   page: number;
@@ -34,12 +31,15 @@ export interface GetTrustedListAppsResponse {
 /** API Request body for creating a new Trusted App entry */
 export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequestSchema.body>;
 
-/** API Request body for Updating a new Trusted App entry */
-export type PutTrustedAppUpdateRequest = TypeOf<typeof PutTrustedAppUpdateRequestSchema.body>;
-
 export interface PostTrustedAppCreateResponse {
   data: TrustedApp;
 }
+
+/** API request params for updating a Trusted App */
+export type PutTrustedAppsRequestParams = TypeOf<typeof PutTrustedAppUpdateRequestSchema.params>;
+
+/** API Request body for Updating a new Trusted App entry */
+export type PutTrustedAppUpdateRequest = TypeOf<typeof PutTrustedAppUpdateRequestSchema.body>;
 
 export type PutTrustedAppUpdateResponse = PostTrustedAppCreateResponse;
 

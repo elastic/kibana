@@ -15,7 +15,7 @@ import {
   TRUSTED_APPS_CREATE_API,
   TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_LIST_API,
-  TRUSTED_APPS_PUT_API,
+  TRUSTED_APPS_UPDATE_API,
   TRUSTED_APPS_SUMMARY_API,
 } from '../../../../common/endpoint/constants';
 import {
@@ -65,7 +65,7 @@ export const registerTrustedAppsRoutes = (
   // PUT
   router.put(
     {
-      path: TRUSTED_APPS_PUT_API,
+      path: TRUSTED_APPS_UPDATE_API,
       validate: PutTrustedAppUpdateRequestSchema,
       options: { authRequired: true },
     },
