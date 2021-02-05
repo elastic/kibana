@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
@@ -56,7 +57,6 @@ interface PopoverItem {
 export function ServiceIcons({ serviceName }: Props) {
   const {
     urlParams: { start, end },
-    uiFilters,
   } = useUrlParams();
   const [
     selectedIconPopover,
@@ -70,12 +70,12 @@ export function ServiceIcons({ serviceName }: Props) {
           endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { start, end },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters]
+    [serviceName, start, end]
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
@@ -86,12 +86,12 @@ export function ServiceIcons({ serviceName }: Props) {
           endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { start, end },
           },
         });
       }
     },
-    [selectedIconPopover, serviceName, start, end, uiFilters]
+    [selectedIconPopover, serviceName, start, end]
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;

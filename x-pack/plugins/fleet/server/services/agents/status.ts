@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
 import { getAgent, listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentStatus } from '../../types';
 
 import { AgentStatusKueryHelper } from '../../../common/services';
+import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+import { normalizeKuery } from '../saved_object';
 
 export async function getAgentStatusById(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgent(soClient, agentId);
+  const agent = await getAgent(soClient, esClient, agentId);
   return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
@@ -25,17 +29,29 @@ export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 function joinKuerys(...kuerys: Array<string | undefined>) {
   return kuerys
     .filter((kuery) => kuery !== undefined)
-    .reduce((acc, kuery) => {
-      if (acc === '') {
-        return `(${kuery})`;
+    .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
+      if (kuery === undefined) {
+        return acc;
+      }
+      const normalizedKuery: KueryNode = esKuery.fromKueryExpression(
+        normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery || '')
+      );
+
+      if (!acc) {
+        return normalizedKuery;
       }
 
-      return `${acc} and (${kuery})`;
-    }, '');
+      return {
+        type: 'function',
+        function: 'and',
+        arguments: [acc, normalizedKuery],
+      };
+    }, undefined as KueryNode | undefined);
 }
 
 export async function getAgentStatusForAgentPolicy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentPolicyId?: string,
   filterKuery?: string
 ) {
@@ -48,7 +64,7 @@ export async function getAgentStatusForAgentPolicy(
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
     (kuery) =>
-      listAgents(soClient, {
+      listAgents(soClient, esClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
@@ -56,6 +72,7 @@ export async function getAgentStatusForAgentPolicy(
           ...[
             kuery,
             filterKuery,
+            `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`,
             agentPolicyId ? `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${agentPolicyId}"` : undefined,
           ]
         ),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -17,7 +18,6 @@ describe('analytics routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines/{engineName}/analytics/queries',
-        payload: 'query',
       });
 
       registerAnalyticsRoutes({
@@ -27,12 +27,8 @@ describe('analytics routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter.callRoute({
-        params: { engineName: 'some-engine' },
-      });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/analytics/queries',
+        path: '/as/engines/:engineName/analytics/queries',
       });
     });
 
@@ -74,7 +70,6 @@ describe('analytics routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines/{engineName}/analytics/queries/{query}',
-        payload: 'query',
       });
 
       registerAnalyticsRoutes({
@@ -84,12 +79,8 @@ describe('analytics routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter.callRoute({
-        params: { engineName: 'some-engine', query: 'some-query' },
-      });
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/some-engine/analytics/query/some-query',
+        path: '/as/engines/:engineName/analytics/query/:query',
       });
     });
 

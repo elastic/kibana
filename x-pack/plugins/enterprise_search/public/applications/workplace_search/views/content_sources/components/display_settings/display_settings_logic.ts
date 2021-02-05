@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, isEqual, differenceBy } from 'lodash';
@@ -13,7 +14,7 @@ import { HttpLogic } from '../../../../../shared/http';
 
 import {
   setSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
 
@@ -61,7 +62,6 @@ interface DisplaySettingsActions {
   toggleSubtitleFieldHover(): void;
   toggleDescriptionFieldHover(): void;
   toggleUrlFieldHover(): void;
-  resetDisplaySettingsState(): void;
 }
 
 interface DisplaySettingsValues {
@@ -85,7 +85,7 @@ interface DisplaySettingsValues {
   unsavedChanges: boolean;
 }
 
-const defaultSearchResultConfig = {
+export const defaultSearchResultConfig = {
   titleField: '',
   subtitleField: '',
   descriptionField: '',
@@ -117,7 +117,6 @@ export const DisplaySettingsLogic = kea<
     toggleSubtitleFieldHover: () => true,
     toggleDescriptionFieldHover: () => true,
     toggleUrlFieldHover: () => true,
-    resetDisplaySettingsState: () => true,
     initializeDisplaySettings: () => true,
     setServerData: () => true,
   },
@@ -330,10 +329,7 @@ export const DisplaySettingsLogic = kea<
       setSuccessMessage(SUCCESS_MESSAGE);
     },
     toggleFieldEditorModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
-    },
-    resetDisplaySettingsState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

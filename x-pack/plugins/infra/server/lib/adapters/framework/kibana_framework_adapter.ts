@@ -1,12 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { GraphQLSchema } from 'graphql';
-import { runHttpQuery } from 'apollo-server-core';
-import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
@@ -23,16 +21,15 @@ import {
   CoreSetup,
   IRouter,
   KibanaRequest,
-  RequestHandlerContext,
-  KibanaResponseFactory,
   RouteMethod,
 } from '../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
 
 export class KibanaFramework {
-  public router: IRouter;
+  public router: IRouter<InfraPluginRequestHandlerContext>;
   public plugins: InfraServerPluginSetupDeps;
 
   constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginSetupDeps) {
@@ -42,7 +39,7 @@ export class KibanaFramework {
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
     config: InfraRouteConfig<Params, Query, Body, Method>,
-    handler: RequestHandler<Params, Query, Body>
+    handler: RequestHandler<Params, Query, Body, InfraPluginRequestHandlerContext>
   ) {
     const defaultOptions = {
       tags: ['access:infra'],
@@ -73,122 +70,49 @@ export class KibanaFramework {
     }
   }
 
-  public registerGraphQLEndpoint(routePath: string, gqlSchema: GraphQLSchema) {
-    // These endpoints are validated by GraphQL at runtime and with GraphQL generated types
-    const body = schema.object({}, { unknowns: 'allow' });
-    type Body = TypeOf<typeof body>;
-
-    const routeOptions = {
-      path: `/api/infra${routePath}`,
-      validate: {
-        body,
-      },
-      options: {
-        tags: ['access:infra'],
-      },
-    };
-    async function handler(
-      context: RequestHandlerContext,
-      request: KibanaRequest<unknown, unknown, Body>,
-      response: KibanaResponseFactory
-    ) {
-      try {
-        const query =
-          request.route.method === 'post'
-            ? (request.body as Record<string, any>)
-            : (request.query as Record<string, any>);
-
-        const gqlResponse = await runHttpQuery([context, request], {
-          method: request.route.method.toUpperCase(),
-          options: (req: RequestHandlerContext, rawReq: KibanaRequest) => ({
-            context: { req, rawReq },
-            schema: gqlSchema,
-          }),
-          query,
-        });
-
-        return response.ok({
-          body: gqlResponse,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      } catch (error) {
-        const errorBody = {
-          message: error.message,
-        };
-
-        if ('HttpQueryError' !== error.name) {
-          return response.internalError({
-            body: errorBody,
-          });
-        }
-
-        if (error.isGraphQLError === true) {
-          return response.customError({
-            statusCode: error.statusCode,
-            body: errorBody,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-        }
-
-        const { headers = [], statusCode = 500 } = error;
-        return response.customError({
-          statusCode,
-          headers,
-          body: errorBody,
-        });
-      }
-    }
-    this.router.post(routeOptions, handler);
-    this.router.get(routeOptions, handler);
-  }
-
   callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'search',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>>;
   callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'msearch',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'fieldCaps',
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseFieldCapsResponse>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: 'indices.existsAlias',
     options?: CallWithRequestParams
   ): Promise<boolean>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     method: 'indices.getAlias',
     options?: object
   ): Promise<InfraDatabaseGetIndicesAliasResponse>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     method: 'indices.get' | 'ml.getBuckets',
     options?: object
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     method: 'transport.request',
     options?: CallWithRequestParams
   ): Promise<unknown>;
   callWithRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
     options?: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse>;
 
-  public async callWithRequest<Hit = {}, Aggregation = undefined>(
-    requestContext: RequestHandlerContext,
+  public async callWithRequest(
+    requestContext: InfraPluginRequestHandlerContext,
     endpoint: string,
     params: CallWithRequestParams
   ) {
@@ -216,7 +140,9 @@ export class KibanaFramework {
     });
   }
 
-  public getIndexPatternsService(requestContext: RequestHandlerContext): IndexPatternsFetcher {
+  public getIndexPatternsService(
+    requestContext: InfraPluginRequestHandlerContext
+  ): IndexPatternsFetcher {
     return new IndexPatternsFetcher(requestContext.core.elasticsearch.client.asCurrentUser, true);
   }
 
@@ -235,7 +161,7 @@ export class KibanaFramework {
   }
 
   public async makeTSVBRequest(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     rawRequest: KibanaRequest,
     model: TSVBMetricModel,
     timerange: { min: number; max: number },

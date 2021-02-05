@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
-
-import { mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__';
 
 import { mockOverviewValues } from './__mocks__';
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {
+  const { mount } = new LogicMounter(OverviewLogic);
   const { http } = mockHttpValues;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    OverviewLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {

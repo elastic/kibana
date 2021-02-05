@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fetch, { Response } from 'node-fetch';
@@ -20,10 +21,10 @@ interface ConstructorDependencies {
   config: ConfigType;
   log: Logger;
 }
-interface RequestParams<ResponseBody> {
+interface RequestParams {
   path: string;
   params?: object;
-  hasValidData?: (body?: ResponseBody) => boolean;
+  hasValidData?: Function;
 }
 interface ErrorResponse {
   message: string;
@@ -32,7 +33,7 @@ interface ErrorResponse {
   };
 }
 export interface IEnterpriseSearchRequestHandler {
-  createRequest(requestParams?: object): RequestHandler<unknown, unknown, unknown>;
+  createRequest(requestParams?: RequestParams): RequestHandler<unknown, unknown, unknown>;
 }
 
 /**
@@ -53,11 +54,7 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest<ResponseBody>({
-    path,
-    params = {},
-    hasValidData = () => true,
-  }: RequestParams<ResponseBody>) {
+  createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -65,11 +62,12 @@ export class EnterpriseSearchRequestHandler {
     ) => {
       try {
         // Set up API URL
+        const encodedPath = this.encodePathParams(path, request.params as Record<string, string>);
         const queryParams = { ...(request.query as object), ...params };
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
-        const url = encodeURI(this.enterpriseSearchUrl + path) + queryString;
+        const url = encodeURI(this.enterpriseSearchUrl) + encodedPath + queryString;
 
         // Set up API options
         const { method } = request.route;
@@ -124,6 +122,36 @@ export class EnterpriseSearchRequestHandler {
         return this.handleConnectionError(response, e);
       }
     };
+  }
+
+  /**
+   * This path helper is similar to React Router's generatePath, but much simpler &
+   * does not use regexes. It enables us to pass a static '/foo/:bar/baz' string to
+   * createRequest({ path }) and have :bar be automatically replaced by the value of
+   * request.params.bar.
+   * It also (very importantly) wraps all URL request params with encodeURIComponent(),
+   * which is an extra layer of encoding required by the Enterprise Search server in
+   * order to correctly & safely parse user-generated IDs with special characters in
+   * their names - just encodeURI alone won't work.
+   */
+  encodePathParams(path: string, params: Record<string, string>) {
+    const hasParams = path.includes(':');
+    if (!hasParams) {
+      return path;
+    } else {
+      return path
+        .split('/')
+        .map((pathPart) => {
+          const isParam = pathPart.startsWith(':');
+          if (!isParam) {
+            return pathPart;
+          } else {
+            const pathParam = pathPart.replace(':', '');
+            return encodeURIComponent(params[pathParam]);
+          }
+        })
+        .join('/');
+    }
   }
 
   /**

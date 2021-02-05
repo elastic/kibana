@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
@@ -47,6 +48,7 @@ export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
 
 export const WaterfallChartFixedAxisContainer = euiStyled.div`
   height: ${FIXED_AXIS_HEIGHT}px;
+  z-index: ${(props) => props.theme.eui.euiZLevel4};
 `;
 
 interface WaterfallChartSidebarContainer {
@@ -54,7 +56,7 @@ interface WaterfallChartSidebarContainer {
 }
 
 export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSidebarContainer>`
-  height: ${(props) => `${props.height - FIXED_AXIS_HEIGHT}px`};
+  height: ${(props) => `${props.height}px`};
   overflow-y: hidden;
 `;
 
@@ -76,12 +78,14 @@ export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
 
 interface WaterfallChartChartContainer {
   height: number;
+  chartIndex: number;
 }
 
 export const WaterfallChartChartContainer = euiStyled.div<WaterfallChartChartContainer>`
   width: 100%;
-  height: ${(props) => `${props.height}px`};
-  margin-top: -${FIXED_AXIS_HEIGHT}px;
+  height: ${(props) => `${props.height + FIXED_AXIS_HEIGHT - 4}px`};
+  margin-top: -${FIXED_AXIS_HEIGHT - 4}px;
+  z-index: ${(props) => Math.round(props.theme.eui.euiZLevel3 / (props.chartIndex + 1))};
 `;
 
 export const WaterfallChartLegendContainer = euiStyled.div`
@@ -99,4 +103,9 @@ export const WaterfallChartTooltip = euiStyled.div`
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
   color: ${(props) => props.theme.eui.euiColorLightestShade};
   padding: ${(props) => props.theme.eui.paddingSizes.s};
+`;
+
+export const NetworkRequestsTotalStyle = euiStyled(EuiText)`
+  line-height: ${FIXED_AXIS_HEIGHT}px;
+  margin-left: ${(props) => props.theme.eui.paddingSizes.m}
 `;

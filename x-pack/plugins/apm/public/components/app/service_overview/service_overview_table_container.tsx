@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
-import { useShouldUseMobileLayout } from './use_should_use_mobile_layout';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 /**
  * The height for a table on the overview page. Is the height of a 5-row basic
@@ -58,12 +59,12 @@ export function ServiceOverviewTableContainer({
   children?: ReactNode;
   isEmptyAndLoading: boolean;
 }) {
-  const shouldUseMobileLayout = useShouldUseMobileLayout();
+  const { isMedium } = useBreakPoints();
 
   return (
     <ServiceOverviewTableContainerDiv
       isEmptyAndLoading={isEmptyAndLoading}
-      shouldUseMobileLayout={shouldUseMobileLayout}
+      shouldUseMobileLayout={isMedium}
     >
       {children}
     </ServiceOverviewTableContainerDiv>

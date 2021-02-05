@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
-
 import {
+  LogicMounter,
   mockKibanaValues,
   mockFlashMessageHelpers,
   mockHttpValues,
-  expectedAsyncError,
 } from '../../../__mocks__';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { groups } from '../../__mocks__/groups.mock';
 import { mockGroupValues } from './__mocks__/group_logic.mock';
@@ -20,6 +21,7 @@ import { GroupLogic } from './group_logic';
 import { GROUPS_PATH } from '../../routes';
 
 describe('GroupLogic', () => {
+  const { mount } = new LogicMounter(GroupLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
   const {
@@ -37,8 +39,7 @@ describe('GroupLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    GroupLogic.mount();
+    mount();
   });
 
   it('has expected default values', () => {
@@ -230,32 +231,29 @@ describe('GroupLogic', () => {
     describe('initializeGroup', () => {
       it('calls API and sets values', async () => {
         const onInitializeGroupSpy = jest.spyOn(GroupLogic.actions, 'onInitializeGroup');
-        const promise = Promise.resolve(group);
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/groups/123');
-        await promise;
+        await nextTick();
         expect(onInitializeGroupSpy).toHaveBeenCalledWith(group);
       });
 
       it('handles 404 error', async () => {
-        const promise = Promise.reject({ response: { status: 404 } });
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject({ response: { status: 404 } }));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
         expect(setQueuedErrorMessage).toHaveBeenCalledWith('Unable to find group with ID: "123".');
       });
 
       it('handles non-404 error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.get.mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('this is an error'));
 
         GroupLogic.actions.initializeGroup(sourceIds[0]);
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
         expect(setQueuedErrorMessage).toHaveBeenCalledWith('this is an error');
@@ -267,13 +265,12 @@ describe('GroupLogic', () => {
         GroupLogic.actions.onInitializeGroup(group);
       });
       it('deletes a group', async () => {
-        const promise = Promise.resolve(true);
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.resolve(true));
 
         GroupLogic.actions.deleteGroup();
         expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/groups/123');
 
-        await promise;
+        await nextTick();
         expect(navigateToUrl).toHaveBeenCalledWith(GROUPS_PATH);
         expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
           'Group "group" was successfully deleted.'
@@ -281,11 +278,10 @@ describe('GroupLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.delete.mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.reject('this is an error'));
 
         GroupLogic.actions.deleteGroup();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -298,15 +294,14 @@ describe('GroupLogic', () => {
       });
       it('updates name', async () => {
         const onGroupNameChangedSpy = jest.spyOn(GroupLogic.actions, 'onGroupNameChanged');
-        const promise = Promise.resolve(group);
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.updateGroupName();
         expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123', {
           body: JSON.stringify({ group: { name: 'new name' } }),
         });
 
-        await promise;
+        await nextTick();
         expect(onGroupNameChangedSpy).toHaveBeenCalledWith(group);
         expect(setSuccessMessage).toHaveBeenCalledWith(
           'Successfully renamed this group to "group".'
@@ -314,11 +309,10 @@ describe('GroupLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.reject('this is an error'));
 
         GroupLogic.actions.updateGroupName();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -331,15 +325,14 @@ describe('GroupLogic', () => {
       });
       it('updates name', async () => {
         const onGroupSourcesSavedSpy = jest.spyOn(GroupLogic.actions, 'onGroupSourcesSaved');
-        const promise = Promise.resolve(group);
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSources();
         expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/123/share', {
           body: JSON.stringify({ content_source_ids: sourceIds }),
         });
 
-        await promise;
+        await nextTick();
         expect(onGroupSourcesSavedSpy).toHaveBeenCalledWith(group);
         expect(setSuccessMessage).toHaveBeenCalledWith(
           'Successfully updated shared content sources.'
@@ -347,11 +340,10 @@ describe('GroupLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.reject('this is an error'));
 
         GroupLogic.actions.saveGroupSources();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -363,15 +355,14 @@ describe('GroupLogic', () => {
       });
       it('updates name', async () => {
         const onGroupUsersSavedSpy = jest.spyOn(GroupLogic.actions, 'onGroupUsersSaved');
-        const promise = Promise.resolve(group);
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupUsers();
         expect(http.post).toHaveBeenCalledWith('/api/workplace_search/groups/123/assign', {
           body: JSON.stringify({ user_ids: userIds }),
         });
 
-        await promise;
+        await nextTick();
         expect(onGroupUsersSavedSpy).toHaveBeenCalledWith(group);
         expect(setSuccessMessage).toHaveBeenCalledWith(
           'Successfully updated the users of this group.'
@@ -379,11 +370,10 @@ describe('GroupLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.reject('this is an error'));
 
         GroupLogic.actions.saveGroupUsers();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
@@ -398,8 +388,7 @@ describe('GroupLogic', () => {
           GroupLogic.actions,
           'onGroupPrioritiesChanged'
         );
-        const promise = Promise.resolve(group);
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.resolve(group));
 
         GroupLogic.actions.saveGroupSourcePrioritization();
         expect(http.put).toHaveBeenCalledWith('/api/workplace_search/groups/123/boosts', {
@@ -411,7 +400,7 @@ describe('GroupLogic', () => {
           }),
         });
 
-        await promise;
+        await nextTick();
         expect(setSuccessMessage).toHaveBeenCalledWith(
           'Successfully updated shared source prioritization.'
         );
@@ -419,11 +408,10 @@ describe('GroupLogic', () => {
       });
 
       it('handles error', async () => {
-        const promise = Promise.reject('this is an error');
-        http.put.mockReturnValue(promise);
+        http.put.mockReturnValue(Promise.reject('this is an error'));
 
         GroupLogic.actions.saveGroupSourcePrioritization();
-        await expectedAsyncError(promise);
+        await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });

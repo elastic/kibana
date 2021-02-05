@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
@@ -22,7 +23,7 @@ import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vec
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
-import { GeojsonFileSource } from '../classes/sources/geojson_file_source';
+import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
   STYLE_TYPE,
@@ -76,7 +77,7 @@ export function createLayerInstance(
         joins,
       });
     case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source });
+      return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
     case BlendedVectorLayer.type:
@@ -169,6 +170,9 @@ export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.ma
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
+export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
+  map.mapState.searchSessionId;
+
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
@@ -220,7 +224,17 @@ export const getDataFilters = createSelector(
   getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query, filters) => {
+  getSearchSessionId,
+  (
+    mapExtent,
+    mapBuffer,
+    mapZoom,
+    timeFilters,
+    refreshTimerLastTriggeredAt,
+    query,
+    filters,
+    searchSessionId
+  ) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
@@ -229,6 +243,7 @@ export const getDataFilters = createSelector(
       refreshTimerLastTriggeredAt,
       query,
       filters,
+      searchSessionId,
     };
   }
 );
@@ -241,10 +256,10 @@ export const getSpatialFiltersLayer = createSelector(
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
     };
-    const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
-      featureCollection,
-      'spatialFilters'
-    );
+    const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor({
+      __featureCollection: featureCollection,
+      name: 'spatialFilters',
+    });
 
     return new VectorLayer({
       layerDescriptor: VectorLayer.createDescriptor({
@@ -272,7 +287,7 @@ export const getSpatialFiltersLayer = createSelector(
           },
         }),
       }),
-      source: new GeojsonFileSource(geoJsonSourceDescriptor),
+      source: new GeoJsonFileSource(geoJsonSourceDescriptor),
     });
   }
 );

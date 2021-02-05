@@ -9,7 +9,7 @@ Extended version of [RequestHandler](./kibana-plugin-core-server.requesthandler.
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown> = RequestHandler<P, Q, B, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
+export declare type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 ```
 
 ## Example

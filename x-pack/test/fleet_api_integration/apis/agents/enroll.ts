@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -72,28 +73,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(401);
-    });
-
-    it('should not allow to enroll an agent with a shared id if it already exists ', async () => {
-      const { body: apiResponse } = await supertest
-        .post(`/api/fleet/agents/enroll`)
-        .set('kbn-xsrf', 'xxx')
-        .set(
-          'authorization',
-          `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`
-        )
-        .send({
-          shared_id: 'agent2_filebeat',
-          type: 'PERMANENT',
-          metadata: {
-            local: {
-              elastic: { agent: { version: kibanaVersion } },
-            },
-            user_provided: {},
-          },
-        })
-        .expect(400);
-      expect(apiResponse.message).to.match(/Impossible to enroll an already active agent/);
     });
 
     it('should not allow to enroll an agent with a version > kibana', async () => {

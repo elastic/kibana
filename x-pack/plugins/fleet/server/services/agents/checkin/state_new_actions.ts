@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import semverParse from 'semver/functions/parse';
@@ -21,7 +22,7 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
-import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
 import {
   Agent,
   AgentAction,
@@ -228,6 +229,7 @@ export function agentCheckinStateNewActionsFactory() {
 
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     agent: Agent,
     options?: { signal: AbortSignal }
   ): Promise<AgentAction[]> {
@@ -262,7 +264,7 @@ export function agentCheckinStateNewActionsFactory() {
           (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
         );
         if (hasConfigReassign) {
-          return from(getAgent(soClient, agent.id)).pipe(
+          return from(getAgent(soClient, esClient, agent.id)).pipe(
             concatMap((refreshedAgent) => {
               if (!refreshedAgent.policy_id) {
                 throw new Error('Agent does not have a policy assigned');

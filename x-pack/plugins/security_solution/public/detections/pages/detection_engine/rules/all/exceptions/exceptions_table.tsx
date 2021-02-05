@@ -1,20 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
-import {
-  EuiBasicTable,
-  EuiEmptyPrompt,
-  EuiLoadingContent,
-  EuiProgress,
-  EuiFieldSearch,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiLoadingContent, EuiProgress } from '@elastic/eui';
 import styled from 'styled-components';
 import { History } from 'history';
-import { set } from 'lodash/fp';
 
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { NamespaceType } from '../../../../../../../../lists/common';
@@ -77,14 +71,8 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
       exceptionReferenceModalInitialState
     );
-    const [filters, setFilters] = useState<ExceptionListFilter>({
-      name: null,
-      list_id: null,
-      created_by: null,
-    });
     const [loadingExceptions, exceptions, pagination, refreshExceptions] = useExceptionLists({
       errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-      filterOptions: filters,
       http,
       namespaceTypes: ['single', 'agnostic'],
       notifications,
@@ -236,27 +224,6 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       );
     }, []);
 
-    const handleSearch = useCallback((search: string) => {
-      const regex = search.split(/\s+(?=([^"]*"[^"]*")*[^"]*$)/);
-      const formattedFilter = regex
-        .filter((c) => c != null)
-        .reduce<ExceptionListFilter>(
-          (filter, term) => {
-            const [qualifier, value] = term.split(':');
-
-            if (qualifier == null) {
-              filter.name = search;
-            } else if (value != null && Object.keys(filter).includes(qualifier)) {
-              return set(qualifier, value, filter);
-            }
-
-            return filter;
-          },
-          { name: null, list_id: null, created_by: null }
-        );
-      setFilters(formattedFilter);
-    }, []);
-
     const handleCloseReferenceErrorModal = useCallback((): void => {
       setDeletingListIds([]);
       setShowReferenceErrorModal(false);
@@ -354,17 +321,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               split
               title={i18n.ALL_EXCEPTIONS}
               subtitle={<LastUpdatedAt showUpdating={loading} updatedAt={lastUpdated} />}
-            >
-              <EuiFieldSearch
-                data-test-subj="exceptionsHeaderSearch"
-                aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-                placeholder={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
-                onSearch={handleSearch}
-                disabled={initLoading}
-                incremental={false}
-                fullWidth
-              />
-            </HeaderSection>
+            />
 
             {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />

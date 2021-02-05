@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
-import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsBulkCreateObject,
+} from 'src/core/server';
 import {
   Agent,
   NewAgentEvent,
@@ -20,6 +25,7 @@ import { getAgentActionsForCheckin } from '../actions';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent,
   data: {
     events: NewAgentEvent[];
@@ -54,7 +60,7 @@ export async function agentCheckin(
   }
 
   // Wait for new actions
-  actions = await agentCheckinState.subscribeToNewActions(soClient, agent, options);
+  actions = await agentCheckinState.subscribeToNewActions(soClient, esClient, agent, options);
 
   return { actions };
 }

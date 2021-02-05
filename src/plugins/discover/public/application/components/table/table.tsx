@@ -1,22 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { DocViewTableRow } from './table_row';
 import { trimAngularSpan } from './table_helper';
 import { isNestedFieldParent } from '../../helpers/nested_fields';
@@ -33,6 +24,36 @@ export function DocViewTable({
   onRemoveColumn,
 }: DocViewRenderProps) {
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
+  const [multiFields, setMultiFields] = useState({} as Record<string, string[]>);
+  const [fieldsWithParents, setFieldsWithParents] = useState([] as string[]);
+
+  useEffect(() => {
+    if (!indexPattern) {
+      return;
+    }
+    const mapping = indexPattern.fields.getByName;
+    const flattened = indexPattern.flattenHit(hit);
+    const map: Record<string, string[]> = {};
+    const arr: string[] = [];
+
+    Object.keys(flattened).forEach((key) => {
+      const field = mapping(key);
+
+      if (field && field.spec?.subType?.multi?.parent) {
+        const parent = field.spec.subType.multi.parent;
+        if (!map[parent]) {
+          map[parent] = [] as string[];
+        }
+        const value = map[parent];
+        value.push(key);
+        map[parent] = value;
+        arr.push(key);
+      }
+    });
+    setMultiFields(map);
+    setFieldsWithParents(arr);
+  }, [indexPattern, hit]);
+
   if (!indexPattern) {
     return null;
   }
@@ -44,11 +65,13 @@ export function DocViewTable({
     fieldRowOpen[field] = !fieldRowOpen[field];
     setFieldRowOpen({ ...fieldRowOpen });
   }
-
   return (
     <table className="table table-condensed kbnDocViewerTable">
       <tbody>
         {Object.keys(flattened)
+          .filter((field) => {
+            return !fieldsWithParents.includes(field);
+          })
           .sort((fieldA, fieldB) => {
             const mappingA = mapping(fieldA);
             const mappingB = mapping(fieldB);
@@ -77,23 +100,59 @@ export function DocViewTable({
             const fieldType = isNestedFieldParent(field, indexPattern)
               ? 'nested'
               : indexPattern.fields.getByName(field)?.type;
-
             return (
-              <DocViewTableRow
-                key={field}
-                field={field}
-                fieldMapping={mapping(field)}
-                fieldType={String(fieldType)}
-                displayUnderscoreWarning={displayUnderscoreWarning}
-                isCollapsed={isCollapsed}
-                isCollapsible={isCollapsible}
-                isColumnActive={Array.isArray(columns) && columns.includes(field)}
-                onFilter={filter}
-                onToggleCollapse={() => toggleValueCollapse(field)}
-                onToggleColumn={toggleColumn}
-                value={value}
-                valueRaw={valueRaw}
-              />
+              <React.Fragment key={field}>
+                <DocViewTableRow
+                  field={field}
+                  fieldMapping={mapping(field)}
+                  fieldType={String(fieldType)}
+                  displayUnderscoreWarning={displayUnderscoreWarning}
+                  isCollapsed={isCollapsed}
+                  isCollapsible={isCollapsible}
+                  isColumnActive={Array.isArray(columns) && columns.includes(field)}
+                  onFilter={filter}
+                  onToggleCollapse={() => toggleValueCollapse(field)}
+                  onToggleColumn={toggleColumn}
+                  value={value}
+                  valueRaw={valueRaw}
+                />
+                {multiFields[field] ? (
+                  <tr
+                    key={`tableDocViewRow-multifieldsTitle-${field}`}
+                    className="kbnDocViewer__multifield_row"
+                    data-test-subj={`tableDocViewRow-multifieldsTitle-${field}`}
+                  >
+                    <td className="kbnDocViewer__field">&nbsp;</td>
+                    <td className="kbnDocViewer__multifield_title">
+                      <b>
+                        {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
+                          defaultMessage: 'Multi fields',
+                        })}
+                      </b>
+                    </td>
+                  </tr>
+                ) : null}
+                {multiFields[field]
+                  ? multiFields[field].map((multiField) => {
+                      return (
+                        <DocViewTableRow
+                          key={multiField}
+                          fieldMapping={mapping(multiField)}
+                          fieldType={String(fieldType)}
+                          displayUnderscoreWarning={displayUnderscoreWarning}
+                          isCollapsed={isCollapsed}
+                          isCollapsible={isCollapsible}
+                          isColumnActive={Array.isArray(columns) && columns.includes(field)}
+                          onFilter={filter}
+                          onToggleCollapse={() => toggleValueCollapse(field)}
+                          onToggleColumn={toggleColumn}
+                          value={value}
+                          valueRaw={valueRaw}
+                        />
+                      );
+                    })
+                  : null}
+              </React.Fragment>
             );
           })}
       </tbody>

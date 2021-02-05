@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -52,14 +53,22 @@ export const serviceMetadataDetailsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
 
-    return getServiceMetadataDetails({ serviceName, setup });
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceMetadataDetails({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 });
 
@@ -67,14 +76,22 @@ export const serviceMetadataIconsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
 
-    return getServiceMetadataIcons({ serviceName, setup });
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceMetadataIcons({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 });
 
@@ -178,7 +195,7 @@ export const serviceAnnotationsRoute = createRoute({
       serviceName,
       environment,
       annotationsClient,
-      apiCaller: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+      client: context.core.elasticsearch.client.asCurrentUser,
       logger: context.logger,
     });
   },

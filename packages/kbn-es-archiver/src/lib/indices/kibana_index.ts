@@ -1,23 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Client, CreateDocumentParams } from 'elasticsearch';
+import { inspect } from 'util';
+
+import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
@@ -68,13 +59,17 @@ export async function migrateKibanaIndex({
 }) {
   // we allow dynamic mappings on the index, as some interceptors are accessing documents before
   // the migration is actually performed. The migrator will put the value back to `strict` after migration.
-  await client.indices.putMapping({
-    index: '.kibana',
-    body: {
-      dynamic: true,
+  await client.indices.putMapping(
+    {
+      index: '.kibana',
+      body: {
+        dynamic: true,
+      },
     },
-    ignore: [404],
-  } as any);
+    {
+      ignore: [404],
+    }
+  );
 
   await kbnClient.savedObjects.migrate();
 }
@@ -86,9 +81,14 @@ export async function migrateKibanaIndex({
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
  */
 async function fetchKibanaIndices(client: Client) {
-  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
+  const resp = await client.cat.indices<unknown>({ index: '.kibana*', format: 'json' });
   const isKibanaIndex = (index: string) => /^\.kibana(:?_\d*)?$/.test(index);
-  return kibanaIndices.map((x: { index: string }) => x.index).filter(isKibanaIndex);
+
+  if (!Array.isArray(resp.body)) {
+    throw new Error(`expected response to be an array ${inspect(resp.body)}`);
+  }
+
+  return resp.body.map((x: { index: string }) => x.index).filter(isKibanaIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
@@ -113,27 +113,31 @@ export async function cleanKibanaIndices({
   }
 
   while (true) {
-    const resp = await client.deleteByQuery({
-      index: `.kibana`,
-      body: {
-        query: {
-          bool: {
-            must_not: {
-              ids: {
-                values: ['space:default'],
+    const resp = await client.deleteByQuery(
+      {
+        index: `.kibana`,
+        body: {
+          query: {
+            bool: {
+              must_not: {
+                ids: {
+                  values: ['space:default'],
+                },
               },
             },
           },
         },
       },
-      ignore: [409],
-    });
+      {
+        ignore: [409],
+      }
+    );
 
-    if (resp.total !== resp.deleted) {
+    if (resp.body.total !== resp.body.deleted) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
-        resp.deleted,
-        resp.total
+        resp.body.deleted,
+        resp.body.total
       );
       await delay(200);
       continue;
@@ -151,19 +155,23 @@ export async function cleanKibanaIndices({
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
-  await client.create({
-    index,
-    id: 'space:default',
-    ignore: 409,
-    body: {
-      type: 'space',
-      updated_at: new Date().toISOString(),
-      space: {
-        name: 'Default Space',
-        description: 'This is the default space',
-        disabledFeatures: [],
-        _reserved: true,
+  await client.create(
+    {
+      index,
+      id: 'space:default',
+      body: {
+        type: 'space',
+        updated_at: new Date().toISOString(),
+        space: {
+          name: 'Default Space',
+          description: 'This is the default space',
+          disabledFeatures: [],
+          _reserved: true,
+        },
       },
     },
-  } as CreateDocumentParams);
+    {
+      ignore: [409],
+    }
+  );
 }

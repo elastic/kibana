@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject, Observable } from 'rxjs';
@@ -54,6 +43,8 @@ import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
+import { registerCoreObjectTypes } from './object_types';
+
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -315,6 +306,8 @@ export class SavedObjectsService
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
 
+    registerCoreObjectTypes(this.typeRegistry);
+
     return {
       status$: calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
@@ -388,6 +381,12 @@ export class SavedObjectsService
      */
     const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
+    /**
+     * Note: Prepares all migrations maps. If a saved object type was registered with property `migrations`
+     * of type function; this function will be called to get the type's SavedObjectMigrationMap.
+     */
+    migrator.prepareMigrations();
+
     if (skipMigrations) {
       this.logger.warn(
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
@@ -458,6 +457,7 @@ export class SavedObjectsService
       createExporter: (savedObjectsClient) =>
         new SavedObjectsExporter({
           savedObjectsClient,
+          typeRegistry: this.typeRegistry,
           exportSizeLimit: this.config!.maxImportExportSize,
         }),
       createImporter: (savedObjectsClient) =>

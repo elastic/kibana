@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -125,6 +126,12 @@ export class EditorFrameService {
         collectAsyncDefinitions(this.visualizations),
       ]);
 
+      const unmount = () => {
+        if (domElement) {
+          unmountComponentAtNode(domElement);
+        }
+      };
+
       return {
         mount: async (
           element,
@@ -141,6 +148,9 @@ export class EditorFrameService {
             searchSessionId,
           }
         ) => {
+          if (domElement !== element) {
+            unmount();
+          }
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
@@ -179,11 +189,7 @@ export class EditorFrameService {
             domElement
           );
         },
-        unmount() {
-          if (domElement) {
-            unmountComponentAtNode(domElement);
-          }
-        },
+        unmount,
       };
     };
 

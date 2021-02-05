@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
-import { LegacyEsProvider } from './services';
 
 export default async function ({ readConfigFile }) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
@@ -25,7 +25,6 @@ export default async function ({ readConfigFile }) {
     services: {
       ...kibanaCommonConfig.get('services'),
       supertest: kibanaAPITestsConfig.get('services.supertest'),
-      legacyEs: LegacyEsProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {

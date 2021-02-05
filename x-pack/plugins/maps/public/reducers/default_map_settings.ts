@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
@@ -22,6 +23,7 @@ export function getDefaultMapSettings(): MapSettings {
     browserLocation: { zoom: 2 },
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
+    showScaleControl: false,
     showSpatialFilters: true,
     spatialFiltersAlpa: 0.3,
     spatialFiltersFillColor: '#DA8B45',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -10,14 +11,23 @@
  * rescheduling, middleware application, etc.
  */
 
-import { Logger } from 'src/core/server';
 import apm from 'elastic-apm-node';
 import { performance } from 'perf_hooks';
-import Joi from 'joi';
 import { identity, defaults, flow } from 'lodash';
+import { Logger, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
 import { Middleware } from '../lib/middleware';
-import { asOk, asErr, mapErr, eitherAsync, unwrap, isOk, mapOk, Result } from '../lib/result_type';
+import {
+  asOk,
+  asErr,
+  mapErr,
+  eitherAsync,
+  unwrap,
+  isOk,
+  mapOk,
+  Result,
+  promiseResult,
+} from '../lib/result_type';
 import {
   TaskRun,
   TaskMarkRunning,
@@ -36,7 +46,6 @@ import {
   FailedRunResult,
   FailedTaskResult,
   TaskDefinition,
-  validateRunResult,
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
@@ -228,17 +237,15 @@ export class TaskManagerRunner implements TaskRunner {
       'taskManager'
     );
 
-    const VERSION_CONFLICT_STATUS = 409;
     const now = new Date();
-
-    const { taskInstance } = await this.beforeMarkRunning({
-      taskInstance: this.instance,
-    });
-
-    const attempts = taskInstance.attempts + 1;
-    const ownershipClaimedUntil = taskInstance.retryAt;
-
     try {
+      const { taskInstance } = await this.beforeMarkRunning({
+        taskInstance: this.instance,
+      });
+
+      const attempts = taskInstance.attempts + 1;
+      const ownershipClaimedUntil = taskInstance.retryAt;
+
       const { id } = taskInstance;
 
       const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
@@ -286,7 +293,16 @@ export class TaskManagerRunner implements TaskRunner {
       if (apmTrans) apmTrans.end('failure');
       performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
-      if (error.statusCode !== VERSION_CONFLICT_STATUS) {
+      if (!SavedObjectsErrorHelpers.isConflictError(error)) {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+          // try to release claim as an unknown failure prevented us from marking as running
+          mapErr((errReleaseClaim: Error) => {
+            this.logger.error(
+              `[Task Runner] Task ${this.instance.id} failed to release claim after failure: ${errReleaseClaim}`
+            );
+          }, await this.releaseClaimAndIncrementAttempts());
+        }
+
         throw error;
       }
     }
@@ -311,20 +327,22 @@ export class TaskManagerRunner implements TaskRunner {
   private validateResult(
     result?: SuccessfulRunResult | FailedRunResult | void
   ): Result<SuccessfulRunResult, FailedRunResult> {
-    const { error } = Joi.validate(result, validateRunResult);
+    return isFailedRunResult(result)
+      ? asErr({ ...result, error: result.error })
+      : asOk(result || EMPTY_RUN_RESULT);
+  }
 
-    if (error) {
-      this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
-      return asErr({
-        error: new Error(`Invalid task result for ${this}: ${error.message}`),
-        state: {},
-      });
-    }
-    if (!result) {
-      return asOk(EMPTY_RUN_RESULT);
-    }
-
-    return isFailedRunResult(result) ? asErr({ ...result, error: result.error }) : asOk(result);
+  private async releaseClaimAndIncrementAttempts(): Promise<Result<ConcreteTaskInstance, Error>> {
+    return promiseResult(
+      this.bufferedTaskStore.update({
+        ...this.instance,
+        status: TaskStatus.Idle,
+        attempts: this.instance.attempts + 1,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
+      })
+    );
   }
 
   private shouldTryToScheduleRetry(): boolean {

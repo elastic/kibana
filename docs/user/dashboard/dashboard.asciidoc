@@ -3,520 +3,283 @@
 
 [partintro]
 --
+**_Visualize your data with dashboards._**
 
-A _dashboard_ is a collection of panels that you use to analyze your data. On a dashboard, you can add a variety of panels that
-you can rearrange and tell a story about your data. Panels contain everything you need, including visualizations,
-interactive controls, markdown, and more.
-
-With *Dashboard*, you can:
-
-* Add multiple panels to see many aspects and views of your data in one place.
-
-* Arrange panels for analysis and comparison.
-
-* Add text and images to provide context to the panels and make them easy to consume.
-
-* Create and apply filters to focus on the data you want to display.
-
-* Control who can use your data, and share the dashboard with a small or large audience.
-
-* Generate reports based on your findings.
-
-To begin, open the main menu, click *Dashboard*, then click *Create dashboard*.
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
+that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. Configure each panel to display your data in a chart, table, map, and more, 
+then compare the panels side-by-side to identify the patterns and connections in your data. 
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-[float]
-[[dashboard-read-only-access]]
-=== [xpack]#Read only access#
-If you see
-the read-only icon in the application header,
-then you don't have sufficient privileges to create and save dashboards. The buttons to create and edit
-dashboards are not visible. For more information, see <<xpack-security-authorization>>.
+[[tsvb]]
 
-[role="screenshot"]
-image::images/dashboard-read-only-badge.png[Example of Dashboard read only access indicator in Kibana header]
+Dashboards support many types of panels, and provide several editors that you can use to create panels.
 
-[float]
-[[types-of-panels]]
-== Types of panels
-
-Panels contain everything you need to tell a story about you data, including visualizations,
-interactive controls, Markdown, and more.
-
-[cols="50, 50"]
+[cols="2"]
 |===
 
-a| *Area*
+| <<create-panels-with-lens,Lens>>
+| The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
 
-Displays data points, connected by a line, where the area between the line and axes are shaded.
-Use area charts to compare two or more categories over time, and display the magnitude of trends.
+| <<maps,Maps>>
+| Create beautiful displays of your geographical data.
 
-| image:images/area.png[Area chart]
+| <<add-panels-with-advanced-editors,Advanced editors>>
+| Visualize time series data with *TSVB* or *Timelion*, or create a custom visualization using *Vega* or *Vega-Lite*.
 
-a| *Stacked area*
+| <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>>
+| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
 
-Displays the evolution of the value of several data groups. The values of each group are displayed
-on top of each other. Use stacked area charts to visualize part-to-whole relationships, and to show
-how each category contributes to the cumulative total.
+| <<enhance-dashboards,Tools>>
+| Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
 
-| image:images/stacked_area.png[Stacked area chart]
+| <<save-your-search,Saved search table>>
+| Display a previously saved search table from <<discover, *Discover*>>. The table results are not aggregated.
 
-a| *Bar*
-
-Displays bars side-by-side where each bar represents a category. Use bar charts to compare data across a
-large number of categories, display data that includes categories with negative values, and easily identify
-the categories that represent the highest and lowest values. Kibana also supports horizontal bar charts.
-
-| image:images/bar.png[Bar chart]
-
-a| *Stacked bar*
-
-Displays numeric values across two or more categories. Use stacked bar charts to compare numeric values between
-levels of a categorical value. Kibana also supports stacked horizontal bar charts.
-
-| image:images/stacked_bar.png[Stacked area chart]
-
-
-a| *Line*
-
-Displays data points that are connected by a line. Use line charts to visualize a sequence of values, discover
-trends over time, and forecast future values.
-
-| image:images/line.png[Line chart]
-
-a| *Pie*
-
-Displays slices that represent a data category, where the slice size is proportional to the quantity it represents.
-Use pie charts to show comparisons between multiple categories, illustrate the dominance of one category over others,
-and show percentage or proportional data.
-
-| image:images/pie.png[Pie chart]
-
-a| *Donut*
-
-Similar to the pie chart, but the central circle is removed. Use donut charts when you’d like to display multiple statistics at once.
-
-| image:images/donut.png[Donut chart]
-
-
-a| *Tree map*
-
-Relates different segments of your data to the whole. Each rectangle is subdivided into smaller rectangles, or sub branches, based on
-its proportion to the whole. Use treemaps to make efficient use of space to show percent total for each category.
-
-| image:images/treemap.png[Tree map]
-
-
-a| *Heat map*
-
-Displays graphical representations of data where the individual values are represented by colors. Use heat maps when your data set includes
-categorical data. For example, use a heat map to see the flights of origin countries compared to destination countries using the sample flight data.
-
-| image:images/heat_map.png[Heat map]
-
-a| *Goal*
-
-Displays how your metric progresses toward a fixed goal. Use the goal to display an easy to read visual of the status of your goal progression.
-
-| image:images/goal.png[Goal]
-
-
-a| *Gauge*
-
-Displays your data along a scale that changes color according to where your data falls on the expected scale. Use the gauge to show how metric
-values relate to reference threshold values, or determine how a specified field is performing versus how it is expected to perform.
-
-| image:images/gauge.png[Gauge]
-
-
-a| *Metric*
-
-Displays a single numeric value for an aggregation. Use the metric visualization when you have a numeric value that is powerful enough to tell
-a story about your data.
-
-| image:images/metric.png[Metric]
-
-
-a| *Data table*
-
-Displays your raw data or aggregation results in a tabular format. Use data tables to display server configuration details, track counts, min,
-or max values for a specific field, and monitor the status of key services.
-
-| image:images/data_table.png[Data table]
-
-
-a| *Tag cloud*
-
-Graphical representations of how frequently a word appears in the source text. Use tag clouds to easily produce a summary of large documents and
-create visual art for a specific topic.
-
-| image:images/tag_cloud.png[Tag cloud]
-
-
-a| *Maps*
-
-For all your mapping needs, use <<maps,Maps>>.
-
-| image:images/maps.png[Maps]
-
+| <<xpack-ml-anomalies,Machine Learning>>
+| Display a previously saved visualization of <<xpack-ml, machine learning>> anomaly detection data.
 
 |===
 
 [float]
-[[create-panels]]
-== Create panels
+[[create-dashboards]]
+== Create dashboards
 
-To create a panel, make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>
-to retrieve the data from {es}. If you aren’t ready to use your own data, {kib} comes with several pre-built dashboards that you can test out. For more information,
-refer to <<add-sample-data, Explore {kib} using sample data>>.
+Dashboards provide you with the space where you add panels of your data.
 
-To begin, click *Create new*, then choose one of the following options on the
-*New Visualization* window:
+[float]
+[[dashboard-minimum-requirements]]
+=== Minimum requirements
 
-* Click on the type of panel you want to create, then configure the options.
+To create dashboards, you must meet the minimum requirements. 
 
-* Select an editor to help you create the panel.
+* If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
-[role="screenshot"]
-image:images/Dashboard_add_new_visualization.png[Example add new visualization to dashboard]
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
 
-{kib} provides you with several editors that help you create panels.
+* Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
+
+* When the read-only indicator appears, you have insufficient privileges
+to create or save dashboards. The options to create and save dashboards are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
+
+[float]
+[[open-the-dashboard]]
+=== Open the dashboard
+
+Begin with an empty dashboard, or open an existing dashboard. 
+
+. Open the main menu, then click *Dashboard*.
+
+. On the *Dashboards* page, choose one of the following options:
+
+* To start with an empty dashboard, click *Create dashboard*.
+
+* To open an existing dashboard, click the dashboard *Title* you want to open.
 
 [float]
 [[create-panels-with-lens]]
-=== Create panels with Lens
+=== Create panels
 
-*Lens* is the simplest and fastest way to create powerful visualizations of your data. To use *Lens*, you drag and drop as many data fields
-as you want onto the visualization builder pane, and *Lens* uses heuristics to decide how to apply each field to the visualization.
+Choose the type of panel you want to create, then save the panel to the dashboard.
 
-With *Lens*, you can:
+. From the dashboard, choose one of the following options:
 
-* Use the automatically generated suggestions to change the visualization type.
-* Create visualizations with multiple layers and indices.
-* Change the aggregation and labels to customize the data.
+* To create a panel, click *Create panel*, then click the panel type on the *New visualization* window. *Lens* is recommended for most users. 
 
-[role="screenshot"]
-image::images/lens_drag_drop.gif[Drag and drop]
+* To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
-TIP: Drag-and-drop capabilities are available only when *Lens* knows how to use the data. If *Lens* is unable to automatically generate a
-visualization, configure the customization options for your visualization.
+. To save the panel, click *Save* in the toolbar, then configure the *Save visualization* options.
 
-[float]
-[[fiter-the-data-fields]]
-==== Filter the data fields
+.. Enter the *Title* and optional *Description*.
 
-The data fields that are displayed are based on the selected <<index-patterns,index pattern>> and the <<set-time-filter,time filter>>.
+.. From the *Tags* drop down, select any applicable tags. 
 
-To view the data fields in a different index pattern, click the *Change Index Pattern* dropdown, then select a new one.
+.. Select *Add to Dashboard after saving*.
 
-To filter the data fields:
+.. Click *Save and return*.
 
-* Enter the data field name in *Search field names*.
-* Click *Field filters*, then select the filter.
+TIP: To access your saved panels, open the main menu, then click *Visualize*.
 
 [float]
-[[view-data-summaries]]
-==== View data field summaries
+[[arrange-panels]]
+[[moving-containers]]
+[[resizing-containers]]
+=== Arrange panels
 
-To help you decide exactly the data you want to display, get a quick summary of each data field. The summary shows the distribution of
-values within the specified time range.
+To compare the data in the panels, arrange the panels on the dashboard, or remove the panel from the dashboard.
 
-To view the data field summary information, navigate to the field, then click *i*.
+. From the toolbar, click *Edit*, then use the following options:
 
-[role="screenshot"]
-image::images/lens_data_info.png[Data summary window]
+* To move, click and hold the panel header, then drag to the new location.
 
-*Lens* shows a summary depending on the type of data: date fields show the time distribution, string fields show the top 10 values, and numeric fields show a detailed summary with the top 10 values and a value distribution.
+* To resize, click the resize control, then drag to the new dimensions.
 
-[role="screenshot"]
-image::images/lens_data_info_documents.png[Data summary analyzed documents]
+* To delete, open the panel menu, then select *Delete from dashboard*.
 
-*Lens* uses a sample of 5,000 documents to perform the field analysis. The bottom line of the summary shows the percentage of sampled documents over all available documents.
-
-When *Lens* presents the top 10 values distribution, it also shows the percentage of "Other" values. For array value fields, the percentage distribution is considers each value in the array separate.
-
-[role="screenshot"]
-image::images/lens_data_info_other.png[Data summary window with Other]
-
-NOTE: the sum of all the entries and "Other" may be above 100% by a small amount, that is due to a rounding problem when presenting all values as integers.
+. To save your changes, click *Save* in the toolbar.
 
 [float]
-[[change-the-visualization-type]]
-==== Change the visualization type
+[[search-or-filter-your-data]]
+=== Search or filter your data
 
-Use the automatically generated suggestions to change the visualization type, or manually select the type of visualization you want to view.
-
-*Suggestions* are shortcuts to alternative visualizations that *Lens* generates for you.
-
-[role="screenshot"]
-image::images/lens_suggestions.gif[Visualization suggestions]
-
-If you’d like to use a visualization type outside of the suggestions, click the visualization type, then select a new one.
+{kib} provides you with several ways to search your data and apply {es} filters. You can combine the filters with any panel-specific
+filters to display the data want to you see.
 
 [role="screenshot"]
-image::images/lens_viz_types.png[]
+image::dashboard/images/dashboard-filters.png[Labeled interface with semi-structured search, time filter, and additional filters]
 
-When there is an exclamation point (!) next to a visualization type, *Lens* is unable to transfer your data, but still allows you to make the change.
+Semi-structured search::
+  Combine free text search with field-based search using the <<kuery-query,{kib} Query Language>>.
+  Type a search term to match across all fields, or begin typing a field name to
+  get prompted with field names and operators you can use to build a structured query.
+  +
+  For example, in the sample web logs data, this query displays data only for the US:
+
+  . Enter `g`, and then select *geo.source*.
+  . Select *equals some value* and *US*, and then click *Update*.
+  . For a more complex search, try:
+
+    `geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"`
+
+Time filter::
+  Dashboards have a global time filter that restricts the data that displays, but individual panels can
+  override the global time filter.
+  
+  . To update the time filter, add a panel that displays time on the x-axis.
+
+  . Open the panel menu, then select *More > Customize time range*.
+
+  . On the *Customize panel time range* window, specify the new time range, then click *Add to panel*.
+
+[role="screenshot"]
+image:images/time_range_per_panel.gif[Time range per dashboard panel]
+
+Additional filters with AND::
+  You can add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, using a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL].
+  
+  When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
+  
+  To dynamically add filters, click a series on a dashboard. For example, to filter the dashboard to display only ios data:
+
+  . Click *Add filter*.
+  . Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
+  . *Save* the filter.
+  . To remove the filter, click *x* next to the filter.
 
 [float]
-[[customize-the-data]]
-==== Customize the data
+[[clone-panels]]
+=== Clone panels
 
-For each visualization type, you can customize the aggregation and labels. The options available depend on the selected visualization type.
+To duplicate a panel and the configured functionality, clone the panel. Cloned panels continue to replicate all of the functionality from the original panel, 
+including renaming, editing, and cloning. When you clone a panel, the clone appears beside the original panel, and moves other panels to provide a space on the 
+dashboard.
 
-. From the editor, click a data field, or click *Drop a field or click to add*.
+. From the toolbar, click *Edit*. 
 
-. Change the options, then click *Close*.
-
-[float]
-[[add-layers-and-indices]]
-==== Add layers and indices
-
-To compare and analyze data from different sources, you can visualize multiple data layers and indices. Multiple layers and indices are
-supported in area, line, and bar charts.
-
-To add a layer, click *+*, then drag and drop the data fields for the new layer.
-
-[role="screenshot"]
-image::images/lens_layers.png[Add layers]
-
-To view a different index, click the index name in the editor, then select a new one.
-
-[role="screenshot"]
-image::images/lens_index_pattern.png[Add index pattern]
-
-Ready to try out *Lens*? Refer to the <<lens-tutorial,step-by-step tutorial>>.
-
-[float]
-[[tsvb]]
-=== Create panels with TSVB
-
-*TSVB* is a time series data visualizer that allows you to use the full power of the Elasticsearch aggregation framework. To use *TSVB*,
-you can combine an infinite number of <<aggregation-reference,aggregations>> to display your data.
-
-With *TSVB*, you can:
-
-* Create visualizations, data tables, and markdown panels.
-* Create visualizations with multiple indices.
-* Change the aggregation and labels to customize the data.
+. Open the panel menu, then select *Clone panel*. 
 +
 [role="screenshot"]
-image::images/tsvb.png[TSVB UI]
+image:images/clone_panel.gif[clone panel]
++
+{kib} automatically saves the cloned panel in *Visualize*. To access the cloned panel, open the main menu, then click *Visualize*.
 
 [float]
-[[configure-the-data]]
-==== Configure the data
+[[explore-the-underlying-data]]
+=== Explore the underlying documents
 
-With *TSVB*, you can add and display multiple data sets to compare and analyze. {kib} uses many types of <<aggregation-reference,aggregations>> that you can use to build
-complex summaries of that data.
-
-. Select *Data*. If you are using *Table*, select *Columns*.
-. From the *Aggregation* drop down, select the aggregation you want to visualize.
-+
-If you don’t see any data, change the <<set-time-filter,time filter>>.
-+
-To add multiple aggregations, click *+*.
-. From the *Group by* drop down, select how you want to group or split the data.
-. To add another data set, click *+*.
-+
-When you have more than one aggregation, the last value is displayed, which is indicated by the eye icon.
-
-[float]
-[[change-the-data-display]]
-==== Change the data display
-
-To find the best way to display your data, *TSVB* supports several types of panels and charts.
-
-To change the *Time Series* chart type:
-
-. Click *Data > Options*.
-. Select the *Chart type*.
-
-To change the panel type, click on the panel options:
+Dashboard panels have a shortcut to view the underlying documents in *Discover*. Open the panel menu,
+then click *Explore underlying data*. *Discover* will be opened with the same time range and filters as the panel.
 
 [role="screenshot"]
-image::images/tsvb_change_display.gif[TSVB change the panel type]
+image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+A second shortcut is disabled by default, and creates a new interaction when clicking on a chart.
+This shortcut is similar to a <<drilldowns, drilldown>>, but can show you data for only one series.
+To enable the chart interactivity shortcut, add the following to kibana.yml:
+
+["source","yml"]
+-----------
+xpack.discoverEnhanced.actions.exploreDataInChart.enabled: true
+-----------
+
+[role="screenshot"]
+image::images/explore_data_in_chart.png[Explore underlying data from chart]
+
+TIP: *Explore underlying data* is available only for visualization panels with a single index pattern.
 
 [float]
-[[custommize-the-data]]
-==== Customize the data
+[[download-csv]]
+=== Download panel data as CSV
 
-View data in a different <<index-patterns,index pattern>>, and change the data label name and colors. The options available depend on the panel type.
+Download panel data in a CSV file. You can download most panels in a CSV file, but there is a shortcut available
+for *Lens* panels.
 
-To change the index pattern, click *Panel options*, then enter the new *Index Pattern*.
-
-To override the index pattern for a data set, click *Data > Options*. Select *Yes* to override, then enter the new *Index pattern*.
-
-To change the data labels and colors:
-
-. Click *Data*.
-. Enter the *Label* name, which *TSVB* uses on the legends and data labels.
-. Click the color picker, then select the color for the data.
+[role="xpack"]
+Lens::
+Open the *Lens* panel menu, then select *More > Download as CSV*.
 +
 [role="screenshot"]
-image::images/tsvb_color_picker.png[TSVB color picker]
+image::images/download_csv_context_menu.png[Download as CSV from panel context menu]
 
-[float]
-[[add-annotations]]
-==== Add annotations
+All panels::
+  . Open the panel menu, then select *Inspect*.
 
-You can overlay annotation events on top of your *Time Series* charts. The options available depend on the data source.
-
-To begin, click *Annotations*, click *Add data source*, then configure the options.
+  . Click *Download CSV*, then select the CSV type from the dropdown. The *Formatted CSV* contains
+    human-readable dates and numbers, while the *Unformatted* option is for computer use.
 
 [role="screenshot"]
-image::images/tsvb_annotations.png[TSVB annotations]
+image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 [float]
-[[filter-the-panel]]
-==== Filter the panel
+[[save-the-dashboard]]
+=== Save the dashboard
 
-The data that displays on the panel is based on the <<index-patterns,index pattern>> and <<set-time-filter,time filter>>.
-You can filter the data on the panels using the <<lucene-query,Lucene query syntax>>.
+When you're finished making changes, save the dashboard.
 
-Click *Panel options*, then enter the syntax in the *Panel Filter* field.
+. From the toolbar, click *Save*.
 
-If you want to ignore filters from all of {kib}, select *Yes* for *Ignore global filter*.
+. Enter the dashboard *Title* and an optional *Description*.
 
-[float]
-[[vega]]
-=== Create custom panels with Vega
+. From the *Tags* dropdown, select the tags you want to apply.
 
-Build custom visualizations using *Vega* and *Vega-Lite*, backed by one or more data sources including {es}, Elastic Map Service,
-URL, or static data. Use the {kib} extensions to embed *Vega* in your dashboard, and add interactive tools.
+. To save the time range, select *Store time with dashboard*.
 
-Use *Vega* and *Vega-Lite* when you want to create a visualization for:
-
-* Aggregations that use `nested` or `parent/child` mapping
-* Aggregations without an index pattern
-* Queries that use custom time filters
-* Complex calculations
-* Extracting data from _source instead of aggregations
-* Scatter charts, sankey charts, and custom maps
-* Using an unsupported visual theme
-
-[role="screenshot"]
-image::images/vega.png[Vega UI]
-
-*Vega* and *Vega-Lite*  are declarative formats that:
-
-* Create complex visualizations
-* Use JSON and a different syntax for declaring visualizations
-* Are not fully interchangeable
-
-For more information about *Vega* and *Vega-Lite*, refer to:
-
-* <<vega-lite-tutorial-create-your-first-visualizations,Create your first visualization>>
-* <<vega-tutorial-update-kibana-filters-from-vega,Update Kibana filters>>
-* <<reference-for-kibana-extensions,Reference for Kibana extensions>>
-* <<resources-and-examples,Resources and examples>>
+. Click *Save*.
 
 [float]
-[[timelion]]
-=== Create panels with Timelion
+[[share-the-dashboard]]
+=== Share the dashboard
 
-*Timelion* is a time series data visualizer that enables you to combine independent data sources within a single visualization.
+To share the dashboard with a larger audience, click *Share* in the toolbar, then choose one of the following options:
 
-*Timelion* is driven by a simple expression language that you use to:
+* *Embed code* &mdash; Embed the dashboard as an iframe on a web page. Embedded dashboards are fully interactive, but you can
+  hide some parts of the dashboard using the menu options. User authentication is required, which the user provides or via reverse proxy. 
+  <<anonymous-authentication, Anonymous access>> is also supported. For more details,
+  learn about <<kibana-authentication>>.
 
-* Retrieve time series data
-* Perform calculation to tease out the answers to complex questions
-* Visualize the results
+* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
 
-[role="screenshot"]
-image::images/timelion.png[Timelion UI]
+* *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
 
-Ready to try out Timelion? For step-by-step tutorials, refer to:
-
-* <<timelion-tutorial-create-time-series-visualizations,Create time series visualizations>>
-* <<timelion-tutorial-create-visualizations-with-mathematical-functions,Create visualizations with mathematical functions>>
-* <<timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends,Create visualizations with conditional logic and tracking trends>>
+* *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
-[[timelion-deprecation]]
-==== Timelion app deprecation
+[[import-dashboards]]
+=== Export the dashboard
 
-In 7.0 and later, *Timelion* app is deprecated. In 8.0 and later, *Timelion* app is removed from {kib}. To prepare for the removal of *Timelion* app, you must migrate *Timelion* app worksheets to a dashboard.
-
-NOTE: Only *Timelion* app is deprecated. {kib} continues to support *Timelion*
-visualizations in *Dashboard*, *Visualize*, and *Canvas*.
-
-To migrate a *Timelion* worksheet to a dashboard:
-
-. Open the main menu, click *Dashboard*, then click *Create dashboard*.
-
-. For each *Timelion* app worksheet, complete the following steps.
-
-.. On the dashboard, click *Create New*, then click *Timelion* on the *New Visualization* window.
-
-.. Open a new tab, open the *Timelion* app, select the chart you want to copy, then copy the chart expression.
-+
-[role="screenshot"]
-image::images/timelion-copy-expression.png[Timelion app chart]
-
-.. Go to *Timelion*, paste the chart expression in the *Timelion expression* field, then click *Update*.
-+
-[role="screenshot"]
-image::images/timelion-vis-paste-expression.png[Timelion advanced editor UI]
-
-.. In the toolbar, click *Save*.
-
-.. On the *Save visualization* window, enter the visualization *Title*, then click *Save and return*.
-+
-The Timelion visualization panel appears on the dashboard.
-+
-[role="screenshot"]
-image::images/timelion-dashboard.png[Final dashboard with saved Timelion app worksheet]
-
-[float]
-[[save-panels]]
-== Save panels
-
-When you’ve finished making changes, save the panels.
-
-. In the toolbar, click *Save*.
-. Add the *Title* and optional *Description*.
-. Click *Save and return*.
-
-[float]
-[[add-existing-panels]]
-== Add existing panels
-
-Add panels that you’ve already created to your dashboard.
-
-On the dashboard, click *Add an existing*, then select the panel you want to add.
-
-When a panel contains a stored query, both queries are applied.
-
-[role="screenshot"]
-image:images/Dashboard_add_visualization.png[Example add visualization to dashboard]
-
-To make changes to the panel, put the dashboard in *Edit* mode, then select the edit option from the panel menu.
-The changes you make appear in every dashboard that uses the panel, except if you edit the panel title. Changes to the panel title appear only on the dashboard where you made the change.
-
-[float]
-[[save-dashboards]]
-== Save dashboards
-
-When you’ve finished adding the panels, save the dashboard.
-
-. In the toolbar, click *Save*.
-
-. Enter the dashboard *Title* and optional *Description*, then *Save* the dashboard.
+To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all references needed.
 
 --
-include::edit-dashboards.asciidoc[]
+include::lens.asciidoc[]
 
-include::explore-dashboard-data.asciidoc[]
+include::advanced-editors.asciidoc[]
+
+include::aggregation-based.asciidoc[]
+
+include::enhance-dashboards.asciidoc[]
 
 include::drilldowns.asciidoc[]
 
-include::share-dashboards.asciidoc[]
-
-include::tutorials.asciidoc[]
-
 include::aggregation-reference.asciidoc[]
-
-include::vega-reference.asciidoc[]

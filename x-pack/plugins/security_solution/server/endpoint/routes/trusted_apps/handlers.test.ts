@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaResponseFactory } from 'kibana/server';
@@ -22,6 +23,7 @@ import {
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
 } from './handlers';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -31,13 +33,14 @@ const createAppContextMock = () => ({
   config: () => Promise.resolve(createMockConfig()),
 });
 
-const createHandlerContextMock = () => ({
-  ...xpackMocks.createRequestHandlerContext(),
-  lists: {
-    getListClient: jest.fn(),
-    getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
-  },
-});
+const createHandlerContextMock = () =>
+  (({
+    ...xpackMocks.createRequestHandlerContext(),
+    lists: {
+      getListClient: jest.fn(),
+      getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
+    },
+  } as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>);
 
 const assertResponse = <T>(
   response: jest.Mocked<KibanaResponseFactory>,

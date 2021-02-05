@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createCaseClient } from '.';
 import {
@@ -19,6 +20,7 @@ import { create } from './cases/create';
 import { update } from './cases/update';
 import { addComment } from './comments/add';
 import { updateAlertsStatus } from './alerts/update_status';
+import type { CasesRequestHandlerContext } from '../types';
 
 jest.mock('./cases/create');
 jest.mock('./cases/update');
@@ -32,7 +34,7 @@ const connectorMappingsService = connectorMappingsServiceMock();
 const request = {} as KibanaRequest;
 const savedObjectsClient = savedObjectsClientMock.create();
 const userActionService = createUserActionServiceMock();
-const context = {} as RequestHandlerContext;
+const context = {} as CasesRequestHandlerContext;
 
 const createMock = create as jest.Mock;
 const updateMock = update as jest.Mock;
@@ -57,7 +59,6 @@ describe('createCaseClient()', () => {
       caseConfigureService,
       caseService,
       connectorMappingsService,
-      context,
       request,
       savedObjectsClient,
       userActionService,
@@ -68,7 +69,6 @@ describe('createCaseClient()', () => {
       caseConfigureService,
       caseService,
       connectorMappingsService,
-      context,
       request,
       savedObjectsClient,
       userActionService,
@@ -79,7 +79,6 @@ describe('createCaseClient()', () => {
       caseConfigureService,
       caseService,
       connectorMappingsService,
-      context,
       request,
       savedObjectsClient,
       userActionService,

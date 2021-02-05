@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ParsedQuery } from 'query-string';
+import { ParsedQuery, parse, stringify } from 'query-string';
 import { transform } from 'lodash';
 
 /**
@@ -43,15 +32,38 @@ export function encodeUriQuery(val: string, pctEncodeSpaces = false) {
 
 export const encodeQuery = (
   query: ParsedQuery,
-  encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery
-) =>
-  transform(query, (result: any, value, key) => {
+  encodeFunction: (val: string, pctEncodeSpaces?: boolean) => string = encodeUriQuery,
+  pctEncodeSpaces = true
+): ParsedQuery =>
+  transform<any, ParsedQuery>(query, (result, value, key) => {
     if (key) {
       const singleValue = Array.isArray(value) ? value.join(',') : value;
 
       result[key] = encodeFunction(
         singleValue === undefined || singleValue === null ? '' : singleValue,
-        true
+        pctEncodeSpaces
       );
     }
   });
+
+/**
+ * Method to help modify url query params.
+ *
+ * @param params
+ * @param key
+ * @param value
+ */
+export const addQueryParam = (params: string, key: string, value?: string) => {
+  const queryParams = parse(params);
+
+  if (value !== undefined) {
+    queryParams[key] = value;
+  } else {
+    delete queryParams[key];
+  }
+
+  return stringify(encodeQuery(queryParams, undefined, false), {
+    sort: false,
+    encode: false,
+  });
+};

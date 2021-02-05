@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +12,7 @@ import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 
-import { PluginStart } from '../../../../src/plugins/data/server';
+import type { PluginStart, DataRequestHandlerContext } from '../../../../src/plugins/data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
@@ -53,7 +42,9 @@ export interface TimelionPluginStartDeps {
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(
+    core: CoreSetup<TimelionPluginStartDeps>
+  ): Promise<RecursiveReadonly<PluginSetupContract>> {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof configSchema>>()
       .pipe(first())
@@ -78,7 +69,7 @@ export class Plugin {
 
     const logger = this.initializerContext.logger.get('timelion');
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
 
     const deps = {
       configManager,
@@ -90,7 +81,7 @@ export class Plugin {
 
     functionsRoute(router, deps);
     runRoute(router, deps);
-    validateEsRoute(router, core);
+    validateEsRoute(router);
 
     core.uiSettings.register({
       'timelion:es.timefield': {
@@ -178,6 +169,7 @@ export class Plugin {
           defaultMessage: '{experimentalLabel} Your API key from www.quandl.com',
           values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` },
         }),
+        sensitive: true,
         category: ['timelion'],
         schema: schema.string(),
       },

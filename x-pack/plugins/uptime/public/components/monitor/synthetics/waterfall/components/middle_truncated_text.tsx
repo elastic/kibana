@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { FIXED_AXIS_HEIGHT } from './constants';
 
 const OuterContainer = styled.div`
   width: 100%;
@@ -29,10 +31,12 @@ const FirstChunk = styled.span`
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 const LastChunk = styled.span`
   flex-shrink: 0;
+  line-height: ${FIXED_AXIS_HEIGHT}px;
 `;
 
 export const getChunks = (text: string) => {

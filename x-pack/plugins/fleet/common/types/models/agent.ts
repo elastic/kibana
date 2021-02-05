@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FullAgentPolicy } from './agent_policy';
 import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
 
@@ -130,7 +132,6 @@ interface AgentBase {
   unenrollment_started_at?: string;
   upgraded_at?: string;
   upgrade_started_at?: string;
-  shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
   default_api_key_id?: string;

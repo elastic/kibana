@@ -1,13 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    snapshotRestore?: SnapshotRestoreContext;
-  }
-}
 
 import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +13,6 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  ILegacyScopedClusterClient,
 } from 'kibana/server';
 
 import { PLUGIN, APP_REQUIRED_CLUSTER_PRIVILEGES } from '../common';
@@ -26,12 +21,8 @@ import { ApiRoutes } from './routes';
 import { wrapEsError } from './lib';
 import { isEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
-import { Dependencies } from './types';
+import type { Dependencies, SnapshotRestoreRequestHandlerContext } from './types';
 import { SnapshotRestoreConfig } from './config';
-
-export interface SnapshotRestoreContext {
-  client: ILegacyScopedClusterClient;
-}
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
@@ -65,7 +56,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       return;
     }
 
-    const router = http.createRouter();
+    const router = http.createRouter<SnapshotRestoreRequestHandlerContext>();
 
     this.license.setup(
       {
@@ -95,13 +86,16 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       ],
     });
 
-    http.registerRouteHandlerContext('snapshotRestore', async (ctx, request) => {
-      this.snapshotRestoreESClient =
-        this.snapshotRestoreESClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.snapshotRestoreESClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<SnapshotRestoreRequestHandlerContext, 'snapshotRestore'>(
+      'snapshotRestore',
+      async (ctx, request) => {
+        this.snapshotRestoreESClient =
+          this.snapshotRestoreESClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.snapshotRestoreESClient.asScoped(request),
+        };
+      }
+    );
 
     this.apiRoutes.setup({
       router,

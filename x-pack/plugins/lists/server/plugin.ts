@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { first } from 'rxjs/operators';
@@ -19,6 +20,7 @@ import type {
   ContextProviderReturn,
   ListPluginSetup,
   ListsPluginStart,
+  ListsRequestHandlerContext,
   PluginsStart,
 } from './types';
 import { createConfig$ } from './create_config';
@@ -44,8 +46,11 @@ export class ListPlugin
 
     initSavedObjects(core.savedObjects);
 
-    core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
-    const router = core.http.createRouter();
+    core.http.registerRouteHandlerContext<ListsRequestHandlerContext, 'lists'>(
+      'lists',
+      this.createRouteHandlerContext()
+    );
+    const router = core.http.createRouter<ListsRequestHandlerContext>();
     initRoutes(router, config);
 
     return {

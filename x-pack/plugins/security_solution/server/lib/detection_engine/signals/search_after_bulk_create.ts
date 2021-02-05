@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable complexity */
 
 import { singleSearchAfter } from './single_search_after';
@@ -70,6 +72,7 @@ export const searchAfterAndBulkCreate = async ({
     interval,
     buildRuleMessage,
   });
+  const tuplesToBeLogged = [...totalToFromTuples];
   logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
 
   while (totalToFromTuples.length > 0) {
@@ -87,25 +90,14 @@ export const searchAfterAndBulkCreate = async ({
         let mergedSearchResults = createSearchResultReturnType();
         logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
 
-        // perform search_after with optionally undefined sortId
-        const singleSearchAfterPromise = singleSearchAfter({
-          buildRuleMessage,
-          searchAfterSortId: sortId,
-          index: inputIndexPattern,
-          from: tuple.from.toISOString(),
-          to: tuple.to.toISOString(),
-          services,
-          logger,
-          filter,
-          pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
-          timestampOverride: ruleParams.timestampOverride,
-          excludeDocsWithTimestampOverride: false,
-        });
-
         // if there is a timestampOverride param we always want to do a secondary search against @timestamp
         if (ruleParams.timestampOverride != null && hasBackupSortId) {
           // only execute search if we have something to sort on or if it is the first search
-          const singleSearchAfterDefaultTimestamp = singleSearchAfter({
+          const {
+            searchResult: searchResultB,
+            searchDuration: searchDurationB,
+            searchErrors: searchErrorsB,
+          } = await singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: backupSortId,
             index: inputIndexPattern,
@@ -118,11 +110,6 @@ export const searchAfterAndBulkCreate = async ({
             timestampOverride: ruleParams.timestampOverride,
             excludeDocsWithTimestampOverride: true,
           });
-          const {
-            searchResult: searchResultB,
-            searchDuration: searchDurationB,
-            searchErrors: searchErrorsB,
-          } = await singleSearchAfterDefaultTimestamp;
 
           // call this function setSortIdOrExit()
           const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
@@ -153,7 +140,19 @@ export const searchAfterAndBulkCreate = async ({
 
         if (hasSortId) {
           // only execute search if we have something to sort on or if it is the first search
-          const { searchResult, searchDuration, searchErrors } = await singleSearchAfterPromise;
+          const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+            buildRuleMessage,
+            searchAfterSortId: sortId,
+            index: inputIndexPattern,
+            from: tuple.from.toISOString(),
+            to: tuple.to.toISOString(),
+            services,
+            logger,
+            filter,
+            pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+            timestampOverride: ruleParams.timestampOverride,
+            excludeDocsWithTimestampOverride: false,
+          });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
             toReturn,
@@ -298,5 +297,6 @@ export const searchAfterAndBulkCreate = async ({
     }
   }
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
+  toReturn.totalToFromTuples = tuplesToBeLogged;
   return toReturn;
 };
