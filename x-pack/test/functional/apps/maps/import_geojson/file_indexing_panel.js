@@ -11,7 +11,6 @@ import uuid from 'uuid/v4';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
@@ -88,20 +87,6 @@ export default function ({ getService, getPageObjects }) {
 
       const newIndexedLayerExists = await PageObjects.maps.doesLayerExist(indexName);
       expect(newIndexedLayerExists).to.be(false);
-    });
-
-    it('should create a link to new index in management', async () => {
-      const indexName = await indexPoint();
-
-      const layerAddReady = await PageObjects.maps.importLayerReadyForAdd();
-      expect(layerAddReady).to.be(true);
-
-      const newIndexLinkExists = await testSubjects.exists('indexManagementNewIndexLink');
-      expect(newIndexLinkExists).to.be(true);
-
-      const indexLink = await testSubjects.getAttribute('indexManagementNewIndexLink', 'href');
-      const linkDirectsToNewIndex = indexLink.endsWith(indexName);
-      expect(linkDirectsToNewIndex).to.be(true);
     });
 
     const GEO_POINT = 'geo_point';
