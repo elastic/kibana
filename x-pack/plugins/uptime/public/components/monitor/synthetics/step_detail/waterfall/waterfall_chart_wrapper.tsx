@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
+import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/public';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import { WaterfallProvider, WaterfallChart, RenderItem } from '../../waterfall';
@@ -65,6 +66,14 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     },
     [hasFilters, onlyHighlighted]
   );
+
+  useTrackMetric({ app: 'uptime', metric: 'waterfall_chart_view', metricType: METRIC_TYPE.COUNT });
+  useTrackMetric({
+    app: 'uptime',
+    metric: 'waterfall_chart_view',
+    metricType: METRIC_TYPE.COUNT,
+    delay: 15000,
+  });
 
   return (
     <WaterfallProvider
