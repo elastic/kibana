@@ -11218,7 +11218,6 @@
     "xpack.lens.editLayerSettingsChartType": "编辑图层设置 {chartType}",
     "xpack.lens.editorFrame.buildExpressionError": "准备图表时发生意外错误",
     "xpack.lens.editorFrame.colorIndicatorLabel": "此维度的颜色：{hex}",
-    "xpack.lens.editorFrame.configurationFailure": "配置无效",
     "xpack.lens.editorFrame.configurationFailureMoreErrors": " +{errors} 个{errors, plural, other {错误}}",
     "xpack.lens.editorFrame.dataFailure": "加载数据时出错。",
     "xpack.lens.editorFrame.emptyWorkspace": "将一些字段拖放到此处以开始",

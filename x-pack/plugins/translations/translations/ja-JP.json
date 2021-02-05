@@ -11189,7 +11189,6 @@
     "xpack.lens.editLayerSettingsChartType": "レイヤー設定を編集、{chartType}",
     "xpack.lens.editorFrame.buildExpressionError": "グラフの準備中に予期しないエラーが発生しました",
     "xpack.lens.editorFrame.colorIndicatorLabel": "このディメンションの色：{hex}",
-    "xpack.lens.editorFrame.configurationFailure": "無効な構成です",
     "xpack.lens.editorFrame.configurationFailureMoreErrors": " +{errors} {errors, plural, other {エラー}}",
     "xpack.lens.editorFrame.dataFailure": "データの読み込み中にエラーが発生しました。",
     "xpack.lens.editorFrame.emptyWorkspace": "開始するにはここにフィールドをドロップしてください",
