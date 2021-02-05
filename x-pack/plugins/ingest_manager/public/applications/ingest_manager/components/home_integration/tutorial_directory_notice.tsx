@@ -23,7 +23,7 @@ import {
   useGetSettings,
   useLink,
   useCapabilities,
-  useStartServices,
+  useCore,
 } from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
@@ -39,7 +39,7 @@ export const tutorialDirectoryNoticeState$ = new BehaviorSubject({
 
 const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
   const { getHref } = useLink();
-  const { application } = useStartServices();
+  const { application } = useCore();
   const { show: hasIngestManager } = useCapabilities();
   const { data: settingsData, isLoading } = useGetSettings();
   const [dismissedNotice, setDismissedNotice] = useState<boolean>(false);
