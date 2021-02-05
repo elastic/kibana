@@ -27,6 +27,10 @@ optional_field: {{optional_field}}
 {{/if}}
 foo: {{bar}}
 some_text_field: {{should_be_text}}
+multi_text_field:
+{{#each multi_text}}
+  - {{this}}
+{{/each}}
       `;
     const vars = {
       paths: { value: ['/usr/local/var/log/nginx/access.log'] },
@@ -34,6 +38,7 @@ some_text_field: {{should_be_text}}
       optional_field: { type: 'text', value: undefined },
       bar: { type: 'text', value: 'bar' },
       should_be_text: { type: 'text', value: '1234' },
+      multi_text: { type: 'text', value: ['1234', 'foo', 'bar'] },
     };
 
     const output = compileTemplate(vars, streamTemplate);
@@ -45,6 +50,7 @@ some_text_field: {{should_be_text}}
       password: '',
       foo: 'bar',
       some_text_field: '1234',
+      multi_text_field: ['1234', 'foo', 'bar'],
     });
   });
 
