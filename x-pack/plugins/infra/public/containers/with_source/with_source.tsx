@@ -1,20 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext } from 'react';
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import { SourceQuery, UpdateSourceInput } from '../../graphql/types';
+import {
+  InfraSavedSourceConfiguration,
+  InfraSourceConfiguration,
+} from '../../../common/http_api/source_api';
 import { RendererFunction } from '../../utils/typed_react';
 import { Source } from '../source';
 
 interface WithSourceProps {
   children: RendererFunction<{
-    configuration?: SourceQuery.Query['source']['configuration'];
-    create: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
+    configuration?: InfraSourceConfiguration;
+    create: (sourceProperties: InfraSavedSourceConfiguration) => Promise<any> | undefined;
     createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
@@ -25,7 +29,7 @@ interface WithSourceProps {
     metricAlias?: string;
     metricIndicesExist?: boolean;
     sourceId: string;
-    update: (sourceProperties: UpdateSourceInput) => Promise<any> | undefined;
+    update: (sourceProperties: InfraSavedSourceConfiguration) => Promise<any> | undefined;
     version?: string;
   }>;
 }

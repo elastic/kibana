@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,7 @@ export const getTopNavLinks = ({
   savedSearch,
   services,
   state,
+  onOpenInspector,
 }: {
   getFieldCounts: () => Promise<Record<string, number>>;
   indexPattern: IndexPattern;
@@ -36,6 +37,7 @@ export const getTopNavLinks = ({
   savedSearch: SavedSearch;
   services: DiscoverServices;
   state: GetStateReturn;
+  onOpenInspector: () => void;
 }) => {
   const newSearch = {
     id: 'new',
@@ -123,6 +125,7 @@ export const getTopNavLinks = ({
     }),
     testId: 'openInspectorButton',
     run: () => {
+      onOpenInspector();
       services.inspector.open(inspectorAdapters, {
         title: savedSearch.title,
       });

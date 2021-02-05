@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -18,6 +19,7 @@ import { getInstallation } from '../../packages';
 import { deleteTransforms, deleteTransformRefs } from './remove';
 import { getAsset } from './common';
 import { appContextService } from '../../../app_context';
+import { isLegacyESClientError } from '../../../../errors';
 
 interface TransformInstallation {
   installationName: string;
@@ -115,17 +117,27 @@ async function handleTransformInstall({
   callCluster: CallESAsCurrentUser;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
-  // defer validation on put if the source index is not available
-  await callCluster('transport.request', {
-    method: 'PUT',
-    path: `/_transform/${transform.installationName}`,
-    query: 'defer_validation=true',
-    body: transform.content,
-  });
-
+  try {
+    // defer validation on put if the source index is not available
+    await callCluster('transport.request', {
+      method: 'PUT',
+      path: `/_transform/${transform.installationName}`,
+      query: 'defer_validation=true',
+      body: transform.content,
+    });
+  } catch (err) {
+    // swallow the error if the transform already exists.
+    const isAlreadyExistError =
+      isLegacyESClientError(err) && err?.body?.error?.type === 'resource_already_exists_exception';
+    if (!isAlreadyExistError) {
+      throw err;
+    }
+  }
   await callCluster('transport.request', {
     method: 'POST',
     path: `/_transform/${transform.installationName}/_start`,
+    // Ignore error if the transform is already started
+    ignore: [409],
   });
 
   return { id: transform.installationName, type: ElasticsearchAssetType.transform };

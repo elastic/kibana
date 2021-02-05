@@ -2,8 +2,9 @@
 /* eslint-disable */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export type Maybe<T> = T | null;
@@ -834,6 +835,12 @@ export interface ResponseFavoriteTimeline {
   message?: Maybe<string>;
 
   savedObjectId: string;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 
   version: string;
 
@@ -1691,6 +1698,12 @@ export interface PersistTimelineMutationArgs {
 }
 export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface DeleteTimelineMutationArgs {
   id: string[];
@@ -2096,6 +2109,9 @@ export namespace DeleteTimelineMutation {
 export namespace PersistTimelineFavoriteMutation {
   export type Variables = {
     timelineId?: Maybe<string>;
+    templateTimelineId?: Maybe<string>;
+    templateTimelineVersion?: Maybe<number>;
+    timelineType: TimelineType;
   };
 
   export type Mutation = {
@@ -2112,6 +2128,12 @@ export namespace PersistTimelineFavoriteMutation {
     version: string;
 
     favorite: Maybe<Favorite[]>;
+
+    templateTimelineId: Maybe<string>;
+
+    templateTimelineVersion: Maybe<number>;
+
+    timelineType: Maybe<TimelineType>;
   };
 
   export type Favorite = {
