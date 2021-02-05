@@ -128,6 +128,7 @@ export const useLogAnalysisResultsUrlState = () => {
 
   return {
     timeRange: queryTimeRange,
+    friendlyTimeRange: timeRange,
     setTimeRange,
     autoRefresh,
     setAutoRefresh,

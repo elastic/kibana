@@ -89,6 +89,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
 
   const {
     timeRange,
+    friendlyTimeRange,
     setTimeRange: setSelectedTimeRange,
     autoRefresh,
     setAutoRefresh,
@@ -204,8 +205,8 @@ export const LogEntryRateResultsContent: React.FunctionComponent = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
-                  start={moment(timeRange.value.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ')}
-                  end={moment(timeRange.value.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ')}
+                  start={friendlyTimeRange.startTime}
+                  end={friendlyTimeRange.endTime}
                   onTimeChange={handleSelectedTimeRangeChange}
                   isPaused={autoRefresh.isPaused}
                   refreshInterval={autoRefresh.interval}
