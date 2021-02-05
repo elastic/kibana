@@ -17,7 +17,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { TutorialDirectoryNoticeComponent } from 'src/plugins/home/public';
-import { sendPutSettings, useGetSettings, useLink, useCapabilities } from '../../hooks';
+import { RedirectAppLinks } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  sendPutSettings,
+  useGetSettings,
+  useLink,
+  useCapabilities,
+  useStartServices,
+} from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
   &&& {
@@ -25,13 +32,14 @@ const FlexItemButtonWrapper = styled(EuiFlexItem)`
   }
 `;
 
-const tutorialDirectoryNoticeState$ = new BehaviorSubject({
+export const tutorialDirectoryNoticeState$ = new BehaviorSubject({
   settingsDataLoaded: false,
   hasSeenNotice: false,
 });
 
 const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
   const { getHref } = useLink();
+  const { application } = useStartServices();
   const { show: hasIngestManager } = useCapabilities();
   const { data: settingsData, isLoading } = useGetSettings();
   const [dismissedNotice, setDismissedNotice] = useState<boolean>(false);
@@ -96,12 +104,14 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
         <EuiFlexGroup gutterSize="s">
           <FlexItemButtonWrapper grow={false}>
             <div>
-              <EuiButton size="s" href={getHref('overview')}>
-                <FormattedMessage
-                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.fleetAppButtonText"
-                  defaultMessage="Try Fleet Beta"
-                />
-              </EuiButton>
+              <RedirectAppLinks application={application}>
+                <EuiButton size="s" href={getHref('overview')}>
+                  <FormattedMessage
+                    id="xpack.ingestManager.homeIntegration.tutorialDirectory.fleetAppButtonText"
+                    defaultMessage="Try Fleet Beta"
+                  />
+                </EuiButton>
+              </RedirectAppLinks>
             </div>
           </FlexItemButtonWrapper>
           <FlexItemButtonWrapper grow={false}>
