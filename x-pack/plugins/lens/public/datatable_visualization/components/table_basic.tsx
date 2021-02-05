@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './table_basic.scss';
@@ -21,17 +22,20 @@ import { FormatFactory, LensFilterEvent, LensTableRowContextMenuEvent } from '..
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
+import { ColumnState } from '../visualization';
 import {
   DataContextType,
   DatatableRenderProps,
   LensSortAction,
   LensResizeAction,
   LensGridDirection,
+  LensToggleAction,
 } from './types';
 import { createGridColumns } from './columns';
 import { createGridCell } from './cell_value';
 import {
   createGridFilterHandler,
+  createGridHideHandler,
   createGridResizeHandler,
   createGridSortingConfig,
 } from './table_actions';
@@ -43,15 +47,33 @@ const gridStyle: EuiDataGridStyle = {
   header: 'underline',
 };
 
+export interface ColumnConfig {
+  columns: Array<
+    ColumnState & {
+      type: 'lens_datatable_column';
+    }
+  >;
+  sortingColumnId: string | undefined;
+  sortingDirection: LensGridDirection;
+}
+
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const [firstTable] = Object.values(props.data.tables);
 
-  const [columnConfig, setColumnConfig] = useState(props.args.columns);
+  const [columnConfig, setColumnConfig] = useState({
+    columns: props.args.columns,
+    sortingColumnId: props.args.sortingColumnId,
+    sortingDirection: props.args.sortingDirection,
+  });
   const [firstLocalTable, updateTable] = useState(firstTable);
 
   useDeepCompareEffect(() => {
-    setColumnConfig(props.args.columns);
-  }, [props.args.columns]);
+    setColumnConfig({
+      columns: props.args.columns,
+      sortingColumnId: props.args.sortingColumnId,
+      sortingDirection: props.args.sortingDirection,
+    });
+  }, [props.args.columns, props.args.sortingColumnId, props.args.sortingDirection]);
 
   useDeepCompareEffect(() => {
     updateTable(firstTable);
@@ -84,7 +106,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const onEditAction = useCallback(
-    (data: LensSortAction['data'] | LensResizeAction['data']) => {
+    (data: LensSortAction['data'] | LensResizeAction['data'] | LensToggleAction['data']) => {
       if (renderMode === 'edit') {
         dispatchEvent({ name: 'edit', data });
       }
@@ -105,13 +127,15 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const bucketColumns = useMemo(
     () =>
-      columnConfig.columnIds.filter((_colId, index) => {
-        const col = firstTableRef.current.columns[index];
-        return (
-          col?.meta?.sourceParams?.type &&
-          getType(col.meta.sourceParams.type as string)?.type === 'buckets'
-        );
-      }),
+      columnConfig.columns
+        .filter((_col, index) => {
+          const col = firstTableRef.current.columns[index];
+          return (
+            col?.meta?.sourceParams?.type &&
+            getType(col.meta.sourceParams.type as string)?.type === 'buckets'
+          );
+        })
+        .map((col) => col.columnId),
     [firstTableRef, columnConfig, getType]
   );
 
@@ -120,16 +144,25 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     (bucketColumns.length &&
       firstTable.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
 
-  const visibleColumns = useMemo(() => columnConfig.columnIds.filter((field) => !!field), [
-    columnConfig,
-  ]);
+  const visibleColumns = useMemo(
+    () =>
+      columnConfig.columns
+        .filter((col) => !!col.columnId && !col.hidden)
+        .map((col) => col.columnId),
+    [columnConfig]
+  );
 
-  const { sortBy, sortDirection } = columnConfig;
+  const { sortingColumnId: sortBy, sortingDirection: sortDirection } = props.args;
 
   const isReadOnlySorted = renderMode !== 'edit';
 
   const onColumnResize = useMemo(
     () => createGridResizeHandler(columnConfig, setColumnConfig, onEditAction),
+    [onEditAction, setColumnConfig, columnConfig]
+  );
+
+  const onColumnHide = useMemo(
+    () => createGridHideHandler(columnConfig, setColumnConfig, onEditAction),
     [onEditAction, setColumnConfig, columnConfig]
   );
 
@@ -143,7 +176,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         columnConfig,
         visibleColumns,
         formatFactory,
-        onColumnResize
+        onColumnResize,
+        onColumnHide
       ),
     [
       bucketColumns,
@@ -154,6 +188,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       visibleColumns,
       formatFactory,
       onColumnResize,
+      onColumnHide,
     ]
   );
 
@@ -183,7 +218,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
                 onRowContextMenuClick({
                   rowIndex,
                   table: firstTableRef.current,
-                  columns: columnConfig.columnIds,
+                  columns: columnConfig.columns.map((col) => col.columnId),
                 });
               }}
             />

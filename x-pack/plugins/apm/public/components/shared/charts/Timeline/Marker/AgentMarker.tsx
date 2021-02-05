@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,7 +12,7 @@ import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/use_theme';
 import { px, units } from '../../../../../style/variables';
 import { Legend } from '../../Legend';
-import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { AgentMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 const NameContainer = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};

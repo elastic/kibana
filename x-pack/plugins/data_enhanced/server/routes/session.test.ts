@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
@@ -14,6 +15,13 @@ import type {
 } from '../../../../../src/plugins/data/server';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { registerSessionRoutes } from './session';
+
+enum PostHandlerIndex {
+  SAVE,
+  FIND,
+  CANCEL,
+  EXTEND,
+}
 
 describe('registerSessionRoutes', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
@@ -36,7 +44,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, saveHandler]] = mockRouter.post.mock.calls;
+    const [, saveHandler] = mockRouter.post.mock.calls[PostHandlerIndex.SAVE];
 
     saveHandler(mockContext, mockRequest, mockResponse);
 
@@ -70,7 +78,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, [, findHandler]] = mockRouter.post.mock.calls;
+    const [, findHandler] = mockRouter.post.mock.calls[PostHandlerIndex.FIND];
 
     findHandler(mockContext, mockRequest, mockResponse);
 
@@ -88,14 +96,14 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, updateHandler]] = mockRouter.put.mock.calls;
+    const [, updateHandler] = mockRouter.put.mock.calls[0];
 
     updateHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.updateSession).toHaveBeenCalledWith(id, body);
   });
 
-  it('delete calls cancelSession with id', async () => {
+  it('cancel calls cancelSession with id', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const params = { id };
 
@@ -103,11 +111,26 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [[, deleteHandler]] = mockRouter.delete.mock.calls;
+    const [, cancelHandler] = mockRouter.post.mock.calls[PostHandlerIndex.CANCEL];
 
-    deleteHandler(mockContext, mockRequest, mockResponse);
+    cancelHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
+  });
+
+  it('delete calls deleteSession with id', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const params = { id };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [, deleteHandler] = mockRouter.delete.mock.calls[0];
+
+    await deleteHandler(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
   });
 
   it('extend calls extendSession with id', async () => {
@@ -120,7 +143,7 @@ describe('registerSessionRoutes', () => {
     const mockResponse = httpServerMock.createResponseFactory();
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
-    const [, , [, extendHandler]] = mockRouter.post.mock.calls;
+    const [, extendHandler] = mockRouter.post.mock.calls[PostHandlerIndex.EXTEND];
 
     extendHandler(mockContext, mockRequest, mockResponse);
 

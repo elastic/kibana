@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -86,7 +87,6 @@ describe('search settings routes', () => {
     const mockRouter = new MockRouter({
       method: 'put',
       path: '/api/app_search/engines/{engineName}/search_settings',
-      payload: 'body',
     });
 
     beforeEach(() => {
@@ -148,7 +148,6 @@ describe('search settings routes', () => {
     const mockRouter = new MockRouter({
       method: 'post',
       path: '/api/app_search/engines/{engineName}/search_settings_search',
-      payload: 'body',
     });
 
     beforeEach(() => {
@@ -187,29 +186,18 @@ describe('search settings routes', () => {
     });
 
     describe('validates query', () => {
-      const queryRouter = new MockRouter({
-        method: 'post',
-        path: '/api/app_search/engines/{engineName}/search_settings_search',
-        payload: 'query',
-      });
-
       it('correctly', () => {
-        registerSearchSettingsRoutes({
-          ...mockDependencies,
-          router: queryRouter.router,
-        });
-
         const request = {
           query: {
             query: 'foo',
           },
         };
-        queryRouter.shouldValidate(request);
+        mockRouter.shouldValidate(request);
       });
 
       it('missing required fields', () => {
         const request = { query: {} };
-        queryRouter.shouldThrow(request);
+        mockRouter.shouldThrow(request);
       });
     });
   });
