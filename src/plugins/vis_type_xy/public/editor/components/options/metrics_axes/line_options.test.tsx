@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 import { NumberInputOption } from '../../../../../../vis_default_editor/public';
 
 import { LineOptions, LineOptionsParams } from './line_options';
-import { seriesParam, vis } from './mocks';
+import { seriesParam } from './mocks';
 
 const LINE_WIDTH = 'lineWidth';
 const DRAW_LINES = 'drawLinesBetweenPoints';
@@ -26,7 +26,6 @@ describe('LineOptions component', () => {
 
     defaultProps = {
       chart: { ...seriesParam },
-      vis,
       setChart,
     };
   });
