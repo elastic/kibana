@@ -31,7 +31,7 @@ interface Props {
   plugins: IManagementSectionsPluginsSetup;
 }
 
-export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props }: Props) {
+export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, ...props }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
@@ -111,7 +111,7 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
       rowProps={() => ({
         'data-test-subj': 'searchSessionsRow',
       })}
-      columns={getColumns(core, api, config, timezone, onActionComplete)}
+      columns={getColumns(core, plugins, api, config, timezone, onActionComplete)}
       items={tableData}
       pagination={pagination}
       search={search}

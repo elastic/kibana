@@ -23,6 +23,7 @@ import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { TableText } from './';
 import { SearchSessionsMgmtTable } from './table';
+import { IManagementSectionsPluginsSetup } from '../';
 
 interface Props {
   documentation: AsyncSearchIntroDocumentation;
@@ -31,6 +32,7 @@ interface Props {
   http: HttpStart;
   timezone: string;
   config: SessionsConfigSchema;
+  plugins: IManagementSectionsPluginsSetup;
 }
 
 export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
