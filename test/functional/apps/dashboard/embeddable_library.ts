@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('Rendering Test: heatmap');
       await find.existsByLinkText('Rendering Test: heatmap');
+      await dashboardAddPanel.closeAddPanel();
     });
 
     it('save visualize panel to embeddable library', async () => {
@@ -89,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickOpenAddPanel();
       await dashboardAddPanel.filterEmbeddableNames('Rendering Test: geo map');
       await find.existsByLinkText('Rendering Test: geo map');
+      await dashboardAddPanel.closeAddPanel();
     });
 
     it('save map panel to embeddable library', async () => {
