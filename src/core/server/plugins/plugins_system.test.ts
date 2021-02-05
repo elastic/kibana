@@ -505,3 +505,47 @@ describe('start', () => {
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
   });
 });
+
+describe('stop', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
+    const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
+      (plugin, index) => {
+        jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+        jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+        pluginsSystem.addPlugin(plugin);
+        return plugin;
+      }
+    );
+
+    const stopSpy1 = jest
+      .spyOn(plugin1, 'stop')
+      .mockImplementationOnce(() => new Promise((resolve) => resolve));
+    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const stopPromise = pluginsSystem.stopPlugins();
+
+    jest.runAllTimers();
+    await stopPromise;
+    expect(stopSpy1).toHaveBeenCalledTimes(1);
+    expect(stopSpy2).toHaveBeenCalledTimes(1);
+
+    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "\\"timeout-stop-1\\" plugin didn't finish \\"stop\\" in 30sec.",
+        ],
+      ]
+    `);
+  });
+});
