@@ -46,7 +46,6 @@ export type LayerWizardWithMeta = LayerWizard & {
 const registry: LayerWizard[] = [];
 
 export function registerLayerWizard(layerWizard: LayerWizard) {
-  console.log('register!', layerWizard);
   registry.push({
     checkVisibility: async () => {
       return true;
@@ -59,9 +58,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 }
 
 export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
-  console.log('get da ziards');
   const promises = registry.map(async (layerWizard: LayerWizard) => {
-    console.log('daboo,', layerWizard);
     return {
       ...layerWizard,
       isVisible: await layerWizard.checkVisibility!(),

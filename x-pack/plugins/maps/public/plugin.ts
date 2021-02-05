@@ -116,9 +116,6 @@ export class MapsPlugin
   }
 
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
-
-    console.log('maps setuip');
-
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -170,10 +167,6 @@ export class MapsPlugin
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
-
-
-    console.log('maps start');
-
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
 

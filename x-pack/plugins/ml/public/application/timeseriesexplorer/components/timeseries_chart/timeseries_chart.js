@@ -19,6 +19,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import {
+  getFormattedSeverityScore,
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
@@ -1442,12 +1443,11 @@ class TimeseriesChartIntl extends Component {
 
     if (marker.anomalyScore !== undefined) {
       const score = parseInt(marker.anomalyScore);
-      const displayScore = score > 0 ? score : '< 1';
       tooltipData.push({
         label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel', {
           defaultMessage: 'anomaly score',
         }),
-        value: displayScore,
+        value: getFormattedSeverityScore(score),
         color: anomalyColorScale(score),
         seriesIdentifier: {
           key: seriesKey,
