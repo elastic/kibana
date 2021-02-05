@@ -133,6 +133,80 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         ]);
       });
     });
+    describe('keyboard drag and drop', () => {
+      it('should drop a field to workspace', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.goToTimeRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.copyFieldWithKeyboard('@timestamp');
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          '@timestamp'
+        );
+      });
+      it('should drop a field to empty dimension', async () => {
+        await PageObjects.lens.copyFieldWithKeyboard('bytes', 4);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          'Count of records',
+          'Average of bytes',
+        ]);
+        await PageObjects.lens.copyFieldWithKeyboard('@message.raw', 1, true);
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql(['Top values of @message.raw']);
+      });
+      it('should drop a field to an existing dimension replacing the old one', async () => {
+        await PageObjects.lens.copyFieldWithKeyboard('clientip', 1, true);
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql(['Top values of clientip']);
+      });
+      it('should duplicate an element in a group', async () => {
+        await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          'Count of records',
+          'Average of bytes',
+          'Count of records [1]',
+        ]);
+      });
+
+      it('should move dimension to compatible dimension', async () => {
+        await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 5);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql(
+          []
+        );
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql(['@timestamp']);
+
+        await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_splitDimensionPanel', 0, 5, true);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
+          '@timestamp',
+        ]);
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql([]);
+      });
+      it('should move dimension to incompatible dimension', async () => {
+        await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 1, 2);
+        expect(
+          await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
+        ).to.eql(['bytes']);
+
+        await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 2);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          'Count of records',
+          'Unique count of @timestamp',
+        ]);
+      });
+      it('should reorder elements with keyboard', async () => {
+        await PageObjects.lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          'Unique count of @timestamp',
+          'Count of records',
+        ]);
+      });
+    });
 
     describe('workspace drop', () => {
       it('should always nest time dimension in categorical dimension', async () => {
@@ -166,16 +240,3 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     });
   });
 }
-
-// focus element .focus()
-
-// TODO: keyboard tests
-// * moving field to workspace
-// * moving field to add
-// * moving field to replace
-// * duplicating in group
-// * reordering with keyboard (check if we don't have it)
-// * moving to compatible
-// * moving to incompatible
-// * replacing incompatible
-// * replacing compatible

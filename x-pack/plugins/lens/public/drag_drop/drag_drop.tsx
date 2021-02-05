@@ -279,7 +279,7 @@ const DragInner = memo(function DragInner({
     );
   };
   return (
-    <div className={className}>
+    <div className={className} data-test-subj={`lnsDragDrop_draggable-${value.humanData.label}`}>
       <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={value.humanData.label}

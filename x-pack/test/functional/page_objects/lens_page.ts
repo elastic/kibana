@@ -163,6 +163,80 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
+    async getDatatableCell(rowIndex = 0, colIndex = 0) {
+      return await find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRow"]:nth-child(${
+          rowIndex + 2 // this is a bit specific for EuiDataGrid: the first row is the Header
+        }) [data-test-subj="dataGridRowCell"]:nth-child(${colIndex + 1})`
+      );
+    },
+
+    /**
+     * Copies field to chosen destination that is defined by distance of `steps`
+     * (right arrow presses) from it
+     *
+     * @param fieldName  - the desired field for the dimension
+     * @param steps - number of steps user has to press right
+     * */
+    async copyFieldWithKeyboard(fieldName: string, steps = 1, reverse = false) {
+      const field = await find.byCssSelector(
+        `[data-test-subj="lnsDragDrop_draggable-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+      );
+      await field.focus();
+      await browser.pressKeys(browser.keys.ENTER);
+      for (let i = 0; i < steps; i++) {
+        await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      await browser.pressKeys(browser.keys.ENTER);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Selects draggable element and moves it by number of `steps`
+     *
+     * @param group  - the group of the element
+     * @param index  - the index of the element in the group
+     * @param steps - number of steps of presses right or left
+     * @param reverse - defines the direction of choosing drops
+     * */
+    async dimensionKeyboardDragDrop(group: string, index = 0, steps = 1, reverse = false) {
+      const elements = await find.allByCssSelector(
+        `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
+      );
+      const el = elements[index];
+      await el.focus();
+      await browser.pressKeys(browser.keys.ENTER);
+      for (let i = 0; i < steps; i++) {
+        await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      await browser.pressKeys(browser.keys.ENTER);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+    /**
+     * Selects draggable element and reorders it by number of `steps`
+     *
+     * @param group  - the group of the element
+     * @param index  - the index of the element in the group
+     * @param steps - number of steps of presses right or left
+     * @param reverse - defines the direction of choosing drops
+     * */
+    async dimensionKeyboardReorder(group: string, index = 0, steps = 1, reverse = false) {
+      const elements = await find.allByCssSelector(
+        `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
+      );
+      const el = elements[index];
+      await el.focus();
+      await browser.pressKeys(browser.keys.ENTER);
+      for (let i = 0; i < steps; i++) {
+        await browser.pressKeys(reverse ? browser.keys.ARROW_UP : browser.keys.ARROW_DOWN);
+      }
+      await browser.pressKeys(browser.keys.ENTER);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
     /**
      * Drags field to dimension trigger
      *
