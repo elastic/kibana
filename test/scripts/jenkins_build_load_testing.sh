@@ -44,6 +44,7 @@ ls -l
 
 pushd metricbeat-install
 echo "check inside folder"
+echo $PWD
 ls -l
 popd
 
@@ -75,7 +76,7 @@ source test/scripts/jenkins_test_setup_xpack.sh
 
 # Start Metricbeat
 echo "Starting metricbeat"
-nohup $KIBANA_DIR/metricbeat-install/metricbeat > $KIBANA_DIR/metricbeat-install/logs/metricbeat.log 2>&1 &
+nohup $KIBANA_DIR/metricbeat-install/metricbeat > $KIBANA_DIR/metricbeat-install/metricbeat.log 2>&1 &
 
 echo " -> run gatling load testing"
 export GATLING_SIMULATIONS="$simulations"
@@ -84,4 +85,4 @@ node scripts/functional_tests \
   --config test/load/config.ts
   
 echo "output of metricbeat.log" 
-cat $KIBANA_DIR/metricbeat-install/logs/metricbeat.log
+cat $KIBANA_DIR/metricbeat-install/metricbeat.log
