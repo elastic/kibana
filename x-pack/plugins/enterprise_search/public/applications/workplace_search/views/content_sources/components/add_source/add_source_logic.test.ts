@@ -11,20 +11,18 @@ import {
   mockHttpValues,
   mockKibanaValues,
 } from '../../../../../__mocks__';
+import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
-import { AppLogic } from '../../../../app_logic';
+import { nextTick } from '@kbn/test/jest';
 
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { AppLogic } from '../../../../app_logic';
 
 import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { CustomSource } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
-
-import { nextTick } from '@kbn/test/jest';
-
-import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import {
   AddSourceLogic,

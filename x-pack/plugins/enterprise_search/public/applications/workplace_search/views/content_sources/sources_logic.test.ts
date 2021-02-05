@@ -11,14 +11,12 @@ import {
   mockHttpValues,
   expectedAsyncError,
 } from '../../../__mocks__';
-
-import { AppLogic } from '../../app_logic';
+import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
-
-import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
+import { AppLogic } from '../../app_logic';
 
 import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
 

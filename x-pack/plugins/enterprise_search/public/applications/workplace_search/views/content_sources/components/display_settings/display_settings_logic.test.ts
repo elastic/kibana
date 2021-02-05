@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
-import { LogicMounter } from '../../../../../__mocks__/kea.mock';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+
+import { nextTick } from '@kbn/test/jest';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
   SourceLogic: { values: { contentSource } },
 }));
 
-import { AppLogic } from '../../../../app_logic';
-
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
-
-import { nextTick } from '@kbn/test/jest';
-
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+import { AppLogic } from '../../../../app_logic';
 
 import { LEAVE_UNASSIGNED_FIELD } from './constants';
 import { DisplaySettingsLogic, defaultSearchResultConfig } from './display_settings_logic';

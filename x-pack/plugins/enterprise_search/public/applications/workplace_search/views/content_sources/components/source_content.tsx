@@ -34,14 +34,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Loading } from '../../../../../applications/shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
-import { SourceContentItem } from '../../../types';
-
-const MAX_LENGTH = 28;
-
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { CUSTOM_SERVICE_TYPE } from '../../../constants';
+import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
+import { SourceContentItem } from '../../../types';
 import {
   NO_CONTENT_MESSAGE,
   CUSTOM_DOCUMENTATION_LINK,
@@ -53,6 +50,8 @@ import {
   CONTENT_LOADING_TEXT,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
+
+const MAX_LENGTH = 28;
 
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');

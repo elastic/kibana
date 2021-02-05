@@ -6,10 +6,8 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
-
-import { shallow, mount } from 'enzyme';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 /**
  * Mocking necessary due to console warnings from react d-n-d, which EUI uses
@@ -41,9 +39,9 @@ jest.mock('react-beautiful-dnd', () => ({
 
 import React from 'react';
 
-import { EuiTextColor } from '@elastic/eui';
+import { shallow, mount } from 'enzyme';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+import { EuiTextColor } from '@elastic/eui';
 
 import { ExampleResultDetailCard } from './example_result_detail_card';
 import { ResultDetail } from './result_detail';

@@ -6,6 +6,7 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
+import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -20,8 +21,6 @@ jest.mock('../../../../app_logic', () => ({
 
 const spyScrollTo = jest.fn();
 Object.defineProperty(global.window, 'scrollTo', { value: spyScrollTo });
-
-import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
