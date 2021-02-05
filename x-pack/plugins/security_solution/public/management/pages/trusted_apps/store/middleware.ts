@@ -55,7 +55,13 @@ import {
   trustedAppsListPageActive,
   entriesExistState,
   policiesState,
+  isEdit,
+  isFetchingEditTrustedAppItem,
+  editItemId,
+  editingTrustedApp,
+  getListItems,
 } from './selectors';
+import { toNewTrustedApp } from '../service/to_new_trusted_app';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -140,9 +146,26 @@ const submitCreationIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
-  const submissionResourceState = getCreationSubmissionResourceState(store.getState());
-  const isValid = isCreationDialogFormValid(store.getState());
-  const entry = getCreationDialogFormEntry(store.getState());
+  const currentState = store.getState();
+  const submissionResourceState = getCreationSubmissionResourceState(currentState);
+  const isValid = isCreationDialogFormValid(currentState);
+  const entry = getCreationDialogFormEntry(currentState);
+  const editMode = isEdit(currentState);
+
+  // FIXME: Implement PUT API for updating Trusted App
+  if (editMode) {
+    // eslint-disable-next-line no-console
+    console.warn('PUT Trusted APP API missing');
+    store.dispatch(
+      createTrustedAppCreationSubmissionResourceStateChanged({
+        type: 'LoadedResourceState',
+        data: entry as TrustedApp,
+      })
+    );
+    store.dispatch({
+      type: 'trustedAppsListDataOutdated',
+    });
+  }
 
   if (isStaleResourceState(submissionResourceState) && entry !== undefined && isValid) {
     store.dispatch(
@@ -316,6 +339,56 @@ export const retrieveListOfPoliciesIfNeeded = async (
   }
 };
 
+const fetchEditTrustedAppIfNeeded = async (
+  { getState, dispatch }: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const currentState = getState();
+  const isPageActive = trustedAppsListPageActive(currentState);
+  const isEditFlow = isEdit(currentState);
+  const isAlreadyFetching = isFetchingEditTrustedAppItem(currentState);
+  const editTrustedAppId = editItemId(currentState);
+
+  if (isPageActive && isEditFlow && editTrustedAppId && !isAlreadyFetching) {
+    let trustedAppForEdit = editingTrustedApp(currentState);
+
+    // If Trusted App is already loaded, then do nothing
+    if (trustedAppForEdit && trustedAppForEdit.id === editTrustedAppId) {
+      return;
+    }
+
+    // See if we can get the Trusted App record from the current list of Trusted Apps being displayed
+    trustedAppForEdit = getListItems(currentState).find((ta) => ta.id === editTrustedAppId);
+    if (trustedAppForEdit) {
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'LoadedResourceState',
+          data: trustedAppForEdit,
+        },
+      });
+
+      dispatch({
+        type: 'trustedAppCreationDialogFormStateUpdated',
+        payload: {
+          entry: toNewTrustedApp(trustedAppForEdit),
+          isValid: true,
+        },
+      });
+      return;
+    }
+
+    // Retrieve Trusted App record via API. This would be the case when linking from another place or
+    // using an UUID for a Trusted App that is not currently displayed on the list view.
+
+    // eslint-disable-next-line no-console
+    console.log('todo: api call');
+
+    // FIXME: Implement GET API
+    throw new Error('GET trusted app API missing!');
+  }
+};
+
 export const createTrustedAppsPageMiddleware = (
   trustedAppsService: TrustedAppsService
 ): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
@@ -331,6 +404,7 @@ export const createTrustedAppsPageMiddleware = (
     if (action.type === 'userChangedUrl') {
       updateCreationDialogIfNeeded(store);
       retrieveListOfPoliciesIfNeeded(store, trustedAppsService);
+      fetchEditTrustedAppIfNeeded(store, trustedAppsService);
     }
 
     if (action.type === 'trustedAppCreationDialogConfirmed') {

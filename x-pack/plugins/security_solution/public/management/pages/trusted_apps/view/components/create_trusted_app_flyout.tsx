@@ -24,16 +24,19 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
 import {
+  getCreationDialogFormEntry,
   getCreationError,
   isCreationDialogFormValid,
   isCreationInProgress,
   isCreationSuccessful,
+  isEdit,
   listOfPolicies,
   loadingPolicies,
 } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
 import { ABOUT_TRUSTED_APPS } from '../translations';
+import { defaultNewTrustedApp } from '../../store/builders';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -46,6 +49,8 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const isFormValid = useTrustedAppsSelector(isCreationDialogFormValid);
     const isLoadingPolicies = useTrustedAppsSelector(loadingPolicies);
     const policyList = useTrustedAppsSelector(listOfPolicies);
+    const isEditMode = useTrustedAppsSelector(isEdit);
+    const formValues = useTrustedAppsSelector(getCreationDialogFormEntry) || defaultNewTrustedApp();
 
     const dataTestSubj = flyoutProps['data-test-subj'];
 
@@ -65,16 +70,19 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       },
       [dataTestSubj]
     );
+
     const handleCancelClick = useCallback(() => {
       if (creationInProgress) {
         return;
       }
       onClose();
     }, [onClose, creationInProgress]);
+
     const handleSaveClick = useCallback(
       () => dispatch({ type: 'trustedAppCreationDialogConfirmed' }),
       [dispatch]
     );
+
     const handleFormOnChange = useCallback<CreateTrustedAppFormProps['onChange']>(
       (newFormState) => {
         dispatch({
@@ -97,25 +105,35 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2 data-test-subj={getTestId('headerTitle')}>
-              <FormattedMessage
-                id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.title"
-                defaultMessage="Add trusted application"
-              />
+              {isEditMode ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.editTitle"
+                  defaultMessage="Edit trusted application"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.createTitle"
+                  defaultMessage="Add trusted application"
+                />
+              )}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EuiText color="subdued" size="xs">
-            <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
-            <EuiSpacer size="m" />
-          </EuiText>
+          {!isEditMode && (
+            <EuiText color="subdued" size="xs">
+              <p data-test-subj={getTestId('about')}>{ABOUT_TRUSTED_APPS}</p>
+              <EuiSpacer size="m" />
+            </EuiText>
+          )}
           <CreateTrustedAppForm
             fullWidth
             onChange={handleFormOnChange}
             isInvalid={!!creationErrors}
             error={creationErrors?.message}
             policies={policies}
+            trustedApp={formValues}
             data-test-subj={getTestId('createForm')}
           />
         </EuiFlyoutBody>
@@ -143,10 +161,17 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
                 isLoading={creationInProgress}
                 data-test-subj={getTestId('createButton')}
               >
-                <FormattedMessage
-                  id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.saveButton"
-                  defaultMessage="Add trusted application"
-                />
+                {isEditMode ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.editSaveButton"
+                    defaultMessage="Save"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.createSaveButton"
+                    defaultMessage="Add trusted application"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -15,7 +15,11 @@ describe('trusted_app_card', () => {
   describe('TrustedAppCard', () => {
     it('should render correctly', () => {
       const element = shallow(
-        <TrustedAppCard trustedApp={createSampleTrustedApp(4)} onDelete={() => {}} />
+        <TrustedAppCard
+          trustedApp={createSampleTrustedApp(4)}
+          onDelete={() => {}}
+          onEdit={() => {}}
+        />
       );
 
       expect(element).toMatchSnapshot();
@@ -23,7 +27,11 @@ describe('trusted_app_card', () => {
 
     it('should trim long texts', () => {
       const element = shallow(
-        <TrustedAppCard trustedApp={createSampleTrustedApp(4, true)} onDelete={() => {}} />
+        <TrustedAppCard
+          trustedApp={createSampleTrustedApp(4, true)}
+          onDelete={() => {}}
+          onEdit={() => {}}
+        />
       );
 
       expect(element).toMatchSnapshot();
