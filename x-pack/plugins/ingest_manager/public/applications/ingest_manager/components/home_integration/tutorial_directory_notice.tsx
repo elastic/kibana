@@ -18,13 +18,7 @@ import {
 } from '@elastic/eui';
 import type { TutorialDirectoryNoticeComponent } from 'src/plugins/home/public';
 import { RedirectAppLinks } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  sendPutSettings,
-  useGetSettings,
-  useLink,
-  useCapabilities,
-  useCore,
-} from '../../hooks';
+import { sendPutSettings, useGetSettings, useLink, useCapabilities, useCore } from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
   &&& {
