@@ -34,19 +34,19 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
     const listItems = [
       {
         title: i18n.translate('xpack.ml.previewAlert.jobsLabel', {
-          defaultMessage: 'Job IDs: ',
+          defaultMessage: 'Job IDs:',
         }),
         description: jobIds.join(', '),
       },
       {
         title: i18n.translate('xpack.ml.previewAlert.timeLabel', {
-          defaultMessage: 'Time',
+          defaultMessage: 'Time: ',
         }),
         description: timestampIso8601,
       },
       {
         title: i18n.translate('xpack.ml.previewAlert.scoreLabel', {
-          defaultMessage: 'Anomaly score',
+          defaultMessage: 'Anomaly score:',
         }),
         description: score,
       },
@@ -187,7 +187,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             title={
               <FormattedMessage
                 id="xpack.ml.previewAlert.previewMessage"
-                defaultMessage="There {alertsCount, plural, one {was} other {were}} {alertsCount, plural, one {# anomaly} other {# anomalies}} that satisfied the conditions of the alert in the last {interval}"
+                defaultMessage="Triggers {alertsCount, plural, one {# time} other {# times}} in the last {interval}"
                 values={{
                   alertsCount: previewResponse.count,
                   interval: lookBehindInterval,

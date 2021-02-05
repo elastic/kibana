@@ -37,7 +37,7 @@ export const ResultTypeSelector: FC<ResultTypeSelectorProps> = ({
       description: (
         <FormattedMessage
           id="xpack.ml.recordResultType.description"
-          defaultMessage="What individual anomalies are present in a range of time?"
+          defaultMessage="What individual anomalies are present in a time range?"
         />
       ),
     },
@@ -49,7 +49,7 @@ export const ResultTypeSelector: FC<ResultTypeSelectorProps> = ({
       description: (
         <FormattedMessage
           id="xpack.ml.influencerResultType.description"
-          defaultMessage="What are the most unusual entities in a range of time?"
+          defaultMessage="What are the most unusual entities in a time range?"
         />
       ),
     },

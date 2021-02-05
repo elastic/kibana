@@ -16,7 +16,7 @@ export const mlAnomalyDetectionAlertParams = schema.object({
     {
       validate: (v) => {
         if (!v.jobIds?.length && !v.groupIds?.length) {
-          return 'List of job ids or group ids is required';
+          return 'List of job IDs or group IDs is required';
         }
       },
     }
