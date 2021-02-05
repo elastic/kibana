@@ -36,6 +36,22 @@ async function isBazelBinAvailable() {
   }
 }
 
+async function isBazeliskInstalled(bazeliskVersion: string) {
+  try {
+    const { stdout: bazeliskPkgInstallStdout } = await spawn(
+      'npm',
+      ['ls', '--global', '--parseable', '--long', `@bazel/bazelisk@${bazeliskVersion}`],
+      {
+        stdio: 'pipe',
+      }
+    );
+
+    return bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`);
+  } catch {
+    return false;
+  }
+}
+
 export async function installBazelTools(repoRootPath: string) {
   log.debug(`[bazel_tools] reading bazel tools versions from version files`);
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
@@ -43,23 +59,21 @@ export async function installBazelTools(repoRootPath: string) {
 
   // Check what globals are installed
   log.debug(`[bazel_tools] verify if bazelisk is installed`);
-  const { stdout: bazeliskPkgInstallStdout } = await spawn('yarn', ['global', 'list'], {
-    stdio: 'pipe',
-  });
 
+  // Test if bazelisk is already installed in the correct version
+  const isBazeliskPkgInstalled = await isBazeliskInstalled(bazeliskVersion);
+
+  // Test if bazel bin is available
   const isBazelBinAlreadyAvailable = await isBazelBinAvailable();
 
   // Install bazelisk if not installed
-  if (
-    !bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`) ||
-    !isBazelBinAlreadyAvailable
-  ) {
+  if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {
     log.info(`[bazel_tools] installing Bazel tools`);
 
     log.debug(
       `[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`
     );
-    await spawn('yarn', ['global', 'add', `@bazel/bazelisk@${bazeliskVersion}`], {
+    await spawn('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
       env: {
         USE_BAZEL_VERSION: bazelVersion,
       },
@@ -69,7 +83,7 @@ export async function installBazelTools(repoRootPath: string) {
     const isBazelBinAvailableAfterInstall = await isBazelBinAvailable();
     if (!isBazelBinAvailableAfterInstall) {
       throw new Error(dedent`
-        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure 'yarn global bin' is on your $PATH, otherwise just add it there
+        [bazel_tools] an error occurred when installing the Bazel tools. Please make sure you have access to npm globally installed modules on your $PATH
       `);
     }
   }

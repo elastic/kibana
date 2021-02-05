@@ -6,3 +6,4 @@
  */
 
 export { FieldHistogramRequestConfig, FieldRequestConfig } from './request';
+export type { CombinedQuery } from './combined_query';
