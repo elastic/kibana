@@ -136,11 +136,14 @@ Semi-structured search::
   get prompted with field names and operators you can use to build a structured query. 
   For example, in the sample web logs data, this query displays data only for the US:
 
-  . Enter `g`, and then select *geo.source*.
-  . Select *equals some value* and *US*, and then click *Update*.
+  . Enter `g`, then select *geo.source*.
+  . Select *equals some value* and *US*, then click *Update*.
   . For a more complex search, try:
 
-    `geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"`
+[source,text]
+-------------------
+geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"
+-------------------
 
 Time filter::
   Dashboards have a global time filter that restricts the data that displays, but individual panels can
