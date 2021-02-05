@@ -1122,7 +1122,7 @@ module.exports = {
         'import/order': [
           'error',
           {
-            groups: ['unknown', 'builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+            groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
             pathGroups: [
               {
                 pattern:
