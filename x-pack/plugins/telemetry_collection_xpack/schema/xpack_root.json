@@ -8,6 +8,12 @@
         "issue_date": {
           "type": "date"
         },
+        "expiry_date": {
+          "type": "date"
+        },
+        "expiry_date_in_millis": {
+          "type": "long"
+        },
         "issue_date_in_millis": {
           "type": "long"
         },
@@ -28,6 +34,9 @@
         },
         "max_nodes": {
           "type": "long"
+        },
+        "max_resource_units": {
+          "type": "long"
         }
       }
     },
@@ -35,6 +44,78 @@
       "properties": {
         "xpack": {
           "properties": {
+            "aggregate_metric": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "runtime_fields": {
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "field_types": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "long"
+                      },
+                      "index_count": {
+                        "type": "long"
+                      },
+                      "scriptless_count": {
+                        "type": "long"
+                      },
+                      "shadowed_count": {
+                        "type": "long"
+                      },
+                      "lang": {
+                        "type": "array",
+                        "items": {
+                          "type": "keyword"
+                        }
+                      },
+                      "lines_max": {
+                        "type": "long"
+                      },
+                      "lines_total": {
+                        "type": "long"
+                      },
+                      "chars_max": {
+                        "type": "long"
+                      },
+                      "chars_total": {
+                        "type": "long"
+                      },
+                      "source_max": {
+                        "type": "long"
+                      },
+                      "source_total": {
+                        "type": "long"
+                      },
+                      "doc_max": {
+                        "type": "long"
+                      },
+                      "doc_total": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "flattened": {
               "properties": {
                 "enabled": {
@@ -71,27 +152,33 @@
                     "actions": {
                       "properties": {
                         "_all": {
-                          "total": {
-                            "type": "long"
-                          },
-                          "total_time_in_ms": {
-                            "type": "long"
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "total_time_in_ms": {
+                              "type": "long"
+                            }
                           }
                         },
                         "slack": {
-                          "total": {
-                            "type": "long"
-                          },
-                          "total_time_in_ms": {
-                            "type": "long"
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "total_time_in_ms": {
+                              "type": "long"
+                            }
                           }
                         },
                         "DYNAMIC_KEY": {
-                          "total": {
-                            "type": "long"
-                          },
-                          "total_time_in_ms": {
-                            "type": "long"
+                          "properties": {
+                            "total": {
+                              "type": "long"
+                            },
+                            "total_time_in_ms": {
+                              "type": "long"
+                            }
                           }
                         }
                       }
@@ -528,7 +615,10 @@
                                 "type": "long"
                               },
                               "actions": {
-                                "type": "keyword"
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -538,7 +628,10 @@
                                 "type": "long"
                               },
                               "actions": {
-                                "type": "keyword"
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -548,7 +641,10 @@
                                 "type": "long"
                               },
                               "actions": {
-                                "type": "keyword"
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -558,7 +654,10 @@
                                 "type": "long"
                               },
                               "actions": {
-                                "type": "keyword"
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           },
@@ -568,7 +667,10 @@
                                 "type": "long"
                               },
                               "actions": {
-                                "type": "keyword"
+                                "type": "array",
+                                "items": {
+                                  "type": "keyword"
+                                }
                               }
                             }
                           }
@@ -882,7 +984,7 @@
                         }
                       }
                     },
-                    "obdc": {
+                    "odbc": {
                       "properties": {
                         "total": {
                           "type": "long"
@@ -977,7 +1079,7 @@
                     "boxplot_usage": {
                       "type": "long"
                     },
-                    "top_metric_usage": {
+                    "top_metrics_usage": {
                       "type": "long"
                     },
                     "cumulative_cardinality_usage": {
@@ -987,6 +1089,9 @@
                       "type": "long"
                     },
                     "moving_percentiles_usage": {
+                      "type": "long"
+                    },
+                    "multi_terms_usage": {
                       "type": "long"
                     },
                     "t_test_usage": {
@@ -1071,6 +1176,430 @@
                           "type": "boolean"
                         }
                       }
+                    }
+                  }
+                },
+                "realms": {
+                  "properties": {
+                    "file": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    },
+                    "ldap": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    },
+                    "native": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    },
+                    "saml": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    },
+                    "kerberos": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    },
+                    "oidc": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    },
+                    "active_directory": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    },
+                    "pki": {
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "available": {
+                          "type": "boolean"
+                        },
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "cache": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "size": {
+                                "type": "long"
+                              }
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        },
+                        "order": {
+                          "type": "array",
+                          "items": {
+                            "type": "long"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "roles": {
+                  "properties": {
+                    "native": {
+                      "properties": {
+                        "size": {
+                          "type": "long"
+                        },
+                        "fls": {
+                          "type": "boolean"
+                        },
+                        "dls": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "file": {
+                      "properties": {
+                        "size": {
+                          "type": "long"
+                        },
+                        "fls": {
+                          "type": "boolean"
+                        },
+                        "dls": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "dls": {
+                      "properties": {
+                        "bit_set_cache": {
+                          "properties": {
+                            "memory": {
+                              "type": "text"
+                            },
+                            "memory_in_bytes": {
+                              "type": "long"
+                            },
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "role_mapping": {
+                  "properties": {
+                    "native": {
+                      "properties": {
+                        "size": {
+                          "type": "long"
+                        },
+                        "enabled": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "token_service": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "api_key_service": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "audit": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "anonymous": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "fips_140": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "operator_privileges": {
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "available": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "ipfilter": {
+                  "properties": {
+                    "http": {
+                      "type": "boolean"
+                    },
+                    "transport": {
+                      "type": "boolean"
                     }
                   }
                 }
