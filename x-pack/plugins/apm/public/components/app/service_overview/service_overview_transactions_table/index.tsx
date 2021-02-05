@@ -149,9 +149,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionGroupsStatistics: transactionGroupsStatistics
-      ? transactionGroupsStatistics[requestId]
-      : undefined,
+    transactionGroupsStatistics: transactionGroupsStatistics?.[requestId],
   });
 
   const isLoading =

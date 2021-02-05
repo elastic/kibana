@@ -150,7 +150,7 @@ export async function getServiceTransactionGroupsStatistics({
       x: timeseriesBucket.key,
       y:
         timeseriesBucket.throughput_rate.value !== null
-          ? timeseriesBucket.throughput_rate.value / 100
+          ? timeseriesBucket.throughput_rate.value
           : null,
     }));
 

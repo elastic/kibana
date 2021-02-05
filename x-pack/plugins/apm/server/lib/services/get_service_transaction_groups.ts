@@ -129,11 +129,8 @@ export async function getServiceTransactionGroups({
       };
     }) ?? [];
 
-  // By default sorts transactions by impact
-  const sortedTransactionGroups = sortBy(transactionGroups, 'impact').reverse();
-
   return {
-    transactionGroups: sortedTransactionGroups.map((transactionGroup) => ({
+    transactionGroups: transactionGroups.map((transactionGroup) => ({
       ...transactionGroup,
       transactionType,
     })),
