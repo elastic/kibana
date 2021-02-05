@@ -7,19 +7,21 @@
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { Projection } from '../../common/projections';
-import { pickKeys } from '../../common/utils/pick_keys';
+import { LocalUIFilterName } from '../../../../../common/ui_filter';
+import { pickKeys } from '../../../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LocalUIFiltersAPIResponse } from '../../server/lib/ui_filters/local_ui_filters';
+import { LocalUIFiltersAPIResponse } from '../../../../../server/lib/ui_filters/local_ui_filters';
 import {
   localUIFilters,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../server/lib/ui_filters/local_ui_filters/config';
-import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
-import { removeUndefinedProps } from '../context/url_params_context/helpers';
-import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
-import { LocalUIFilterName } from '../../common/ui_filter';
+} from '../../../../../server/lib/ui_filters/local_ui_filters/config';
+import {
+  fromQuery,
+  toQuery,
+} from '../../../../components/shared/Links/url_helpers';
+import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 
 const getInitialData = (
   filterNames: LocalUIFilterName[]
@@ -31,12 +33,10 @@ const getInitialData = (
 };
 
 export function useLocalUIFilters({
-  projection,
   filterNames,
   params,
   shouldFetch,
 }: {
-  projection: Projection;
   filterNames: LocalUIFilterName[];
   params?: Record<string, string | number | boolean | undefined>;
   shouldFetch: boolean;
@@ -72,7 +72,7 @@ export function useLocalUIFilters({
     (callApmApi) => {
       if (shouldFetch && urlParams.start && urlParams.end) {
         return callApmApi({
-          endpoint: `GET /api/apm/ui_filters/local_filters/${projection}` as const,
+          endpoint: `GET /api/apm/ui_filters/local_filters/rumOverview`,
           params: {
             query: {
               uiFilters: JSON.stringify(uiFilters),
@@ -87,7 +87,6 @@ export function useLocalUIFilters({
       }
     },
     [
-      projection,
       uiFilters,
       urlParams.start,
       urlParams.end,
