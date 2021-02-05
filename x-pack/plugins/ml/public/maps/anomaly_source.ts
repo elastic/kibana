@@ -15,19 +15,18 @@ import {
   VectorSourceSyncMeta,
 } from '../../../maps/common/descriptor_types';
 import { Adapters } from '../../../../../src/plugins/inspector/common/adapters';
-import { GeoJsonWithMeta } from '../../../maps/public';
-import { IField } from '../../../maps/public/classes/fields/field';
-import {
+import type { GeoJsonWithMeta } from '../../../maps/public';
+import type { IField } from '../../../maps/public';
+import type {
   Attribution,
   ImmutableSourceProperty,
   PreIndexedShape,
-} from '../../../maps/public/classes/sources/source';
-import { BoundsFilters } from '../../../maps/public/classes/sources/vector_source';
-import { LICENSED_FEATURES } from '../../../maps/public/licensed_features';
+} from '../../../maps/public';
+import type { BoundsFilters } from '../../../maps/public';
+import type { LICENSED_FEATURES} from "../../../maps/public";
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
-  type: SOURCE_TYPES.ML_ANOMALY;
-  jobId: 'string';
+  jobId: string;
 }
 
 export class AnomalySource implements IVectorSource {

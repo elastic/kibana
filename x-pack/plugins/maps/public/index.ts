@@ -26,3 +26,10 @@ export { MapsSetupApi } from './api';
 
 // ML - changes
 export { IVectorSource, GeoJsonWithMeta } from './classes/sources/vector_source/vector_source';
+export { LICENSED_FEATURES } from './licensed_features';
+export { Attribution, ImmutableSourceProperty, PreIndexedShape } from './classes/sources/source';
+export { BoundsFilters } from './classes/sources/vector_source/vector_source';
+export { IField } from './classes/fields/field';
+export { VectorStyle } from './classes/styles/vector/vector_style';
+export { LayerWizard, RenderWizardArguments } from './classes/layers/layer_wizard_registry';
+export { VectorLayer } from './classes/layers/vector_layer/vector_layer';
