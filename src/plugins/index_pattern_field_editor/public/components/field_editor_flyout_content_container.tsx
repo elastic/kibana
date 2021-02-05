@@ -85,9 +85,14 @@ export const FieldEditorFlyoutContentContainer = ({
 
   const saveField = useCallback(
     async (updatedField: Field) => {
-      const script = updatedField.script?.source ? updatedField.script : undefined;
+      const { script } = updatedField;
 
       if (fieldTypeToProcess === 'runtime') {
+        // rename an existing runtime field
+        if (field?.name && field.name !== updatedField.name) {
+          indexPattern.removeRuntimeField(field.name);
+        }
+
         indexPattern.addRuntimeField(updatedField.name, {
           type: updatedField.type as RuntimeType,
           script,
@@ -112,6 +117,11 @@ export const FieldEditorFlyoutContentContainer = ({
         }
 
         indexPatternService.updateSavedObject(indexPattern).then(() => {
+          const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+            defaultMessage: "Saved '{fieldName}'",
+            values: { fieldName: updatedField.name },
+          });
+          notifications.toasts.addSuccess(message);
           onSave(editedField);
         });
       } catch (e) {
@@ -121,7 +131,7 @@ export const FieldEditorFlyoutContentContainer = ({
         notifications.toasts.addError(e, { title });
       }
     },
-    [onSave, indexPattern, indexPatternService, notifications, fieldTypeToProcess]
+    [onSave, indexPattern, indexPatternService, notifications, fieldTypeToProcess, field?.name]
   );
 
   const loadEditor = useCallback(async () => {

@@ -389,6 +389,8 @@ export class IndexPattern implements IIndexPattern {
         existingField.runtimeField = undefined;
       } else {
         // runtimeField only
+        this.setFieldCustomLabel(name, null);
+        this.deleteFieldFormat(name);
         this.fields.remove(existingField);
       }
     }

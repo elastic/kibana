@@ -55,12 +55,6 @@ export const getFieldEditorOpener = (
     const onSaveField = (updatedField: IndexPatternField) => {
       closeEditor();
 
-      const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
-        defaultMessage: "Saved '{fieldName}'",
-        values: { fieldName: updatedField.name },
-      });
-      notifications.toasts.addSuccess(message);
-
       if (onSave) {
         onSave(updatedField);
       }

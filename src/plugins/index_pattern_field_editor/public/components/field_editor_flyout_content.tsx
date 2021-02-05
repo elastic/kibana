@@ -139,7 +139,7 @@ const FieldEditorFlyoutContentComponent = ({
       <EuiFlyoutFooter>
         {FieldEditor && (
           <>
-            {isSubmitted && !isFormValid && (
+            {isSubmitted && isFormValid === false && (
               <>
                 <EuiCallOut
                   title={i18nTexts.formErrorsCalloutTitle}

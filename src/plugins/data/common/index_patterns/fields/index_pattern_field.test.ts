@@ -26,7 +26,7 @@ describe('Field', function () {
     script: 'script',
     lang: 'lang',
     count: 1,
-    esTypes: ['text'], // note, this should get replaced by the runtime field type
+    esTypes: ['text'], // note, this will get replaced by the runtime field type
     aggregatable: true,
     filterable: true,
     searchable: true,
