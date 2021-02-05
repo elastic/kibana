@@ -2,7 +2,7 @@
   "name": "@kbn/plugin-generator",
   "version": "1.0.0",
   "private": true,
-  "license": "SSPL-1.0 OR Elastic License",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "main": "target/index.js",
   "scripts": {
     "kbn:bootstrap": "node scripts/build",
