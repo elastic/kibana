@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiText } from '@elastic/eui';
 import { asDuration } from '../../../../common/utils/formatters';
-import { PercentOfParent } from '../../app/TransactionDetails/WaterfallWithSummmary/PercentOfParent';
+import { PercentOfParent } from '../../app/transaction_details/WaterfallWithSummmary/PercentOfParent';
 
 interface Props {
   duration: number;
