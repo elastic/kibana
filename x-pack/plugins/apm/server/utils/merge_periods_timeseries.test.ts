@@ -13,7 +13,7 @@ describe('mergePeriodsTimeseries', () => {
         currentPeriodTimeseries: [],
         previousPeriodTimeseries: [],
       })
-    ).toBeUndefined();
+    ).toEqual([]);
   });
   it('returns undefined when comparison timeseries is undefined', () => {
     expect(
@@ -21,7 +21,7 @@ describe('mergePeriodsTimeseries', () => {
         currentPeriodTimeseries: [],
         previousPeriodTimeseries: undefined,
       })
-    ).toBeUndefined();
+    ).toEqual([]);
   });
   it('merges timeseries and comparison data', () => {
     const currentPeriodTimeseries = [
