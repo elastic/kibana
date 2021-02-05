@@ -408,7 +408,7 @@ const EXPECTED_DATA = [
     values: ['filebeat-7.0.0-iot-2019.06'],
     originalValue: 'filebeat-7.0.0-iot-2019.06',
   },
-  { category: '_type', field: '_type', values: ['_doc'], originalValue: ['_doc'] },
+  { category: '_type', field: '_type', values: ['_doc'], originalValue: '_doc' },
   {
     category: '_id',
     field: '_id',
