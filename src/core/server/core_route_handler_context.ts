@@ -13,8 +13,6 @@ import { SavedObjectsClientContract } from './saved_objects/types';
 import {
   InternalSavedObjectsServiceStart,
   ISavedObjectTypeRegistry,
-  ISavedObjectsExporter,
-  ISavedObjectsImporter,
   SavedObjectsClientProviderOptions,
 } from './saved_objects';
 import {
