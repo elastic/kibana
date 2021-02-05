@@ -11,3 +11,7 @@ There are currently 2 files:
   More details in the [Schema field](../../usage_collection/README.md#schema-field) chapter in the UsageCollection's docs.
 
 NOTE: Despite its similarities to ES mappings, the intention of these files is not to define any index mappings. They should be considered as a tool to understand the format of the payload that will be sent when reporting telemetry to the Remote Service.
+
+## Testing
+
+Functional tests are defined at `test/api_integration/apis/telemetry/telemetry_local.ts`. They merge both files, and validates the actual output of the telemetry endpoint against the final schema.
