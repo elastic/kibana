@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentSOAttributes } from '../../types';
+import type { AgentSOAttributes } from '../../types';
+import { AgentReassignmentError } from '../../errors';
 import { agentPolicyService } from '../agent_policy';
-import { getAgents, listAllAgents } from './crud';
+import { getAgentPolicyForAgent, getAgents, listAllAgents } from './crud';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
@@ -19,10 +20,12 @@ export async function reassignAgent(
   agentId: string,
   newAgentPolicyId: string
 ) {
-  const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
-  if (!agentPolicy) {
+  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
+
+  await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     policy_id: newAgentPolicyId,
@@ -34,6 +37,29 @@ export async function reassignAgent(
     created_at: new Date().toISOString(),
     type: 'INTERNAL_POLICY_REASSIGN',
   });
+}
+
+export async function reassignAgentIsAllowed(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string,
+  newAgentPolicyId: string
+) {
+  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
+  if (agentPolicy?.is_managed) {
+    throw new AgentReassignmentError(
+      `Cannot reassign an agent from managed agent policy ${agentPolicy.id}`
+    );
+  }
+
+  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  if (newAgentPolicy?.is_managed) {
+    throw new AgentReassignmentError(
+      `Cannot reassign an agent to managed agent policy ${newAgentPolicy.id}`
+    );
+  }
+
+  return true;
 }
 
 export async function reassignAgents(
@@ -63,7 +89,15 @@ export async function reassignAgents(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter((agent) => agent.policy_id !== newAgentPolicyId);
+  // And which are allowed to unenroll
+  const settled = await Promise.allSettled(
+    agents.map((agent) =>
+      reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId).then((_) => agent)
+    )
+  );
+  const agentsToUpdate = agents.filter(
+    (agent, index) => settled[index].status === 'fulfilled' && agent.policy_id !== newAgentPolicyId
+  );
 
   // Update the necessary agents
   const res = await soClient.bulkUpdate<AgentSOAttributes>(

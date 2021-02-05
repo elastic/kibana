@@ -42,6 +42,8 @@ import { getStateColumnActions } from '../angular/doc_table/actions/columns';
 import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { getTopNavLinks } from './top_nav/get_top_nav_links';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -65,10 +67,10 @@ export function Discover({
   searchSource,
   state,
   timeRange,
-  topNavMenu,
   updateQuery,
   unmappedFieldsConfig,
 }: DiscoverProps) {
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
@@ -77,9 +79,26 @@ export function Discover({
   };
 
   const [toggleOn, toggleChart] = useState(true);
-  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const { savedSearch, indexPatternList, config, setAppState, data, services } = opts;
+  const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
   const { trackUiMetric, capabilities, indexPatterns } = services;
+  const [isSidebarClosed, setIsSidebarClosed] = useState(false);
+  const topNavMenu = useMemo(
+    () =>
+      getTopNavLinks({
+        getFieldCounts: opts.getFieldCounts,
+        indexPattern,
+        inspectorAdapters: opts.inspectorAdapters,
+        navigateTo: opts.navigateTo,
+        savedSearch: opts.savedSearch,
+        services,
+        state: opts.stateContainer,
+        onOpenInspector: () => {
+          // prevent overlapping
+          setExpandedDoc(undefined);
+        },
+      }),
+    [indexPattern, opts, services]
+  );
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
@@ -372,12 +391,14 @@ export function Discover({
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
                               columns={getDisplayedColumns(state.columns, indexPattern)}
+                              expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
+                              setExpandedDoc={setExpandedDoc}
                               showTimeCol={
                                 !config.get('doc_table:hideTimeColumn', false) &&
                                 !!indexPattern.timeFieldName

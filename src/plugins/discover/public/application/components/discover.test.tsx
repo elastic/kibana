@@ -9,10 +9,8 @@
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
 import { Discover } from './discover';
-import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { getTopNavLinks } from './top_nav/get_top_nav_links';
 import { DiscoverServices } from '../../build_services';
 import { GetStateReturn } from '../angular/discover_state';
 import { savedSearchMock } from '../../__mocks__/saved_search';
@@ -26,6 +24,7 @@ import { navigationPluginMock } from '../../../../navigation/public/mocks';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { DiscoverProps } from './types';
+import { RequestAdapter } from '../../../../inspector/common';
 
 const mockNavigation = navigationPluginMock.createStartContract();
 
@@ -48,7 +47,6 @@ jest.mock('../../kibana_services', () => {
 
 function getProps(indexPattern: IndexPattern): DiscoverProps {
   const searchSourceMock = createSearchSourceMock({});
-  const state = ({} as unknown) as GetStateReturn;
   const services = ({
     capabilities: {
       discover: {
@@ -71,7 +69,10 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
       config: mockUiSettings,
       data: dataPluginMock.createStartContract(),
       filterManager: createFilterManagerMock(),
+      getFieldCounts: jest.fn(),
       indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
+      inspectorAdapters: { requests: {} as RequestAdapter },
+      navigateTo: jest.fn(),
       sampleSize: 10,
       savedSearch: savedSearchMock,
       setHeaderActionMenu: jest.fn(),
@@ -85,15 +86,6 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
     rows: esHits,
     searchSource: searchSourceMock,
     state: { columns: [] },
-    topNavMenu: getTopNavLinks({
-      getFieldCounts: jest.fn(),
-      indexPattern,
-      inspectorAdapters: inspectorPluginMock,
-      navigateTo: jest.fn(),
-      savedSearch: savedSearchMock,
-      services,
-      state,
-    }),
     updateQuery: jest.fn(),
   };
 }

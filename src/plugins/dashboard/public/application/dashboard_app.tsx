@@ -192,7 +192,6 @@ export function DashboardApp({
 
     subscriptions.add(
       merge(
-        data.search.session.onRefresh$,
         data.query.timefilter.timefilter.getAutoRefreshFetch$(),
         searchSessionIdQuery$
       ).subscribe(() => {
