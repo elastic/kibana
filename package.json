@@ -95,7 +95,7 @@
     "@elastic/datemath": "link:packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^7.12.0-canary",
     "@elastic/ems-client": "7.11.0",
-    "@elastic/eui": "31.3.0",
+    "@elastic/eui": "31.4.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/node-crypto": "1.2.1",
