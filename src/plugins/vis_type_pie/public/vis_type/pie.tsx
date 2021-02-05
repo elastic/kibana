@@ -13,7 +13,6 @@ import { AggGroupNames } from '../../../data/public';
 import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations/public';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
-import { getLegendPositions } from '../editor';
 import { getPieOptions } from '../editor/components';
 import { SplitTooltip } from './split_tooltip';
 
@@ -53,9 +52,6 @@ export const getPieVisTypeDefinition = ({
     },
   },
   editorConfig: {
-    collections: {
-      legendPositions: getLegendPositions(),
-    },
     optionsTemplate: getPieOptions({
       showElasticChartsOptions,
       palettes,

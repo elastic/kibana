@@ -6,4 +6,3 @@
  */
 
 export const UNDETECTED_BEAT_TYPE = 'beat';
-export const DEFAULT_BEAT_FOR_URLS = 'metricbeat';

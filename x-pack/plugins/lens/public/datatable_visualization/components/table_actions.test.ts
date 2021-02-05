@@ -14,17 +14,19 @@ import {
   createGridFilterHandler,
   createGridResizeHandler,
   createGridSortingConfig,
+  createGridHideHandler,
 } from './table_actions';
-import { DatatableColumns, LensGridDirection } from './types';
+import { LensGridDirection } from './types';
+import { ColumnConfig } from './table_basic';
 
-function getDefaultConfig(): DatatableColumns & {
-  type: 'lens_datatable_columns';
-} {
+function getDefaultConfig(): ColumnConfig {
   return {
-    columnIds: [],
-    sortBy: '',
-    sortDirection: 'none',
-    type: 'lens_datatable_columns',
+    columns: [
+      { columnId: 'a', type: 'lens_datatable_column' },
+      { columnId: 'b', type: 'lens_datatable_column' },
+    ],
+    sortingColumnId: '',
+    sortingDirection: 'none',
   };
 }
 
@@ -207,7 +209,13 @@ describe('Table actions', () => {
 
       expect(setColumnConfig).toHaveBeenCalledWith({
         ...columnConfig,
-        columnWidth: [{ columnId: 'a', width: 100, type: 'lens_datatable_column_width' }],
+        columns: [
+          { columnId: 'a', width: 100, type: 'lens_datatable_column' },
+          {
+            columnId: 'b',
+            type: 'lens_datatable_column',
+          },
+        ],
       });
 
       expect(onEditAction).toHaveBeenCalledWith({ action: 'resize', columnId: 'a', width: 100 });
@@ -215,16 +223,14 @@ describe('Table actions', () => {
 
     it('should pull out the table custom width from the local state when passing undefined', () => {
       const columnConfig = getDefaultConfig();
-      columnConfig.columnWidth = [
-        { columnId: 'a', width: 100, type: 'lens_datatable_column_width' },
-      ];
+      columnConfig.columns = [{ columnId: 'a', width: 100, type: 'lens_datatable_column' }];
 
       const resizer = createGridResizeHandler(columnConfig, setColumnConfig, onEditAction);
       resizer({ columnId: 'a', width: undefined });
 
       expect(setColumnConfig).toHaveBeenCalledWith({
         ...columnConfig,
-        columnWidth: [],
+        columns: [{ columnId: 'a', width: undefined, type: 'lens_datatable_column' }],
       });
 
       expect(onEditAction).toHaveBeenCalledWith({
@@ -232,6 +238,25 @@ describe('Table actions', () => {
         columnId: 'a',
         width: undefined,
       });
+    });
+  });
+  describe('Column hiding', () => {
+    const setColumnConfig = jest.fn();
+
+    it('should allow to hide column', () => {
+      const columnConfig = getDefaultConfig();
+      const hiding = createGridHideHandler(columnConfig, setColumnConfig, onEditAction);
+      hiding({ columnId: 'a' });
+
+      expect(setColumnConfig).toHaveBeenCalledWith({
+        ...columnConfig,
+        columns: [
+          { columnId: 'a', hidden: true, type: 'lens_datatable_column' },
+          { columnId: 'b', type: 'lens_datatable_column' },
+        ],
+      });
+
+      expect(onEditAction).toHaveBeenCalledWith({ action: 'toggle', columnId: 'a' });
     });
   });
 });

@@ -14,11 +14,6 @@ import { chartPluginMock } from '../../../../charts/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('../collections', () => ({
-  getLabelPositions: jest.fn(() => []),
-  getValuesFormats: jest.fn(() => []),
-}));
-
 describe('PalettePicker', function () {
   let props: PieOptionsProps;
   let component: ReactWrapper<PieOptionsProps>;

@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { LabelPositions, ValueFormats } from '../types';
 
-export const getLabelPositions = () => [
+export const getLabelPositions = [
   {
     text: i18n.translate('visTypePie.labelPositions.insideText', {
       defaultMessage: 'Inside',
@@ -24,7 +24,7 @@ export const getLabelPositions = () => [
   },
 ];
 
-export const getValuesFormats = () => [
+export const getValuesFormats = [
   {
     text: i18n.translate('visTypePie.valuesFormats.percent', {
       defaultMessage: 'Show percent',

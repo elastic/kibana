@@ -23,6 +23,7 @@ import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../charts/public';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
+import { getLegendPositions } from '../positions';
 
 export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
 
@@ -63,7 +64,7 @@ const PieOptions = (props: PieOptionsProps) => {
           value={stateParams.isDonut}
           setValue={setValue}
         />
-        <BasicOptions {...props} />
+        <BasicOptions {...props} legendPositions={getLegendPositions} />
         {props.showElasticChartsOptions && (
           <SwitchOption
             label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
@@ -121,7 +122,7 @@ const PieOptions = (props: PieOptionsProps) => {
               defaultMessage: 'Label position',
             })}
             disabled={!stateParams.labels.show}
-            options={getLabelPositions()}
+            options={getLabelPositions}
             paramName="position"
             value={stateParams.labels.position || LabelPositions.DEFAULT}
             setValue={(paramName, value) => {
@@ -158,7 +159,7 @@ const PieOptions = (props: PieOptionsProps) => {
               defaultMessage: 'Values',
             })}
             disabled={!stateParams.labels.values}
-            options={getValuesFormats()}
+            options={getValuesFormats}
             paramName="valuesFormat"
             value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
             setValue={(paramName, value) => {

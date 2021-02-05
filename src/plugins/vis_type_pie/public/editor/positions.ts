@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
-export const getLegendPositions = () => [
+export const getLegendPositions = [
   {
     text: i18n.translate('visTypePie.legendPositions.topText', {
       defaultMessage: 'Top',
