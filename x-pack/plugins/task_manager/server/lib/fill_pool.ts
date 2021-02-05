@@ -8,7 +8,6 @@
 import { performance } from 'perf_hooks';
 import { Observable } from 'rxjs';
 import { concatMap, last } from 'rxjs/operators';
-import uuid from 'uuid';
 import { ClaimOwnershipResult } from '../queries/task_claiming';
 import { ConcreteTaskInstance } from '../task';
 import { WithTaskTiming, startTaskTimer } from '../task_events';
