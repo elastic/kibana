@@ -13,7 +13,7 @@ import { ID } from './constants';
 import { PainlessContext, PainlessAutocompleteField } from './types';
 import { PainlessWorker } from './worker';
 import { PainlessCompletionAdapter } from './completion_adapter';
-import { DiagnosticsAdapter } from './diagnostics_adapter';
+import { DiagnosticsAdapter, SyntaxErrors } from './diagnostics_adapter';
 
 const workerProxyService = new WorkerProxyService();
 const editorStateService = new EditorStateService();
@@ -35,8 +35,9 @@ export const getSuggestionProvider = (
 
 let diagnosticsAdapter: DiagnosticsAdapter;
 
-export const hasSyntaxError = (): boolean => {
-  return diagnosticsAdapter.hasSyntaxError();
+// Returns syntax errors for all models by model id
+export const getSyntaxErrors = (): SyntaxErrors => {
+  return diagnosticsAdapter.getSyntaxErrors();
 };
 
 monaco.languages.onLanguage(ID, async () => {

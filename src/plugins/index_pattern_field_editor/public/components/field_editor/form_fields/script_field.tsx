@@ -57,6 +57,8 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
     mapReturnTypeToPainlessContext(defaultType)
   );
 
+  const [editorId, setEditorId] = useState<string | undefined>(undefined);
+
   const suggestionProvider = PainlessLang.getSuggestionProvider(
     painlessContext,
     existingConcreteFields
@@ -69,8 +71,12 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
     // before checking if there are any syntax errors
     clearTimeout(editorValidationTimeout);
     editorValidationTimeout = setTimeout(() => {
-      const hasSyntaxError = PainlessLang.hasSyntaxError();
-      if (hasSyntaxError) {
+      const painlessSyntaxErrors = PainlessLang.getSyntaxErrors();
+      // It is possible for there to be more than one editor in a view,
+      // so we need to get the syntax errors based on the editor (aka model) ID
+      const editorHasSyntaxErrors = editorId && painlessSyntaxErrors[editorId].length > 0;
+
+      if (editorHasSyntaxErrors) {
         setErrors([
           {
             message: i18n.translate(
@@ -133,6 +139,7 @@ export const ScriptField = ({ existingConcreteFields = [], links }: Props) => {
                 setValue(newValue);
                 validateScript(setErrors);
               }}
+              editorDidMount={(editor) => setEditorId(editor.getModel()?.id)}
               options={{
                 fontSize: 12,
                 minimap: {
