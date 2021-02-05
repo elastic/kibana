@@ -7,10 +7,16 @@
 
 import { CoreSetup, Plugin } from 'src/core/server';
 import { registerSettings } from './ui_settings';
+import { BannersRequestHandlerContext } from './types';
+import { registerRoutes } from './routes';
 
 export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
-  setup({ uiSettings }: CoreSetup<{}, {}>) {
+  setup({ uiSettings, getStartServices, http }: CoreSetup<{}, {}>) {
     registerSettings(uiSettings);
+
+    const router = http.createRouter<BannersRequestHandlerContext>();
+    registerRoutes(router);
+
     return {};
   }
 
