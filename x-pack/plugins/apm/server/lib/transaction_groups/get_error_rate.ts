@@ -14,7 +14,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -66,7 +66,7 @@ export async function getErrorRate({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { range: rangeFilter(start, end) },
+    rangeQuery(start, end),
     ...getEnvironmentFilter(environment),
     ...esFilter,
   ];

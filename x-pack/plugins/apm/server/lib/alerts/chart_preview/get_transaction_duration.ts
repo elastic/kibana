@@ -13,7 +13,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
 import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { getBucketSize } from '../../helpers/get_bucket_size';
@@ -37,12 +37,12 @@ export async function getTransactionDurationChartPreview({
   const query = {
     bool: {
       filter: [
-        { range: rangeFilter(start, end) },
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...(transactionType
           ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
           : []),
+        rangeQuery(start, end),
         ...getEnvironmentFilter(environment),
       ],
     },

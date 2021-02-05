@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   ERROR_GROUP_ID,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeQuery } from '../../common/utils/queries';
 import { ProcessorEvent } from '../../common/processor_event';
 import { getEnvironmentFilter } from '../lib/helpers/get_environment_filter';
 
@@ -34,7 +34,7 @@ export function getErrorGroupsProjection({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],

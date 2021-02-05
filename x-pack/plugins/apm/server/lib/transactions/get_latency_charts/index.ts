@@ -13,7 +13,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -55,7 +55,7 @@ async function searchLatency({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { range: rangeFilter(start, end) },
+    rangeQuery(start, end),
     ...getEnvironmentFilter(environment),
     ...esFilter,
   ];

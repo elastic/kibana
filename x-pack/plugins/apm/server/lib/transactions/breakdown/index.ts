@@ -18,7 +18,7 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
@@ -83,7 +83,7 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
+    rangeQuery(start, end),
     ...getEnvironmentFilter(environment),
     ...esFilter,
   ];

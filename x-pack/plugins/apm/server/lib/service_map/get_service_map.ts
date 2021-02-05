@@ -83,7 +83,6 @@ async function getServicesData(options: IEnvOptions) {
   const { environment, setup, searchAggregatedTransactions } = options;
 
   const projection = getServicesProjection({
-    environment,
     setup: { ...setup, esFilter: [] },
     searchAggregatedTransactions,
   });
@@ -96,6 +95,10 @@ async function getServicesData(options: IEnvOptions) {
         [SERVICE_NAME]: options.serviceName,
       },
     });
+  }
+
+  if (options.environment) {
+    filter = filter.concat(getEnvironmentFilter(environment));
   }
 
   const params = mergeProjection(projection, {

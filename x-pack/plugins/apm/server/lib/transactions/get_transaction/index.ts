@@ -9,7 +9,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
@@ -35,7 +35,7 @@ export async function getTransaction({
           filter: [
             { term: { [TRANSACTION_ID]: transactionId } },
             { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
           ],
         },
       },

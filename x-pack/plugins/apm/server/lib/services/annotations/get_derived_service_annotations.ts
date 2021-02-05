@@ -12,7 +12,7 @@ import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -55,7 +55,7 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: [...filter, { range: rangeFilter(start, end) }],
+              filter: [...filter, rangeQuery(start, end)],
             },
           },
           aggs: {

@@ -19,7 +19,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { joinByKey } from '../../../../common/utils/join_by_key';
@@ -47,7 +47,7 @@ export const getDestinationMap = async ({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
             ...getEnvironmentFilter(environment),
           ],
         },
@@ -112,7 +112,7 @@ export const getDestinationMap = async ({
                 ),
               },
             },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
           ],
         },
       },

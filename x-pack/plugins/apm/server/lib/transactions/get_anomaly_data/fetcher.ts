@@ -7,7 +7,7 @@
 
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 import { Setup } from '../../helpers/setup_request';
 
@@ -40,7 +40,7 @@ export async function anomalySeriesFetcher({
             { terms: { result_type: ['model_plot', 'record'] } },
             { term: { partition_field_value: serviceName } },
             { term: { by_field_value: transactionType } },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
           ],
         },
       },

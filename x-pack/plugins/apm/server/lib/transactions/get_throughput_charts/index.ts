@@ -13,7 +13,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -52,7 +52,7 @@ async function searchThroughput({
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { range: rangeFilter(start, end) },
+    rangeQuery(start, end),
     ...getEnvironmentFilter(environment),
     ...esFilter,
   ];

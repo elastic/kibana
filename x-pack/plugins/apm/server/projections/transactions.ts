@@ -11,7 +11,7 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeQuery } from '../../common/utils/queries';
 import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
@@ -53,7 +53,7 @@ export function getTransactionsProjection({
       ...getDocumentTypeFilterForAggregatedTransactions(
         searchAggregatedTransactions
       ),
-      { range: rangeFilter(start, end) },
+      rangeQuery(start, end),
       ...getEnvironmentFilter(environment),
       ...esFilter,
     ],

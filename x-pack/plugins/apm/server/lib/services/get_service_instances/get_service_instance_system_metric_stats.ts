@@ -6,7 +6,7 @@
  */
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
@@ -96,7 +96,7 @@ export async function getServiceInstanceSystemMetricStats({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],

@@ -15,7 +15,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../../common/transaction_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -75,7 +75,7 @@ export async function getServiceTransactionStats({
             ...getDocumentTypeFilterForAggregatedTransactions(
               searchAggregatedTransactions
             ),
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],

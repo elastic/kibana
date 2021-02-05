@@ -19,7 +19,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../common/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -59,7 +59,7 @@ export async function getServiceMapServiceNodeInfo({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    rangeQuery(start, end),
     ...getEnvironmentFilter(environment),
   ];
 

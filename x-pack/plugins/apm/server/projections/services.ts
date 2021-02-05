@@ -10,14 +10,11 @@ import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../common/utils/range_filter';
 import { ProcessorEvent } from '../../common/processor_event';
 import { getProcessorEventForAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { getEnvironmentFilter } from '../lib/helpers/get_environment_filter';
 
 export function getServicesProjection({
-  environment,
   setup,
   searchAggregatedTransactions,
 }: {
-  environment?: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
@@ -37,11 +34,7 @@ export function getServicesProjection({
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: rangeFilter(start, end) },
-            ...getEnvironmentFilter(environment),
-            ...esFilter,
-          ],
+          filter: [rangeQuery(start, end), ...esFilter],
         },
       },
       aggs: {

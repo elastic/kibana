@@ -7,7 +7,7 @@
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -41,7 +41,7 @@ export async function getCorrelationsForSlowTransactions({
   const { start, end, esFilter, apmEventClient } = setup;
 
   const backgroundFilters: ESFilter[] = [
-    { range: rangeFilter(start, end) },
+    rangeQuery(start, end),
     ...getEnvironmentFilter(environment),
     ...esFilter,
   ];

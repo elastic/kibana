@@ -8,7 +8,7 @@
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -83,7 +83,7 @@ export async function getTimeseriesDataForTransactionGroups({
             ...getDocumentTypeFilterForAggregatedTransactions(
               searchAggregatedTransactions
             ),
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],

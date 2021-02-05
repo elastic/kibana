@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { unwrapEsResponse } from '../../../../../observability/server';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
@@ -31,14 +31,13 @@ export async function getStoredAnnotations({
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
 }): Promise<Annotation[]> {
+  const { start, end } = setup;
   const body = {
     size: 50,
     query: {
       bool: {
         filter: [
-          {
-            range: rangeFilter(setup.start, setup.end),
-          },
+          rangeQuery(start, end),
           { term: { 'annotation.type': 'deployment' } },
           { term: { tags: 'apm' } },
           { term: { [SERVICE_NAME]: serviceName } },

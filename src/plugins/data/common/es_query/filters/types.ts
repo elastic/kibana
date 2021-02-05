@@ -11,7 +11,7 @@ import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
 import { GeoPolygonFilter } from './geo_polygon_filter';
 import { PhrasesFilter } from './phrases_filter';
 import { PhraseFilter } from './phrase_filter';
-import { RangeFilter } from './range_filter';
+import { rangeQuery } from './queries';
 import { MatchAllFilter } from './match_all_filter';
 import { MissingFilter } from './missing_filter';
 

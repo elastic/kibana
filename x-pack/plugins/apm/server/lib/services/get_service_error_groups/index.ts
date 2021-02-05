@@ -9,7 +9,7 @@ import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../common/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ERROR_EXC_MESSAGE,
@@ -63,7 +63,7 @@ export async function getServiceErrorGroups({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
@@ -137,7 +137,7 @@ export async function getServiceErrorGroups({
             { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            { range: rangeFilter(start, end) },
+            rangeQuery(start, end),
             ...getEnvironmentFilter(environment),
             ...esFilter,
           ],
