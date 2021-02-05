@@ -7,7 +7,7 @@
  */
 
 // @ts-expect-error
-import stubbedLogstashFields from '../../../../fixtures/logstash_fields';
+import stubbedLogstashFields from './fixtures/logstash_fields';
 
 const mockLogstashFields = stubbedLogstashFields();
 
