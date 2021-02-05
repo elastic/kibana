@@ -188,7 +188,7 @@ echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" 
 
 export PATH="$PATH:$HOME/.yarn/bin"
 ls "/var/lib/jenkins/.config/yarn/global"
-ls "$(yarn global bin)"
+#ls "$(yarn global bin)"
 ls "$HOME/.yarn/bin"
 ls $(yarn global bin)
 ###
