@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -27,9 +27,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.skip('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        await esArchiver.load('management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
+        await esArchiver.load('management');
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
@@ -213,9 +213,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        await esArchiver.load('saved_objects_imports');
+        // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
+        await esArchiver.load('saved_objects_imports');
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 

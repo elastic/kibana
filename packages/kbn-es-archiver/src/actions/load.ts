@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
-import { Client } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 
@@ -92,7 +92,7 @@ export async function loadAction({
 
   await client.indices.refresh({
     index: '_all',
-    allowNoIndices: true,
+    allow_no_indices: true,
   });
 
   // If we affected the Kibana index, we need to ensure it's migrated...
