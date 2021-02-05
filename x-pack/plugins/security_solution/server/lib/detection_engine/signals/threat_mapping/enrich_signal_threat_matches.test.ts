@@ -437,6 +437,7 @@ describe('enrichSignalThreatMatches', () => {
     });
     const signals = getSignalsResponseMock([signalHit, otherSignalHit]);
     const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    expect(enrichedSignals.hits.total).toEqual(expect.objectContaining({ value: 1 }));
     expect(enrichedSignals.hits.hits).toHaveLength(1);
 
     const [enrichedHit] = enrichedSignals.hits.hits;

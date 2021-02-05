@@ -73,7 +73,6 @@ export const enrichSignalThreatMatches = async (
     return signals;
   }
 
-  // TODO update hits total to account for deduping
   const uniqueHits = groupAndMergeSignalMatches(signalHits);
   const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
   const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
@@ -101,8 +100,14 @@ export const enrichSignalThreatMatches = async (
       },
     };
   });
-  // eslint-disable-next-line require-atomic-updates
+  /* eslint-disable require-atomic-updates */
   signals.hits.hits = enrichedSignals;
+  if (isObject(signals.hits.total)) {
+    signals.hits.total.value = enrichedSignals.length;
+  } else {
+    signals.hits.total = enrichedSignals.length;
+  }
+  /* eslint-enable require-atomic-updates */
 
   return signals;
 };
