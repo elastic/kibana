@@ -12,6 +12,13 @@ import { rootReducer } from './reducers';
 
 export type AppState = ReturnType<typeof rootReducer>;
 
+type ComposeType = typeof compose;
+declare global {
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: ComposeType;
+  }
+}
+
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const sagaMW = createSagaMiddleware();
