@@ -119,6 +119,10 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 ###
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
+# In some situations looks lik the yarn binaries added through
+# yarn global add will not be placed on yarn global bin
+# but on $HOME/.yarn/bin. I'm also adding it into the PATH
+export PATH="$PATH:$HOME/.yarn/bin"
 
 # use a proxy to fetch chromedriver/geckodriver asset
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
@@ -186,15 +190,11 @@ cp -f "$KIBANA_DIR/src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
 echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
 echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
 
-export PATH="$PATH:$HOME/.yarn/bin"
-ls "/var/lib/jenkins/.config/yarn/global"
-#ls "$(yarn global bin)"
-ls "$HOME/.yarn/bin"
-ls $(yarn global bin)
+
 ###
 ### make sure bazelisk is installed on CI
 ###
-bazeliskVersion=$(head -n 1 "$KIBANA_DIR/.bazeliskversion")
-yarn global add "@bazel/bazelisk@${bazeliskVersion}"
+# bazeliskVersion=$(head -n 1 "$KIBANA_DIR/.bazeliskversion")
+# yarn global add "@bazel/bazelisk@${bazeliskVersion}"
 
 export CI_ENV_SETUP=true
