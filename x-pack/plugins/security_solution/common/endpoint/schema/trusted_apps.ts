@@ -65,7 +65,7 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends Con
       }),
       schema.object({
         type: schema.literal('policy'),
-        policies: schema.arrayOf(schema.string({ minLength: 1 })), // TODO: validate policies
+        policies: schema.arrayOf(schema.string({ minLength: 1 })),
       }),
     ]),
     os: osSchema,
@@ -79,7 +79,7 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends Con
         );
       },
     }),
-    ...(forUpdateFlow ? { version: schema.maybe(schema.boolean()) } : {}),
+    ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
   });
 
 export const PostTrustedAppCreateRequestSchema = {

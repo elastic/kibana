@@ -222,27 +222,36 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
 };
 
 /**
- * Map NewTrustedApp to CreateExceptionListItemOptions.
+ * Map UpdateTrustedApp to UpdateExceptionListItemOptions
+ *
+ * @param {ExceptionListItemSchema} currentTrustedAppExceptionItem
+ * @param {UpdateTrustedApp} updatedTrustedApp
  */
-export const updatedTrustedAppToUpdateExceptionListItemOptions = ({
-  os,
-  entries,
-  name,
-  description = '',
-  effectScope,
-}: UpdateTrustedApp): UpdateExceptionListItemOptions => {
+export const updatedTrustedAppToUpdateExceptionListItemOptions = (
+  {
+    id,
+    item_id: itemId,
+    namespace_type: namespaceType,
+    type,
+    comments,
+    meta,
+  }: ExceptionListItemSchema,
+  { os, entries, name, description = '', effectScope, version }: UpdateTrustedApp
+): UpdateExceptionListItemOptions => {
   return {
-    id: '', // FIXME: need value
-    _version: '', // FIXME: need value
-    comments: [],
+    _version: version,
+    name,
     description,
     entries: conditionEntriesToEntries(entries),
-    itemId: '', // FIXME: need value
-    meta: undefined,
-    name,
-    namespaceType: 'agnostic',
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
     tags: effectScopeToTags(effectScope),
-    type: 'simple',
+
+    // Copied from current trusted app exception item
+    id,
+    comments,
+    itemId,
+    meta,
+    namespaceType,
+    type,
   };
 };

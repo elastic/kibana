@@ -23,6 +23,7 @@ import {
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItemOptions,
   osFromExceptionItem,
+  updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
 
 export class TrustedAppNotFoundError extends Error {
@@ -78,6 +79,9 @@ export const createTrustedApp = async (
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
+  // Validate update TA entry - error if not valid
+  // TODO: implement validations
+
   const createdTrustedAppExceptionItem = await exceptionsListClient.createExceptionListItem(
     newTrustedAppToCreateExceptionListItemOptions(newTrustedApp)
   );
@@ -90,7 +94,6 @@ export const updateTrustedApp = async (
   id: string,
   updatedTrustedApp: PutTrustedAppUpdateRequest
 ): Promise<PutTrustedAppUpdateResponse> => {
-  // retrieve existing TA entry - error if it does not exist
   const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
     itemId: '',
     id,
@@ -102,9 +105,20 @@ export const updateTrustedApp = async (
   }
 
   // Validate update TA entry - error if not valid
-  // Update the TA entry - Error if it fails
+  // TODO: implement validations
 
-  throw new Error('not implemented');
+  const updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
+    updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
+  );
+
+  // If `null` is returned, then that means the TA does not exist (could happen in race conditions)
+  if (!updatedTrustedAppExceptionItem) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  return {
+    data: exceptionListItemToTrustedApp(updatedTrustedAppExceptionItem),
+  };
 };
 
 export const getTrustedAppsSummary = async (
