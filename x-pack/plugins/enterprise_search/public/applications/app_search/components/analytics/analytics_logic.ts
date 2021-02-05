@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -62,6 +63,36 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
         onQueryDataLoad: (_, { allTags }) => allTags,
       },
     ],
+    recentQueries: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { recentQueries }) => recentQueries,
+      },
+    ],
+    topQueries: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueries }) => topQueries,
+      },
+    ],
+    topQueriesNoResults: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesNoResults }) => topQueriesNoResults,
+      },
+    ],
+    topQueriesNoClicks: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesNoClicks }) => topQueriesNoClicks,
+      },
+    ],
+    topQueriesWithClicks: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesWithClicks }) => topQueriesWithClicks,
+      },
+    ],
     totalQueries: [
       0,
       {
@@ -108,6 +139,12 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       [],
       {
         onQueryDataLoad: (_, { queriesPerDayForQuery }) => queriesPerDayForQuery,
+      },
+    ],
+    topClicksForQuery: [
+      [],
+      {
+        onQueryDataLoad: (_, { topClicksForQuery }) => topClicksForQuery,
       },
     ],
     startDate: [

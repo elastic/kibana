@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // info on nodemailer: https://nodemailer.com/about/
@@ -9,7 +10,7 @@ import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
 import { Logger } from '../../../../../../src/core/server';
-import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -18,9 +19,8 @@ export interface SendEmailOptions {
   transport: Transport;
   routing: Routing;
   content: Content;
-  proxySettings?: ProxySettings;
-  rejectUnauthorized?: boolean;
   hasAuth: boolean;
+  configurationUtilities: ActionsConfigurationUtilities;
 }
 
 // config validation ensures either service is set or host/port are set
@@ -47,12 +47,14 @@ export interface Content {
 
 // send an email
 export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
-  const { transport, routing, content, proxySettings, rejectUnauthorized, hasAuth } = options;
+  const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
   const transportConfig: Record<string, unknown> = {};
+  const proxySettings = configurationUtilities.getProxySettings();
+  const rejectUnauthorized = configurationUtilities.isRejectUnauthorizedCertificatesEnabled();
 
   if (hasAuth && user != null && password != null) {
     transportConfig.auth = {

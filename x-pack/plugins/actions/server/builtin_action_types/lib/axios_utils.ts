@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AxiosInstance, Method, AxiosResponse, AxiosBasicCredentials } from 'axios';
 import { Logger } from '../../../../../../src/core/server';
-import { ProxySettings } from '../../types';
-import { getProxyAgents } from './get_proxy_agents';
+import { getCustomAgents } from './get_custom_agents';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const request = async <T = unknown>({
   axios,
@@ -15,7 +16,7 @@ export const request = async <T = unknown>({
   logger,
   method = 'get',
   data,
-  proxySettings,
+  configurationUtilities,
   ...rest
 }: {
   axios: AxiosInstance;
@@ -24,12 +25,12 @@ export const request = async <T = unknown>({
   method?: Method;
   data?: T;
   params?: unknown;
-  proxySettings?: ProxySettings;
+  configurationUtilities: ActionsConfigurationUtilities;
   headers?: Record<string, string> | null;
   validateStatus?: (status: number) => boolean;
   auth?: AxiosBasicCredentials;
 }): Promise<AxiosResponse> => {
-  const { httpAgent, httpsAgent } = getProxyAgents(proxySettings, logger);
+  const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger);
 
   return await axios(url, {
     ...rest,
@@ -47,13 +48,13 @@ export const patch = async <T = unknown>({
   url,
   data,
   logger,
-  proxySettings,
+  configurationUtilities,
 }: {
   axios: AxiosInstance;
   url: string;
   data: T;
   logger: Logger;
-  proxySettings?: ProxySettings;
+  configurationUtilities: ActionsConfigurationUtilities;
 }): Promise<AxiosResponse> => {
   return request({
     axios,
@@ -61,7 +62,7 @@ export const patch = async <T = unknown>({
     logger,
     method: 'patch',
     data,
-    proxySettings,
+    configurationUtilities,
   });
 };
 

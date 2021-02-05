@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, FormEvent } from 'react';
@@ -35,6 +36,7 @@ import { FeatureIds, Configuration, Features } from '../../../../types';
 import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
 import { SourceFeatures } from './source_features';
 
+import { LEARN_MORE_LINK } from '../../constants';
 import {
   CONNECT_REMOTE,
   CONNECT_PRIVATE,
@@ -206,7 +208,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
               values={{
                 link: (
                   <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-                    Learn more
+                    {LEARN_MORE_LINK}
                   </EuiLink>
                 ),
               }}
@@ -242,7 +244,6 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
       <EuiFormRow>
         <EuiButton color="primary" type="submit" fill isLoading={formLoading}>
-          Connect {name}
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.connect.button', {
             defaultMessage: 'Connect {name}',
             values: { name },

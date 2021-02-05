@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -14,7 +15,6 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { Loading } from '../../../../shared/loading';
 import { SourceDataItem } from '../../../types';
 import { staticSourceData } from '../../content_sources/source_data';
-import { SourceLogic } from '../../content_sources/source_logic';
 import { AddSourceLogic } from '../../content_sources/components/add_source/add_source_logic';
 
 import { AddSourceHeader } from '../../content_sources/components/add_source/add_source_header';
@@ -30,18 +30,18 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
   const { configuration, serviceType } = staticSourceData[sourceIndex] as SourceDataItem;
   const { deleteSourceConfig } = useActions(SettingsLogic);
-  const { getSourceConfigData } = useActions(SourceLogic);
-  const { saveSourceConfig } = useActions(AddSourceLogic);
+  const { saveSourceConfig, getSourceConfigData } = useActions(AddSourceLogic);
   const {
     sourceConfigData: { name, categories },
-    dataLoading: sourceDataLoading,
-  } = useValues(SourceLogic);
+    dataLoading,
+  } = useValues(AddSourceLogic);
 
   useEffect(() => {
     getSourceConfigData(serviceType);
   }, []);
 
-  if (sourceDataLoading) return <Loading />;
+  if (dataLoading) return <Loading />;
+
   const hideConfirmModal = () => setConfirmModalVisibility(false);
   const showConfirmModal = () => setConfirmModalVisibility(true);
   const saveUpdatedConfig = () => saveSourceConfig(true);

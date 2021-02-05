@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
+  ActionTypeConnector,
   CasePostRequest,
   CasesConfigureRequest,
   ConnectorTypes,
@@ -70,6 +73,49 @@ export const getActions = (): FindActionResult[] => [
     },
     isPreconfigured: false,
     referencedByCount: 0,
+  },
+];
+
+export const getActionTypes = (): ActionTypeConnector[] => [
+  {
+    id: '.email',
+    name: 'Email',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.index',
+    name: 'Index',
+    minimumLicenseRequired: 'basic',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.servicenow',
+    name: 'ServiceNow',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.jira',
+    name: 'Jira',
+    minimumLicenseRequired: 'gold',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.resilient',
+    name: 'IBM Resilient',
+    minimumLicenseRequired: 'platinum',
+    enabled: false,
+    enabledInConfig: true,
+    enabledInLicense: true,
   },
 ];
 

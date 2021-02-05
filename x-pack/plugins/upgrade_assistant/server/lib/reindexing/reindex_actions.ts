@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -236,7 +237,7 @@ export const reindexActionsFactory = (
     },
 
     async getFlatSettings(indexName: string) {
-      const { body: flatSettings } = await esClient.indices.getSettings<{
+      const { body: flatSettings } = await esClient.indices.get<{
         [indexName: string]: FlatSettings;
       }>({
         index: indexName,
