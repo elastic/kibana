@@ -226,6 +226,10 @@ it('prepares assets for distribution', async () => {
 
   await allValuesFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
 
+  expect(
+    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/metrics.json'), 'utf8')
+  ).toMatchSnapshot('metrics.json');
+
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(
     'plugins/foo/target/public/foo.chunk.1.js',
