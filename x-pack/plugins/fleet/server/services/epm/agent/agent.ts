@@ -20,12 +20,22 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
 
   const yamlFromCompiledTemplate = safeLoad(compiledTemplate, {});
 
-  // Hack to keep empty string ('') values around in the end yaml because
-  // `safeLoad` replaces empty strings with null
+  // Post yaml template compilation and conversion back to JS object hacks:
+  //   1. Keep empty string ('') values around in the end yaml because
+  //      `safeLoad` replaces empty strings with null
+  //   2. Convert non-string values back to string if they were originally strings
+  //      because during conversion back to JS object, numeric strings become numbers. ex:
+  //      `variables`                       => `{"some_key": {"type": "text", "value": "123"}}`
+  //      `templateStr`                     => `some_key: {{some_key}}`
+  //      `compiledTemplate`                => `some_key: 123`
+  //      `yamlFromCompiledTemplate`        => `{"some_key": 123}`
+  //      `patchedYamlFromCompiledTemplate` => `{"some_key": "123"}`
   const patchedYamlFromCompiledTemplate = Object.entries(yamlFromCompiledTemplate).reduce(
     (acc, [key, value]) => {
       if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
         acc[key] = '';
+      } else if (typeof vars[key] === 'string' && typeof value !== 'string') {
+        acc[key] = String(value);
       } else {
         acc[key] = value;
       }
