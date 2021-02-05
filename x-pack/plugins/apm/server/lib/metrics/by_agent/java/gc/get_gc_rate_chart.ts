@@ -32,15 +32,18 @@ const chartBase: ChartBase = {
 };
 
 function getGcRateChart({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return fetchAndTransformGcMetrics({
+    environment,
     setup,
     serviceName,
     serviceNodeName,

@@ -53,15 +53,18 @@ const chartBase: ChartBase = {
 };
 
 export async function getCPUChartData({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   const metricsChart = await fetchAndTransformMetrics({
+    environment,
     setup,
     serviceName,
     serviceNodeName,

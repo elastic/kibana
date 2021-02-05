@@ -39,7 +39,7 @@ async function searchLatency({
   searchAggregatedTransactions,
   latencyAggregationType,
 }: {
-  environment: string;
+  environment?: string;
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;

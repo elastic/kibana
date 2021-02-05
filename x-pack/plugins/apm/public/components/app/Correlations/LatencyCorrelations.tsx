@@ -61,7 +61,13 @@ export function LatencyCorrelations() {
   const [durationPercentile, setDurationPercentile] = useState('50');
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-  const { transactionName, transactionType, start, end } = urlParams;
+  const {
+    environment,
+    transactionName,
+    transactionType,
+    start,
+    end,
+  } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -70,6 +76,7 @@ export function LatencyCorrelations() {
           endpoint: 'GET /api/apm/correlations/slow_transactions',
           params: {
             query: {
+              environment,
               serviceName,
               transactionName,
               transactionType,
@@ -84,6 +91,7 @@ export function LatencyCorrelations() {
       }
     },
     [
+      environment,
       serviceName,
       start,
       end,

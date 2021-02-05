@@ -27,14 +27,17 @@ import {
   getOutcomeAggregation,
   getTransactionErrorRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
+import { getEnvironmentFilter } from '../../helpers/get_environment_filter';
 
 export async function getCorrelationsForFailedTransactions({
+  environment,
   serviceName,
   transactionType,
   transactionName,
   fieldNames,
   setup,
 }: {
+  environment?: string;
   serviceName: string | undefined;
   transactionType: string | undefined;
   transactionName: string | undefined;
@@ -44,8 +47,9 @@ export async function getCorrelationsForFailedTransactions({
   const { start, end, esFilter, apmEventClient } = setup;
 
   const backgroundFilters: ESFilter[] = [
-    ...esFilter,
     { range: rangeFilter(start, end) },
+    ...getEnvironmentFilter(environment),
+    ...esFilter,
   ];
 
   if (serviceName) {

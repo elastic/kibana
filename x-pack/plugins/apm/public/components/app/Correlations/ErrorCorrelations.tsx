@@ -61,7 +61,13 @@ export function ErrorCorrelations() {
   const [fieldNames, setFieldNames] = useState(initialFieldNames);
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
-  const { transactionName, transactionType, start, end } = urlParams;
+  const {
+    environment,
+    transactionName,
+    transactionType,
+    start,
+    end,
+  } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -70,6 +76,7 @@ export function ErrorCorrelations() {
           endpoint: 'GET /api/apm/correlations/failed_transactions',
           params: {
             query: {
+              environment,
               serviceName,
               transactionName,
               transactionType,
@@ -83,6 +90,7 @@ export function ErrorCorrelations() {
       }
     },
     [
+      environment,
       serviceName,
       start,
       end,

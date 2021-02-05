@@ -41,15 +41,18 @@ const chartBase: ChartBase = {
 };
 
 export async function getThreadCountChart({
+  environment,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return fetchAndTransformMetrics({
+    environment,
     setup,
     serviceName,
     serviceNodeName,

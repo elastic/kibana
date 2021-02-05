@@ -130,7 +130,7 @@ export const transactionGroupsOverviewRoute = createRoute({
   },
 });
 
-export const transactionLatencyChatsRoute = createRoute({
+export const transactionLatencyChartsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/charts/latency',
   params: t.type({
     path: t.type({
@@ -197,7 +197,7 @@ export const transactionLatencyChatsRoute = createRoute({
   },
 });
 
-export const transactionThroughputChatsRoute = createRoute({
+export const transactionThroughputChartsRoute = createRoute({
   endpoint:
     'GET /api/apm/services/{serviceName}/transactions/charts/throughput',
   params: t.type({

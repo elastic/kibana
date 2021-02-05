@@ -20,7 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   // url parameters
   const { start, end } = metadata;
-  const uiFilters = JSON.stringify({ environment: 'testing' });
+  const uiFilters = JSON.stringify({});
 
   registry.when('Throughput when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
@@ -28,6 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         url.format({
           pathname: `/api/apm/services/opbeans-node/transactions/charts/throughput`,
           query: {
+            environment: 'testing',
             start,
             end,
             uiFilters,
@@ -53,6 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           url.format({
             pathname: `/api/apm/services/opbeans-node/transactions/charts/throughput`,
             query: {
+              environment: 'testing',
               start,
               end,
               uiFilters,

@@ -17,20 +17,21 @@ import { getMLJobIds } from '../../service_map/get_service_anomalies';
 import { ANOMALY_THRESHOLD } from '../../../../../ml/common';
 
 export async function getAnomalySeries({
+  environment,
   serviceName,
   transactionType,
   transactionName,
   setup,
   logger,
 }: {
+  environment?: string;
   serviceName: string;
   transactionType: string;
   transactionName?: string;
   setup: Setup & SetupTimeRange;
   logger: Logger;
 }) {
-  const { uiFilters, start, end, ml } = setup;
-  const { environment } = uiFilters;
+  const { start, end, ml } = setup;
 
   // don't fetch anomalies if the ML plugin is not setup
   if (!ml) {
@@ -44,18 +45,17 @@ export async function getAnomalySeries({
   }
 
   // don't fetch anomalies when no specific environment is selected
-  if (environment === ENVIRONMENT_ALL.value) {
+  if (!environment || environment === ENVIRONMENT_ALL.value) {
     return undefined;
   }
 
-  // don't fetch anomalies if unknown uiFilters are applied
-  const knownFilters = ['environment', 'serviceName'];
-  const hasUnknownFiltersApplied = Object.entries(setup.uiFilters)
-    .filter(([key, value]) => !!value)
-    .map(([key]) => key)
-    .some((uiFilterName) => !knownFilters.includes(uiFilterName));
+  // Don't fetch anomalies if uiFilters are applied. This filters out anything
+  // with empty values so `kuery: ''` returns false but `kuery: 'x:y'` returns true.
+  const hasUiFiltersApplied =
+    Object.entries(setup.uiFilters).filter(([_key, value]) => !!value).length >
+    0;
 
-  if (hasUnknownFiltersApplied) {
+  if (hasUiFiltersApplied) {
     return undefined;
   }
 
