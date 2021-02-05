@@ -23,7 +23,7 @@ echo $MB_BUILD
 MB_BUILD_ID=$(echo $TOP | sed 's/.*"build_id" : "\(.*\)", "manifest_url.*/\1/')
 echo $MB_BUILD_ID
 
-URL=https://snapshots.elastic.co/${MB_BUILD_ID}/downloads/beats/metricbeat/metricbeat-${MB_BUILD}-amd64.deb
+URL=https://snapshots.elastic.co/${MB_BUILD_ID}/downloads/beats/metricbeat/metricbeat-${MB_BUILD}-linux-x86_64.tar.gz
 
 # Downloading the Metricbeat package
 while [ 1 ]; do
@@ -34,15 +34,15 @@ while [ 1 ]; do
 
 
 # Install Metricbeat
-dpkg -i ./metricbeat-${BUILD}-amd64.deb || exit 1
+tar -xf metricbeat-${MB_BUILD}-linux-x86_64.tar.gz --directory /home
 
 # Configure Metricbeat
 pushd ../kibana-load-testing
-cp cfg/metricbeat/elasticsearch-xpack.yml /etc/metricbeat/modules.d/elasticsearch-xpack.yml
-cp cfg/metricbeat/kibana-xpack.yml /etc/metricbeat/modules.d/elasticsearch-xpack.yml
+cp cfg/metricbeat/elasticsearch-xpack.yml /home/metricbeat/modules.d/elasticsearch-xpack.yml
+cp cfg/metricbeat/kibana-xpack.yml /home/metricbeat/modules.d/elasticsearch-xpack.yml
 echo "fields.build: ${BUILD_ID}" >> cfg/metricbeat/metricbeat.yml
-cp cfg/metricbeat/metricbeat.yml /etc/metricbeat/metricbeat.yml
-mv /etc/metricbeat/modules.d/system.yml /etc/metricbeat/modules.d/system.yml.disabled
+cp cfg/metricbeat/metricbeat.yml /home/metricbeat/metricbeat.yml
+mv /etc/metricbeat/modules.d/system.yml /home/metricbeat/modules.d/system.yml.disabled
 popd
 
 # doesn't persist, also set in kibanaPipeline.groovy
@@ -62,8 +62,8 @@ cp -pR install/kibana/. $WORKSPACE/kibana-build-xpack/
 echo " -> test setup"
 source test/scripts/jenkins_test_setup_xpack.sh
 
-# Restart Metricbeat service
-service metricbeat restart
+# Start Metricbeat
+nohup home/metricbeat/metricbeat > home/metricbeat/logs/metricbeat.log 2>&1 &
 
 echo " -> run gatling load testing"
 export GATLING_SIMULATIONS="$simulations"
@@ -71,5 +71,3 @@ node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
   --config test/load/config.ts
   
-# Stopping the Metricbeat service
-service metricbeat stop
