@@ -10,10 +10,10 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Vsi from 'vega-spec-injector';
 
-import { VegaSpec } from '../../../data_model/types';
+import { Spec } from 'vega';
 import { defaultProjection } from '../constants';
 
-export const injectMapPropsIntoSpec = (spec: VegaSpec) => {
+export const injectMapPropsIntoSpec = (spec: Spec) => {
   const vsi = new Vsi();
 
   vsi.overrideField(spec, 'autosize', 'none');
