@@ -14,7 +14,6 @@ export default function upgradeAssistantFunctionalTests({
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
-  const security = getService('security');
   const log = getService('log');
   const retry = getService('retry');
 
