@@ -543,7 +543,7 @@ describe('stop', () => {
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "\\"timeout-stop-1\\" plugin didn't finish \\"stop\\" in 30sec.",
+          "\\"timeout-stop-1\\" plugin didn't stop in 30sec., move on to the next.",
         ],
       ]
     `);
