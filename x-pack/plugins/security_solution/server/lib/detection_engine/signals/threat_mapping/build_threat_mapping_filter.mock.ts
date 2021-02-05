@@ -176,31 +176,17 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [{ match: { 'host.name': 'host-1' } }],
+                should: [
+                  { match: { 'host.name': { query: 'host-1', _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },
             {
               bool: {
-                should: [{ match: { 'host.ip': '192.168.0.0.1' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [{ match: { 'destination.ip': '127.0.0.1' } }],
-                minimum_should_match: 1,
-              },
-            },
-            {
-              bool: {
-                should: [{ match: { 'destination.port': port } }],
+                should: [
+                  { match: { 'host.ip': { query: '192.168.0.0.1', _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },
@@ -212,7 +198,19 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [{ match: { 'source.port': port } }],
+                should: [
+                  {
+                    match: { 'destination.ip': { query: '127.0.0.1', _name: expect.any(String) } },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [
+                  { match: { 'destination.port': { query: port, _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },
@@ -224,7 +222,21 @@ export const getThreatMappingFilterShouldMock = (port = 1) => ({
           filter: [
             {
               bool: {
-                should: [{ match: { 'source.ip': '127.0.0.1' } }],
+                should: [{ match: { 'source.port': { query: port, _name: expect.any(String) } } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { match: { 'source.ip': { query: '127.0.0.1', _name: expect.any(String) } } },
+                ],
                 minimum_should_match: 1,
               },
             },
