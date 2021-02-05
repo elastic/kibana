@@ -159,7 +159,15 @@ export class PluginsSystem {
       const pluginName = this.satupPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
-      await this.plugins.get(pluginName)!.stop();
+
+      const result = (await Promise.race([
+        this.plugins.get(pluginName)!.stop(),
+        new Promise((resolve) => setTimeout(() => resolve({ delayed: true }), 30 * Sec)),
+      ])) as { delayed?: boolean };
+
+      if (result?.delayed) {
+        this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+      }
     }
   }
 
