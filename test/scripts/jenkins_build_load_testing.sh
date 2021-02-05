@@ -75,3 +75,5 @@ node scripts/functional_tests \
   --kibana-install-dir "$KIBANA_INSTALL_DIR" \
   --config test/load/config.ts
   
+echo "output of metricbeat.log" 
+cat "$KIBANA_DIR"/metricbeat-install/logs/metricbeat.log
