@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createGunzip } from 'zlib';
 import mockFs from 'mock-fs';
 import { createReadStream } from 'fs';
 
@@ -54,6 +55,11 @@ describe('getPayloadSize', () => {
       const result = getResponsePayloadBytes(readStream);
       expect(result).toBe(Buffer.byteLength(data));
     });
+
+    test('ignores streams that are not instances of ReadStream', async () => {
+      const result = getResponsePayloadBytes(createGunzip());
+      expect(result).toBe(undefined);
+    });
   });
 
   describe('handles plain responses', () => {
@@ -71,6 +77,11 @@ describe('getPayloadSize', () => {
       const payload = { message: 'heya' };
       const result = getResponsePayloadBytes(payload);
       expect(result).toBe(JSON.stringify(payload).length);
+    });
+
+    test('returns undefined when source is not plain object', () => {
+      const result = getResponsePayloadBytes([1, 2, 3]);
+      expect(result).toBe(undefined);
     });
   });
 
