@@ -32,7 +32,6 @@ import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
@@ -114,10 +113,6 @@ export class BaseAlert {
         context: actionVariables,
       },
     };
-  }
-
-  public isEnabled(licenseService: MonitoringLicenseService) {
-    return true;
   }
 
   public getId() {
