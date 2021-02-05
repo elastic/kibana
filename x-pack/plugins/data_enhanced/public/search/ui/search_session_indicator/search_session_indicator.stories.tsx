@@ -28,6 +28,9 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => (
       <SearchSessionIndicator state={SearchSessionState.Restored} />
     </div>
     <div>
+      <SearchSessionIndicator state={SearchSessionState.Canceled} />
+    </div>
+    <div>
       <SearchSessionIndicator
         state={SearchSessionState.Completed}
         disabled={true}
