@@ -10,8 +10,9 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
+  const testSubjects = getService('testSubjects');
 
-  describe.only('maps loaded from sample data', () => {
+  describe('maps loaded from sample data', () => {
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents
     // Setting the time range to a window larger than the sample data set
@@ -39,6 +40,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.toggleLayerVisibility('World Countries');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.closeLegend();
+        const mapContainerElement = await testSubjects.find('mapContainer');
+        await mapContainerElement.moveMouseTo({ xOffset: 0, yOffset: 0 });
       });
 
       after(async () => {
@@ -55,7 +59,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'ecommerce_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0.03);
       });
     });
 
@@ -70,6 +74,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.toggleLayerVisibility('Road map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.closeLegend();
+        const mapContainerElement = await testSubjects.find('mapContainer');
+        await mapContainerElement.moveMouseTo({ xOffset: 0, yOffset: 0 });
       });
 
       after(async () => {
@@ -86,7 +93,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'flights_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0.05);
       });
     });
 
@@ -102,6 +109,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.enterFullScreen();
+        await PageObjects.maps.closeLegend();
+        const mapContainerElement = await testSubjects.find('mapContainer');
+        await mapContainerElement.moveMouseTo({ xOffset: 0, yOffset: 0 });
       });
 
       after(async () => {
@@ -118,7 +128,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'web_logs_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.02);
+        expect(percentDifference).to.be.lessThan(0.06);
       });
     });
   });
