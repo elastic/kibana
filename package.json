@@ -636,7 +636,7 @@
     "eslint-plugin-ban": "^1.4.0",
     "eslint-plugin-cypress": "^2.11.2",
     "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.0.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-mocha": "^6.2.2",
