@@ -6,24 +6,78 @@
  */
 
 import expect from '@kbn/expect';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
 
   describe('maps loaded from sample data', () => {
-    // Sample data is shifted to be relative to current time
-    // This means that a static timerange will return different documents
-    // Setting the time range to a window larger than the sample data set
-    // ensures all documents are coverered by time query so the ES results will always be the same
-    async function setTimerangeToCoverAllSampleData() {
-      const past = new Date();
-      past.setMonth(past.getMonth() - 6);
-      const future = new Date();
-      future.setMonth(future.getMonth() + 6);
-      await PageObjects.maps.setAbsoluteRange(past.toISOString(), future.toISOString());
-    }
+    before(async () => {
+      const SAMPLE_DATA_RANGE = `[
+        {
+          "from": "now-30d",
+          "to": "now+40d",
+          "display": "sample data range"
+        },
+        {
+          "from": "now/d",
+          "to": "now/d",
+          "display": "Today"
+        },
+        {
+          "from": "now/w",
+          "to": "now/w",
+          "display": "This week"
+        },
+        {
+          "from": "now-15m",
+          "to": "now",
+          "display": "Last 15 minutes"
+        },
+        {
+          "from": "now-30m",
+          "to": "now",
+          "display": "Last 30 minutes"
+        },
+        {
+          "from": "now-1h",
+          "to": "now",
+          "display": "Last 1 hour"
+        },
+        {
+          "from": "now-24h",
+          "to": "now",
+          "display": "Last 24 hours"
+        },
+        {
+          "from": "now-7d",
+          "to": "now",
+          "display": "Last 7 days"
+        },
+        {
+          "from": "now-30d",
+          "to": "now",
+          "display": "Last 30 days"
+        },
+        {
+          "from": "now-90d",
+          "to": "now",
+          "display": "Last 90 days"
+        },
+        {
+          "from": "now-1y",
+          "to": "now",
+          "display": "Last 1 year"
+        }
+      ]`;
+
+      await kibanaServer.uiSettings.update({
+        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
+      });
+    });
 
     describe('ecommerce', () => {
       before(async () => {
@@ -38,7 +92,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.toggleLayerVisibility('France');
         await PageObjects.maps.toggleLayerVisibility('United States');
         await PageObjects.maps.toggleLayerVisibility('World Countries');
-        await setTimerangeToCoverAllSampleData();
+        await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();
         const mapContainerElement = await testSubjects.find('mapContainer');
@@ -59,7 +113,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'ecommerce_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.03);
+        expect(percentDifference).to.be.lessThan(0.0002);
       });
     });
 
@@ -72,7 +126,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
         await PageObjects.maps.toggleLayerVisibility('Road map');
-        await setTimerangeToCoverAllSampleData();
+        await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();
         const mapContainerElement = await testSubjects.find('mapContainer');
@@ -107,7 +161,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.maps.toggleLayerVisibility('Road map');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
-        await setTimerangeToCoverAllSampleData();
+        await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();
         const mapContainerElement = await testSubjects.find('mapContainer');
