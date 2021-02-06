@@ -59,6 +59,23 @@ export default function ({ getService }: FtrProviderContext) {
         const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         const json = getRes.body;
         expect(json.item.is_managed).to.equal(true);
+
+        const {
+          body: { item: createdPolicy2 },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST3',
+            namespace: 'default',
+            is_managed: false,
+          })
+          .expect(200);
+
+        const {
+          body: { item: policy2 },
+        } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
+        expect(policy2.is_managed).to.equal(false);
       });
 
       it('should return a 400 with an empty namespace', async () => {
@@ -242,6 +259,23 @@ export default function ({ getService }: FtrProviderContext) {
         const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         const json = getRes.body;
         expect(json.item.is_managed).to.equal(true);
+
+        const {
+          body: { item: createdPolicy2 },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST2',
+            namespace: 'default',
+            is_managed: false,
+          })
+          .expect(200);
+
+        const {
+          body: { item: policy2 },
+        } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy2.id}`);
+        expect(policy2.is_managed).to.equal(false);
       });
 
       it('should return a 409 if policy already exists with name given', async () => {
