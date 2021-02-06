@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await reloadIndicesButton.isDisplayed()).to.be(true);
     });
 
-    describe('Data streams', () => {
+    describe.only('Data streams', () => {
       it('renders the data streams tab', async () => {
         // Navigate to the data streams tab
         await pageObjects.indexManagement.changeTabs('data_streamsTab');
@@ -50,8 +50,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain(`/data_streams`);
 
         // Verify content
-        await retry.waitFor('Wait until dataStream List is visible.', async () => {
-          return await testSubjects.isDisplayed('dataStreamList');
+        await retry.waitFor('Wait until dataStream Table is visible.', async () => {
+          return await testSubjects.isDisplayed('dataStreamTable');
         });
       });
     });
