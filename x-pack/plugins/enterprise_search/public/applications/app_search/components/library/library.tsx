@@ -198,7 +198,7 @@ export const Library: React.FC = () => {
             <h3>With a link</h3>
           </EuiTitle>
           <EuiSpacer />
-          <Result {...props} shouldLinkToDetailPage={true} />
+          <Result {...props} shouldLinkToDetailPage />
           <EuiSpacer />
 
           <EuiSpacer />
