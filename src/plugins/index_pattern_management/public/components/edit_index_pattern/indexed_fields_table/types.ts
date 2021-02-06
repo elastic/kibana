@@ -12,4 +12,5 @@ export interface IndexedFieldItem extends IFieldType {
   info: string[];
   excluded: boolean;
   kbnType: string;
+  isMapped: boolean;
 }

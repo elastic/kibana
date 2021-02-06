@@ -117,7 +117,7 @@ export const ScriptField = React.memo(({ existingConcreteFields = [], links }: P
             helpText={
               <FormattedMessage
                 id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
-                defaultMessage="Runtime fields without a script retrieve values from _source. If the field doesn't exist in _source, a search request returns no value. {learnMoreLink}"
+                defaultMessage="Runtime fields without a script retrieve values from {_source}. If the field doesn't exist in _source, a search request returns no value. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink

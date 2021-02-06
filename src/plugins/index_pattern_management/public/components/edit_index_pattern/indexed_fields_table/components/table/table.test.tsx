@@ -26,6 +26,7 @@ const items: IndexedFieldItem[] = [
     kbnType: 'string',
     excluded: false,
     format: '',
+    isMapped: true,
   },
   {
     name: 'timestamp',
@@ -35,6 +36,7 @@ const items: IndexedFieldItem[] = [
     info: [],
     excluded: false,
     format: 'YYYY-MM-DD',
+    isMapped: true,
   },
   {
     name: 'conflictingField',
@@ -44,70 +46,52 @@ const items: IndexedFieldItem[] = [
     info: [],
     excluded: false,
     format: '',
+    isMapped: true,
   },
 ];
 
+const renderTable = (
+  { editField } = {
+    editField: () => {},
+  }
+) =>
+  shallow(
+    <Table indexPattern={indexPattern} items={items} editField={editField} deleteField={() => {}} />
+  );
+
 describe('Table', () => {
   test('should render normally', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    expect(component).toMatchSnapshot();
+    expect(renderTable()).toMatchSnapshot();
   });
 
   test('should render normal field name', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[0].render('Elastic', items[0]));
+    const tableCell = shallow(renderTable().prop('columns')[0].render('Elastic', items[0]));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render timestamp field name', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[0].render('timestamp', items[1]));
+    const tableCell = shallow(renderTable().prop('columns')[0].render('timestamp', items[1]));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render the boolean template (true)', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[3].render(true));
+    const tableCell = shallow(renderTable().prop('columns')[3].render(true));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render the boolean template (false)', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[3].render(false, items[2]));
+    const tableCell = shallow(renderTable().prop('columns')[3].render(false, items[2]));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render normal type', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
-    const tableCell = shallow(component.prop('columns')[1].render('string', {}));
+    const tableCell = shallow(renderTable().prop('columns')[1].render('string', {}));
     expect(tableCell).toMatchSnapshot();
   });
 
   test('should render conflicting type', () => {
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
-    );
-
     const tableCell = shallow(
-      component.prop('columns')[1].render('conflict', { kbnType: 'conflict' })
+      renderTable().prop('columns')[1].render('conflict', { kbnType: 'conflict' })
     );
     expect(tableCell).toMatchSnapshot();
   });
@@ -115,12 +99,8 @@ describe('Table', () => {
   test('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={editField} />
-    );
-
     // Click the edit button
-    component.prop('columns')[6].actions[0].onClick();
+    renderTable({ editField }).prop('columns')[6].actions[0].onClick();
     expect(editField).toBeCalled();
   });
 });

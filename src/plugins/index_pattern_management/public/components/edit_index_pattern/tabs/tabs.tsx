@@ -94,6 +94,7 @@ export function Tabs({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
   const closeEditorHandler = useRef<() => void | undefined>();
+  const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -215,17 +216,22 @@ export function Tabs({
               <EuiSpacer size="m" />
               {getFilterSection(type)}
               <EuiSpacer size="m" />
-              <IndexedFieldsTable
-                fields={fields}
-                indexPattern={indexPattern}
-                fieldFilter={fieldFilter}
-                fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                indexedFieldTypeFilter={indexedFieldTypeFilter}
-                helpers={{
-                  editField: openFieldEditor,
-                  getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
-                }}
-              />
+              <DeleteRuntimeFieldProvider indexPattern={indexPattern} onDelete={refreshFields}>
+                {(deleteFields) => (
+                  <IndexedFieldsTable
+                    fields={fields}
+                    indexPattern={indexPattern}
+                    fieldFilter={fieldFilter}
+                    fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+                    indexedFieldTypeFilter={indexedFieldTypeFilter}
+                    helpers={{
+                      editField: openFieldEditor,
+                      deleteField: (fieldName) => deleteFields(fieldName),
+                      getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
+                    }}
+                  />
+                )}
+              </DeleteRuntimeFieldProvider>
             </Fragment>
           );
         case TAB_SCRIPTED_FIELDS:
@@ -280,6 +286,8 @@ export function Tabs({
       scriptedFieldLanguageFilter,
       saveIndexPattern,
       openFieldEditor,
+      DeleteRuntimeFieldProvider,
+      refreshFields,
     ]
   );
 
