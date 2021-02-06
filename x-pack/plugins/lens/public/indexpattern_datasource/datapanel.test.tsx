@@ -281,7 +281,7 @@ describe('IndexPattern Data Panel', () => {
         setState={setStateSpy}
         dragDropContext={{
           ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
+          dragging: { id: '1', humanData: { label: 'Label' }, ghost: React.createElement('div') },
         }}
       />
     );
@@ -303,7 +303,7 @@ describe('IndexPattern Data Panel', () => {
         setState={jest.fn()}
         dragDropContext={{
           ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
+          dragging: { id: '1', humanData: { label: 'Label' }, ghost: React.createElement('div') },
         }}
         changeIndexPattern={jest.fn()}
       />
@@ -338,7 +338,7 @@ describe('IndexPattern Data Panel', () => {
         setState,
         dragDropContext: {
           ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
+          dragging: { id: '1', humanData: { label: 'Label' }, ghost: React.createElement('div') },
         },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         state: {

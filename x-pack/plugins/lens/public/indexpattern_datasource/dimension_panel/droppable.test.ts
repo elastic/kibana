@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { onDrop, getDropTypes } from './droppable';
@@ -74,6 +74,7 @@ const defaultDragging = {
   humanData: {
     label: 'Column 2',
   },
+  ghost: React.createElement('div'),
 };
 
 const draggingField = {
@@ -81,6 +82,7 @@ const draggingField = {
   indexPatternId: 'foo',
   id: 'bar',
   humanData: { label: 'Label' },
+  ghost: React.createElement('div'),
 };
 
 /**
@@ -187,7 +189,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
           groupId,
           dragDropContext: {
             ...dragDropContext,
-            dragging: { name: 'bar', id: 'bar', humanData: { label: 'Label' } },
+            dragging: {
+              name: 'bar',
+              id: 'bar',
+              humanData: { label: 'Label' },
+              ghost: React.createElement('div'),
+            },
           },
         })
       ).toBe(undefined);
@@ -205,6 +212,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               field: { type: 'string', name: 'mystring', aggregatable: true },
               id: 'mystring',
               humanData: { label: 'Label' },
+              ghost: React.createElement('div'),
             },
           },
           filterOperations: () => false,
@@ -238,6 +246,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               indexPatternId: 'foo2',
               id: 'bar',
               humanData: { label: 'Label' },
+              ghost: React.createElement('div'),
             },
           },
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
@@ -264,6 +273,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               indexPatternId: 'foo',
               id: 'bar',
               humanData: { label: 'Label' },
+              ghost: React.createElement('div'),
             },
           },
         })
@@ -283,6 +293,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               layerId: 'first',
               id: 'col1',
               humanData: { label: 'Label' },
+              ghost: React.createElement('div'),
             },
           },
           columnId: 'col2',
@@ -326,6 +337,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               layerId: 'first',
               id: 'col1',
               humanData: { label: 'Label' },
+              ghost: React.createElement('div'),
             },
           },
           columnId: 'col2',
@@ -365,6 +377,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               layerId: 'first',
               id: 'col1',
               humanData: { label: 'Label' },
+              ghost: React.createElement('div'),
             },
           },
           columnId: 'col2',
@@ -472,6 +485,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         indexPatternId: 'foo',
         id: '1',
         humanData: { label: 'Label' },
+        ghost: React.createElement('div'),
       };
       onDrop({
         ...defaultProps,
@@ -531,6 +545,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         layerId: 'first',
         id: 'bar',
         humanData: { label: 'Label' },
+        ghost: React.createElement('div'),
       };
 
       onDrop({
@@ -660,6 +675,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         layerId: 'first',
         id: 'col3',
         humanData: { label: 'Label' },
+        ghost: React.createElement('div'),
       };
 
       onDrop({
@@ -696,6 +712,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         layerId: 'first',
         id: 'col2',
         humanData: { label: 'Label' },
+        ghost: React.createElement('div'),
       };
 
       onDrop({
@@ -735,6 +752,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         layerId: 'first',
         id: 'col1',
         humanData: { label: 'Label' },
+        ghost: React.createElement('div'),
       };
       const testState = {
         ...state,

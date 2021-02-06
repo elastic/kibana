@@ -93,6 +93,11 @@ interface BaseProps {
    * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
    */
   order: number[];
+
+  /**
+   * don't display ghost image for the drop element
+   */
+  noGhost?: boolean;
 }
 
 /**
@@ -232,7 +237,7 @@ const DragInner = memo(function DragInner({
 
     const currentTarget = e?.currentTarget;
     setTimeout(() => {
-      setDragging(value);
+      setDragging({ ...value, ghost: children });
       setA11yMessage(announce.lifted(value.humanData));
       if (onDragStart) {
         onDragStart(currentTarget);
@@ -278,8 +283,19 @@ const DragInner = memo(function DragInner({
         : announce.noTarget()
     );
   };
+  const shouldShowGhostImageInstead =
+    isDragging &&
+    dragType === 'move' &&
+    keyboardMode &&
+    activeDropTarget?.activeDropTarget &&
+    activeDropTarget?.activeDropTarget.dropType !== 'reorder';
   return (
-    <div className={className} data-test-subj={`lnsDragDrop_draggable-${value.humanData.label}`}>
+    <div
+      className={classNames(className, {
+        'lnsDragDrop-isHidden-noFocus': shouldShowGhostImageInstead,
+      })}
+      data-test-subj={`lnsDragDrop_draggable-${value.humanData.label}`}
+    >
       <EuiScreenReaderOnly showOnFocus>
         <button
           aria-label={value.humanData.label}
@@ -321,7 +337,8 @@ const DragInner = memo(function DragInner({
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, 'lnsDragDrop', 'lnsDragDrop-isDraggable', {
-          'lnsDragDrop-isHidden': isDragging && dragType === 'move' && !keyboardMode,
+          'lnsDragDrop-isHidden':
+            (isDragging && dragType === 'move' && !keyboardMode) || shouldShowGhostImageInstead,
         }),
         draggable: true,
         onDragEnd: dragEnd,
@@ -344,6 +361,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     isNotDroppable,
     dragType = 'copy',
     dropType,
+    noGhost,
     keyboardMode,
     activeDropTarget,
     registerDropTarget,
@@ -431,6 +449,15 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
         onDrop: drop,
         draggable,
       })}
+      {!noGhost &&
+      dragging?.ghost &&
+      activeDropTargetMatches &&
+      keyboardMode &&
+      dropType !== 'reorder'
+        ? React.cloneElement(dragging.ghost, {
+            className: classNames('lnsDragDrop_ghost', children.props.className),
+          })
+        : null}
     </>
   );
 });

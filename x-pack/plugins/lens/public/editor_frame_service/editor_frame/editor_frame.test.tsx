@@ -1323,7 +1323,11 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField', humanData: { label: 'draggedField' } });
+                    setDragging({
+                      id: 'draggedField',
+                      humanData: { label: 'draggedField' },
+                      ghost: <div>Hello</div>,
+                    });
                   }
                 },
               },
@@ -1425,7 +1429,11 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
                   if (!dragging || dragging.id !== 'draggedField') {
-                    setDragging({ id: 'draggedField', humanData: { label: '1' } });
+                    setDragging({
+                      id: 'draggedField',
+                      humanData: { label: '1' },
+                      ghost: <div>Hello</div>,
+                    });
                   }
                 },
               },

@@ -775,7 +775,7 @@ describe('workspace_panel', () => {
     let mockGetSuggestionForField: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
-    const draggedField = { id: 'field', humanData: { label: 'Label' } };
+    const draggedField = { id: 'field', humanData: { label: 'Label' }, ghost: <div>Field</div> };
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();

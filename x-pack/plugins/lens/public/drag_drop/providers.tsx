@@ -25,6 +25,10 @@ export type DragDropIdentifier = Record<string, unknown> & {
   humanData: HumanData;
 };
 
+export type DraggingIdentifier = DragDropIdentifier & {
+  ghost: React.ReactElement;
+};
+
 export type DropIdentifier = DragDropIdentifier & {
   dropType: DropType;
   onDrop: DropHandler;
@@ -41,7 +45,7 @@ export interface DragContextState {
   /**
    * The item being dragged or undefined.
    */
-  dragging?: DragDropIdentifier;
+  dragging?: DraggingIdentifier;
 
   /**
    * keyboard mode
@@ -54,7 +58,7 @@ export interface DragContextState {
   /**
    * Set the item being dragged.
    */
-  setDragging: (dragging?: DragDropIdentifier) => void;
+  setDragging: (dragging?: DraggingIdentifier) => void;
 
   activeDropTarget?: DropTargets;
 
@@ -99,13 +103,13 @@ export interface ProviderProps {
    * The item being dragged. If unspecified, the provider will
    * behave as if it is the root provider.
    */
-  dragging?: DragDropIdentifier;
+  dragging?: DraggingIdentifier;
 
   /**
    * Sets the item being dragged. If unspecified, the provider
    * will behave as if it is the root provider.
    */
-  setDragging: (dragging?: DragDropIdentifier) => void;
+  setDragging: (dragging?: DraggingIdentifier) => void;
 
   activeDropTarget?: {
     activeDropTarget?: DropIdentifier;
@@ -132,7 +136,7 @@ export interface ProviderProps {
  * @param props
  */
 export function RootDragDropProvider({ children }: { children: React.ReactNode }) {
-  const [draggingState, setDraggingState] = useState<{ dragging?: DragDropIdentifier }>({
+  const [draggingState, setDraggingState] = useState<{ dragging?: DraggingIdentifier }>({
     dragging: undefined,
   });
   const [keyboardModeState, setKeyboardModeState] = useState(false);
@@ -146,7 +150,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   });
 
   const setDragging = useMemo(
-    () => (dragging?: DragDropIdentifier) => setDraggingState({ dragging }),
+    () => (dragging?: DraggingIdentifier) => setDraggingState({ dragging }),
     [setDraggingState]
   );
 

@@ -447,6 +447,7 @@ describe('LayerPanel', () => {
         indexPatternId: 'a',
         id: '1',
         humanData: { label: 'Label' },
+        ghost: <button>Hello!</button>,
       };
 
       const component = mountWithIntl(
@@ -497,6 +498,7 @@ describe('LayerPanel', () => {
         indexPatternId: 'a',
         id: '1',
         humanData: { label: 'Label' },
+        ghost: <button>Hello!</button>,
       };
 
       const component = mountWithIntl(
@@ -554,6 +556,7 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: <button>Hello!</button>,
       };
 
       const component = mountWithIntl(
@@ -613,6 +616,7 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: <div />,
       };
 
       const component = mountWithIntl(
@@ -650,6 +654,7 @@ describe('LayerPanel', () => {
         groupId: 'a',
         id: 'a',
         humanData: { label: 'Label' },
+        ghost: <button>Hello!</button>,
       };
 
       const component = mountWithIntl(

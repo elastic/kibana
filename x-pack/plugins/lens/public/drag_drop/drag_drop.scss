@@ -6,6 +6,19 @@
   transition: background-color $euiAnimSpeedFast ease-in-out, border-color $euiAnimSpeedFast ease-in-out;
 }
 
+.lnsDragDrop_ghost {
+  @include lnsDraggable;
+  border: $euiBorderWidthThin dashed $euiBorderColor;
+  position: absolute !important;  // sass-lint:disable-line no-important
+  top:0;
+  width: 100%;
+  left:0;
+  opacity:.9;
+  transform: translate(-25px, -30px);
+  z-index: $euiZLevel2;
+  pointer-events: none;
+}
+
 // Draggable item
 .lnsDragDrop-isDraggable {
   @include lnsDraggable;
@@ -87,11 +100,6 @@
   z-index: $euiZLevel1;
 }
 
-// Draggable item when it is moving
-.lnsDragDrop-isHidden {
-  opacity: 0;
-}
-
 .lnsDragDrop__keyboardHandler {
   top: 0;
   position: absolute;
@@ -103,5 +111,20 @@
   &:focus-within {
     @include euiFocusRing;
     pointer-events: none;
+  }
+}
+
+// Draggable item when it is moving
+.lnsDragDrop-isHidden {
+  opacity: 0;
+}
+
+.lnsDragDrop-isHidden-noFocus {
+  opacity: 0;
+  .lnsDragDrop__keyboardHandler {
+    &:focus,
+    &:focus-within {
+      animation: none;
+    }
   }
 }

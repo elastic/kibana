@@ -316,6 +316,7 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         onDrop={onDrop}
         value={dropProps.value}
         order={dropProps.order}
+        noGhost
       >
         <div>
           {renderVisualization()}
