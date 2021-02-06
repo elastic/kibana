@@ -11182,8 +11182,6 @@
     "xpack.lens.dimensionContainer.close": "閉じる",
     "xpack.lens.dimensionContainer.closeConfiguration": "構成を閉じる",
     "xpack.lens.discover.visualizeFieldLegend": "Visualize フィールド",
-    "xpack.lens.dragDrop.elementLifted": "位置 {position} のアイテム {itemLabel} を持ち上げました。",
-    "xpack.lens.dragDrop.elementMoved": "位置 {prevPosition} から位置 {position} までアイテム {itemLabel} を移動しました",
     "xpack.lens.editLayerSettings": "レイヤー設定を編集",
     "xpack.lens.editLayerSettingsChartType": "レイヤー設定を編集、{chartType}",
     "xpack.lens.editorFrame.buildExpressionError": "グラフの準備中に予期しないエラーが発生しました",
