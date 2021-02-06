@@ -8,7 +8,7 @@
 import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {

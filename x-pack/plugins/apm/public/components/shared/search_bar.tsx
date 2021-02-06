@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { px, unit } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';

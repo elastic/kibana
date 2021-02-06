@@ -7,7 +7,7 @@
 
 import { EuiTabs } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 // Since our `EuiTab` components have `APMLink`s inside of them and not just
 // `href`s, we need to override the color of the links inside or they will all

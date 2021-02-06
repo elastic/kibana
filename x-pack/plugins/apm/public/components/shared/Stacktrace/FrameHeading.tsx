@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 import {

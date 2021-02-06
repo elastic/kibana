@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from 'src/plugins/kibana_react/common';
 import { EuiBadge } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTheme } from '../../../hooks/use_theme';
 import { px } from '../../../../public/style/variables';
 import { units } from '../../../style/variables';

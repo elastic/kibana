@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
 /**

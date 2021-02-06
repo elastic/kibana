@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   asDuration,
   asPercent,

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiTitle } from '@elastic/eui';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 const Button = euiStyled(EuiButtonEmpty).attrs(() => ({
   contentProps: {

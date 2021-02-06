@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History, Location } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Timeline } from '../../../../../shared/charts/Timeline';
 import { HeightRetainer } from '../../../../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';

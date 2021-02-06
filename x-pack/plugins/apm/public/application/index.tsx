@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {

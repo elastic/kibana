@@ -12,7 +12,7 @@ import React, { Fragment } from 'react';
 import sql from 'react-syntax-highlighter/dist/cjs/languages/hljs/sql';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import {
   borderRadius,

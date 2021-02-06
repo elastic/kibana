@@ -13,7 +13,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React, { Fragment } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   SPAN_SUBTYPE,
   SPAN_TYPE,

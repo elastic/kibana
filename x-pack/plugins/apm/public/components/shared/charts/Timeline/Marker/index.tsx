@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { px } from '../../../../../style/variables';
 import { AgentMarker } from './AgentMarker';
 import { ErrorMarker } from './ErrorMarker';

@@ -19,7 +19,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../../style/variables';
 import { FilterTitleButton } from './FilterTitleButton';

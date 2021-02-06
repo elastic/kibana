@@ -9,7 +9,7 @@ import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import { Location } from 'history';
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './WaterfallItem';
 import {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useTheme } from '../../../../hooks/use_theme';
 import { fontSizes, px, units } from '../../../../style/variables';
 

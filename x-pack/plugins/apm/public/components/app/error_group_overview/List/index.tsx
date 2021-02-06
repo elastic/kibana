@@ -9,8 +9,8 @@ import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
 import { EuiIconTip } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {

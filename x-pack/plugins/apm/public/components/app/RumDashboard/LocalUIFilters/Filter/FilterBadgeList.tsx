@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import { euiStyled } from 'src/plugins/kibana_react/common';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { unit, px, truncate } from '../../../../../style/variables';
 
 const BadgeText = euiStyled.div`

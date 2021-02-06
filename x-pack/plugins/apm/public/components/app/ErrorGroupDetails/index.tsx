@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/use_fetcher';

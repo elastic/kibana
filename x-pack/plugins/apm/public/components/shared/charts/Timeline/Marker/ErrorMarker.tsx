@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/use_theme';
 import {

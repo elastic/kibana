@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { px, units } from '../../../../public/style/variables';
 import { Maybe } from '../../../../typings/common';
 

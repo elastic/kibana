@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { HeaderMenuPortal } from '../../../../../observability/public';
 import { ActionMenu } from '../../../application/action_menu';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';

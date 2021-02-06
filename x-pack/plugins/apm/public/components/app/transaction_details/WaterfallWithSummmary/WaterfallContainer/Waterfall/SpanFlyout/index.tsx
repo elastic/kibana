@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';

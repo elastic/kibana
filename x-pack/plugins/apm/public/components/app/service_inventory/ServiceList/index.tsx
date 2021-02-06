@@ -8,11 +8,11 @@
 import { EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,

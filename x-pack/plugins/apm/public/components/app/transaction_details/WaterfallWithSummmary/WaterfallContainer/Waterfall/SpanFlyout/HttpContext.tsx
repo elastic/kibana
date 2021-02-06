@@ -6,9 +6,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
-
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import {
   borderRadius,
   fontFamilyCode,

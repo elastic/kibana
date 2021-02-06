@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { px, unit, units } from '../../../style/variables';
 import { Stacktrace } from '.';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';

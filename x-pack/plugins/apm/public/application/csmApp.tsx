@@ -12,7 +12,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,

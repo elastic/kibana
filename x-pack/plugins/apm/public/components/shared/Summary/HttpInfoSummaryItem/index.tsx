@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { units, px, truncate, unit } from '../../../../style/variables';
 import { HttpStatusBadge } from '../HttpStatusBadge';
 

@@ -13,7 +13,7 @@ import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { borderRadius, px, unit, units } from '../../../style/variables';
 

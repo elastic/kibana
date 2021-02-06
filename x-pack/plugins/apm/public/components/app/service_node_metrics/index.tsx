@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';

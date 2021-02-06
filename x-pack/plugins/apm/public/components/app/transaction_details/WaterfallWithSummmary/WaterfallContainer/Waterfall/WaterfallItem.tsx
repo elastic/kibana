@@ -6,10 +6,10 @@
  */
 
 import React, { ReactNode } from 'react';
-import { euiStyled } from 'src/plugins/kibana_react/common';
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';

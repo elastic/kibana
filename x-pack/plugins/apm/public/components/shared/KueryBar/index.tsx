@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { euiStyled } from 'src/plugins/kibana_react/common';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   esKuery,
   IIndexPattern,
