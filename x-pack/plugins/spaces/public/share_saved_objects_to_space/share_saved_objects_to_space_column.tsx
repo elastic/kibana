@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, ReactNode } from 'react';
+import React, { useState, ReactNode, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -14,22 +14,29 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SavedObjectsManagementColumn } from '../../../../../src/plugins/saved_objects_management/public';
 import { SpaceTarget } from './types';
-import { SpacesManager } from '../spaces_manager';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { getSpaceColor } from '..';
+import { useSpaces } from '../spaces_context';
+import { SpacesData } from '../spaces_context/types';
 
 const SPACES_DISPLAY_COUNT = 5;
 
-type SpaceMap = Map<string, SpaceTarget>;
 interface ColumnDataProps {
   namespaces?: string[];
-  data?: SpaceMap;
 }
 
-const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const ColumnDisplay = ({ namespaces }: ColumnDataProps) => {
+  const { spacesDataPromise } = useSpaces();
 
-  if (!data) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [spacesData, setSpacesData] = useState<SpacesData>();
+
+  useEffect(() => {
+    spacesDataPromise.then((x) => {
+      setSpacesData(x);
+    });
+  }, [spacesDataPromise]);
+
+  if (!spacesData) {
     return null;
   }
 
@@ -54,7 +61,7 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
     const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
     const authorizedSpaceTargets: SpaceTarget[] = [];
     authorized.forEach((namespace) => {
-      const spaceTarget = data.get(namespace);
+      const spaceTarget = spacesData.spacesMap.get(namespace);
       if (spaceTarget === undefined) {
         // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
         authorizedSpaceTargets.push({ id: namespace, name: namespace, isActiveSpace: false });
@@ -118,9 +125,8 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
 };
 
 export class ShareToSpaceSavedObjectsManagementColumn
-  implements SavedObjectsManagementColumn<SpaceMap> {
+  implements SavedObjectsManagementColumn<void> {
   public id: string = 'share_saved_objects_to_space';
-  public data: Map<string, SpaceTarget> | undefined;
 
   public euiColumn = {
     field: 'namespaces',
@@ -130,26 +136,8 @@ export class ShareToSpaceSavedObjectsManagementColumn
     description: i18n.translate('xpack.spaces.management.shareToSpace.columnDescription', {
       defaultMessage: 'The other spaces that this object is currently shared to',
     }),
-    render: (namespaces: string[] | undefined) => (
-      <ColumnDisplay namespaces={namespaces} data={this.data} />
-    ),
+    render: (namespaces: string[] | undefined) => <ColumnDisplay namespaces={namespaces} />,
   };
 
-  constructor(private readonly spacesManager: SpacesManager) {}
-
-  public loadData = () => {
-    this.data = undefined;
-    return Promise.all([this.spacesManager.getSpaces(), this.spacesManager.getActiveSpace()]).then(
-      ([spaces, activeSpace]) => {
-        this.data = spaces
-          .map<SpaceTarget>((space) => ({
-            ...space,
-            isActiveSpace: space.id === activeSpace.id,
-            color: getSpaceColor(space),
-          }))
-          .reduce((acc, cur) => acc.set(cur.id, cur), new Map<string, SpaceTarget>());
-        return this.data;
-      }
-    );
-  };
+  constructor() {}
 }

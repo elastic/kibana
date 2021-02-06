@@ -5,46 +5,54 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
-import { SpacesManager } from '../spaces_manager';
+import React from 'react';
+import { mountWithIntl } from '@kbn/test/jest';
+import { act } from '@testing-library/react';
+import { coreMock } from 'src/core/public/mocks';
+import type { Space } from 'src/plugins/spaces_oss/common';
+import { getSpacesContextWrapper } from '../spaces_context';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
-import { SpaceTarget } from './types';
+import { ReactWrapper } from 'enzyme';
 
-const ACTIVE_SPACE: SpaceTarget = {
+const ACTIVE_SPACE: Space = {
   id: 'default',
   name: 'Default',
   color: '#ffffff',
-  isActiveSpace: true,
+  disabledFeatures: [],
 };
 const getSpaceData = (inactiveSpaceCount: number = 0) => {
   const inactive = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel']
-    .map<SpaceTarget>((name) => ({
+    .map<Space>((name) => ({
       id: name.toLowerCase(),
       name,
       color: `#123456`, // must be a valid color as `render()` is used below
-      isActiveSpace: false,
+      disabledFeatures: [],
     }))
     .slice(0, inactiveSpaceCount);
-  const spaceTargets = [ACTIVE_SPACE, ...inactive];
-  const namespaces = spaceTargets.map(({ id }) => id);
-  return { spaceTargets, namespaces };
+  const spaces = [ACTIVE_SPACE, ...inactive];
+  const namespaces = spaces.map(({ id }) => id);
+  return { spaces, namespaces };
 };
 
 describe('ShareToSpaceSavedObjectsManagementColumn', () => {
-  let spacesManager: SpacesManager;
-  beforeEach(() => {
-    spacesManager = spacesManagerMock.create();
-  });
+  const createColumn = async (spaces: Space[], namespaces: string[]) => {
+    const column = new ShareToSpaceSavedObjectsManagementColumn();
+    const { getStartServices } = coreMock.createSetup();
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.getActiveSpace.mockResolvedValue(ACTIVE_SPACE);
+    spacesManager.getSpaces.mockResolvedValue(spaces);
 
-  const createColumn = (spaceTargets: SpaceTarget[], namespaces: string[]) => {
-    const column = new ShareToSpaceSavedObjectsManagementColumn(spacesManager);
-    column.data = spaceTargets.reduce(
-      (acc, cur) => acc.set(cur.id, cur),
-      new Map<string, SpaceTarget>()
-    );
+    const SpacesContext = getSpacesContextWrapper({ getStartServices, spacesManager });
     const element = column.euiColumn.render(namespaces);
-    return shallowWithIntl(element);
+
+    const wrapper = mountWithIntl(<SpacesContext>{element}</SpacesContext>);
+
+    // wait for context wrapper to rerender
+    await act(async () => {});
+    wrapper.update();
+
+    return wrapper;
   };
 
   /**
@@ -54,80 +62,77 @@ describe('ShareToSpaceSavedObjectsManagementColumn', () => {
    * If '*' (aka "All spaces") is present, it supersedes all of the above and just displays a single badge without a button.
    */
   describe('#euiColumn.render', () => {
+    function getBadgeText(wrapper: ReactWrapper) {
+      return wrapper.find('EuiBadge').map((x) => x.render().text());
+    }
+    function getButton(wrapper: ReactWrapper) {
+      return wrapper.find('EuiButtonEmpty');
+    }
+
     describe('with only the active space', () => {
-      const { spaceTargets, namespaces } = getSpaceData();
-      const wrapper = createColumn(spaceTargets, namespaces);
+      const { spaces, namespaces } = getSpaceData();
 
       it('does not show badges or button', async () => {
-        const badges = wrapper.find('EuiBadge');
-        expect(badges).toHaveLength(0);
-        const button = wrapper.find('EuiButtonEmpty');
-        expect(button).toHaveLength(0);
+        const wrapper = await createColumn(spaces, namespaces);
+
+        expect(getBadgeText(wrapper)).toHaveLength(0);
+        expect(getButton(wrapper)).toHaveLength(0);
       });
     });
 
     describe('with the active space and one inactive space', () => {
-      const { spaceTargets, namespaces } = getSpaceData(1);
-      const wrapper = createColumn(spaceTargets, namespaces);
+      const { spaces, namespaces } = getSpaceData(1);
 
       it('shows one badge without button', async () => {
-        const badges = wrapper.find('EuiBadge');
-        expect(badges).toMatchInlineSnapshot(`
-          <EuiBadge
-            color="#123456"
-          >
-            Alpha
-          </EuiBadge>
-        `);
-        const button = wrapper.find('EuiButtonEmpty');
-        expect(button).toHaveLength(0);
+        const wrapper = await createColumn(spaces, namespaces);
+
+        expect(getBadgeText(wrapper)).toEqual(['Alpha']);
+        expect(getButton(wrapper)).toHaveLength(0);
       });
     });
 
     describe('with the active space and five inactive spaces', () => {
-      const { spaceTargets, namespaces } = getSpaceData(5);
-      const wrapper = createColumn(spaceTargets, namespaces);
+      const { spaces, namespaces } = getSpaceData(5);
 
       it('shows badges without button', async () => {
-        const badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
-        const button = wrapper.find('EuiButtonEmpty');
-        expect(button).toHaveLength(0);
+        const wrapper = await createColumn(spaces, namespaces);
+
+        expect(getBadgeText(wrapper)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
+        expect(getButton(wrapper)).toHaveLength(0);
       });
     });
 
     describe('with the active space, five inactive spaces, and one unauthorized space', () => {
-      const { spaceTargets, namespaces } = getSpaceData(5);
-      const wrapper = createColumn(spaceTargets, [...namespaces, '?']);
+      const { spaces, namespaces } = getSpaceData(5);
 
       it('shows badges without button', async () => {
-        const badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', '+1']);
-        const button = wrapper.find('EuiButtonEmpty');
-        expect(button).toHaveLength(0);
+        const wrapper = await createColumn(spaces, [...namespaces, '?']);
+
+        expect(getBadgeText(wrapper)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', '+1']);
+        expect(getButton(wrapper)).toHaveLength(0);
       });
     });
 
     describe('with the active space, five inactive spaces, and two unauthorized spaces', () => {
-      const { spaceTargets, namespaces } = getSpaceData(5);
-      const wrapper = createColumn(spaceTargets, [...namespaces, '?', '?']);
+      const { spaces, namespaces } = getSpaceData(5);
 
       it('shows badges without button', async () => {
-        const badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', '+2']);
-        const button = wrapper.find('EuiButtonEmpty');
-        expect(button).toHaveLength(0);
+        const wrapper = await createColumn(spaces, [...namespaces, '?', '?']);
+
+        expect(getBadgeText(wrapper)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', '+2']);
+        expect(getButton(wrapper)).toHaveLength(0);
       });
     });
 
     describe('with the active space and six inactive spaces', () => {
-      const { spaceTargets, namespaces } = getSpaceData(6);
-      const wrapper = createColumn(spaceTargets, namespaces);
+      const { spaces, namespaces } = getSpaceData(6);
 
       it('shows badges with button', async () => {
-        let badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
-        const button = wrapper.find('EuiButtonEmpty');
+        const wrapper = await createColumn(spaces, namespaces);
+
+        expect(getBadgeText(wrapper)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
+
+        const button = getButton(wrapper);
         expect(button.find('FormattedMessage').props()).toEqual({
           defaultMessage: '+{count} more',
           id: 'xpack.spaces.management.shareToSpace.showMoreSpacesLink',
@@ -135,19 +140,19 @@ describe('ShareToSpaceSavedObjectsManagementColumn', () => {
         });
 
         button.simulate('click');
-        badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
+        const badgeText = getBadgeText(wrapper);
         expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot']);
       });
     });
 
     describe('with the active space, six inactive spaces, and one unauthorized space', () => {
-      const { spaceTargets, namespaces } = getSpaceData(6);
-      const wrapper = createColumn(spaceTargets, [...namespaces, '?']);
+      const { spaces, namespaces } = getSpaceData(6);
 
       it('shows badges with button', async () => {
-        let badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
-        const button = wrapper.find('EuiButtonEmpty');
+        const wrapper = await createColumn(spaces, [...namespaces, '?']);
+
+        expect(getBadgeText(wrapper)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
+        const button = getButton(wrapper);
         expect(button.find('FormattedMessage').props()).toEqual({
           defaultMessage: '+{count} more',
           id: 'xpack.spaces.management.shareToSpace.showMoreSpacesLink',
@@ -155,19 +160,19 @@ describe('ShareToSpaceSavedObjectsManagementColumn', () => {
         });
 
         button.simulate('click');
-        badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
+        const badgeText = getBadgeText(wrapper);
         expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', '+1']);
       });
     });
 
     describe('with the active space, six inactive spaces, and two unauthorized spaces', () => {
-      const { spaceTargets, namespaces } = getSpaceData(6);
-      const wrapper = createColumn(spaceTargets, [...namespaces, '?', '?']);
+      const { spaces, namespaces } = getSpaceData(6);
 
       it('shows badges with button', async () => {
-        let badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
-        const button = wrapper.find('EuiButtonEmpty');
+        const wrapper = await createColumn(spaces, [...namespaces, '?', '?']);
+
+        expect(getBadgeText(wrapper)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
+        const button = getButton(wrapper);
         expect(button.find('FormattedMessage').props()).toEqual({
           defaultMessage: '+{count} more',
           id: 'xpack.spaces.management.shareToSpace.showMoreSpacesLink',
@@ -175,32 +180,29 @@ describe('ShareToSpaceSavedObjectsManagementColumn', () => {
         });
 
         button.simulate('click');
-        badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
+        const badgeText = getBadgeText(wrapper);
         expect(badgeText).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', '+2']);
       });
     });
 
     describe('with only "all spaces"', () => {
-      const wrapper = createColumn([], ['*']);
-
       it('shows one badge without button', async () => {
-        const badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['* All spaces']);
-        const button = wrapper.find('EuiButtonEmpty');
-        expect(button).toHaveLength(0);
+        const wrapper = await createColumn([], ['*']);
+
+        expect(getBadgeText(wrapper)).toEqual(['* All spaces']);
+        expect(getButton(wrapper)).toHaveLength(0);
       });
     });
 
     describe('with "all spaces", the active space, six inactive spaces, and one unauthorized space', () => {
       // same as assertions 'with only "all spaces"' test case; if "all spaces" is present, it supersedes everything else
-      const { spaceTargets, namespaces } = getSpaceData(6);
-      const wrapper = createColumn(spaceTargets, ['*', ...namespaces, '?']);
+      const { spaces, namespaces } = getSpaceData(6);
 
       it('shows one badge without button', async () => {
-        const badgeText = wrapper.find('EuiBadge').map((x) => x.render().text());
-        expect(badgeText).toEqual(['* All spaces']);
-        const button = wrapper.find('EuiButtonEmpty');
-        expect(button).toHaveLength(0);
+        const wrapper = await createColumn(spaces, ['*', ...namespaces, '?']);
+
+        expect(getBadgeText(wrapper)).toEqual(['* All spaces']);
+        expect(getButton(wrapper)).toHaveLength(0);
       });
     });
   });

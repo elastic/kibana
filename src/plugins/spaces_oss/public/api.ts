@@ -39,6 +39,10 @@ export interface SpacesApiUi {
  */
 export interface SpacesApiUiComponent {
   /**
+   * Provides a context that is required to render all Spaces components.
+   */
+  SpacesContext: FunctionComponent;
+  /**
    * Displays the tags for given saved object.
    */
   ShareToSpaceFlyout: FunctionComponent<ShareToSpaceFlyoutProps>;

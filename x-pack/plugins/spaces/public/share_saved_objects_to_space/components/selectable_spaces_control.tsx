@@ -22,11 +22,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NoSpacesAvailable } from './no_spaces_available';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
 import { SpaceTarget } from '../types';
+import { useSpaces } from '../../spaces_context';
 
 interface Props {
   spaces: SpaceTarget[];
@@ -73,13 +73,14 @@ export const SelectableSpacesControl = (props: Props) => {
     enableCreateNewSpaceLink,
     enableSpaceAgnosticBehavior,
   } = props;
-  const { services } = useKibana();
+  const { services } = useSpaces();
   const { application, docLinks } = services;
 
-  const activeSpaceId = spaces.find((space) => space.isActiveSpace)?.id;
+  const activeSpaceId =
+    !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const options = spaces
-    .sort((a, b) => (a.isActiveSpace ? -1 : b.isActiveSpace ? 1 : 0))
+    .sort((a, b) => (a.id === activeSpaceId ? -1 : b.id === activeSpaceId ? 1 : 0))
     .map<SpaceOption>((space) => {
       const checked = selectedSpaceIds.includes(space.id);
       return {
@@ -90,7 +91,7 @@ export const SelectableSpacesControl = (props: Props) => {
         ['data-test-subj']: `sts-space-selector-row-${space.id}`,
         ...(isGlobalControlChecked && { disabled: true }),
         ...(space.isPartiallyAuthorized && partiallyAuthorizedSpaceProps(checked)),
-        ...(space.isActiveSpace && activeSpaceProps),
+        ...(space.id === activeSpaceId && activeSpaceProps),
       };
     });
 

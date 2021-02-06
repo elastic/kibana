@@ -8,11 +8,11 @@
 
 import { SpacesApi } from './api';
 
-interface SpacesAvailableStartContract extends SpacesApi {
+export interface SpacesAvailableStartContract extends SpacesApi {
   isSpacesAvailable: true;
 }
 
-interface SpacesUnavailableStartContract {
+export interface SpacesUnavailableStartContract {
   isSpacesAvailable: false;
 }
 

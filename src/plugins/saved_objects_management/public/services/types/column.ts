@@ -12,7 +12,4 @@ import { SavedObjectsManagementRecord } from '.';
 export interface SavedObjectsManagementColumn<T> {
   id: string;
   euiColumn: Omit<EuiTableFieldDataColumnType<SavedObjectsManagementRecord>, 'sortable'>;
-
-  data?: T;
-  loadData: () => Promise<T>;
 }

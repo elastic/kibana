@@ -28,18 +28,12 @@ import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from 'src/plugins/spaces_oss/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { GetSpaceResult } from '../../../common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { SpacesManager } from '../../spaces_manager';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { ShareOptions, SpaceTarget } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
-
-interface InternalProps extends ShareToSpaceFlyoutProps {
-  spacesManager: SpacesManager;
-}
+import { useSpaces } from '../../spaces_context';
 
 const DEFAULT_FLYOUT_ICON = 'share';
 const DEFAULT_OBJECT_ICON = 'empty';
@@ -98,12 +92,12 @@ function createDefaultChangeSpacesHandler(
   };
 }
 
-export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
-  const { services } = useKibana();
+export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
+  const { spacesManager, spacesDataPromise, services } = useSpaces();
   const { notifications } = services;
   const toastNotifications = notifications!.toasts;
 
-  const { savedObjectTarget: object, spacesManager } = props;
+  const { savedObjectTarget: object } = props;
   const savedObjectTarget = useMemo(
     () => ({
       type: object.type,
@@ -142,27 +136,19 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
     spaces: SpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
-    const getActiveSpace = enableSpaceAgnosticBehavior
-      ? Promise.resolve<Space>({} as Space)
-      : spacesManager.getActiveSpace();
     const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObjectTarget.type);
-    Promise.all([getSpaces, getActiveSpace, getPermissions])
-      .then(([allSpaces, activeSpace, permissions]) => {
+    Promise.all([spacesDataPromise, getPermissions])
+      .then(([spacesData, permissions]) => {
+        const activeSpaceId = !enableSpaceAgnosticBehavior && spacesData.activeSpaceId;
         setShareOptions({
           selectedSpaceIds: savedObjectTarget.namespaces.filter(
-            (spaceId) => spaceId !== activeSpace.id
+            (spaceId) => spaceId !== activeSpaceId
           ),
         });
         setCanShareToAllSpaces(permissions.shareToAllSpaces);
-        const createSpaceTarget = (space: GetSpaceResult): SpaceTarget => ({
-          ...space,
-          isActiveSpace: space.id === activeSpace.id,
-          isPartiallyAuthorized: space.authorizedPurposes?.shareSavedObjectsIntoSpace === false,
-        });
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.map((space) => createSpaceTarget(space)),
+          spaces: [...spacesData.spacesMap].map(([, spaceTarget]) => spaceTarget),
         });
       })
       .catch((e) => {
@@ -172,7 +158,13 @@ export const ShareToSpaceFlyoutInternal = (props: InternalProps) => {
           }),
         });
       });
-  }, [savedObjectTarget, spacesManager, toastNotifications, enableSpaceAgnosticBehavior]);
+  }, [
+    savedObjectTarget,
+    spacesManager,
+    spacesDataPromise,
+    toastNotifications,
+    enableSpaceAgnosticBehavior,
+  ]);
 
   const getSelectionChanges = () => {
     const activeSpace = spaces.find((space) => space.isActiveSpace);

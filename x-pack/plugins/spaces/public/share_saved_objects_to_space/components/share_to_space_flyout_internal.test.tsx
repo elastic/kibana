@@ -29,6 +29,7 @@ import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
 import { ShareModeControl } from './share_mode_control';
 import { ReactWrapper } from 'enzyme';
 import { ALL_SPACES_ID } from '../../../common/constants';
+import { getSpacesContextWrapper } from '../../spaces_context';
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -46,12 +47,14 @@ const setup = async (opts: SetupOpts = {}) => {
 
   const mockSpacesManager = spacesManagerMock.create();
 
+  // note: this call is made in the SpacesContext
   mockSpacesManager.getActiveSpace.mockResolvedValue({
     id: 'my-active-space',
     name: 'my active space',
     disabledFeatures: [],
   });
 
+  // note: this call is made in the SpacesContext
   mockSpacesManager.getSpaces.mockResolvedValue(
     opts.mockSpaces || [
       {
@@ -98,22 +101,25 @@ const setup = async (opts: SetupOpts = {}) => {
   const mockToastNotifications = startServices.notifications.toasts;
   getStartServices.mockResolvedValue([startServices, , ,]);
 
-  const ShareToSpaceFlyout = getShareToSpaceFlyoutComponent({
+  const SpacesContext = getSpacesContextWrapper({
     getStartServices,
     spacesManager: mockSpacesManager,
   });
+  const ShareToSpaceFlyout = getShareToSpaceFlyoutComponent();
   // the internal flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
   // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
   // the ShareToSpaceFlyout component renders the internal flyout inside of the context wrapper
   const wrapper = mountWithIntl(
-    <ShareToSpaceFlyout
-      savedObjectTarget={savedObjectToShare}
-      onUpdate={onUpdate}
-      onClose={onClose}
-      enableCreateCopyCallout={opts.enableCreateCopyCallout}
-      enableCreateNewSpaceLink={opts.enableCreateNewSpaceLink}
-      enableSpaceAgnosticBehavior={opts.enableSpaceAgnosticBehavior}
-    />
+    <SpacesContext>
+      <ShareToSpaceFlyout
+        savedObjectTarget={savedObjectToShare}
+        onUpdate={onUpdate}
+        onClose={onClose}
+        enableCreateCopyCallout={opts.enableCreateCopyCallout}
+        enableCreateNewSpaceLink={opts.enableCreateNewSpaceLink}
+        enableSpaceAgnosticBehavior={opts.enableSpaceAgnosticBehavior}
+      />
+    </SpacesContext>
   );
 
   // wait for context wrapper to rerender
@@ -124,10 +130,7 @@ const setup = async (opts: SetupOpts = {}) => {
 
   if (!opts.returnBeforeSpacesLoad) {
     // Wait for spaces manager to complete and flyout to rerender
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    wrapper.update();
   }
 
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare };
@@ -145,10 +148,7 @@ describe('ShareToSpaceFlyout', () => {
     expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    wrapper.update();
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);

@@ -19,6 +19,6 @@ export interface ShareSavedObjectsToSpaceResponse {
 }
 
 export interface SpaceTarget extends Omit<GetSpaceResult, 'disabledFeatures'> {
-  isActiveSpace: boolean;
+  isActiveSpace?: boolean;
   isPartiallyAuthorized?: boolean;
 }

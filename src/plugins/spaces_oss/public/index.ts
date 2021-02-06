@@ -8,7 +8,12 @@
 
 import { SpacesOssPlugin } from './plugin';
 
-export { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
+export {
+  SpacesOssPluginSetup,
+  SpacesOssPluginStart,
+  SpacesAvailableStartContract,
+  SpacesUnavailableStartContract,
+} from './types';
 
 export {
   SpacesApi,

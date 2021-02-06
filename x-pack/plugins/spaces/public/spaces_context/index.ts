@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';
-export { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
+export { useSpaces } from './context';
+export { getSpacesContextWrapper } from './wrapper';
