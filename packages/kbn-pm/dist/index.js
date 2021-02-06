@@ -8903,7 +8903,16 @@ const BootstrapCommand = {
     const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = (_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path; // Install bazel machinery tools if needed
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Install monorepo npm dependencies
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Bootstrap process for Bazel packages
+    // Bazel is now managing dependencies so yarn install
+    // will happen as part of this
+    //
+    // NOTE: Bazel projects will be introduced incrementally
+    // And should begin from the ones with none dependencies forward.
+    // That way non bazel projects could depend on bazel projects but not the other way around
+    // That is only intended during the migration process while non Bazel projects are not removed at all.
+
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build']); // Install monorepo npm dependencies outside of the Bazel managed ones
 
     for (const batch of batchedNonBazelProjects) {
       for (const project of batch) {
@@ -8913,12 +8922,12 @@ const BootstrapCommand = {
           continue;
         }
 
-        if (project.isSinglePackageJsonProject || isExternalPlugin) {
+        if (isExternalPlugin) {
           await project.installDependencies();
           continue;
         }
 
-        if (!project.isEveryDependencyLocal() && !isExternalPlugin) {
+        if (!project.isSinglePackageJsonProject && !project.isEveryDependencyLocal() && !isExternalPlugin) {
           throw new Error(`[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`);
         }
       }
@@ -8930,16 +8939,11 @@ const BootstrapCommand = {
       await Object(_utils_validate_dependencies__WEBPACK_IMPORTED_MODULE_8__["validateDependencies"])(kbn, yarnLock);
     } // Assure all kbn projects with bin defined scripts
     // copy those scripts into the top level node_modules folder
-
-
-    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph); // Bootstrap process for Bazel packages
     //
-    // NOTE: Bazel projects will be introduced incrementally
-    // And should begin from the ones with none dependencies forward.
-    // That way non bazel projects could depend on bazel projects but not the other way around
-    // That is only intended during the migration process while non Bazel projects are not removed at all.
+    // NOTE: We don't probably need this anymore, is actually not being used
 
-    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['build', '//packages:build']); // Bootstrap process for non Bazel packages
+
+    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph); // Bootstrap process for non Bazel packages
 
     /**
      * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts

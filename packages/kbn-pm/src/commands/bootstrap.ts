@@ -31,7 +31,17 @@ export const BootstrapCommand: ICommand = {
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
 
-    // Install monorepo npm dependencies
+    // Bootstrap process for Bazel packages
+    // Bazel is now managing dependencies so yarn install
+    // will happen as part of this
+    //
+    // NOTE: Bazel projects will be introduced incrementally
+    // And should begin from the ones with none dependencies forward.
+    // That way non bazel projects could depend on bazel projects but not the other way around
+    // That is only intended during the migration process while non Bazel projects are not removed at all.
+    await runBazel(['build', '//packages:build']);
+
+    // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {
       for (const project of batch) {
         const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${sep}plugins`);
@@ -40,12 +50,16 @@ export const BootstrapCommand: ICommand = {
           continue;
         }
 
-        if (project.isSinglePackageJsonProject || isExternalPlugin) {
+        if (isExternalPlugin) {
           await project.installDependencies();
           continue;
         }
 
-        if (!project.isEveryDependencyLocal() && !isExternalPlugin) {
+        if (
+          !project.isSinglePackageJsonProject &&
+          !project.isEveryDependencyLocal() &&
+          !isExternalPlugin
+        ) {
           throw new Error(
             `[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
           );
@@ -61,15 +75,9 @@ export const BootstrapCommand: ICommand = {
 
     // Assure all kbn projects with bin defined scripts
     // copy those scripts into the top level node_modules folder
-    await linkProjectExecutables(projects, projectGraph);
-
-    // Bootstrap process for Bazel packages
     //
-    // NOTE: Bazel projects will be introduced incrementally
-    // And should begin from the ones with none dependencies forward.
-    // That way non bazel projects could depend on bazel projects but not the other way around
-    // That is only intended during the migration process while non Bazel projects are not removed at all.
-    await runBazel(['build', '//packages:build']);
+    // NOTE: We don't probably need this anymore, is actually not being used
+    await linkProjectExecutables(projects, projectGraph);
 
     // Bootstrap process for non Bazel packages
     /**

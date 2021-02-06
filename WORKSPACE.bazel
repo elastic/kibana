@@ -10,8 +10,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # Fetch Node.js rules
 http_archive(
     name = "build_bazel_rules_nodejs",
-    sha256 = "6142e9586162b179fdd570a55e50d1332e7d9c030efd853453438d607569721d",
-    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/3.0.0/rules_nodejs-3.0.0.tar.gz"],
+    sha256 = "9d93d4e1340c43dbf6b2fd66b683d89630a6310bf8be3bf40ec96685dcacc26c",
+    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/2.3.3/rules_nodejs-2.3.3.tar.gz"],
 )
 
 # Now that we have the rules let's import from them to complete the work
@@ -23,7 +23,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "check_rules_nodejs_version", "nod
 # were released with the wrong version logic set in place
 # https://github.com/bazelbuild/rules_nodejs/blob/835a5198e3651bb4454ab65bb6e5e16705dfadce/version.bzl#L22
 # We can change that line after it gets fixed
-check_rules_nodejs_version(minimum_version_string = "3.0.0")
+check_rules_nodejs_version(minimum_version_string = "2.3.3")
 
 # Setup the Node.js toolchain for the architectures we want to support
 #
@@ -62,5 +62,5 @@ yarn_install(
     ],
     symlink_node_modules = True,
     quiet = False,
-    frozen_lockfile = False,
+    # frozen_lockfile = False, needed for next rules node js version
 )
