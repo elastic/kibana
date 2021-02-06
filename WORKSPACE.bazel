@@ -1,17 +1,17 @@
 # Define the workspace base name and a managed directory by bazel
 # that will hold the node_modules called @npm
 workspace(
-    name = "kibana",
-    managed_directories = {"@npm": ["node_modules"]},
+  name = "kibana",
+  managed_directories = {"@npm": ["node_modules"]},
 )
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Fetch Node.js rules
 http_archive(
-    name = "build_bazel_rules_nodejs",
-    sha256 = "9d93d4e1340c43dbf6b2fd66b683d89630a6310bf8be3bf40ec96685dcacc26c",
-    urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/2.3.3/rules_nodejs-2.3.3.tar.gz"],
+  name = "build_bazel_rules_nodejs",
+  sha256 = "9d93d4e1340c43dbf6b2fd66b683d89630a6310bf8be3bf40ec96685dcacc26c",
+  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/2.3.3/rules_nodejs-2.3.3.tar.gz"],
 )
 
 # Now that we have the rules let's import from them to complete the work
@@ -31,36 +31,42 @@ check_rules_nodejs_version(minimum_version_string = "2.3.3")
 # The PR for it was merged and should be available in the next release of bazel and bazelisk. As soon as they have it
 # we can update that rule.
 node_repositories(
-    node_repositories = {
-        "14.15.4-darwin_amd64": ("node-v14.15.4-darwin-x64.tar.gz", "node-v14.15.4-darwin-x64", "6b0e19e5c2601ef97510f7eb4f52cc8ee261ba14cb05f31eb1a41a5043b0304e"),
-        "14.15.4-linux_arm64": ("node-v14.15.4-linux-arm64.tar.xz", "node-v14.15.4-linux-arm64", "b990bd99679158c3164c55a20c2a6677c3d9e9ffdfa0d4a40afe9c9b5e97a96f"),
-        "14.15.4-linux_s390x": ("node-v14.15.4-linux-s390x.tar.xz", "node-v14.15.4-linux-s390x", "29f794d492eccaf0b08e6492f91162447ad95cfefc213fc580a72e29e11501a9"),
-        "14.15.4-linux_amd64": ("node-v14.15.4-linux-x64.tar.xz", "node-v14.15.4-linux-x64", "ed01043751f86bb534d8c70b16ab64c956af88fd35a9506b7e4a68f5b8243d8a"),
-        "14.15.4-windows_amd64": ("node-v14.15.4-win-x64.zip", "node-v14.15.4-win-x64", "b2a0765240f8fbd3ba90a050b8c87069d81db36c9f3745aff7516e833e4d2ed6"),
-    },
-    node_version = "14.15.4",
-    node_urls = [
-        "https://nodejs.org/dist/v{version}/{filename}",
-    ],
-    yarn_repositories = {
-        "1.21.1": ("yarn-v1.21.1.tar.gz", "yarn-v1.21.1", "d1d9f4a0f16f5ed484e814afeb98f39b82d4728c6c8beaafb5abc99c02db6674"),
-    },
-    yarn_version = "1.21.1",
-    yarn_urls = [
-        "https://github.com/yarnpkg/yarn/releases/download/v{version}/{filename}",
-    ],
-    package_json = ["//:package.json"],
+  node_repositories = {
+    "14.15.4-darwin_amd64": ("node-v14.15.4-darwin-x64.tar.gz", "node-v14.15.4-darwin-x64", "6b0e19e5c2601ef97510f7eb4f52cc8ee261ba14cb05f31eb1a41a5043b0304e"),
+    "14.15.4-linux_arm64": ("node-v14.15.4-linux-arm64.tar.xz", "node-v14.15.4-linux-arm64", "b990bd99679158c3164c55a20c2a6677c3d9e9ffdfa0d4a40afe9c9b5e97a96f"),
+    "14.15.4-linux_s390x": ("node-v14.15.4-linux-s390x.tar.xz", "node-v14.15.4-linux-s390x", "29f794d492eccaf0b08e6492f91162447ad95cfefc213fc580a72e29e11501a9"),
+    "14.15.4-linux_amd64": ("node-v14.15.4-linux-x64.tar.xz", "node-v14.15.4-linux-x64", "ed01043751f86bb534d8c70b16ab64c956af88fd35a9506b7e4a68f5b8243d8a"),
+    "14.15.4-windows_amd64": ("node-v14.15.4-win-x64.zip", "node-v14.15.4-win-x64", "b2a0765240f8fbd3ba90a050b8c87069d81db36c9f3745aff7516e833e4d2ed6"),
+  },
+  node_version = "14.15.4",
+  node_urls = [
+    "https://nodejs.org/dist/v{version}/{filename}",
+  ],
+  yarn_repositories = {
+    "1.21.1": ("yarn-v1.21.1.tar.gz", "yarn-v1.21.1", "d1d9f4a0f16f5ed484e814afeb98f39b82d4728c6c8beaafb5abc99c02db6674"),
+  },
+  yarn_version = "1.21.1",
+  yarn_urls = [
+    "https://github.com/yarnpkg/yarn/releases/download/v{version}/{filename}",
+  ],
+  package_json = ["//:package.json"],
 )
 
 # Run yarn_install rule to take care of dependencies
+#
+# NOTE: FORCE_COLOR env var forces colors on non tty mode
 yarn_install(
-    name = "npm",
-    package_json = "//:package.json",
-    yarn_lock = "//:yarn.lock",
-    data = [
-      "//:preinstall_check.js",
-    ],
-    symlink_node_modules = True,
-    quiet = False,
-    # frozen_lockfile = False, needed for next rules node js version
+  name = "npm",
+  environment = {
+    "FORCE_COLOR": "True",
+  },
+  package_json = "//:package.json",
+  yarn_lock = "//:yarn.lock",
+  data = [
+    "//:.yarnrc",
+    "//:preinstall_check.js",
+  ],
+  symlink_node_modules = True,
+  quiet = False,
+  # frozen_lockfile = False, needed for next rules node js version
 )
