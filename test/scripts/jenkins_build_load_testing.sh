@@ -53,6 +53,7 @@ pushd ../kibana-load-testing
 cp cfg/metricbeat/elasticsearch-xpack.yml $KIBANA_DIR/metricbeat-install/modules.d/elasticsearch-xpack.yml
 cp cfg/metricbeat/kibana-xpack.yml $KIBANA_DIR/metricbeat-install/modules.d/elasticsearch-xpack.yml
 echo "fields.build: ${BUILD_ID}" >> cfg/metricbeat/metricbeat.yml
+echo "path.config: ${KIBANA_DIR}/metricbeat-install" >> cfg/metricbeat/metricbeat.yml
 cp cfg/metricbeat/metricbeat.yml $KIBANA_DIR/metricbeat-install/metricbeat.yml
 mv $KIBANA_DIR/metricbeat-install/modules.d/system.yml $KIBANA_DIR/metricbeat-install/modules.d/system.yml.disabled
 popd
@@ -86,3 +87,9 @@ node scripts/functional_tests \
   
 echo "output of metricbeat.log" 
 cat $KIBANA_DIR/metricbeat-install/metricbeat.log
+pushd $KIBANA_DIR/metricbeat-install
+echo "check inside folder"
+echo $PWD
+ls -l
+popd
+
