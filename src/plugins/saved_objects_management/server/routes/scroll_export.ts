@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
+import { chain } from 'lodash';
 import { findAll } from '../lib';
 
 export const registerScrollForExportRoute = (router: IRouter) => {
@@ -21,10 +22,20 @@ export const registerScrollForExportRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { client } = context.core.savedObjects;
+      const { typesToInclude } = req.body;
+      const { getClient, typeRegistry } = context.core.savedObjects;
+      const includedHiddenTypes = chain(typesToInclude)
+        .uniq()
+        .filter(
+          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
+        )
+        .value();
+
+      const client = getClient({ includedHiddenTypes });
+
       const objects = await findAll(client, {
         perPage: 1000,
-        type: req.body.typesToInclude,
+        type: typesToInclude,
       });
 
       return res.ok({

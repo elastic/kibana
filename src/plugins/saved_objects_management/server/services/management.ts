@@ -18,10 +18,6 @@ export class SavedObjectsManagement {
     return this.registry.isImportableAndExportable(type);
   }
 
-  public isHidden(type: string) {
-    return this.registry.isHidden(type);
-  }
-
   public getDefaultSearchField(type: string) {
     return this.registry.getType(type)?.management?.defaultSearchField;
   }

@@ -40,7 +40,7 @@ describe('POST /api/saved_objects/_export', () => {
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
     );
-    exporter = handlerContext.savedObjects.exporter;
+    exporter = handlerContext.savedObjects.getExporter();
 
     const router = httpSetup.createRouter('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();

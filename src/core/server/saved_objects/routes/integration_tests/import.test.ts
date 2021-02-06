@@ -68,9 +68,9 @@ describe(`POST ${URL}`, () => {
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
     });
-    handlerContext.savedObjects.importer.import.mockImplementation((options) =>
-      importer.import(options)
-    );
+    handlerContext.savedObjects
+      .getImporter()
+      .import.mockImplementation((options) => importer.import(options));
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
