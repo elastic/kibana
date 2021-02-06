@@ -26,7 +26,6 @@ import {
 } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
-import { getConfigCollections } from '../editor/collections';
 import { getOptionTabs } from '../editor/common_config';
 
 export const getLineVisTypeDefinition = (
@@ -126,7 +125,6 @@ export const getLineVisTypeDefinition = (
     },
   },
   editorConfig: {
-    collections: getConfigCollections(),
     optionTabs: getOptionTabs(showElasticChartsOptions),
     schemas: [
       {
