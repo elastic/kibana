@@ -1,19 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
 import { Discover } from './discover';
-import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { getTopNavLinks } from './top_nav/get_top_nav_links';
-import { DiscoverServices } from '../../build_services';
 import { GetStateReturn } from '../angular/discover_state';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
@@ -25,6 +22,8 @@ import { SavedObject } from '../../../../../core/types';
 import { navigationPluginMock } from '../../../../navigation/public/mocks';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
+import { DiscoverProps } from './types';
+import { RequestAdapter } from '../../../../inspector/common';
 
 const mockNavigation = navigationPluginMock.createStartContract();
 
@@ -45,17 +44,9 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-function getProps(indexPattern: IndexPattern) {
+function getProps(indexPattern: IndexPattern): DiscoverProps {
   const searchSourceMock = createSearchSourceMock({});
   const state = ({} as unknown) as GetStateReturn;
-  const services = ({
-    capabilities: {
-      discover: {
-        save: true,
-      },
-    },
-    uiSettings: mockUiSettings,
-  } as unknown) as DiscoverServices;
 
   return {
     fetch: jest.fn(),
@@ -76,32 +67,25 @@ function getProps(indexPattern: IndexPattern) {
     opts: {
       config: mockUiSettings,
       data: dataPluginMock.createStartContract(),
-      fixedScroll: jest.fn(),
       filterManager: createFilterManagerMock(),
+      getFieldCounts: jest.fn(),
       indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
+      inspectorAdapters: { requests: {} as RequestAdapter },
+      navigateTo: jest.fn(),
       sampleSize: 10,
       savedSearch: savedSearchMock,
-      setHeaderActionMenu: jest.fn(),
-      timefield: indexPattern.timeFieldName || '',
       setAppState: jest.fn(),
+      setHeaderActionMenu: jest.fn(),
+      stateContainer: state,
+      timefield: indexPattern.timeFieldName || '',
     },
     resetQuery: jest.fn(),
     resultState: 'ready',
     rows: esHits,
     searchSource: searchSourceMock,
     setIndexPattern: jest.fn(),
-    showSaveQuery: true,
     state: { columns: [] },
     timefilterUpdateHandler: jest.fn(),
-    topNavMenu: getTopNavLinks({
-      getFieldCounts: jest.fn(),
-      indexPattern,
-      inspectorAdapters: inspectorPluginMock,
-      navigateTo: jest.fn(),
-      savedSearch: savedSearchMock,
-      services,
-      state,
-    }),
     updateQuery: jest.fn(),
     updateSavedQueryId: jest.fn(),
   };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -25,8 +26,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/fleet/agent_policies', () => {
-      it('should work with valid values', async () => {
-        await supertest
+      it('should work with valid minimum required values', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
@@ -34,6 +37,28 @@ export default function ({ getService }: FtrProviderContext) {
             namespace: 'default',
           })
           .expect(200);
+
+        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        const json = getRes.body;
+        expect(json.item.is_managed).to.equal(false);
+      });
+
+      it('sets given is_managed value', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST2',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+
+        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        const json = getRes.body;
+        expect(json.item.is_managed).to.equal(true);
       });
 
       it('should return a 400 with an empty namespace', async () => {
@@ -107,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(newPolicy).to.eql({
           name: 'Copied policy',
           description: 'Test',
+          is_managed: false,
           namespace: 'default',
           monitoring_enabled: ['logs', 'metrics'],
           revision: 1,
@@ -160,6 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
+      let agentPolicyId: undefined | string;
       it('should work with valid values', async () => {
         const {
           body: { item: originalPolicy },
@@ -172,11 +199,11 @@ export default function ({ getService }: FtrProviderContext) {
             namespace: 'default',
           })
           .expect(200);
-
+        agentPolicyId = originalPolicy.id;
         const {
           body: { item: updatedPolicy },
         } = await supertest
-          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Updated name',
@@ -192,10 +219,29 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Updated name',
           description: 'Updated description',
           namespace: 'default',
+          is_managed: false,
           revision: 2,
           updated_by: 'elastic',
           package_policies: [],
         });
+      });
+
+      it('sets given is_managed value', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST2',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+
+        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        const json = getRes.body;
+        expect(json.item.is_managed).to.equal(true);
       });
 
       it('should return a 409 if policy already exists with name given', async () => {

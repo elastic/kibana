@@ -4271,55 +4271,6 @@ exports[`Header renders 1`] = `
                 "thrownError": null,
               }
             }
-            breadcrumbsAppendExtension$={
-              BehaviorSubject {
-                "_isScalar": false,
-                "_value": undefined,
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [
-                  Subscriber {
-                    "_parentOrParents": null,
-                    "_subscriptions": Array [
-                      SubjectSubscription {
-                        "_parentOrParents": [Circular],
-                        "_subscriptions": null,
-                        "closed": false,
-                        "subject": [Circular],
-                        "subscriber": [Circular],
-                      },
-                    ],
-                    "closed": false,
-                    "destination": SafeSubscriber {
-                      "_complete": undefined,
-                      "_context": [Circular],
-                      "_error": undefined,
-                      "_next": [Function],
-                      "_parentOrParents": null,
-                      "_parentSubscriber": [Circular],
-                      "_subscriptions": null,
-                      "closed": false,
-                      "destination": Object {
-                        "closed": true,
-                        "complete": [Function],
-                        "error": [Function],
-                        "next": [Function],
-                      },
-                      "isStopped": false,
-                      "syncErrorThrowable": false,
-                      "syncErrorThrown": false,
-                      "syncErrorValue": null,
-                    },
-                    "isStopped": false,
-                    "syncErrorThrowable": true,
-                    "syncErrorThrown": false,
-                    "syncErrorValue": null,
-                  },
-                ],
-                "thrownError": null,
-              }
-            }
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
@@ -4943,6 +4894,7 @@ exports[`Header renders 1`] = `
                           listItems={
                             Array [
                               Object {
+                                "data-test-subj": "homeLink",
                                 "href": "/",
                                 "iconType": "home",
                                 "label": "Home",
@@ -4964,6 +4916,7 @@ exports[`Header renders 1`] = `
                           >
                             <EuiListGroupItem
                               color="text"
+                              data-test-subj="homeLink"
                               href="/"
                               iconType="home"
                               key="title-0"
@@ -4978,6 +4931,7 @@ exports[`Header renders 1`] = `
                               >
                                 <a
                                   className="euiListGroupItem__button"
+                                  data-test-subj="homeLink"
                                   href="/"
                                   onClick={[Function]}
                                   rel="noreferrer"

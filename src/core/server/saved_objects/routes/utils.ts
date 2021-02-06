@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Readable } from 'stream';
-import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
+import {
+  RequestHandlerWrapper,
+  SavedObject,
+  SavedObjectsExportResultDetails,
+} from 'src/core/server';
 import {
   createSplitStream,
   createMapStream,
@@ -16,6 +20,7 @@ import {
   createListStream,
   createConcatStream,
 } from '@kbn/utils';
+import Boom from '@hapi/boom';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([
@@ -52,3 +57,30 @@ export function validateObjects(
       .join(', ')}`;
   }
 }
+
+/**
+ * Catches errors thrown by saved object route handlers and returns an error
+ * with the payload and statusCode of the boom error.
+ *
+ * This is very close to the core `router.handleLegacyErrors` except that it
+ * throws internal errors (statusCode: 500) so that the internal error's
+ * message get logged by Core.
+ *
+ * TODO: Remove once https://github.com/elastic/kibana/issues/65291 is fixed.
+ */
+export const catchAndReturnBoomErrors: RequestHandlerWrapper = (handler) => {
+  return async (context, request, response) => {
+    try {
+      return await handler(context, request, response);
+    } catch (e) {
+      if (Boom.isBoom(e) && e.output.statusCode !== 500) {
+        return response.customError({
+          body: e.output.payload,
+          statusCode: e.output.statusCode,
+          headers: e.output.headers as { [key: string]: string },
+        });
+      }
+      throw e;
+    }
+  };
+};

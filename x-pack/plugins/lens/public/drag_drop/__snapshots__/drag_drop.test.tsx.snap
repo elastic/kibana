@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DragDrop droppable is reflected in the className 1`] = `
+exports[`DragDrop defined dropType is reflected in the className 1`] = `
 <button
   class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
   data-test-subj="lnsDragDrop"
@@ -9,14 +9,12 @@ exports[`DragDrop droppable is reflected in the className 1`] = `
 </button>
 `;
 
-exports[`DragDrop items that have droppable=false get special styling when another item is dragged 1`] = `
+exports[`DragDrop items that has dropType=undefined get special styling when another item is dragged 1`] = `
 <button
   className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
   data-test-subj="lnsDragDrop"
-  onDragEnd={[Function]}
   onDragLeave={[Function]}
   onDragOver={[Function]}
-  onDragStart={[Function]}
   onDrop={[Function]}
 >
   Hello!
@@ -24,11 +22,21 @@ exports[`DragDrop items that have droppable=false get special styling when anoth
 `;
 
 exports[`DragDrop renders if nothing is being dragged 1`] = `
-<button
-  class="lnsDragDrop lnsDragDrop-isDraggable"
-  data-test-subj="lnsDragDrop"
-  draggable="true"
+<div
+  data-test-subj="lnsDragDrop_draggable-hello"
 >
-  Hello!
-</button>
+  <button
+    aria-describedby="lnsDragDrop-keyboardInstructions"
+    aria-label="hello"
+    class="euiScreenReaderOnly--showOnFocus lnsDragDrop__keyboardHandler"
+    data-test-subj="lnsDragDrop-keyboardHandler"
+  />
+  <button
+    class="lnsDragDrop lnsDragDrop-isDraggable"
+    data-test-subj="lnsDragDrop"
+    draggable="true"
+  >
+    Hello!
+  </button>
+</div>
 `;

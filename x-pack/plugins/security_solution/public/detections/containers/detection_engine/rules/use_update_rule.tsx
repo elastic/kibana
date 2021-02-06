@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState, Dispatch } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
 import { UpdateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+
+import { transformOutput } from './transforms';
 
 import { updateRule } from './api';
 import * as i18n from './translations';
@@ -29,11 +32,11 @@ export const useUpdateRule = (): ReturnUpdateRule => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     setIsSaved(false);
-    async function saveRule() {
+    const saveRule = async () => {
       if (rule != null) {
         try {
           setIsLoading(true);
-          await updateRule({ rule, signal: abortCtrl.signal });
+          await updateRule({ rule: transformOutput(rule), signal: abortCtrl.signal });
           if (isSubscribed) {
             setIsSaved(true);
           }
@@ -46,15 +49,14 @@ export const useUpdateRule = (): ReturnUpdateRule => {
           setIsLoading(false);
         }
       }
-    }
+    };
 
     saveRule();
     return () => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule]);
+  }, [rule, dispatchToaster]);
 
   return [{ isLoading, isSaved }, setRule];
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -22,6 +23,7 @@ import {
   SOURCES_PATH,
   PERSONAL_SOURCES_PATH,
   ORG_SETTINGS_PATH,
+  SECURITY_PATH,
 } from './routes';
 
 import { SetupGuide } from './views/setup_guide';
@@ -29,6 +31,7 @@ import { ErrorState } from './views/error_state';
 import { NotFound } from '../shared/not_found';
 import { Overview } from './views/overview';
 import { GroupsRouter } from './views/groups';
+import { Security } from './views/security';
 import { SourcesRouter } from './views/content_sources';
 import { SettingsRouter } from './views/settings';
 
@@ -100,6 +103,11 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           readOnlyMode={readOnlyMode}
         >
           <GroupsRouter />
+        </Layout>
+      </Route>
+      <Route path={SECURITY_PATH}>
+        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
+          <Security />
         </Layout>
       </Route>
       <Route path={ORG_SETTINGS_PATH}>

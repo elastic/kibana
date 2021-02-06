@@ -1,14 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
 import { Query } from 'src/plugins/data/public';
 import { SortDirection } from 'src/plugins/data/common/search';
-import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SCALING_TYPES, MVT_FIELD_TYPE } from '../constants';
+import {
+  AGG_TYPE,
+  GRID_RESOLUTION,
+  RENDER_AS,
+  SCALING_TYPES,
+  MVT_FIELD_TYPE,
+  SOURCE_TYPES,
+} from '../constants';
 
 export type AttributionDescriptor = {
   attributionText?: string;
@@ -105,6 +114,7 @@ export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   term: string; // term field name
   whereQuery?: Query;
   size?: number;
+  type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
@@ -156,14 +166,24 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
     tooltipProperties: string[];
   };
 
-export type GeoJsonFileFieldDescriptor = {
+export type InlineFieldDescriptor = {
   name: string;
   type: 'string' | 'number';
 };
 
 export type GeojsonFileSourceDescriptor = {
-  __fields?: GeoJsonFileFieldDescriptor[];
+  __fields?: InlineFieldDescriptor[];
   __featureCollection: FeatureCollection;
   name: string;
   type: string;
 };
+
+export type TableSourceDescriptor = {
+  id: string;
+  type: SOURCE_TYPES.TABLE_SOURCE;
+  __rows: Array<{ [key: string]: string | number }>;
+  __columns: InlineFieldDescriptor[];
+  term: string;
+};
+
+export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;
