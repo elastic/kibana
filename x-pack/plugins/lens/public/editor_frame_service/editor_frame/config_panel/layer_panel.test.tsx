@@ -68,7 +68,7 @@ describe('LayerPanel', () => {
       dispatch: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
-      setLayerRef: jest.fn(),
+      registerNewLayerRef: jest.fn(),
     };
   }
 
