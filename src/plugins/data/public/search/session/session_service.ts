@@ -172,6 +172,7 @@ export class SessionService {
    * @returns sessionId
    */
   public start() {
+    this.abortPendingSearches();
     this.state.transitions.start();
     return this.getSessionId()!;
   }
@@ -188,19 +189,25 @@ export class SessionService {
    * Cleans up current state
    */
   public clear() {
+    if (!this.getSessionId()) return;
+    if (!this.isStored()) this.abortPendingSearches();
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
+  }
+
+  private abortPendingSearches() {
+    this.state.get().pendingSearches.forEach((s) => {
+      s.abort();
+    });
   }
 
   /**
    * Request a cancellation of on-going search requests within current session
    */
   public async cancel(): Promise<void> {
-    const isStoredSession = this.state.get().isStored;
-    this.state.get().pendingSearches.forEach((s) => {
-      s.abort();
-    });
+    const isStoredSession = this.isStored();
+    this.abortPendingSearches();
     this.state.transitions.cancel();
     if (isStoredSession) {
       await this.sessionsClient.delete(this.state.get().sessionId!);

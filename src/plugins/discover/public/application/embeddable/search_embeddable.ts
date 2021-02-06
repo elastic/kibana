@@ -95,7 +95,6 @@ export class SearchEmbeddable
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
-  private abortController?: AbortController;
   private services: DiscoverServices;
 
   private prevTimeRange?: TimeRange;
@@ -188,8 +187,6 @@ export class SearchEmbeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-
-    if (this.abortController) this.abortController.abort();
   }
 
   private initializeSearchScope() {
@@ -293,10 +290,6 @@ export class SearchEmbeddable
 
     const { searchSource, pre712 } = this.savedSearch;
 
-    // Abort any in-progress requests
-    if (this.abortController) this.abortController.abort();
-    this.abortController = new AbortController();
-
     searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
@@ -342,10 +335,11 @@ export class SearchEmbeddable
 
     try {
       // Make the request
-      const resp = await searchSource.fetch({
-        abortSignal: this.abortController.signal,
-        sessionId: searchSessionId,
-      });
+      const resp = await searchSource
+        .fetch$({
+          sessionId: searchSessionId,
+        })
+        .toPromise();
       this.updateOutput({ loading: false, error: undefined });
 
       // Log response to inspector

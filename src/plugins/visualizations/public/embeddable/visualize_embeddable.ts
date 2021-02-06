@@ -99,7 +99,6 @@ export class VisualizeEmbeddable
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
   private attributeService?: AttributeService<
@@ -267,9 +266,6 @@ export class VisualizeEmbeddable
   };
 
   onContainerError = (error: ExpressionRenderError) => {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
     this.renderComplete.dispatchError();
     this.updateOutput({ loading: false, error });
   };
@@ -378,18 +374,13 @@ export class VisualizeEmbeddable
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-    this.abortController = new AbortController();
-    const abortController = this.abortController;
+
     this.expression = await toExpressionAst(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
-      abortSignal: this.abortController!.signal,
     });
 
-    if (this.handler && !abortController.signal.aborted) {
+    if (this.handler) {
       this.handler.update(this.expression, expressionParams);
     }
   }

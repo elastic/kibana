@@ -353,9 +353,7 @@ function discoverController($route, $scope, Promise) {
   $scope.showTimeCol =
     !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
-  let abortController;
   $scope.$on('$destroy', () => {
-    if (abortController) abortController.abort();
     savedSearch.destroy();
     subscriptions.unsubscribe();
     if (!isChangingIndexPattern) {
@@ -570,10 +568,6 @@ function discoverController($route, $scope, Promise) {
       return;
     }
 
-    // Abort any in-progress requests before fetching again
-    if (abortController) abortController.abort();
-    abortController = new AbortController();
-
     const searchSessionId = searchSessionManager.getNextSearchSessionId();
 
     $scope
@@ -583,7 +577,6 @@ function discoverController($route, $scope, Promise) {
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest({ searchSessionId });
         return $scope.searchSource.fetch({
-          abortSignal: abortController.signal,
           sessionId: searchSessionId,
         });
       })
