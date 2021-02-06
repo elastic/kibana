@@ -11,6 +11,7 @@ import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { httpServerMock } from '../../http/http_server.mocks';
+import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
@@ -22,14 +23,21 @@ const exportSizeLimit = 500;
 const request = httpServerMock.createKibanaRequest();
 
 describe('getSortedObjectsForExport()', () => {
+  let logger: MockedLogger;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let typeRegistry: SavedObjectTypeRegistry;
   let exporter: SavedObjectsExporter;
 
   beforeEach(() => {
+    logger = loggerMock.create();
     typeRegistry = new SavedObjectTypeRegistry();
     savedObjectsClient = savedObjectsClientMock.create();
-    exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit, typeRegistry });
+    exporter = new SavedObjectsExporter({
+      exportSizeLimit,
+      logger,
+      savedObjectsClient,
+      typeRegistry,
+    });
   });
 
   describe('#exportByTypes', () => {
@@ -96,30 +104,36 @@ describe('getSortedObjectsForExport()', () => {
               ]
           `);
       expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-              [MockFunction] {
-                "calls": Array [
-                  Array [
-                    Object {
-                      "hasReference": undefined,
-                      "hasReferenceOperator": undefined,
-                      "namespaces": undefined,
-                      "perPage": 500,
-                      "search": undefined,
-                      "type": Array [
-                        "index-pattern",
-                        "search",
-                      ],
-                    },
-                  ],
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "hasReference": undefined,
+                "hasReferenceOperator": undefined,
+                "namespaces": undefined,
+                "perPage": 500,
+                "pit": Object {
+                  "id": "some_pit_id",
+                  "keepAlive": "1m",
+                },
+                "search": undefined,
+                "sortField": "updated_at",
+                "sortOrder": "desc",
+                "type": Array [
+                  "index-pattern",
+                  "search",
                 ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": Promise {},
-                  },
-                ],
-              }
-          `);
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Promise {},
+            },
+          ],
+        }
+      `);
     });
 
     test('applies the export transforms', async () => {
@@ -138,7 +152,12 @@ describe('getSortedObjectsForExport()', () => {
           },
         },
       });
-      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit, typeRegistry });
+      exporter = new SavedObjectsExporter({
+        exportSizeLimit,
+        logger,
+        savedObjectsClient,
+        typeRegistry,
+      });
 
       savedObjectsClient.find.mockResolvedValueOnce({
         total: 1,
@@ -233,30 +252,36 @@ describe('getSortedObjectsForExport()', () => {
               ]
           `);
       expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-              [MockFunction] {
-                "calls": Array [
-                  Array [
-                    Object {
-                      "hasReference": undefined,
-                      "hasReferenceOperator": undefined,
-                      "namespaces": undefined,
-                      "perPage": 500,
-                      "search": undefined,
-                      "type": Array [
-                        "index-pattern",
-                        "search",
-                      ],
-                    },
-                  ],
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "hasReference": undefined,
+                "hasReferenceOperator": undefined,
+                "namespaces": undefined,
+                "perPage": 500,
+                "pit": Object {
+                  "id": "some_pit_id",
+                  "keepAlive": "1m",
+                },
+                "search": undefined,
+                "sortField": "updated_at",
+                "sortOrder": "desc",
+                "type": Array [
+                  "index-pattern",
+                  "search",
                 ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": Promise {},
-                  },
-                ],
-              }
-          `);
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Promise {},
+            },
+          ],
+        }
+      `);
     });
 
     test('exclude export details if option is specified', async () => {
@@ -383,30 +408,36 @@ describe('getSortedObjectsForExport()', () => {
               ]
           `);
       expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-              [MockFunction] {
-                "calls": Array [
-                  Array [
-                    Object {
-                      "hasReference": undefined,
-                      "hasReferenceOperator": undefined,
-                      "namespaces": undefined,
-                      "perPage": 500,
-                      "search": "foo",
-                      "type": Array [
-                        "index-pattern",
-                        "search",
-                      ],
-                    },
-                  ],
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "hasReference": undefined,
+                "hasReferenceOperator": undefined,
+                "namespaces": undefined,
+                "perPage": 500,
+                "pit": Object {
+                  "id": "some_pit_id",
+                  "keepAlive": "1m",
+                },
+                "search": "foo",
+                "sortField": "updated_at",
+                "sortOrder": "desc",
+                "type": Array [
+                  "index-pattern",
+                  "search",
                 ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": Promise {},
-                  },
-                ],
-              }
-          `);
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Promise {},
+            },
+          ],
+        }
+      `);
     });
 
     test('exports selected types with references when present', async () => {
@@ -465,35 +496,41 @@ describe('getSortedObjectsForExport()', () => {
               ]
           `);
       expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-              [MockFunction] {
-                "calls": Array [
-                  Array [
-                    Object {
-                      "hasReference": Array [
-                        Object {
-                          "id": "1",
-                          "type": "index-pattern",
-                        },
-                      ],
-                      "hasReferenceOperator": "OR",
-                      "namespaces": undefined,
-                      "perPage": 500,
-                      "search": undefined,
-                      "type": Array [
-                        "index-pattern",
-                        "search",
-                      ],
-                    },
-                  ],
-                ],
-                "results": Array [
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "hasReference": Array [
                   Object {
-                    "type": "return",
-                    "value": Promise {},
+                    "id": "1",
+                    "type": "index-pattern",
                   },
                 ],
-              }
-          `);
+                "hasReferenceOperator": "OR",
+                "namespaces": undefined,
+                "perPage": 500,
+                "pit": Object {
+                  "id": "some_pit_id",
+                  "keepAlive": "1m",
+                },
+                "search": undefined,
+                "sortField": "updated_at",
+                "sortOrder": "desc",
+                "type": Array [
+                  "index-pattern",
+                  "search",
+                ],
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Promise {},
+            },
+          ],
+        }
+      `);
     });
 
     test('exports from the provided namespace when present', async () => {
@@ -560,36 +597,47 @@ describe('getSortedObjectsForExport()', () => {
               ]
           `);
       expect(savedObjectsClient.find).toMatchInlineSnapshot(`
-              [MockFunction] {
-                "calls": Array [
-                  Array [
-                    Object {
-                      "hasReference": undefined,
-                      "hasReferenceOperator": undefined,
-                      "namespaces": Array [
-                        "foo",
-                      ],
-                      "perPage": 500,
-                      "search": undefined,
-                      "type": Array [
-                        "index-pattern",
-                        "search",
-                      ],
-                    },
-                  ],
+        [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "hasReference": undefined,
+                "hasReferenceOperator": undefined,
+                "namespaces": Array [
+                  "foo",
                 ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": Promise {},
-                  },
+                "perPage": 500,
+                "pit": Object {
+                  "id": "some_pit_id",
+                  "keepAlive": "1m",
+                },
+                "search": undefined,
+                "sortField": "updated_at",
+                "sortOrder": "desc",
+                "type": Array [
+                  "index-pattern",
+                  "search",
                 ],
-              }
-          `);
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Promise {},
+            },
+          ],
+        }
+      `);
     });
 
     test('export selected types throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, typeRegistry });
+      exporter = new SavedObjectsExporter({
+        exportSizeLimit: 1,
+        logger,
+        savedObjectsClient,
+        typeRegistry,
+      });
 
       savedObjectsClient.find.mockResolvedValueOnce({
         total: 2,
@@ -836,7 +884,12 @@ describe('getSortedObjectsForExport()', () => {
     });
 
     test('export selected objects throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, typeRegistry });
+      exporter = new SavedObjectsExporter({
+        exportSizeLimit: 1,
+        logger,
+        savedObjectsClient,
+        typeRegistry,
+      });
 
       const exportOpts = {
         request,
