@@ -26,6 +26,7 @@ import {
   getLatencyValue,
 } from '../helpers/latency_aggregation_type';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -90,7 +91,10 @@ export async function getServiceTransactionGroups({
             },
             ...getLatencyAggregation(latencyAggregationType, field),
             [EVENT_OUTCOME]: {
-              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+              terms: {
+                field: EVENT_OUTCOME,
+                include: [EventOutcome.failure, EventOutcome.success],
+              },
             },
           },
         },
@@ -102,10 +106,9 @@ export async function getServiceTransactionGroups({
 
   const transactionGroups =
     response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate =
-        bucket.doc_count > 0
-          ? bucket[EVENT_OUTCOME].doc_count / bucket.doc_count
-          : null;
+      const errorRate = calculateTransactionErrorPercentage(
+        bucket[EVENT_OUTCOME]
+      );
 
       const transactionGroupTotalDuration =
         bucket.transaction_group_total_duration.value || 0;
