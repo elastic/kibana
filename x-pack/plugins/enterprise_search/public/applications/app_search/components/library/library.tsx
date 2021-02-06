@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -197,7 +198,7 @@ export const Library: React.FC = () => {
             <h3>With a link</h3>
           </EuiTitle>
           <EuiSpacer />
-          <Result {...props} shouldLinkToDetailPage={true} />
+          <Result {...props} shouldLinkToDetailPage />
           <EuiSpacer />
 
           <EuiSpacer />

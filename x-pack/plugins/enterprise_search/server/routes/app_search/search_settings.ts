@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -37,7 +38,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings/details`,
+      path: '/as/engines/:engineName/search_settings/details',
     })
   );
 
@@ -51,7 +52,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings/reset`,
+      path: '/as/engines/:engineName/search_settings/reset',
     })
   );
 
@@ -66,7 +67,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings`,
+      path: '/as/engines/:engineName/search_settings',
     })
   );
 
@@ -87,7 +88,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings_search`,
+      path: '/as/engines/:engineName/search_settings_search',
     })
   );
 }

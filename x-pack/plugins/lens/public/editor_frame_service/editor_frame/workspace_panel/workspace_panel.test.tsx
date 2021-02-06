@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -774,7 +775,7 @@ describe('workspace_panel', () => {
     let mockGetSuggestionForField: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
-    const draggedField = { id: 'field' };
+    const draggedField = { id: 'field', humanData: { label: 'Label' } };
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
@@ -792,6 +793,7 @@ describe('workspace_panel', () => {
           keyboardMode={false}
           setKeyboardMode={() => {}}
           setA11yMessage={() => {}}
+          registerDropTarget={jest.fn()}
         >
           <WorkspacePanel
             activeDatasourceId={'mock'}
@@ -830,7 +832,7 @@ describe('workspace_panel', () => {
       });
       initComponent();
 
-      instance.find(DragDrop).prop('onDrop')!(draggedField, { id: 'lnsWorkspace' });
+      instance.find(DragDrop).prop('onDrop')!(draggedField, 'field_replace');
 
       expect(mockDispatch).toHaveBeenCalledWith({
         type: 'SWITCH_VISUALIZATION',
@@ -849,12 +851,12 @@ describe('workspace_panel', () => {
         visualizationState: {},
       });
       initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeTruthy();
+      expect(instance.find(DragDrop).prop('dropType')).toBeTruthy();
     });
 
     it('should refuse to drop if there are no suggestions', () => {
       initComponent();
-      expect(instance.find(DragDrop).prop('droppable')).toBeFalsy();
+      expect(instance.find(DragDrop).prop('dropType')).toBeFalsy();
     });
   });
 });

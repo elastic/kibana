@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -104,7 +105,7 @@ export const EngineNav: React.FC = () => {
       {canViewEngineAnalytics && (
         <SideNavLink
           to={generateEnginePath(ENGINE_ANALYTICS_PATH)}
-          shouldShowActiveForSubroutes={true}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineAnalyticsLink"
         >
           {ANALYTICS_TITLE}
@@ -113,7 +114,7 @@ export const EngineNav: React.FC = () => {
       {canViewEngineDocuments && (
         <SideNavLink
           to={generateEnginePath(ENGINE_DOCUMENTS_PATH)}
-          shouldShowActiveForSubroutes={true}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineDocumentsLink"
         >
           {DOCUMENTS_TITLE}

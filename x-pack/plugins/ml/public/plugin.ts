@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -45,6 +46,7 @@ import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
 import type { MapsStartApi } from '../../maps/public';
+import { LensPublicStart } from '../../lens/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -54,6 +56,7 @@ export interface MlStartDependencies {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
+  lens?: LensPublicStart;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
@@ -105,6 +108,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
+            lens: pluginsStart.lens,
             kibanaVersion,
           },
           params
