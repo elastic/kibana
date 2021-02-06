@@ -38,9 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
-        const json = getRes.body;
-        expect(json.item.is_managed).to.equal(false);
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        expect(body.item.is_managed).to.equal(false);
       });
 
       it('sets given is_managed value', async () => {
@@ -56,9 +55,8 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const getRes = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
-        const json = getRes.body;
-        expect(json.item.is_managed).to.equal(true);
+        const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
+        expect(body.item.is_managed).to.equal(true);
 
         const {
           body: { item: createdPolicy2 },
