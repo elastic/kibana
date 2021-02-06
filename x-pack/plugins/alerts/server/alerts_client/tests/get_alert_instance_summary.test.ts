@@ -18,7 +18,7 @@ import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { SavedObject } from 'kibana/server';
 import { RawAlert } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
-import { RawEventLogAlertsSummary } from '../../lib/alert_instance_summary_from_event_log';
+import { RawEventLogAlertsSummary } from '../../lib/alerts_instance_summary_from_event_log';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -110,43 +110,24 @@ describe('getAlertInstanceSummary()', () => {
 
     const instancesLatestStateSummary = [
       {
-        savedObjectId: 'ca200500-66b2-11eb-aa35-e3f876ca1006',
+        savedObjectId: '1',
         summary: {
-          doc_count: 8066,
           errors_state: {
-            doc_count: 0,
             action: {
               hits: {
-                total: {
-                  value: 0,
-                  relation: 'eq',
-                },
-                max_score: null,
                 hits: [],
               },
             },
           },
           instances: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
             buckets: [
               {
                 key: '*',
-                doc_count: 40,
                 last_state: {
-                  doc_count: 40,
                   action: {
                     hits: {
-                      total: {
-                        value: 4033,
-                        relation: 'eq',
-                      },
-                      max_score: null,
                       hits: [
                         {
-                          _index: '.kibana-event-log-8.0.0-000001',
-                          _id: 'IW1Ob3cB0UnnGUWTi4rB',
-                          _score: null,
                           _source: {
                             '@timestamp': '2021-02-04T23:09:14.190Z',
                             event: {
@@ -158,7 +139,6 @@ describe('getAlertInstanceSummary()', () => {
                               },
                             },
                           },
-                          sort: [1612480154190],
                         },
                       ],
                     },
@@ -168,9 +148,7 @@ describe('getAlertInstanceSummary()', () => {
             ],
           },
           last_execution_state: {
-            doc_count: 4033,
             max_timestamp: {
-              value: 1612480154169,
               value_as_string: '2021-02-04T23:09:14.169Z',
             },
           },
@@ -185,7 +163,7 @@ describe('getAlertInstanceSummary()', () => {
 
     const instancesCreatedSummary = [
       {
-        savedObjectId: 'ca200500-66b2-11eb-aa35-e3f876ca1006',
+        savedObjectId: '1',
         summary: {
           instances: {
             buckets: [
@@ -247,7 +225,7 @@ describe('getAlertInstanceSummary()', () => {
   });
 
   // Further tests don't check the result of `getAlertInstanceSummary()`, as the result
-  // is just the result from the `alertInstanceSummaryFromEventLog()`, which itself
+  // is just the result from the `alertsInstanceSummaryFromEventLog()`, which itself
   // has a complete set of tests.  These tests just make sure the data gets
   // sent into `getAlertInstanceSummary()` as appropriate.
 

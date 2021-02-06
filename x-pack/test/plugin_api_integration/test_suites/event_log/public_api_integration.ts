@@ -158,10 +158,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should aggregate events summary by Saved Object ids', async () => {
-          const id1 = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+          const id1 = `test-000001`;
           const expectedEvents1 = [fakeEvent(namespace, id1), fakeEvent(namespace, id1)];
 
-          const id2 = `421f2511-5cd1-44fd-95df-e0df83e354d1`;
+          const id2 = `test-000002`;
           const expectedEvents2 = [fakeEvent(namespace, id2), fakeEvent(namespace, id2)];
 
           await logTestEvent(namespace, id1, expectedEvents1[0]);
@@ -174,8 +174,8 @@ export default function ({ getService }: FtrProviderContext) {
 
             expect(result.body.length).to.be(2);
             expect(result.body).to.eql([
-              { savedObjectId: '421f2511-5cd1-44fd-95df-e0df83e354d1', summary: { doc_count: 2 } },
-              { savedObjectId: '421f2511-5cd1-44fd-95df-e0df83e354d5', summary: { doc_count: 2 } },
+              { savedObjectId: 'test-000001', summary: { doc_count: 2 } },
+              { savedObjectId: 'test-000002', summary: { doc_count: 2 } },
             ]);
           });
         });

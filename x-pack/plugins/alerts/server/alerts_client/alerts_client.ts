@@ -51,8 +51,9 @@ import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import {
   alertInstanceCreatedQueryAggregation,
   alertActiveAndResolvedInstancesSummaryQueryAggregation,
-  alertInstanceSummaryFromEventLog,
-} from '../lib/alert_instance_summary_from_event_log';
+  alertsInstanceSummaryFromEventLog,
+  RawEventLogAlertsSummary,
+} from '../lib/alerts_instance_summary_from_event_log';
 import { AuditLogger, EventOutcome } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
@@ -415,13 +416,12 @@ export class AlertsClient {
     const eventLogClient = await this.getEventLogClient();
 
     this.logger.debug(`getAlertInstanceSummary(): search the event log for alert ${id}`);
-    let instancesLatestStateSummary: {
-      instances: Record<string, unknown>;
-      last_execution_state: Record<string, unknown>;
-      errors_state: Record<string, unknown>;
-    };
+    let instancesLatestStateSummaries: Array<{
+      savedObjectId: string;
+      summary: RawEventLogAlertsSummary;
+    }> = [];
     try {
-      const instancesStatesQueryResult = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+      instancesLatestStateSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
         instances: Record<string, unknown>;
         last_execution_state: Record<string, unknown>;
         errors_state: Record<string, unknown>;
@@ -432,39 +432,34 @@ export class AlertsClient {
         parsedDateStart.toISOString(),
         dateNow.toISOString()
       );
-
-      instancesLatestStateSummary = instancesStatesQueryResult[0].summary;
     } catch (err) {
       this.logger.debug(
         `alertsClient.getAlertInstanceSummary(): error searching event log latest instances state for alert ${id}: ${err.message}`
       );
-      instancesLatestStateSummary = { instances: {}, last_execution_state: {}, errors_state: {} };
     }
 
-    let instancesCreatedSummary: {
-      instances: Record<string, unknown>;
-    };
+    let instancesCreatedSummaries: Array<{
+      savedObjectId: string;
+      summary: Pick<RawEventLogAlertsSummary, 'instances'>;
+    }> = [];
     try {
-      const instancesCreatedQueryResult = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+      instancesCreatedSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
         instances: Record<string, unknown>;
         last_execution_state: Record<string, unknown>;
       }>('alert', [id], alertInstanceCreatedQueryAggregation);
-
-      instancesCreatedSummary = instancesCreatedQueryResult[0].summary;
     } catch (err) {
       this.logger.debug(
         `alertsClient.getAlertInstanceSummary(): error searching event log instances created for alert ${id}: ${err.message}`
       );
-      instancesCreatedSummary = { instances: {} };
     }
 
-    return alertInstanceSummaryFromEventLog({
-      alert,
-      instancesLatestStateSummary,
-      instancesCreatedSummary,
+    return alertsInstanceSummaryFromEventLog({
+      alerts: [alert],
+      instancesLatestStateSummaries,
+      instancesCreatedSummaries,
       dateStart: parsedDateStart.toISOString(),
       dateEnd: dateNow.toISOString(),
-    });
+    })[0];
   }
 
   public async find<Params extends AlertTypeParams = never>({
