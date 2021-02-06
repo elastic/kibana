@@ -11,6 +11,7 @@ import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMPlugin } from './plugin';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 
+// plugin config
 export const config = {
   exposeToBrowser: {
     serviceMapEnabled: true,
@@ -50,18 +51,20 @@ export const config = {
 };
 
 export type APMXPackConfig = TypeOf<typeof config.schema>;
+export type APMConfig = ReturnType<typeof mergeConfigs>;
 
+// plugin config and ui indices settings
 export function mergeConfigs(
   apmOssConfig: APMOSSConfig,
   apmConfig: APMXPackConfig
 ) {
-  return {
+  const mergedConfig = {
     /* eslint-disable @typescript-eslint/naming-convention */
     // TODO: Remove all apm_oss options by 8.0
-    'apm_oss.transactionIndices': `traces-apm*,${apmOssConfig.transactionIndices}`,
-    'apm_oss.spanIndices': `traces-apm*,${apmOssConfig.spanIndices}`,
-    'apm_oss.errorIndices': `logs-apm*,${apmOssConfig.errorIndices}`,
-    'apm_oss.metricsIndices': `metrics-apm*,${apmOssConfig.metricsIndices}`,
+    'apm_oss.transactionIndices': apmOssConfig.transactionIndices,
+    'apm_oss.spanIndices': apmOssConfig.spanIndices,
+    'apm_oss.errorIndices': apmOssConfig.errorIndices,
+    'apm_oss.metricsIndices': apmOssConfig.metricsIndices,
     'apm_oss.sourcemapIndices': apmOssConfig.sourcemapIndices,
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
     'apm_oss.indexPattern': apmOssConfig.indexPattern, // TODO: add data stream indices: traces-apm*,logs-apm*,metrics-apm*. Blocked by https://github.com/elastic/kibana/issues/87851
@@ -90,9 +93,27 @@ export function mergeConfigs(
       apmConfig.searchAggregatedTransactions,
     'xpack.apm.metricsInterval': apmConfig.metricsInterval,
   };
-}
 
-export type APMConfig = ReturnType<typeof mergeConfigs>;
+  if (apmOssConfig.fleetMode) {
+    mergedConfig[
+      'apm_oss.transactionIndices'
+    ] = `traces-apm*,${mergedConfig['apm_oss.transactionIndices']}`;
+
+    mergedConfig[
+      'apm_oss.spanIndices'
+    ] = `traces-apm*,${mergedConfig['apm_oss.spanIndices']}`;
+
+    mergedConfig[
+      'apm_oss.errorIndices'
+    ] = `logs-apm*,${mergedConfig['apm_oss.errorIndices']}`;
+
+    mergedConfig[
+      'apm_oss.metricsIndices'
+    ] = `metrics-apm*,${mergedConfig['apm_oss.metricsIndices']}`;
+  }
+
+  return mergedConfig;
+}
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
