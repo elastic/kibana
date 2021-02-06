@@ -33,10 +33,7 @@ import { RouteDeps } from '../../types';
 import { escapeHatch, flattenSubCaseSavedObject, isAlertCommentSO, wrapError } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
 import { UserInfo } from '../../../../common';
-import {
-  buildCaseUserActions,
-  buildSubCaseUserActions,
-} from '../../../../services/user_actions/helpers';
+import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;

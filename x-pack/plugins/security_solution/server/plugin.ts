@@ -77,13 +77,6 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_CONFIGURE_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../case/server';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -125,11 +118,11 @@ const securitySubPlugins = [
 ];
 
 const caseSavedObjects = [
-  CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_CONFIGURE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
+  'cases',
+  'cases-comments',
+  'cases-sub-case',
+  'cases-configure',
+  'cases-user-actions',
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {

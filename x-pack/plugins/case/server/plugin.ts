@@ -129,7 +129,7 @@ export class CasePlugin {
       request: KibanaRequest
     ) => {
       return createExternalCaseClient({
-        callCluster: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+        scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
         caseService: this.caseService!,
@@ -170,7 +170,7 @@ export class CasePlugin {
       return {
         getCaseClient: () => {
           return new CaseClientImpl({
-            callCluster: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,
             caseConfigureService,
