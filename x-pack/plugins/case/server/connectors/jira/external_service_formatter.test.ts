@@ -10,7 +10,7 @@ import { jiraExternalServiceFormatter } from './external_service_formatter';
 
 describe('Jira formatter', () => {
   const theCase = {
-    tags: ['a tag'],
+    tags: ['tag'],
     connector: { fields: { priority: 'High', issueType: 'Task', parent: null } },
   } as CaseResponse;
 
@@ -20,8 +20,16 @@ describe('Jira formatter', () => {
   });
 
   it('it formats correctly when fields do not exist ', async () => {
-    const invalidFields = { tags: ['a tag'], connector: { fields: null } } as CaseResponse;
+    const invalidFields = { tags: ['tag'], connector: { fields: null } } as CaseResponse;
     const res = await jiraExternalServiceFormatter.format(invalidFields, []);
     expect(res).toEqual({ priority: null, issueType: null, parent: null, labels: theCase.tags });
+  });
+
+  it('it replace white spaces with hyphens on tags', async () => {
+    const res = await jiraExternalServiceFormatter.format(
+      { ...theCase, tags: ['a tag with spaces'] },
+      []
+    );
+    expect(res).toEqual({ ...theCase.connector.fields, labels: ['a-tag-with-spaces'] });
   });
 });

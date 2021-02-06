@@ -15,7 +15,13 @@ interface ExternalServiceParams extends JiraFieldsType {
 const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async (theCase) => {
   const { priority = null, issueType = null, parent = null } =
     (theCase.connector.fields as ConnectorJiraTypeFields['fields']) ?? {};
-  return { priority, labels: theCase.tags, issueType, parent };
+  return {
+    priority,
+    // Jira do not allows empty spaces on labels. We replace white spaces with hyphens
+    labels: theCase.tags.map((tag) => tag.replace(/\s+/g, '-')),
+    issueType,
+    parent,
+  };
 };
 
 export const jiraExternalServiceFormatter: ExternalServiceFormatter<ExternalServiceParams> = {
