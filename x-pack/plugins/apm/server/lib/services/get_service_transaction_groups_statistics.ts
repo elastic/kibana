@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { keyBy } from 'lodash';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -132,48 +133,43 @@ export async function getServiceTransactionGroupsStatistics({
   const buckets = response.aggregations?.transaction_groups.buckets ?? [];
 
   const totalDuration = response.aggregations?.total_duration.value;
-
-  return buckets.reduce((acc, bucket) => {
-    const transactionName = bucket.key;
-
-    const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-      x: timeseriesBucket.key,
-      y: getLatencyValue({
-        latencyAggregationType,
-        aggregation: timeseriesBucket.latency,
-      }),
-    }));
-
-    const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-      x: timeseriesBucket.key,
-      y:
-        timeseriesBucket.throughput_rate.value !== null
-          ? timeseriesBucket.throughput_rate.value
-          : null,
-    }));
-
-    const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-      x: timeseriesBucket.key,
-      y:
-        timeseriesBucket.doc_count > 0
-          ? timeseriesBucket[EVENT_OUTCOME].doc_count /
-            timeseriesBucket.doc_count
-          : null,
-    }));
-
-    const transactionGroupTotalDuration =
-      bucket.transaction_group_total_duration.value || 0;
-
-    return {
-      ...acc,
-      [transactionName]: {
+  return keyBy(
+    buckets.map((bucket) => {
+      const transactionName = bucket.key;
+      const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+        x: timeseriesBucket.key,
+        y: getLatencyValue({
+          latencyAggregationType,
+          aggregation: timeseriesBucket.latency,
+        }),
+      }));
+      const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+        x: timeseriesBucket.key,
+        y:
+          timeseriesBucket.throughput_rate.value !== null
+            ? timeseriesBucket.throughput_rate.value
+            : null,
+      }));
+      const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
+        x: timeseriesBucket.key,
+        y:
+          timeseriesBucket.doc_count > 0
+            ? timeseriesBucket[EVENT_OUTCOME].doc_count /
+              timeseriesBucket.doc_count
+            : null,
+      }));
+      const transactionGroupTotalDuration =
+        bucket.transaction_group_total_duration.value || 0;
+      return {
+        transactionName,
         latency,
         throughput,
         errorRate,
         impact: totalDuration
           ? (transactionGroupTotalDuration * 100) / totalDuration
           : 0,
-      },
-    };
-  }, {});
+      };
+    }),
+    'transactionName'
+  );
 }

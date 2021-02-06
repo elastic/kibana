@@ -29,7 +29,7 @@ import { rangeRt, uiFiltersRt } from './default_api_types';
 
 /**
  * Returns a list of transactions grouped by name
- * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/overview/
+ * //TODO: delete this once we moved away from the old table in the transaction overview page. It should be replaced by /transactions/groups/primary_statistics/
  */
 export const transactionGroupsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups',
@@ -65,8 +65,9 @@ export const transactionGroupsRoute = createRoute({
   },
 });
 
-export const transactionGroupsOverviewRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+export const transactionGroupsPrimaryStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
@@ -103,9 +104,9 @@ export const transactionGroupsOverviewRoute = createRoute({
   },
 });
 
-export const transactionGroupsStatisticsRoute = createRoute({
+export const transactionGroupsComparisonStatisticsRoute = createRoute({
   endpoint:
-    'GET /api/apm/services/{serviceName}/transactions/groups/statistics',
+    'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics',
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([

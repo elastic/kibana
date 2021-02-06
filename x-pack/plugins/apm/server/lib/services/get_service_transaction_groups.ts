@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,

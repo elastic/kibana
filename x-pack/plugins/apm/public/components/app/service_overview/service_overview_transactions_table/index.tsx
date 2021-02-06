@@ -69,7 +69,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/overview',
+          'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -122,7 +122,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/statistics',
+            'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics',
           params: {
             path: { serviceName },
             query: {

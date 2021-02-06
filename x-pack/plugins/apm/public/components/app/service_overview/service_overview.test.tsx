@@ -86,7 +86,7 @@ describe('ServiceOverview', () => {
         error_groups: [],
         total_error_groups: 0,
       },
-      'GET /api/apm/services/{serviceName}/transactions/groups/overview': {
+      'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics': {
         transactionGroups: [],
         totalTransactionGroups: 0,
         isAggregationAccurate: true,

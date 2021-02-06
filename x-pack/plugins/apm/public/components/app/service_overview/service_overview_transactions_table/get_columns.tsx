@@ -21,12 +21,12 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 
-type TransactionGroupsOverview = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/overview'>;
+type TransactionGroupsOverview = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics'>;
 
 type ServiceTransactionGroupItem = ValuesType<
   TransactionGroupsOverview['transactionGroups']
 >;
-type TransactionGroupsStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/statistics'>;
+type TransactionGroupsStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/comparison_statistics'>;
 
 function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   switch (latencyAggregationType) {
