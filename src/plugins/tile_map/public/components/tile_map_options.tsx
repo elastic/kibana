@@ -17,20 +17,25 @@ import {
   SwitchOption,
   RangeOption,
 } from '../../../vis_default_editor/public';
+import { truncatedColorSchemas } from '../../../charts/public';
 import { WmsOptions } from '../../../maps_legacy/public';
 import { TileMapVisParams } from '../types';
 import { MapTypes } from '../utils/map_types';
+import { getTmsLayers } from '../services';
+import { collections } from './collections';
 
 export type TileMapOptionsProps = VisEditorOptionsProps<TileMapVisParams>;
+
+const tmsLayers = getTmsLayers();
 
 function TileMapOptions(props: TileMapOptionsProps) {
   const { stateParams, setValue, vis } = props;
 
   useEffect(() => {
     if (!stateParams.mapType) {
-      setValue('mapType', vis.type.editorConfig.collections.mapTypes[0]);
+      setValue('mapType', collections.mapTypes[0].value);
     }
-  }, [setValue, stateParams.mapType, vis.type.editorConfig.collections.mapTypes]);
+  }, [setValue, stateParams.mapType]);
 
   return (
     <>
@@ -39,7 +44,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
           label={i18n.translate('tileMap.visParams.mapTypeLabel', {
             defaultMessage: 'Map type',
           })}
-          options={vis.type.editorConfig.collections.mapTypes}
+          options={collections.mapTypes}
           paramName="mapType"
           value={stateParams.mapType}
           setValue={setValue}
@@ -62,14 +67,14 @@ function TileMapOptions(props: TileMapOptionsProps) {
             label={i18n.translate('tileMap.visParams.colorSchemaLabel', {
               defaultMessage: 'Color schema',
             })}
-            options={vis.type.editorConfig.collections.colorSchemas}
+            options={truncatedColorSchemas}
             paramName="colorSchema"
             value={stateParams.colorSchema}
             setValue={setValue}
           />
         )}
 
-        <BasicOptions {...props} />
+        <BasicOptions {...props} legendPositions={collections.legendPositions} />
 
         <SwitchOption
           disabled={!vis.type.visConfig?.canDesaturate}
@@ -88,7 +93,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
 
       <EuiSpacer size="s" />
 
-      <WmsOptions {...props} />
+      <WmsOptions setValue={setValue} stateParams={stateParams} tmsLayers={tmsLayers} />
     </>
   );
 }
