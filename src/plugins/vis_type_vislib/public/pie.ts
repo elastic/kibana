@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
-import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
-import { getPositions } from '../../vis_type_xy/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { CommonVislibParams } from './types';
 import { PieOptions } from './editor';
@@ -28,7 +27,7 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
+export const pieVisTypeDefinition: VisTypeDefinition<PieVisParams> = {
   name: 'pie',
   title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
@@ -53,9 +52,6 @@ export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
     },
   },
   editorConfig: {
-    collections: {
-      legendPositions: getPositions(),
-    },
     optionsTemplate: PieOptions,
     schemas: [
       {
@@ -93,5 +89,5 @@ export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
     ],
   },
   hierarchicalData: true,
-  responseHandler: 'vislib_slices',
+  requiresSearch: true,
 };

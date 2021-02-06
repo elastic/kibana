@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { esKuery } from '../../../../../src/plugins/data/server';
+
 import { RecoveredActionGroup } from '../../common';
 import {
   asFiltersByAlertTypeAndConsumer,
@@ -30,11 +31,14 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           },
         ])
       )
-    ).toEqual(
-      esKuery.fromKueryExpression(
-        `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(myApp)))`
-      )
-    );
+    ).toMatchSnapshot();
+    // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
+    // resolved, we can start using this code again instead of toMatchSnapshot()
+    // ).toEqual(
+    //   esKuery.fromKueryExpression(
+    //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(myApp)))`
+    //   )
+    // );
   });
 
   test('constructs filter for single alert type with multiple authorized consumer', async () => {
@@ -58,11 +62,14 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           },
         ])
       )
-    ).toEqual(
-      esKuery.fromKueryExpression(
-        `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp)))`
-      )
-    );
+    ).toMatchSnapshot();
+    // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
+    // resolved, we can start using this code again, instead of toMatchSnapshot():
+    // ).toEqual(
+    //   esKuery.fromKueryExpression(
+    //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp)))`
+    //  )
+    // );
   });
 
   test('constructs filter for multiple alert types across authorized consumer', async () => {
@@ -119,11 +126,14 @@ describe('asFiltersByAlertTypeAndConsumer', () => {
           },
         ])
       )
-    ).toEqual(
-      esKuery.fromKueryExpression(
-        `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-      )
-    );
+    ).toMatchSnapshot();
+    // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
+    // resolved, we can start using this code again, instead of toMatchSnapshot():
+    // ).toEqual(
+    //   esKuery.fromKueryExpression(
+    //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+    //   )
+    // );
   });
 });
 

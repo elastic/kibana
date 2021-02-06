@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,16 +19,18 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import useSet from 'react-use/lib/useSet';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import {
+  AnomalyType,
   formatAnomalyScore,
   getFriendlyNameForPartitionId,
   formatOneDecimalPlace,
+  isCategoryAnomaly,
 } from '../../../../../../common/log_analysis';
-import { AnomalyType } from '../../../../../../common/http_api/log_analysis';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
+import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
 import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
 import {
   Page,
@@ -50,6 +53,7 @@ interface TableItem {
   typical: number;
   actual: number;
   type: AnomalyType;
+  categoryRegex?: string;
 }
 
 const anomalyScoreColumnName = i18n.translate(
@@ -124,6 +128,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         type: anomaly.type,
         typical: anomaly.typical,
         actual: anomaly.actual,
+        categoryRegex: isCategoryAnomaly(anomaly) ? anomaly.categoryRegex : undefined,
       };
     });
   }, [results]);
@@ -166,9 +171,7 @@ export const AnomaliesTable: React.FunctionComponent<{
       {
         name: anomalyMessageColumnName,
         truncateText: true,
-        render: (item: TableItem) => (
-          <AnomalyMessage actual={item.actual} typical={item.typical} type={item.type} />
-        ),
+        render: (item: TableItem) => <AnomalyMessage anomaly={item} />,
       },
       {
         field: 'startTime',
@@ -226,15 +229,9 @@ export const AnomaliesTable: React.FunctionComponent<{
   );
 };
 
-const AnomalyMessage = ({
-  actual,
-  typical,
-  type,
-}: {
-  actual: number;
-  typical: number;
-  type: AnomalyType;
-}) => {
+const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
+  const { type, actual, typical } = anomaly;
+
   const moreThanExpectedAnomalyMessage = i18n.translate(
     'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
     {
@@ -262,9 +259,20 @@ const AnomalyMessage = ({
   const ratioMessage = useRatio ? `${formatOneDecimalPlace(ratio)}x` : '';
 
   return (
-    <span>
-      <EuiIcon type={icon} /> {`${ratioMessage} ${message}`}
-    </span>
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexItem grow={false} component="span">
+        <EuiIcon type={icon} />
+      </EuiFlexItem>
+      <EuiFlexItem component="span">
+        {`${ratioMessage} ${message}`}
+        {anomaly.categoryRegex && (
+          <>
+            {': '}
+            <RegularExpressionRepresentation regularExpression={anomaly.categoryRegex} />
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

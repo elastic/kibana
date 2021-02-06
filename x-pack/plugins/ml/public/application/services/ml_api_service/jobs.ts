@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -13,6 +14,8 @@ import {
   MlJobWithTimeRange,
   MlSummaryJobs,
   CombinedJobWithStats,
+  Job,
+  Datafeed,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { AggFieldNamePair } from '../../../../common/types/fields';
@@ -43,6 +46,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       jobsMap: Dictionary<MlJobWithTimeRange>;
     }>({
       path: `${basePath()}/jobs/jobs_with_time_range`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  jobForCloning(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
+      path: `${basePath()}/jobs/job_for_cloning`,
       method: 'POST',
       body,
     });

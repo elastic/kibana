@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
@@ -531,7 +532,7 @@ describe('suggestion helpers', () => {
         {
           mockindexpattern: { state: mockDatasourceState, isLoading: false },
         },
-        { id: 'myfield' },
+        { id: 'myfield', humanData: { label: 'myfieldLabel' } },
       ];
     });
 
@@ -542,6 +543,9 @@ describe('suggestion helpers', () => {
         mockDatasourceState,
         {
           id: 'myfield',
+          humanData: {
+            label: 'myfieldLabel',
+          },
         }
       );
     });

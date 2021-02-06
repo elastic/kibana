@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggGroupNames } from '../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
@@ -33,52 +34,10 @@ export const tagCloudVisTypeDefinition = {
   },
   toExpressionAst,
   editorConfig: {
-    collections: {
-      scales: [
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.linearText', {
-            defaultMessage: 'Linear',
-          }),
-          value: 'linear',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.logText', {
-            defaultMessage: 'Log',
-          }),
-          value: 'log',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.scales.squareRootText', {
-            defaultMessage: 'Square root',
-          }),
-          value: 'square root',
-        },
-      ],
-      orientations: [
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.singleText', {
-            defaultMessage: 'Single',
-          }),
-          value: 'single',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.rightAngledText', {
-            defaultMessage: 'Right angled',
-          }),
-          value: 'right angled',
-        },
-        {
-          text: i18n.translate('visTypeTagCloud.vis.editorConfig.orientations.multipleText', {
-            defaultMessage: 'Multiple',
-          }),
-          value: 'multiple',
-        },
-      ],
-    },
     optionsTemplate: TagCloudOptions,
     schemas: [
       {
-        group: 'metrics',
+        group: AggGroupNames.Metrics,
         name: 'metric',
         title: i18n.translate('visTypeTagCloud.vis.schemas.metricTitle', {
           defaultMessage: 'Tag size',
@@ -96,7 +55,7 @@ export const tagCloudVisTypeDefinition = {
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
-        group: 'buckets',
+        group: AggGroupNames.Buckets,
         name: 'segment',
         title: i18n.translate('visTypeTagCloud.vis.schemas.segmentTitle', {
           defaultMessage: 'Tags',
@@ -107,4 +66,5 @@ export const tagCloudVisTypeDefinition = {
       },
     ],
   },
+  requiresSearch: true,
 };

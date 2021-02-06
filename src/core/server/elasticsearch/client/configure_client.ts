@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Buffer } from 'buffer';
@@ -15,12 +15,12 @@ import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
-  { logger, scoped = false }: { logger: Logger; scoped?: boolean }
+  { logger, type, scoped = false }: { logger: Logger; type: string; scoped?: boolean }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
 
   const client = new Client(clientOptions);
-  addLogging(client, logger, config.logQueries);
+  addLogging(client, logger.get('query', type));
 
   return client;
 };
@@ -67,15 +67,13 @@ function getResponseMessage(event: RequestEvent): string {
   return `${event.statusCode}\n${params.method} ${url}${body}`;
 }
 
-const addLogging = (client: Client, logger: Logger, logQueries: boolean) => {
+const addLogging = (client: Client, logger: Logger) => {
   client.on('response', (error, event) => {
-    if (event && logQueries) {
+    if (event) {
       if (error) {
-        logger.error(getErrorMessage(error, event));
+        logger.debug(getErrorMessage(error, event));
       } else {
-        logger.debug(getResponseMessage(event), {
-          tags: ['query'],
-        });
+        logger.debug(getResponseMessage(event));
       }
     }
   });

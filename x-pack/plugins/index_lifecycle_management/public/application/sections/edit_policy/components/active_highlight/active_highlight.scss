@@ -1,0 +1,16 @@
+.ilmActivePhaseHighlight {
+  border-left: $euiBorderWidthThin solid $euiColorLightShade;
+  height: 100%;
+
+  &.hotPhase.active {
+    border-left-color: $euiColorVis9_behindText;
+  }
+
+  &.warmPhase.active {
+    border-left-color: $euiColorVis5_behindText;
+  }
+
+  &.coldPhase.active {
+    border-left-color: $euiColorVis1_behindText;
+  }
+}
