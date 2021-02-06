@@ -2776,7 +2776,6 @@
     "indexPatternManagement.editIndexPattern.tabs.sourceHeader": "字段筛选",
     "indexPatternManagement.editIndexPattern.timeFilterHeader": "时间字段：“{timeFieldName}”",
     "indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink": "映射 API",
-    "indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail": "此页根据 Elasticsearch 的记录列出“{indexPatternTitle}”索引中的每个字段以及字段的关联核心类型。要更改字段类型，请使用 Elasticsearch",
     "indexPatternManagement.editIndexPatternLiveRegionAriaLabel": "索引模式",
     "indexPatternManagement.emptyIndexPatternPrompt.documentation": "阅读文档",
     "indexPatternManagement.emptyIndexPatternPrompt.indexPatternExplanation": "Kibana 需要索引模式，以识别您要浏览的索引。索引模式可以指向特定索引（例如昨天的日志数据），或包含日志数据的所有索引。",
