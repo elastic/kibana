@@ -25,7 +25,10 @@ import {
   ContextTypeGeneratedAlertRt,
   CommentRequestGeneratedAlertType,
 } from '../../../common/api';
-import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
+import {
+  buildCaseUserActionItem,
+  buildCommentUserActionItem,
+} from '../../services/user_actions/helpers';
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase, UserInfo } from '../../common';
@@ -36,20 +39,37 @@ async function getSubCase({
   savedObjectsClient,
   caseId,
   createdAt,
+  userActionService,
+  user,
 }: {
   caseService: CaseServiceSetup;
   savedObjectsClient: SavedObjectsClientContract;
   caseId: string;
   createdAt: string;
+  userActionService: CaseUserActionServiceSetup;
+  user: UserInfo;
 }): Promise<SavedObject<SubCaseAttributes>> {
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
     return mostRecentSubCase;
   }
 
-  // TODO: add action for sub_case creation
-  // else need to create a new sub case
-  return caseService.createSubCase(savedObjectsClient, createdAt, caseId);
+  const newSubCase = await caseService.createSubCase(savedObjectsClient, createdAt, caseId);
+  await userActionService.postUserActions({
+    client: savedObjectsClient,
+    actions: [
+      buildCaseUserActionItem({
+        action: 'create',
+        actionAt: createdAt,
+        actionBy: user,
+        caseId,
+        subCaseId: newSubCase.id,
+        fields: ['status', 'sub_case'],
+        newValue: JSON.stringify({ status: newSubCase.attributes.status }),
+      }),
+    ],
+  });
+  return newSubCase;
 }
 
 interface AddCommentFromRuleArgs {
@@ -89,11 +109,19 @@ const addGeneratedAlerts = async ({
     throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
   }
 
+  const userDetails: UserInfo = {
+    username: caseInfo.attributes.created_by?.username,
+    full_name: caseInfo.attributes.created_by?.full_name,
+    email: caseInfo.attributes.created_by?.email,
+  };
+
   const subCase = await getSubCase({
     caseService,
     savedObjectsClient,
     caseId,
     createdAt: createdDate,
+    userActionService,
+    user: userDetails,
   });
 
   const commentableCase = new CommentableCase({
@@ -103,16 +131,10 @@ const addGeneratedAlerts = async ({
     service: caseService,
   });
 
-  const userDetails: UserInfo = {
-    username: caseInfo.attributes.created_by?.username,
-    full_name: caseInfo.attributes.created_by?.full_name,
-    email: caseInfo.attributes.created_by?.email,
-  };
-
-  const [newComment, updatedCase] = await Promise.all([
-    commentableCase.createComment({ createdDate, user: userDetails, commentReq: query }),
-    commentableCase.update({ date: createdDate, user: userDetails }),
-  ]);
+  const {
+    comment: newComment,
+    commentableCase: updatedCase,
+  } = await commentableCase.createComment({ createdDate, user: userDetails, commentReq: query });
 
   if (
     (newComment.attributes.type === CommentType.alert ||
@@ -134,7 +156,8 @@ const addGeneratedAlerts = async ({
         action: 'create',
         actionAt: createdDate,
         actionBy: { ...userDetails },
-        caseId: subCase.id,
+        caseId: updatedCase.caseId,
+        subCaseId: updatedCase.subCaseId,
         commentId: newComment.id,
         fields: ['comment'],
         newValue: JSON.stringify(query),
@@ -238,15 +261,11 @@ export const addComment = async ({
     email,
   };
 
-  const [newComment, updatedCase] = await Promise.all([
-    combinedCase.createComment({ createdDate, user: userInfo, commentReq: query }),
-    // This will return a full new CombinedCase object that has the updated and base fields
-    // merged together so let's use the return value from now on
-    combinedCase.update({
-      date: createdDate,
-      user: { username, full_name, email },
-    }),
-  ]);
+  const { comment: newComment, commentableCase: updatedCase } = await combinedCase.createComment({
+    createdDate,
+    user: userInfo,
+    commentReq: query,
+  });
 
   if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
     const ids = getAlertIds(query);
@@ -264,7 +283,8 @@ export const addComment = async ({
         action: 'create',
         actionAt: createdDate,
         actionBy: { username, full_name, email },
-        caseId: updatedCase.id,
+        caseId: updatedCase.caseId,
+        subCaseId: updatedCase.subCaseId,
         commentId: newComment.id,
         fields: ['comment'],
         newValue: JSON.stringify(query),

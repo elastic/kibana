@@ -127,17 +127,14 @@ export function initPatchCommentApi({
         };
 
         const updatedDate = new Date().toISOString();
-        const [updatedComment, updatedCase] = await Promise.all([
-          commentableCase.updateComment({
-            updateRequest: query,
-            updatedAt: updatedDate,
-            user: userInfo,
-          }),
-          commentableCase.update({
-            date: updatedDate,
-            user: { username, full_name, email },
-          }),
-        ]);
+        const {
+          comment: updatedComment,
+          commentableCase: updatedCase,
+        } = await commentableCase.updateComment({
+          updateRequest: query,
+          updatedAt: updatedDate,
+          user: userInfo,
+        });
 
         await userActionService.postUserActions({
           client,

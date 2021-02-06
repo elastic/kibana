@@ -161,25 +161,46 @@ const userActionFieldsAllowed: UserActionField = [
   'sub_case',
 ];
 
+interface CaseSubIDs {
+  caseId: string;
+  subCaseId?: string;
+}
+
+type GetCaseAndSubID = <T>(so: SavedObjectsUpdateResponse<T>) => CaseSubIDs;
+type GetField = <T>(
+  attributes: Pick<SavedObjectsUpdateResponse<T>, 'attributes'>,
+  field: UserActionFieldType
+) => unknown;
+
+/**
+ * Abstraction functions to retrieve a given field and the caseId and subCaseId depending on
+ * whether we're interacting with a case or a sub case.
+ */
+interface Getters {
+  getField: GetField;
+  getCaseAndSubID: GetCaseAndSubID;
+}
+
 const buildGenericCaseUserActions = <T>({
   actionDate,
   actionBy,
   originalCases,
   updatedCases,
   allowedFields,
-  getField,
+  getters,
 }: {
   actionDate: string;
   actionBy: User;
   originalCases: Array<SavedObject<T>>;
   updatedCases: Array<SavedObjectsUpdateResponse<T>>;
   allowedFields: UserActionField;
-  getField: (
-    attributes: Pick<SavedObjectsUpdateResponse<T>, 'attributes'>,
-    field: UserActionFieldType
-  ) => unknown;
-}): UserActionItem[] =>
-  updatedCases.reduce<UserActionItem[]>((acc, updatedItem) => {
+  getters: Getters;
+}): UserActionItem[] => {
+  const { getCaseAndSubID, getField } = getters;
+  return updatedCases.reduce<UserActionItem[]>((acc, updatedItem) => {
+    const { caseId, subCaseId } = getCaseAndSubID(updatedItem);
+    // regardless of whether we're looking at a sub case or case, the id field will always be used to match between
+    // the original and the updated saved object
     const originalItem = originalCases.find((oItem) => oItem.id === updatedItem.id);
     if (originalItem != null) {
       let userActions: UserActionItem[] = [];
@@ -196,7 +217,8 @@ const buildGenericCaseUserActions = <T>({
                 action: 'update',
                 actionAt: actionDate,
                 actionBy,
-                caseId: updatedItem.id,
+                caseId,
+                subCaseId,
                 fields: [field],
                 newValue: updatedValue,
                 oldValue: origValue,
@@ -211,7 +233,8 @@ const buildGenericCaseUserActions = <T>({
                   action: 'add',
                   actionAt: actionDate,
                   actionBy,
-                  caseId: updatedItem.id,
+                  caseId,
+                  subCaseId,
                   fields: [field],
                   newValue: compareValues.addedItems.join(', '),
                 }),
@@ -225,7 +248,8 @@ const buildGenericCaseUserActions = <T>({
                   action: 'delete',
                   actionAt: actionDate,
                   actionBy,
-                  caseId: updatedItem.id,
+                  caseId,
+                  subCaseId,
                   fields: [field],
                   newValue: compareValues.deletedItems.join(', '),
                 }),
@@ -242,7 +266,8 @@ const buildGenericCaseUserActions = <T>({
                 action: 'update',
                 actionAt: actionDate,
                 actionBy,
-                caseId: updatedItem.id,
+                caseId,
+                subCaseId,
                 fields: [field],
                 newValue: JSON.stringify(updatedValue),
                 oldValue: JSON.stringify(origValue),
@@ -255,6 +280,7 @@ const buildGenericCaseUserActions = <T>({
     }
     return acc;
   }, []);
+};
 
 /**
  * Create a user action for an updated sub case.
@@ -270,13 +296,23 @@ export const buildSubCaseUserActions = (args: {
     field: UserActionFieldType
   ) => get(so, ['attributes', field]);
 
+  const getCaseAndSubID = (so: SavedObjectsUpdateResponse<SubCaseAttributes>): CaseSubIDs => {
+    const caseId = so.references?.find((ref) => ref.type === CASE_SAVED_OBJECT)?.id ?? '';
+    return { caseId, subCaseId: so.id };
+  };
+
+  const getters: Getters = {
+    getField,
+    getCaseAndSubID,
+  };
+
   return buildGenericCaseUserActions({
     actionDate: args.actionDate,
     actionBy: args.actionBy,
     originalCases: args.originalSubCases,
     updatedCases: args.updatedSubCases,
     allowedFields: ['status'],
-    getField,
+    getters,
   });
 };
 
@@ -298,5 +334,14 @@ export const buildCaseUserActions = (args: {
       : get(so, ['attributes', field]);
   };
 
-  return buildGenericCaseUserActions({ ...args, allowedFields: userActionFieldsAllowed, getField });
+  const caseGetIds: GetCaseAndSubID = <T>(so: SavedObjectsUpdateResponse<T>): CaseSubIDs => {
+    return { caseId: so.id };
+  };
+
+  const getters: Getters = {
+    getField,
+    getCaseAndSubID: caseGetIds,
+  };
+
+  return buildGenericCaseUserActions({ ...args, allowedFields: userActionFieldsAllowed, getters });
 };
