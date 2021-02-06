@@ -122,7 +122,7 @@ export const Schema: React.FC = () => {
                   <EuiFlexItem>{addFieldButton}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {percentageComplete < 100 ? (
-                      <EuiButton isLoading={true} fill={true}>
+                      <EuiButton isLoading fill>
                         {SCHEMA_UPDATING}
                       </EuiButton>
                     ) : (
@@ -130,7 +130,7 @@ export const Schema: React.FC = () => {
                         disabled={formUnchanged}
                         data-test-subj="UpdateTypesButton"
                         onClick={updateFields}
-                        fill={true}
+                        fill
                       >
                         {SCHEMA_SAVE_BUTTON}
                       </EuiButton>
