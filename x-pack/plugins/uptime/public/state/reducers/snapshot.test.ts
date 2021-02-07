@@ -7,6 +7,7 @@
 
 import { snapshotReducer } from './snapshot';
 import { getSnapshotCountAction } from '../actions';
+import { IHttpFetchError } from '../../../../../../src/core/public';
 
 describe('snapshot reducer', () => {
   it('updates existing state', () => {
@@ -47,7 +48,7 @@ describe('snapshot reducer', () => {
 
   it('appends a current error to existing errors list', () => {
     const action = getSnapshotCountAction.fail(
-      new Error(`I couldn't get your data because the server denied the request`)
+      new Error(`I couldn't get your data because the server denied the request`) as IHttpFetchError
     );
 
     expect(snapshotReducer(undefined, action)).toMatchSnapshot();

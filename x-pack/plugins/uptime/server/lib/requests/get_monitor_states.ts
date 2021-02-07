@@ -25,6 +25,7 @@ export interface GetMonitorStatesParams {
   pageSize: number;
   filters?: string | null;
   statusFilter?: string;
+  query?: string;
 }
 
 // To simplify the handling of the group of pagination vars they're passed back to the client as a string
