@@ -12,15 +12,24 @@ import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
 import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
+import { InfoButton } from './info_button';
 import { ACTION, OnActionComplete } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
-  { id, name, expires }: UISession,
+  uiSession: UISession,
   onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
+  const { id, name, expires } = uiSession;
   switch (actionType) {
+    case ACTION.INFO:
+      return {
+        iconType: 'iInCircle',
+        textColor: 'default',
+        label: <InfoButton searchSession={uiSession} />,
+      };
+
     case ACTION.DELETE:
       return {
         iconType: 'crossInACircleFilled',

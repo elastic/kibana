@@ -8,6 +8,7 @@
 export type OnActionComplete = () => void;
 
 export enum ACTION {
+  INFO = 'info',
   EXTEND = 'extend',
   DELETE = 'delete',
 }
