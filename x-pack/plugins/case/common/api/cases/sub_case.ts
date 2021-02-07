@@ -24,6 +24,7 @@ export const SubCaseAttributesRt = rt.intersection([
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,
+    created_by: rt.union([UserRT, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRT, rt.null]),
   }),

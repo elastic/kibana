@@ -63,8 +63,8 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
                 // still override this behavior.
                 page: defaultPage,
                 perPage: defaultPerPage,
-                ...query,
                 sortField: 'created_at',
+                ...query,
               },
               associationType,
             }
@@ -75,6 +75,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
               options: {
                 page: defaultPage,
                 perPage: defaultPerPage,
+                sortField: 'created_at',
               },
               associationType,
             };

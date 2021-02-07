@@ -27,12 +27,12 @@ import {
   ESCaseAttributes,
   SubCaseResponse,
   SubCasesResponseRt,
+  User,
 } from '../../../../../common/api';
 import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import { escapeHatch, flattenSubCaseSavedObject, isAlertCommentSO, wrapError } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
-import { UserInfo } from '../../../../common';
 import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
 
 interface UpdateArgs {
@@ -212,7 +212,7 @@ async function update({
     client,
     subCases: nonEmptySubCaseRequests.map((thisCase) => {
       const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
-      let closedInfo: { closed_at: string | null; closed_by: UserInfo | null } = {
+      let closedInfo: { closed_at: string | null; closed_by: User | null } = {
         closed_at: null,
         closed_by: null,
       };

@@ -28,6 +28,7 @@ import {
   SubCaseAttributes,
   AssociationType,
 } from '../../common/api';
+import { defaultSortField } from '../common';
 import { combineFilters } from '../routes/api/cases/helpers';
 import { transformNewSubCase } from '../routes/api/utils';
 import {
@@ -97,6 +98,12 @@ interface GetCommentArgs extends ClientArgs {
 
 interface PostCaseArgs extends ClientArgs {
   attributes: ESCaseAttributes;
+}
+
+interface CreateSubCaseArgs extends ClientArgs {
+  createdAt: string;
+  caseId: string;
+  createdBy: User;
 }
 
 interface PostCommentArgs extends ClientArgs {
@@ -178,11 +185,7 @@ export interface CaseServiceSetup {
     client: SavedObjectsClientContract,
     caseId: string
   ): Promise<SavedObject<SubCaseAttributes> | undefined>;
-  createSubCase(
-    client: SavedObjectsClientContract,
-    createdAt: string,
-    caseId: string
-  ): Promise<SavedObject<SubCaseAttributes>>;
+  createSubCase(args: CreateSubCaseArgs): Promise<SavedObject<SubCaseAttributes>>;
   patchSubCase(args: PatchSubCase): Promise<SavedObjectsUpdateResponse<SubCaseAttributes>>;
   patchSubCases(args: PatchSubCases): Promise<SavedObjectsBulkUpdateResponse<SubCaseAttributes>>;
 }
@@ -193,14 +196,15 @@ export class CaseService implements CaseServiceSetup {
     private readonly authentication?: SecurityPluginSetup['authc']
   ) {}
 
-  public async createSubCase(
-    client: SavedObjectsClientContract,
-    createdAt: string,
-    caseId: string
-  ): Promise<SavedObject<SubCaseAttributes>> {
+  public async createSubCase({
+    client,
+    createdAt,
+    caseId,
+    createdBy,
+  }: CreateSubCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new sub case`);
-      return client.create(SUB_CASE_SAVED_OBJECT, transformNewSubCase(createdAt), {
+      return client.create(SUB_CASE_SAVED_OBJECT, transformNewSubCase({ createdAt, createdBy }), {
         references: [
           {
             type: CASE_SAVED_OBJECT,
@@ -332,7 +336,11 @@ export class CaseService implements CaseServiceSetup {
   }: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
-      return await client.find({ ...options, type: CASE_SAVED_OBJECT });
+      return await client.find({
+        sortField: defaultSortField,
+        ...options,
+        type: CASE_SAVED_OBJECT,
+      });
     } catch (error) {
       this.log.debug(`Error on find cases: ${error}`);
       throw error;
@@ -349,6 +357,7 @@ export class CaseService implements CaseServiceSetup {
       // grab all sub cases
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return client.find({
+          sortField: defaultSortField,
           ...options,
           type: SUB_CASE_SAVED_OBJECT,
         });
@@ -358,12 +367,14 @@ export class CaseService implements CaseServiceSetup {
         fields: [],
         page: 1,
         perPage: 1,
+        sortField: defaultSortField,
         ...options,
         type: SUB_CASE_SAVED_OBJECT,
       });
       return client.find({
         page: 1,
         perPage: stats.total,
+        sortField: defaultSortField,
         ...options,
         type: SUB_CASE_SAVED_OBJECT,
       });
@@ -424,6 +435,7 @@ export class CaseService implements CaseServiceSetup {
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return client.find({
           type: CASE_COMMENT_SAVED_OBJECT,
+          sortField: defaultSortField,
           ...options,
         });
       }
@@ -433,6 +445,7 @@ export class CaseService implements CaseServiceSetup {
         fields: [],
         page: 1,
         perPage: 1,
+        sortField: defaultSortField,
         // spread the options after so the caller can override the default behavior if they want
         ...options,
       });
@@ -441,6 +454,7 @@ export class CaseService implements CaseServiceSetup {
         type: CASE_COMMENT_SAVED_OBJECT,
         page: 1,
         perPage: stats.total,
+        sortField: defaultSortField,
         ...options,
       });
     } catch (error) {

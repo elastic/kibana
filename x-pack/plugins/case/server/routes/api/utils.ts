@@ -42,6 +42,7 @@ import {
   ContextTypeGeneratedAlertRt,
   SubCasesFindResponse,
   AttributesTypeAlerts,
+  User,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -49,12 +50,18 @@ import { SortFieldCase, TotalCommentByCase } from './types';
 
 // TODO: refactor these functions to a common location, this is used by the caseClient too
 
-// TODO: maybe inline this
-export const transformNewSubCase = (createdAt: string): SubCaseAttributes => {
+export const transformNewSubCase = ({
+  createdAt,
+  createdBy,
+}: {
+  createdAt: string;
+  createdBy: User;
+}): SubCaseAttributes => {
   return {
     closed_at: null,
     closed_by: null,
     created_at: createdAt,
+    created_by: createdBy,
     status: CaseStatuses.open,
     updated_at: null,
     updated_by: null,

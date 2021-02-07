@@ -8,6 +8,8 @@
 import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
 import { CommentAttributes, CommentType } from '../../common/api';
 
+export const defaultSortField = 'created_at';
+
 // TODO: write unit tests for these function
 export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) => {
   let totalAlerts = 0;

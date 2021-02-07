@@ -155,8 +155,7 @@ export const subCaseResp = ({
   totalAlerts,
   totalComment,
   closed_by: null,
-  // TODO: add this
-  // created_by: defaultUser,
+  created_by: defaultUser,
   updated_by: defaultUser,
 });
 

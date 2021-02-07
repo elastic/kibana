@@ -34,6 +34,19 @@ export const subCaseSavedObjectType: SavedObjectsType = {
       created_at: {
         type: 'date',
       },
+      created_by: {
+        properties: {
+          username: {
+            type: 'keyword',
+          },
+          full_name: {
+            type: 'keyword',
+          },
+          email: {
+            type: 'keyword',
+          },
+        },
+      },
       status: {
         type: 'keyword',
       },

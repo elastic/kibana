@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 
 import {
   SavedObject,
@@ -15,13 +16,16 @@ import {
   AssociationType,
   CaseSettings,
   CaseStatuses,
+  CaseType,
   CollectionWithSubCaseResponse,
   CollectWithSubCaseResponseRt,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
+  CommentType,
   ESCaseAttributes,
   SubCaseAttributes,
+  User,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from '../../routes/api/cases/helpers';
 import {
@@ -31,7 +35,7 @@ import {
 } from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseServiceSetup } from '../../services';
-import { countAlertsForID, UserInfo } from '../index';
+import { countAlertsForID } from '../index';
 
 interface UpdateCommentResp {
   comment: SavedObjectsUpdateResponse<CommentAttributes>;
@@ -114,7 +118,7 @@ export class CommentableCase {
     ];
   }
 
-  private async update({ date, user }: { date: string; user: UserInfo }): Promise<CommentableCase> {
+  private async update({ date, user }: { date: string; user: User }): Promise<CommentableCase> {
     let updatedSubCaseAttributes: SavedObject<SubCaseAttributes> | undefined;
 
     if (this.subCase) {
@@ -176,7 +180,7 @@ export class CommentableCase {
   }: {
     updateRequest: CommentPatchRequest;
     updatedAt: string;
-    user: UserInfo;
+    user: User;
   }): Promise<UpdateCommentResp> {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
@@ -208,9 +212,19 @@ export class CommentableCase {
     commentReq,
   }: {
     createdDate: string;
-    user: UserInfo;
+    user: User;
     commentReq: CommentRequest;
   }): Promise<NewCommentResp> {
+    if (commentReq.type === CommentType.alert) {
+      if (this.status === CaseStatuses.closed) {
+        throw Boom.badRequest('Alert cannot be attached to a closed case');
+      }
+
+      if (!this.subCase && this.collection.attributes.type === CaseType.collection) {
+        throw Boom.badRequest('Alert cannot be attached to a collection case');
+      }
+    }
+
     const [comment, commentableCase] = await Promise.all([
       this.service.postNewComment({
         client: this.soClient,

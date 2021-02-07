@@ -24,6 +24,7 @@ import {
   CollectionWithSubCaseResponse,
   ContextTypeGeneratedAlertRt,
   CommentRequestGeneratedAlertType,
+  User,
 } from '../../../common/api';
 import {
   buildCaseUserActionItem,
@@ -31,7 +32,7 @@ import {
 } from '../../services/user_actions/helpers';
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
-import { CommentableCase, UserInfo } from '../../common';
+import { CommentableCase } from '../../common';
 import { CaseClientImpl } from '..';
 
 async function getSubCase({
@@ -47,14 +48,19 @@ async function getSubCase({
   caseId: string;
   createdAt: string;
   userActionService: CaseUserActionServiceSetup;
-  user: UserInfo;
+  user: User;
 }): Promise<SavedObject<SubCaseAttributes>> {
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
     return mostRecentSubCase;
   }
 
-  const newSubCase = await caseService.createSubCase(savedObjectsClient, createdAt, caseId);
+  const newSubCase = await caseService.createSubCase({
+    client: savedObjectsClient,
+    createdAt,
+    caseId,
+    createdBy: user,
+  });
   await userActionService.postUserActions({
     client: savedObjectsClient,
     actions: [
@@ -109,7 +115,7 @@ const addGeneratedAlerts = async ({
     throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
   }
 
-  const userDetails: UserInfo = {
+  const userDetails: User = {
     username: caseInfo.attributes.created_by?.username,
     full_name: caseInfo.attributes.created_by?.full_name,
     email: caseInfo.attributes.created_by?.email,
@@ -248,14 +254,9 @@ export const addComment = async ({
 
   const combinedCase = await getCombinedCase(caseService, savedObjectsClient, caseId);
 
-  // An alert cannot be attach to a closed case.
-  if (query.type === CommentType.alert && combinedCase.status === CaseStatuses.closed) {
-    throw Boom.badRequest('Alert cannot be attached to a closed case');
-  }
-
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
-  const userInfo: UserInfo = {
+  const userInfo: User = {
     username,
     full_name,
     email,
