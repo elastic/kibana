@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -11,8 +12,10 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 
 import 'jest-canvas-mock';
 import { MIME_FILTERS, WaterfallFilter } from './waterfall_filter';
-import { OPEN_FILTERS_POPOVER } from '../../translations';
-import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
+import {
+  FILTER_REQUESTS_LABEL,
+  FILTER_POPOVER_OPEN_LABEL,
+} from '../../waterfall/components/translations';
 
 describe('waterfall filter', () => {
   jest.useFakeTimers();
@@ -29,9 +32,7 @@ describe('waterfall filter', () => {
       />
     );
 
-    act(() => {
-      fireEvent.click(getByLabelText(OPEN_FILTERS_POPOVER));
-    });
+    fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
 
     MIME_FILTERS.forEach((filter) => {
       expect(getByTitle(filter.label));
@@ -55,25 +56,19 @@ describe('waterfall filter', () => {
     };
     const { getByLabelText, getByTitle } = render(<Component />);
 
-    act(() => {
-      fireEvent.click(getByLabelText(OPEN_FILTERS_POPOVER));
-    });
+    fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
 
-    act(() => {
-      fireEvent.click(getByTitle('XHR'));
-    });
+    fireEvent.click(getByTitle('XHR'));
 
-    expect(getByLabelText(OPEN_FILTERS_POPOVER)).toHaveAttribute(
+    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
       'class',
       'euiButtonIcon euiButtonIcon--primary'
     );
 
     // toggle it back to inactive
-    act(() => {
-      fireEvent.click(getByTitle('XHR'));
-    });
+    fireEvent.click(getByTitle('XHR'));
 
-    expect(getByLabelText(OPEN_FILTERS_POPOVER)).toHaveAttribute(
+    expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
       'class',
       'euiButtonIcon euiButtonIcon--text'
     );
@@ -98,9 +93,7 @@ describe('waterfall filter', () => {
 
     const testText = 'js';
 
-    act(() => {
-      fireEvent.change(getByLabelText(FILTER_REQUESTS_LABEL), { target: { value: testText } });
-    });
+    fireEvent.change(getByLabelText(FILTER_REQUESTS_LABEL), { target: { value: testText } });
 
     // inout has debounce effect so hence the timer
     act(() => {

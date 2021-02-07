@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,8 +16,10 @@ import { extractItems, isHighlightedItem } from './data_formatting';
 import 'jest-canvas-mock';
 import { BAR_HEIGHT } from '../../waterfall/components/constants';
 import { MimeType } from './types';
-import { OPEN_FILTERS_POPOVER } from '../../translations';
-import { FILTER_REQUESTS_LABEL } from '../../waterfall/components/translations';
+import {
+  FILTER_POPOVER_OPEN_LABEL,
+  FILTER_REQUESTS_LABEL,
+} from '../../waterfall/components/translations';
 
 const getHighLightedItems = (query: string, filters: string[]) => {
   return NETWORK_EVENTS.events.filter((item) => isHighlightedItem(item, query, filters));
@@ -44,9 +47,7 @@ describe('waterfall chart wrapper', () => {
 
     const searchText = '.js';
 
-    act(() => {
-      fireEvent.change(filterInput, { target: { value: searchText } });
-    });
+    fireEvent.change(filterInput, { target: { value: searchText } });
 
     // inout has debounce effect so hence the timer
     act(() => {
@@ -76,13 +77,9 @@ describe('waterfall chart wrapper', () => {
 
     expect(sideBarItems).toHaveLength(5);
 
-    act(() => {
-      fireEvent.click(getByLabelText(OPEN_FILTERS_POPOVER));
-    });
+    fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
 
-    act(() => {
-      fireEvent.click(getAllByText('XHR')[1]);
-    });
+    fireEvent.click(getAllByText('XHR')[1]);
 
     // inout has debounce effect so hence the timer
     act(() => {

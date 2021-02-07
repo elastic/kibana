@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiCheckbox,
@@ -16,15 +17,15 @@ import {
   EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   FILTER_REQUESTS_LABEL,
   FILTER_SCREENREADER_LABEL,
   FILTER_REMOVE_SCREENREADER_LABEL,
+  FILTER_POPOVER_OPEN_LABEL,
+  FILTER_COLLAPSE_REQUESTS_LABEL,
 } from '../../waterfall/components/translations';
 import { MimeType, FriendlyMimetypeLabels } from './types';
-import { OPEN_FILTERS_POPOVER } from '../../translations';
 import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
 
 interface Props {
@@ -133,7 +134,7 @@ export const WaterfallFilter = ({
         <EuiPopover
           button={
             <EuiButtonIcon
-              aria-label={OPEN_FILTERS_POPOVER}
+              aria-label={FILTER_POPOVER_OPEN_LABEL}
               iconType="filter"
               onClick={() => setIsPopoverOpen((prevState) => !prevState)}
               color={activeFilters.length > 0 ? 'primary' : 'text'}
@@ -166,7 +167,7 @@ export const WaterfallFilter = ({
             compressed={true}
             disabled={!(query || activeFilters.length > 0)}
             id="onlyHighlighted"
-            label="Collapse to only show matching requests"
+            label={FILTER_COLLAPSE_REQUESTS_LABEL}
             checked={onlyHighlighted}
             onChange={(e) => {
               setOnlyHighlighted(e.target.checked);
