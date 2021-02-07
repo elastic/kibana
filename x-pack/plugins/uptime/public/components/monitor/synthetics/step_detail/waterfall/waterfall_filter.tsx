@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -22,7 +23,7 @@ import {
   FILTER_SCREENREADER_LABEL,
   FILTER_REMOVE_SCREENREADER_LABEL,
 } from '../../waterfall/components/translations';
-import { MimeType } from './types';
+import { MimeType, FriendlyMimetypeLabels } from './types';
 import { OPEN_FILTERS_POPOVER } from '../../translations';
 import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
 
@@ -37,27 +38,27 @@ interface Props {
 
 export const MIME_FILTERS = [
   {
-    label: 'XHR',
+    label: FriendlyMimetypeLabels[MimeType.XHR],
     mimeType: MimeType.XHR,
   },
   {
-    label: 'HTML',
+    label: FriendlyMimetypeLabels[MimeType.Html],
     mimeType: MimeType.Html,
   },
   {
-    label: 'JS',
+    label: FriendlyMimetypeLabels[MimeType.Script],
     mimeType: MimeType.Script,
   },
   {
-    label: 'CSS',
+    label: FriendlyMimetypeLabels[MimeType.Stylesheet],
     mimeType: MimeType.Stylesheet,
   },
   {
-    label: 'Font',
+    label: FriendlyMimetypeLabels[MimeType.Font],
     mimeType: MimeType.Font,
   },
   {
-    label: 'Media',
+    label: FriendlyMimetypeLabels[MimeType.Media],
     mimeType: MimeType.Media,
   },
 ];
