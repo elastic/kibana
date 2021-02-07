@@ -150,6 +150,12 @@
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
+/.bazelignore @elastic/kibana-operations
+/.bazeliskversion @elastic/kibana-operations
+/.bazelrc @elastic/kibana-operations
+/.bazelrc.common @elastic/kibana-operations
+/.bazelversion @elastic/kibana-operations
+/WORKSPACE.bazel @elastic/kibana-operations
 #CC# /packages/kbn-expect/ @elastic/kibana-operations
 
 # Quality Assurance
