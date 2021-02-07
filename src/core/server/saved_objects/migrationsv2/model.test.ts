@@ -182,6 +182,21 @@ describe('migrations v2 model', () => {
         versionAlias: '.kibana_7.11.0',
         versionIndex: '.kibana_7.11.0_001',
       };
+      const mappingsWithUnknownType = {
+        properties: {
+          disabled_saved_object_type: {
+            properties: {
+              value: { type: 'keyword' },
+            },
+          },
+        },
+        _meta: {
+          migrationMappingPropertyHashes: {
+            disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
+          },
+        },
+      };
+
       test('INIT -> OUTDATED_DOCUMENTS_SEARCH if .kibana is already pointing to the target index', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_7.11.0_001': {
@@ -189,38 +204,27 @@ describe('migrations v2 model', () => {
               '.kibana': {},
               '.kibana_7.11.0': {},
             },
-            mappings: {
-              properties: {
-                disabled_saved_object_type: {
-                  properties: {
-                    value: { type: 'keyword' },
-                  },
-                },
-              },
-              _meta: {
-                migrationMappingPropertyHashes: {
-                  disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
-                },
-              },
-            },
+            mappings: mappingsWithUnknownType,
             settings: {},
           },
         });
         const newState = model(initState, res);
 
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH');
+        // This snapshot asserts that we merge the
+        // migrationMappingPropertyHashes of the existing index, but we leave
+        // the mappings for the disabled_saved_object_type untouched. There
+        // might be another Kibana instance that knows about this type and
+        // needs these mappings in place.
         expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
           Object {
             "_meta": Object {
               "migrationMappingPropertyHashes": Object {
+                "disabled_saved_object_type": "7997cf5a56cc02bdc9c93361bde732b0",
                 "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
               },
             },
             "properties": Object {
-              "disabled_saved_object_type": Object {
-                "dynamic": false,
-                "properties": Object {},
-              },
               "new_saved_object_type": Object {
                 "properties": Object {
                   "value": Object {
@@ -271,7 +275,7 @@ describe('migrations v2 model', () => {
               '.kibana': {},
               '.kibana_7.12.0': {},
             },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            mappings: mappingsWithUnknownType,
             settings: {},
           },
           '.kibana_7.11.0_001': {
@@ -288,12 +292,37 @@ describe('migrations v2 model', () => {
           sourceIndex: Option.some('.kibana_7.invalid.0_001'),
           targetIndex: '.kibana_7.11.0_001',
         });
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
       });
       test('INIT -> SET_SOURCE_WRITE_BLOCK when migrating from a v2 migrations index (>= 7.11.0)', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana_7.11.0_001': {
             aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            mappings: mappingsWithUnknownType,
             settings: {},
           },
           '.kibana_3': {
@@ -319,6 +348,31 @@ describe('migrations v2 model', () => {
           sourceIndex: Option.some('.kibana_7.11.0_001'),
           targetIndex: '.kibana_7.12.0_001',
         });
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -328,7 +382,7 @@ describe('migrations v2 model', () => {
             aliases: {
               '.kibana': {},
             },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            mappings: mappingsWithUnknownType,
             settings: {},
           },
         });
@@ -339,6 +393,31 @@ describe('migrations v2 model', () => {
           sourceIndex: Option.some('.kibana_3'),
           targetIndex: '.kibana_7.11.0_001',
         });
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -346,7 +425,7 @@ describe('migrations v2 model', () => {
         const res: ResponseType<'INIT'> = Either.right({
           '.kibana': {
             aliases: {},
-            mappings: { properties: {}, _meta: {} },
+            mappings: mappingsWithUnknownType,
             settings: {},
           },
         });
@@ -357,6 +436,31 @@ describe('migrations v2 model', () => {
           sourceIndex: Option.some('.kibana_pre6.5.0_001'),
           targetIndex: '.kibana_7.11.0_001',
         });
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -366,7 +470,7 @@ describe('migrations v2 model', () => {
             aliases: {
               'my-saved-objects': {},
             },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            mappings: mappingsWithUnknownType,
             settings: {},
           },
         });
@@ -386,6 +490,31 @@ describe('migrations v2 model', () => {
           sourceIndex: Option.some('my-saved-objects_3'),
           targetIndex: 'my-saved-objects_7.11.0_001',
         });
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
@@ -395,7 +524,7 @@ describe('migrations v2 model', () => {
             aliases: {
               'my-saved-objects': {},
             },
-            mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+            mappings: mappingsWithUnknownType,
             settings: {},
           },
         });
@@ -416,6 +545,31 @@ describe('migrations v2 model', () => {
           sourceIndex: Option.some('my-saved-objects_7.11.0'),
           targetIndex: 'my-saved-objects_7.12.0_001',
         });
+        // This snapshot asserts that we disable the unknown saved object
+        // type. Because it's mappings are disabled, we also don't copy the
+        // `_meta.migrationMappingPropertyHashes` for the disabled type.
+        expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
+          Object {
+            "_meta": Object {
+              "migrationMappingPropertyHashes": Object {
+                "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
+              },
+            },
+            "properties": Object {
+              "disabled_saved_object_type": Object {
+                "dynamic": false,
+                "properties": Object {},
+              },
+              "new_saved_object_type": Object {
+                "properties": Object {
+                  "value": Object {
+                    "type": "text",
+                  },
+                },
+              },
+            },
+          }
+        `);
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
