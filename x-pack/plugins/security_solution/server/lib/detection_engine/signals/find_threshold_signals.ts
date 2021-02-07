@@ -69,22 +69,21 @@ export const findThresholdSignals = async ({
             },
           });
           if (i === threshold.field.length - 1) {
-            const innermostAgg = {
-              top_threshold_hits: {
-                top_hits: {
-                  sort: [
-                    {
-                      [timestampOverride ?? '@timestamp']: {
-                        order: 'desc',
-                      },
+            const topHitsAgg = {
+              top_hits: {
+                sort: [
+                  {
+                    [timestampOverride ?? '@timestamp']: {
+                      order: 'desc',
                     },
-                  ],
-                  size: 1,
-                },
+                  },
+                ],
+                size: 1,
               },
             };
             if (!isEmpty(threshold.cardinality_field)) {
               set(acc, `${aggPath}.aggs`, {
+                top_threshold_hits: topHitsAgg,
                 cardinality_count: {
                   cardinality: {
                     field: threshold.cardinality_field,
@@ -97,11 +96,10 @@ export const findThresholdSignals = async ({
                     },
                     script: `params.cardinalityCount > ${threshold.cardinality_value}`, // TODO: cardinality operator
                   },
-                  aggs: innermostAgg,
                 },
               });
             } else {
-              set(acc, `${aggPath}.aggs`, innermostAgg);
+              set(acc, `${aggPath}.aggs`, topHitsAgg);
             }
           }
           return acc;

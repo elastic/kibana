@@ -267,6 +267,9 @@ export interface SearchAfterAndBulkCreateReturnType {
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
   top_threshold_hits: BaseSearchResponse<SignalSource>;
+  cardinality_count: {
+    value: number;
+  };
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

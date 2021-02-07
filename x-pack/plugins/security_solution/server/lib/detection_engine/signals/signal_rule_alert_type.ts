@@ -421,6 +421,8 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
 
+          // console.log(JSON.stringify(thresholdResults));
+
           const {
             success,
             bulkCreateDuration,
