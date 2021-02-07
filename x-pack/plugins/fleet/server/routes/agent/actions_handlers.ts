@@ -30,7 +30,7 @@ export const postNewAgentActionHandlerBuilder = function (
 
       const newAgentAction = request.body.action;
 
-      const savedAgentAction = await actionsService.createAgentAction(soClient, {
+      const savedAgentAction = await actionsService.createAgentAction(soClient, esClient, {
         created_at: new Date().toISOString(),
         ...newAgentAction,
         agent_id: agent.id,
