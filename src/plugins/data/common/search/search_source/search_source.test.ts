@@ -854,9 +854,7 @@ describe('SearchSource', () => {
       const request = await searchSource.getSearchRequestBody();
       expect(request.stored_fields).toEqual(['geometry', 'prop1']);
       expect(request.docvalue_fields).toEqual(['prop1']);
-      expect(request._source).toEqual({
-        includes: ['geometry', 'prop1'],
-      });
+      expect(request._source).toEqual(['geometry']);
     });
   });
 });
