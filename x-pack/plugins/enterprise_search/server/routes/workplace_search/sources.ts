@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { KibanaRequest } from 'kibana/server';
+
 import { schema } from '@kbn/config-schema';
+
+import { ENTERPRISE_SEARCH_KIBANA_COOKIE } from '../../../common/constants';
 
 import { RouteDependencies } from '../../plugin';
 
@@ -864,6 +868,30 @@ export function registerOauthConnectorParamsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources/create',
+      computeExtraParams: (request: KibanaRequest) => {
+        // In the future the token package will be stored in the login session. For now it's in a cookie.
+        const cookieHeader = request.headers.cookie;
+
+        if (!cookieHeader) {
+          return {};
+        }
+
+        // Take any cookie headers and split the individual cookies out, e.g. "_my_cookie=chocolateChip"
+        const cookiePayloads = [cookieHeader].flat().flatMap((rawHeader) => rawHeader.split('; '));
+
+        // Split those raw cookies into [key, value] pairs, e.g. ["_my_cookie", "chocolateChip"]
+        const cookiePairs = cookiePayloads.map((rawCookie) => rawCookie.split('='));
+
+        const tokenPackageCookie = cookiePairs.find((cookiePair) => {
+          return cookiePair[0] === ENTERPRISE_SEARCH_KIBANA_COOKIE;
+        });
+
+        if (tokenPackageCookie) {
+          return { token_package: tokenPackageCookie[1] };
+        } else {
+          return {};
+        }
+      },
     })
   );
 }
