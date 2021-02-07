@@ -189,7 +189,6 @@ export class SessionService {
    * Cleans up current state
    */
   public clear() {
-    if (!this.getSessionId()) return;
     if (!this.isStored()) this.abortPendingSearches();
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
