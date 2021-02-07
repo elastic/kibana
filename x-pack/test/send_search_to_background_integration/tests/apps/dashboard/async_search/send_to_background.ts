@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.missingOrFail();
     });
 
-    describe('slower stuff', () => {
+    describe.only('slower stuff', () => {
       before(async () => {
         await kibanaServer.uiSettings.replace({ 'search:timeout': 30000 });
       });
@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Check that session is restored
         await searchSessions.expectState('restored');
         await testSubjects.missingOrFail('embeddableErrorLabel');
-      });
+      }).timeout(60000);
     });
   });
 }
