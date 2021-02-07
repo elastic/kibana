@@ -93,3 +93,8 @@ echo $PWD
 ls -l
 popd
 
+pushd $KIBANA_DIR/metricbeat-install/modules.d/
+echo "check inside modules.d folder"
+echo $PWD
+ls -l
+popd
