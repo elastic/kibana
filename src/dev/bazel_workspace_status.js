@@ -25,7 +25,6 @@
     try {
       return await execa(cmd, args);
     } catch (e) {
-      console.log(e);
       return { exitCode: 1 };
     }
   }
