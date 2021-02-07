@@ -161,6 +161,8 @@ describe('DatatableComponent', () => {
       />
     );
 
+    wrapper.find('[data-test-subj="dataGridRowCell"]').first().simulate('focus');
+
     wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -200,7 +202,9 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="lensDatatableFilterFor"]').at(3).simulate('click');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').at(1).simulate('focus');
+
+    wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
@@ -278,7 +282,9 @@ describe('DatatableComponent', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="lensDatatableFilterFor"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="dataGridRowCell"]').at(0).simulate('focus');
+
+    wrapper.find('[data-test-subj="lensDatatableFilterFor"]').first().simulate('click');
 
     expect(onDispatchEvent).toHaveBeenCalledWith({
       name: 'filter',
