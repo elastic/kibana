@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 import { NetworkRequestsTotalStyle } from './styles';
@@ -26,18 +27,22 @@ export const NetworkRequestsTotal = ({
   return (
     <NetworkRequestsTotalStyle size="xs" color="subdued">
       <strong>
-        {i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage', {
-          defaultMessage: '{numNetworkRequests} network requests',
-          values: {
+        <FormattedMessage
+          id="xpack.uptime.synthetics.waterfall.requestsTotalMessage"
+          defaultMessage="{numNetworkRequests} network requests"
+          values={{
             numNetworkRequests:
-              totalNetworkRequests > fetchedNetworkRequests
-                ? i18n.translate('xpack.uptime.synthetics.waterfall.requestsTotalMessage.first', {
-                    defaultMessage: 'First {count}',
-                    values: { count: `${fetchedNetworkRequests}/${totalNetworkRequests}` },
-                  })
-                : totalNetworkRequests,
-          },
-        })}{' '}
+              totalNetworkRequests > fetchedNetworkRequests ? (
+                <FormattedMessage
+                  id="xpack.uptime.synthetics.waterfall.requestsTotalMessage.first"
+                  defaultMessage="First {count}"
+                  values={{ count: `${fetchedNetworkRequests}/${totalNetworkRequests}` }}
+                />
+              ) : (
+                totalNetworkRequests
+              ),
+          }}
+        />{' '}
         {showHighlightedNetworkRequests &&
           highlightedNetworkRequests >= 0 &&
           `(${i18n.translate('xpack.uptime.synthetics.waterfall.requestsHighlightedMessage', {
