@@ -93,9 +93,10 @@ export class InfoButton extends Component<Props, State> {
 
     if (restoreState.filters) {
       const filters = restoreState.filters as Filter[];
+      const filterText = filters.map((filter) => JSON.stringify(filter.query)).join('\n');
       sessionInfo.push({
         title: 'Filters',
-        description: filters && filters.length ? JSON.stringify(filters) : 'N/A',
+        description: filters && filters.length ? filterText : 'N/A',
       });
     }
 
