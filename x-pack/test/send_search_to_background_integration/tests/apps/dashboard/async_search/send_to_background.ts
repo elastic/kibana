@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.missingOrFail();
     });
 
-    describe.only('slower stuff', () => {
+    describe('slower stuff', () => {
       before(async () => {
         await kibanaServer.uiSettings.replace({ 'search:timeout': 30000 });
       });
