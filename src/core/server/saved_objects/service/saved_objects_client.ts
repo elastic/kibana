@@ -319,7 +319,7 @@ export interface SavedObjectsResolveResponse<T = unknown> {
 /**
  * @public
  */
-export interface SavedObjectsOpenPointInTimeOptions {
+export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
   /**
    * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
    */

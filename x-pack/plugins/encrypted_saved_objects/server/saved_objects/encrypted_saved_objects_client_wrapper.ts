@@ -257,6 +257,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.openPointInTimeForType(type, options);
   }
 
+  public async closePointInTime(id: string) {
+    return await this.options.baseClient.closePointInTime(id);
+  }
+
   /**
    * Strips encrypted attributes from any non-bulk Saved Objects API response. If type isn't
    * registered, response is returned as is.

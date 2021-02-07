@@ -394,6 +394,19 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     type: string | string[],
     options: SavedObjectsOpenPointInTimeOptions = {}
   ) {
-    return await this.client.openPointInTimeForType(type, options);
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.openPointInTimeForType(type, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   */
+  async closePointInTime(id: string) {
+    return await this.client.closePointInTime(id);
   }
 }

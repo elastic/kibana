@@ -191,6 +191,7 @@ export enum SavedObjectAction {
   DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
   REMOVE_REFERENCES = 'saved_object_remove_references',
   OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
+  CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
 }
 
 type VerbsTuple = [string, string, string];
@@ -204,7 +205,16 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_find: ['access', 'accessing', 'accessed'],
   saved_object_add_to_spaces: ['update', 'updating', 'updated'],
   saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
-  saved_object_open_point_in_time: ['open', 'opening', 'opened'],
+  saved_object_open_point_in_time: [
+    'open point-in-time',
+    'opening point-in-time',
+    'opened point-in-time',
+  ],
+  saved_object_close_point_in_time: [
+    'close point-in-time',
+    'closing point-in-time',
+    'closed point-in-time',
+  ],
   saved_object_remove_references: [
     'remove references to',
     'removing references to',
@@ -222,6 +232,7 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EventType> = {
   saved_object_add_to_spaces: EventType.CHANGE,
   saved_object_delete_from_spaces: EventType.CHANGE,
   saved_object_open_point_in_time: EventType.CREATION,
+  saved_object_close_point_in_time: EventType.DELETION,
   saved_object_remove_references: EventType.CHANGE,
 };
 

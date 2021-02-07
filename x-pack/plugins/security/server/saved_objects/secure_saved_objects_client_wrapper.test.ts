@@ -987,6 +987,45 @@ describe('#get', () => {
   });
 });
 
+describe('#openPointInTimeForType', () => {
+  const type = 'foo';
+  const namespace = 'some-ns';
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.openPointInTimeForType, { type });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const options = { namespace };
+    await expectForbiddenError(client.openPointInTimeForType, { type, options });
+  });
+
+  test(`returns result of baseClient.openPointInTimeForType when authorized`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
+
+    const options = { namespace };
+    const result = await expectSuccess(client.openPointInTimeForType, { type, options });
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
+    const options = { namespace };
+    await expectSuccess(client.openPointInTimeForType, { type, options });
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_open_point_in_time', EventOutcome.SUCCESS);
+  });
+
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.openPointInTimeForType(type, { namespace })).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_open_point_in_time', EventOutcome.FAILURE);
+  });
+});
+
 describe('#resolve', () => {
   const type = 'foo';
   const id = `${type}-id`;
