@@ -67,10 +67,14 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
     }
 
-    public async save() {
+    public async save(state = 'complete') {
       log.debug('save the search session');
       await this.ensurePopoverOpened();
-      await testSubjects.click('searchSessionIndicatorSaveBtn');
+      await testSubjects.click(
+        state === 'complete'
+          ? 'searchSessionIndicatorSaveBtn'
+          : 'searchSessionIndicatorContinueInBackgroundBtn'
+      );
       await this.ensurePopoverClosed();
     }
 

@@ -68,11 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkSampleDashboardLoaded();
 
       // load URL to restore a saved session
-      await PageObjects.searchSessionsManagement.goTo();
-      const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-
-      // navigate to dashboard
-      await searchSessionList[0].view();
+      await PageObjects.searchSessionsManagement.restoreLatest();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();

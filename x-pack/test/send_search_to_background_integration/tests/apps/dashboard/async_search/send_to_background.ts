@@ -12,11 +12,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'dashboard',
+    'visChart',
+    'searchSessionsManagement',
+  ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const queryBar = getService('queryBar');
+  const kibanaServer = getService('kibanaServer');
 
   describe('send to background', () => {
     before(async function () {
@@ -72,21 +79,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.be(fakeSessionId);
     });
 
-    it('Saves and restores a session', async () => {
+    it('Saves and restores a session, navigate away when complete', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
-      const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-        'Sum of Bytes by Extension'
-      );
 
       // load URL to restore a saved session
-      // TODO: replace with clicking on "Re-run link"
-      const url = await browser.getCurrentUrl();
-      const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
-      await browser.get(savedSessionURL);
+      await PageObjects.searchSessionsManagement.restoreLatest();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
 
@@ -104,6 +105,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // navigating to a listing page clears the session
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await searchSessions.missingOrFail();
+    });
+
+    describe('slower stuff', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.replace({ 'search:timeout': 30000 });
+      });
+      after(async () => {
+        await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
+      });
+
+      it('Saves and restores a session, navigate away while loading', async () => {
+        await PageObjects.dashboard.loadSavedDashboard('Delayed 15s');
+        await searchSessions.expectState('loading');
+        await searchSessions.save('loading');
+
+        // load URL to restore a saved session
+        await PageObjects.searchSessionsManagement.restoreLatest();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        // Check that session is restored
+        await searchSessions.expectState('restored');
+        await testSubjects.missingOrFail('embeddableErrorLabel');
+      });
     });
   });
 }

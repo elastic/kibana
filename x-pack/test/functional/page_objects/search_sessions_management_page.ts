@@ -14,6 +14,15 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
   const PageObjects = getPageObjects(['common']);
 
   return {
+    async restoreLatest() {
+      // go to management
+      await this.goTo();
+
+      // navigate back to search session
+      const searchSessionList = await this.getList();
+      await searchSessionList[0].view();
+    },
+
     async goTo() {
       await PageObjects.common.navigateToApp('management/kibana/search_sessions');
     },
