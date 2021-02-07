@@ -105,7 +105,7 @@ export const EngineNav: React.FC = () => {
       {canViewEngineAnalytics && (
         <SideNavLink
           to={generateEnginePath(ENGINE_ANALYTICS_PATH)}
-          shouldShowActiveForSubroutes={true}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineAnalyticsLink"
         >
           {ANALYTICS_TITLE}
@@ -114,7 +114,7 @@ export const EngineNav: React.FC = () => {
       {canViewEngineDocuments && (
         <SideNavLink
           to={generateEnginePath(ENGINE_DOCUMENTS_PATH)}
-          shouldShowActiveForSubroutes={true}
+          shouldShowActiveForSubroutes
           data-test-subj="EngineDocumentsLink"
         >
           {DOCUMENTS_TITLE}
