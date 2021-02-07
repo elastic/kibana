@@ -337,11 +337,14 @@ const search1Child = {
 (searchRoot.treeRoot as any) = search1;
 (shard1.searches[0] as any) = searchRoot;
 
-export const processedResponseWithFirstShard = produce<Index[]>([], () => [
-  {
-    shards: [shard1],
-    time: 0.058419,
-    name: '.kibana_1',
-    visible: false,
-  },
-]);
+export const processedResponseWithFirstShard = produce<Index[]>(
+  [
+    {
+      shards: [shard1],
+      time: 0.058419,
+      name: '.kibana_1',
+      visible: false,
+    },
+  ],
+  () => undefined
+);
