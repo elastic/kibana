@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
 import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import {
   CaseClientFactoryArguments,
@@ -32,13 +27,7 @@ import {
   CaseUserActionServiceSetup,
   AlertServiceContract,
 } from '../services';
-import {
-  CasesPatchRequest,
-  CasesPatchRequestRt,
-  CasePostRequest,
-  excess,
-  throwErrors,
-} from '../../common/api';
+import { CasesPatchRequest, CasePostRequest } from '../../common/api';
 
 // TODO: rename
 export class CaseClientImpl implements CaseClient {
@@ -95,22 +84,13 @@ export class CaseClientImpl implements CaseClient {
     });
   }
 
-  /**
-   * This enforces the restriction of not changing the case type field
-   * @param args requested cases to be updated
-   */
-  public async update(args: CasesPatchRequest) {
-    const validatedCases = pipe(
-      excess(CasesPatchRequestRt).decode(args),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
+  public async update(cases: CasesPatchRequest) {
     return update({
       savedObjectsClient: this._savedObjectsClient,
       caseService: this._caseService,
       userActionService: this._userActionService,
       request: this.request,
-      cases: validatedCases,
+      cases,
       caseClient: this,
     });
   }

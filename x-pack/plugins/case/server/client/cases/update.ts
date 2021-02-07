@@ -13,7 +13,6 @@ import { identity } from 'fp-ts/lib/function';
 import {
   KibanaRequest,
   SavedObject,
-  SavedObjectsBulkResponse,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from 'kibana/server';
@@ -27,11 +26,11 @@ import {
   CasePatchRequest,
   CasesResponse,
   CaseStatuses,
-  CasesUpdateRequest,
-  CasesUpdateRequestRt,
+  CasesPatchRequestRt,
   CommentType,
   ESCaseAttributes,
   CaseType,
+  CasesPatchRequest,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
@@ -48,13 +47,8 @@ import { CaseClientImpl } from '..';
  */
 function throwIfUpdateStatusOfCollection(
   requests: ESCasePatchRequest[],
-  cases: SavedObjectsBulkResponse<ESCaseAttributes>
+  casesMap: Map<string, SavedObject<ESCaseAttributes>>
 ) {
-  const casesMap = cases.saved_objects.reduce((acc, so) => {
-    acc.set(so.id, so);
-    return acc;
-  }, new Map<string, SavedObject<ESCaseAttributes>>());
-
   const requestsUpdatingStatusOfCollection = requests.filter(
     (req) =>
       req.status !== undefined && casesMap.get(req.id)?.attributes.type === CaseType.collection
@@ -68,13 +62,81 @@ function throwIfUpdateStatusOfCollection(
   }
 }
 
+/**
+ * Throws an error if any of the requests attempt to update a collection style case to an individual one.
+ */
+function throwIfUpdateTypeCollectionToIndividual(
+  requests: ESCasePatchRequest[],
+  casesMap: Map<string, SavedObject<ESCaseAttributes>>
+) {
+  const requestsUpdatingTypeCollectionToInd = requests.filter(
+    (req) =>
+      req.type === CaseType.individual &&
+      casesMap.get(req.id)?.attributes.type === CaseType.collection
+  );
+
+  if (requestsUpdatingTypeCollectionToInd.length > 0) {
+    const ids = requestsUpdatingTypeCollectionToInd.map((req) => req.id);
+    throw Boom.badRequest(
+      `Converting a collection to an individual case is not allowed ids: [${ids.join(', ')}]`
+    );
+  }
+}
+
+/**
+ * Throws an error if any of the requests attempt to update an individual style cases' type field to a collection
+ * when alerts are attached to the case.
+ */
+async function throwIfInvalidUpdateOfTypeWithAlerts({
+  requests,
+  caseService,
+  client,
+}: {
+  requests: ESCasePatchRequest[];
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+}) {
+  const getAlertsForID = async (caseToUpdate: ESCasePatchRequest) => {
+    const alerts = await caseService.getAllCaseComments({
+      client,
+      id: caseToUpdate.id,
+      options: {
+        fields: [],
+        // there should never be generated alerts attached to an individual case but we'll check anyway
+        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+        page: 1,
+        perPage: 1,
+      },
+    });
+
+    return { id: caseToUpdate.id, alerts };
+  };
+
+  const requestsUpdatingTypeField = requests.filter((req) => req.type === CaseType.collection);
+  const casesAlertTotals = await Promise.all(
+    requestsUpdatingTypeField.map((caseToUpdate) => getAlertsForID(caseToUpdate))
+  );
+
+  // grab the cases that have at least one alert comment attached to them
+  const typeUpdateWithAlerts = casesAlertTotals.filter((caseInfo) => caseInfo.alerts.total > 0);
+
+  if (typeUpdateWithAlerts.length > 0) {
+    const ids = typeUpdateWithAlerts.map((req) => req.id);
+    throw Boom.badRequest(
+      `Converting a case to a collection is not allowed when it has alert comments, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
 interface UpdateArgs {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
   request: KibanaRequest;
   caseClient: CaseClientImpl;
-  cases: CasesUpdateRequest;
+  cases: CasesPatchRequest;
 }
 
 export const update = async ({
@@ -86,7 +148,7 @@ export const update = async ({
   cases,
 }: UpdateArgs): Promise<CasesResponse> => {
   const query = pipe(
-    excess(CasesUpdateRequestRt).decode(cases),
+    excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
@@ -144,7 +206,18 @@ export const update = async ({
     throw Boom.notAcceptable('All update fields are identical to current version.');
   }
 
-  throwIfUpdateStatusOfCollection(updateFilterCases, myCases);
+  const casesMap = myCases.saved_objects.reduce((acc, so) => {
+    acc.set(so.id, so);
+    return acc;
+  }, new Map<string, SavedObject<ESCaseAttributes>>());
+
+  throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
+  throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);
+  await throwIfInvalidUpdateOfTypeWithAlerts({
+    requests: updateFilterCases,
+    caseService,
+    client: savedObjectsClient,
+  });
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
