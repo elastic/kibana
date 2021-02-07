@@ -43,14 +43,15 @@ export const NetworkRequestsTotal = ({
               ),
           }}
         />{' '}
-        {showHighlightedNetworkRequests &&
-          highlightedNetworkRequests >= 0 &&
-          `(${i18n.translate('xpack.uptime.synthetics.waterfall.requestsHighlightedMessage', {
-            defaultMessage: '{numHighlightedRequests} match the filter',
-            values: {
+        {showHighlightedNetworkRequests && highlightedNetworkRequests >= 0 && (
+          <FormattedMessage
+            id="xpack.uptime.synthetics.waterfall.requestsHighlightedMessage"
+            defaultMessage="({numHighlightedRequests} match the filter)"
+            values={{
               numHighlightedRequests: highlightedNetworkRequests,
-            },
-          })})`}
+            }}
+          />
+        )}
       </strong>
       {totalNetworkRequests > fetchedNetworkRequests && (
         <EuiIconTip
