@@ -166,9 +166,6 @@ export class SearchSessionsMgmtAPI {
         }),
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
       this.deps.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.data.mgmt.searchSessions.api.deletedError', {
           defaultMessage: 'Failed to delete the search session!',
@@ -188,9 +185,6 @@ export class SearchSessionsMgmtAPI {
         }),
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
       this.deps.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
           defaultMessage: 'Failed to extend the search session!',
