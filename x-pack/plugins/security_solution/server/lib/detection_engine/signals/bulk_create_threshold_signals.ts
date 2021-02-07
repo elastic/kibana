@@ -92,7 +92,7 @@ const getTransformedHits = (
     ];
   }
 
-  if (!results.aggregations?.threshold) {
+  if (!results.aggregations?.threshold_0) {
     return [];
   }
 
@@ -149,8 +149,8 @@ const getTransformedHits = (
       '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
       threshold_result: {
         count: bucket.docCount,
-        value: get(threshold.field, hit._source),
-        cardinalityCount: bucket.cardinalityCount,
+        value: bucket.terms,
+        cardinality_count: bucket.cardinalityCount,
       },
     };
 

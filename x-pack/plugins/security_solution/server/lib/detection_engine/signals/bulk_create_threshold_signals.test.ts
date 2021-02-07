@@ -10,26 +10,47 @@ import { transformThresholdResultsToEcs } from './bulk_create_threshold_signals'
 import { calculateThresholdSignalUuid } from './utils';
 import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
 
+describe('getCombinations', () => {
+  it('should get all combinations for multiple aggregations without cardinality', () => {});
+
+  it('should get all combinations for multiple aggregations with cardinality', () => {});
+
+  it('should exclude empty buckets', () => {});
+});
+
 describe('transformThresholdResultsToEcs', () => {
   it('should return transformed threshold results', () => {
     const threshold: Threshold = {
-      field: ['source.ip'],
+      field: ['source.ip', 'host.name'],
       value: 1,
+      cardinality_field: 'destination.ip',
+      cardinality_value: 5,
     };
     const startedAt = new Date('2020-12-17T16:27:00Z');
     const transformedResults = transformThresholdResultsToEcs(
       {
         ...sampleDocSearchResultsNoSortId('abcd'),
         aggregations: {
-          threshold: {
+          threshold_0: {
             buckets: [
               {
                 key: '127.0.0.1',
-                doc_count: 1,
-                top_threshold_hits: {
-                  hits: {
-                    hits: [sampleDocNoSortId('abcd')],
-                  },
+                doc_count: 15,
+                threshold_1: {
+                  buckets: [
+                    {
+                      key: 'garden-gnomes',
+                      doc_count: 12,
+                      top_threshold_hits: {
+                        hits: {
+                          hits: [sampleDocNoSortId('abcd')],
+                        },
+                      },
+                      cardinality_count: {
+                        value: 7,
+                      },
+                    },
+                  ],
                 },
               },
             ],
@@ -44,7 +65,12 @@ describe('transformThresholdResultsToEcs', () => {
       '1234',
       undefined
     );
-    const _id = calculateThresholdSignalUuid('1234', startedAt, ['source.ip'], '127.0.0.1');
+    const _id = calculateThresholdSignalUuid(
+      '1234',
+      startedAt,
+      ['source.ip', 'host.name'],
+      '127.0.0.1,garden-gnomes'
+    );
     expect(transformedResults).toEqual({
       took: 10,
       timed_out: false,
@@ -69,8 +95,9 @@ describe('transformThresholdResultsToEcs', () => {
             _source: {
               '@timestamp': '2020-04-20T21:27:45+0000',
               threshold_result: {
-                count: 1,
-                value: '127.0.0.1',
+                count: 12,
+                value: ['127.0.0.1', 'garden-gnomes'],
+                cardinality_count: 7,
               },
             },
           },
