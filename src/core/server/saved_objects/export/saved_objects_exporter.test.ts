@@ -19,7 +19,7 @@ async function readStreamToCompletion(stream: Readable): Promise<Array<SavedObje
   return createPromiseFromStreams([stream, createConcatStream([])]);
 }
 
-const exportSizeLimit = 500;
+const exportSizeLimit = 20000;
 const request = httpServerMock.createKibanaRequest();
 
 describe('getSortedObjectsForExport()', () => {
@@ -111,7 +111,7 @@ describe('getSortedObjectsForExport()', () => {
                 "hasReference": undefined,
                 "hasReferenceOperator": undefined,
                 "namespaces": undefined,
-                "perPage": 500,
+                "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "1m",
@@ -134,6 +134,199 @@ describe('getSortedObjectsForExport()', () => {
           ],
         }
       `);
+    });
+
+    describe('pages through results with PIT', () => {
+      function generateHits(
+        hitCount: number,
+        {
+          attributes = {},
+          sort = [],
+          type = 'index-pattern',
+        }: {
+          attributes?: Record<string, unknown>;
+          sort?: unknown[];
+          type?: string;
+        } = {}
+      ) {
+        const hits = [];
+        for (let i = 1; i <= hitCount; i++) {
+          hits.push({
+            id: `${i}`,
+            type,
+            attributes,
+            sort,
+            score: 1,
+            references: [],
+          });
+        }
+        return hits;
+      }
+
+      describe('<10k hits', () => {
+        const mockHits = generateHits(20);
+
+        test('requests a single page', async () => {
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 20,
+            saved_objects: mockHits,
+            per_page: 10000,
+            page: 0,
+          });
+
+          const exportStream = await exporter.exportByTypes({
+            request,
+            types: ['index-pattern'],
+          });
+
+          const response = await readStreamToCompletion(exportStream);
+
+          expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+          expect(response[response.length - 1]).toMatchInlineSnapshot(`
+            Object {
+              "exportedCount": 20,
+              "missingRefCount": 0,
+              "missingReferences": Array [],
+            }
+          `);
+        });
+
+        test('opens and closes PIT', async () => {
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 20,
+            saved_objects: mockHits,
+            per_page: 10000,
+            page: 0,
+          });
+
+          const exportStream = await exporter.exportByTypes({
+            request,
+            types: ['index-pattern'],
+          });
+
+          await readStreamToCompletion(exportStream);
+
+          expect(savedObjectsClient.openPointInTimeForType).toHaveBeenCalledTimes(1);
+          expect(savedObjectsClient.closePointInTime).toHaveBeenCalledTimes(1);
+        });
+
+        test('passes correct PIT ID to `find`', async () => {
+          savedObjectsClient.openPointInTimeForType.mockResolvedValueOnce({
+            id: 'abc123',
+          });
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 20,
+            saved_objects: mockHits,
+            per_page: 10000,
+            page: 0,
+          });
+
+          const exportStream = await exporter.exportByTypes({
+            request,
+            types: ['index-pattern'],
+          });
+
+          await readStreamToCompletion(exportStream);
+
+          expect(savedObjectsClient.find).toHaveBeenCalledWith(
+            expect.objectContaining({
+              pit: expect.objectContaining({ id: 'abc123', keepAlive: '1m' }),
+              sortField: 'updated_at',
+              sortOrder: 'desc',
+              type: ['index-pattern'],
+            })
+          );
+        });
+      });
+
+      describe('>10k hits', () => {
+        const firstMockHits = generateHits(10000, { sort: ['a', 'b'] });
+        const secondMockHits = generateHits(5000);
+
+        test('requests multiple pages', async () => {
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 15000,
+            saved_objects: firstMockHits,
+            per_page: 10000,
+            page: 0,
+          });
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 15000,
+            saved_objects: secondMockHits,
+            per_page: 5000,
+            page: 1,
+          });
+
+          const exportStream = await exporter.exportByTypes({
+            request,
+            types: ['index-pattern'],
+          });
+
+          const response = await readStreamToCompletion(exportStream);
+
+          expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
+          expect(response[response.length - 1]).toMatchInlineSnapshot(`
+            Object {
+              "exportedCount": 15000,
+              "missingRefCount": 0,
+              "missingReferences": Array [],
+            }
+          `);
+        });
+
+        test('opens and closes PIT', async () => {
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 15000,
+            saved_objects: firstMockHits,
+            per_page: 10000,
+            page: 0,
+          });
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 15000,
+            saved_objects: secondMockHits,
+            per_page: 5000,
+            page: 1,
+          });
+
+          const exportStream = await exporter.exportByTypes({
+            request,
+            types: ['index-pattern'],
+          });
+
+          await readStreamToCompletion(exportStream);
+
+          expect(savedObjectsClient.openPointInTimeForType).toHaveBeenCalledTimes(1);
+          expect(savedObjectsClient.closePointInTime).toHaveBeenCalledTimes(1);
+        });
+
+        test('passes sort values to searchAfter', async () => {
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 15000,
+            saved_objects: firstMockHits,
+            per_page: 10000,
+            page: 0,
+          });
+          savedObjectsClient.find.mockResolvedValueOnce({
+            total: 15000,
+            saved_objects: secondMockHits,
+            per_page: 5000,
+            page: 1,
+          });
+
+          const exportStream = await exporter.exportByTypes({
+            request,
+            types: ['index-pattern'],
+          });
+
+          await readStreamToCompletion(exportStream);
+
+          expect(savedObjectsClient.find.mock.calls[1][0]).toEqual(
+            expect.objectContaining({
+              searchAfter: ['a', 'b'],
+            })
+          );
+        });
+      });
     });
 
     test('applies the export transforms', async () => {
@@ -259,7 +452,7 @@ describe('getSortedObjectsForExport()', () => {
                 "hasReference": undefined,
                 "hasReferenceOperator": undefined,
                 "namespaces": undefined,
-                "perPage": 500,
+                "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "1m",
@@ -415,7 +608,7 @@ describe('getSortedObjectsForExport()', () => {
                 "hasReference": undefined,
                 "hasReferenceOperator": undefined,
                 "namespaces": undefined,
-                "perPage": 500,
+                "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "1m",
@@ -508,7 +701,7 @@ describe('getSortedObjectsForExport()', () => {
                 ],
                 "hasReferenceOperator": "OR",
                 "namespaces": undefined,
-                "perPage": 500,
+                "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "1m",
@@ -606,7 +799,7 @@ describe('getSortedObjectsForExport()', () => {
                 "namespaces": Array [
                   "foo",
                 ],
-                "perPage": 500,
+                "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "1m",
