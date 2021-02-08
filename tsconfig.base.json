@@ -54,6 +54,10 @@
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom"
+    ],
+    "rootDirs": [
+      ".",
+      "./bazel/bin"
     ]
   }
 }

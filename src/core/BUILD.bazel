@@ -79,7 +79,8 @@ NPM_DEPS = [
   "@npm//react-markdown",
   "@npm//react-use",
   "@npm//rxjs",
-  "@npm//strip-ansi"
+  "@npm//strip-ansi",
+  "//src/legacy",
 ]
 
 ts_config(
@@ -99,7 +100,8 @@ ts_project(
   incremental = True,
   tsconfig = "tsconfig",
   srcs = SRCS,
-  deps = NPM_DEPS
+  deps = NPM_DEPS,
+  out_dir = "target_types",
 )
 
 copy_to_bin(
