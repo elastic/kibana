@@ -107,7 +107,10 @@ async function getErrorStats({
     uiFilters: { environment },
     esFilter: getEnvironmentUiFilterES(environment),
   };
+  const { start, end } = setupWithBlankUiFilters;
   const { noHits, average } = await getErrorRate({
+    start,
+    end,
     setup: setupWithBlankUiFilters,
     serviceName,
     searchAggregatedTransactions,

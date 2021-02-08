@@ -33,18 +33,22 @@ export async function getErrorRate({
   transactionName,
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }): Promise<{
   noHits: boolean;
   transactionErrorRate: Coordinate[];
   average: number | null;
 }> {
-  const { start, end, esFilter, apmEventClient } = setup;
+  const { esFilter, apmEventClient } = setup;
 
   const transactionNamefilter = transactionName
     ? [{ term: { [TRANSACTION_NAME]: transactionName } }]

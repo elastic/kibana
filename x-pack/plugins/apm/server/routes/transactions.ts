@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -24,6 +24,7 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../common/latency_aggregation_types';
+import { mergePeriodsTimeseries } from '../utils/merge_periods_timeseries';
 
 /**
  * Returns a list of transactions grouped by name
@@ -322,6 +323,7 @@ export const transactionChartsErrorRateRoute = createRoute({
       rangeRt,
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
+      comparisonRangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -329,18 +331,54 @@ export const transactionChartsErrorRateRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
-    const { transactionType, transactionName } = params.query;
+    const {
+      transactionType,
+      transactionName,
+      comparisonStart,
+      comparisonEnd,
+    } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    return getErrorRate({
+    const { start, end } = setup;
+
+    const commonParams = {
       serviceName,
       transactionType,
       transactionName,
       setup,
       searchAggregatedTransactions,
-    });
+    };
+
+    const comparisonPromise =
+      comparisonStart && comparisonEnd
+        ? getErrorRate({
+            ...commonParams,
+            start: comparisonStart,
+            end: comparisonEnd,
+          })
+        : undefined;
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getErrorRate({
+        ...commonParams,
+        start,
+        end,
+      }),
+      comparisonPromise,
+    ]);
+
+    return {
+      currentPeriod,
+      previousPeriod: {
+        ...previousPeriod,
+        transactionErrorRate: mergePeriodsTimeseries({
+          currentPeriodTimeseries: currentPeriod.transactionErrorRate,
+          previousPeriodTimeseries: previousPeriod?.transactionErrorRate,
+        }),
+      },
+    };
   },
 });
