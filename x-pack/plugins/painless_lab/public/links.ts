@@ -12,11 +12,11 @@ export type Links = ReturnType<typeof getLinks>;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const getLinks = ({ links }: DocLinksStart) =>
   Object.freeze({
-    painlessExecuteAPI: `${getLinks.links.apis.painlessExecute}`,
-    painlessExecuteAPIContexts: `${getLinks.links.apis.painlessExecuteAPIContexts}`,
-    painlessAPIReference: `${getLinks.links.scriptedFields.painlessApi}`,
-    painlessWalkthrough: `${getLinks.links.scriptedFields.painlessWalkthrough}`,
-    painlessLangSpec: `${getLinks.links.scriptedFields.painlessLangSpec}`,
-    esQueryDSL: `${getLinks.links.query.queryDsl}`,
-    modulesScriptingPreferParams: `${getLinks.links.elasticsearch.scriptParameters}`,
+    painlessExecuteAPI: getLinks.links.apis.painlessExecute,
+    painlessExecuteAPIContexts: getLinks.links.apis.painlessExecuteAPIContexts,
+    painlessAPIReference: getLinks.links.scriptedFields.painlessApi,
+    painlessWalkthrough: getLinks.links.scriptedFields.painlessWalkthrough,
+    painlessLangSpec: getLinks.links.scriptedFields.painlessLangSpec,
+    esQueryDSL: getLinks.links.query.queryDsl,
+    modulesScriptingPreferParams: getLinks.links.elasticsearch.scriptParameters,
   });
