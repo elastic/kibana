@@ -231,11 +231,18 @@ export function DiscoverField({
           position="bottom"
           content={i18n.translate('discover.field.mappingConflict', {
             defaultMessage:
-              'Mapping Conflict: This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
+              'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
               'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
           })}
         >
-          <EuiIcon tabIndex={0} type="alert" title={field.displayName} size="s" />
+          <EuiIcon
+            tabIndex={0}
+            type="alert"
+            title={i18n.translate('discover.field.mappingConflict.title', {
+              defaultMessage: 'Mapping Conflict',
+            })}
+            size="s"
+          />
         </EuiToolTip>
       );
     }
