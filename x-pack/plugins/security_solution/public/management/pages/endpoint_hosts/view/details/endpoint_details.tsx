@@ -22,11 +22,11 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { isPolicyOutOfDate } from '../../utils';
-import { HostInfo, HostMetadata } from '../../../../../../common/endpoint/types';
+import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector, useAgentDetailsIngestUrl } from '../hooks';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
-import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
+import { POLICY_STATUS_TO_HEALTH_COLOR, HOST_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
@@ -57,7 +57,15 @@ const LinkToExternalApp = styled.div`
 const openReassignFlyoutSearch = '?openReassignFlyout=true';
 
 export const EndpointDetails = memo(
-  ({ details, policyInfo }: { details: HostMetadata; policyInfo?: HostInfo['policy_info'] }) => {
+  ({
+    details,
+    policyInfo,
+    hostStatus,
+  }: {
+    details: HostMetadata;
+    policyInfo?: HostInfo['policy_info'];
+    hostStatus?: HostStatus;
+  }) => {
     const agentId = details.elastic.agent.id;
     const {
       url: agentDetailsUrl,
@@ -79,13 +87,32 @@ export const EndpointDetails = memo(
           description: details.host.os.full,
         },
         {
+          title: i18n.translate('xpack.securitySolution.endpoint.details.agentStatus', {
+            defaultMessage: 'Agent Status',
+          }),
+          description: (
+            <EuiHealth
+              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus] || 'subdued'}
+              data-test-subj="agentStatusHealth"
+            >
+              <EuiText size="m">
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.list.hostStatusValue"
+                  defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
+                  values={{ hostStatus }}
+                />
+              </EuiText>
+            </EuiHealth>
+          ),
+        },
+        {
           title: i18n.translate('xpack.securitySolution.endpoint.details.lastSeen', {
             defaultMessage: 'Last Seen',
           }),
           description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
         },
       ];
-    }, [details]);
+    }, [details, hostStatus]);
 
     const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
       // eslint-disable-next-line @typescript-eslint/naming-convention

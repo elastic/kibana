@@ -43,6 +43,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   endpointsTotalError: undefined,
   queryStrategyVersion: undefined,
   policyVersionInfo: undefined,
+  hostStatus: undefined,
 };
 
 /* eslint-disable-next-line complexity */
@@ -58,6 +59,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       request_page_index: pageIndex,
       query_strategy_version: queryStrategyVersion,
       policy_info: policyVersionInfo,
+      host_status: hostStatus,
     } = action.payload;
     return {
       ...state,
@@ -67,6 +69,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       pageIndex,
       queryStrategyVersion,
       policyVersionInfo,
+      hostStatus,
       loading: false,
       error: undefined,
     };
@@ -109,6 +112,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       ...state,
       details: action.payload.metadata,
       policyVersionInfo: action.payload.policy_info,
+      hostStatus: action.payload.host_status,
       detailsLoading: false,
       detailsError: undefined,
     };

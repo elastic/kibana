@@ -36,6 +36,7 @@ import {
   policyResponseLoading,
   policyResponseTimestamp,
   policyVersionInfo,
+  hostStatusInfo,
 } from '../../store/selectors';
 import { EndpointDetails } from './endpoint_details';
 import { PolicyResponse } from './policy_response';
@@ -57,6 +58,7 @@ export const EndpointDetailsFlyout = memo(() => {
   } = queryParams;
   const details = useEndpointSelector(detailsData);
   const policyInfo = useEndpointSelector(policyVersionInfo);
+  const hostStatus = useEndpointSelector(hostStatusInfo);
   const loading = useEndpointSelector(detailsLoading);
   const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
@@ -83,7 +85,7 @@ export const EndpointDetailsFlyout = memo(() => {
       onClose={handleFlyoutClose}
       style={{ zIndex: 4001 }}
       data-test-subj="endpointDetailsFlyout"
-      size="s"
+      size="m"
     >
       <EuiFlyoutHeader hasBorder>
         {loading ? (
@@ -112,7 +114,11 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'details' && (
             <>
               <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
-                <EndpointDetails details={details} policyInfo={policyInfo} />
+                <EndpointDetails
+                  details={details}
+                  policyInfo={policyInfo}
+                  hostStatus={hostStatus}
+                />
               </EuiFlyoutBody>
             </>
           )}
