@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObject, KibanaRequest } from 'src/core/server';
-import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
-import { EnrollmentAPIKeySOAttributes, EnrollmentAPIKey } from '../../types';
+import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
 import { createAPIKey } from './security';
-import { escapeSearchQueryPhrase } from '../saved_object';
 
 export { invalidateAPIKeys } from './security';
 export * from './enrollment_api_key';
@@ -70,25 +67,6 @@ export async function generateAccessApiKey(soClient: SavedObjectsClientContract,
   return { id: key.id, key: Buffer.from(`${key.id}:${key.api_key}`).toString('base64') };
 }
 
-export async function getEnrollmentAPIKeyById(
-  soClient: SavedObjectsClientContract,
-  apiKeyId: string
-) {
-  const [enrollmentAPIKey] = (
-    await soClient.find<EnrollmentAPIKeySOAttributes>({
-      type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
-      searchFields: ['api_key_id'],
-      search: escapeSearchQueryPhrase(apiKeyId),
-    })
-  ).saved_objects.map(_savedObjectToEnrollmentApiKey);
-
-  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
-    throw new Error('find enrollmentKeyById returned an incorrect key');
-  }
-
-  return enrollmentAPIKey;
-}
-
 export function parseApiKeyFromHeaders(headers: KibanaRequest['headers']) {
   const authorizationHeader = headers.authorization;
 
@@ -115,20 +93,5 @@ export function parseApiKey(apiKey: string) {
   return {
     apiKey,
     apiKeyId,
-  };
-}
-
-function _savedObjectToEnrollmentApiKey({
-  error,
-  attributes,
-  id,
-}: SavedObject<any>): EnrollmentAPIKey {
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return {
-    id,
-    ...attributes,
   };
 }
