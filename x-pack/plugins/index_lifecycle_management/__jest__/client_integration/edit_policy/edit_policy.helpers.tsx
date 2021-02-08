@@ -26,6 +26,8 @@ type Phases = keyof PolicyPhases;
 import { POLICY_NAME } from './constants';
 import { TestSubjects } from '../helpers';
 
+const PRE_V8_VERSION = '7.0.0';
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
 
@@ -64,6 +66,7 @@ const MyComponent = ({ appServicesContext, ...rest }: any) => {
       services={{
         breadcrumbService,
         license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+        stackVersion: PRE_V8_VERSION,
         ...appServicesContext,
       }}
     >

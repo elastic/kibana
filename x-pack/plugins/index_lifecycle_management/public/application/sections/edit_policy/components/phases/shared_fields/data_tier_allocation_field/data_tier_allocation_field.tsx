@@ -6,7 +6,8 @@
  */
 
 import { get } from 'lodash';
-import React, { FunctionComponent } from 'react';
+import semver from 'semver';
+import React, { FunctionComponent, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
@@ -43,14 +44,19 @@ interface Props {
   description: React.ReactNode;
 }
 
+const V_8_0_0 = '8.0.0';
+
 /**
  * Top-level layout control for the data tier allocation field.
  */
 export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, description }) => {
   const {
-    services: { cloud },
+    services: { cloud, stackVersion },
   } = useKibana();
 
+  const isPreV8 = useMemo(() => {
+    return semver.lt(stackVersion, V_8_0_0);
+  }, [stackVersion]);
   const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
   const [formData] = useFormData({ watch: dataTierAllocationTypePath });
   const allocationType: DataTierAllocationType = get(formData, dataTierAllocationTypePath);
@@ -141,7 +147,9 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           hasNodeAttributes={hasNodeAttrs}
           phase={phase}
           nodes={nodesByAttributes}
-          disableDataTierOption={Boolean(isCloudEnabled && isUsingDeprecatedDataRoleConfig)}
+          disableDataTierOption={Boolean(
+            isPreV8 && isCloudEnabled && isUsingDeprecatedDataRoleConfig
+          )}
           isLoading={isLoading}
         />
 

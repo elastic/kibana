@@ -30,6 +30,8 @@ export class IndexLifecycleManagementPlugin
       ui: { enabled: isIndexLifecycleManagementUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
 
+    const stackVersion = this.initializerContext.env.packageInfo.version;
+
     if (isIndexLifecycleManagementUiEnabled) {
       const {
         http,
@@ -78,6 +80,7 @@ export class IndexLifecycleManagementPlugin
             getUrlForApp,
             this.breadcrumbService,
             license,
+            stackVersion,
             cloud
           );
 

@@ -674,39 +674,80 @@ describe('<EditPolicy />', () => {
     });
     describe('on cloud', () => {
       describe('using legacy data role config', () => {
-        beforeEach(async () => {
-          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-          httpRequestsMockHelpers.setListNodes({
-            nodesByAttributes: { test: ['123'] },
-            // On cloud, even if there are data_* roles set, the default, recommended allocation option should not
-            // be available.
-            nodesByRoles: { data_hot: ['123'] },
-            isUsingDeprecatedDataRoleConfig: true,
-          });
-          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
-
-          await act(async () => {
-            testBed = await setup({
-              appServicesContext: {
-                cloud: {
-                  isCloudEnabled: true,
-                },
-                license: licensingMock.createLicense({ license: { type: 'basic' } }),
-              },
+        describe('pre v8', () => {
+          beforeEach(async () => {
+            httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+            httpRequestsMockHelpers.setListNodes({
+              nodesByAttributes: { test: ['123'] },
+              // On cloud, even if there are data_* roles set, the default, recommended allocation option should not
+              // be available.
+              nodesByRoles: { data_hot: ['123'] },
+              isUsingDeprecatedDataRoleConfig: true,
             });
+            httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+            await act(async () => {
+              testBed = await setup({
+                appServicesContext: {
+                  cloud: {
+                    isCloudEnabled: true,
+                  },
+                  license: licensingMock.createLicense({ license: { type: 'basic' } }),
+                },
+              });
+            });
+
+            const { component } = testBed;
+            component.update();
           });
+          test('hiding default, recommended option', async () => {
+            const { actions, find } = testBed;
+            await actions.warm.enable(true);
+            actions.warm.showDataAllocationOptions();
 
-          const { component } = testBed;
-          component.update();
+            expect(find('defaultDataAllocationOption').exists()).toBeFalsy();
+            expect(find('customDataAllocationOption').exists()).toBeTruthy();
+            expect(find('noneDataAllocationOption').exists()).toBeTruthy();
+          });
         });
-        test('hiding default, recommended option', async () => {
-          const { actions, find } = testBed;
-          await actions.warm.enable(true);
-          actions.warm.showDataAllocationOptions();
 
-          expect(find('defaultDataAllocationOption').exists()).toBeFalsy();
-          expect(find('customDataAllocationOption').exists()).toBeTruthy();
-          expect(find('noneDataAllocationOption').exists()).toBeTruthy();
+        describe('v8 and above', () => {
+          beforeEach(async () => {
+            httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+            httpRequestsMockHelpers.setListNodes({
+              nodesByAttributes: { test: ['123'] },
+              // On cloud, even if there are data_* roles set, the default, recommended allocation option should not
+              // be available.
+              nodesByRoles: { data_hot: ['123'] },
+              isUsingDeprecatedDataRoleConfig: true,
+            });
+            httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+            await act(async () => {
+              testBed = await setup({
+                appServicesContext: {
+                  cloud: {
+                    isCloudEnabled: true,
+                  },
+                  license: licensingMock.createLicense({ license: { type: 'basic' } }),
+                  stackVersion: '8.0.0',
+                },
+              });
+            });
+
+            const { component } = testBed;
+            component.update();
+          });
+          test('hiding default, recommended option', async () => {
+            const { actions, find } = testBed;
+            await actions.warm.enable(true);
+            actions.warm.showDataAllocationOptions();
+
+            // Should show all options!!
+            expect(find('defaultDataAllocationOption').exists()).toBeTruthy();
+            expect(find('customDataAllocationOption').exists()).toBeTruthy();
+            expect(find('noneDataAllocationOption').exists()).toBeTruthy();
+          });
         });
       });
       describe('using data role config', () => {
