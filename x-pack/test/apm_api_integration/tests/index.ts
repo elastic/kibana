@@ -43,8 +43,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./services/throughput'));
     loadTestFile(require.resolve('./services/top_services'));
     loadTestFile(require.resolve('./services/transaction_types'));
-    loadTestFile(require.resolve('./services/error_groups'));
-    loadTestFile(require.resolve('./services/error_groups_statistics'));
+    loadTestFile(require.resolve('./services/error_groups_primary_statistics'));
+    loadTestFile(require.resolve('./services/error_groups_comparison_statistics'));
 
     loadTestFile(require.resolve('./settings/anomaly_detection/basic'));
     loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));

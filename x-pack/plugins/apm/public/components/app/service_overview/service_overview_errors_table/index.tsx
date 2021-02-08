@@ -68,7 +68,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+        endpoint:
+          'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -104,14 +105,14 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     currentPageErrorGroups.map(({ group_id: groupId }) => groupId).sort()
   );
   const {
-    data: groupIdsErrorStatistics,
-    status: groupIdsErrorStatisticsStatus,
+    data: errorGroupsComparisonStatistics,
+    status: errorGroupsComparisonStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (!isEmpty(requestId) && groupIds && start && end && transactionType) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/error_groups/statistics',
+            'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -136,9 +137,8 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const columns = getColumns({
     serviceName,
-    groupIdsErrorStatistics: groupIdsErrorStatistics
-      ? groupIdsErrorStatistics[requestId]
-      : undefined,
+    errorGroupsComparisonStatistics:
+      errorGroupsComparisonStatistics?.[requestId],
   });
 
   return (
@@ -182,7 +182,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               }}
               loading={
                 status === FETCH_STATUS.LOADING ||
-                groupIdsErrorStatisticsStatus === FETCH_STATUS.LOADING
+                errorGroupsComparisonStatisticsStatus === FETCH_STATUS.LOADING
               }
               onChange={(newTableOptions: {
                 page?: {

@@ -257,8 +257,9 @@ export const serviceAnnotationsCreateRoute = createRoute({
   },
 });
 
-export const serviceErrorGroupsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/error_groups',
+export const serviceErrorGroupsPrimaryStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/error_groups/primary_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -287,8 +288,9 @@ export const serviceErrorGroupsRoute = createRoute({
   },
 });
 
-export const serviceErrorGroupsStatisticsRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/error_groups/statistics',
+export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,

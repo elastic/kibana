@@ -26,13 +26,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   ];
 
   registry.when(
-    'Error groups agg results when data is not loaded',
+    'Error groups comparison statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
             query: {
               start,
               end,
@@ -50,13 +50,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Error groups agg results when data is loaded',
+    'Error groups comparison statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
             query: {
               start,
               end,
@@ -77,7 +77,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns empty data', async () => {
         const response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/error_groups/statistics`,
+            pathname: `/api/apm/services/opbeans-java/error_groups/comparison_statistics`,
             query: {
               start,
               end,

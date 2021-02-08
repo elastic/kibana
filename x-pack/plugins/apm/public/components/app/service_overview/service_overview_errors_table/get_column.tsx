@@ -16,16 +16,18 @@ import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 
-type ErrorGroupItem = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups'>;
-type GroupIdsErrorStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/statistics'>;
+type ErrorGroupsPrimaryStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/primary_statistics'>;
+type ErrorGroupsComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics'>;
 
 export function getColumns({
   serviceName,
-  groupIdsErrorStatistics,
+  errorGroupsComparisonStatistics,
 }: {
   serviceName: string;
-  groupIdsErrorStatistics: GroupIdsErrorStatistics;
-}): Array<EuiBasicTableColumn<ErrorGroupItem['error_groups'][0]>> {
+  errorGroupsComparisonStatistics: ErrorGroupsComparisonStatistics;
+}): Array<
+  EuiBasicTableColumn<ErrorGroupsPrimaryStatistics['error_groups'][0]>
+> {
   return [
     {
       field: 'name',
@@ -71,8 +73,8 @@ export function getColumns({
       ),
       width: px(unit * 12),
       render: (_, { occurrences, group_id: errorGroupId }) => {
-        const timeseries = groupIdsErrorStatistics
-          ? groupIdsErrorStatistics[errorGroupId]?.timeseries
+        const timeseries = errorGroupsComparisonStatistics
+          ? errorGroupsComparisonStatistics[errorGroupId]?.timeseries
           : undefined;
         return (
           <SparkPlot
