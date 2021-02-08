@@ -25,7 +25,7 @@ export const getAction = (
   switch (actionType) {
     case ACTION.INFO:
       return {
-        iconType: 'iInCircle',
+        iconType: 'document',
         textColor: 'default',
         label: <InfoButton searchSession={uiSession} />,
       };

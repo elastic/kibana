@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiDescriptionList,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
