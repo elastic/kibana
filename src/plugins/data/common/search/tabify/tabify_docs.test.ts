@@ -12,8 +12,8 @@ import { SearchResponse } from 'elasticsearch';
 
 describe('tabifyDocs', () => {
   const fieldFormats = {
-    getInstance: (id: string) => ({ toJSON: () => ({ id }) }),
-    getDefaultInstance: (id: string) => ({ toJSON: () => ({ id }) }),
+    getInstance: jest.fn().mockImplementation((id: string) => ({ toJSON: () => ({ id }) })),
+    getDefaultInstance: jest.fn().mockImplementation((id: string) => ({ toJSON: () => ({ id }) })),
   };
 
   const index = new IndexPattern({
@@ -62,5 +62,14 @@ describe('tabifyDocs', () => {
   it('works without provided index pattern', () => {
     const table = tabifyDocs(response);
     expect(table).toMatchSnapshot();
+  });
+
+  it('uses custom format params', () => {
+    const table = tabifyDocs(response, index, {}, { timezone: `US/Alaska` });
+    expect(table).toMatchSnapshot();
+
+    expect(fieldFormats.getDefaultInstance).toBeCalledWith('number', undefined, {
+      timezone: 'US/Alaska',
+    });
   });
 });
