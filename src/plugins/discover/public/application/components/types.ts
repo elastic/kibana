@@ -9,7 +9,7 @@
 import { IUiSettingsClient, MountPoint, SavedObject } from 'kibana/public';
 import { Chart } from '../angular/helpers/point_series';
 import { IndexPattern } from '../../../../data/common/index_patterns/index_patterns';
-import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { AggConfigs } from '../../../../data/common/search/aggs';
 
 import {
@@ -21,8 +21,9 @@ import {
   TimeRange,
 } from '../../../../data/public';
 import { SavedSearch } from '../../saved_searches';
-import { AppState } from '../angular/discover_state';
-import { TopNavMenuData } from '../../../../navigation/public';
+import { AppState, GetStateReturn } from '../angular/discover_state';
+import { RequestAdapter } from '../../../../inspector/common';
+import { DiscoverServices } from '../../build_services';
 
 export interface DiscoverProps {
   /**
@@ -60,37 +61,9 @@ export interface DiscoverProps {
    */
   minimumVisibleRows: number;
   /**
-   * Function to add a column to state
-   */
-  onAddColumn: (column: string) => void;
-  /**
-   * Function to add a filter to state
-   */
-  onAddFilter: DocViewFilterFn;
-  /**
-   * Function to change the used time interval of the date histogram
-   */
-  onChangeInterval: (interval: string) => void;
-  /**
-   * Function to move a given column to a given index, used in legacy table
-   */
-  onMoveColumn: (columns: string, newIdx: number) => void;
-  /**
-   * Function to remove a given column from state
-   */
-  onRemoveColumn: (column: string) => void;
-  /**
-   * Function to replace columns in state
-   */
-  onSetColumns: (columns: string[]) => void;
-  /**
    * Function to scroll down the legacy table to the bottom
    */
   onSkipBottomButtonClick: () => void;
-  /**
-   * Function to change sorting of the table, triggers a fetch
-   */
-  onSort: (sort: string[][]) => void;
   opts: {
     /**
      * Date histogram aggregation config
@@ -100,6 +73,18 @@ export interface DiscoverProps {
      * Client of uiSettings
      */
     config: IUiSettingsClient;
+    /**
+     * returns field statistics based on the loaded data sample
+     */
+    getFieldCounts: () => Promise<Record<string, number>>;
+    /**
+     * Use angular router for navigation
+     */
+    navigateTo: () => void;
+    /**
+     * Inspect, for analyzing requests and responses
+     */
+    inspectorAdapters: { requests: RequestAdapter };
     /**
      * Data plugin
      */
@@ -113,6 +98,10 @@ export interface DiscoverProps {
      */
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     /**
+     * Kibana core services used by discover
+     */
+    services: DiscoverServices;
+    /**
      * The number of documents that can be displayed in the table/grid
      */
     sampleSize: number;
@@ -124,6 +113,10 @@ export interface DiscoverProps {
      * Function to set the header menu
      */
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    /**
+     * Functions for retrieving/mutating state
+     */
+    stateContainer: GetStateReturn;
     /**
      * Timefield of the currently used index pattern
      */
@@ -150,33 +143,17 @@ export interface DiscoverProps {
    */
   searchSource: ISearchSource;
   /**
-   * Function to change the current index pattern
-   */
-  setIndexPattern: (id: string) => void;
-  /**
    * Current app state of URL
    */
   state: AppState;
-  /**
-   * Function to update the time filter
-   */
-  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   /**
    * Currently selected time range
    */
   timeRange?: { from: string; to: string };
   /**
-   * Menu data of top navigation (New, save ...)
-   */
-  topNavMenu: TopNavMenuData[];
-  /**
    * Function to update the actual query
    */
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  /**
-   * Function to update the actual savedQuery id
-   */
-  updateSavedQueryId: (savedQueryId?: string) => void;
   /**
    * An object containing properties for proper handling of unmapped fields in the UI
    */

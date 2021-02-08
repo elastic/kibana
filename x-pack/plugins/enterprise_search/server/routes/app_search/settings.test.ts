@@ -41,7 +41,6 @@ describe('log settings routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/app_search/log_settings',
-        payload: 'body',
       });
 
       registerSettingsRoutes({
