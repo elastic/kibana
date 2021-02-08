@@ -56,7 +56,7 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/details`,
+      path: '/as/engines/:name/details',
     })
   );
   router.get(
@@ -69,7 +69,7 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/overview_metrics`,
+      path: '/as/engines/:name/overview_metrics',
     })
   );
 }

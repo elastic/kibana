@@ -253,5 +253,6 @@ export function createMockedDragDropContext(): jest.Mocked<DragContextState> {
     keyboardMode: false,
     setKeyboardMode: jest.fn(),
     setA11yMessage: jest.fn(),
+    registerDropTarget: jest.fn(),
   };
 }
