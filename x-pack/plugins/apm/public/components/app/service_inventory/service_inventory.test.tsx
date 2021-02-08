@@ -20,7 +20,6 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
 import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
@@ -75,13 +74,6 @@ describe('ServiceInventory', () => {
   beforeEach(() => {
     // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
-
-    jest.spyOn(useLocalUIFilters, 'useLocalUIFilters').mockReturnValue({
-      filters: [],
-      setFilterValue: () => null,
-      clearValues: () => null,
-      status: FETCH_STATUS.SUCCESS,
-    });
 
     jest.spyOn(hook, 'useAnomalyDetectionJobsFetcher').mockReturnValue({
       anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,

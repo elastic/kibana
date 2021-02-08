@@ -109,7 +109,7 @@ export const AddSourceList: React.FC = () => {
               data-test-subj="FilterSourcesInput"
               value={filterValue}
               onChange={handleFilterChange}
-              fullWidth={true}
+              fullWidth
               placeholder={ADD_SOURCE_PLACEHOLDER}
             />
           </EuiFormRow>
