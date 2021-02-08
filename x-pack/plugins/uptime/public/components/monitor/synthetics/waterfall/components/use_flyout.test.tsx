@@ -26,7 +26,7 @@ describe('useFlyoutHook', () => {
     },
   ];
 
-  it('sets isFlyoutVisible to true  and sets flyoutData when calling onSidebarClick', () => {
+  it('sets isFlyoutVisible to true and sets flyoutData when calling onSidebarClick', () => {
     const index = 0;
     const { result } = renderHook((props) => useFlyout(props.metaData), {
       initialProps: { metaData },
