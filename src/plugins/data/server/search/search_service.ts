@@ -309,25 +309,27 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private cancelSessionSearches = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
-
-    for (const [searchId, strategyName] of searchIdMapping.entries()) {
-      const searchOptions = {
-        sessionId,
-        strategy: strategyName,
-        isStored: true,
-      };
-      this.cancel(deps, searchId, searchOptions);
-    }
+    await Promise.all(
+      Object.keys(searchIdMapping).map((searchId) => {
+        const strategyName = searchIdMapping.get(searchId);
+        const searchOptions = {
+          sessionId,
+          strategy: strategyName,
+          isStored: true,
+        };
+        return this.cancel(deps, searchId, searchOptions);
+      })
+    );
   };
 
   private cancelSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const response = await deps.searchSessionsClient.cancel(sessionId);
-    this.cancelSessionSearches(deps, sessionId);
+    await this.cancelSessionSearches(deps, sessionId);
     return response;
   };
 
   private deleteSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
-    this.cancelSessionSearches(deps, sessionId);
+    await this.cancelSessionSearches(deps, sessionId);
     return deps.searchSessionsClient.delete(sessionId);
   };
 
@@ -339,14 +341,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
     const keepAlive = `${moment(expires).diff(moment())}ms`;
 
-    for (const [searchId, strategyName] of searchIdMapping.entries()) {
-      const searchOptions = {
-        sessionId,
-        strategy: strategyName,
-        isStored: true,
-      };
-      await this.extend(deps, searchId, keepAlive, searchOptions);
-    }
+    await Promise.all(
+      Object.keys(searchIdMapping).map((searchId) => {
+        const strategyName = searchIdMapping.get(searchId);
+        const searchOptions = {
+          sessionId,
+          strategy: strategyName,
+          isStored: true,
+        };
+        return this.extend(deps, searchId, keepAlive, searchOptions);
+      })
+    );
 
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
