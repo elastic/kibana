@@ -108,33 +108,32 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   type: 'latest' as const,
-      //   suiteTitle: 'clone transform with latest function',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformId: `clone_${transformConfigWithLatest.id}`,
-      //   transformDescription: `a cloned transform`,
-      //   get destinationIndex(): string {
-      //     return `user-${this.transformId}`;
-      //   },
-      //   expected: {
-      //     indexPreview: {
-      //       columns: 10,
-      //       rows: 5,
-      //     },
-      //     transformPreview: {
-      //       column: 0,
-      //       values: [
-      //         'July 12th 2019, 22:16:19',
-      //         'July 12th 2019, 22:50:53',
-      //         'July 12th 2019, 23:06:43',
-      //         'July 12th 2019, 23:15:22',
-      //         'July 12th 2019, 23:31:12',
-      //       ],
-      //     },
-      //   },
-      // },
+      {
+        type: 'latest' as const,
+        suiteTitle: 'clone transform with latest function',
+        originalConfig: transformConfigWithLatest,
+        transformId: `clone_${transformConfigWithLatest.id}`,
+        transformDescription: `a cloned transform`,
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          transformPreview: {
+            column: 0,
+            values: [
+              'July 12th 2019, 22:16:19',
+              'July 12th 2019, 22:50:53',
+              'July 12th 2019, 23:06:43',
+              'July 12th 2019, 23:15:22',
+              'July 12th 2019, 23:31:12',
+            ],
+          },
+        },
+      },
     ];
 
     for (const testData of testDataList) {

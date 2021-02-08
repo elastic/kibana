@@ -74,22 +74,21 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   suiteTitle: 'edit transform with latest configuration',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformDescription: 'updated description',
-      //   transformDocsPerSecond: '1000',
-      //   transformFrequency: '10m',
-      //   expected: {
-      //     messageText: 'updated transform.',
-      //     row: {
-      //       status: TRANSFORM_STATE.STOPPED,
-      //       mode: 'batch',
-      //       progress: '100',
-      //     },
-      //   },
-      // },
+      {
+        suiteTitle: 'edit transform with latest configuration',
+        originalConfig: transformConfigWithLatest,
+        transformDescription: 'updated description',
+        transformDocsPerSecond: '1000',
+        transformFrequency: '10m',
+        expected: {
+          messageText: 'updated transform.',
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+        },
+      },
     ];
 
     for (const testData of testDataList) {
