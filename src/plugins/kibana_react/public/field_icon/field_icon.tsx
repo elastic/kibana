@@ -34,7 +34,7 @@ const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
 export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   boolean: { iconType: 'tokenBoolean' },
   // icon for an index pattern mapping conflict in discover
-  conflict: { iconType: 'alert', color: 'euiVisColor9' },
+  conflict: { iconType: 'alert', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
   geo_point: { iconType: 'tokenGeo' },
   geo_shape: { iconType: 'tokenGeo' },
@@ -59,7 +59,6 @@ export function FieldIcon({
   ...rest
 }: FieldIconProps) {
   const token = typeToEuiIconMap[type] || defaultIcon;
-
   return (
     <EuiToken
       {...token}

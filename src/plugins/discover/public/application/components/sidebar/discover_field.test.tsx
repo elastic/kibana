@@ -114,4 +114,20 @@ describe('discover sidebar field', function () {
     findTestSubject(comp, 'field-_source-showDetails').simulate('click');
     expect(props.getDetails).not.toHaveBeenCalled();
   });
+  it('displays warning for conflicting fields', function () {
+    const field = new IndexPatternField({
+      name: 'troubled_field',
+      type: 'conflict',
+      esTypes: ['integer', 'text'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: false,
+    });
+    const { comp } = getComponent({
+      selected: true,
+      field,
+    });
+    const dscField = findTestSubject(comp, 'field-troubled_field-showDetails');
+    expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
+  });
 });
