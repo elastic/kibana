@@ -84,7 +84,7 @@ export class VisualizePlugin
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<VisualizePluginStartDependencies>,
     { home, urlForwarding, data }: VisualizePluginSetupDependencies
   ) {
