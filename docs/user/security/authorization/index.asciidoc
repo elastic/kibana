@@ -22,7 +22,7 @@ The `manage_security` {ref}/security-privileges.html#privileges-list-cluster[clu
 [[adding_cluster_privileges]]
 ==== Cluster privileges
 
-Cluster privileges grant access to monitoring and management features within {es}. They also enable certain <<management, Stack Management>> capabilities within {kib}.
+Cluster privileges grant access to monitoring and management features in {es}. They also enable <<management, Stack Management>> capabilities in {kib}.
 
 Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileges] for a complete description of available options.
 
@@ -30,16 +30,16 @@ Refer to {ref}/security-privileges.html#privileges-list-cluster[cluster privileg
 ==== Index privileges
 
 Each role can grant access to multiple data indices, and each index can have a different set of privileges.
-We recommend granting the `read` and `view_index_metadata` privileges to each index that you expect your users to work with inside of {kib}.
+We recommend granting the `read` and `view_index_metadata` privileges to each index that you expect your users to work with in {kib}.
 
 Refer to {ref}/security-privileges.html#privileges-list-indices[index privileges] for a complete description of available options.
 
 Document-level and field-level security affords you even more granularity when it comes to granting access to your data.
-With document-level security ("DLS"), you can write an {es} query to describe which documents this role should grant access to.
-With field-level security ("FLS"), you can instruct {es} to grant or deny access to specific fields within each document.
+With document-level security (DLS), you can write an {es} query to describe which documents this role grants access to.
+With field-level security (FLS), you can instruct {es} to grant or deny access to specific fields within each document.
 
 [[index_privilege_example_1]]
-===== Example 1: Grant access to indices matching the `filebeat-*` pattern
+===== Example: Grant access to indices that match the `filebeat-*` pattern
 
 . Enter `filebeat-*` in the **Index** field under the **Index Privileges** section.
 . Enter `read` and `view_index_metadata` in the **Privileges** field under the **Index Privileges** section.
@@ -48,12 +48,12 @@ With field-level security ("FLS"), you can instruct {es} to grant or deny access
 image::user/security/images/create-role-index-example.png[Create role with index privileges]
 
 [[index_privilege_dls_example]]
-===== Example 2: Grant read access to specific documents matching the `filebeat-*` pattern
+===== Example: Grant read access to specific documents that match the `filebeat-*` pattern
 
 . Enter `filebeat-*` in the **Indices** field under the **Index Privileges** section.
 . Enter `read` and `view_index_metadata` in the **Privileges** field under the **Index Privileges** section.
-. Select the **Grant read privileges to selected documents** option.
-. Enter an {es} query describing the documents you wish to grant access to. In this example, we are writing a query which allows access to documents that have a `category` field equal to `click`:
+. Select **Grant read privileges to selected documents**.
+. Enter an {es} query that describes the documents you want to grant access to. This example writes a query that allows access to documents that have a `category` field equal to `click`:
 +
 [source,sh]
 --------------------------------------------------
@@ -64,7 +64,7 @@ image::user/security/images/create-role-index-example.png[Create role with index
 }
 --------------------------------------------------
 +
-NOTE: {kib} automatically surrounds your DLS query with a `query` block, so it is not necessary to provide your own.
+NOTE: {kib} automatically surrounds your DLS query with a `query` block, so you don't have to provide your own.
 
 [role="screenshot"]
 image::user/security/images/create-role-dls-example.png[Create role with DLS index privileges]
