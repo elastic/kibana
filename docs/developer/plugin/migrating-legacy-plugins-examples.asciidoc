@@ -71,22 +71,20 @@ export function plugin(initializerContext: PluginInitializerContext) {
 *plugins/my_plugin/(public|server)/plugin.ts*
 [source,typescript]
 ----
-import type { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'kibana/server';
 import type { MyPluginConfig } from './config';
 
 export class MyPlugin implements Plugin {
-  private readonly config$: Observable<MyPluginConfig>;
+  private readonly config: MyPluginConfig;
   private readonly log: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = initializerContext.logger.get();
-    this.config$ = initializerContext.config.create();
+    this.config = initializerContext.config.get<MyPluginConfig>();
   }
 
-  public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
-    const isEnabled = await this.config$.pipe(first()).toPromise();
+  public setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
+    const { someConfigValue }  = this.config;
   }
 }
 ----
@@ -96,7 +94,7 @@ Additionally, some plugins need to access the runtime env configuration.
 [source,typescript]
 ----
 export class MyPlugin implements Plugin {
-  public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
+  public setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
     const { mode: { dev }, packageInfo: { version } } = this.initializerContext.env
   }
 ----
