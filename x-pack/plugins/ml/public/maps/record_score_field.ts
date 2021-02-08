@@ -13,7 +13,7 @@ import { AnomalySource } from './anomaly_source';
 import { ITooltipProperty } from '../../../maps/public';
 import { Filter } from '../../../../../src/plugins/data/public';
 
-class RecordScoreTooltipProperty implements ITooltipProperty {
+export class RecordScoreTooltipProperty implements ITooltipProperty {
   private readonly _label: string;
   private readonly _value: string;
 

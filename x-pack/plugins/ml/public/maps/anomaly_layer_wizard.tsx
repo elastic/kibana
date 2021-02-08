@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import React from 'react';
 import uuid from 'uuid';
 import { LAYER_WIZARD_CATEGORY, STYLE_TYPE } from '../../../maps/common/constants';

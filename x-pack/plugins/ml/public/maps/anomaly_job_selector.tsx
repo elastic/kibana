@@ -39,7 +39,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
         })}
         display="columnCompressed"
       >
-        <EuiComboBox singleSelection={true} onChange={this.onJobIdSelect} options={} />
+        <EuiComboBox singleSelection={true} onChange={this.onJobIdSelect} options={[]} />
       </EuiFormRow>
     );
   }

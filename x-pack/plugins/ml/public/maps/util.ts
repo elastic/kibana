@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ml } from '../../../../services/ml_api_service';
+// import { ml } from '../../../../services/ml_api_service';
 
 const DUMMY_JOB_LIST = [
   {

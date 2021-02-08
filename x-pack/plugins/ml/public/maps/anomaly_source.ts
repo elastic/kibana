@@ -20,15 +20,14 @@ import {
   MapQuery,
   VectorSourceSyncMeta,
 } from '../../../maps/common/descriptor_types';
+import { ITooltipProperty, LICENSED_FEATURES } from '../../../maps/public';
+import { RecordScoreField, RecordScoreTooltipProperty } from './record_score_field';
 import type { Adapters } from '../../../../../src/plugins/inspector/common/adapters';
 import type { GeoJsonWithMeta } from '../../../maps/public';
 import type { IField } from '../../../maps/public';
 import type { Attribution, ImmutableSourceProperty, PreIndexedShape } from '../../../maps/public';
 import type { BoundsFilters } from '../../../maps/public';
-import { LICENSED_FEATURES } from '../../../maps/public';
-import { RecordScoreField } from './record_score_field';
 import type { SourceEditorArgs } from '../../../maps/public';
-import { ITooltipProperty } from '../../../maps/public';
 import type { DataRequest } from '../../../maps/public';
 import type { SourceTooltipConfig } from '../../../maps/public';
 import type { IVectorSource } from '../../../maps/public';
@@ -100,8 +99,8 @@ export class AnomalySource implements IVectorSource {
     return new RecordScoreField({ source: this });
   }
 
-  createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
-    return undefined;
+  async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
+    return null;
   }
 
   destroy(): void {}
@@ -141,6 +140,11 @@ export class AnomalySource implements IVectorSource {
     return null;
   }
 
+  showJoinEditor(): boolean {
+    // Ignore, only show if joins are enabled for current configuration
+    return false;
+  }
+
   getFieldNames(): string[] {
     return ['record_score'];
   }
@@ -153,6 +157,10 @@ export class AnomalySource implements IVectorSource {
     return 0;
   }
 
+  isBoundsAware(): boolean {
+    return false;
+  }
+
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       {
@@ -163,6 +171,61 @@ export class AnomalySource implements IVectorSource {
       },
     ];
   }
+
+  async isTimeAware(): Promise<boolean> {
+    return true;
+  }
+
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): React.ReactElement<any> | null {
+    return null;
+  }
+
+  async supportsFitToBounds(): Promise<boolean> {
+    // Return true if you can compute bounds of data
+    return true;
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [LICENSED_FEATURES.ML_ANOMALIES];
+  }
+
+  getMaxZoom(): number {
+    return MAX_ZOOM;
+  }
+
+  getMinZoom(): number {
+    return MIN_ZOOM;
+  }
+
+  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+    throw new Error('not implemented');
+  }
+
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
+    return [VECTOR_SHAPE_TYPE.POINT];
+  }
+
+  getSyncMeta(): VectorSourceSyncMeta | null {
+    return null;
+  }
+
+  async getTooltipProperties(properties: { [p: string]: any } | null): Promise<ITooltipProperty[]> {
+    const tooltipProperties: ITooltipProperty[] = [];
+    for (const key in properties) {
+      if (key === 'record_score') {
+        tooltipProperties.push(new RecordScoreTooltipProperty('Record score', properties[key]));
+      }
+    }
+    return tooltipProperties;
+  }
+
+  // This is for type-ahead support in the UX for by-value styling
+  async getValueSuggestions(field: IField, query: string): Promise<string[]> {
+    return [];
+  }
+
+  // -----------------
+  // API ML probably can ignore
 
   getIndexPatternIds(): string[] {
     // IGNORE: This is only relevant if your source is backed by an index-pattern
@@ -184,18 +247,6 @@ export class AnomalySource implements IVectorSource {
     return [];
   }
 
-  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
-    return [LICENSED_FEATURES.ML_ANOMALIES];
-  }
-
-  getMaxZoom(): number {
-    return MAX_ZOOM;
-  }
-
-  getMinZoom(): number {
-    return MIN_ZOOM;
-  }
-
   async getPreIndexedShape(
     properties: { [p: string]: any } | null
   ): Promise<PreIndexedShape | null> {
@@ -204,70 +255,36 @@ export class AnomalySource implements IVectorSource {
   }
 
   getQueryableIndexPatternIds(): string[] {
+    // IGNORE: This is only relevant if your source is backed by an index-pattern
     return [];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
-    return undefined;
-  }
-
-  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
-    return undefined;
-  }
-
-  getSyncMeta(): VectorSourceSyncMeta | null {
-    return undefined;
-  }
-
-  getTooltipProperties(properties: { [p: string]: any } | null): Promise<ITooltipProperty[]> {
-    return undefined;
-  }
-
-  getValueSuggestions(field: IField, query: string): Promise<string[]> {
-    return undefined;
-  }
-
-  isBoundsAware(): boolean {
-    return false;
-  }
-
   isESSource(): boolean {
+    // IGNORE: This is only relevant if your source is backed by an index-pattern
     return false;
   }
 
   isFieldAware(): boolean {
-    return false;
+    return true;
   }
 
   isFilterByMapBounds(): boolean {
+    // Only implement if you can query this data with a bounding-box
     return false;
   }
 
   isGeoGridPrecisionAware(): boolean {
+    // Ignore: only implement if your data is scale-dependent (probably not)
     return false;
   }
 
   isQueryAware(): boolean {
+    // IGNORE: This is only relevant if your source is backed by an index-pattern
     return false;
   }
 
   isRefreshTimerAware(): boolean {
-    return false;
-  }
-
-  async isTimeAware(): Promise<boolean> {
-    return true;
-  }
-
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): React.ReactElement<any> | null {
-    return null;
-  }
-
-  showJoinEditor(): boolean {
-    return false;
-  }
-
-  async supportsFitToBounds(): Promise<boolean> {
+    // Allow force-refresh when user clicks "refresh" button in the global time-picker
     return true;
   }
 }
