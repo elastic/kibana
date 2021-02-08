@@ -44,7 +44,8 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
       schema.arrayOf(
         schema.string({
           validate: (label) =>
-            label.includes(' ') ? `The label ${label} cannot contain spaces` : undefined,
+            // Matches any space, tab or newline character.
+            label.match(/\s/g) ? `The label ${label} cannot contain spaces` : undefined,
         })
       )
     ),

@@ -87,7 +87,7 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
 
       if (actionParams.subActionParams?.incident?.labels?.length) {
         // Jira do not allows empty spaces on labels. If the label includes a whitespace show an error.
-        if (actionParams.subActionParams.incident.labels.some((label) => label.includes(' ')))
+        if (actionParams.subActionParams.incident.labels.some((label) => label.match(/\s/g)))
           errors['subActionParams.incident.labels'].push(i18n.LABELS_WHITE_SPACES);
       }
       return validationResult;
