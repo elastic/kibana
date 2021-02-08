@@ -552,35 +552,18 @@ if (doc['task.runAt'].size()!=0) {
       });
     });
 
-    test('it should reduce the available capacity from batche to batch', async () => {
+    test('it should reduce the available capacity from batch to batch', async () => {
       const maxAttempts = _.random(2, 43);
       const definitions = new TaskTypeDictionary(mockLogger());
       const taskManagerId = uuid.v1();
-      const fieldUpdates = {
-        ownerId: taskManagerId,
-        retryAt: new Date(Date.now()),
-      };
       definitions.registerTaskDefinitions({
         unlimited: {
           title: 'unlimited',
           createTaskRunner: jest.fn(),
         },
-        anotherUnlimited: {
-          title: 'anotherUnlimited',
-          createTaskRunner: jest.fn(),
-        },
-        finalUnlimited: {
-          title: 'finalUnlimited',
-          createTaskRunner: jest.fn(),
-        },
-        limitedToOne: {
-          title: 'limitedToOne',
-          maxConcurrency: 1,
-          createTaskRunner: jest.fn(),
-        },
-        anotherLimitedToOne: {
-          title: 'anotherLimitedToOne',
-          maxConcurrency: 1,
+        limitedToFive: {
+          title: 'limitedToFive',
+          maxConcurrency: 5,
           createTaskRunner: jest.fn(),
         },
         limitedToTwo: {
@@ -598,107 +581,71 @@ if (doc['task.runAt'].size()!=0) {
           maxAttempts,
           getCapacity: (type) => {
             switch (type) {
-              case 'limitedToOne':
-              case 'anotherLimitedToOne':
-                return 1;
               case 'limitedToTwo':
                 return 2;
+              case 'limitedToFive':
+                return 5;
               default:
                 return 10;
             }
           },
         },
+        hits: [
+          [
+            // 7 returned by unlimited query
+            mockInstance({
+              taskType: 'unlimited',
+            }),
+            mockInstance({
+              taskType: 'unlimited',
+            }),
+            mockInstance({
+              taskType: 'unlimited',
+            }),
+            mockInstance({
+              taskType: 'unlimited',
+            }),
+            mockInstance({
+              taskType: 'unlimited',
+            }),
+            mockInstance({
+              taskType: 'unlimited',
+            }),
+            mockInstance({
+              taskType: 'unlimited',
+            }),
+          ],
+          // 2 returned by limitedToFive query
+          [
+            mockInstance({
+              taskType: 'limitedToFive',
+            }),
+            mockInstance({
+              taskType: 'limitedToFive',
+            }),
+          ],
+          // 1 reterned by limitedToTwo query
+          [
+            mockInstance({
+              taskType: 'limitedToTwo',
+            }),
+          ],
+        ],
         claimingOpts: {
           claimOwnershipUntil: new Date(),
-          claimTasksById: [
-            '33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-            'a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
-          ],
+          claimTasksById: [],
         },
       });
 
-      expect(results.length).toEqual(4);
+      expect(results.length).toEqual(3);
 
       expect(results[0].args.updateByQuery[1].max_docs).toEqual(10);
-      expect(results[0].args.updateByQuery[0].script).toMatchObject({
-        source: expect.any(String),
-        lang: 'painless',
-        params: {
-          fieldUpdates,
-          claimTasksById: [
-            'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
-            'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
-          ],
-          claimableTaskTypes: ['unlimited', 'anotherUnlimited', 'finalUnlimited'],
-          skippedTaskTypes: ['limitedToOne', 'anotherLimitedToOne', 'limitedToTwo'],
-          taskMaxAttempts: {
-            unlimited: maxAttempts,
-          },
-        },
-      });
 
-      expect(results[1].args.updateByQuery[1].max_docs).toEqual(1);
-      expect(results[1].args.updateByQuery[0].script).toMatchObject({
-        source: expect.any(String),
-        lang: 'painless',
-        params: {
-          fieldUpdates,
-          claimTasksById: [],
-          claimableTaskTypes: ['limitedToOne'],
-          skippedTaskTypes: [
-            'unlimited',
-            'anotherUnlimited',
-            'finalUnlimited',
-            'anotherLimitedToOne',
-            'limitedToTwo',
-          ],
-          taskMaxAttempts: {
-            limitedToOne: maxAttempts,
-          },
-        },
-      });
+      // only capacity for 3, even though 5 are allowed
+      expect(results[1].args.updateByQuery[1].max_docs).toEqual(3);
 
+      // only capacity for 1, even though 2 are allowed
       expect(results[2].args.updateByQuery[1].max_docs).toEqual(1);
-      expect(results[2].args.updateByQuery[0].script).toMatchObject({
-        source: expect.any(String),
-        lang: 'painless',
-        params: {
-          fieldUpdates,
-          claimTasksById: [],
-          claimableTaskTypes: ['anotherLimitedToOne'],
-          skippedTaskTypes: [
-            'unlimited',
-            'anotherUnlimited',
-            'finalUnlimited',
-            'limitedToOne',
-            'limitedToTwo',
-          ],
-          taskMaxAttempts: {
-            anotherLimitedToOne: maxAttempts,
-          },
-        },
-      });
-
-      expect(results[3].args.updateByQuery[1].max_docs).toEqual(2);
-      expect(results[3].args.updateByQuery[0].script).toMatchObject({
-        source: expect.any(String),
-        lang: 'painless',
-        params: {
-          fieldUpdates,
-          claimTasksById: [],
-          claimableTaskTypes: ['limitedToTwo'],
-          skippedTaskTypes: [
-            'unlimited',
-            'anotherUnlimited',
-            'finalUnlimited',
-            'limitedToOne',
-            'anotherLimitedToOne',
-          ],
-          taskMaxAttempts: {
-            limitedToTwo: maxAttempts,
-          },
-        },
-      });
     });
 
     test('it shuffles the types claimed in batches to ensure no type starves another', async () => {
@@ -1483,7 +1430,7 @@ function generateFakeTasks(count: number = 1) {
 function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {
   return Object.assign(
     {
-      id: 'foo',
+      id: uuid.v4(),
       taskType: 'bar',
       sequenceNumber: 32,
       primaryTerm: 32,

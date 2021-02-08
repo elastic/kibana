@@ -82,6 +82,19 @@ export interface ClaimOwnershipResult {
   docs: ConcreteTaskInstance[];
 }
 
+enum BatchConcurrency {
+  Unlimited,
+  Limited,
+}
+
+type TaskClaimingBatches = Array<UnlimitedBatch | LimitedBatch>;
+interface TaskClaimingBatch<Concurrency extends BatchConcurrency, TaskType> {
+  concurrency: Concurrency;
+  tasksTypes: TaskType;
+}
+type UnlimitedBatch = TaskClaimingBatch<BatchConcurrency.Unlimited, Set<string>>;
+type LimitedBatch = TaskClaimingBatch<BatchConcurrency.Limited, string>;
+
 export class TaskClaiming {
   public readonly errors$ = new Subject<Error>();
   public readonly maxAttempts: number;
@@ -91,7 +104,7 @@ export class TaskClaiming {
   private taskStore: TaskStore;
   private getCapacity: (taskType?: string) => number;
   private logger: Logger;
-  private readonly taskClaimingBatchesByType: Array<Set<string>>;
+  private readonly taskClaimingBatchesByType: TaskClaimingBatches;
 
   /**
    * Constructs a new TaskStore.
@@ -110,14 +123,16 @@ export class TaskClaiming {
     this.events$ = new Subject<TaskClaim>();
   }
 
-  private partitionIntoClaimingBatches(definitions: TaskTypeDictionary) {
+  private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
     const { limitedConcurrency, unlimitedConcurrency } = groupBy(
       definitions.getAllDefinitions(),
       (definition) => (definition.maxConcurrency ? 'limitedConcurrency' : 'unlimitedConcurrency')
     );
     return [
-      ...(unlimitedConcurrency ? [new Set(unlimitedConcurrency.map(({ type }) => type))] : []),
-      ...(limitedConcurrency ? limitedConcurrency.map(({ type }) => new Set([type])) : []),
+      ...(unlimitedConcurrency
+        ? [asUnlimited(new Set(unlimitedConcurrency.map(({ type }) => type)))]
+        : []),
+      ...(limitedConcurrency ? limitedConcurrency.map(({ type }) => asLimited(type)) : []),
     ];
   }
 
@@ -162,23 +177,23 @@ export class TaskClaiming {
     const initialCapacity = this.getCapacity();
     return from(this.getClaimingBatches()).pipe(
       mergeScan(
-        (prevResult, taskTypes) => {
+        (accumulatedResult, batch) => {
           const capacity = Math.min(
-            initialCapacity - prevResult.stats.tasksClaimed,
-            this.getCapacity([...taskTypes][0])
+            initialCapacity - accumulatedResult.stats.tasksClaimed,
+            isLimited(batch) ? this.getCapacity(batch.tasksTypes) : this.getCapacity()
           );
           // if we have no more capacity, short circuit here
           if (capacity <= 0) {
-            return of(prevResult);
+            return of(accumulatedResult);
           }
           return from(
             this.executClaimAvailableTasks({
               claimOwnershipUntil,
               claimTasksById: claimTasksById.splice(0, capacity),
               size: capacity,
-              taskTypes,
+              taskTypes: isLimited(batch) ? new Set([batch.tasksTypes]) : batch.tasksTypes,
             }).then((result) => {
-              const { stats, docs } = accumulateClaimOwnershipResults(prevResult, result);
+              const { stats, docs } = accumulateClaimOwnershipResults(accumulatedResult, result);
               stats.tasksConflicted = correctVersionConflictsForContinuation(
                 stats.tasksUpdated,
                 stats.tasksConflicted,
@@ -423,4 +438,22 @@ function accumulateClaimOwnershipResults(
     return res;
   }
   return prev;
+}
+
+function isLimited(
+  batch: TaskClaimingBatch<BatchConcurrency.Limited | BatchConcurrency.Unlimited, unknown>
+): batch is LimitedBatch {
+  return batch.concurrency === BatchConcurrency.Limited;
+}
+function asLimited(tasksType: string): LimitedBatch {
+  return {
+    concurrency: BatchConcurrency.Limited,
+    tasksTypes: tasksType,
+  };
+}
+function asUnlimited(tasksTypes: Set<string>): UnlimitedBatch {
+  return {
+    concurrency: BatchConcurrency.Unlimited,
+    tasksTypes,
+  };
 }
