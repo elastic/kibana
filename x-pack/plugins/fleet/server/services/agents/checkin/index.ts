@@ -19,9 +19,10 @@ import {
   AgentEventSOAttributes,
 } from '../../../types';
 
-import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { agentCheckinState } from './state';
 import { getAgentActionsForCheckin } from '../actions';
+import { updateAgent } from '../crud';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
@@ -35,13 +36,7 @@ export async function agentCheckin(
   options?: { signal: AbortSignal }
 ) {
   const updateData: Partial<AgentSOAttributes> = {};
-  const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, data.events);
-  if (
-    updatedErrorEvents &&
-    !(updatedErrorEvents.length === 0 && agent.current_error_events.length === 0)
-  ) {
-    updateData.current_error_events = JSON.stringify(updatedErrorEvents);
-  }
+  await processEventsForCheckin(soClient, agent, data.events);
   if (data.localMetadata && !deepEqual(data.localMetadata, agent.local_metadata)) {
     updateData.local_metadata = data.localMetadata;
   }
@@ -50,9 +45,8 @@ export async function agentCheckin(
   }
   // Update agent only if something changed
   if (Object.keys(updateData).length > 0) {
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);
+    await updateAgent(soClient, esClient, agent.id, updateData);
   }
-
   // Check if some actions are not acknowledged
   let actions = await getAgentActionsForCheckin(soClient, agent.id);
   if (actions.length > 0) {
