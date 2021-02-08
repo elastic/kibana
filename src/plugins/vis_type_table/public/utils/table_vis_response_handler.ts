@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Datatable } from 'src/plugins/expressions';
@@ -27,7 +27,6 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
     const splitColumnIndex = split[0].accessor;
     const splitColumnFormatter = getFormatService().deserialize(split[0].format);
     const splitColumn = input.columns[splitColumnIndex];
-    const columns = input.columns.filter((c, idx) => idx !== splitColumnIndex);
     const splitMap: { [key: string]: number } = {};
     let splitIndex = 0;
 
@@ -39,7 +38,7 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
         const tableGroup: TableGroup = {
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
           table: {
-            columns,
+            columns: input.columns,
             rows: [],
             formattedColumns: {},
           },
@@ -53,7 +52,7 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
     });
 
     tables.forEach((tg) => {
-      tg.table = createFormattedTable({ ...tg.table, columns: input.columns }, visConfig);
+      tg.table = createFormattedTable(tg.table, visConfig);
 
       if (visConfig.percentageCol) {
         tg.table = addPercentageColumn(tg.table, visConfig.percentageCol);

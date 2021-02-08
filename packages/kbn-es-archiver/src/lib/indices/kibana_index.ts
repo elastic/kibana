@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { inspect } from 'util';
@@ -82,7 +82,9 @@ export async function migrateKibanaIndex({
  */
 async function fetchKibanaIndices(client: Client) {
   const resp = await client.cat.indices<unknown>({ index: '.kibana*', format: 'json' });
-  const isKibanaIndex = (index: string) => /^\.kibana(:?_\d*)?$/.test(index);
+  const isKibanaIndex = (index: string) =>
+    /^\.kibana(:?_\d*)?$/.test(index) ||
+    /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index);
 
   if (!Array.isArray(resp.body)) {
     throw new Error(`expected response to be an array ${inspect(resp.body)}`);
@@ -115,7 +117,7 @@ export async function cleanKibanaIndices({
   while (true) {
     const resp = await client.deleteByQuery(
       {
-        index: `.kibana`,
+        index: `.kibana,.kibana_task_manager`,
         body: {
           query: {
             bool: {
@@ -129,7 +131,7 @@ export async function cleanKibanaIndices({
         },
       },
       {
-        ignore: [409],
+        ignore: [404, 409],
       }
     );
 

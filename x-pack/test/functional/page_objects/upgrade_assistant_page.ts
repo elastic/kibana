@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -23,7 +24,7 @@ export function UpgradeAssistantPageProvider({ getPageObjects, getService }: Ftr
       return await retry.try(async () => {
         await common.navigateToApp('settings');
         await testSubjects.click('upgrade_assistant');
-        retry.waitFor('url to contain /upgrade_assistant', async () => {
+        await retry.waitFor('url to contain /upgrade_assistant', async () => {
           const url = await browser.getCurrentUrl();
           return url.includes('/upgrade_assistant');
         });
@@ -60,7 +61,7 @@ export function UpgradeAssistantPageProvider({ getPageObjects, getService }: Ftr
 
     async waitForTelemetryHidden() {
       const self = this;
-      retry.waitFor('Telemetry to disappear.', async () => {
+      await retry.waitFor('Telemetry to disappear.', async () => {
         return (await self.isTelemetryExists()) === false;
       });
     }

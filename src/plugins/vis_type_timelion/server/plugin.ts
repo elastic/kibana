@@ -1,23 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import { first } from 'rxjs/operators';
 import { TypeOf, schema } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
-import type { RequestHandlerContext } from 'src/core/server';
 
-import type {
-  PluginStart,
-  DataApiRequestHandlerContext,
-} from '../../../../src/plugins/data/server';
-import { CoreSetup, PluginInitializerContext } from '../../../../src/core/server';
+import type { PluginStart, DataRequestHandlerContext } from '../../../../src/plugins/data/server';
+import { CoreSetup, PluginInitializerContext, Plugin } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';
@@ -43,16 +38,12 @@ export interface TimelionPluginStartDeps {
 /**
  * Represents Timelion Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class TimelionPlugin
+  implements Plugin<RecursiveReadonly<PluginSetupContract>, void, TimelionPluginStartDeps> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(
-    core: CoreSetup<TimelionPluginStartDeps>
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await this.initializerContext.config
-      .create<TypeOf<typeof configSchema>>()
-      .pipe(first())
-      .toPromise();
+  public setup(core: CoreSetup<TimelionPluginStartDeps>): RecursiveReadonly<PluginSetupContract> {
+    const config = this.initializerContext.config.get<TypeOf<typeof configSchema>>();
 
     const configManager = new ConfigManager(this.initializerContext.config);
 
@@ -73,9 +64,7 @@ export class Plugin {
 
     const logger = this.initializerContext.logger.get('timelion');
 
-    const router = core.http.createRouter<
-      RequestHandlerContext & { search: DataApiRequestHandlerContext }
-    >();
+    const router = core.http.createRouter<DataRequestHandlerContext>();
 
     const deps = {
       configManager,
