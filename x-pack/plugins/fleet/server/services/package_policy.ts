@@ -25,6 +25,7 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { IngestManagerError } from '../errors';
 import {
   NewPackagePolicy,
   UpdatePackagePolicy,
@@ -63,15 +64,20 @@ class PackagePolicyService {
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
-    } else {
-      if (
-        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-          (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
-        )
-      ) {
-        throw new Error('There is already a package with the same name on this agent policy');
-      }
     }
+    if (parentAgentPolicy.is_managed) {
+      throw new IngestManagerError(
+        `Cannot add integrations to managed policy ${parentAgentPolicy.id}`
+      );
+    }
+    if (
+      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
+        (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
+      )
+    ) {
+      throw new Error('There is already a package with the same name on this agent policy');
+    }
+
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
