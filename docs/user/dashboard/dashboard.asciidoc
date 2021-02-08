@@ -162,7 +162,6 @@ Additional filters with AND::
   Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, using a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL]. 
   When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
   To dynamically add filters, click a series on a dashboard. For example, to filter the dashboard to display only ios data:
-  
   . Click *Add filter*.
   . Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
   . *Save* the filter.
