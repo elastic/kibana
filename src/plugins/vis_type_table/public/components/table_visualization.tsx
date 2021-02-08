@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './table_visualization.scss';
@@ -14,8 +14,7 @@ import { CoreStart } from 'kibana/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import type { PersistedState } from 'src/plugins/visualizations/public';
 import { KibanaContextProvider } from '../../../kibana_react/public';
-import { TableVisConfig } from '../types';
-import { TableContext } from '../table_vis_response_handler';
+import { TableVisConfig, TableVisData } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
 import { useUiState } from '../utils';
@@ -23,7 +22,7 @@ import { useUiState } from '../utils';
 interface TableVisualizationComponentProps {
   core: CoreStart;
   handlers: IInterpreterRenderHandlers;
-  visData: TableContext;
+  visData: TableVisData;
   visConfig: TableVisConfig;
 }
 

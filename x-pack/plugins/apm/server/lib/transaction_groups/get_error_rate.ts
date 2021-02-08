@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Coordinate } from '../../../typings/timeseries';
@@ -14,7 +15,10 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
@@ -55,12 +59,15 @@ export async function getErrorRate({
     {
       terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
     },
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
     ...transactionNamefilter,
     ...transactionTypefilter,
     ...esFilter,
   ];
 
-  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
+  const outcomes = getOutcomeAggregation();
 
   const params = {
     apm: {

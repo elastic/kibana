@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
+import uuid from 'uuid/v4';
 import semverParse from 'semver/functions/parse';
 import semverDiff from 'semver/functions/diff';
 import semverLte from 'semver/functions/lte';
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { AgentType, Agent, AgentSOAttributes } from '../../types';
+import { AgentType, Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import * as APIKeyService from '../api_keys';
 import { appContextService } from '../app_context';
 
@@ -24,6 +26,36 @@ export async function enroll(
 ): Promise<Agent> {
   const agentVersion = metadata?.local?.elastic?.agent?.version;
   validateAgentVersion(agentVersion);
+
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+    const esClient = appContextService.getInternalUserESClient();
+
+    const agentId = uuid();
+    const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agentId);
+    const fleetServerAgent: FleetServerAgent = {
+      active: true,
+      policy_id: agentPolicyId,
+      type,
+      enrolled_at: new Date().toISOString(),
+      user_provided_metadata: metadata?.userProvided ?? {},
+      local_metadata: metadata?.local ?? {},
+      access_api_key_id: accessAPIKey.id,
+    };
+    await esClient.create({
+      index: AGENTS_INDEX,
+      body: fleetServerAgent,
+      id: agentId,
+      refresh: 'wait_for',
+    });
+
+    return {
+      id: agentId,
+      current_error_events: [],
+      packages: [],
+      ...fleetServerAgent,
+      access_api_key: accessAPIKey.key,
+    } as Agent;
+  }
 
   const agentData: AgentSOAttributes = {
     active: true,
