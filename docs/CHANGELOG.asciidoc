@@ -164,6 +164,8 @@ Dashboard::
 * ExternalUrl service was integrated with URL Drilldown {kibana-pull}85779[#85779]
 Discover::
 * Adds new responsive layout {kibana-pull}83633[#83633]
+Elastic Security Solution::
+For the Elastic Security Solution 7.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
 * Agent logs UI {kibana-pull}83356[#83356]
 Lens and visualizations::
@@ -255,6 +257,7 @@ Maps::
 * Style by percentiles {kibana-pull}84291[#84291]
 * Use index-pattern field display name in UX {kibana-pull}84945[#84945]
 * Adds percentile {kibana-pull}85367[#85367]
+* Adds on-prem EMS config {kibana-pull}82525[#82525]
 Metrics::
 * Adds endpoint for Metrics API {kibana-pull}81693[#81693]
 * Adds full custom metric UI to inventory alerts {kibana-pull}81929[#81929]
@@ -362,6 +365,8 @@ Dashboard::
 Discover::
 * Fixes double fetching of saved search embeddable  {kibana-pull}84060[#84060]
 * Fixes navigating back when changing index pattern {kibana-pull}84061[#84061]
+Elastic Security Solution::
+For the Elastic Security Solution 7.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
 * Fixes duplicate ingest pipeline refs {kibana-pull}82078[#82078]
 Lens and visualizations::
