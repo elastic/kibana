@@ -76,10 +76,10 @@ export const SearchResults: React.FC = () => {
             >
               <EuiSelect
                 options={fieldOptions}
-                required={true}
+                required
                 name="titleField"
                 className="field-selector"
-                hasNoInitialSelection={true}
+                hasNoInitialSelection
                 data-test-subj="TitleFieldSelect"
                 value={titleField || ''}
                 onChange={(e) => setTitleField(e.target.value)}
@@ -88,9 +88,9 @@ export const SearchResults: React.FC = () => {
             <EuiFormRow label="URL">
               <EuiSelect
                 options={fieldOptions}
-                required={true}
+                required
                 className="field-selector"
-                hasNoInitialSelection={true}
+                hasNoInitialSelection
                 data-test-subj="UrlFieldSelect"
                 value={urlField || ''}
                 onChange={(e) => setUrlField(e.target.value)}
@@ -110,7 +110,7 @@ export const SearchResults: React.FC = () => {
               <EuiSelect
                 options={optionalFieldOptions}
                 className="field-selector"
-                hasNoInitialSelection={true}
+                hasNoInitialSelection
                 data-test-subj="SubtitleFieldSelect"
                 value={subtitleField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
@@ -129,7 +129,7 @@ export const SearchResults: React.FC = () => {
               <EuiSelect
                 options={optionalFieldOptions}
                 className="field-selector"
-                hasNoInitialSelection={true}
+                hasNoInitialSelection
                 data-test-subj="DescriptionFieldSelect"
                 value={descriptionField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
