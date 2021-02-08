@@ -17,7 +17,7 @@ import {
   AssociationType,
 } from '../../../../case/common/api';
 
-export { CaseConnector, ActionConnector } from '../../../../case/common/api';
+export { CaseConnector, ActionConnector, CaseType } from '../../../../case/common/api';
 
 export type Comment = CommentRequest & {
   associationType: AssociationType;
@@ -54,6 +54,7 @@ export interface CaseExternalService {
 
 interface BasicCase {
   id: string;
+  caseParentId?: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];

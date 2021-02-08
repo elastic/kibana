@@ -7,9 +7,8 @@
 import React from 'react';
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case } from '../../containers/types';
+import { Case, CaseType } from '../../containers/types';
 import { CasesColumns } from './columns';
-import { basicCase, cases } from '../../containers/mock';
 
 type ExpandedRowMap = Record<string, Element> | {};
 
@@ -31,7 +30,7 @@ const BasicTable = styled(EuiBasicTable)`
 BasicTable.displayName = 'BasicTable';
 
 export const getExpandedRowMap = ({
-  data = cases, // mock
+  data,
   columns,
 }: {
   data: Case[] | null;
@@ -41,9 +40,14 @@ export const getExpandedRowMap = ({
     return {};
   }
 
-  return data.reduce((acc, curr) => {
-    curr.subCases = [basicCase, basicCase]; // MOCK data
+  return data.reduce((acc, curr, index) => {
     if (curr.subCases != null) {
+      const subCases = curr.subCases.map((subCase) => ({
+        ...subCase,
+        caseParentId: curr.id,
+        title: `${curr.title} ${index + 1}`,
+        type: CaseType.subCase,
+      }));
       return {
         ...acc,
         [curr.id]: (
@@ -51,7 +55,7 @@ export const getExpandedRowMap = ({
             columns={columns}
             data-test-subj={`sub-cases-table-${curr.id}`}
             itemId="id"
-            items={curr.subCases}
+            items={subCases}
           />
         ),
       };

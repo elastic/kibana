@@ -20,7 +20,7 @@ import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_t
 
 import { CaseStatuses } from '../../../../../case/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { Case } from '../../containers/types';
+import { Case, CaseType } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
 import * as i18n from './translations';
@@ -59,7 +59,11 @@ export const getCasesColumns = (
       render: (theCase: Case) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = !isModal ? (
-            <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+            <CaseDetailsLink
+              detailName={theCase.caseParentId ?? theCase.id}
+              title={theCase.title}
+              subCaseId={theCase.type === CaseType.subCase ? theCase.id : undefined}
+            >
               {theCase.title}
             </CaseDetailsLink>
           ) : (

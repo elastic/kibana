@@ -8,8 +8,22 @@ import { appendSearch } from './helpers';
 
 export const getCaseUrl = (search?: string | null) => `${appendSearch(search ?? undefined)}`;
 
-export const getCaseDetailsUrl = ({ id, search }: { id: string; search?: string | null }) =>
-  `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
+export const getCaseDetailsUrl = ({
+  id,
+  search,
+  subCaseId,
+}: {
+  id: string;
+  search?: string | null;
+  subCaseId?: string;
+}) => {
+  if (subCaseId) {
+    return `/${encodeURIComponent(id)}/sub-case/${encodeURIComponent(subCaseId)}${appendSearch(
+      search ?? undefined
+    )}`;
+  }
+  return `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;
+};
 
 export const getCaseDetailsUrlWithCommentId = ({
   id,

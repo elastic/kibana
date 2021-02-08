@@ -16,6 +16,7 @@ import { SubCaseResponseRt } from './sub_case';
 export enum CaseType {
   collection = 'collection',
   individual = 'individual',
+  subCase = 'sub-case',
 }
 
 const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
