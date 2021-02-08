@@ -8,8 +8,8 @@ import '../../../../__mocks__/kea.mock';
 import { mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { shallow, ShallowWrapper } from 'enzyme';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { EmptyState } from './';
 
@@ -20,12 +20,24 @@ describe('EmptyState', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 
-  it('sends telemetry on create first engine click', () => {
-    const wrapper = shallow(<EmptyState />);
-    const prompt = wrapper.find(EuiEmptyPrompt).dive();
-    const button = prompt.find(EuiButton);
+  describe('CTA Button', () => {
+    let wrapper: ShallowWrapper;
+    let prompt: ShallowWrapper;
+    let button: ShallowWrapper;
 
-    button.simulate('click');
-    expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalled();
+    beforeEach(() => {
+      wrapper = shallow(<EmptyState />);
+      prompt = wrapper.find(EuiEmptyPrompt).dive();
+      button = prompt.find('[data-test-subj="EmptyStateCreateFirstEngineCta"]');
+    });
+
+    it('sends telemetry on create first engine click', () => {
+      button.simulate('click');
+      expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalled();
+    });
+
+    it('sends a user to engine creation', () => {
+      expect(button.prop('to')).toEqual('/engine_creation');
+    });
   });
 });
