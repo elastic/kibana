@@ -2,13 +2,8 @@
 [[geo-alert-types]]
 == Geo alert types
 
-experimental[] Two additional stack alerts are available:
-<<alert-type-tracking-threshold>> and <<alert-type-tracking-containment>>. To enable,
-add the following configuration to your `kibana.yml`:
-
-```yml
-xpack.stack_alerts.enableGeoAlerting: true
-```
+Two additional stack alerts are available:
+<<alert-type-tracking-threshold>> and <<alert-type-tracking-containment>>.
 
 As with other stack alerts, you need `all` access to the *Stack Alerts* feature
 to be able to create and edit either of the geo alerts.

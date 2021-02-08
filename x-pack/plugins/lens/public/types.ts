@@ -138,6 +138,16 @@ export type TableChangeType =
   | 'reorder'
   | 'layers';
 
+export type DropType =
+  | 'field_add'
+  | 'field_replace'
+  | 'reorder'
+  | 'duplicate_in_group'
+  | 'move_compatible'
+  | 'replace_compatible'
+  | 'move_incompatible'
+  | 'replace_incompatible';
+
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
   table: TableSuggestion;
@@ -179,7 +189,9 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
-  canHandleDrop: (props: DatasourceDimensionDropProps<T>) => boolean;
+  getDropTypes: (
+    props: DatasourceDimensionDropProps<T> & { groupId: string }
+  ) => DropType | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
     layerId: string;
@@ -299,13 +311,11 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   state: T;
   setState: StateSetter<T>;
   dragDropContext: DragContextState;
-  isReorder?: boolean;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
   droppedItem: unknown;
-  groupId: string;
-  isNew?: boolean;
+  dropType: DropType;
 };
 
 export type FieldOnlyDataType = 'document' | 'ip' | 'histogram';
