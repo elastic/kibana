@@ -138,9 +138,10 @@ test(`#closePointInTime`, async () => {
   const client = new SavedObjectsClient(mockRepository);
 
   const id = Symbol();
-  const result = await client.closePointInTime(id);
+  const options = Symbol();
+  const result = await client.closePointInTime(id, options);
 
-  expect(mockRepository.closePointInTime).toHaveBeenCalledWith(id);
+  expect(mockRepository.closePointInTime).toHaveBeenCalledWith(id, options);
   expect(result).toBe(returnValue);
 });
 
