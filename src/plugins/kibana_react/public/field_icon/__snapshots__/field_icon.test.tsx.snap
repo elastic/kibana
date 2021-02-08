@@ -47,8 +47,9 @@ exports[`FieldIcon renders known field types conflict is rendered 1`] = `
 <EuiToken
   aria-label="conflict"
   className="kbnFieldIcon"
-  color="euiVisColor9"
+  color="euiColorVis9"
   iconType="alert"
+  shape="square"
   size="s"
   title="conflict"
 />
