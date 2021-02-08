@@ -7,11 +7,22 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { searchProvider } from './search';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
 
-type OrigMlClient = ElasticsearchClient['ml'];
+type OrigMlClient = Omit<ElasticsearchClient['ml'], 'getJobs'>;
 
 export interface MlClient extends OrigMlClient {
   anomalySearch: ReturnType<typeof searchProvider>['anomalySearch'];
+  getJobs: (
+    ...a: Parameters<ElasticsearchClient['ml']['getJobs']>
+  ) =>
+    | Promise<{
+        body: {
+          count: number;
+          jobs: Job[];
+        };
+      }>
+    | never;
 }
 
 export type MlClientParams =

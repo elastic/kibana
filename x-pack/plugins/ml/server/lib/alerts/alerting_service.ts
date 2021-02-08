@@ -13,7 +13,6 @@ import {
   MlAnomalyDetectionAlertPreviewRequest,
 } from '../../routes/schemas/alerting_schema';
 import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
-import { Job } from '../../../common/types/anomaly_detection_jobs';
 import { AnomalyResultType } from '../../../common/types/anomalies';
 import {
   AlertExecutionResult,
@@ -266,8 +265,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).body
-      .jobs as Job[];
+    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).body.jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
