@@ -249,6 +249,23 @@ export interface Plugin<
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {
+  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
+  start(core: CoreStart, plugins: TPluginsStart): TStart;
+  stop?(): void;
+}
+
+/**
+ * A plugin with asynchronous lifecycle methods.
+ *
+ * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
+ * @public
+ */
+export interface AsyncPlugin<
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
+> {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
   stop?(): void;
@@ -389,4 +406,8 @@ export type PluginInitializer<
   TStart,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+> = (
+  core: PluginInitializerContext
+) =>
+  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
