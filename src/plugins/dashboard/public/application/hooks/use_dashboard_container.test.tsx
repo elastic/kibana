@@ -18,8 +18,8 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { DashboardCapabilities } from '../types';
 import { EmbeddableFactory } from '../../../../embeddable/public';
-import { HelloWorldEmbeddable } from '../../../../embeddable/public/tests/fixtures';
 import { DashboardContainer } from '../embeddable';
+import { HelloWorldEmbeddable } from '../../../../../../examples/embeddable_examples/public';
 
 const savedDashboard = getSavedDashboardMock();
 
@@ -33,7 +33,6 @@ const createDashboardState = () =>
   new DashboardStateManager({
     savedDashboard,
     hideWriteControls: false,
-    allowByValueEmbeddables: false,
     kibanaVersion: '7.0.0',
     kbnUrlStateStorage: createKbnUrlStateStorage(),
     history: createBrowserHistory(),
@@ -48,7 +47,6 @@ const defaultCapabilities: DashboardCapabilities = {
   hideWriteControls: true,
   mapsCapabilities: { save: false },
   visualizeCapabilities: { save: false },
-  storeSearchSession: true,
 };
 
 const services = {
