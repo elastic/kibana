@@ -34,6 +34,22 @@ export const SpanWithMargin = styled.span`
 
 const DEFAULT_PAGE_SIZE = 10;
 
+// one second = 1 million micros
+const SECOND_AS_MICROS = 1000000;
+
+export const formatDuration = (durationMicros: number) => {
+  if (durationMicros < SECOND_AS_MICROS) {
+    return i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
+      values: { millis: microsToMillis(durationMicros) },
+      defaultMessage: '{millis} ms',
+    });
+  }
+  return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting', {
+    values: { seconds: (durationMicros / SECOND_AS_MICROS).toFixed(0) },
+    defaultMessage: '{seconds} seconds',
+  });
+};
+
 export const PingList = () => {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [pageIndex, setPageIndex] = useState(0);
@@ -135,11 +151,7 @@ export const PingList = () => {
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) =>
-        i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
-          values: { millis: microsToMillis(duration) },
-          defaultMessage: '{millis} ms',
-        }),
+      render: (duration: number) => formatDuration(duration),
     },
     {
       field: 'error.type',

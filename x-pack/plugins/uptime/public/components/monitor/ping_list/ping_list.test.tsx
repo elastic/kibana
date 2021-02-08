@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { PingList } from './ping_list';
+import { formatDuration, PingList } from './ping_list';
 import { Ping, PingsResponse } from '../../../../common/runtime_types';
 import { ExpandedRowMap } from '../../overview/monitor_list/types';
 import { rowShouldExpand, toggleDetails } from './columns/expand_row';
@@ -183,6 +183,20 @@ describe('PingList component', () => {
         const ping = pings[0];
         ping.monitor.type = 'browser';
         expect(rowShouldExpand(ping)).toBe(true);
+      });
+    });
+
+    describe('formatDuration', () => {
+      it('returns zero for < 1 millisecond', () => {
+        expect(formatDuration(984)).toBe('0 ms');
+      });
+
+      it('returns millisecond string for < 1 sec', () => {
+        expect(formatDuration(921_000)).toBe('921 ms');
+      });
+
+      it('returns seconds string if > 1 second', () => {
+        expect(formatDuration(9_210_390)).toBe('9 seconds');
       });
     });
   });
