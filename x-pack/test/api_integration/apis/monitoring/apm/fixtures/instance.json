@@ -899,6 +899,10 @@
     "eventsEmitted": 6,
     "eventsDropped": 0,
     "bytesWritten": 10478,
-    "timeOfLastEvent": "2018-08-31T13:59:21.201Z"
+    "timeOfLastEvent": "2018-08-31T13:59:21.201Z",
+    "config": {
+      "agentMode": false,
+      "container": false
+    }
   }
 }

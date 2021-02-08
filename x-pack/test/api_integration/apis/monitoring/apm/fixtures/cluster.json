@@ -6,6 +6,10 @@
     "apms": {
       "total": 2
     },
+    "config": {
+      "agentMode": false,
+      "container": false
+    },
     "timeOfLastEvent": "2018-08-31T13:59:21.201Z"
   },
   "metrics": {
