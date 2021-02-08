@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin } from './plugin';
+import { EncryptedSavedObjectsPlugin } from './plugin';
 import { ConfigSchema } from './config';
 
 import { coreMock } from 'src/core/server/mocks';
@@ -13,12 +13,12 @@ import { securityMock } from '../../security/server/mocks';
 
 describe('EncryptedSavedObjects Plugin', () => {
   describe('setup()', () => {
-    it('exposes proper contract', async () => {
-      const plugin = new Plugin(
+    it('exposes proper contract', () => {
+      const plugin = new EncryptedSavedObjectsPlugin(
         coreMock.createPluginInitializerContext(ConfigSchema.validate({}, { dist: true }))
       );
-      await expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
-        .resolves.toMatchInlineSnapshot(`
+      expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
+        .toMatchInlineSnapshot(`
               Object {
                 "createMigration": [Function],
                 "registerType": [Function],
@@ -29,14 +29,14 @@ describe('EncryptedSavedObjects Plugin', () => {
   });
 
   describe('start()', () => {
-    it('exposes proper contract', async () => {
-      const plugin = new Plugin(
+    it('exposes proper contract', () => {
+      const plugin = new EncryptedSavedObjectsPlugin(
         coreMock.createPluginInitializerContext(ConfigSchema.validate({}, { dist: true }))
       );
-      await plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
+      plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
 
       const startContract = plugin.start();
-      await expect(startContract).toMatchInlineSnapshot(`
+      expect(startContract).toMatchInlineSnapshot(`
               Object {
                 "getClient": [Function],
                 "isEncryptionError": [Function],
