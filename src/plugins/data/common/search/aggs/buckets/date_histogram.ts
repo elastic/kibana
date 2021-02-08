@@ -10,7 +10,13 @@ import { get, noop, find, every } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
-import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
+import {
+  IndexPatternField,
+  KBN_FIELD_TYPES,
+  TimeRange,
+  TimeRangeBounds,
+  UI_SETTINGS,
+} from '../../../../common';
 
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
@@ -58,7 +64,7 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
 }
 
 export interface AggParamsDateHistogram extends BaseAggParams {
-  field?: string;
+  field?: IndexPatternField | string;
   timeRange?: TimeRange;
   useNormalizedEsInterval?: boolean;
   scaleMetricValues?: boolean;
