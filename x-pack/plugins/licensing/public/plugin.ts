@@ -123,7 +123,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     };
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.coreStart = core;
     if (!this.refresh || !this.license$) {
       throw new Error('Setup has not been completed');
