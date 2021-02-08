@@ -8,18 +8,13 @@
 import { RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
-import {
-  AgentSOAttributes,
-  PostAgentUpgradeResponse,
-  PostBulkAgentUpgradeResponse,
-} from '../../../common/types';
+import { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
 import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { savedObjectToAgent } from '../../services/agents/saved_objects';
 import { isAgentUpgradeable } from '../../../common/services';
+import { getAgent } from '../../services/agents';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -27,6 +22,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
@@ -39,12 +35,8 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-
-  const agentSO = await soClient.get<AgentSOAttributes>(
-    AGENT_SAVED_OBJECT_TYPE,
-    request.params.agentId
-  );
-  if (agentSO.attributes.unenrollment_started_at || agentSO.attributes.unenrolled_at) {
+  const agent = await getAgent(soClient, esClient, request.params.agentId);
+  if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
       statusCode: 400,
       body: {
@@ -53,7 +45,6 @@ export const postAgentUpgradeHandler: RequestHandler<
     });
   }
 
-  const agent = savedObjectToAgent(agentSO);
   if (!force && !isAgentUpgradeable(agent, kibanaVersion)) {
     return response.customError({
       statusCode: 400,
@@ -66,6 +57,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   try {
     await AgentService.sendUpgradeAgentAction({
       soClient,
+      esClient,
       agentId: request.params.agentId,
       version,
       sourceUri,
