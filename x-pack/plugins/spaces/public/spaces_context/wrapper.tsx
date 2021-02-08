@@ -11,7 +11,6 @@ import { createSpacesReactContext } from './context';
 import { PluginsStart } from '../plugin';
 import { SpacesManager } from '../spaces_manager';
 import { SpaceTarget } from '../share_saved_objects_to_space/types';
-import { getSpaceColor } from '../space_avatar';
 import { SpacesData } from './types';
 
 interface Props {
@@ -28,7 +27,6 @@ async function getSpacesData(spacesManager: SpacesManager): Promise<SpacesData> 
       const isPartiallyAuthorized = authorizedPurposes?.shareSavedObjectsIntoSpace === false;
       return {
         ...space,
-        color: getSpaceColor(space),
         ...(isActiveSpace && { isActiveSpace }),
         ...(isPartiallyAuthorized && { isPartiallyAuthorized }),
       };

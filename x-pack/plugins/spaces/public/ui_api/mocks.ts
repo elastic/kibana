@@ -14,6 +14,7 @@ function createComponentsMock(): jest.Mocked<SpacesApiUiComponent> {
   return {
     SpacesContext: jest.fn(),
     ShareToSpaceFlyout: jest.fn(),
+    SpaceList: jest.fn(),
   };
 }
 

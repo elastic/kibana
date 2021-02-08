@@ -20,7 +20,7 @@ export class ShareSavedObjectsToSpaceService {
     const action = new ShareToSpaceSavedObjectsManagementAction(spacesApiUi);
     savedObjectsManagementSetup.actions.register(action);
     // Note: this column is hidden for now because no saved objects are shareable. It should be uncommented when at least one saved object type is multi-namespace.
-    // const column = new ShareToSpaceSavedObjectsManagementColumn();
+    // const column = new ShareToSpaceSavedObjectsManagementColumn(spacesApiUi);
     // savedObjectsManagementSetup.columns.register(column);
   }
 }

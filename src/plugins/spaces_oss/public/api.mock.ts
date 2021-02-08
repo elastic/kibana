@@ -33,6 +33,7 @@ const createApiUiComponentsMock = () => {
   const mock: SpacesApiUiComponentMock = {
     SpacesContext: jest.fn(),
     ShareToSpaceFlyout: jest.fn(),
+    SpaceList: jest.fn(),
   };
 
   return mock;

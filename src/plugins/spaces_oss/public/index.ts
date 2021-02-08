@@ -21,6 +21,7 @@ export {
   SpacesApiUiComponent,
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
+  SpaceListProps,
 } from './api';
 
 export const plugin = () => new SpacesOssPlugin();

@@ -46,6 +46,10 @@ export interface SpacesApiUiComponent {
    * Displays the tags for given saved object.
    */
   ShareToSpaceFlyout: FunctionComponent<ShareToSpaceFlyoutProps>;
+  /**
+   * Displays a corresponding list of spaces for a given list of saved object namespaces.
+   */
+  SpaceList: FunctionComponent<SpaceListProps>;
 }
 
 /**
@@ -139,4 +143,27 @@ export interface ShareToSpaceSavedObjectTarget {
    * Default value is 'object'.
    */
   noun?: string;
+}
+
+/**
+ * @public
+ */
+export interface SpaceListProps {
+  /**
+   * The namespaces of a saved object to render into a corresponding list of spaces.
+   */
+  namespaces: string[];
+  /**
+   * Optional limit to the number of spaces that can be displayed in the list. If the number of spaces exceeds this limit, they will be
+   * hidden behind a "show more" button. Set to 0 to disable.
+   *
+   * Default value is 5.
+   */
+  displayLimit?: number;
+  /**
+   * When enabled, the space list will omit the active space. Otherwise, the active space is displayed.
+   *
+   * Default value is false.
+   */
+  enableSpaceAgnosticBehavior?: boolean;
 }
