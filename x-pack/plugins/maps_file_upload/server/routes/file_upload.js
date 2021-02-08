@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { importDataProvider } from '../models/import_data';
@@ -9,7 +10,7 @@ import { updateTelemetry } from '../telemetry/telemetry';
 import { MAX_BYTES } from '../../common/constants/file_import';
 import { schema } from '@kbn/config-schema';
 
-export const IMPORT_ROUTE = '/api/fileupload/import';
+export const IMPORT_ROUTE = '/api/maps/fileupload/import';
 
 export const querySchema = schema.maybe(
   schema.object({

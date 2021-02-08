@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PublicContract } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
@@ -191,21 +191,6 @@ export class SessionService {
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
-  }
-
-  private refresh$ = new Subject<void>();
-  /**
-   * Observable emits when search result refresh was requested
-   * For example, the UI could have it's own "refresh" button
-   * Application would use this observable to handle user interaction on that button
-   */
-  public onRefresh$ = this.refresh$.asObservable();
-
-  /**
-   * Request a search results refresh
-   */
-  public refresh() {
-    this.refresh$.next();
   }
 
   /**
