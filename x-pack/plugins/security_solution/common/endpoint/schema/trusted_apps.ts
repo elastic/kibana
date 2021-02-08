@@ -7,7 +7,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
-import { getDuplicateFields, isValidHash } from '../validation/trusted_apps';
+import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 const entryFieldLabels: { [k in ConditionEntryField]: string } = {
   [ConditionEntryField.HASH]: 'Hash',

@@ -61,7 +61,7 @@ import {
   editingTrustedApp,
   getListItems,
 } from './selectors';
-import { toUpdateTrustedApp } from '../service/to_new_trusted_app';
+import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
