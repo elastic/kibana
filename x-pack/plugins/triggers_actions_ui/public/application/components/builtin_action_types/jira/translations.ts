@@ -201,7 +201,7 @@ export const SEARCH_ISSUES_LOADING = i18n.translate(
 );
 
 export const LABELS_WHITE_SPACES = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.jira.requiredSummaryTextField',
+  'xpack.triggersActionsUI.components.builtinActionTypes.jira.labelsSpacesErrorMessage',
   {
     defaultMessage: 'Labels cannot contain spaces.',
   }
