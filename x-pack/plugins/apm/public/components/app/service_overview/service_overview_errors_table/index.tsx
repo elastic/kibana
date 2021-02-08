@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty, orderBy } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -105,11 +105,11 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
     currentPageErrorGroups.map(({ group_id: groupId }) => groupId).sort()
   );
   const {
-    data: errorGroupsComparisonStatistics,
-    status: errorGroupsComparisonStatisticsStatus,
+    data: errorGroupComparisonStatistics,
+    status: errorGroupComparisonStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (!isEmpty(requestId) && groupIds && start && end && transactionType) {
+      if (currentPageErrorGroups.length && start && end && transactionType) {
         return callApmApi({
           endpoint:
             'GET /api/apm/services/{serviceName}/error_groups/comparison_statistics',
@@ -137,8 +137,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
 
   const columns = getColumns({
     serviceName,
-    errorGroupsComparisonStatistics:
-      errorGroupsComparisonStatistics?.[requestId],
+    errorGroupComparisonStatistics: errorGroupComparisonStatistics?.[requestId],
   });
 
   return (
@@ -182,7 +181,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               }}
               loading={
                 status === FETCH_STATUS.LOADING ||
-                errorGroupsComparisonStatisticsStatus === FETCH_STATUS.LOADING
+                errorGroupComparisonStatisticsStatus === FETCH_STATUS.LOADING
               }
               onChange={(newTableOptions: {
                 page?: {

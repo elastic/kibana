@@ -17,8 +17,8 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
-import { getServiceErrorGroupsStatistics } from '../lib/services/get_service_error_groups_statistics';
+import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_group_primary_statistics';
+import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_group_comparison_statistics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
@@ -280,7 +280,7 @@ export const serviceErrorGroupsPrimaryStatisticsRoute = createRoute({
       path: { serviceName },
       query: { transactionType },
     } = context.params;
-    return getServiceErrorGroups({
+    return getServiceErrorGroupPrimaryStatistics({
       serviceName,
       setup,
       transactionType,
@@ -313,7 +313,7 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
       path: { serviceName },
       query: { numBuckets, transactionType, groupIds },
     } = context.params;
-    return getServiceErrorGroupsStatistics({
+    return getServiceErrorGroupComparisonStatistics({
       serviceName,
       setup,
       numBuckets,

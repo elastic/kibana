@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { rangeFilter } from '../../../../common/utils/range_filter';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getErrorName } from '../../helpers/get_error_name';
+} from '../../../common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeFilter } from '../../../common/utils/range_filter';
+import { getErrorName } from '../helpers/get_error_name';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export type ServiceErrorGroupItem = ValuesType<
-  PromiseReturnType<typeof getServiceErrorGroups>
->;
-
-export async function getServiceErrorGroups({
+export async function getServiceErrorGroupPrimaryStatistics({
   serviceName,
   setup,
   transactionType,

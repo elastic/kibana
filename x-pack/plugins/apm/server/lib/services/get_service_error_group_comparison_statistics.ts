@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Coordinate } from '../../../../typings/timeseries';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
-import { getBucketSize } from '../../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+} from '../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeFilter } from '../../../common/utils/range_filter';
+import { Coordinate } from '../../../typings/timeseries';
+import { getBucketSize } from '../helpers/get_bucket_size';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
-export async function getServiceErrorGroupsStatistics({
+export async function getServiceErrorGroupComparisonStatistics({
   serviceName,
   setup,
   numBuckets,
