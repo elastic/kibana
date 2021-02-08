@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import {
   DataPublicPluginSetup,
@@ -93,6 +94,9 @@ export class DataEnhancedPlugin
               application: core.application,
               timeFilter: plugins.data.query.timefilter.timefilter,
               storage: this.storage,
+              disableSaveAfterSessionCompletesTimeout: moment
+                .duration(this.config.search.sessions.notTouchedTimeout)
+                .asMilliseconds(),
               usageCollector: this.usageCollector,
             })
           )
