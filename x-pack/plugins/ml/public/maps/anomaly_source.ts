@@ -218,6 +218,10 @@ export class AnomalySource implements IVectorSource {
     return tooltipProperties;
   }
 
+  isFieldAware(): boolean {
+    return true;
+  }
+
   // This is for type-ahead support in the UX for by-value styling
   async getValueSuggestions(field: IField, query: string): Promise<string[]> {
     return [];
@@ -261,10 +265,6 @@ export class AnomalySource implements IVectorSource {
   isESSource(): boolean {
     // IGNORE: This is only relevant if your source is backed by an index-pattern
     return false;
-  }
-
-  isFieldAware(): boolean {
-    return true;
   }
 
   isFilterByMapBounds(): boolean {

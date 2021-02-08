@@ -11,32 +11,32 @@ import { FeatureCollection, Feature } from 'geojson';
 
 const DUMMY_JOB_LIST = [
   {
-    jobId: 'foo',
+    jobId: 'Africa incidents',
     results: [
       {
         typical: [10, 12],
         actual: [14, 16],
-        record_score: 5,
+        record_score: 0.7,
       },
       {
         typical: [9, 11],
         actual: [14, 16],
-        record_score: 5,
+        record_score: 0.6,
       },
     ],
   },
   {
-    jobId: 'bar',
+    jobId: 'USA incidents',
     results: [
       {
         typical: [-80, 40],
         actual: [-81, 42],
-        record_score: 5,
+        record_score: 0.7,
       },
       {
         typical: [-79, 35],
         actual: [-78, 34],
-        record_score: 5,
+        record_score: 0.3,
       },
     ],
   },
