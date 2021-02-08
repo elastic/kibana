@@ -24,21 +24,29 @@ export function validateEsPrivilegeResponse(
   return response;
 }
 
-function buildActionsValidationSchema(actions: string[]) {
-  return schema.object({
-    ...actions.reduce<Record<string, any>>((acc, action) => {
-      return {
-        ...acc,
-        [action]: schema.boolean(),
-      };
-    }, {}),
-  });
-}
-
 function buildValidationSchema(application: string, actions: string[], resources: string[]) {
-  const actionValidationSchema = buildActionsValidationSchema(actions);
+  const actionValidationSchema = schema.boolean();
+  const actionsValidationSchema = schema.object(
+    {},
+    {
+      unknowns: 'allow',
+      validate: (value) => {
+        const actualActions = Object.keys(value).sort();
+        if (
+          actions.length !== actualActions.length ||
+          ![...actions].sort().every((x, i) => x === actualActions[i])
+        ) {
+          throw new Error('Payload did not match expected actions');
+        }
 
-  const resourceValidationSchema = schema.object(
+        Object.values(value).forEach((actionResult) => {
+          actionValidationSchema.validate(actionResult);
+        });
+      },
+    }
+  );
+
+  const resourcesValidationSchema = schema.object(
     {},
     {
       unknowns: 'allow',
@@ -46,13 +54,13 @@ function buildValidationSchema(application: string, actions: string[], resources
         const actualResources = Object.keys(value).sort();
         if (
           resources.length !== actualResources.length ||
-          !resources.sort().every((x, i) => x === actualResources[i])
+          ![...resources].sort().every((x, i) => x === actualResources[i])
         ) {
           throw new Error('Payload did not match expected resources');
         }
 
         Object.values(value).forEach((actionResult) => {
-          actionValidationSchema.validate(actionResult);
+          actionsValidationSchema.validate(actionResult);
         });
       },
     }
@@ -63,7 +71,7 @@ function buildValidationSchema(application: string, actions: string[], resources
     has_all_requested: schema.boolean(),
     cluster: schema.object({}, { unknowns: 'allow' }),
     application: schema.object({
-      [application]: resourceValidationSchema,
+      [application]: resourcesValidationSchema,
     }),
     index: schema.object({}, { unknowns: 'allow' }),
   });
