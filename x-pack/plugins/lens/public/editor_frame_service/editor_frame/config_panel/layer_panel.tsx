@@ -123,7 +123,7 @@ export function LayerPanel(
   );
 
   const {
-    setNextFocusedId: setNextButtonId,
+    setNextFocusedId: setNextFocusedButtonId,
     removeRef: removeButtonRef,
     registerNewRef: registerNewButtonRef,
   } = useFocusUpdate(allAccessors);
@@ -142,11 +142,10 @@ export function LayerPanel(
         groupId,
         layerId: targetLayerId,
       } = (targetItem as unknown) as DraggedOperation;
-      // for what operations we want to leave focus on drag and for what move it to drop?
       if (dropType === 'reorder' || dropType === 'field_replace' || dropType === 'field_add') {
-        setNextButtonId(droppedItem.id);
+        setNextFocusedButtonId(droppedItem.id);
       } else {
-        setNextButtonId(columnId);
+        setNextFocusedButtonId(columnId);
       }
 
       const filterOperations =
@@ -191,7 +190,7 @@ export function LayerPanel(
     setDimension,
     removeDimension,
     layerDatasourceDropProps,
-    setNextButtonId,
+    setNextFocusedButtonId,
   ]);
 
   return (
