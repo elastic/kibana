@@ -32,7 +32,7 @@ import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
 export function ApmPanel(props) {
-  const { setupMode } = props;
+  const { setupMode, config } = props;
   const apmsTotal = get(props, 'apms.total') || 0;
   // Do not show if we are not in setup mode
   if (apmsTotal === 0 && !setupMode.enabled) {
@@ -51,54 +51,7 @@ export function ApmPanel(props) {
     />
   ) : null;
 
-  const getAPMServersPanelContent = () => {
-    if (props.config && props.config.agentMode) {
-      return (
-        <EuiDescriptionList type="column">
-          <EuiDescriptionListTitle className="eui-textBreakWord">
-            <FormattedMessage
-              id="xpack.monitoring.cluster.overview.apmPanel.processedEventsLabel"
-              defaultMessage="Processed Events"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription data-test-subj="apmsTotalEvents">
-            {formatMetric(props.totalEvents, '0.[0]a')}
-          </EuiDescriptionListDescription>
-          <EuiDescriptionListTitle className="eui-textBreakWord">
-            <FormattedMessage
-              id="xpack.monitoring.cluster.overview.apmPanel.lastEventLabel"
-              defaultMessage="Last Event"
-            />
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription data-test-subj="apmsBytesSent">
-            <FormattedMessage
-              id="xpack.monitoring.cluster.overview.apmPanel.lastEventDescription"
-              defaultMessage="{timeOfLastEvent} ago"
-              values={{
-                timeOfLastEvent: formatTimestampToDuration(
-                  +moment(props.timeOfLastEvent),
-                  CALCULATE_DURATION_SINCE
-                ),
-              }}
-            />
-          </EuiDescriptionListDescription>
-        </EuiDescriptionList>
-      );
-    }
-    return (
-      <EuiDescriptionList type="column">
-        <EuiDescriptionListTitle className="eui-textBreakWord">
-          <FormattedMessage
-            id="xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel"
-            defaultMessage="Memory Usage"
-          />
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription data-test-subj="apmMemoryUsage">
-          <BytesUsage usedBytes={props.memRss} />
-        </EuiDescriptionListDescription>
-      </EuiDescriptionList>
-    );
-  };
+  const inAgent = config && config.container && config.agentMode;
 
   return (
     <ClusterItemContainer
@@ -181,11 +134,23 @@ export function ApmPanel(props) {
                       )}
                       data-test-subj="apmListing"
                     >
-                      <FormattedMessage
-                        id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
-                        defaultMessage="APM servers: {apmsTotal}"
-                        values={{ apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span> }}
-                      />
+                      {inAgent ? (
+                        <FormattedMessage
+                          id="xpack.monitoring.cluster.overview.apmPanel.agentServersTotalLinkLabel"
+                          defaultMessage="Elastic Agent group servers: {apmsTotal}"
+                          values={{
+                            apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span>,
+                          }}
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
+                          defaultMessage="APM servers: {apmsTotal}"
+                          values={{
+                            apmsTotal: <span data-test-subj="apmsTotal">{apmsTotal}</span>,
+                          }}
+                        />
+                      )}
                     </EuiLink>
                   </h3>
                 </EuiTitle>
@@ -197,7 +162,17 @@ export function ApmPanel(props) {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
-            {getAPMServersPanelContent()}
+            <EuiDescriptionList type="column">
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.apmPanel.memoryUsageLabel"
+                  defaultMessage="Memory Usage"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="apmMemoryUsage">
+                <BytesUsage usedBytes={props.memRss} />
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGrid>
