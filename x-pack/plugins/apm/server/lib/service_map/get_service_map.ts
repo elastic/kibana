@@ -98,7 +98,7 @@ async function getServicesData(options: IEnvOptions) {
   }
 
   if (options.environment) {
-    filter = filter.concat(...environmentQuery(environment));
+    filter = filter.concat(environmentQuery(environment));
   }
 
   const params = mergeProjection(projection, {
