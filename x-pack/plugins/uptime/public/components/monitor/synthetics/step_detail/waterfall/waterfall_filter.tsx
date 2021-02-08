@@ -90,6 +90,14 @@ export const WaterfallFilter = ({
     [value]
   );
 
+  /* reset checkbox when there is no query or active filters
+   * this prevents the checkbox from being checked in a disabled state */
+  useEffect(() => {
+    if (!(query || activeFilters.length > 0)) {
+      setOnlyHighlighted(false);
+    }
+  }, [activeFilters.length, setOnlyHighlighted, query]);
+
   // indicates use of the query input box
   useEffect(() => {
     if (query) {

@@ -14,6 +14,7 @@ import 'jest-canvas-mock';
 import { MIME_FILTERS, WaterfallFilter } from './waterfall_filter';
 import {
   FILTER_REQUESTS_LABEL,
+  FILTER_COLLAPSE_REQUESTS_LABEL,
   FILTER_POPOVER_OPEN_LABEL,
 } from '../../waterfall/components/translations';
 
@@ -101,5 +102,54 @@ describe('waterfall filter', () => {
     });
 
     expect(setQuery).toHaveBeenCalledWith(testText);
+  });
+
+  it('resets checkbox when filters are removed', () => {
+    const Component = () => {
+      const [onlyHighlighted, setOnlyHighlighted] = useState<boolean>(false);
+      const [query, setQuery] = useState<string>('');
+      const [activeFilters, setActiveFilters] = useState<string[]>([]);
+      return (
+        <WaterfallFilter
+          query={query}
+          setQuery={setQuery}
+          activeFilters={activeFilters}
+          onlyHighlighted={onlyHighlighted}
+          setActiveFilters={setActiveFilters}
+          setOnlyHighlighted={setOnlyHighlighted}
+        />
+      );
+    };
+    const { getByLabelText, getByTitle } = render(<Component />);
+    const input = getByLabelText(FILTER_REQUESTS_LABEL);
+    // apply filters
+    const testText = 'js';
+    fireEvent.change(input, { target: { value: testText } });
+    fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
+    const filterGroupButton = getByTitle('XHR');
+    fireEvent.click(filterGroupButton);
+
+    // input has debounce effect so hence the timer
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    const collapseCheckbox = getByLabelText(FILTER_COLLAPSE_REQUESTS_LABEL) as HTMLInputElement;
+    expect(collapseCheckbox).not.toBeDisabled();
+    fireEvent.click(collapseCheckbox);
+    expect(collapseCheckbox).toBeChecked();
+
+    // remove filters
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.click(filterGroupButton);
+
+    // input has debounce effect so hence the timer
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    // expect the checkbox to reset to disabled and unchecked
+    expect(collapseCheckbox).not.toBeChecked();
+    expect(collapseCheckbox).toBeDisabled();
   });
 });
