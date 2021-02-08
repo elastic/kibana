@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 ```
 
 ## Parameters
@@ -19,5 +19,5 @@ setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | 
 
 <b>Returns:</b>
 
-`TSetup | Promise<TSetup>`
+`TSetup`
 
