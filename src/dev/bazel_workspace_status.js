@@ -30,7 +30,12 @@
   }
 
   // Git repo
-  const repoUrlCmdResult = await runCmd('git', ['config', '--get', 'remote.origin.url']);
+  const kbnGitOriginName = process.env.KBN_GIT_ORIGIN_NAME || 'origin';
+  const repoUrlCmdResult = await runCmd('git', [
+    'config',
+    '--get',
+    `remote.${kbnGitOriginName}.url`,
+  ]);
   if (repoUrlCmdResult.exitCode !== 0) {
     process.exit(1);
   }
