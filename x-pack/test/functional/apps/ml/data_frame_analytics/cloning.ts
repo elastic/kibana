@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   // Failing ES promotion, see https://github.com/elastic/kibana/issues/89980
-  describe.skip('jobs cloning supported by UI form', function () {
+  describe('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
