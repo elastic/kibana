@@ -94,7 +94,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
                   <EuiFormRow
                     label="Field name"
                     helpText={fieldNameNote}
-                    fullWidth={true}
+                    fullWidth
                     data-test-subj="SchemaAddFieldNameRow"
                     error={addFieldFormErrors}
                     isInvalid={!!addFieldFormErrors}
@@ -103,10 +103,10 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
                       placeholder="name"
                       type="text"
                       onChange={handleChange}
-                      required={true}
+                      required
                       value={rawFieldName}
-                      fullWidth={true}
-                      autoFocus={true}
+                      fullWidth
+                      autoFocus
                       isLoading={loading}
                       data-test-subj="SchemaAddFieldNameField"
                     />
@@ -132,7 +132,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
             <EuiButtonEmpty onClick={closeAddFieldModal}>{FIELD_NAME_MODAL_CANCEL}</EuiButtonEmpty>
             <EuiButton
               color="primary"
-              fill={true}
+              fill
               disabled={disableForm}
               type="submit"
               isLoading={loading}
