@@ -12,7 +12,9 @@ NOTE: When running multiple tenants of {kib} by changing the `kibana.index` in y
 [[xpack-kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, open the menu, then click *Stack Management > Roles* and click **Create role**.
+Roles are a collection of privileges that allow you to perform actions in {kib} and {es}. Users are not directly granted privileges, but are instead assigned one or more roles that describe the desired level of access. When you assign a user multiple roles, the user receives a union of the roles’ privileges. This means that you cannot reduce the privileges of a user by assigning them an additional role. You must instead remove or edit one of their existing roles.
+
+To create a role, open the menu, then click *Stack Management > Roles* and click **Create role**.
 
 [float]
 ==== Required permissions
@@ -41,8 +43,10 @@ With field-level security (FLS), you can instruct {es} to grant or deny access t
 [[index_privilege_example_1]]
 ===== Example: Grant access to indices that match the `filebeat-*` pattern
 
-. Enter `filebeat-*` in the **Index** field under the **Index Privileges** section.
-. Enter `read` and `view_index_metadata` in the **Privileges** field under the **Index Privileges** section.
+. Go to **Stack Management > Roles**, and then click **Create role**.
+. In **Index privileges**, enter:
+.. `filebeat-*` in the **Index** field.
+.. `read` and `view_index_metadata` in the **Privileges** field.
 
 [role="screenshot"]
 image::user/security/images/create-role-index-example.png[Create role with index privileges]
@@ -50,8 +54,10 @@ image::user/security/images/create-role-index-example.png[Create role with index
 [[index_privilege_dls_example]]
 ===== Example: Grant read access to specific documents that match the `filebeat-*` pattern
 
-. Enter `filebeat-*` in the **Indices** field under the **Index Privileges** section.
-. Enter `read` and `view_index_metadata` in the **Privileges** field under the **Index Privileges** section.
+. Go to **Stack Management > Roles**, and then click **Create role**.
+. In **Index privileges**, enter:
+.. `filebeat-*` in the **Index** field.
+.. `read` and `view_index_metadata` in the **Privileges** field.
 . Select **Grant read privileges to selected documents**.
 . Enter an {es} query that describes the documents you want to grant access to. This example writes a query that allows access to documents that have a `category` field equal to `click`:
 +
