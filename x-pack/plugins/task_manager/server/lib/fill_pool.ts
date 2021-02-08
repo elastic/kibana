@@ -70,6 +70,7 @@ export async function fillPool(
     });
     fetchAvailableTasks()
       .pipe(
+        // each ClaimOwnershipResult will be sequencially consumed an ran using the `run` handler
         concatMap(async (res) =>
           mapResult<ClaimOwnershipResult, FillPoolResult, Promise<FillPoolAndRunResult>>(
             res,
@@ -93,8 +94,8 @@ export async function fillPool(
             async (fillPoolResult) => asErr({ result: fillPoolResult })
           )
         ),
-        // TODO: once we actually make multiple queries this will haveto change
-        // we need to summarize the stats
+        // when the final call to `run` completes, we'll complete the stream and emit the
+        // final accumulated result
         last()
       )
       .subscribe(
