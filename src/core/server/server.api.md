@@ -203,6 +203,16 @@ export interface AssistantAPIClientParams extends GenericParams {
     path: '/_migration/assistance';
 }
 
+// @public @deprecated
+export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
+    // (undocumented)
+    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    // (undocumented)
+    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+    // (undocumented)
+    stop?(): void;
+}
+
 // @public (undocumented)
 export interface Authenticated extends AuthResultParams {
     // (undocumented)
@@ -1815,9 +1825,9 @@ export { PackageInfo }
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
-    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
     // (undocumented)
-    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+    start(core: CoreStart, plugins: TPluginsStart): TStart;
     // (undocumented)
     stop?(): void;
 }
@@ -1836,7 +1846,7 @@ export interface PluginConfigDescriptor<T = any> {
 export type PluginConfigSchema<T> = Type<T>;
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema = unknown> {
@@ -3141,9 +3151,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/http/router/response.ts:306:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:263:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:266:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:371:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:280:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:280:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:283:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:388:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

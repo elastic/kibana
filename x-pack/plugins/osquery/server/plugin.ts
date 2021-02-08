@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -14,8 +13,7 @@ import {
   Logger,
 } from '../../../../src/core/server';
 
-import { ConfigType } from './config';
-import { createConfig$ } from './create_config';
+import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
@@ -32,9 +30,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
-    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
+    const config = createConfig(this.initializerContext);
 
     if (!config.enabled) {
       return {};
