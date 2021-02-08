@@ -20,6 +20,11 @@ import {
   getComparisonChartTheme,
 } from '../../shared/time_comparison/get_time_range_comparison';
 
+const INITIAL_STATE = {
+  currentPeriod: [],
+  previousPeriod: [],
+};
+
 export function ServiceOverviewThroughputChart({
   height,
 }: {
@@ -37,7 +42,7 @@ export function ServiceOverviewThroughputChart({
     comparisonType,
   });
 
-  const { data, status } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
         return callApmApi({
@@ -86,7 +91,7 @@ export function ServiceOverviewThroughputChart({
         customTheme={comparisonChartTheme}
         timeseries={[
           {
-            data: data?.currentPeriod.throughput ?? [],
+            data: data.currentPeriod,
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
@@ -97,7 +102,7 @@ export function ServiceOverviewThroughputChart({
           ...(comparisonEnabled
             ? [
                 {
-                  data: data?.previousPeriod.throughput ?? [],
+                  data: data.previousPeriod,
                   type: 'area',
                   color: theme.eui.euiColorLightestShade,
                   title: i18n.translate(

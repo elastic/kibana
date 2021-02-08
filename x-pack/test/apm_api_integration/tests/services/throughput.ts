@@ -34,8 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         })}`
       );
       expect(response.status).to.be(200);
-      expect(response.body.currentPeriod.throughput.length).to.be(0);
-      expect(response.body.previousPeriod.throughput.length).to.be(0);
+      expect(response.body.currentPeriod.length).to.be(0);
+      expect(response.body.previousPeriod.length).to.be(0);
     });
   });
 
@@ -61,34 +61,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns some data', () => {
-        expect(throughputResponse.currentPeriod.throughput.length).to.be.greaterThan(0);
-        expect(throughputResponse.previousPeriod.throughput.length).not.to.be.greaterThan(0);
+        expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
+        expect(throughputResponse.previousPeriod.length).not.to.be.greaterThan(0);
 
-        const nonNullDataPoints = throughputResponse.currentPeriod.throughput.filter(
-          removeInvalidYAxis
-        );
+        const nonNullDataPoints = throughputResponse.currentPeriod.filter(removeInvalidYAxis);
 
         expect(nonNullDataPoints.length).to.be.greaterThan(0);
       });
 
       it('has the correct start date', () => {
         expectSnapshot(
-          new Date(first(throughputResponse.currentPeriod.throughput)?.x ?? NaN).toISOString()
+          new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
         ).toMatchInline(`"2020-12-08T13:57:30.000Z"`);
       });
 
       it('has the correct end date', () => {
         expectSnapshot(
-          new Date(last(throughputResponse.currentPeriod.throughput)?.x ?? NaN).toISOString()
+          new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
         ).toMatchInline(`"2020-12-08T14:27:30.000Z"`);
       });
 
       it('has the correct number of buckets', () => {
-        expectSnapshot(throughputResponse.currentPeriod.throughput.length).toMatchInline(`61`);
+        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`61`);
       });
 
       it('has the correct throughput', () => {
-        expectSnapshot(throughputResponse.currentPeriod.throughput).toMatch();
+        expectSnapshot(throughputResponse.currentPeriod).toMatch();
       });
     }
   );
@@ -112,13 +110,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns some data', () => {
-        expect(throughputResponse.currentPeriod.throughput.length).to.be.greaterThan(0);
-        expect(throughputResponse.previousPeriod.throughput.length).to.be.greaterThan(0);
+        expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
+        expect(throughputResponse.previousPeriod.length).to.be.greaterThan(0);
 
-        const currentPeriodNonNullDataPoints = throughputResponse.currentPeriod.throughput.filter(
+        const currentPeriodNonNullDataPoints = throughputResponse.currentPeriod.filter(
           removeInvalidYAxis
         );
-        const previousPeriodNonNullDataPoints = throughputResponse.previousPeriod.throughput.filter(
+        const previousPeriodNonNullDataPoints = throughputResponse.previousPeriod.filter(
           removeInvalidYAxis
         );
 
@@ -128,27 +126,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('has the correct start date', () => {
         expectSnapshot(
-          new Date(first(throughputResponse.currentPeriod.throughput)?.x ?? NaN).toISOString()
+          new Date(first(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
         ).toMatchInline(`"2020-12-08T14:12:50.000Z"`);
 
         expectSnapshot(
-          new Date(first(throughputResponse.previousPeriod.throughput)?.x ?? NaN).toISOString()
+          new Date(first(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
         ).toMatchInline(`"2020-12-08T14:12:50.000Z"`);
       });
 
       it('has the correct end date', () => {
         expectSnapshot(
-          new Date(last(throughputResponse.currentPeriod.throughput)?.x ?? NaN).toISOString()
+          new Date(last(throughputResponse.currentPeriod)?.x ?? NaN).toISOString()
         ).toMatchInline(`"2020-12-08T14:27:50.000Z"`);
 
         expectSnapshot(
-          new Date(last(throughputResponse.previousPeriod.throughput)?.x ?? NaN).toISOString()
+          new Date(last(throughputResponse.previousPeriod)?.x ?? NaN).toISOString()
         ).toMatchInline(`"2020-12-08T14:27:50.000Z"`);
       });
 
       it('has the correct number of buckets', () => {
-        expectSnapshot(throughputResponse.currentPeriod.throughput.length).toMatchInline(`91`);
-        expectSnapshot(throughputResponse.previousPeriod.throughput.length).toMatchInline(`91`);
+        expectSnapshot(throughputResponse.currentPeriod.length).toMatchInline(`91`);
+        expectSnapshot(throughputResponse.previousPeriod.length).toMatchInline(`91`);
       });
 
       it('has the correct throughput', () => {

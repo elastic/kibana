@@ -343,13 +343,13 @@ export const serviceThroughputRoute = createRoute({
       transactionType,
     };
 
-    const throughputPromise = getThroughput({
+    const currentPeriodPromise = getThroughput({
       ...commonProps,
       start,
       end,
     });
 
-    const comparisonPromise =
+    const previousPeriodPromise =
       comparisonStart && comparisonEnd
         ? getThroughput({
             ...commonProps,
@@ -359,18 +359,18 @@ export const serviceThroughputRoute = createRoute({
         : undefined;
 
     const [currentPeriod, previousPeriod] = await Promise.all([
-      throughputPromise,
-      comparisonPromise,
+      currentPeriodPromise,
+      previousPeriodPromise,
     ]);
 
     const previousPeriodTimeseries = mergePeriodsTimeseries({
-      currentPeriodTimeseries: currentPeriod.throughput,
-      previousPeriodTimeseries: previousPeriod?.throughput,
+      currentPeriodTimeseries: currentPeriod,
+      previousPeriodTimeseries: previousPeriod,
     });
 
     return {
       currentPeriod,
-      previousPeriod: { throughput: previousPeriodTimeseries },
+      previousPeriod: previousPeriodTimeseries,
     };
   },
 });

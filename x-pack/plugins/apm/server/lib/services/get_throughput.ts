@@ -91,7 +91,5 @@ async function fetcher({
 }
 
 export async function getThroughput(options: Options) {
-  return {
-    throughput: transform(options, await fetcher(options)),
-  };
+  return transform(options, await fetcher(options));
 }
