@@ -8,8 +8,10 @@
 
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { Node } from 'ts-morph';
+import { isNamedNode } from '../tsmorph_utils';
 import { Reference } from '../types';
 import { extractImportReferences } from './extract_import_refs';
+import { getTypeKind } from './get_type_kind';
 
 /**
  * Special logic for creating the signature based on the type of node. See https://github.com/dsherret/ts-morph/issues/923#issue-795332729
@@ -27,7 +29,8 @@ export function getSignature(
   node: Node,
   plugins: KibanaPlatformPlugin[],
   log: ToolingLog
-): Array<string | Reference> {
+): Array<string | Reference> | undefined {
+  let signature = '';
   //  node.getType() on a TypeAliasDeclaration is just a reference to itself. If we don't special case this, then
   // `export type Foo = string | number;` would show up with a signagure of `Foo` that is a link to itself, instead of
   //  `string | number`.
@@ -37,12 +40,10 @@ export function getSignature(
       const declarations = symbol.getDeclarations();
       if (declarations.length === 1) {
         // Unfortunately we are losing some reference links here.
-        return extractImportReferences(declarations[0].getType().getText(node), plugins, log);
+        signature = declarations[0].getType().getText(node);
       }
     }
-  }
-
-  if (Node.isFunctionDeclaration(node)) {
+  } else if (Node.isFunctionDeclaration(node)) {
     // See https://github.com/dsherret/ts-morph/issues/907#issue-770284331.
     // Unfortunately this has to be manually pieced together, or it comes up as "typeof TheFunction"
     const params = node
@@ -50,25 +51,34 @@ export function getSignature(
       .map((p) => `${p.getName()}: ${p.getType().getText()}`)
       .join(', ');
     const returnType = node.getReturnType().getText();
-    return extractImportReferences(`(${params}) => ${returnType}`, plugins, log);
-  }
-
-  // Need to tack on manually any type parameters or "extends/implements" section.
-  if (Node.isInterfaceDeclaration(node) || Node.isClassDeclaration(node)) {
+    signature = `(${params}) => ${returnType}`;
+  } else if (Node.isInterfaceDeclaration(node) || Node.isClassDeclaration(node)) {
+    // Need to tack on manually any type parameters or "extends/implements" section.
     const heritageClause = node
       .getHeritageClauses()
       .map((h) => h.getText())
       .join(' ');
-
-    return extractImportReferences(
-      `${node.getType().getText()}${heritageClause ? ' ' + heritageClause : ''}`,
-      plugins,
-      log
-    );
+    signature = `${node.getType().getText()}${heritageClause ? ' ' + heritageClause : ''}`;
+  } else {
+    // Here, 'node' is explicitly *not* passed in to `getText` otherwise arrow functions won't
+    // include reference links. Tests will break if you add it in here, or remove it from above.
+    // There is test coverage for all this oddness.
+    signature = node.getType().getText();
   }
 
-  // Here, 'node' is explicitly *not* passed in to `getText` otherwise arrow functions won't
-  // include reference links. Tests will break if you add it in here, or remove it from above.
-  // There is test coverage for all this oddness.
-  return extractImportReferences(node.getType().getText(), plugins, log);
+  // Don't return the signature if it's the same as the type (string, string)
+  if (getTypeKind(node).toString() === signature) return undefined;
+
+  const referenceLinks = extractImportReferences(signature, plugins, log);
+  // Don't return the signature if it's a single self referential link.
+  if (
+    isNamedNode(node) &&
+    referenceLinks.length === 1 &&
+    typeof referenceLinks[0] === 'object' &&
+    (referenceLinks[0] as Reference).text === node.getName()
+  ) {
+    return undefined;
+  }
+
+  return referenceLinks;
 }

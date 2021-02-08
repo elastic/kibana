@@ -35,7 +35,6 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   // The signature should contain a link to ExampleInterface param.
   expect(fn?.signature).toBeDefined();
   expect(linkCount(fn!.signature!)).toBe(3);
-  expect(linkCount(fn!.signature!)).toBe(3);
 
   expect(fn?.children!.length).toBe(5);
   expect(fn?.returnComment!.length).toBe(1);
@@ -64,7 +63,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p4).toBeDefined();
   expect(p4!.isRequired).toBe(true);
   expect(p4!.type).toBe(TypeKind.CompoundTypeKind);
-  expect(p4!.signature?.length).toBeGreaterThan(1);
+  expect(p4!.signature?.length).toBe(1);
   expect(linkCount(p4!.signature!)).toBe(1);
 
   const p5 = fn?.children!.find((c) => c.label === 'e');
@@ -141,14 +140,13 @@ it('const exported from common folder is correct', () => {
 describe('functions', () => {
   it('arrow function is exported correctly', () => {
     const fn = doc.client.functions.find((c) => c.label === 'arrowFn');
-    // For some reason the arrow function signature uses "e?: string | undefined) => " while
-    // non arrow function signature shows up with "e: string | undefined) => ", hence the need to
-    // pass it in.
+    // Using the same data as the not an arrow function so this is refactored.
     fnIsCorrect(fn);
   });
 
   it('non arrow function is exported correctly', () => {
     const fn = doc.client.functions.find((c) => c.label === 'notAnArrowFn');
+    // Using the same data as the arrow function so this is refactored.
     fnIsCorrect(fn);
   });
 
@@ -226,6 +224,8 @@ describe('Misc types', () => {
     const aStr = doc.client.misc.find((c) => c.label === 'aStr');
     expect(aStr).toBeDefined();
     expect(aStr?.type).toBe(TypeKind.StringKind);
+    // signature would be the same as type, so it should be removed.
+    expect(aStr?.signature).toBeUndefined();
   });
 
   it('Implicitly typed number is returned with the correct type', () => {
@@ -258,7 +258,15 @@ describe('Misc types', () => {
 });
 
 describe('interfaces and classes', () => {
-  it('Interface exported correctly', () => {
+  it('Basic interface exported correctly', () => {
+    const anInterface = doc.client.interfaces.find((c) => c.label === 'IReturnAReactComponent');
+    expect(anInterface).toBeDefined();
+
+    // Make sure it doesn't include a self referential link.
+    expect(anInterface?.signature).toBeUndefined();
+  });
+
+  it('Interface which extends exported correctly', () => {
     const exampleInterface = doc.client.interfaces.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
     expect(exampleInterface?.signature).toBeDefined();
@@ -299,7 +307,6 @@ describe('interfaces and classes', () => {
     expect(clss?.type).toBe(TypeKind.ClassKind);
     expect(clss?.signature).toMatchInlineSnapshot(`
       Array [
-        "",
         Object {
           "docId": "kibPluginAPluginApi",
           "section": "def-public.CrazyClass",
@@ -308,7 +315,7 @@ describe('interfaces and classes', () => {
         "<P> extends ExampleClass<WithGen<P>>",
       ]
     `);
-    expect(clss?.signature?.length).toBe(3);
+    expect(clss?.signature?.length).toBe(2);
   });
 
   it('Function with generic inside interface is exported with function type', () => {

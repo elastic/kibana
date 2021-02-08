@@ -42,7 +42,9 @@ export function extractImportReferences(
     const ref = extractImportRef(textSegment);
     if (ref) {
       const index = textSegment.indexOf('import("');
-      texts.push(textSegment.substr(0, index));
+      if (index !== 0) {
+        texts.push(textSegment.substr(0, index));
+      }
       const { name, path } = ref;
       const lengthOfImport = 'import(".")'.length + path.length + name.length;
       const plugin = getPluginForPath(path, plugins);
@@ -53,7 +55,10 @@ export function extractImportReferences(
         }
         // If we can't create a link for this, still remove the import("..."). part to make
         // it easier to read.
-        texts.push(textSegment.substr(index + lengthOfImport - name.length, name.length));
+        const str = textSegment.substr(index + lengthOfImport - name.length, name.length);
+        if (str && str !== '') {
+          texts.push(str);
+        }
       } else {
         const section = getApiSectionId({
           pluginName: plugin.manifest.id,
@@ -68,7 +73,9 @@ export function extractImportReferences(
       }
       textSegment = textSegment.substr(index + lengthOfImport);
     } else {
-      texts.push(textSegment);
+      if (textSegment && textSegment !== '') {
+        texts.push(textSegment);
+      }
       textSegment = undefined;
     }
   }

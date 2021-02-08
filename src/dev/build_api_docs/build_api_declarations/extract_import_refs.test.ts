@@ -65,3 +65,9 @@ it('test extractImportReference with unknown imports', () => {
   expect(results[1]).toBe('FooFoo');
   expect(results[2]).toBe('>');
 });
+
+it('test single link', () => {
+  const results = extractImportReferences(`import("/plugin_a/public/foo").FooFoo`, plugins, log);
+  expect(results.length).toBe(1);
+  expect((results[0] as Reference).text).toBe('FooFoo');
+});
