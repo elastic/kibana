@@ -57,14 +57,17 @@ describe('useSwimlaneInputResolver', () => {
           ),
         },
         anomalyDetectorService: {
-          getJobs$: jest.fn(() =>
-            of([
+          getJobs$: jest.fn((jobId: string[]) => {
+            if (jobId.includes('invalid-job-id')) {
+              throw new Error('Invalid job');
+            }
+            return of([
               {
                 job_id: 'cw_multi_1',
                 analysis_config: { bucket_span: '15m' },
               },
-            ])
-          ),
+            ]);
+          }),
         },
       } as unknown) as AnomalySwimlaneServices,
     ];
@@ -127,6 +130,31 @@ describe('useSwimlaneInputResolver', () => {
 
     expect(services[2].anomalyDetectorService.getJobs$).toHaveBeenCalledTimes(2);
     expect(services[2].anomalyTimelineService.loadOverallData).toHaveBeenCalledTimes(3);
+  });
+
+  test('should not complete the observable on error', async () => {
+    const { result } = renderHook(() =>
+      useSwimlaneInputResolver(
+        embeddableInput as Observable<AnomalySwimlaneEmbeddableInput>,
+        onInputChange,
+        refresh,
+        services,
+        1000,
+        1
+      )
+    );
+
+    await act(async () => {
+      embeddableInput.next({
+        id: 'test-swimlane-embeddable',
+        jobIds: ['invalid-job-id'],
+        swimlaneType: SWIMLANE_TYPE.OVERALL,
+        filters: [],
+        query: { language: 'kuery', query: '' },
+      } as Partial<AnomalySwimlaneEmbeddableInput>);
+    });
+
+    expect(result.current[6]).toBe('Invalid job');
   });
 });
 
