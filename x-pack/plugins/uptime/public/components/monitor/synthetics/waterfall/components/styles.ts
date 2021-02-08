@@ -8,7 +8,7 @@
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { FIXED_AXIS_HEIGHT } from './constants';
+import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 
 interface WaterfallChartOuterContainerProps {
   height?: string;
@@ -54,6 +54,10 @@ export const WaterfallChartFixedAxisContainer = euiStyled.div`
 interface WaterfallChartSidebarContainer {
   height: number;
 }
+
+export const WaterfallChartSidebarWrapper = euiStyled(EuiFlexItem)`
+  max-width: ${SIDEBAR_GROW_SIZE * 10}%;
+`;
 
 export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSidebarContainer>`
   height: ${(props) => `${props.height}px`};

@@ -6,7 +6,7 @@
  */
 
 import { getChunks, MiddleTruncatedText } from './middle_truncated_text';
-import { render, within } from '@testing-library/react';
+import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
 const longString =
@@ -47,5 +47,18 @@ describe('Component', () => {
 
     expect(link).toHaveAttribute('href', url);
     expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders a button when onClick function is passed', () => {
+    const handleClick = jest.fn();
+    const { getByTestId } = render(
+      <MiddleTruncatedText text={longString} url={url} onClick={handleClick} />
+    );
+    const button = getByTestId('middleTruncatedTextButton');
+    fireEvent.click(button);
+
+    waitFor(() => {
+      expect(handleClick).toBeCalled();
+    });
   });
 });

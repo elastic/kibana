@@ -34,6 +34,7 @@ import {
   WaterfallChartFixedAxisContainer,
   WaterfallChartChartContainer,
   WaterfallChartTooltip,
+  WaterfallChartSidebarWrapper,
 } from './styles';
 import { WaterfallData } from '../types';
 import { BAR_HEIGHT, CANVAS_MAX_ITEMS, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
@@ -136,14 +137,14 @@ export const WaterfallChart = ({
         <WaterfallChartFixedTopContainer>
           <EuiFlexGroup gutterSize="none" responsive={false}>
             {shouldRenderSidebar && (
-              <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
+              <WaterfallChartSidebarWrapper grow={SIDEBAR_GROW_SIZE}>
                 <WaterfallChartFixedTopContainerSidebarCover paddingSize="none" hasShadow={false}>
                   <NetworkRequestsTotal
                     totalNetworkRequests={totalNetworkRequests}
                     fetchedNetworkRequests={fetchedNetworkRequests}
                   />
                 </WaterfallChartFixedTopContainerSidebarCover>
-              </EuiFlexItem>
+              </WaterfallChartSidebarWrapper>
             )}
             <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
               <WaterfallChartFixedAxisContainer>
@@ -189,7 +190,11 @@ export const WaterfallChart = ({
           style={{ paddingTop: '10px' }}
           ref={chartWrapperDivRef}
         >
-          {shouldRenderSidebar && <Sidebar items={sidebarItems!} render={renderSidebarItem!} />}
+          {shouldRenderSidebar && (
+            <WaterfallChartSidebarWrapper>
+              <Sidebar items={sidebarItems!} render={renderSidebarItem!} />
+            </WaterfallChartSidebarWrapper>
+          )}
           <EuiFlexItem grow={shouldRenderSidebar ? MAIN_GROW_SIZE : true}>
             {chartsToDisplay.map((chartData, ind) => (
               <WaterfallChartChartContainer

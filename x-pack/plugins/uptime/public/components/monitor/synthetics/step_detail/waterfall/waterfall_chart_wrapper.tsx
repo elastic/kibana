@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
-import { EuiButtonEmpty, EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import {
@@ -18,18 +17,6 @@ import {
   useFlyout,
 } from '../../waterfall';
 import { WaterfallFlyout } from '../../waterfall/components/waterfall_flyout';
-
-const StyledButton = styled(EuiButtonEmpty)`
-  &&& {
-    height: auto;
-    border: none;
-
-    .euiButtonContent {
-      display: inline-block;
-      padding: 0;
-    }
-  }
-`;
 
 export const RenderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick) => {
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null | HTMLAnchorElement>();
@@ -53,23 +40,21 @@ export const RenderSidebarItem: RenderItem<SidebarItem> = (item, index, onClick)
   return (
     <>
       {!status || !isErrorStatusCode(status) ? (
-        <StyledButton
+        <MiddleTruncatedText
+          text={`${index + 1}. ${item.url}`}
+          url={item.url}
           onClick={handleSidebarClick}
-          buttonRef={setRef}
-          data-test-subj={`sidebarItem${index}`}
-        >
-          <MiddleTruncatedText text={`${index + 1}. ${item.url}`} url={item.url} />
-        </StyledButton>
+          setButtonRef={setRef}
+        />
       ) : (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <StyledButton
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <MiddleTruncatedText
+              text={`${index + 1}. ${item.url}`}
+              url={item.url}
               onClick={handleSidebarClick}
-              buttonRef={setRef}
-              data-test-subj={`sidebarItem${index}`}
-            >
-              <MiddleTruncatedText text={`${index + 1}. ${item.url}`} url={item.url} />
-            </StyledButton>
+              setButtonRef={setRef}
+            />
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiBadge color="danger">{status}</EuiBadge>
