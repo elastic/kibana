@@ -180,7 +180,7 @@ export const EditIndexPattern = withRouter(
             <p>
               <FormattedMessage
                 id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="View and edit fields in {indexPatternTitle}. Field attributes, such as type and searchability are based on {mappingAPILink} in Elasticsearch."
+                defaultMessage="View and edit fields in {indexPatternTitle}. Field attributes, such as type and searchability, are based on {mappingAPILink} in Elasticsearch."
                 values={{
                   indexPatternTitle: <strong>{indexPattern.title}</strong>,
                   mappingAPILink: (
