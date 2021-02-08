@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getLatestTransformConfig } from './index';
 import {
   isLatestTransform,
   isPivotTransform,

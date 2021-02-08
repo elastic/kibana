@@ -9,6 +9,7 @@ import { TransformPivotConfig } from '../../../../plugins/transform/common/types
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { getLatestTransformConfig } from './index';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
