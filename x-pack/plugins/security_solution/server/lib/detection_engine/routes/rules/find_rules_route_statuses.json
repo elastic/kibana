@@ -1,0 +1,157 @@
+[
+  [
+    {
+      "type": "siem-detection-engine-rule-status",
+      "id": "2efbb4c0-66df-11eb-89d7-93d66aca027c",
+      "attributes": {
+        "alertId": "10efab2b-66dd-11eb-89d7-93d66aca027c",
+        "statusDate": "2021-02-04T12:10:31.830Z",
+        "status": "failed",
+        "lastFailureAt": "2021-02-04T12:10:31.830Z",
+        "lastSuccessAt": null,
+        "lastFailureMessage": "The following index patterns did not match any indices: [\"logs-endpoint.alerts-*\"]",
+        "lastSuccessMessage": null,
+        "gap": null,
+        "bulkCreateTimeDurations": [],
+        "searchAfterTimeDurations": [],
+        "lastLookBackDate": null
+      },
+      "references": [],
+      "coreMigrationVersion": "8.0.0",
+      "updated_at": "2021-02-04T12:10:31.831Z",
+      "version": "WzI5OTcsMV0=",
+      "namespaces": [
+        "default"
+      ],
+      "score": null
+    }
+  ],
+  [
+    {
+      "type": "siem-detection-engine-rule-status",
+      "id": "fd7a2f50-66e1-11eb-89d7-93d66aca027c",
+      "attributes": {
+        "alertId": "fba8cab0-66e1-11eb-89d7-93d66aca027c",
+        "statusDate": "2021-02-04T12:10:40.214Z",
+        "status": "succeeded",
+        "lastFailureAt": null,
+        "lastSuccessAt": "2021-02-04T12:10:40.214Z",
+        "lastFailureMessage": null,
+        "lastSuccessMessage": "succeeded",
+        "gap": null,
+        "bulkCreateTimeDurations": [
+          "301.49"
+        ],
+        "searchAfterTimeDurations": [
+          "420.60",
+          "3.58"
+        ],
+        "lastLookBackDate": "2021-02-04T12:08:27.664Z"
+      },
+      "references": [],
+      "coreMigrationVersion": "8.0.0",
+      "updated_at": "2021-02-04T12:10:40.215Z",
+      "version": "WzMwMDYsMV0=",
+      "namespaces": [
+        "default"
+      ],
+      "score": null
+    }
+  ]
+]
+
+
+------------
+
+
+[
+  {
+    "key": "10efab2b-66dd-11eb-89d7-93d66aca027c",
+    "doc_count": 6,
+    "latest_status": {
+      "hits": {
+        "total": {
+          "value": 6,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": [
+          {
+            "_index": ".kibana_8.0.0_001",
+            "_id": "siem-detection-engine-rule-status:631ab270-67ce-11eb-aef4-013ff78cbeaf",
+            "_score": null,
+            "_source": {
+              "siem-detection-engine-rule-status": {
+                "alertId": "10efab2b-66dd-11eb-89d7-93d66aca027c",
+                "statusDate": "2021-02-05T16:22:47.849Z",
+                "status": "failed",
+                "lastFailureAt": "2021-02-05T16:22:47.849Z",
+                "lastSuccessAt": null,
+                "lastFailureMessage": "The following index patterns did not match any indices: [\"logs-endpoint.alerts-*\"]",
+                "lastSuccessMessage": null,
+                "gap": "15 hours",
+                "bulkCreateTimeDurations": [],
+                "searchAfterTimeDurations": [],
+                "lastLookBackDate": null
+              },
+              "type": "siem-detection-engine-rule-status",
+              "references": [],
+              "coreMigrationVersion": "8.0.0",
+              "updated_at": "2021-02-05T16:22:48.857Z"
+            },
+            "sort": [
+              1612542167849
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "key": "fba8cab0-66e1-11eb-89d7-93d66aca027c",
+    "doc_count": 2,
+    "latest_status": {
+      "hits": {
+        "total": {
+          "value": 2,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": [
+          {
+            "_index": ".kibana_8.0.0_001",
+            "_id": "siem-detection-engine-rule-status:fd7a2f50-66e1-11eb-89d7-93d66aca027c",
+            "_score": null,
+            "_source": {
+              "siem-detection-engine-rule-status": {
+                "alertId": "fba8cab0-66e1-11eb-89d7-93d66aca027c",
+                "statusDate": "2021-02-05T16:22:49.564Z",
+                "status": "succeeded",
+                "lastFailureAt": "2021-02-05T09:49:05.724Z",
+                "lastSuccessAt": "2021-02-05T16:22:49.564Z",
+                "lastFailureMessage": "15 hours (53021023ms) has passed since last rule execution, and signals may have been missed. Consider increasing your look behind time or adding more Kibana instances. name: \"Process exit code > 0\" id: \"fba8cab0-66e1-11eb-89d7-93d66aca027c\" rule id: \"a50d43e2-e055-41d9-8e44-2a417d3bb432\" signals index: \".siem-signals-default\"",
+                "lastSuccessMessage": "succeeded",
+                "gap": "15 hours",
+                "bulkCreateTimeDurations": [
+                  "993.21"
+                ],
+                "searchAfterTimeDurations": [
+                  "710.34",
+                  "2.44"
+                ],
+                "lastLookBackDate": "2021-02-05T16:21:08.555Z"
+              },
+              "type": "siem-detection-engine-rule-status",
+              "references": [],
+              "coreMigrationVersion": "8.0.0",
+              "updated_at": "2021-02-05T16:22:49.566Z"
+            },
+            "sort": [
+              1612542169564
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

@@ -19,6 +19,7 @@ export interface IRuleActionsAttributes extends Record<string, any> {
 
 export interface RuleActions {
   id: string;
+  ruleAlertId: string;
   actions: RuleAlertAction[];
   ruleThrottle: string;
   alertThrottle: string | null;

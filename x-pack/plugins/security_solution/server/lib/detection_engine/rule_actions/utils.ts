@@ -23,11 +23,13 @@ export const getRuleActionsFromSavedObject = (
   savedObject: SavedObjectsUpdateResponse<IRuleActionsAttributesSavedObjectAttributes>
 ): {
   id: string;
+  ruleAlertId: string;
   actions: RuleAlertAction[];
   alertThrottle: string | null;
   ruleThrottle: string;
 } => ({
   id: savedObject.id,
+  ruleAlertId: savedObject.attributes.ruleAlertId || '',
   actions: savedObject.attributes.actions || [],
   alertThrottle: savedObject.attributes.alertThrottle || null,
   ruleThrottle: savedObject.attributes.ruleThrottle || 'no_actions',

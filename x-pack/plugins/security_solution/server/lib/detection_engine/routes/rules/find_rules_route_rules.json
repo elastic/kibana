@@ -1,0 +1,192 @@
+[
+  {
+    "id": "10efab2b-66dd-11eb-89d7-93d66aca027c",
+    "notifyWhen": "onActiveAlert",
+    "name": "Endpoint Security",
+    "tags": [
+      "Elastic",
+      "Endpoint Security",
+      "__internal_rule_id:9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+      "__internal_immutable:true"
+    ],
+    "alertTypeId": "siem.signals",
+    "consumer": "siem",
+    "params": {
+      "author": [
+        "Elastic"
+      ],
+      "buildingBlockType": null,
+      "description": "Generates a detection alert each time an Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+      "ruleId": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+      "index": [
+        "logs-endpoint.alerts-*"
+      ],
+      "falsePositives": [],
+      "from": "now-10m",
+      "immutable": true,
+      "query": "event.kind:alert and event.module:(endpoint and not endgame)",
+      "language": "kuery",
+      "license": "Elastic License",
+      "outputIndex": ".siem-signals-default",
+      "savedId": null,
+      "timelineId": null,
+      "timelineTitle": null,
+      "meta": null,
+      "filters": null,
+      "maxSignals": 10000,
+      "riskScore": 47,
+      "riskScoreMapping": [
+        {
+          "field": "event.risk_score",
+          "operator": "equals",
+          "value": ""
+        }
+      ],
+      "ruleNameOverride": "message",
+      "severity": "medium",
+      "severityMapping": [
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "low",
+          "value": "21"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "medium",
+          "value": "47"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "high",
+          "value": "73"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "critical",
+          "value": "99"
+        }
+      ],
+      "threat": [],
+      "threatFilters": null,
+      "timestampOverride": "event.ingested",
+      "to": "now",
+      "type": "query",
+      "references": [],
+      "note": null,
+      "version": 2,
+      "exceptionsList": [
+        {
+          "id": "endpoint_list",
+          "list_id": "endpoint_list",
+          "namespace_type": "agnostic",
+          "type": "endpoint"
+        }
+      ]
+    },
+    "schedule": {
+      "interval": "5m"
+    },
+    "enabled": true,
+    "actions": [],
+    "throttle": null,
+    "apiKeyOwner": "elastic",
+    "createdBy": "elastic",
+    "updatedBy": "elastic",
+    "muteAll": false,
+    "mutedInstanceIds": [],
+    "updatedAt": "2021-02-04T11:35:23.153Z",
+    "createdAt": "2021-02-04T11:35:23.153Z",
+    "scheduledTaskId": "1232d960-66dd-11eb-89d7-93d66aca027c",
+    "executionStatus": {
+      "lastExecutionDate": "2021-02-04T12:10:31.055Z",
+      "status": "ok"
+    }
+  },
+  {
+    "id": "fba8cab0-66e1-11eb-89d7-93d66aca027c",
+    "notifyWhen": "onActiveAlert",
+    "name": "Process exit code > 0",
+    "tags": [
+      "__internal_rule_id:a50d43e2-e055-41d9-8e44-2a417d3bb432",
+      "__internal_immutable:false"
+    ],
+    "alertTypeId": "siem.signals",
+    "consumer": "siem",
+    "params": {
+      "author": [],
+      "buildingBlockType": null,
+      "description": "?",
+      "ruleId": "a50d43e2-e055-41d9-8e44-2a417d3bb432",
+      "falsePositives": [],
+      "from": "now-540s",
+      "immutable": false,
+      "license": "",
+      "outputIndex": ".siem-signals-default",
+      "timelineId": null,
+      "timelineTitle": null,
+      "meta": {
+        "from": "4m",
+        "kibana_siem_app_url": "http://localhost:5601/kbn/app/security"
+      },
+      "maxSignals": 100,
+      "riskScore": 21,
+      "riskScoreMapping": [],
+      "ruleNameOverride": null,
+      "severity": "low",
+      "severityMapping": [],
+      "threat": [],
+      "timestampOverride": null,
+      "to": "now",
+      "references": [],
+      "note": null,
+      "version": 1,
+      "exceptionsList": [],
+      "type": "query",
+      "language": "kuery",
+      "index": [
+        "apm-*-transaction*",
+        "auditbeat-*",
+        "endgame-*",
+        "filebeat-*",
+        "logs-*",
+        "packetbeat-*",
+        "winlogbeat-*"
+      ],
+      "query": "host.name: \"gg-mac-16.fritz.box\" and process.exit_code > 0",
+      "filters": [],
+      "savedId": null,
+      "threatFilters": null
+    },
+    "schedule": {
+      "interval": "5m"
+    },
+    "enabled": true,
+    "actions": [
+      {
+        "group": "default",
+        "params": {
+          "body": "Rule:\n{{context.rule.name}}\n{{context.rule.id}}\n\nAlert:\n{{alertName}}\n{{alertId}}\n{{alertActionGroupName}}\n\nTags:\n{{tags}}\n\n{{date}}"
+        },
+        "actionTypeId": ".webhook",
+        "id": "7a8a4990-66e1-11eb-89d7-93d66aca027c"
+      }
+    ],
+    "throttle": null,
+    "apiKeyOwner": "elastic",
+    "createdBy": "elastic",
+    "updatedBy": "elastic",
+    "muteAll": false,
+    "mutedInstanceIds": [],
+    "updatedAt": "2021-02-04T12:10:35.004Z",
+    "createdAt": "2021-02-04T12:10:35.004Z",
+    "scheduledTaskId": "fcc5ac60-66e1-11eb-89d7-93d66aca027c",
+    "executionStatus": {
+      "lastExecutionDate": "2021-02-04T12:10:37.096Z",
+      "status": "active"
+    }
+  }
+]

@@ -18,6 +18,7 @@ interface GetRuleActionsSavedObject {
 
 export interface RulesActionsSavedObject {
   id: string;
+  ruleAlertId: string;
   actions: RuleAlertAction[];
   alertThrottle: string | null;
   ruleThrottle: string;
@@ -42,4 +43,29 @@ export const getRuleActionsSavedObject = async ({
   } else {
     return getRuleActionsFromSavedObject(saved_objects[0]);
   }
+};
+
+interface BulkFetchRuleActionsOfManyRules {
+  ruleIds: string[];
+  savedObjectsClient: AlertServices['savedObjectsClient'];
+}
+
+export const bulkFetchRuleActionsOfManyRules = async ({
+  ruleIds,
+  savedObjectsClient,
+}: BulkFetchRuleActionsOfManyRules): Promise<Array<RulesActionsSavedObject | null>> => {
+  if (ruleIds.length === 0) {
+    return [];
+  }
+
+  const {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    saved_objects,
+  } = await savedObjectsClient.find<IRuleActionsAttributesSavedObjectAttributes>({
+    type: ruleActionsSavedObjectType,
+    search: ruleIds.join(' '),
+    searchFields: ['ruleAlertId'],
+  });
+
+  return saved_objects.map(getRuleActionsFromSavedObject);
 };

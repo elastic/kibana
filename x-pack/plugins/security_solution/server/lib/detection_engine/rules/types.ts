@@ -106,6 +106,7 @@ import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_en
 
 export type RuleAlertType = Alert<RuleTypeParams>;
 
+// TODO: extends SavedObjectAttributes?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
   alertId: string; // created alert id.
@@ -142,19 +143,23 @@ export interface RuleStatusResponse {
   };
 }
 
+// TODO: del or rename
 export interface IRuleSavedAttributesSavedObjectAttributes
   extends IRuleStatusSOAttributes,
     SavedObjectAttributes {}
 
+// TODO: del, not used
 export interface IRuleStatusSavedObject {
   type: string;
   id: string;
+  // NOTE: incorrect, attributes is an object of type IRuleSavedAttributesSavedObjectAttributes
   attributes: Array<SavedObject<IRuleStatusSOAttributes & SavedObjectAttributes>>;
   references: unknown[];
   updated_at: string;
   version: string;
 }
 
+// TODO: del, not used
 export interface IRuleStatusFindType {
   page: number;
   per_page: number;

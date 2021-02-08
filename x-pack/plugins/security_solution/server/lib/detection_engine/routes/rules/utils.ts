@@ -183,25 +183,55 @@ export const transformFindAlerts = (
   total: number;
   data: Array<Partial<RulesSchema>>;
 } | null => {
-  if (!ruleStatuses && isAlertTypes(findResults.data)) {
-    return {
-      page: findResults.page,
-      perPage: findResults.perPage,
-      total: findResults.total,
-      data: findResults.data.map((alert, idx) => transformAlertToRule(alert, ruleActions[idx])),
-    };
-  } else if (isAlertTypes(findResults.data) && isRuleStatusFindTypes(ruleStatuses)) {
-    return {
-      page: findResults.page,
-      perPage: findResults.perPage,
-      total: findResults.total,
-      data: findResults.data.map((alert, idx) =>
-        transformAlertToRule(alert, ruleActions[idx], ruleStatuses[idx].saved_objects[0])
-      ),
-    };
-  } else {
-    return null;
+  if (isAlertTypes(findResults.data)) {
+    const ruleActionsByRuleId = new Map<string, RuleActions>();
+    const ruleStatusByRuleId = new Map<
+      string,
+      SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+    >();
+
+    ruleActions.forEach((actions) => {
+      if (actions != null) {
+        ruleActionsByRuleId.set(actions.ruleAlertId, actions);
+      }
+    });
+
+    if (ruleStatuses != null) {
+      ruleStatuses.forEach((statusesFindResult) => {
+        const [status] = statusesFindResult.saved_objects;
+        if (status != null) {
+          ruleStatusByRuleId.set(status.attributes.alertId, status);
+        }
+      });
+    }
+
+    if (!ruleStatuses) {
+      return {
+        page: findResults.page,
+        perPage: findResults.perPage,
+        total: findResults.total,
+        data: findResults.data.map((alert) => {
+          const actions = ruleActionsByRuleId.get(alert.id);
+          return transformAlertToRule(alert, actions);
+        }),
+      };
+    }
+
+    if (isRuleStatusFindTypes(ruleStatuses)) {
+      return {
+        page: findResults.page,
+        perPage: findResults.perPage,
+        total: findResults.total,
+        data: findResults.data.map((alert) => {
+          const actions = ruleActionsByRuleId.get(alert.id);
+          const status = ruleStatusByRuleId.get(alert.id);
+          return transformAlertToRule(alert, actions, status);
+        }),
+      };
+    }
   }
+
+  return null;
 };
 
 export const transform = (

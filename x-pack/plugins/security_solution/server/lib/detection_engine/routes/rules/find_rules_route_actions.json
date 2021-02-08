@@ -1,0 +1,18 @@
+[
+  null,
+  {
+    "id": "fd61c550-66e1-11eb-89d7-93d66aca027c",
+    "actions": [
+      {
+        "group": "default",
+        "id": "7a8a4990-66e1-11eb-89d7-93d66aca027c",
+        "params": {
+          "body": "Rule:\n{{context.rule.name}}\n{{context.rule.id}}\n\nAlert:\n{{alertName}}\n{{alertId}}\n{{alertActionGroupName}}\n\nTags:\n{{tags}}\n\n{{date}}"
+        },
+        "action_type_id": ".webhook"
+      }
+    ],
+    "alertThrottle": null,
+    "ruleThrottle": "rule"
+  }
+]
