@@ -170,22 +170,6 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
     ]
   );
 
-  // When connector change set fields to null
-  useEffect(() => {
-    if (!init.current) {
-      onChange({
-        category: null,
-        destIp: true,
-        malwareHash: true,
-        malwareUrl: true,
-        priority: null,
-        sourceIp: null,
-        subcategory: null,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector]);
-
   // Set field at initialization
   useEffect(() => {
     if (init.current) {

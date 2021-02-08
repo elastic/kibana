@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { UseField, useFormData, FieldHook } from '../../../shared_imports';
+import { UseField, useFormData, FieldHook, useFormContext } from '../../../shared_imports';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
@@ -42,7 +42,15 @@ const ConnectorFields = ({ connectors, isEdit, field }: ConnectorsFieldProps) =>
 };
 
 const ConnectorComponent: React.FC<Props> = ({ isLoading }) => {
+  const { getFields } = useFormContext();
   const { loading: isLoadingConnectors, connectors } = useConnectors();
+  const handleConnectorChange = useCallback(
+    (newConnector) => {
+      const { fields } = getFields();
+      fields.setValue(null);
+    },
+    [getFields]
+  );
 
   return (
     <EuiFlexGroup>
@@ -52,6 +60,7 @@ const ConnectorComponent: React.FC<Props> = ({ isLoading }) => {
           component={ConnectorSelector}
           componentProps={{
             connectors,
+            handleChange: handleConnectorChange,
             dataTestSubj: 'caseConnectors',
             disabled: isLoading || isLoadingConnectors,
             idAria: 'caseConnectors',
