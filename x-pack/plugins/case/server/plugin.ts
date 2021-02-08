@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { first, map } from 'rxjs/operators';
 import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
@@ -38,8 +37,8 @@ import { createCaseClient } from './client';
 import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 
-function createConfig$(context: PluginInitializerContext) {
-  return context.config.create<ConfigType>().pipe(map((config) => config));
+function createConfig(context: PluginInitializerContext) {
+  return context.config.get<ConfigType>();
 }
 
 export interface PluginsSetup {
@@ -60,7 +59,7 @@ export class CasePlugin {
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
+    const config = createConfig(this.initializerContext);
 
     if (!config.enabled) {
       return;
@@ -118,7 +117,7 @@ export class CasePlugin {
     });
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
     this.alertsService!.initialize(core.elasticsearch.client);
 
