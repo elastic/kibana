@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+import { txtValue } from './i18n';
 import { UrlDrilldownGlobalScope } from '../../../../../ui_actions_enhanced/public';
 import type { UrlTemplateEditorVariable } from '../../../../../../../src/plugins/kibana_react/public';
 
@@ -23,15 +24,13 @@ export const getGlobalVariableList = (
       title: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation.title', {
         defaultMessage: 'Link to Kibana homepage.',
       }),
-      documentation: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation', {
-        defaultMessage:
-          'Kibana base URL. Useful for creating URL drilldowns that navigate within Kibana.' +
-          '\n\n' +
-          'Value: {value}',
-        values: {
-          value: values.kibanaUrl,
-        },
-      }),
+      documentation:
+        i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation', {
+          defaultMessage:
+            'Kibana base URL. Useful for creating URL drilldowns that navigate within Kibana.',
+        }) +
+        '\n\n' +
+        txtValue(values.kibanaUrl),
       kind,
     },
   ];

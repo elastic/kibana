@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { getFlattenedObject } from '@kbn/std';
+import { txtValue } from './i18n';
 import type { Filter, Query, TimeRange } from '../../../../../../../src/plugins/data/public';
 import {
   EmbeddableInput,
@@ -196,6 +197,14 @@ const variableDescriptions: Record<string, undefined | VariableDescription> = {
 const kind = monaco.languages.CompletionItemKind.Variable;
 const sortPrefix = '2.';
 
+const formatValue = (value: unknown) => {
+  if (typeof value === 'object') {
+    return '\n' + JSON.stringify(value, null, 4);
+  }
+
+  return String(value);
+};
+
 const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] => {
   const variables: UrlTemplateEditorVariable[] = [];
   const flattenedValues = getFlattenedObject(values);
@@ -209,6 +218,7 @@ const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] 
       variables.push({
         label,
         sortText: sortPrefix + label,
+        documentation: !!flattenedValues[key] ? txtValue(formatValue(flattenedValues[key])) : '',
         kind,
       });
       continue;
@@ -218,7 +228,10 @@ const getPanelVariableList = (values: PanelValues): UrlTemplateEditorVariable[] 
       label,
       sortText: sortPrefix + label,
       title: description.title,
-      documentation: description.documentation,
+      documentation:
+        (description.documentation || '') +
+        (!!description.documentation && !!flattenedValues[key] ? '\n\n' : '') +
+        (!!flattenedValues[key] ? txtValue(formatValue(flattenedValues[key])) : ''),
       kind,
     });
   }
