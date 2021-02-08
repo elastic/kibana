@@ -8,6 +8,7 @@
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import {
   deleteRules,
   duplicateRules,
@@ -28,6 +29,7 @@ import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../../../common/lib/t
 import * as i18n from '../translations';
 import { bucketRulesResponse } from './helpers';
 import { Action } from './reducer';
+import { transformOutput } from '../../../../containers/detection_engine/rules/transforms';
 
 export const editRuleAction = (rule: Rule, history: H.History) => {
   history.push(getEditRuleUrl(rule.id));
@@ -41,7 +43,9 @@ export const duplicateRulesAction = async (
 ) => {
   try {
     dispatch({ type: 'loadingRuleIds', ids: ruleIds, actionType: 'duplicate' });
-    const response = await duplicateRules({ rules });
+    const response = await duplicateRules({
+      rules: rules.map((rule) => transformOutput(rule as CreateRulesSchema) as Rule),
+    });
     const { errors } = bucketRulesResponse(response);
     if (errors.length > 0) {
       displayErrorToast(
