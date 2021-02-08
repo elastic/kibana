@@ -19,8 +19,10 @@ export interface SearchUsageCollector
 |  [trackSessionExtended](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionextended.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
 |  [trackSessionIndicatorTourLoading](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionindicatortourloading.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
 |  [trackSessionIndicatorTourRestored](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionindicatortourrestored.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
+|  [trackSessionIsRestored](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionisrestored.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
 |  [trackSessionReloaded](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionreloaded.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
-|  [trackSessionRestored](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionrestored.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
 |  [trackSessionSavedResults](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionsavedresults.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
 |  [trackSessionSentToBackground](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionsenttobackground.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
+|  [trackSessionViewRestored](./kibana-plugin-plugins-data-public.searchusagecollector.tracksessionviewrestored.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
+|  [trackViewSessionsList](./kibana-plugin-plugins-data-public.searchusagecollector.trackviewsessionslist.md) | <code>() =&gt; Promise&lt;void&gt;</code> |  |
 

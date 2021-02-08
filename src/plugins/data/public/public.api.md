@@ -2460,13 +2460,17 @@ export interface SearchUsageCollector {
     // (undocumented)
     trackSessionIndicatorTourRestored: () => Promise<void>;
     // (undocumented)
-    trackSessionReloaded: () => Promise<void>;
+    trackSessionIsRestored: () => Promise<void>;
     // (undocumented)
-    trackSessionRestored: () => Promise<void>;
+    trackSessionReloaded: () => Promise<void>;
     // (undocumented)
     trackSessionSavedResults: () => Promise<void>;
     // (undocumented)
     trackSessionSentToBackground: () => Promise<void>;
+    // (undocumented)
+    trackSessionViewRestored: () => Promise<void>;
+    // (undocumented)
+    trackViewSessionsList: () => Promise<void>;
 }
 
 // Warning: (ae-missing-release-tag) "SortDirection" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

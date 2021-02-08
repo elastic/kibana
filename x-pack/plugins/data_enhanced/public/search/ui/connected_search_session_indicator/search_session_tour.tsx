@@ -47,6 +47,7 @@ export function useSearchSessionTour(
     }
 
     if (state === SearchSessionState.Restored) {
+      usageCollector?.trackSessionIsRestored();
       if (!safeHas(storage, TOUR_RESTORE_STEP_KEY)) {
         usageCollector?.trackSessionIndicatorTourRestored();
         searchSessionIndicatorRef.openPopover();

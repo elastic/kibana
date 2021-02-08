@@ -63,12 +63,21 @@ describe('Search Usage Collector', () => {
     );
   });
 
-  test('tracks session restored', async () => {
-    await usageCollector.trackSessionRestored();
+  test('tracks session view restored', async () => {
+    await usageCollector.trackSessionViewRestored();
     expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
     expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
     expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
-      SEARCH_EVENT_TYPE.SESSION_RESTORED
+      SEARCH_EVENT_TYPE.SESSION_VIEW_RESTORED
+    );
+  });
+
+  test('tracks session is restored', async () => {
+    await usageCollector.trackSessionIsRestored();
+    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.CLICK);
+    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
+      SEARCH_EVENT_TYPE.SESSION_IS_RESTORED
     );
   });
 

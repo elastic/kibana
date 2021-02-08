@@ -86,7 +86,7 @@ export const getColumns = (
         const isRestorable = isSessionRestorable(status);
         const href = isRestorable ? restoreUrl : reloadUrl;
         const trackAction = isRestorable
-          ? plugins.data.search.usageCollector?.trackSessionRestored
+          ? plugins.data.search.usageCollector?.trackSessionViewRestored
           : plugins.data.search.usageCollector?.trackSessionReloaded;
         const notRestorableWarning = isRestorable ? null : (
           <>

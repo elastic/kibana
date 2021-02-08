@@ -46,7 +46,11 @@ export const createUsageCollector = (
       METRIC_TYPE.CLICK,
       SEARCH_EVENT_TYPE.SESSION_SAVED_RESULTS
     ),
-    trackSessionRestored: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_RESTORED),
+    trackSessionViewRestored: getCollector(
+      METRIC_TYPE.CLICK,
+      SEARCH_EVENT_TYPE.SESSION_VIEW_RESTORED
+    ),
+    trackSessionIsRestored: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_IS_RESTORED),
     trackSessionReloaded: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_RELOADED),
     trackSessionExtended: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_EXTENDED),
     trackSessionCancelled: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_CANCELLED),
