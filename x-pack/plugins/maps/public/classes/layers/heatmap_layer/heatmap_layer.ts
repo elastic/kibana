@@ -79,6 +79,10 @@ export class HeatmapLayer extends AbstractLayer {
     return this._getHeatmapLayerId() === mbLayerId;
   }
 
+  ownsMbSourceId(mbSourceId: string) {
+    return this.getId() === mbSourceId;
+  }
+
   async syncData(syncContext: DataRequestContext) {
     if (this.isLoadingBounds()) {
       return;
