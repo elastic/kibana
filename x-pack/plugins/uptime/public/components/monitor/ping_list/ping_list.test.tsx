@@ -198,6 +198,10 @@ describe('PingList component', () => {
       it('returns seconds string if > 1 second', () => {
         expect(formatDuration(9_210_390)).toBe('9 seconds');
       });
+
+      it('returns a singular description if exactly one second', () => {
+        expect(formatDuration(1_321_001)).toBe('1 second');
+      });
     });
   });
 });

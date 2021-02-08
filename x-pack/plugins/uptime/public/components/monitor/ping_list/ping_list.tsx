@@ -44,8 +44,18 @@ export const formatDuration = (durationMicros: number) => {
       defaultMessage: '{millis} ms',
     });
   }
+  const seconds = (durationMicros / SECOND_AS_MICROS).toFixed(0);
+
+  // we don't handle this case for millis because it's very unlikely, but for
+  // seconds we could frequently see incorrect plurality
+  if (seconds === '1') {
+    return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting.singular', {
+      values: { seconds },
+      defaultMessage: '{seconds} second',
+    });
+  }
   return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting', {
-    values: { seconds: (durationMicros / SECOND_AS_MICROS).toFixed(0) },
+    values: { seconds },
     defaultMessage: '{seconds} seconds',
   });
 };
