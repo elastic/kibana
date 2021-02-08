@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,7 @@ import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
+import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -47,7 +49,7 @@ export class MonitoringPlugin
     Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -164,6 +166,7 @@ export class MonitoringPlugin
       )
     );
     alertTypeRegistry.register(createCCRReadExceptionsAlertType());
+    alertTypeRegistry.register(createLargeShardSizeAlertType());
     const legacyAlertTypes = createLegacyAlertTypes();
     for (const legacyAlertType of legacyAlertTypes) {
       alertTypeRegistry.register(legacyAlertType);

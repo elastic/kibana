@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { HasPrivilegesResponse } from './types';
 
 export function validateEsPrivilegeResponse(
@@ -13,48 +14,57 @@ export function validateEsPrivilegeResponse(
   actions: string[],
   resources: string[]
 ) {
-  const schema = buildValidationSchema(application, actions, resources);
-  const { error, value } = schema.validate(response);
-
-  if (error) {
-    throw new Error(
-      `Invalid response received from Elasticsearch has_privilege endpoint. ${error}`
-    );
+  const validationSchema = buildValidationSchema(application, actions, resources);
+  try {
+    validationSchema.validate(response);
+  } catch (e) {
+    throw new Error(`Invalid response received from Elasticsearch has_privilege endpoint. ${e}`);
   }
 
-  return value;
+  return response;
 }
 
 function buildActionsValidationSchema(actions: string[]) {
-  return Joi.object({
+  return schema.object({
     ...actions.reduce<Record<string, any>>((acc, action) => {
       return {
         ...acc,
-        [action]: Joi.bool().required(),
+        [action]: schema.boolean(),
       };
     }, {}),
-  }).required();
+  });
 }
 
 function buildValidationSchema(application: string, actions: string[], resources: string[]) {
   const actionValidationSchema = buildActionsValidationSchema(actions);
 
-  const resourceValidationSchema = Joi.object({
-    ...resources.reduce((acc, resource) => {
-      return {
-        ...acc,
-        [resource]: actionValidationSchema,
-      };
-    }, {}),
-  }).required();
+  const resourceValidationSchema = schema.object(
+    {},
+    {
+      unknowns: 'allow',
+      validate: (value) => {
+        const actualResources = Object.keys(value).sort();
+        if (
+          resources.length !== actualResources.length ||
+          !resources.sort().every((x, i) => x === actualResources[i])
+        ) {
+          throw new Error('Payload did not match expected resources');
+        }
 
-  return Joi.object({
-    username: Joi.string().required(),
-    has_all_requested: Joi.bool(),
-    cluster: Joi.object(),
-    application: Joi.object({
+        Object.values(value).forEach((actionResult) => {
+          actionValidationSchema.validate(actionResult);
+        });
+      },
+    }
+  );
+
+  return schema.object({
+    username: schema.string(),
+    has_all_requested: schema.boolean(),
+    cluster: schema.object({}, { unknowns: 'allow' }),
+    application: schema.object({
       [application]: resourceValidationSchema,
-    }).required(),
-    index: Joi.object(),
-  }).required();
+    }),
+    index: schema.object({}, { unknowns: 'allow' }),
+  });
 }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BundleCache, State } from './bundle_cache';
@@ -25,12 +25,12 @@ beforeEach(() => {
 });
 
 it(`doesn't complain if files are not on disk`, () => {
-  const cache = new BundleCache('/foo/bar.json');
+  const cache = new BundleCache('/foo');
   expect(cache.get()).toEqual({});
 });
 
 it(`updates files on disk when calling set()`, () => {
-  const cache = new BundleCache('/foo/bar.json');
+  const cache = new BundleCache('/foo');
   cache.set(SOME_STATE);
   expect(mockReadFileSync).not.toHaveBeenCalled();
   expect(mockMkdirSync.mock.calls).toMatchInlineSnapshot(`
@@ -46,7 +46,7 @@ it(`updates files on disk when calling set()`, () => {
   expect(mockWriteFileSync.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
-        "/foo/bar.json",
+        "/foo/.kbn-optimizer-cache",
         "{
       \\"cacheKey\\": \\"abc\\",
       \\"files\\": [
@@ -61,7 +61,7 @@ it(`updates files on disk when calling set()`, () => {
 });
 
 it(`serves updated state from memory`, () => {
-  const cache = new BundleCache('/foo/bar.json');
+  const cache = new BundleCache('/foo');
   cache.set(SOME_STATE);
   jest.clearAllMocks();
 
@@ -72,7 +72,7 @@ it(`serves updated state from memory`, () => {
 });
 
 it('reads state from disk on get() after refresh()', () => {
-  const cache = new BundleCache('/foo/bar.json');
+  const cache = new BundleCache('/foo');
   cache.set(SOME_STATE);
   cache.refresh();
   jest.clearAllMocks();
@@ -83,7 +83,7 @@ it('reads state from disk on get() after refresh()', () => {
   expect(mockReadFileSync.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
-        "/foo/bar.json",
+        "/foo/.kbn-optimizer-cache",
         "utf8",
       ],
     ]
@@ -91,7 +91,7 @@ it('reads state from disk on get() after refresh()', () => {
 });
 
 it('provides accessors to specific state properties', () => {
-  const cache = new BundleCache('/foo/bar.json');
+  const cache = new BundleCache('/foo');
 
   expect(cache.getModuleCount()).toBe(undefined);
   expect(cache.getReferencedFiles()).toEqual(undefined);

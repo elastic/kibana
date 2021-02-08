@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
 import './discover.scss';
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -21,35 +20,34 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
-import { getServices } from '../../kibana_services';
 import { DiscoverHistogram, DiscoverUninitialized } from '../angular/directives';
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DocTableLegacy, DocTableLegacyProps } from '../angular/doc_table/create_doc_table_react';
+import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
-import { search } from '../../../../data/public';
-import {
-  DiscoverSidebarResponsive,
-  DiscoverSidebarResponsiveProps,
-} from './sidebar/discover_sidebar_responsive';
+import { esFilters, IndexPatternField, search } from '../../../../data/public';
+import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
 import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
-import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { popularizeField } from '../helpers/popularize_field';
+import { getStateColumnActions } from '../angular/doc_table/actions/columns';
+import { DocViewFilterFn } from '../doc_views/doc_views_types';
+import { DiscoverGrid } from './discover_grid/discover_grid';
+import { DiscoverTopNav } from './discover_topnav';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 
-const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
-  <DocTableLegacy {...props} />
-));
-const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
-  <DiscoverSidebarResponsive {...props} />
-));
-
-const DataGridMemoized = React.memo((props: DiscoverGridProps) => <DiscoverGrid {...props} />);
+const DocTableLegacyMemoized = React.memo(DocTableLegacy);
+const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
+const DataGridMemoized = React.memo(DiscoverGrid);
+const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function Discover({
   fetch,
@@ -60,27 +58,18 @@ export function Discover({
   hits,
   indexPattern,
   minimumVisibleRows,
-  onAddColumn,
-  onAddFilter,
-  onChangeInterval,
-  onMoveColumn,
-  onRemoveColumn,
-  onSetColumns,
   onSkipBottomButtonClick,
-  onSort,
   opts,
   resetQuery,
   resultState,
   rows,
   searchSource,
-  setIndexPattern,
   state,
-  timefilterUpdateHandler,
   timeRange,
-  topNavMenu,
   updateQuery,
-  updateSavedQueryId,
+  unmappedFieldsConfig,
 }: DiscoverProps) {
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
@@ -89,11 +78,9 @@ export function Discover({
   };
 
   const [toggleOn, toggleChart] = useState(true);
+  const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
+  const { trackUiMetric, capabilities, indexPatterns } = services;
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const services = getServices();
-  const { TopNavMenu } = services.navigation.ui;
-  const { trackUiMetric } = services;
-  const { savedSearch, indexPatternList, config } = opts;
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
@@ -102,6 +89,95 @@ export function Discover({
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+
+  const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
+    () =>
+      getStateColumnActions({
+        capabilities,
+        indexPattern,
+        indexPatterns,
+        setAppState,
+        state,
+        useNewFieldsApi,
+      }),
+    [capabilities, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
+  );
+
+  const onOpenInspector = useCallback(() => {
+    // prevent overlapping
+    setExpandedDoc(undefined);
+  }, [setExpandedDoc]);
+
+  const onSort = useCallback(
+    (sort: string[][]) => {
+      setAppState({ sort });
+    },
+    [setAppState]
+  );
+
+  const onAddFilter = useCallback(
+    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
+      const fieldName = typeof field === 'string' ? field : field.name;
+      popularizeField(indexPattern, fieldName, indexPatterns);
+      const newFilters = esFilters.generateFilters(
+        opts.filterManager,
+        field,
+        values,
+        operation,
+        String(indexPattern.id)
+      );
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+      }
+      return opts.filterManager.addFilters(newFilters);
+    },
+    [opts, indexPattern, indexPatterns, trackUiMetric]
+  );
+
+  const onChangeInterval = useCallback(
+    (interval: string) => {
+      if (interval) {
+        setAppState({ interval });
+      }
+    },
+    [setAppState]
+  );
+
+  const timefilterUpdateHandler = useCallback(
+    (ranges: { from: number; to: number }) => {
+      data.query.timefilter.timefilter.setTime({
+        from: moment(ranges.from).toISOString(),
+        to: moment(ranges.to).toISOString(),
+        mode: 'absolute',
+      });
+    },
+    [data]
+  );
+
+  const onBackToTop = useCallback(() => {
+    if (scrollableDesktop && scrollableDesktop.current) {
+      scrollableDesktop.current.focus();
+    }
+    // Only the desktop one needs to target a specific container
+    if (!isMobile() && scrollableDesktop.current) {
+      scrollableDesktop.current.scrollTo(0, 0);
+    } else if (window) {
+      window.scrollTo(0, 0);
+    }
+  }, [scrollableDesktop]);
+
+  const onResize = useCallback(
+    (colSettings: { columnId: string; width: number }) => {
+      const grid = { ...state.grid } || {};
+      const newColumns = { ...grid.columns } || {};
+      newColumns[colSettings.columnId] = {
+        width: colSettings.width,
+      };
+      const newGrid = { ...grid, columns: newColumns };
+      opts.setAppState({ grid: newGrid });
+    },
+    [opts, state]
+  );
 
   const columns = useMemo(() => {
     if (!state.columns) {
@@ -112,20 +188,12 @@ export function Discover({
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
-        <TopNavMenu
-          appName="discover"
-          config={topNavMenu}
-          indexPatterns={[indexPattern]}
-          onQuerySubmit={updateQuery}
-          onSavedQueryIdChange={updateSavedQueryId}
-          query={state.query}
-          setMenuMountPoint={opts.setHeaderActionMenu}
-          savedQueryId={state.savedQuery}
-          screenTitle={savedSearch.title}
-          showDatePicker={indexPattern.isTimeBased()}
-          showSaveQuery={!!services.capabilities.discover.saveQuery}
-          showSearchBar={true}
-          useDefaultBehaviors={true}
+        <TopNavMemoized
+          indexPattern={indexPattern}
+          opts={opts}
+          onOpenInspector={onOpenInspector}
+          state={state}
+          updateQuery={updateQuery}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
           <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
@@ -134,18 +202,22 @@ export function Discover({
           <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
             <EuiFlexItem grow={false}>
               <SidebarMemoized
+                config={config}
                 columns={columns}
                 fieldCounts={fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
+                indexPatterns={indexPatterns}
                 onAddField={onAddColumn}
                 onAddFilter={onAddFilter}
                 onRemoveField={onRemoveColumn}
                 selectedIndexPattern={searchSource && searchSource.getField('index')}
                 services={services}
-                setIndexPattern={setIndexPattern}
+                setAppState={setAppState}
+                state={state}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
@@ -292,17 +364,7 @@ export function Discover({
                             searchDescription={opts.savedSearch.description}
                             searchTitle={opts.savedSearch.lastSavedTitle}
                             onAddColumn={onAddColumn}
-                            onBackToTop={() => {
-                              if (scrollableDesktop && scrollableDesktop.current) {
-                                scrollableDesktop.current.focus();
-                              }
-                              // Only the desktop one needs to target a specific container
-                              if (!isMobile() && scrollableDesktop.current) {
-                                scrollableDesktop.current.scrollTo(0, 0);
-                              } else if (window) {
-                                window.scrollTo(0, 0);
-                              }
-                            }}
+                            onBackToTop={onBackToTop}
                             onFilter={onAddFilter}
                             onMoveColumn={onMoveColumn}
                             onRemoveColumn={onRemoveColumn}
@@ -316,12 +378,14 @@ export function Discover({
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
                               columns={getDisplayedColumns(state.columns, indexPattern)}
+                              expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
+                              setExpandedDoc={setExpandedDoc}
                               showTimeCol={
                                 !config.get('doc_table:hideTimeColumn', false) &&
                                 !!indexPattern.timeFieldName
@@ -329,19 +393,11 @@ export function Discover({
                               services={services}
                               settings={state.grid}
                               onAddColumn={onAddColumn}
-                              onFilter={onAddFilter}
+                              onFilter={onAddFilter as DocViewFilterFn}
                               onRemoveColumn={onRemoveColumn}
                               onSetColumns={onSetColumns}
                               onSort={onSort}
-                              onResize={(colSettings: { columnId: string; width: number }) => {
-                                const grid = { ...state.grid } || {};
-                                const newColumns = { ...grid.columns } || {};
-                                newColumns[colSettings.columnId] = {
-                                  width: colSettings.width,
-                                };
-                                const newGrid = { ...grid, columns: newColumns };
-                                opts.setAppState({ grid: newGrid });
-                              }}
+                              onResize={onResize}
                             />
                           </div>
                         )}

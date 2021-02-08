@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -48,11 +49,11 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
                 '[data-test-subj="sessionManagementPopoverAction-reload"]'
               );
             },
-            cancel: async () => {
-              log.debug('management ui: cancel the session');
+            delete: async () => {
+              log.debug('management ui: delete the session');
               await actionsCell.click();
               await find.clickByCssSelector(
-                '[data-test-subj="sessionManagementPopoverAction-cancel"]'
+                '[data-test-subj="sessionManagementPopoverAction-delete"]'
               );
               await PageObjects.common.clickConfirmOnModal();
             },

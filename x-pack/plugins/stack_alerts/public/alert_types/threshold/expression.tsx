@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, Fragment, useEffect } from 'react';
@@ -123,15 +124,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
     });
 
     if (indexArray.length > 0) {
-      await refreshEsFields();
+      await refreshEsFields(indexArray);
     }
   };
 
-  const refreshEsFields = async () => {
-    if (indexArray.length > 0) {
-      const currentEsFields = await getFields(http, indexArray);
-      setEsFields(currentEsFields);
-    }
+  const refreshEsFields = async (indices: string[]) => {
+    const currentEsFields = await getFields(http, indices);
+    setEsFields(currentEsFields);
   };
 
   useEffect(() => {
@@ -180,7 +179,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
               timeField: '',
             });
           } else {
-            await refreshEsFields();
+            await refreshEsFields(indices);
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) =>

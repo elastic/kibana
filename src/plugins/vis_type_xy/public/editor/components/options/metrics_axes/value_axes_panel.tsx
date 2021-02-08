@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -20,8 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Vis } from '../../../../../../visualizations/public';
-
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from '.';
@@ -33,7 +31,6 @@ export interface ValueAxesPanelProps {
   setParamByIndex: SetParamByIndex;
   seriesParams: SeriesParam[];
   valueAxes: ValueAxis[];
-  vis: Vis;
   setMultipleValidity: (paramName: string, isValid: boolean) => void;
 }
 
@@ -152,7 +149,6 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
               onValueAxisPositionChanged={props.onValueAxisPositionChanged}
               setParamByIndex={props.setParamByIndex}
               setMultipleValidity={props.setMultipleValidity}
-              vis={props.vis}
             />
           </>
         </EuiAccordion>
