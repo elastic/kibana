@@ -24,10 +24,7 @@ type AlertFieldMappingAndValues = Record<
   { alertPath: string; values: Set<string>; sirFieldKey: string }
 >;
 
-const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async (
-  theCase,
-  alerts
-) => {
+const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = (theCase, alerts) => {
   const {
     destIp = null,
     sourceIp = null,

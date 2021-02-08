@@ -37,6 +37,7 @@ export const push = ({
   /* Start of push to external service */
   const theCase = await caseClient.get({ id: caseId, includeComments: true });
 
+  // We need to change the logic when we support subcases
   if (theCase.status === CaseStatuses.closed) {
     throw Boom.conflict(
       `This case ${theCase.title} is closed. You can not pushed if the case is closed.`

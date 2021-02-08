@@ -8,7 +8,7 @@
 import { ResilientFieldsType, ConnectorResillientTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 
-const format: ExternalServiceFormatter<ResilientFieldsType>['format'] = async (theCase) => {
+const format: ExternalServiceFormatter<ResilientFieldsType>['format'] = (theCase) => {
   const { incidentTypes = null, severityCode = null } =
     (theCase.connector.fields as ConnectorResillientTypeFields['fields']) ?? {};
   return { incidentTypes, severityCode };
