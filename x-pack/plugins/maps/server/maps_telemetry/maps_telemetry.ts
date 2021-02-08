@@ -116,7 +116,7 @@ async function isFieldGeoShape(
   indexPatternId: string,
   geoField: string | undefined
 ): Promise<boolean> {
-  if (!geoField) {
+  if (!geoField || !indexPatternId) {
     return false;
   }
   const indexPatternsService = await getIndexPatternsService();
