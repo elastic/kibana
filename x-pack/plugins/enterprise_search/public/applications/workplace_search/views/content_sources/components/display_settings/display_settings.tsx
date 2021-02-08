@@ -118,7 +118,7 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
           description={DISPLAY_SETTINGS_DESCRIPTION}
           action={
             hasDocuments ? (
-              <EuiButton type="submit" disabled={!unsavedChanges} fill={true}>
+              <EuiButton type="submit" disabled={!unsavedChanges} fill>
                 {SAVE_BUTTON}
               </EuiButton>
             ) : null
