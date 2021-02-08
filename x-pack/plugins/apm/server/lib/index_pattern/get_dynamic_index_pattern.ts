@@ -17,7 +17,7 @@ import {
 } from '../../../common/processor_event';
 import { APMRequestHandlerContext } from '../../routes/typings';
 
-interface IndexPatternTitleAndFields {
+export interface IndexPatternTitleAndFields {
   title: string;
   fields: FieldDescriptor[];
 }

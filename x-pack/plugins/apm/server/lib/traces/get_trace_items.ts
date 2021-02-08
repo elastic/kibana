@@ -19,7 +19,7 @@ import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';
 
-interface ErrorsPerTransaction {
+export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 

@@ -83,7 +83,22 @@ async function uploadData() {
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return unwrapEsResponse(client.search<any>(body));
+        // The `body as any` is here because of this error:
+        //
+        //     error TS2769: No overload matches this call.
+        //       Overload 1 of 4, '(params?: Search<Record<string, any>> | undefined, options?: TransportRequestOptions | undefined): TransportRequestPromise<ApiResponse<any, unknown>>', gave the following error.
+        //       Argument of type 'TSearchRequest' is not assignable to parameter of type 'Search<Record<string, any>> | undefined'.
+        //         Type 'Search<ESSearchBody>' is not assignable to type 'Search<Record<string, any>>'.
+        //           Type 'TSearchRequest' is not assignable to type 'Search<Record<string, any>>'.
+        //             Type 'Search<ESSearchBody>' is not assignable to type 'Search<Record<string, any>>'.
+        //               Types of property 'track_total_hits' are incompatible.
+        //                 Type 'number | boolean | undefined' is not assignable to type 'boolean | undefined'.
+        //                   Type 'number' is not assignable to type 'boolean | undefined'.
+        //     Overload 2 of 4, '(callback: callbackFn<any, unknown>): TransportRequestCallback', gave the following error.
+        //       Argument of type 'TSearchRequest' is not assignable to parameter of type 'callbackFn<any, unknown>'.
+        //         Type 'Search<ESSearchBody>' is not assignable to type 'callbackFn<any, unknown>'.
+        //           Type 'Search<ESSearchBody>' provides no match for the signature '(err: ApiError, result: ApiResponse<any, unknown>): void'.
+        return unwrapEsResponse(client.search<any>(body as any));
       },
       indicesStats: (body) => {
         return unwrapEsResponse(client.indices.stats<any>(body));

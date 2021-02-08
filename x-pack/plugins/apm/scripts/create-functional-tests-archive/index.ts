@@ -149,14 +149,14 @@ async function run() {
   // profile
   const indicesWithDocs =
     response.body.aggregations?.index.buckets.map(
-      (bucket) => bucket.key as string
+      (bucket: { key: string }) => bucket.key
     ) ?? [];
 
   // create the archive
   const tmpDir = path.join(__dirname, 'tmp/');
   execSync(
     `node scripts/es_archiver save ${archiveName} ${indicesWithDocs
-      .filter((index) => !index.startsWith('.kibana'))
+      .filter((index: string) => !index.startsWith('.kibana'))
       .concat('.kibana')
       .join(
         ','

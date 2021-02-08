@@ -16,7 +16,7 @@ const SpanBadge = (styled(EuiBadge)`
   margin-right: ${px(units.quarter)};
 ` as unknown) as typeof EuiBadge;
 
-interface SyncBadgeProps {
+export interface SyncBadgeProps {
   /**
    * Is the request synchronous? True will show blocking, false will show async.
    */
