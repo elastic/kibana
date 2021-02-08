@@ -17,7 +17,7 @@ export const CredentialsFlyoutHeader: React.FC = () => {
   const { activeApiToken } = useValues(CredentialsLogic);
 
   return (
-    <EuiFlyoutHeader hasBorder={true}>
+    <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
         <h2 id={FLYOUT_ARIA_LABEL_ID}>
           {activeApiToken.id
