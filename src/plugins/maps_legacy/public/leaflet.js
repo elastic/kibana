@@ -12,7 +12,6 @@ if (!window.hasOwnProperty('L')) {
   window.L.Browser.touch = false;
   window.L.Browser.pointer = false;
 
-  require('leaflet-vega');
   require('leaflet.heat/dist/leaflet-heat.js');
   require('leaflet-draw/dist/leaflet.draw.css');
   require('leaflet-draw/dist/leaflet.draw.js');
