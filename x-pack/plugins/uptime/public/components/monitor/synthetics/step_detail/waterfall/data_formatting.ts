@@ -83,7 +83,7 @@ const getCurrentOffset = (item: NetworkItem, zeroOffset: number): number => {
   return offsetValue - zeroOffset;
 };
 
-const getConnectingTime = (connect?: number, ssl?: number) => {
+export const getConnectingTime = (connect?: number, ssl?: number) => {
   if (ssl && connect && ssl > 0) {
     return connect - ssl;
   } else {
@@ -93,10 +93,8 @@ const getConnectingTime = (connect?: number, ssl?: number) => {
 
 export const getSeriesAndDomain = (items: NetworkItems) => {
   // The earliest point in time a request is sent or started. This will become our notion of "0".
-  const zeroOffset = items.reduce<number>((acc, item) => {
-    const offsetValue = getValueForOffset(item);
-    return offsetValue < acc ? offsetValue : acc;
-  }, Infinity);
+  let zeroOffset = Infinity;
+  items.forEach((i) => (zeroOffset = Math.min(zeroOffset, getValueForOffset(i))));
 
   const getValue = (timings: NetworkEvent['timings'], timing: Timings) => {
     if (!timings) return;
@@ -191,7 +189,10 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
   return { series, domain, metaData };
 };
 
-const formatHeaders = (headers: Record<string, unknown>) => {
+const formatHeaders = (headers?: Record<string, unknown>) => {
+  if (typeof headers === 'undefined') {
+    return undefined;
+  }
   return Object.keys(headers).map((key) => ({
     name: key,
     value: `${headers[key]}`,
@@ -213,27 +214,27 @@ const formatMetaData = ({
   return {
     x: index,
     url,
-    requestHeaders: requestHeaders ? formatHeaders(requestHeaders) : undefined,
-    responseHeaders: responseHeaders ? formatHeaders(responseHeaders) : undefined,
+    requestHeaders: formatHeaders(requestHeaders),
+    responseHeaders: formatHeaders(responseHeaders),
     certificates: certificates
       ? [
           {
             name: FriendlyFlyoutLabels[MetaData.CertificateIssuer],
-            value: certificates?.issuer,
+            value: certificates.issuer,
           },
           {
             name: FriendlyFlyoutLabels[MetaData.CertificateIssueDate],
             value: certificates.validFrom
-              ? moment(certificates?.validFrom).format('L LT')
+              ? moment(certificates.validFrom).format('L LT')
               : undefined,
           },
           {
             name: FriendlyFlyoutLabels[MetaData.CertificateExpiryDate],
-            value: certificates.validTo ? moment(certificates?.validTo).format('L LT') : undefined,
+            value: certificates.validTo ? moment(certificates.validTo).format('L LT') : undefined,
           },
           {
             name: FriendlyFlyoutLabels[MetaData.CertificateSubject],
-            value: certificates?.subjectName,
+            value: certificates.subjectName,
           },
         ]
       : undefined,

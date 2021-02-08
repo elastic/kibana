@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
-import { colourPalette, getSeriesAndDomain } from './data_formatting';
+import { colourPalette, getConnectingTime, getSeriesAndDomain } from './data_formatting';
 import {
   NetworkItems,
   MimeType,
@@ -161,6 +161,28 @@ export const networkItemsWithUncommonMimeType: NetworkItems = [
     },
   },
 ];
+
+describe('getConnectingTime', () => {
+  it('returns `connect` value if `ssl` is undefined', () => {
+    expect(getConnectingTime(10)).toBe(10);
+  });
+
+  it('returns `undefined` if `connect` is not defined', () => {
+    expect(getConnectingTime(undefined, 23)).toBeUndefined();
+  });
+
+  it('returns `connect` value if `ssl` is 0', () => {
+    expect(getConnectingTime(10, 0)).toBe(10);
+  });
+
+  it('returns `connect` value if `ssl` is -1', () => {
+    expect(getConnectingTime(10, 0)).toBe(10);
+  });
+
+  it('reduces `connect` value by `ssl` value if both are defined', () => {
+    expect(getConnectingTime(10, 3)).toBe(7);
+  });
+});
 
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
