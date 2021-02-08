@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, { FC } from 'react';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,50 +13,67 @@ import { i18n } from '@kbn/i18n';
 import { EMPTY_FIELD_VALUE_LABEL } from '../../timeseriesexplorer/components/entity_control/entity_control';
 import { MLCATEGORY } from '../../../../common/constants/field_types';
 
-function getAddFilter({ entityName, entityValue, filter }) {
-  return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.entityCell.addFilterTooltip"
-          defaultMessage="Add filter"
-        />
-      }
-    >
-      <EuiButtonIcon
-        size="s"
-        className="filter-button"
-        onClick={() => filter(entityName, entityValue, '+')}
-        iconType="plusInCircle"
-        aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
-          defaultMessage: 'Add filter',
-        })}
-      />
-    </EuiToolTip>
-  );
+export type EntityCellFilter = (
+  entityName: string,
+  entityValue: string,
+  direction: '+' | '-'
+) => void;
+
+interface EntityCellProps {
+  entityName: string;
+  entityValue: string;
+  filter?: EntityCellFilter;
+  wrapText?: boolean;
 }
 
-function getRemoveFilter({ entityName, entityValue, filter }) {
-  return (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="xpack.ml.anomaliesTable.entityCell.removeFilterTooltip"
-          defaultMessage="Remove filter"
+function getAddFilter({ entityName, entityValue, filter }: EntityCellProps) {
+  if (filter !== undefined) {
+    return (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.entityCell.addFilterTooltip"
+            defaultMessage="Add filter"
+          />
+        }
+      >
+        <EuiButtonIcon
+          size="s"
+          className="filter-button"
+          onClick={() => filter(entityName, entityValue, '+')}
+          iconType="plusInCircle"
+          aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
+            defaultMessage: 'Add filter',
+          })}
         />
-      }
-    >
-      <EuiButtonIcon
-        size="s"
-        className="filter-button"
-        onClick={() => filter(entityName, entityValue, '-')}
-        iconType="minusInCircle"
-        aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
-          defaultMessage: 'Remove filter',
-        })}
-      />
-    </EuiToolTip>
-  );
+      </EuiToolTip>
+    );
+  }
+}
+
+function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
+  if (filter !== undefined) {
+    return (
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.entityCell.removeFilterTooltip"
+            defaultMessage="Remove filter"
+          />
+        }
+      >
+        <EuiButtonIcon
+          size="s"
+          className="filter-button"
+          onClick={() => filter(entityName, entityValue, '-')}
+          iconType="minusInCircle"
+          aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
+            defaultMessage: 'Remove filter',
+          })}
+        />
+      </EuiToolTip>
+    );
+  }
 }
 
 /*
@@ -65,12 +81,12 @@ function getRemoveFilter({ entityName, entityValue, filter }) {
  * of the entity, such as a partitioning or influencer field value, and optionally links for
  * adding or removing a filter on this entity.
  */
-export const EntityCell = function EntityCell({
+export const EntityCell: FC<EntityCellProps> = ({
   entityName,
   entityValue,
   filter,
   wrapText = false,
-}) {
+}) => {
   let valueText = entityValue === '' ? <i>{EMPTY_FIELD_VALUE_LABEL}</i> : entityValue;
   if (entityName === MLCATEGORY) {
     valueText = `${MLCATEGORY} ${valueText}`;
@@ -116,11 +132,4 @@ export const EntityCell = function EntityCell({
       </EuiFlexGroup>
     );
   }
-};
-
-EntityCell.propTypes = {
-  entityName: PropTypes.string,
-  entityValue: PropTypes.any,
-  filter: PropTypes.func,
-  wrapText: PropTypes.bool,
 };

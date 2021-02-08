@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
-import { Observable } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { CloudConfigType } from './config';
@@ -28,25 +26,24 @@ export interface CloudSetup {
 
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly logger: Logger;
-  private readonly config$: Observable<CloudConfigType>;
+  private readonly config: CloudConfigType;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
-    this.config$ = this.context.config.create<CloudConfigType>();
+    this.config = this.context.config.get<CloudConfigType>();
   }
 
-  public async setup(core: CoreSetup, { usageCollection }: PluginsSetup) {
+  public setup(core: CoreSetup, { usageCollection }: PluginsSetup) {
     this.logger.debug('Setting up Cloud plugin');
-    const config = await this.config$.pipe(first()).toPromise();
-    const isCloudEnabled = getIsCloudEnabled(config.id);
+    const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
 
     return {
-      cloudId: config.id,
+      cloudId: this.config.id,
       isCloudEnabled,
       apm: {
-        url: config.apm?.url,
-        secretToken: config.apm?.secret_token,
+        url: this.config.apm?.url,
+        secretToken: this.config.apm?.secret_token,
       },
     };
   }
