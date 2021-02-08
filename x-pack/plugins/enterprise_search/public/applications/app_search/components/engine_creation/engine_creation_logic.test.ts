@@ -12,12 +12,7 @@ import {
 } from '../../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
-import { generatePath } from 'react-router-dom';
 
-import { ENGINE_PATH } from '../../routes';
-import { formatApiName } from '../../utils/format_api_name';
-
-import { ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 import { EngineCreationLogic } from './engine_creation_logic';
 
 describe('EngineCreationLogic', () => {
