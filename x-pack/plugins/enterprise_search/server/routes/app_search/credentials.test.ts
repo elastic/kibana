@@ -18,7 +18,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/credentials',
-        payload: 'query',
       });
 
       registerCredentialsRoutes({
@@ -54,7 +53,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/app_search/credentials',
-        payload: 'body',
       });
 
       registerCredentialsRoutes({
@@ -167,7 +165,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/credentials/details',
-        payload: 'query',
       });
 
       registerCredentialsRoutes({
@@ -191,7 +188,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/app_search/credentials/{name}',
-        payload: 'body',
       });
 
       registerCredentialsRoutes({
