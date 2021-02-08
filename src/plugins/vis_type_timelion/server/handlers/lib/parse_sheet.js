@@ -7,17 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import fs from 'fs';
-import path from 'path';
-import _ from 'lodash';
-const grammar = fs.readFileSync(path.resolve(__dirname, '../../../common/chain.peg'), 'utf8');
-import PEG from 'pegjs';
-const Parser = PEG.generate(grammar);
+import { parse } from '../../../common/_generated_/chain';
 
 export default function parseSheet(sheet) {
-  return _.map(sheet, function (plot) {
+  return sheet.map(function (plot) {
     try {
-      return Parser.parse(plot).tree;
+      return parse(plot).tree;
     } catch (e) {
       if (e.expected) {
         throw new Error(

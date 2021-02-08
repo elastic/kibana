@@ -33,3 +33,19 @@ export interface ITimelionFunction {
     [key: string]: TimelionFunctionArgs[];
   };
 }
+
+export interface TimelionExpressionArgument {
+  function: string;
+  type: string;
+  location: {
+    min: number;
+    max: number;
+  };
+  name: string;
+  text: string;
+  value: {
+    type: string;
+    value: string;
+    text: string;
+  };
+}
