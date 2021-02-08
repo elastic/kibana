@@ -7,6 +7,7 @@
  */
 
 import { KibanaServerError } from '../../../../kibana_utils/common';
+import { IndexPattern } from '../..';
 
 export interface FailedShard {
   shard: number;
@@ -37,6 +38,7 @@ export interface IEsErrorAttributes {
   reason: string;
   root_cause?: Reason[];
   failed_shards?: FailedShard[];
+  index_pattern?: IndexPattern;
 }
 
 export type IEsError = KibanaServerError<IEsErrorAttributes>;

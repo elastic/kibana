@@ -557,6 +557,7 @@ function discoverController($route, $scope, Promise) {
 
         $scope.fetchStatus = fetchStatuses.NO_RESULTS;
         $scope.fetchError = error;
+        error.attributes.index_pattern = $scope.indexPattern;
 
         data.search.showError(error);
       });
