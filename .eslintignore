@@ -16,6 +16,7 @@ target
 snapshots.js
 
 !/.eslintrc.js
+!.storybook
 
 # plugin overrides
 /src/core/lib/kbn_internal_native_observable
