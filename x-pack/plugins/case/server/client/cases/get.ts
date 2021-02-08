@@ -13,12 +13,10 @@ export const get = ({ savedObjectsClient, caseService }: CaseClientFactoryArgume
   id,
   includeComments = false,
 }: CaseClientGet): Promise<CaseResponse> => {
-  const [theCase] = await Promise.all([
-    caseService.getCase({
-      client: savedObjectsClient,
-      caseId: id,
-    }),
-  ]);
+  const theCase = await caseService.getCase({
+    client: savedObjectsClient,
+    caseId: id,
+  });
 
   if (!includeComments) {
     return CaseResponseRt.encode(

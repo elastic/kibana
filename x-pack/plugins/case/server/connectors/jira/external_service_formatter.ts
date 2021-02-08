@@ -12,7 +12,7 @@ interface ExternalServiceParams extends JiraFieldsType {
   labels: string[];
 }
 
-const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async (theCase) => {
+const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = (theCase) => {
   const { priority = null, issueType = null, parent = null } =
     (theCase.connector.fields as ConnectorJiraTypeFields['fields']) ?? {};
   return {

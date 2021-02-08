@@ -23,7 +23,7 @@ describe('ITSM formatter', () => {
     },
   } as CaseResponse;
 
-  it('it formats correctly', async () => {
+  it('it formats correctly without alerts', async () => {
     const res = await serviceNowSIRExternalServiceFormatter.format(theCase, []);
     expect(res).toEqual({
       dest_ip: null,
@@ -65,6 +65,42 @@ describe('ITSM formatter', () => {
       {
         id: 'alert-2',
         index: 'index-2',
+        destination: { ip: '192.168.1.4' },
+        source: { ip: '192.168.1.3' },
+        file: {
+          hash: { sha256: '60303ae22b998861bce3b28f33eec1be758a213c86c93c076dbe9f558c11c752' },
+        },
+        url: { full: 'https://attack.com/api' },
+      },
+    ];
+    const res = await serviceNowSIRExternalServiceFormatter.format(theCase, alerts);
+    expect(res).toEqual({
+      dest_ip: '192.168.1.1,192.168.1.4',
+      source_ip: '192.168.1.2,192.168.1.3',
+      category: 'Denial of Service',
+      subcategory: 'Inbound DDos',
+      malware_hash:
+        '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,60303ae22b998861bce3b28f33eec1be758a213c86c93c076dbe9f558c11c752',
+      malware_url: 'https://attack.com,https://attack.com/api',
+      priority: '2 - High',
+    });
+  });
+
+  it('it handles duplicates correctly', async () => {
+    const alerts = [
+      {
+        id: 'alert-1',
+        index: 'index-1',
+        destination: { ip: '192.168.1.1' },
+        source: { ip: '192.168.1.2' },
+        file: {
+          hash: { sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08' },
+        },
+        url: { full: 'https://attack.com' },
+      },
+      {
+        id: 'alert-2',
+        index: 'index-2',
         destination: { ip: '192.168.1.1' },
         source: { ip: '192.168.1.3' },
         file: {
@@ -80,6 +116,47 @@ describe('ITSM formatter', () => {
       category: 'Denial of Service',
       subcategory: 'Inbound DDos',
       malware_hash: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+      malware_url: 'https://attack.com,https://attack.com/api',
+      priority: '2 - High',
+    });
+  });
+
+  it('it formats correctly when field is not selected', async () => {
+    const alerts = [
+      {
+        id: 'alert-1',
+        index: 'index-1',
+        destination: { ip: '192.168.1.1' },
+        source: { ip: '192.168.1.2' },
+        file: {
+          hash: { sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08' },
+        },
+        url: { full: 'https://attack.com' },
+      },
+      {
+        id: 'alert-2',
+        index: 'index-2',
+        destination: { ip: '192.168.1.1' },
+        source: { ip: '192.168.1.3' },
+        file: {
+          hash: { sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08' },
+        },
+        url: { full: 'https://attack.com/api' },
+      },
+    ];
+
+    const newCase = {
+      ...theCase,
+      connector: { fields: { ...theCase.connector.fields, destIp: false, malwareHash: false } },
+    } as CaseResponse;
+
+    const res = await serviceNowSIRExternalServiceFormatter.format(newCase, alerts);
+    expect(res).toEqual({
+      dest_ip: null,
+      source_ip: '192.168.1.2,192.168.1.3',
+      category: 'Denial of Service',
+      subcategory: 'Inbound DDos',
+      malware_hash: null,
       malware_url: 'https://attack.com,https://attack.com/api',
       priority: '2 - High',
     });

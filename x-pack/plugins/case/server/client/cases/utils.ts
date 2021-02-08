@@ -24,7 +24,6 @@ import {
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CaseClientGetAlertsResponse } from '../../client/alerts/types';
-import { isUserContext } from '../../routes/api/utils';
 import {
   BasicParams,
   EntityInformation,
@@ -111,7 +110,7 @@ export const createIncident = async ({
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
 
-  const externalServiceFields = await externalServiceFormatters[connector.actionTypeId].format(
+  const externalServiceFields = externalServiceFormatters[connector.actionTypeId].format(
     theCase,
     alerts
   );
@@ -300,14 +299,23 @@ export const isCommentAlertType = (
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType =>
-  isUserContext(attributes)
-    ? {
+): CommentRequestUserType | CommentRequestAlertType => {
+  switch (attributes.type) {
+    case CommentType.user:
+      return {
         type: CommentType.user,
         comment: attributes.comment,
-      }
-    : {
+      };
+    case CommentType.alert:
+      return {
         type: CommentType.alert,
         alertId: attributes.alertId,
         index: attributes.index,
       };
+    default:
+      return {
+        type: CommentType.user,
+        comment: '',
+      };
+  }
+};

@@ -46,10 +46,7 @@ export interface RegisterConnectorsArgs extends GetActionTypeParams {
 export type FormatterConnectorTypes = Exclude<ConnectorTypes, ConnectorTypes.none>;
 
 export interface ExternalServiceFormatter<TExternalServiceParams = {}> {
-  format: (
-    theCase: CaseResponse,
-    alerts: CaseClientGetAlertsResponse
-  ) => Promise<TExternalServiceParams>;
+  format: (theCase: CaseResponse, alerts: CaseClientGetAlertsResponse) => TExternalServiceParams;
 }
 
 export type ExternalServiceFormatterMapper = {

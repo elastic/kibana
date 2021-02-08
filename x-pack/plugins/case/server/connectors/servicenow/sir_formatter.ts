@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { get } from 'lodash/fp';
 import { ConnectorServiceNowSIRTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
-
 interface ExternalServiceParams {
   dest_ip: string | null;
   source_ip: string | null;
@@ -18,16 +16,12 @@ interface ExternalServiceParams {
   malware_url: string | null;
   priority: string | null;
 }
-
+type SirFieldKey = 'dest_ip' | 'source_ip' | 'malware_hash' | 'malware_url';
 type AlertFieldMappingAndValues = Record<
   string,
-  { alertPath: string; values: Set<string>; sirFieldKey: string }
+  { alertPath: string; sirFieldKey: SirFieldKey; add: boolean }
 >;
-
-const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async (
-  theCase,
-  alerts
-) => {
+const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = (theCase, alerts) => {
   const {
     destIp = null,
     sourceIp = null,
@@ -37,46 +31,58 @@ const format: ExternalServiceFormatter<ExternalServiceParams>['format'] = async 
     malwareUrl = null,
     priority = null,
   } = (theCase.connector.fields as ConnectorServiceNowSIRTypeFields['fields']) ?? {};
-  const alertFieldsVariables = [destIp, sourceIp, malwareHash, malwareUrl];
-
-  // Set is used to avoid duplicates
-  const alertFieldMappingAndValues: AlertFieldMappingAndValues = {
-    destIp: { alertPath: 'destination.ip', values: new Set(), sirFieldKey: 'dest_ip' },
-    sourceIp: { alertPath: 'source.ip', values: new Set(), sirFieldKey: 'source_ip' },
-    malwareHash: { alertPath: 'file.hash.sha256', values: new Set(), sirFieldKey: 'malware_hash' },
-    malwareUrl: { alertPath: 'url.full', values: new Set(), sirFieldKey: 'malware_url' },
+  const alertFieldMapping: AlertFieldMappingAndValues = {
+    destIp: { alertPath: 'destination.ip', sirFieldKey: 'dest_ip', add: !!destIp },
+    sourceIp: { alertPath: 'source.ip', sirFieldKey: 'source_ip', add: !!sourceIp },
+    malwareHash: { alertPath: 'file.hash.sha256', sirFieldKey: 'malware_hash', add: !!malwareHash },
+    malwareUrl: { alertPath: 'url.full', sirFieldKey: 'malware_url', add: !!malwareUrl },
   };
 
-  if (alertFieldsVariables.some((field) => field != null)) {
-    alerts.forEach((alert) => {
-      Object.keys(alertFieldMappingAndValues).forEach((alertField) => {
-        const field = get(alertFieldMappingAndValues[alertField].alertPath, alert);
-        if (field) {
-          alertFieldMappingAndValues[alertField].values.add(field);
-        }
-      });
-    });
-  }
+  const manageDuplicate: Record<SirFieldKey, Set<string>> = {
+    dest_ip: new Set(),
+    source_ip: new Set(),
+    malware_hash: new Set(),
+    malware_url: new Set(),
+  };
 
-  const alertFields = Object.keys(alertFieldMappingAndValues).reduce(
-    (acc, field) => ({
-      ...acc,
-      [alertFieldMappingAndValues[field].sirFieldKey]:
-        alertFieldMappingAndValues[field].values.size > 0
-          ? Array.from(alertFieldMappingAndValues[field].values).join(',')
-          : null,
-    }),
-    { dest_ip: null, source_ip: null, malware_hash: null, malware_url: null }
+  let sirFields: Record<SirFieldKey, string | null> = {
+    dest_ip: null,
+    source_ip: null,
+    malware_hash: null,
+    malware_url: null,
+  };
+
+  const fieldsToAdd = (Object.keys(alertFieldMapping) as SirFieldKey[]).filter(
+    (key) => alertFieldMapping[key].add
   );
 
+  if (fieldsToAdd.length > 0) {
+    sirFields = alerts.reduce<Record<SirFieldKey, string | null>>((acc, alert) => {
+      fieldsToAdd.forEach((alertField) => {
+        const field = get(alertFieldMapping[alertField].alertPath, alert);
+        if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
+          manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
+          acc = {
+            ...acc,
+            [alertFieldMapping[alertField].sirFieldKey]: `${
+              acc[alertFieldMapping[alertField].sirFieldKey] != null
+                ? `${acc[alertFieldMapping[alertField].sirFieldKey]},${field}`
+                : field
+            }`,
+          };
+        }
+      });
+      return acc;
+    }, sirFields);
+  }
+
   return {
-    ...alertFields,
+    ...sirFields,
     category,
     subcategory,
     priority,
   };
 };
-
 export const serviceNowSIRExternalServiceFormatter: ExternalServiceFormatter<ExternalServiceParams> = {
   format,
 };
