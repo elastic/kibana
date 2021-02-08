@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -82,17 +83,17 @@ export const EngineCreation: React.FC = () => {
                         ALLOWED_CHARS_NOTE
                       )
                     }
-                    fullWidth={true}
+                    fullWidth
                   >
                     <EuiFieldText
                       name="engine-name"
                       value={rawName}
                       onChange={(event) => setRawName(event.currentTarget.value)}
                       autoComplete="off"
-                      fullWidth={true}
+                      fullWidth
                       data-test-subj="EngineCreationNameInput"
                       placeholder={ENGINE_CREATION_FORM_ENGINE_NAME_PLACEHOLDER}
-                      autoFocus={true}
+                      autoFocus
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
