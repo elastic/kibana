@@ -51,16 +51,16 @@ describe('EngineCreationLogic', () => {
         EngineCreationLogic.actions.setRawName('Name__With#$&*%Special--Characters');
       });
 
-      describe('rawName', () => {
-        it('should be set to provided value', () => {
-          expect(EngineCreationLogic.values.rawName).toEqual('Name__With#$&*%Special--Characters');
-        });
+      afterAll(() => {
+        jest.clearAllMocks();
       });
 
-      describe('name', () => {
-        it('should be set to a sanitized value', () => {
-          expect(EngineCreationLogic.values.name).toEqual('name-with-special-characters');
-        });
+      it('should set rawName to provided value', () => {
+        expect(EngineCreationLogic.values.rawName).toEqual('Name__With#$&*%Special--Characters');
+      });
+
+      it('should set name to a sanitized value', () => {
+        expect(EngineCreationLogic.values.name).toEqual('name-with-special-characters');
       });
     });
   });
@@ -70,6 +70,10 @@ describe('EngineCreationLogic', () => {
       beforeAll(() => {
         mount({ language: 'English', rawName: 'test' });
         EngineCreationLogic.actions.onEngineCreationSuccess();
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
       });
 
       it('should set a success message', () => {
@@ -86,6 +90,10 @@ describe('EngineCreationLogic', () => {
         mount({ language: 'English', rawName: 'test' });
       });
 
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
       it('POSTS to /api/app_search/engines', () => {
         const body = JSON.stringify({
           name: EngineCreationLogic.values.name,
@@ -98,14 +106,14 @@ describe('EngineCreationLogic', () => {
       it('calls onEngineCreationSuccess on valid submission', async () => {
         jest.spyOn(EngineCreationLogic.actions, 'onEngineCreationSuccess');
         http.post.mockReturnValueOnce(Promise.resolve({}));
-        await EngineCreationLogic.actions.submitEngine();
+        EngineCreationLogic.actions.submitEngine();
         await nextTick();
         expect(EngineCreationLogic.actions.onEngineCreationSuccess).toHaveBeenCalledTimes(1);
       });
 
       it('calls flashAPIErrors on API Error', async () => {
         http.post.mockReturnValueOnce(Promise.reject());
-        await EngineCreationLogic.actions.submitEngine();
+        EngineCreationLogic.actions.submitEngine();
         await nextTick();
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
       });
