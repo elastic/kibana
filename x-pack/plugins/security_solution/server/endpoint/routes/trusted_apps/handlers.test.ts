@@ -27,35 +27,11 @@ import {
   getTrustedAppsDeleteRouteHandler,
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
+  getTrustedAppsUpdateRouteHandler,
 } from './handlers';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { TrustedAppNotFoundError } from './errors';
-
-const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
-
-const createAppContextMock = () => ({
-  logFactory: loggingSystemMock.create(),
-  service: new EndpointAppContextService(),
-  config: () => Promise.resolve(createMockConfig()),
-});
-
-const createHandlerContextMock = () =>
-  (({
-    ...xpackMocks.createRequestHandlerContext(),
-    lists: {
-      getListClient: jest.fn(),
-      getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
-    },
-  } as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>);
-
-const assertResponse = <T>(
-  response: jest.Mocked<KibanaResponseFactory>,
-  expectedResponseType: keyof KibanaResponseFactory,
-  expectedResponseBody: T
-) => {
-  expect(response[expectedResponseType]).toBeCalled();
-  expect(response[expectedResponseType].mock.calls[0][0]?.body).toEqual(expectedResponseBody);
-};
+import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import { updateExceptionListItemImplementationMock } from './test_utils';
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
   _version: '123',
@@ -108,16 +84,36 @@ const TRUSTED_APP: TrustedApp = {
 };
 
 describe('handlers', () => {
-  const appContextMock = createAppContextMock();
+  const createAppContextMock = () => ({
+    logFactory: loggingSystemMock.create(),
+    service: new EndpointAppContextService(),
+    config: () => Promise.resolve(createMockConfig()),
+  });
+
+  let appContextMock: ReturnType<typeof createAppContextMock> = createAppContextMock();
+  let exceptionsListClient: jest.Mocked<ExceptionListClient> = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
+
+  const createHandlerContextMock = () =>
+    (({
+      ...xpackMocks.createRequestHandlerContext(),
+      lists: {
+        getListClient: jest.fn(),
+        getExceptionListClient: jest.fn().mockReturnValue(exceptionsListClient),
+      },
+    } as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>);
+
+  const assertResponse = <T>(
+    response: jest.Mocked<KibanaResponseFactory>,
+    expectedResponseType: keyof KibanaResponseFactory,
+    expectedResponseBody: T
+  ) => {
+    expect(response[expectedResponseType]).toBeCalled();
+    expect(response[expectedResponseType].mock.calls[0][0]?.body).toEqual(expectedResponseBody);
+  };
 
   beforeEach(() => {
-    exceptionsListClient.deleteExceptionListItem.mockReset();
-    exceptionsListClient.createExceptionListItem.mockReset();
-    exceptionsListClient.findExceptionListItem.mockReset();
-    exceptionsListClient.createTrustedAppsList.mockReset();
-
-    appContextMock.logFactory.get.mockClear();
-    (appContextMock.logFactory.get().error as jest.Mock).mockClear();
+    appContextMock = createAppContextMock();
+    exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
   });
 
   describe('getTrustedAppsDeleteRouteHandler', () => {
@@ -307,6 +303,91 @@ describe('handlers', () => {
 
       assertResponse(mockResponse, 'internalError', error);
       expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('getTrustedAppsUpdateRouteHandler', () => {
+    const updateHandler = getTrustedAppsUpdateRouteHandler(appContextMock);
+
+    let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
+
+    beforeEach(() => {
+      mockResponse = httpServerMock.createResponseFactory();
+    });
+
+    it('should return success with updated trusted app', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+      exceptionsListClient.updateExceptionListItem.mockImplementationOnce(
+        updateExceptionListItemImplementationMock
+      );
+
+      await updateHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { id: '123' }, body: NEW_TRUSTED_APP }),
+        mockResponse
+      );
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          data: {
+            created_at: '11/11/2011T11:11:11.111',
+            created_by: 'admin',
+            description: 'Linux trusted app 1',
+            effectScope: {
+              type: 'global',
+            },
+            entries: [
+              {
+                field: 'process.hash.*',
+                operator: 'included',
+                type: 'match',
+                value: '1234234659af249ddf3e40864e9fb241',
+              },
+              {
+                field: 'process.executable.caseless',
+                operator: 'included',
+                type: 'match',
+                value: '/bin/malware',
+              },
+            ],
+            id: '123',
+            name: 'linux trusted app 1',
+            os: 'linux',
+            version: '123',
+          },
+        },
+      });
+    });
+
+    it('should return 404 if trusted app does not exist', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
+
+      await updateHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { id: '123' }, body: NEW_TRUSTED_APP }),
+        mockResponse
+      );
+
+      expect(mockResponse.notFound).toHaveBeenCalledWith({
+        body: expect.any(TrustedAppNotFoundError),
+      });
+    });
+
+    it('should should return 409 if version conflict occurs', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+      exceptionsListClient.updateExceptionListItem.mockRejectedValue(
+        Object.assign(new Error(), { output: { statusCode: 409 } })
+      );
+
+      await updateHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { id: '123' }, body: NEW_TRUSTED_APP }),
+        mockResponse
+      );
+
+      expect(mockResponse.conflict).toHaveBeenCalledWith({
+        body: expect.any(TrustedAppVersionConflictError),
+      });
     });
   });
 });

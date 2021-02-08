@@ -23,6 +23,7 @@ import {
 } from './service';
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import { updateExceptionListItemImplementationMock } from './test_utils';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -184,28 +185,9 @@ describe('service', () => {
     beforeEach(() => {
       exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
 
-      exceptionsListClient.updateExceptionListItem.mockImplementationOnce(async (listItem) => {
-        return {
-          _version: listItem._version || '123',
-          id: listItem.id || '123',
-          comments: [],
-          created_at: '11/11/2011T11:11:11.111',
-          created_by: 'admin',
-          description: listItem.description || '',
-          entries: listItem.entries || [],
-          item_id: listItem.itemId || '',
-          list_id: 'endpoint_trusted_apps',
-          meta: undefined,
-          name: listItem.name || '',
-          namespace_type: listItem.namespaceType || '',
-          os_types: listItem.osTypes || '',
-          tags: listItem.tags || [],
-          type: 'simple',
-          tie_breaker_id: '123',
-          updated_at: '11/11/2011T11:11:11.111',
-          updated_by: 'admin',
-        };
-      });
+      exceptionsListClient.updateExceptionListItem.mockImplementationOnce(
+        updateExceptionListItemImplementationMock
+      );
     });
 
     afterEach(() => jest.resetAllMocks());

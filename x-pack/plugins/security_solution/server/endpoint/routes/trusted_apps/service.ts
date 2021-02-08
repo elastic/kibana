@@ -110,7 +110,7 @@ export const updateTrustedApp = async (
       updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
     );
   } catch (e) {
-    if (e?.output.statusCode === 409) {
+    if (e?.output?.statusCode === 409) {
       throw new TrustedAppVersionConflictError(id, e);
     }
 
