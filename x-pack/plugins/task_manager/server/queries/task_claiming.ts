@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -39,7 +40,11 @@ import {
   tasksOfType,
 } from './mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskStore, UpdateByQueryResult } from '../task_store';
+import {
+  correctVersionConflictsForContinuation,
+  TaskStore,
+  UpdateByQueryResult,
+} from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 
 export interface TaskClaimingOpts {
@@ -158,19 +163,29 @@ export class TaskClaiming {
     return from(this.getClaimingBatches()).pipe(
       mergeScan(
         (prevResult, taskTypes) => {
-          const capacity = initialCapacity - prevResult.stats.tasksClaimed;
-          const typedCapacity = Math.min(capacity, this.getCapacity([...taskTypes][0]));
+          const capacity = Math.min(
+            initialCapacity - prevResult.stats.tasksClaimed,
+            this.getCapacity([...taskTypes][0])
+          );
           // if we have no more capacity, short circuit here
-          if (typedCapacity <= 0) {
+          if (capacity <= 0) {
             return of(prevResult);
           }
           return from(
             this.executClaimAvailableTasks({
               claimOwnershipUntil,
-              claimTasksById: claimTasksById.splice(0, typedCapacity),
-              size: typedCapacity,
+              claimTasksById: claimTasksById.splice(0, capacity),
+              size: capacity,
               taskTypes,
-            }).then((result) => accumulateClaimOwnershipResults(prevResult, result))
+            }).then((result) => {
+              const { stats, docs } = accumulateClaimOwnershipResults(prevResult, result);
+              stats.tasksConflicted = correctVersionConflictsForContinuation(
+                stats.tasksUpdated,
+                stats.tasksConflicted,
+                capacity
+              );
+              return { stats, docs };
+            })
           );
         },
         // initialise the accumulation with no results
@@ -361,9 +376,9 @@ export class TaskClaiming {
     taskTypes: Set<string>,
     size: number
   ): Promise<ConcreteTaskInstance[]> {
-    const claimedTasksQuery = mustBeAllOf(
-      tasksClaimedByOwner(this.taskStore.taskManagerId),
-      filterDownBy(tasksOfType([...taskTypes]))
+    const claimedTasksQuery = tasksClaimedByOwner(
+      this.taskStore.taskManagerId,
+      tasksOfType([...taskTypes])
     );
     const { docs } = await this.taskStore.fetch({
       query:

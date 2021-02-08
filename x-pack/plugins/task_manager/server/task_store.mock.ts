@@ -23,6 +23,7 @@ export const taskStoreMock = {
       getLifecycle: jest.fn(),
       fetch: jest.fn(),
       aggregate: jest.fn(),
+      updateByQuery: jest.fn(),
       index,
       taskManagerId,
     } as unknown) as jest.Mocked<TaskStore>;

@@ -15,6 +15,7 @@ import {
   MustCondition,
   BoolClauseWithAnyCondition,
   ShouldCondition,
+  FilterCondition,
 } from './query_clauses';
 
 export const TaskWithSchedule: ExistsFilter = {
@@ -48,14 +49,18 @@ export function tasksOfType(taskTypes: string[]): ShouldCondition<TermFilter> {
   };
 }
 
-export function tasksClaimedByOwner(taskManagerId: string) {
+export function tasksClaimedByOwner(
+  taskManagerId: string,
+  ...taskFilters: Array<FilterCondition<TermFilter> | ShouldCondition<TermFilter>>
+) {
   return mustBeAllOf(
     {
       term: {
         'task.ownerId': taskManagerId,
       },
     },
-    { term: { 'task.status': 'claiming' } }
+    { term: { 'task.status': 'claiming' } },
+    ...taskFilters
   );
 }
 

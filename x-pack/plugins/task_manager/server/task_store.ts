@@ -10,7 +10,7 @@
  */
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
-import { SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
+import { ReindexResponseBase, SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
 import {
   SavedObject,
   SavedObjectsSerializer,
@@ -367,17 +367,11 @@ export class TaskStore {
         },
       });
 
-      /**
-       * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
-       * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671
-       * In order to correct for that happening, we only count `version_conflicts` if we haven't updated as
-       * many docs as we could have.
-       * This is still no more than an estimation, as there might have been less docuemnt to update that the
-       * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
-       * have for an unhealthy cluster distribution of Task Manager polling intervals
-       */
-      const conflictsCorrectedForContinuation =
-        max_docs && version_conflicts + updated > max_docs ? max_docs - updated : version_conflicts;
+      const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
+        updated,
+        version_conflicts,
+        max_docs
+      );
 
       return {
         total,
@@ -389,6 +383,22 @@ export class TaskStore {
       throw e;
     }
   }
+}
+/**
+ * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
+ * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671
+ * In order to correct for that happening, we only count `version_conflicts` if we haven't updated as
+ * many docs as we could have.
+ * This is still no more than an estimation, as there might have been less docuemnt to update that the
+ * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
+ * have for an unhealthy cluster distribution of Task Manager polling intervals
+ */
+export function correctVersionConflictsForContinuation(
+  updated: ReindexResponseBase['updated'],
+  versionConflicts: ReindexResponseBase['version_conflicts'],
+  maxDocs?: number
+) {
+  return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
 function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {

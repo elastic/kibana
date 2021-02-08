@@ -60,6 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
+      // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
@@ -91,6 +92,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
       }
+    });
+
+    after(async () => {
+      // clean up after last test
+      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
     function currentTasks<State = unknown, Params = unknown>(): Promise<{
@@ -136,17 +142,21 @@ export default function ({ getService }: FtrProviderContext) {
       return supertest.get(`/api/ensure_tasks_index_refreshed`).send({}).expect(200);
     }
 
-    function historyDocs(taskId?: string): Promise<RawDoc[]> {
+    async function historyDocs(taskId?: string): Promise<RawDoc[]> {
       return es
         .search({
           index: testHistoryIndex,
           body: {
             query: {
-              term: taskId ? { taskId } : { type: 'task' },
+              term: { type: 'task' },
             },
           },
         })
-        .then((result) => ((result.body as unknown) as SearchResults).hits.hits);
+        .then((result) =>
+          ((result.body as unknown) as SearchResults).hits.hits.filter((task) =>
+            taskId ? task._source?.taskId === taskId : true
+          )
+        );
     }
 
     function scheduleTask(
@@ -157,7 +167,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
+        .then((response: { body: SerializedConcreteTaskInstance }) => {
+          log.debug(`Task Scheduled: ${response.body.id}`);
+          return response.body;
+        });
     }
 
     function runTaskNow(task: { id: string }) {
@@ -286,8 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
-        expect(scheduledTask.id).to.eql(task.id);
+        const scheduledTask = await currentTask(task.id);
         expect(scheduledTask.attempts).to.be.greaterThan(0);
         expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(
           Date.parse(task.runAt) + 5 * 60 * 1000
@@ -305,8 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
-        expect(scheduledTask.id).to.eql(task.id);
+        const scheduledTask = await currentTask(task.id);
         const retryAt = Date.parse(scheduledTask.retryAt!);
         expect(isNaN(retryAt)).to.be(false);
 
@@ -330,7 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs(originalTask.id)).length).to.eql(1);
 
-        const [task] = (await currentTasks<{ count: number }>()).docs;
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(count + 1);
 
