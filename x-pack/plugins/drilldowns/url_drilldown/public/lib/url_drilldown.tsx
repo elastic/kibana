@@ -117,7 +117,9 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
-    url: { template: '' },
+    url: {
+      template: 'https://example.com/?{{event.key}}={{event.value}}',
+    },
     openInNewTab: true,
     encodeUrl: true,
   });
