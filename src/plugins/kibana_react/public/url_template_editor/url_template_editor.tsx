@@ -38,7 +38,7 @@ export interface UrlTemplateEditorProps {
 }
 
 export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
-  height = 200,
+  height = 105,
   value,
   variables,
   onChange,
