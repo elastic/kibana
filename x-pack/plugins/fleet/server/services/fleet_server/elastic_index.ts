@@ -34,7 +34,7 @@ export async function setupFleetServerIndexes(
   await Promise.all(
     FLEET_INDEXES.map(async ([indexAlias, indexData]) => {
       const index = `${indexAlias}_${INDEX_VERSION}`;
-      await createOrUpdateIndex(esClient, index, ESFleetAgentIndex);
+      await createOrUpdateIndex(esClient, index, indexData);
       await createAliasIfDoNotExists(esClient, indexAlias, index);
     })
   );
@@ -101,7 +101,7 @@ async function updateIndex(esClient: ElasticsearchClient, indexName: string, ind
 
 async function createIndex(esClient: ElasticsearchClient, indexName: string, indexData: any) {
   try {
-    const res = await esClient.indices.create({
+    await esClient.indices.create({
       index: indexName,
       body: indexData,
     });
