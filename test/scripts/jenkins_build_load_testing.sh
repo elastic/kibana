@@ -42,12 +42,6 @@ mv metricbeat-${MB_BUILD}-linux-x86_64 metricbeat-install
 ls -l
 # Configure Metricbeat
 
-pushd metricbeat-install
-echo "check inside folder"
-echo $PWD
-ls -l
-popd
-
 echo "Changing metricbeat config"
 pushd ../kibana-load-testing
 cp cfg/metricbeat/elasticsearch-xpack.yml $KIBANA_DIR/metricbeat-install/modules.d/elasticsearch-xpack.yml
@@ -89,14 +83,3 @@ node scripts/functional_tests \
   
 echo "output of metricbeat.log" 
 cat $KIBANA_DIR/metricbeat-install/metricbeat.log
-pushd $KIBANA_DIR/metricbeat-install
-echo "check inside folder"
-echo $PWD
-ls -l
-popd
-
-pushd $KIBANA_DIR/metricbeat-install/modules.d/
-echo "check inside modules.d folder"
-echo $PWD
-ls -l
-popd
