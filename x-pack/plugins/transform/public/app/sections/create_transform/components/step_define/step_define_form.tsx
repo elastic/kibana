@@ -57,6 +57,7 @@ import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { LatestFunctionForm } from './latest_function_form';
+import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -65,7 +66,7 @@ export interface StepDefineFormProps {
 }
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
-  const { searchItems, overrides } = props;
+  const { searchItems } = props;
   const { indexPattern } = searchItems;
   const {
     ml: { DataGrid },
@@ -89,7 +90,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     ...useIndexData(
       indexPattern,
       stepDefineForm.searchBar.state.pivotQuery,
-      overrides?.runtimeMappings
+      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
     ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
@@ -105,7 +106,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state.requestPayload
       : stepDefineForm.latestFunctionConfig.requestPayload,
-    overrides?.runtimeMappings
+    stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
   );
 
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern.title);
@@ -130,7 +131,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       pivotQuery,
       validationStatus,
       requestPayload,
-      overrides?.runtimeMappings
+      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
     ),
     dataTestSubj: 'transformPivotPreview',
     title: i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
@@ -282,7 +283,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                             defaultMessage:
                               'The advanced editor allows you to edit the source query clause of the transform configuration.',
                           }
-                        )}{' '}
+                        )}
                         <EuiLink href={esQueryDsl} target="_blank">
                           {i18n.translate(
                             'xpack.transform.stepDefineForm.advancedEditorHelpTextLink',
@@ -313,6 +314,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
+            <AdvancedRuntimeMappingsSettings {...stepDefineForm.runtimeMappingsEditor} />
+            <EuiSpacer size="s" />
+
             <DataGrid {...indexPreviewProps} />
           </>
         </EuiFormRow>

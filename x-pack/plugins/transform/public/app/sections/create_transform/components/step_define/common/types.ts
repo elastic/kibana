@@ -49,6 +49,8 @@ export interface StepDefineExposedState {
    */
   previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
   runtimeMappings?: { [key: string]: RuntimeField };
+  runtimeMappingsUpdated: boolean;
+  isRuntimeMappingsEditorEnabled: boolean;
 }
 
 export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {
