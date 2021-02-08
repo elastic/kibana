@@ -65,9 +65,7 @@ describe('tabifyDocs', () => {
   });
 
   it('uses custom format params', () => {
-    const table = tabifyDocs(response, index, {}, { timezone: `US/Alaska` });
-    expect(table).toMatchSnapshot();
-
+    tabifyDocs(response, index, {}, { timezone: `US/Alaska` });
     expect(fieldFormats.getDefaultInstance).toBeCalledWith('number', undefined, {
       timezone: 'US/Alaska',
     });
