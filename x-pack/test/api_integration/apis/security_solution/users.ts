@@ -51,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
               querySize: 10,
             },
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         console.log('users', JSON.stringify(users));
