@@ -24,6 +24,7 @@ import { getJourneyScreenshot } from './get_journey_screenshot';
 import { getJourneyDetails } from './get_journey_details';
 import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
+import { getAlertsInstances } from './get_alerts_instances';
 
 export const requests = {
   getCerts,
@@ -45,6 +46,7 @@ export const requests = {
   getJourneyScreenshot,
   getJourneyDetails,
   getNetworkEvents,
+  getAlertsInstances,
 };
 
 export type UptimeRequests = typeof requests;
