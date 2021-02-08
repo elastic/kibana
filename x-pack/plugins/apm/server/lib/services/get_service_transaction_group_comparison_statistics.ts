@@ -30,7 +30,7 @@ import {
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { calculateTransactionErrorPercentage } from '../helpers/transaction_error_rate';
 
-export async function getServiceTransactionGroupsStatistics({
+export async function getServiceTransactionGroupComparisonStatistics({
   serviceName,
   transactionNames,
   setup,
@@ -147,10 +147,7 @@ export async function getServiceTransactionGroupsStatistics({
       }));
       const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,
-        y:
-          timeseriesBucket.throughput_rate.value !== null
-            ? timeseriesBucket.throughput_rate.value
-            : null,
+        y: timeseriesBucket.throughput_rate.value,
       }));
       const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,

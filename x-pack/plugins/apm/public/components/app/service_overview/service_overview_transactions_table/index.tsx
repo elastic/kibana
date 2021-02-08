@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty, orderBy } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -109,12 +109,11 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   );
 
   const {
-    data: transactionGroupsStatistics,
-    status: transactionGroupsStatisticsStatus,
+    data: transactionGroupComparisonStatistics,
+    status: transactionGroupComparisonStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (
-        !isEmpty(requestId) &&
         currentPageTransactionGroups.length &&
         start &&
         end &&
@@ -149,12 +148,13 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionGroupsStatistics: transactionGroupsStatistics?.[requestId],
+    transactionGroupComparisonStatistics:
+      transactionGroupComparisonStatistics?.[requestId],
   });
 
   const isLoading =
     status === FETCH_STATUS.LOADING ||
-    transactionGroupsStatisticsStatus === FETCH_STATUS.LOADING;
+    transactionGroupComparisonStatisticsStatus === FETCH_STATUS.LOADING;
 
   const pagination = {
     pageIndex,

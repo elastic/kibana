@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Top transaction groups when data is loaded',
+    'Transaction groups primary statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {

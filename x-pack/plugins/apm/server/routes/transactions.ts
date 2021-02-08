@@ -16,7 +16,7 @@ import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../lib/services/get_service_transaction_groups';
-import { getServiceTransactionGroupsStatistics } from '../lib/services/get_service_transaction_groups_statistics';
+import { getServiceTransactionGroupComparisonStatistics } from '../lib/services/get_service_transaction_group_comparison_statistics';
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
@@ -113,7 +113,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       rangeRt,
       uiFiltersRt,
       t.type({
-        transactionNames: t.string.pipe(jsonRt),
+        transactionNames: jsonRt,
         numBuckets: toNumberRt,
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
@@ -140,7 +140,7 @@ export const transactionGroupsComparisonStatisticsRoute = createRoute({
       },
     } = context.params;
 
-    return getServiceTransactionGroupsStatistics({
+    return getServiceTransactionGroupComparisonStatistics({
       setup,
       serviceName,
       transactionNames,

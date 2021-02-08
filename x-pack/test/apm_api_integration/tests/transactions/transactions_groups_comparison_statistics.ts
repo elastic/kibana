@@ -23,7 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const transactionNames = ['DispatcherServlet#doGet', 'APIRestController#customers'];
 
   registry.when(
-    'Transaction groups agg results when data is not loaded',
+    'Transaction groups comparison statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
@@ -49,7 +49,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Transaction groups agg results when data is loaded',
+    'Transaction groups comparison statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       it('returns the correct data', async () => {

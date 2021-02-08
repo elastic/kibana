@@ -14,5 +14,5 @@ export function roundNumber(num: Maybe<number>) {
 }
 
 export function removeEmptyCoordinates(coordinates: Coordinate[]) {
-  return coordinates.filter(({ y }) => y !== null && y !== undefined);
+  return coordinates.filter(({ y }) => isFiniteNumber(y));
 }
