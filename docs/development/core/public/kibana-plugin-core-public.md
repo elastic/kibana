@@ -39,6 +39,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
 |  [AppMeta](./kibana-plugin-core-public.appmeta.md) | Input type for meta data for an application.<!-- -->Meta fields include <code>keywords</code> and <code>searchDeepLinks</code> Keywords is an array of string with which to associate the app, must include at least one unique string as an array. <code>searchDeepLinks</code> is an array of links that represent secondary in-app locations for the app. |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
+|  [AsyncPlugin](./kibana-plugin-core-public.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-core-public.chromebrand.md) |  |

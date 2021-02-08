@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const security = getService('security');
   const { visualize, visEditor } = getPageObjects(['visualize', 'visEditor']);
@@ -53,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('long_window_logstash');
       await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await security.testUser.restoreDefaults();
     });
   });
