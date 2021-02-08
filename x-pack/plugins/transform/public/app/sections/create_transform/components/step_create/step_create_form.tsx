@@ -196,7 +196,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           {
             title: indexPatternName,
             timeFieldName,
-            ...(runtimeMappings ? { runtimeFieldMap: runtimeMappings } : {}),
+            ...(typeof runtimeMappings === 'object' ? { runtimeFieldMap: runtimeMappings } : {}),
           },
           false,
           true

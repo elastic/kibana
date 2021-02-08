@@ -104,7 +104,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     pivotQuery,
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state.requestPayload
-      : stepDefineForm.latestFunctionConfig.requestPayload
+      : stepDefineForm.latestFunctionConfig.requestPayload,
+    overrides?.runtimeMappings
   );
 
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern.title);

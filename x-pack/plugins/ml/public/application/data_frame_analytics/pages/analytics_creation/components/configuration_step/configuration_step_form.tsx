@@ -320,7 +320,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     () =>
       currentIndexPattern.fields
         .getAll()
-        .filter((f) => true)
+        .filter((f) => f.runtimeField)
         .map((f) => `'${f.displayName}'`),
     [currentIndexPattern.fields]
   );
@@ -458,7 +458,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       </EuiFormRow>
       {unsupportedRuntimeFields && unsupportedRuntimeFields.length > 0 && (
         <>
-          <EuiCallOut size={'s'} color={'warning'}>
+          <EuiCallOut size="s" color="warning">
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFields"
               defaultMessage="The runtime fields {unsupportedRuntimeFields} are not supported for analysis."

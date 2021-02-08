@@ -177,12 +177,7 @@ export const usePivotData = (
     getPreviewData();
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    indexPatternTitle,
-    JSON.stringify([requestPayload, query]),
-    combinedRuntimeMappings,
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
+  }, [indexPatternTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
 
   if (sortingColumns.length > 0) {
     tableItems.sort(multiColumnSortFactory(sortingColumns));

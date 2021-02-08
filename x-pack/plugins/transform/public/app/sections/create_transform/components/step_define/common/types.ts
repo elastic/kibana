@@ -31,10 +31,6 @@ export interface Field {
   type: KBN_FIELD_TYPES;
 }
 
-export interface RuntimeMapping {
-  type: string;
-  script: any;
-}
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;

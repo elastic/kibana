@@ -60,7 +60,7 @@ export function isDefaultQuery(query: PivotQuery): boolean {
 export function getCombinedRuntimeMappings(
   indexPattern: IndexPattern | undefined,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
-) {
+): StepDefineExposedState['runtimeMappings'] | undefined {
   let combinedRuntimeMappings = {};
 
   // Use runtime field mappings defined inline from API
@@ -95,7 +95,7 @@ export function getPreviewTransformRequestBody(
     source: {
       index,
       ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
-      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+      ...(typeof runtimeMappings === 'object' ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(partialRequest ?? {}),
   };
