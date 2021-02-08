@@ -7,6 +7,7 @@
 
 import {
   EuiDescriptionList,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -16,11 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
 import React, { Component, Fragment } from 'react';
-import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { UISession } from '../../types';
 import { TableText } from '../';
+import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
+import './info_button.scss';
 
 interface Props {
   searchSession: UISession;
@@ -30,7 +31,6 @@ interface State {
   isLoading: boolean;
   isFlyoutVisible: boolean;
   calloutTitle: string;
-  error: Error | null;
 }
 
 export class InfoButton extends Component<Props, State> {
@@ -41,7 +41,6 @@ export class InfoButton extends Component<Props, State> {
       isLoading: false,
       isFlyoutVisible: false,
       calloutTitle: 'Search Session Info',
-      error: null,
     };
 
     this.closeFlyout = this.closeFlyout.bind(this);
@@ -49,61 +48,25 @@ export class InfoButton extends Component<Props, State> {
   }
 
   public renderInfo() {
-    const { error: err } = this.state;
-    if (err) {
-      return err.message;
-    }
-
-    const { created, id, initialState, restoreState } = this.props.searchSession;
-
-    const sessionInfo = [
-      {
-        title: 'Search Session Id',
-        description: id,
-      },
-      {
-        title: 'Created at',
-        description: moment(created).toLocaleString(),
-      },
-    ];
-
-    if (initialState.timeRange) {
-      const initialTimerange = initialState.timeRange as TimeRange;
-      sessionInfo.push({
-        title: 'Initial time range',
-        description: `${initialTimerange.from} - ${initialTimerange.to}`,
-      });
-    }
-
-    if (restoreState.timeRange) {
-      const restoreTimerange = restoreState.timeRange as TimeRange;
-      sessionInfo.push({
-        title: 'Actual time range',
-        description: `${restoreTimerange.from} - ${restoreTimerange.to}`,
-      });
-    }
-
-    if (restoreState.query) {
-      const query = restoreState.query as Query;
-      sessionInfo.push({
-        title: 'Query',
-        description: query.query ? `${query.query} (${query.language})` : 'N/A',
-      });
-    }
-
-    if (restoreState.filters) {
-      const filters = restoreState.filters as Filter[];
-      const filterText = filters.map((filter) => JSON.stringify(filter.query)).join('\n');
-      sessionInfo.push({
-        title: 'Filters',
-        description: filters && filters.length ? filterText : 'N/A',
-      });
-    }
-
     return (
       <Fragment>
-        <EuiDescriptionList listItems={sessionInfo} type="column" align="center" compressed />
-        <EuiSpacer size="s" />
+        <CodeEditor
+          languageId="json"
+          value={JSON.stringify(this.props.searchSession.initialState, null, 2)}
+          onChange={() => {}}
+          options={{
+            readOnly: true,
+            lineNumbers: 'off',
+            fontSize: 12,
+            minimap: {
+              enabled: false,
+            },
+            scrollBeyondLastLine: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            automaticLayout: true,
+          }}
+        />
       </Fragment>
     );
   }
@@ -120,6 +83,7 @@ export class InfoButton extends Component<Props, State> {
             size="s"
             aria-labelledby="flyoutTitle"
             data-test-subj="searchSessionsFlyout"
+            className="searchSessionsFlyout"
           >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
@@ -127,7 +91,18 @@ export class InfoButton extends Component<Props, State> {
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
-              <EuiText>{this.renderInfo()}</EuiText>
+              <EuiText>
+                <EuiText size="xs">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.data.sessions.management.flyoutText"
+                      defaultMessage="Original configuration used to create the search session:"
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer />
+                {this.renderInfo()}
+              </EuiText>
             </EuiFlyoutBody>
           </EuiFlyout>
         </EuiPortal>
