@@ -48,6 +48,9 @@ interface Props {
   packageSummary: string | null | undefined;
   packageVersion: string | null | undefined;
   processName: string | null | undefined;
+  processParentName: string | null | undefined;
+  processParentPid: number | null | undefined;
+  processExitCode: number | null | undefined;
   processPid: number | null | undefined;
   processPpid: number | null | undefined;
   processExecutable: string | null | undefined;
@@ -82,6 +85,9 @@ export const SystemGenericFileLine = React.memo<Props>(
     message,
     outcome,
     packageName,
+    processParentName,
+    processParentPid,
+    processExitCode,
     packageSummary,
     packageVersion,
     processExecutable,
@@ -142,6 +148,7 @@ export const SystemGenericFileLine = React.memo<Props>(
           contextId={contextId}
           endgameExitCode={endgameExitCode}
           eventId={id}
+          processExitCode={processExitCode}
           text={i18n.WITH_EXIT_CODE}
         />
         {!isProcessStoppedOrTerminationEvent(eventAction) && (
@@ -149,6 +156,8 @@ export const SystemGenericFileLine = React.memo<Props>(
             contextId={contextId}
             endgameParentProcessName={endgameParentProcessName}
             eventId={id}
+            processParentName={processParentName}
+            processParentPid={processParentPid}
             processPpid={processPpid}
             text={i18n.VIA_PARENT_PROCESS}
           />
@@ -239,6 +248,9 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
     const packageName: string | null | undefined = get('system.audit.package.name[0]', data);
     const packageSummary: string | null | undefined = get('system.audit.package.summary[0]', data);
     const packageVersion: string | null | undefined = get('system.audit.package.version[0]', data);
+    const processExitCode: number | null | undefined = get('process.exit_code[0]', data);
+    const processParentName: string | null | undefined = get('process.parent.name[0]', data);
+    const processParentPid: number | null | undefined = get('process.parent.pid[0]', data);
     const processHashMd5: string | null | undefined = get('process.hash.md5[0]', data);
     const processHashSha1: string | null | undefined = get('process.hash.sha1[0]', data);
     const processHashSha256: string | null | undefined = get('process.hash.sha256[0]', data);
@@ -271,6 +283,9 @@ export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
           userDomain={userDomain}
           userName={userName}
           message={message}
+          processExitCode={processExitCode}
+          processParentName={processParentName}
+          processParentPid={processParentPid}
           processTitle={processTitle}
           workingDirectory={workingDirectory}
           args={args}
