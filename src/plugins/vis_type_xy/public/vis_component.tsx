@@ -360,7 +360,13 @@ const VisComponent = (props: VisComponentProps) => {
           legendPosition={legendPosition}
           xDomain={xDomain}
           adjustedXDomain={adjustedXDomain}
-          legendColorPicker={useColorPicker(legendPosition, setColor, getSeriesName)}
+          legendColorPicker={useColorPicker(
+            legendPosition,
+            setColor,
+            getSeriesName,
+            visParams.palette.name,
+            props.uiState
+          )}
           onElementClick={handleFilterClick(
             visData,
             xAccessor,

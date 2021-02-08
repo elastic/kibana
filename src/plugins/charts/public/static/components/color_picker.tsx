@@ -9,12 +9,12 @@
 import classNames from 'classnames';
 import React, { BaseSyntheticEvent } from 'react';
 
-import { EuiButtonEmpty, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiIcon, euiPaletteColorBlind } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './color_picker.scss';
 
-export const legendColors: string[] = [
+export const legacyColors: string[] = [
   '#3F6833',
   '#967302',
   '#2F575E',
@@ -74,54 +74,86 @@ export const legendColors: string[] = [
 ];
 
 interface ColorPickerProps {
+  /**
+   * Optionally set color picker id.
+   */
   id?: string;
+  /**
+   * Label that characterizes the color that is going to change
+   */
   label: string | number | null;
+  /**
+   * Callback on the color change
+   */
   onChange: (color: string | null, event: BaseSyntheticEvent) => void;
+  /**
+   * Initial color.
+   */
   color: string;
+  /**
+   * Defines if the compatibility (legacy) or eui palette is going to be used. Defauls to true.
+   */
+  useLegacyColors?: boolean;
+  /**
+   * Defines if the default color is overwritten. Defaults to true.
+   */
+  colorIsOverwritten?: boolean;
 }
 
-export const ColorPicker = ({ onChange, color: selectedColor, id, label }: ColorPickerProps) => (
-  <div className="visColorPicker">
-    <span id={`${id}ColorPickerDesc`} className="euiScreenReaderOnly">
-      <FormattedMessage
-        id="charts.colorPicker.setColor.screenReaderDescription"
-        defaultMessage="Set color for value {legendDataLabel}"
-        values={{ legendDataLabel: label }}
-      />
-    </span>
-    <div className="visColorPicker__value" role="listbox">
-      {legendColors.map((color) => (
-        <EuiIcon
-          role="option"
-          tabIndex={0}
-          type="dot"
-          size="l"
-          color={selectedColor}
-          key={color}
-          aria-label={color}
-          aria-describedby={`${id}ColorPickerDesc`}
-          aria-selected={color === selectedColor}
-          onClick={(e) => onChange(color, e)}
-          onKeyPress={(e) => onChange(color, e)}
-          className={classNames('visColorPicker__valueDot', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            'visColorPicker__valueDot-isSelected': color === selectedColor,
-          })}
-          style={{ color }}
-          data-test-subj={`visColorPickerColor-${color}`}
+const euiColors = euiPaletteColorBlind({ rotations: 4 });
+
+export const ColorPicker = ({
+  onChange,
+  color: selectedColor,
+  id,
+  label,
+  useLegacyColors = true,
+  colorIsOverwritten = true,
+}: ColorPickerProps) => {
+  const legendColors = useLegacyColors ? legacyColors : euiColors;
+  return (
+    <div className="visColorPicker">
+      <span id={`${id}ColorPickerDesc`} className="euiScreenReaderOnly">
+        <FormattedMessage
+          id="charts.colorPicker.setColor.screenReaderDescription"
+          defaultMessage="Set color for value {legendDataLabel}"
+          values={{ legendDataLabel: label }}
         />
-      ))}
+      </span>
+      <div className="visColorPicker__value" role="listbox">
+        {legendColors.map((color) => (
+          <EuiIcon
+            role="option"
+            tabIndex={0}
+            type="dot"
+            size="l"
+            color={selectedColor}
+            key={color}
+            aria-label={color}
+            aria-describedby={`${id}ColorPickerDesc`}
+            aria-selected={color === selectedColor}
+            onClick={(e) => onChange(color, e)}
+            onKeyPress={(e) => onChange(color, e)}
+            className={classNames('visColorPicker__valueDot', {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              'visColorPicker__valueDot-isSelected': color === selectedColor,
+            })}
+            style={{ color }}
+            data-test-subj={`visColorPickerColor-${color}`}
+          />
+        ))}
+      </div>
+      {legendColors.some((c) => c === selectedColor) && colorIsOverwritten && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            onClick={(e: any) => onChange(null, e)}
+            onKeyPress={(e: any) => onChange(null, e)}
+          >
+            <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Clear color" />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </div>
-    {legendColors.some((c) => c === selectedColor) && (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          onClick={(e: any) => onChange(null, e)}
-          onKeyPress={(e: any) => onChange(null, e)}
-        >
-          <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Clear color" />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    )}
-  </div>
-);
+  );
+};

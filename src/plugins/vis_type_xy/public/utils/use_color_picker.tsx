@@ -10,7 +10,7 @@ import React, { BaseSyntheticEvent, useCallback, useMemo } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
-
+import type { PersistedState } from '../../../visualizations/public';
 import { ColorPicker } from '../../../charts/public';
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
@@ -33,11 +33,16 @@ export const useColorPicker = (
     seriesKey: string | number,
     event: BaseSyntheticEvent
   ) => void,
-  getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName
+  getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName,
+  paletteName: string,
+  uiState: PersistedState
 ): LegendColorPicker =>
   useMemo(
     () => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
       const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
+      const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
+      const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
+
       const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
         if (!seriesName) {
           return;
@@ -67,10 +72,16 @@ export const useColorPicker = (
             closePopover={onClose}
             panelPaddingSize="s"
           >
-            <ColorPicker color={color} onChange={handlChange} label={seriesName} />
+            <ColorPicker
+              color={color}
+              onChange={handlChange}
+              label={seriesName}
+              useLegacyColors={paletteName === 'kibana_palette'}
+              colorIsOverwritten={colorIsOverwritten}
+            />
           </EuiWrappingPopover>
         </EuiOutsideClickDetector>
       );
     },
-    [getSeriesName, legendPosition, setColor]
+    [getSeriesName, legendPosition, paletteName, setColor, uiState]
   );
