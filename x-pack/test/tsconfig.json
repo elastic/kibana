@@ -77,6 +77,7 @@
     { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../plugins/upgrade_assistant/tsconfig.json" },
     { "path": "../plugins/watcher/tsconfig.json" },
-    { "path": "../plugins/rollup/tsconfig.json" }
+    { "path": "../plugins/rollup/tsconfig.json" },
+    { "path": "../plugins/remote_clusters/tsconfig.json" }
   ]
 }
