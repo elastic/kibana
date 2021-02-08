@@ -7,11 +7,13 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
-const focusableSelector = 'button, [href], input, select, textarea, [tabindex]';
-
 const getFirstFocusable = (el: HTMLElement | null) => {
+  const focusableSelector = 'button, [href], input, select, textarea, [tabindex]';
   if (!el) {
     return null;
+  }
+  if (el.matches(focusableSelector)) {
+    return el;
   }
   const firstFocusable = el.querySelector(focusableSelector);
   if (!firstFocusable) {
@@ -27,7 +29,7 @@ export function useFocusUpdate(ids: string[]) {
   useEffect(() => {
     const element = nextFocusedId && refsById[nextFocusedId];
     if (element) {
-      const focusable = element.matches(focusableSelector) ? element : getFirstFocusable(element);
+      const focusable = getFirstFocusable(element);
       focusable?.focus();
       setNextFocusedId(null);
     }
