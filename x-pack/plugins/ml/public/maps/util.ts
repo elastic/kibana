@@ -40,11 +40,11 @@ const DUMMY_JOB_LIST = [
   },
 ];
 
-export function getAnomalyJobList() {
+export async function getAnomalyJobList(): Promise<Array<{ jobId: string }>> {
   // console.log(ml);
   return DUMMY_JOB_LIST;
 }
 
-export function getResultsForJobId() {
+export async function getResultsForJobId() {
   // console.log(ml);
 }

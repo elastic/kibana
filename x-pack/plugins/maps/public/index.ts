@@ -24,7 +24,7 @@ export { RenderTooltipContentParams } from './classes/tooltips/tooltip_property'
 export { MapsStartApi } from './api';
 export { MapsSetupApi } from './api';
 
-// ML - changes
+// ML - required additions
 export { IVectorSource, GeoJsonWithMeta } from './classes/sources/vector_source/vector_source';
 export { LICENSED_FEATURES } from './licensed_features';
 export { Attribution, ImmutableSourceProperty, PreIndexedShape } from './classes/sources/source';

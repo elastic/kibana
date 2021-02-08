@@ -267,7 +267,7 @@ export class AnomalySource implements IVectorSource {
     return false;
   }
 
-  supportsFitToBounds(): Promise<boolean> {
-    return undefined;
+  async supportsFitToBounds(): Promise<boolean> {
+    return true;
   }
 }

@@ -7,8 +7,7 @@
 
 import React, { Component } from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui/src/components/form/form_row/form_row';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { IFieldType } from '../../../../../src/plugins/data/common/index_patterns/fields';
@@ -22,6 +21,12 @@ interface State {
 }
 
 export class AnomalyJobSelector extends Component<Props, State> {
+  private async _loadJobs() {}
+
+  componentDidMount(): void {
+    this._loadJobs();
+  }
+
   onJobIdSelect = (selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>>) => {
     this.props.onJobChange(selectedOptions[0].value!.name!);
   };
@@ -34,7 +39,7 @@ export class AnomalyJobSelector extends Component<Props, State> {
         })}
         display="columnCompressed"
       >
-        <EuiComboBox singleSelection={true} onChange={this.onJobIdSelect} />
+        <EuiComboBox singleSelection={true} onChange={this.onJobIdSelect} options={} />
       </EuiFormRow>
     );
   }
