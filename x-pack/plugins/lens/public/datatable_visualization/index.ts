@@ -29,15 +29,13 @@ export class DatatableVisualization {
     editorFrame.registerVisualization(async () => {
       const {
         getDatatable,
-        datatableColumns,
-        datatableColumnWidth,
+        datatableColumn,
         getDatatableRenderer,
         datatableVisualization,
       } = await import('../async_services');
       const resolvedFormatFactory = await formatFactory;
 
-      expressions.registerFunction(() => datatableColumns);
-      expressions.registerFunction(() => datatableColumnWidth);
+      expressions.registerFunction(() => datatableColumn);
       expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
       expressions.registerRenderer(() =>
         getDatatableRenderer({
