@@ -1,12 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
+
+const schemaValuesSchema = schema.recordOf(
+  schema.string(),
+  schema.oneOf([
+    schema.literal('text'),
+    schema.literal('number'),
+    schema.literal('geolocation'),
+    schema.literal('date'),
+  ])
+);
 
 const pageSchema = schema.object({
   current: schema.number(),
@@ -15,16 +26,32 @@ const pageSchema = schema.object({
   total_results: schema.number(),
 });
 
-const oAuthConfigSchema = schema.object({
+const oauthConfigSchema = schema.object({
   base_url: schema.maybe(schema.string()),
   client_id: schema.maybe(schema.string()),
   client_secret: schema.maybe(schema.string()),
   service_type: schema.string(),
-  private_key: schema.string(),
-  public_key: schema.string(),
-  consumer_key: schema.string(),
+  private_key: schema.maybe(schema.string()),
+  public_key: schema.maybe(schema.string()),
+  consumer_key: schema.maybe(schema.string()),
 });
 
+const displayFieldSchema = schema.object({
+  fieldName: schema.string(),
+  label: schema.string(),
+});
+
+const displaySettingsSchema = schema.object({
+  titleField: schema.maybe(schema.string()),
+  subtitleField: schema.maybe(schema.string()),
+  descriptionField: schema.maybe(schema.string()),
+  urlField: schema.maybe(schema.string()),
+  color: schema.string(),
+  urlFieldIsLinkable: schema.boolean(),
+  detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),
+});
+
+// Account routes
 export function registerAccountSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -182,10 +209,8 @@ export function registerAccountSourceSettingsRoute({
       path: '/api/workplace_search/account/sources/{id}/settings',
       validate: {
         body: schema.object({
-          query: schema.object({
-            content_source: schema.object({
-              name: schema.string(),
-            }),
+          content_source: schema.object({
+            name: schema.string(),
           }),
         }),
         params: schema.object({
@@ -229,10 +254,14 @@ export function registerAccountPrepareSourcesRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
+        query: schema.object({
+          kibana_host: schema.string(),
+          subdomain: schema.maybe(schema.string()),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/pre_content_sources/:serviceType',
+      path: '/ws/sources/:serviceType/prepare',
     })
   );
 }
@@ -243,7 +272,7 @@ export function registerAccountSourceSearchableRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/sources/{id}/searchable',
+      path: '/api/workplace_search/account/sources/{id}/searchable',
       validate: {
         body: schema.object({
           searchable: schema.boolean(),
@@ -259,6 +288,115 @@ export function registerAccountSourceSearchableRoute({
   );
 }
 
+export function registerAccountSourceDisplaySettingsConfig({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:id/display_settings/config',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/account/sources/{id}/display_settings/config',
+      validate: {
+        body: displaySettingsSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:id/display_settings/config',
+    })
+  );
+}
+
+export function registerAccountSourceSchemasRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{id}/schemas',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:id/schemas',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/account/sources/{id}/schemas',
+      validate: {
+        body: schemaValuesSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:id/schemas',
+    })
+  );
+}
+
+export function registerAccountSourceReindexJobRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+          jobId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:sourceId/reindex_job/:jobId',
+    })
+  );
+}
+
+export function registerAccountSourceReindexJobStatusRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{sourceId}/reindex_job/{jobId}/status',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+          jobId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:sourceId/reindex_job/:jobId/status',
+    })
+  );
+}
+
+// Org routes
 export function registerOrgSourcesRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -336,7 +474,7 @@ export function registerOrgCreateSourceRoute({
           login: schema.maybe(schema.string()),
           password: schema.maybe(schema.string()),
           organizations: schema.maybe(schema.arrayOf(schema.string())),
-          indexPermissions: schema.boolean(),
+          indexPermissions: schema.maybe(schema.boolean()),
         }),
       },
     },
@@ -416,10 +554,8 @@ export function registerOrgSourceSettingsRoute({
       path: '/api/workplace_search/org/sources/{id}/settings',
       validate: {
         body: schema.object({
-          query: schema.object({
-            content_source: schema.object({
-              name: schema.string(),
-            }),
+          content_source: schema.object({
+            name: schema.string(),
           }),
         }),
         params: schema.object({
@@ -463,10 +599,15 @@ export function registerOrgPrepareSourcesRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
+        query: schema.object({
+          kibana_host: schema.string(),
+          index_permissions: schema.boolean(),
+          subdomain: schema.maybe(schema.string()),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/pre_content_sources/:serviceType',
+      path: '/ws/org/sources/:serviceType/prepare',
     })
   );
 }
@@ -493,6 +634,114 @@ export function registerOrgSourceSearchableRoute({
   );
 }
 
+export function registerOrgSourceDisplaySettingsConfig({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/display_settings/config',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/org/sources/{id}/display_settings/config',
+      validate: {
+        body: displaySettingsSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/display_settings/config',
+    })
+  );
+}
+
+export function registerOrgSourceSchemasRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{id}/schemas',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/schemas',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/org/sources/{id}/schemas',
+      validate: {
+        body: schemaValuesSchema,
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:id/schemas',
+    })
+  );
+}
+
+export function registerOrgSourceReindexJobRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+          jobId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:sourceId/reindex_job/:jobId',
+    })
+  );
+}
+
+export function registerOrgSourceReindexJobStatusRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{sourceId}/reindex_job/{jobId}/status',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+          jobId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:sourceId/reindex_job/:jobId/status',
+    })
+  );
+}
+
 export function registerOrgSourceOauthConfigurationsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -501,6 +750,30 @@ export function registerOrgSourceOauthConfigurationsRoute({
     {
       path: '/api/workplace_search/org/settings/connectors',
       validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/connectors',
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/workplace_search/org/settings/connectors',
+      validate: {
+        body: oauthConfigSchema,
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/connectors',
+    })
+  );
+
+  router.put(
+    {
+      path: '/api/workplace_search/org/settings/connectors',
+      validate: {
+        body: oauthConfigSchema,
+      },
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/settings/connectors',
@@ -533,7 +806,7 @@ export function registerOrgSourceOauthConfigurationRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -548,7 +821,7 @@ export function registerOrgSourceOauthConfigurationRoute({
         params: schema.object({
           serviceType: schema.string(),
         }),
-        body: oAuthConfigSchema,
+        body: oauthConfigSchema,
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -571,6 +844,30 @@ export function registerOrgSourceOauthConfigurationRoute({
   );
 }
 
+// Same route is used for org and account. `state` passes the context.
+export function registerOauthConnectorParamsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/sources/create',
+      validate: {
+        query: schema.object({
+          kibana_host: schema.string(),
+          code: schema.string(),
+          session_state: schema.string(),
+          state: schema.string(),
+          oauth_verifier: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/create',
+    })
+  );
+}
+
 export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourcesRoute(dependencies);
   registerAccountSourcesStatusRoute(dependencies);
@@ -583,6 +880,10 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountPreSourceRoute(dependencies);
   registerAccountPrepareSourcesRoute(dependencies);
   registerAccountSourceSearchableRoute(dependencies);
+  registerAccountSourceDisplaySettingsConfig(dependencies);
+  registerAccountSourceSchemasRoute(dependencies);
+  registerAccountSourceReindexJobRoute(dependencies);
+  registerAccountSourceReindexJobStatusRoute(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
   registerOrgSourceRoute(dependencies);
@@ -594,6 +895,11 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgPreSourceRoute(dependencies);
   registerOrgPrepareSourcesRoute(dependencies);
   registerOrgSourceSearchableRoute(dependencies);
+  registerOrgSourceDisplaySettingsConfig(dependencies);
+  registerOrgSourceSchemasRoute(dependencies);
+  registerOrgSourceReindexJobRoute(dependencies);
+  registerOrgSourceReindexJobStatusRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
+  registerOauthConnectorParamsRoute(dependencies);
 };

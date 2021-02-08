@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -21,6 +22,8 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
+
+import { CANCEL_BUTTON } from '../../../constants';
 
 import { AppLogic } from '../../../app_logic';
 import { TruncatedContent } from '../../../../shared/truncate';
@@ -97,12 +100,6 @@ const REMOVE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.overview.removeButtonText',
   {
     defaultMessage: 'Remove group',
-  }
-);
-const CANCEL_REMOVE_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.overview.cancelRemoveButtonText',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 const CONFIRM_TITLE_TEXT = i18n.translate(
@@ -238,7 +235,7 @@ export const GroupOverview: React.FC = () => {
               onConfirm={deleteGroup}
               confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
               title={CONFIRM_TITLE_TEXT}
-              cancelButtonText={CANCEL_REMOVE_BUTTON_TEXT}
+              cancelButtonText={CANCEL_BUTTON}
               defaultFocusedButton="confirm"
             >
               {CONFIRM_REMOVE_DESCRIPTION}

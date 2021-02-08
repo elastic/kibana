@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -17,6 +18,7 @@ import {
 } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
+import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -28,7 +30,6 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
 import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
-import { SourceQuery } from '../../../../graphql/types';
 import { MetricsExplorerEmptyChart } from './empty_chart';
 import { MetricsExplorerNoMetrics } from './no_metrics';
 import { getChartTheme } from './helpers/get_chart_theme';
@@ -45,7 +46,7 @@ interface Props {
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
   series: MetricsExplorerSeries;
-  source: SourceQuery.Query['source']['configuration'] | undefined;
+  source: InfraSourceConfiguration | undefined;
   timeRange: MetricsExplorerTimeOptions;
   onTimeChange: (start: string, end: string) => void;
 }

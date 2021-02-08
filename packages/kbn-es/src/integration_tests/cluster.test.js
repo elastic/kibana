@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const {
@@ -264,9 +264,7 @@ describe('#start(installPath)', () => {
     expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Array [
-            "indices.query.bool.max_nested_depth=100",
-          ],
+          Array [],
           undefined,
           Object {
             "log": <ToolingLog>,
@@ -342,9 +340,7 @@ describe('#run()', () => {
     expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          Array [
-            "indices.query.bool.max_nested_depth=100",
-          ],
+          Array [],
           undefined,
           Object {
             "log": <ToolingLog>,

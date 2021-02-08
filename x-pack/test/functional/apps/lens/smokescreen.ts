@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -10,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
+  const retry = getService('retry');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
@@ -588,13 +590,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should able to use filters cell actions in table', async () => {
       const firstCellContent = await PageObjects.lens.getDatatableCellText(0, 0);
-      await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(
-        await find.existsByCssSelector(
-          `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
-        )
-      ).to.eql(true);
+      await retry.try(async () => {
+        await PageObjects.lens.clickTableCellAction(0, 0, 'lensDatatableFilterOut');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(
+          await find.existsByCssSelector(
+            `[data-test-subj*="filter-value-${firstCellContent}"][data-test-subj*="filter-negated"]`
+          )
+        ).to.eql(true);
+      });
     });
   });
 }

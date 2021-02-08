@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -22,18 +23,14 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
+import { CANCEL_BUTTON } from '../../../constants';
+
 import { GroupsLogic } from '../groups_logic';
 
 const ADD_GROUP_HEADER = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.addGroup.heading',
   {
     defaultMessage: 'Add a group',
-  }
-);
-const ADD_GROUP_CANCEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.addGroup.cancel.action',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 const ADD_GROUP_SUBMIT = i18n.translate(
@@ -72,11 +69,11 @@ export const AddGroupModal: React.FC<{}> = () => {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeNewGroupModal}>{ADD_GROUP_CANCEL}</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={closeNewGroupModal}>{CANCEL_BUTTON}</EuiButtonEmpty>
             <EuiButton
               disabled={!newGroupName}
               onClick={saveNewGroup}
-              fill={true}
+              fill
               data-test-subj="AddGroupSubmit"
             >
               {ADD_GROUP_SUBMIT}

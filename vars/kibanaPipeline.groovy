@@ -128,9 +128,11 @@ def functionalTestProcess(String name, String script) {
   }
 }
 
-def ossCiGroupProcess(ciGroup) {
+def ossCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("ciGroup" + ciGroup) {
-    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    if (withDelay) {
+      sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    }
 
     withEnv([
       "CI_GROUP=${ciGroup}",
@@ -143,9 +145,11 @@ def ossCiGroupProcess(ciGroup) {
   }
 }
 
-def xpackCiGroupProcess(ciGroup) {
+def xpackCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
-    sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    if (withDelay) {
+      sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    }
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -430,13 +434,27 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 }
 
 def allCiTasks() {
-  withTasks {
-    tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
-  }
+  parallel([
+    general: {
+      withTasks {
+        tasks.check()
+        tasks.lint()
+        tasks.test()
+        tasks.functionalOss()
+        tasks.functionalXpack()
+      }
+    },
+    jest: {
+      workers.ci(name: 'jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+      }
+    },
+    xpackJest: {
+      workers.ci(name: 'xpack-jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh')()
+      }
+    },
+  ])
 }
 
 def pipelineLibraryTests() {

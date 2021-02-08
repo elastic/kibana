@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockTelemetryActions } from '../../../__mocks__';
@@ -11,7 +12,7 @@ import { setMockValues } from './__mocks__';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { ORG_SOURCES_PATH, USERS_PATH } from '../../routes';
+import { SOURCES_PATH, USERS_PATH } from '../../routes';
 
 import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 import { OnboardingCard } from './onboarding_card';
@@ -32,7 +33,7 @@ describe('OnboardingSteps', () => {
       const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(1);
-      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(ORG_SOURCES_PATH);
+      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(SOURCES_PATH);
       expect(wrapper.find(OnboardingCard).prop('description')).toBe(
         'Add shared sources for your organization to start searching.'
       );

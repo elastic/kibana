@@ -1,175 +1,283 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
-import { createListStream, createPromiseFromStreams } from '@kbn/utils';
+import {
+  createListStream,
+  createPromiseFromStreams,
+  ToolingLog,
+  createRecursiveSerializer,
+} from '@kbn/dev-utils';
 
 import { Progress } from '../progress';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
-import { createStubStats, createStubClient, createPersonDocRecords } from './__mocks__/stubs';
+import { createStats } from '../stats';
 
-const recordsToBulkBody = (records: any[]) => {
-  return records.reduce((acc, record) => {
-    const { index, type, id, source } = record.value;
+const AT_LINE_RE = /^\s+at /m;
 
-    return [...acc, { index: { _index: index, _type: type, _id: id } }, source];
-  }, [] as any[]);
-};
+expect.addSnapshotSerializer(
+  createRecursiveSerializer(
+    (v) => typeof v === 'string' && AT_LINE_RE.test(v),
+    (v: string) => {
+      const lines = v.split('\n');
+      const withoutStack: string[] = [];
 
-describe('esArchiver: createIndexDocRecordsStream()', () => {
-  it('consumes doc records and sends to `_bulk` api', async () => {
-    const records = createPersonDocRecords(1);
-    const client = createStubClient([
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params).toEqual({
-          body: recordsToBulkBody(records),
-          requestTimeout: 120000,
-        });
-        return { ok: true };
-      },
-    ]);
-    const stats = createStubStats();
-    const progress = new Progress();
+      // move source lines to withoutStack, filtering out stacktrace lines
+      while (lines.length) {
+        const line = lines.shift()!;
 
-    await createPromiseFromStreams([
-      createListStream(records),
-      createIndexDocRecordsStream(client, stats, progress),
-    ]);
+        if (!AT_LINE_RE.test(line)) {
+          withoutStack.push(line);
+        } else {
+          // push in representation of stack trace indented to match "at"
+          withoutStack.push(`${' '.repeat(line.indexOf('at'))}<stack trace>`);
 
-    client.assertNoPendingResponses();
-    expect(progress.getComplete()).toBe(1);
-    expect(progress.getTotal()).toBe(undefined);
-  });
+          // shift off all subsequent `at ...` lines
+          while (lines.length && AT_LINE_RE.test(lines[0])) {
+            lines.shift();
+          }
+        }
+      }
 
-  it('consumes multiple doc records and sends to `_bulk` api together', async () => {
-    const records = createPersonDocRecords(10);
-    const client = createStubClient([
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params).toEqual({
-          body: recordsToBulkBody(records.slice(0, 1)),
-          requestTimeout: 120000,
-        });
-        return { ok: true };
-      },
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params).toEqual({
-          body: recordsToBulkBody(records.slice(1)),
-          requestTimeout: 120000,
-        });
-        return { ok: true };
-      },
-    ]);
-    const stats = createStubStats();
-    const progress = new Progress();
-
-    await createPromiseFromStreams([
-      createListStream(records),
-      createIndexDocRecordsStream(client, stats, progress),
-    ]);
-
-    client.assertNoPendingResponses();
-    expect(progress.getComplete()).toBe(10);
-    expect(progress.getTotal()).toBe(undefined);
-  });
-
-  it('waits until request is complete before sending more', async () => {
-    const records = createPersonDocRecords(10);
-    const stats = createStubStats();
-    const start = Date.now();
-    const delayMs = 1234;
-    const client = createStubClient([
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params).toEqual({
-          body: recordsToBulkBody(records.slice(0, 1)),
-          requestTimeout: 120000,
-        });
-        await delay(delayMs);
-        return { ok: true };
-      },
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params).toEqual({
-          body: recordsToBulkBody(records.slice(1)),
-          requestTimeout: 120000,
-        });
-        expect(Date.now() - start).not.toBeLessThan(delayMs);
-        return { ok: true };
-      },
-    ]);
-    const progress = new Progress();
-
-    await createPromiseFromStreams([
-      createListStream(records),
-      createIndexDocRecordsStream(client, stats, progress),
-    ]);
-
-    client.assertNoPendingResponses();
-    expect(progress.getComplete()).toBe(10);
-    expect(progress.getTotal()).toBe(undefined);
-  });
-
-  it('sends a maximum of 300 documents at a time', async () => {
-    const records = createPersonDocRecords(301);
-    const stats = createStubStats();
-    const client = createStubClient([
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params.body.length).toEqual(1 * 2);
-        return { ok: true };
-      },
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params.body.length).toEqual(299 * 2);
-        return { ok: true };
-      },
-      async (name, params) => {
-        expect(name).toBe('bulk');
-        expect(params.body.length).toEqual(1 * 2);
-        return { ok: true };
-      },
-    ]);
-    const progress = new Progress();
-
-    await createPromiseFromStreams([
-      createListStream(records),
-      createIndexDocRecordsStream(client, stats, progress),
-    ]);
-
-    client.assertNoPendingResponses();
-    expect(progress.getComplete()).toBe(301);
-    expect(progress.getTotal()).toBe(undefined);
-  });
-
-  it('emits an error if any request fails', async () => {
-    const records = createPersonDocRecords(2);
-    const stats = createStubStats();
-    const client = createStubClient([
-      async () => ({ ok: true }),
-      async () => ({ errors: true, forcedError: true }),
-    ]);
-    const progress = new Progress();
-
-    try {
-      await createPromiseFromStreams([
-        createListStream(records),
-        createIndexDocRecordsStream(client, stats, progress),
-      ]);
-      throw new Error('expected stream to emit error');
-    } catch (err) {
-      expect(err.message).toMatch(/"forcedError":\s*true/);
+      return withoutStack.join('\n');
     }
+  )
+);
 
-    client.assertNoPendingResponses();
-    expect(progress.getComplete()).toBe(1);
-    expect(progress.getTotal()).toBe(undefined);
+const log = new ToolingLog();
+
+class MockClient {
+  helpers = {
+    bulk: jest.fn(),
+  };
+}
+
+const testRecords = [
+  {
+    type: 'doc',
+    value: {
+      index: 'foo',
+      id: '0',
+      source: {
+        hello: 'world',
+      },
+    },
+  },
+  {
+    type: 'doc',
+    value: {
+      index: 'foo',
+      id: '1',
+      source: {
+        hello: 'world',
+      },
+    },
+  },
+  {
+    type: 'doc',
+    value: {
+      index: 'foo',
+      id: '2',
+      source: {
+        hello: 'world',
+      },
+    },
+  },
+  {
+    type: 'doc',
+    value: {
+      index: 'foo',
+      id: '3',
+      source: {
+        hello: 'world',
+      },
+    },
+  },
+];
+
+it('indexes documents using the bulk client helper', async () => {
+  const client = new MockClient();
+  client.helpers.bulk.mockImplementation(async () => {});
+
+  const progress = new Progress();
+  const stats = createStats('test', log);
+
+  await createPromiseFromStreams([
+    createListStream(testRecords),
+    createIndexDocRecordsStream(client as any, stats, progress),
+  ]);
+
+  expect(stats).toMatchInlineSnapshot(`
+    Object {
+      "foo": Object {
+        "archived": false,
+        "configDocs": Object {
+          "tagged": 0,
+          "upToDate": 0,
+          "upgraded": 0,
+        },
+        "created": false,
+        "deleted": false,
+        "docs": Object {
+          "archived": 0,
+          "indexed": 4,
+        },
+        "skipped": false,
+        "waitForSnapshot": 0,
+      },
+    }
+  `);
+  expect(progress).toMatchInlineSnapshot(`
+    Progress {
+      "complete": 4,
+      "loggingInterval": undefined,
+      "total": undefined,
+    }
+  `);
+  expect(client.helpers.bulk).toMatchInlineSnapshot(`
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          Object {
+            "datasource": Array [
+              Object {
+                "hello": "world",
+              },
+            ],
+            "onDocument": [Function],
+            "onDrop": [Function],
+            "retries": 5,
+          },
+        ],
+        Array [
+          Object {
+            "datasource": Array [
+              Object {
+                "hello": "world",
+              },
+              Object {
+                "hello": "world",
+              },
+              Object {
+                "hello": "world",
+              },
+            ],
+            "onDocument": [Function],
+            "onDrop": [Function],
+            "retries": 5,
+          },
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": Promise {},
+        },
+        Object {
+          "type": "return",
+          "value": Promise {},
+        },
+      ],
+    }
+  `);
+});
+
+describe('bulk helper onDocument param', () => {
+  it('returns index ops for each doc', async () => {
+    expect.assertions(testRecords.length);
+
+    const client = new MockClient();
+    client.helpers.bulk.mockImplementation(async ({ datasource, onDocument }) => {
+      for (const d of datasource) {
+        const op = onDocument(d);
+        expect(op).toEqual({
+          index: {
+            _index: 'foo',
+            _id: expect.stringMatching(/^\d$/),
+          },
+        });
+      }
+    });
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    await createPromiseFromStreams([
+      createListStream(testRecords),
+      createIndexDocRecordsStream(client as any, stats, progress),
+    ]);
+  });
+
+  it('returns create ops for each doc when instructed', async () => {
+    expect.assertions(testRecords.length);
+
+    const client = new MockClient();
+    client.helpers.bulk.mockImplementation(async ({ datasource, onDocument }) => {
+      for (const d of datasource) {
+        const op = onDocument(d);
+        expect(op).toEqual({
+          create: {
+            _index: 'foo',
+            _id: expect.stringMatching(/^\d$/),
+          },
+        });
+      }
+    });
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    await createPromiseFromStreams([
+      createListStream(testRecords),
+      createIndexDocRecordsStream(client as any, stats, progress, true),
+    ]);
+  });
+});
+
+describe('bulk helper onDrop param', () => {
+  it('throws an error reporting any docs which failed all retry attempts', async () => {
+    const client = new MockClient();
+    let counter = -1;
+    client.helpers.bulk.mockImplementation(async ({ datasource, onDrop }) => {
+      for (const d of datasource) {
+        counter++;
+        if (counter > 0) {
+          onDrop({
+            document: d,
+            error: {
+              reason: `${counter} conflicts with something`,
+            },
+          });
+        }
+      }
+    });
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    const promise = createPromiseFromStreams([
+      createListStream(testRecords),
+      createIndexDocRecordsStream(client as any, stats, progress),
+    ]);
+
+    await expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(`
+            "
+                Error: Bulk doc failure [operation=index]:
+                  doc: {\\"hello\\":\\"world\\"}
+                  error: {\\"reason\\":\\"1 conflicts with something\\"}
+                    <stack trace>
+                Error: Bulk doc failure [operation=index]:
+                  doc: {\\"hello\\":\\"world\\"}
+                  error: {\\"reason\\":\\"2 conflicts with something\\"}
+                    <stack trace>
+                Error: Bulk doc failure [operation=index]:
+                  doc: {\\"hello\\":\\"world\\"}
+                  error: {\\"reason\\":\\"3 conflicts with something\\"}
+                    <stack trace>"
+          `);
   });
 });

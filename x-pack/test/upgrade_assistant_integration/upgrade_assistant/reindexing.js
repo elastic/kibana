@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -75,6 +76,8 @@ export default function ({ getService }) {
       expect(indexSummary[newIndexName]).to.be.an('object');
       // The original index name is aliased to the new one
       expect(indexSummary[newIndexName].aliases.dummydata).to.be.an('object');
+      // Verify mappings exist on new index
+      expect(indexSummary[newIndexName].mappings.properties).to.be.an('object');
       // The number of documents in the new index matches what we expect
       expect((await es.count({ index: lastState.newIndexName })).body.count).to.be(3);
 

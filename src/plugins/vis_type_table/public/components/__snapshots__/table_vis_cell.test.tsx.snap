@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`table vis cell should return a cell component with data in scope 1`] = `
+<div
+  className="tbvChartCellContent"
+  dangerouslySetInnerHTML={
+    Object {
+      "__html": undefined,
+    }
+  }
+  data-test-subj="tbvChartCellContent"
+/>
+`;

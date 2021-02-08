@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { ADD, UPDATE } from './constants/operations';
 
 export type SchemaTypes = 'text' | 'number' | 'geolocation' | 'date';
 // Certain API endpoints will use these internal type names, which map to the external names above
@@ -31,5 +34,12 @@ export interface SchemaConflicts {
 export interface IIndexingStatus {
   percentageComplete: number;
   numDocumentsWithErrors: number;
-  activeReindexJobId: number;
+  activeReindexJobId: string;
 }
+
+export interface IndexJob extends IIndexingStatus {
+  isActive?: boolean;
+  hasErrors?: boolean;
+}
+
+export type TOperation = typeof ADD | typeof UPDATE;

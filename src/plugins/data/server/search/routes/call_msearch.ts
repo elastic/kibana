@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
@@ -12,9 +12,8 @@ import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
-import { shimHitsTotal } from './shim_hits_total';
 import { getKbnServerError } from '../../../../kibana_utils/server';
-import { getShardTimeout, getDefaultSearchParams, shimAbortSignal } from '..';
+import { getShardTimeout, getDefaultSearchParams, shimAbortSignal, shimHitsTotal } from '..';
 
 /** @internal */
 export function convertRequestBody(

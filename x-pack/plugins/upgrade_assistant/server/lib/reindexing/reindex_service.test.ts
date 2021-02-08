@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 jest.mock('../es_indices_state_check', () => ({ esIndicesStateCheck: jest.fn() }));
 import { BehaviorSubject } from 'rxjs';
 import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
@@ -18,14 +20,14 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-
-import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { licensingMock } from '../../../../licensing/server/mocks';
 import { LicensingPluginSetup } from '../../../../licensing/server';
 import { apmReindexScript } from '../apm';
 import apmMappings from '../apm/mapping.json';
 
+import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
+import { versionService } from '../version';
 
 import {
   isMlIndex,
@@ -38,6 +40,8 @@ const asApiResponse = <T>(body: T): RequestEvent<T> =>
   ({
     body,
   } as RequestEvent<T>);
+
+const { currentMajor, prevMajor } = getMockVersionInfo();
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
@@ -87,6 +91,8 @@ describe('reindexService', () => {
       licensingPluginSetup,
       ['apm-*']
     );
+
+    versionService.setup(MOCK_VERSION_STRING);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -112,7 +118,7 @@ describe('reindexService', () => {
           cluster: ['manage'],
           index: [
             {
-              names: ['anIndex', `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`],
+              names: ['anIndex', `reindexed-v${currentMajor}-anIndex`],
               allow_restricted_indices: true,
               privileges: ['all'],
             },
@@ -136,7 +142,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_ml'],
           index: [
             {
-              names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
+              names: ['.ml-anomalies', `.reindexed-v${currentMajor}-ml-anomalies`],
               allow_restricted_indices: true,
               privileges: ['all'],
             },
@@ -154,9 +160,7 @@ describe('reindexService', () => {
         asApiResponse({ has_all_requested: true })
       );
 
-      const hasRequired = await service.hasRequiredPrivileges(
-        `reindexed-v${PREV_MAJOR_VERSION}-anIndex`
-      );
+      const hasRequired = await service.hasRequiredPrivileges(`reindexed-v${prevMajor}-anIndex`);
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
         body: {
@@ -164,8 +168,8 @@ describe('reindexService', () => {
           index: [
             {
               names: [
-                `reindexed-v${PREV_MAJOR_VERSION}-anIndex`,
-                `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`,
+                `reindexed-v${prevMajor}-anIndex`,
+                `reindexed-v${currentMajor}-anIndex`,
                 'anIndex',
               ],
               allow_restricted_indices: true,
@@ -193,7 +197,7 @@ describe('reindexService', () => {
           cluster: ['manage', 'manage_watcher'],
           index: [
             {
-              names: ['.watches', `.reindexed-v${CURRENT_MAJOR_VERSION}-watches`],
+              names: ['.watches', `.reindexed-v${currentMajor}-watches`],
               allow_restricted_indices: true,
               privileges: ['all'],
             },
@@ -508,9 +512,9 @@ describe('reindexService', () => {
     });
 
     it('is true for ML re-indexed indices', () => {
-      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-state`)).toBe(true);
-      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-anomalies`)).toBe(true);
-      expect(isMlIndex(`.reindexed-v${PREV_MAJOR_VERSION}-ml-config`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${prevMajor}-ml-state`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${prevMajor}-ml-anomalies`)).toBe(true);
+      expect(isMlIndex(`.reindexed-v${prevMajor}-ml-config`)).toBe(true);
     });
   });
 
@@ -525,8 +529,8 @@ describe('reindexService', () => {
     });
 
     it('is true for watcher re-indexed indices', () => {
-      expect(isWatcherIndex(`.reindexed-v${PREV_MAJOR_VERSION}-watches`)).toBe(true);
-      expect(isWatcherIndex(`.reindexed-v${PREV_MAJOR_VERSION}-triggered-watches`)).toBe(true);
+      expect(isWatcherIndex(`.reindexed-v${prevMajor}-watches`)).toBe(true);
+      expect(isWatcherIndex(`.reindexed-v${prevMajor}-triggered-watches`)).toBe(true);
     });
   });
 
@@ -579,7 +583,7 @@ describe('reindexService', () => {
             id: '2',
             attributes: {
               ...reindexOp.attributes,
-              indexName: `.reindexed-v${PREV_MAJOR_VERSION}-ml-anomalies`,
+              indexName: `.reindexed-v${prevMajor}-ml-anomalies`,
             },
           } as ReindexSavedObject;
           const updatedOp = await service.processNextStep(mlReindexedOp);
@@ -883,7 +887,7 @@ describe('reindexService', () => {
       });
 
       it('fails if create index is not acknowledged', async () => {
-        clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
           asApiResponse({ myIndex: settingsMappings })
         );
 
@@ -898,7 +902,7 @@ describe('reindexService', () => {
       });
 
       it('fails if create index fails', async () => {
-        clusterClient.asCurrentUser.indices.getSettings.mockResolvedValueOnce(
+        clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
           asApiResponse({ myIndex: settingsMappings })
         );
 

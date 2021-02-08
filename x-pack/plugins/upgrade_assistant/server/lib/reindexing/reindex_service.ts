@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
 
@@ -15,11 +17,12 @@ import {
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 import { apmReindexScript, isLegacyApmIndex } from '../apm';
 import apmMappings from '../apm/mapping.json';
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
+
+import { versionService } from '../version';
 
 import {
   generateNewIndexName,
@@ -581,7 +584,7 @@ export const reindexServiceFactory = (
     async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
       if (isSystemIndex(indexName)) {
         throw error.reindexSystemIndex(
-          `Reindexing system indices are not yet supported within this major version. Upgrade to the latest ${CURRENT_MAJOR_VERSION}.x minor version.`
+          `Reindexing system indices are not yet supported within this major version. Upgrade to the latest ${versionService.getMajorVersion()}.x minor version.`
         );
       }
 

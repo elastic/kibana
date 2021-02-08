@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -19,6 +20,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 
 export async function getServiceInstanceTransactionStats({
   setup,
@@ -104,7 +106,6 @@ export async function getServiceInstanceTransactionStats({
     },
   });
 
-  const deltaAsMinutes = (end - start) / 60 / 1000;
   const bucketSizeInMinutes = bucketSize / 60;
 
   return (
@@ -128,7 +129,7 @@ export async function getServiceInstanceTransactionStats({
             })),
           },
           throughput: {
-            value: count / deltaAsMinutes,
+            value: calculateThroughput({ start, end, value: count }),
             timeseries: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               y: dateBucket.doc_count / bucketSizeInMinutes,

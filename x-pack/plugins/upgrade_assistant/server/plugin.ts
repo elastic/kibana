@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { first } from 'rxjs/operators';
@@ -27,6 +28,7 @@ import { extractIndexPatterns } from './lib/apm/extract_index_patterns';
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
 import { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
+import { versionService } from './lib/version';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
@@ -47,6 +49,7 @@ interface PluginsSetup {
 export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
+  private readonly kibanaVersion: string;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -56,9 +59,10 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private worker?: ReindexWorker;
 
-  constructor({ logger }: PluginInitializerContext) {
+  constructor({ logger, env }: PluginInitializerContext) {
     this.logger = logger.get();
     this.credentialStore = credentialStoreFactory();
+    this.kibanaVersion = env.packageInfo.version;
   }
 
   private getWorker() {
@@ -107,6 +111,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
       },
       licensing,
     };
+
+    // Initialize version service with current kibana version
+    versionService.setup(this.kibanaVersion);
 
     registerClusterCheckupRoutes(dependencies);
     registerDeprecationLoggingRoutes(dependencies);

@@ -156,7 +156,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
+                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -215,7 +215,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -282,7 +282,7 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -306,7 +306,6 @@ exports[`Flyout apm part two should show instructions to migrate to metricbeat 1
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -495,7 +494,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
+                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -554,7 +553,6 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                         Object {
                           "beatType": "beat",
                           "link": <EuiLink
-                            href="https://www.elastic.co/guide/en/beats/metricbeat/current/http-endpoint.html"
                             target="_blank"
                           >
                             <FormattedMessage
@@ -591,7 +589,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -658,7 +656,7 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -682,7 +680,6 @@ exports[`Flyout beats part two should show instructions to migrate to metricbeat
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -860,7 +857,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
+                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -927,7 +924,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -994,7 +991,7 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1018,7 +1015,6 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1211,7 +1207,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
+                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1270,7 +1266,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1337,7 +1333,7 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1361,7 +1357,6 @@ exports[`Flyout kibana part two should show instructions to migrate to metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1545,7 +1540,7 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
+                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1604,7 +1599,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1671,7 +1665,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1695,7 +1688,6 @@ exports[`Flyout logstash part two should show instructions to migrate to metricb
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1822,7 +1814,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation-configuration.html"
+                href="jest-metadata-mock-url"
                 target="_blank"
               >
                 <FormattedMessage
@@ -1881,7 +1873,6 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                         Object {
                           "beatType": "filebeat",
                           "link": <EuiLink
-                            href="https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html"
                             target="_blank"
                           >
                             <FormattedMessage
@@ -1918,7 +1909,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -1985,7 +1976,7 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
                           "link": <React.Fragment>
                              
                             <EuiLink
-                              href="https://www.elastic.co/guide/en/beats/metricbeat/current/configuring-howto-metricbeat.html"
+                              href="jest-metadata-mock-url"
                               target="_blank"
                             >
                               <FormattedMessage
@@ -2009,7 +2000,6 @@ exports[`Flyout should render the beat type for beats for the enabling metricbea
           "children": <EuiText>
             <p>
               <EuiLink
-                href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-starting.html"
                 target="_blank"
               >
                 <FormattedMessage

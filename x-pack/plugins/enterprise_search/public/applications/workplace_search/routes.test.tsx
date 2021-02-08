@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,7 +13,7 @@ import { EuiLink } from '@elastic/eui';
 import {
   getContentSourcePath,
   SOURCES_PATH,
-  ORG_SOURCES_PATH,
+  PERSONAL_SOURCES_PATH,
   SOURCE_DETAILS_PATH,
 } from './routes';
 
@@ -26,13 +27,13 @@ describe('getContentSourcePath', () => {
     const wrapper = shallow(<TestComponent id="123" isOrg />);
     const path = wrapper.find(EuiLink).prop('href');
 
-    expect(path).toEqual(`${ORG_SOURCES_PATH}/123`);
+    expect(path).toEqual(`${SOURCES_PATH}/123`);
   });
 
   it('should format user route', () => {
     const wrapper = shallow(<TestComponent id="123" />);
     const path = wrapper.find(EuiLink).prop('href');
 
-    expect(path).toEqual(`${SOURCES_PATH}/123`);
+    expect(path).toEqual(`${PERSONAL_SOURCES_PATH}/123`);
   });
 });
