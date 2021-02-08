@@ -123,7 +123,7 @@ describe('Search service', () => {
       it('searches using the original request if not restoring, trackId is not called if there is no id in the response', async () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: false, isRestore: false };
-        mockSessionClient.trackId = jest.fn();
+        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
 
         mockStrategy.search.mockReturnValue(
           of({
@@ -165,10 +165,27 @@ describe('Search service', () => {
         expect(request).toStrictEqual({ ...searchRequest, id: 'my_id' });
       });
 
+      it('does not fail if `trackId` throws', async () => {
+        const searchRequest = { params: {} };
+        const options = { sessionId, isStored: false, isRestore: false };
+        mockSessionClient.trackId = jest.fn().mockRejectedValue(undefined);
+
+        mockStrategy.search.mockReturnValue(
+          of({
+            id: 'my_id',
+            rawResponse: {} as any,
+          })
+        );
+
+        await mockScopedClient.search(searchRequest, options).toPromise();
+
+        expect(mockSessionClient.trackId).toBeCalledTimes(1);
+      });
+
       it('calls `trackId` for every response, if the response contains an `id` and not restoring', async () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: false, isRestore: false };
-        mockSessionClient.trackId = jest.fn();
+        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
 
         mockStrategy.search.mockReturnValue(
           of(
@@ -195,7 +212,7 @@ describe('Search service', () => {
         const searchRequest = { params: {} };
         const options = { sessionId, isStored: true, isRestore: true };
         mockSessionClient.getId = jest.fn().mockResolvedValueOnce('my_id');
-        mockSessionClient.trackId = jest.fn();
+        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
@@ -206,7 +223,7 @@ describe('Search service', () => {
         const searchRequest = { params: {} };
         const options = {};
         mockSessionClient.getId = jest.fn().mockResolvedValueOnce('my_id');
-        mockSessionClient.trackId = jest.fn();
+        mockSessionClient.trackId = jest.fn().mockResolvedValue(undefined);
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
