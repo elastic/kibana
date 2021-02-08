@@ -1,20 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
 import { EuiScreenReaderOnly, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HumanData } from './announcements';
+import { DropType } from '../types';
+
+/**
+ * A function that handles a drop event.
+ */
+export type DropHandler = (dropped: DragDropIdentifier, dropType?: DropType) => void;
 
 export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
+  /**
+   * The data for accessibility, consists of required label and not required groupLabel and position in group
+   */
+  humanData: HumanData;
 };
 
-export interface ActiveDropTarget {
-  activeDropTarget?: DragDropIdentifier;
+export type DropIdentifier = DragDropIdentifier & {
+  dropType: DropType;
+  onDrop: DropHandler;
+};
+
+export interface DropTargets {
+  activeDropTarget?: DropIdentifier;
+  dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
 }
 /**
  * The shape of the drag / drop context.
@@ -38,11 +56,12 @@ export interface DragContextState {
    */
   setDragging: (dragging?: DragDropIdentifier) => void;
 
-  activeDropTarget?: ActiveDropTarget;
+  activeDropTarget?: DropTargets;
 
-  setActiveDropTarget: (newTarget?: DragDropIdentifier) => void;
+  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
 
   setA11yMessage: (message: string) => void;
+  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
 }
 
 /**
@@ -58,6 +77,7 @@ export const DragContext = React.createContext<DragContextState>({
   activeDropTarget: undefined,
   setActiveDropTarget: () => {},
   setA11yMessage: () => {},
+  registerDropTarget: () => {},
 });
 
 /**
@@ -88,10 +108,13 @@ export interface ProviderProps {
   setDragging: (dragging?: DragDropIdentifier) => void;
 
   activeDropTarget?: {
-    activeDropTarget?: DragDropIdentifier;
+    activeDropTarget?: DropIdentifier;
+    dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
   };
 
-  setActiveDropTarget: (newTarget?: DragDropIdentifier) => void;
+  setActiveDropTarget: (newTarget?: DropIdentifier) => void;
+
+  registerDropTarget: (order: number[], dropTarget?: DropIdentifier) => void;
 
   /**
    * The React children.
@@ -115,9 +138,11 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   const [keyboardModeState, setKeyboardModeState] = useState(false);
   const [a11yMessageState, setA11yMessageState] = useState('');
   const [activeDropTargetState, setActiveDropTargetState] = useState<{
-    activeDropTarget?: DragDropIdentifier;
+    activeDropTarget?: DropIdentifier;
+    dropTargetsByOrder: Record<string, DropIdentifier | undefined>;
   }>({
     activeDropTarget: undefined,
+    dropTargetsByOrder: {},
   });
 
   const setDragging = useMemo(
@@ -130,8 +155,23 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   ]);
 
   const setActiveDropTarget = useMemo(
-    () => (activeDropTarget?: DragDropIdentifier) =>
+    () => (activeDropTarget?: DropIdentifier) =>
       setActiveDropTargetState((s) => ({ ...s, activeDropTarget })),
+    [setActiveDropTargetState]
+  );
+
+  const registerDropTarget = useMemo(
+    () => (order: number[], dropTarget?: DropIdentifier) => {
+      return setActiveDropTargetState((s) => {
+        return {
+          ...s,
+          dropTargetsByOrder: {
+            ...s.dropTargetsByOrder,
+            [order.join(',')]: dropTarget,
+          },
+        };
+      });
+    },
     [setActiveDropTargetState]
   );
 
@@ -145,6 +185,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
         setDragging={setDragging}
         activeDropTarget={activeDropTargetState}
         setActiveDropTarget={setActiveDropTarget}
+        registerDropTarget={registerDropTarget}
       >
         {children}
       </ChildDragDropProvider>
@@ -154,9 +195,14 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
             <p aria-live="assertive" aria-atomic={true}>
               {a11yMessageState}
             </p>
+            <p id={`lnsDragDrop-keyboardInstructionsWithReorder`}>
+              {i18n.translate('xpack.lens.dragDrop.keyboardInstructionsReorder', {
+                defaultMessage: `Press enter or space to dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press enter or space again to finish.`,
+              })}
+            </p>
             <p id={`lnsDragDrop-keyboardInstructions`}>
               {i18n.translate('xpack.lens.dragDrop.keyboardInstructions', {
-                defaultMessage: `Press enter or space to start reordering the dimension group. When dragging, use arrow keys to reorder. Press enter or space again to finish.`,
+                defaultMessage: `Press enter or space to start dragging. When dragging, use the left/right arrow keys to move between drop targets. Press enter or space again to finish.`,
               })}
             </p>
           </div>
@@ -164,6 +210,45 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
       </EuiPortal>
     </div>
   );
+}
+
+export function nextValidDropTarget(
+  activeDropTarget: DropTargets | undefined,
+  draggingOrder: [string],
+  filterElements: (el: DragDropIdentifier) => boolean = () => true,
+  reverse = false
+) {
+  if (!activeDropTarget) {
+    return;
+  }
+
+  const filteredTargets = [...Object.entries(activeDropTarget.dropTargetsByOrder)].filter(
+    ([, dropTarget]) => dropTarget && filterElements(dropTarget)
+  );
+
+  const nextDropTargets = [...filteredTargets, draggingOrder].sort(([orderA], [orderB]) => {
+    const parsedOrderA = orderA.split(',').map((v) => Number(v));
+    const parsedOrderB = orderB.split(',').map((v) => Number(v));
+
+    const relevantLevel = parsedOrderA.findIndex((v, i) => parsedOrderA[i] !== parsedOrderB[i]);
+    return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
+  });
+
+  let currentActiveDropIndex = nextDropTargets.findIndex(
+    ([_, dropTarget]) => dropTarget?.id === activeDropTarget?.activeDropTarget?.id
+  );
+
+  if (currentActiveDropIndex === -1) {
+    currentActiveDropIndex = nextDropTargets.findIndex(
+      ([targetOrder]) => targetOrder === draggingOrder[0]
+    );
+  }
+
+  const previousElement =
+    (nextDropTargets.length + currentActiveDropIndex - 1) % nextDropTargets.length;
+  const nextElement = (currentActiveDropIndex + 1) % nextDropTargets.length;
+
+  return nextDropTargets[reverse ? previousElement : nextElement][1];
 }
 
 /**
@@ -181,6 +266,7 @@ export function ChildDragDropProvider({
   activeDropTarget,
   setActiveDropTarget,
   setA11yMessage,
+  registerDropTarget,
   children,
 }: ProviderProps) {
   const value = useMemo(
@@ -192,6 +278,7 @@ export function ChildDragDropProvider({
       activeDropTarget,
       setActiveDropTarget,
       setA11yMessage,
+      registerDropTarget,
     }),
     [
       setDragging,
@@ -201,6 +288,7 @@ export function ChildDragDropProvider({
       setKeyboardMode,
       keyboardMode,
       setA11yMessage,
+      registerDropTarget,
     ]
   );
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
@@ -210,7 +298,7 @@ export interface ReorderState {
   /**
    * Ids of the elements that are translated up or down
    */
-  reorderedItems: DragDropIdentifier[];
+  reorderedItems: Array<{ id: string; height?: number }>;
 
   /**
    * Direction of the move of dragged element in the reordered list
@@ -281,51 +369,3 @@ export function ReorderProvider({
     </div>
   );
 }
-
-export const reorderAnnouncements = {
-  moved: (itemLabel: string, position: number, prevPosition: number) => {
-    return prevPosition === position
-      ? i18n.translate('xpack.lens.dragDrop.elementMovedBack', {
-          defaultMessage: `You have moved back the item {itemLabel} to position {prevPosition}`,
-          values: {
-            itemLabel,
-            prevPosition,
-          },
-        })
-      : i18n.translate('xpack.lens.dragDrop.elementMoved', {
-          defaultMessage: `You have moved the item {itemLabel} from position {prevPosition} to position {position}`,
-          values: {
-            itemLabel,
-            position,
-            prevPosition,
-          },
-        });
-  },
-
-  lifted: (itemLabel: string, position: number) =>
-    i18n.translate('xpack.lens.dragDrop.elementLifted', {
-      defaultMessage: `You have lifted an item {itemLabel} in position {position}`,
-      values: {
-        itemLabel,
-        position,
-      },
-    }),
-
-  cancelled: (position: number) =>
-    i18n.translate('xpack.lens.dragDrop.abortMessageReorder', {
-      defaultMessage:
-        'Movement cancelled. The item has returned to its starting position {position}',
-      values: {
-        position,
-      },
-    }),
-  dropped: (position: number, prevPosition: number) =>
-    i18n.translate('xpack.lens.dragDrop.dropMessageReorder', {
-      defaultMessage:
-        'You have dropped the item. You have moved the item from position {prevPosition} to positon {position}',
-      values: {
-        position,
-        prevPosition,
-      },
-    }),
-};

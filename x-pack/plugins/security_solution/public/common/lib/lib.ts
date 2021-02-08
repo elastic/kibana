@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IScope } from 'angular';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 
@@ -37,10 +37,3 @@ export interface AppKibanaUIConfig {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set(key: string, value: any): Promise<boolean>;
 }
-
-export interface AppKibanaAdapterServiceRefs {
-  config: AppKibanaUIConfig;
-  rootScope: IScope;
-}
-
-export type AppBufferedKibanaServiceCall<ServiceRefs> = (serviceRefs: ServiceRefs) => void;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -90,6 +91,7 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
+          data-test-subj="ofExpressionPopover"
           display={display === 'inline' ? 'inline' : 'columns'}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
@@ -118,6 +120,7 @@ export const OfExpression = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
+              id="ofField"
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}

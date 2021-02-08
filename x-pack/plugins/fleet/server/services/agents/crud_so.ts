@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
 
 import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -195,13 +197,35 @@ export async function getAgentByAccessAPIKeyId(
 export async function updateAgent(
   soClient: SavedObjectsClientContract,
   agentId: string,
-  data: {
-    userProvidedMetatada: any;
-  }
+  data: Partial<AgentSOAttributes>
 ) {
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    user_provided_metadata: data.userProvidedMetatada,
-  });
+  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, data);
+}
+
+export async function bulkUpdateAgents(
+  soClient: SavedObjectsClientContract,
+  updateData: Array<{
+    agentId: string;
+    data: Partial<AgentSOAttributes>;
+  }>
+) {
+  const updates: Array<SavedObjectsBulkUpdateObject<AgentSOAttributes>> = updateData.map(
+    ({ agentId, data }) => ({
+      type: AGENT_SAVED_OBJECT_TYPE,
+      id: agentId,
+      attributes: data,
+    })
+  );
+
+  const res = await soClient.bulkUpdate<AgentSOAttributes>(updates);
+
+  return {
+    items: res.saved_objects.map((so) => ({
+      id: so.id,
+      success: !so.error,
+      error: so.error,
+    })),
+  };
 }
 
 export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {

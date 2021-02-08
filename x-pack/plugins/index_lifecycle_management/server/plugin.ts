@@ -1,11 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
@@ -51,22 +50,19 @@ const indexLifecycleDataEnricher = async (
 };
 
 export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, any, any> {
-  private readonly config$: Observable<IndexLifecycleManagementConfig>;
+  private readonly config: IndexLifecycleManagementConfig;
   private readonly license: License;
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config$ = initializerContext.config.create();
+    this.config = initializerContext.config.get();
     this.license = new License();
   }
 
-  async setup(
-    { http }: CoreSetup,
-    { licensing, indexManagement, features }: Dependencies
-  ): Promise<void> {
+  setup({ http }: CoreSetup, { licensing, indexManagement, features }: Dependencies): void {
     const router = http.createRouter();
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = this.config;
 
     this.license.setup(
       {

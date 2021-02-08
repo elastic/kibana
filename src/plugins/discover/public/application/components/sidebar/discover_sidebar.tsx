@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UiCounterMetricType } from '@kbn/analytics';
 import {
   EuiAccordion,
   EuiFlexItem,
@@ -25,122 +24,42 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { IndexPatternAttributes } from '../../../../../data/common';
-import { SavedObject } from '../../../../../../core/types';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
-import { IndexPatternField, IndexPattern } from '../../../../../data/public';
+import { IndexPatternField } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
-import { DiscoverServices } from '../../../build_services';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 
-export interface DiscoverSidebarProps {
-  /**
-   * Determines whether add/remove buttons are displayed not only when focused
-   */
-  alwaysShowActionButtons?: boolean;
-  /**
-   * the selected columns displayed in the doc table in discover
-   */
-  columns: string[];
-  /**
-   * a statistics of the distribution of fields in the given hits
-   */
-  fieldCounts: Record<string, number>;
+export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
    */
   fieldFilter: FieldFilterState;
   /**
-   * hits fetched from ES, displayed in the doc table
-   */
-  hits: ElasticSearchHit[];
-  /**
-   * List of available index patterns
-   */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  /**
-   * Callback function when selecting a field
-   */
-  onAddField: (fieldName: string) => void;
-  /**
-   * Callback function when adding a filter from sidebar
-   */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  /**
-   * Callback function when removing a field
-   * @param fieldName
-   */
-  onRemoveField: (fieldName: string) => void;
-  /**
-   * Currently selected index pattern
-   */
-  selectedIndexPattern?: IndexPattern;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
-  /**
    * Change current state of fieldFilter
    */
   setFieldFilter: (next: FieldFilterState) => void;
-  /**
-   * Callback function to select another index pattern
-   */
-  setIndexPattern: (id: string) => void;
-  /**
-   * If on, fields are read from the fields API, not from source
-   */
-  useNewFieldsApi?: boolean;
-  /**
-   * Metric tracking function
-   * @param metricType
-   * @param eventName
-   */
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  /**
-   * Shows index pattern and a button that displays the sidebar in a flyout
-   */
-  useFlyout?: boolean;
-
-  /**
-   * an object containing properties for proper handling of unmapped fields in the UI
-   */
-  unmappedFieldsConfig?: {
-    /**
-     * callback function to change the value of `showUnmappedFields` flag
-     * @param value new value to set
-     */
-    onChangeUnmappedFields: (value: boolean) => void;
-    /**
-     * determines whether to display unmapped fields
-     * configurable through the switch in the UI
-     */
-    showUnmappedFields: boolean;
-    /**
-     * determines if we should display an option to toggle showUnmappedFields value in the first place
-     * this value is not configurable through the UI
-     */
-    showUnmappedFieldsDefaultValue: boolean;
-  };
 }
 
 export function DiscoverSidebar({
   alwaysShowActionButtons = false,
   columns,
+  config,
   fieldCounts,
   fieldFilter,
   hits,
   indexPatternList,
+  indexPatterns,
   onAddField,
   onAddFilter,
   onRemoveField,
   selectedIndexPattern,
   services,
+  setAppState,
   setFieldFilter,
-  setIndexPattern,
+  state,
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
@@ -240,9 +159,13 @@ export function DiscoverSidebar({
         })}
       >
         <DiscoverIndexPattern
+          config={config}
           selectedIndexPattern={selectedIndexPattern}
-          setIndexPattern={setIndexPattern}
           indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+          indexPatterns={indexPatterns}
+          state={state}
+          setAppState={setAppState}
+          useNewFieldsApi={useNewFieldsApi}
         />
       </section>
     );
@@ -266,9 +189,13 @@ export function DiscoverSidebar({
       >
         <EuiFlexItem grow={false}>
           <DiscoverIndexPattern
+            config={config}
             selectedIndexPattern={selectedIndexPattern}
-            setIndexPattern={setIndexPattern}
             indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+            indexPatterns={indexPatterns}
+            state={state}
+            setAppState={setAppState}
+            useNewFieldsApi={useNewFieldsApi}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

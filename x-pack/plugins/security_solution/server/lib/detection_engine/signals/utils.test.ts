@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -1165,6 +1166,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1175,6 +1179,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1185,6 +1192,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1197,6 +1207,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1204,6 +1217,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1211,13 +1227,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns correct date time stamp if the search result contains an invalid string value', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });

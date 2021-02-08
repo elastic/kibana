@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -49,10 +50,7 @@ export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(_context: PluginInitializerContext) {}
 
-  public async setup(
-    core: CoreSetup<ClientPluginsStart, unknown>,
-    plugins: ClientPluginsSetup
-  ): Promise<void> {
+  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
