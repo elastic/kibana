@@ -21,10 +21,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: `${BASE_API_URL}/index_stats/{indexPatternTitle}/field`,
+      path: `${BASE_API_URL}/index_stats/{indexPatternId}/field`,
       validate: {
         params: schema.object({
-          indexPatternTitle: schema.string(),
+          indexPatternId: schema.string(),
         }),
         body: schema.object(
           {
@@ -32,17 +32,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             fromDate: schema.string(),
             toDate: schema.string(),
             timeFieldName: schema.maybe(schema.string()),
-            field: schema.object(
-              {
-                name: schema.string(),
-                type: schema.string(),
-                esTypes: schema.maybe(schema.arrayOf(schema.string())),
-                scripted: schema.maybe(schema.boolean()),
-                lang: schema.maybe(schema.string()),
-                script: schema.maybe(schema.string()),
-              },
-              { unknowns: 'allow' }
-            ),
+            fieldName: schema.string(),
           },
           { unknowns: 'allow' }
         ),
@@ -50,7 +40,23 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
+      const { fromDate, toDate, timeFieldName, fieldName, dslQuery } = req.body;
+
+      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const savedObjectsClient = savedObjects.getScopedClient(req);
+      const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+        savedObjectsClient,
+        esClient
+      );
+
+      const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
+
+      const field = indexPattern.fields.find((f) => f.name === fieldName);
+
+      if (!field) {
+        throw new Error(`Field {fieldName} not found in index pattern ${indexPattern.title}`);
+      }
 
       try {
         const filter = timeFieldName
@@ -75,11 +81,13 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 
         const search = async (aggs: unknown) => {
           const { body: result } = await requestClient.search({
-            index: req.params.indexPatternTitle,
+            index: indexPattern.title,
             track_total_hits: true,
             body: {
               query,
               aggs,
+              runtime_mappings:
+                !field.isMapped && field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,
           });
