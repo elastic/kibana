@@ -21,6 +21,20 @@ export const AS_REQUESTED_BY_SUBJECT = i18n.translate(
   }
 );
 
+export const FAILED_TO_LOG_IN = i18n.translate(
+  'xpack.securitySolution.timeline.body.renderers.endpoint.failedToLogInDescription',
+  {
+    defaultMessage: 'failed to log in',
+  }
+);
+
+export const FAILED_TO_LOG_OFF = i18n.translate(
+  'xpack.securitySolution.timeline.body.renderers.endpoint.failedToLogOffDescription',
+  {
+    defaultMessage: 'failed to log off',
+  }
+);
+
 export const LOGGED_OFF = i18n.translate(
   'xpack.securitySolution.timeline.body.renderers.endgame.loggedOffDescription',
   {
