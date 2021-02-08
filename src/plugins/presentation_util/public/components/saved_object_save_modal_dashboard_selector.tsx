@@ -37,9 +37,6 @@ export interface SaveModalDashboardSelectorProps {
 
 export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProps) {
   const { documentId, onSelectDashboard, dashboardOption, onChange, copyOnSave } = props;
-  const { capabilities } = pluginServices.getHooks();
-  const { canCreateNewDashboards } = capabilities.useService();
-
   const isDisabled = !copyOnSave && !!documentId;
 
   return (
@@ -92,25 +89,22 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
               </div>
               <EuiSpacer size="s" />
             </>
-            {canCreateNewDashboards() && (
-              <>
-                {' '}
-                <EuiRadio
-                  checked={dashboardOption === 'new'}
-                  id="new-dashboard-option"
-                  name="dashboard-option"
-                  label={i18n.translate(
-                    'presentationUtil.saveModalDashboard.newDashboardOptionLabel',
-                    {
-                      defaultMessage: 'New',
-                    }
-                  )}
-                  onChange={() => onChange('new')}
-                  disabled={isDisabled}
-                />
-                <EuiSpacer size="s" />
-              </>
-            )}
+            <>
+              <EuiRadio
+                checked={dashboardOption === 'new'}
+                id="new-dashboard-option"
+                name="dashboard-option"
+                label={i18n.translate(
+                  'presentationUtil.saveModalDashboard.newDashboardOptionLabel',
+                  {
+                    defaultMessage: 'New',
+                  }
+                )}
+                onChange={() => onChange('new')}
+                disabled={isDisabled}
+              />
+              <EuiSpacer size="s" />
+            </>
             <EuiRadio
               checked={dashboardOption === null}
               id="add-to-library-option"

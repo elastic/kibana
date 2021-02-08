@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(hasPrompt).to.eql(false);
         });
 
-        it('should only display "Existing" add-to-dashboard option', async () => {
+        it('should not display add-to-dashboard options', async () => {
           await PageObjects.visualize.navigateToNewVisualization();
           await PageObjects.visualize.clickVisType('lens');
           await PageObjects.lens.goToTimeRange();
@@ -235,21 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');
-          expect(hasOptions).to.eql(true);
-
-          const hasCreateNewOption = await find.existsByCssSelector(
-            'input[id="new-dashboard-option"]'
-          );
-          const hasExistingOption = await find.existsByCssSelector(
-            'input[id="existing-dashboard-option"]'
-          );
-          const hasAddToLibraryOption = await find.existsByCssSelector(
-            'input[id="add-to-library-option"]'
-          );
-
-          expect(hasCreateNewOption).to.eql(false);
-          expect(hasExistingOption).to.eql(true);
-          expect(hasAddToLibraryOption).to.eql(true);
+          expect(hasOptions).to.eql(false);
         });
       });
     });
