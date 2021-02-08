@@ -337,16 +337,18 @@ export class IndexPattern implements IIndexPattern {
    * @param field
    */
   getFormatterForField(
-    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
+    field: IndexPatternField | IndexPatternField['spec'] | IFieldType,
+    params: Record<string, any> = {}
   ): FieldFormat {
-    const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
+    const fieldFormat = this.getFormatterForFieldNoDefault(field.name, params);
     if (fieldFormat) {
       return fieldFormat;
     }
 
     return this.fieldFormats.getDefaultInstance(
       field.type as KBN_FIELD_TYPES,
-      field.esTypes as ES_FIELD_TYPES[]
+      field.esTypes as ES_FIELD_TYPES[],
+      params
     );
   }
 
@@ -399,10 +401,14 @@ export class IndexPattern implements IIndexPattern {
    * Get formatter for a given field name. Return undefined if none exists
    * @param field
    */
-  getFormatterForFieldNoDefault(fieldname: string) {
+  getFormatterForFieldNoDefault(fieldname: string, params: Record<string, any> = {}) {
     const formatSpec = this.fieldFormatMap[fieldname];
     if (formatSpec?.id) {
-      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
+      const instanceParams = {
+        ...formatSpec.params,
+        ...params,
+      };
+      return this.fieldFormats.getInstance(formatSpec.id, instanceParams);
     }
   }
 
