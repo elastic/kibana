@@ -173,10 +173,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Count of records [1]',
         ]);
 
-        await PageObjects.lens.assertFocusedDimension(
-          'Count of records [1]',
-          'lnsXY_yDimensionPanel'
-        );
+        await PageObjects.lens.assertFocusedDimension('Count of records [1]');
       });
 
       it('should move dimension to compatible dimension', async () => {
