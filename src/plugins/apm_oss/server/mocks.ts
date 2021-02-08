@@ -26,6 +26,7 @@ const defaultConfig = {
 export const apmOSSPluginSetupMock = {
   create(config: Partial<APMOSSConfig> = {}): APMOSSPluginSetup {
     return {
+      config: { ...defaultConfig, ...config },
       config$: of({ ...defaultConfig, ...config }),
       getRegisteredTutorialProvider: jest.fn(),
     };
