@@ -136,14 +136,6 @@ const ResilientFieldsComponent: React.FunctionComponent<
     }
   }, [incidentTypes, onFieldChange]);
 
-  // When connector change set fields to null
-  useEffect(() => {
-    if (!init.current) {
-      onChange({ incidentTypes: null, severityCode: null });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector]);
-
   // Set field at initialization
   useEffect(() => {
     if (init.current) {

@@ -139,14 +139,6 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFiel
     [currentIssueType, fields, onChange, parent, priority]
   );
 
-  // When connector change set fields to null
-  useEffect(() => {
-    if (!init.current) {
-      onChange({ issueType: null, priority: null, parent: null });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connector]);
-
   // Set field at initialization
   useEffect(() => {
     if (init.current) {
