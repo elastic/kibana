@@ -36,10 +36,10 @@
     '--get',
     `remote.${kbnGitOriginName}.url`,
   ]);
-  if (repoUrlCmdResult.exitCode !== 0) {
-    process.exit(1);
+  if (repoUrlCmdResult.exitCode === 0) {
+    // Only output REPO_URL when found it
+    console.log(`REPO_URL ${repoUrlCmdResult.stdout}`);
   }
-  console.log(`REPO_URL ${repoUrlCmdResult.stdout}`);
 
   // Commit SHA
   const commitSHACmdResult = await runCmd('git', ['rev-parse', 'HEAD']);
