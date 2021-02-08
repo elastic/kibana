@@ -45,15 +45,6 @@ describe('Search Usage Collector', () => {
     );
   });
 
-  test('tracks query cancellation', async () => {
-    await usageCollector.trackQueriesCancelled();
-    expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();
-    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][1]).toBe(METRIC_TYPE.LOADED);
-    expect(mockUsageCollectionSetup.reportUiCounter.mock.calls[0][2]).toBe(
-      SEARCH_EVENT_TYPE.QUERIES_CANCELLED
-    );
-  });
-
   test('tracks session sent to background', async () => {
     await usageCollector.trackSessionSentToBackground();
     expect(mockUsageCollectionSetup.reportUiCounter).toHaveBeenCalled();

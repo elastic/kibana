@@ -162,7 +162,7 @@ export class SearchInterceptor {
     const selfAbortController = new AbortController();
 
     // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
-    // 1. The user manually aborts (via `cancelPending`)
+    // 1. The internal abort controller aborts
     // 2. The request times out
     // 3. abort() is called on `selfAbortController`. This is used by session service to abort all pending searches that it tracks
     //    in the current session
@@ -222,8 +222,8 @@ export class SearchInterceptor {
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort
-   * either when `cancelPending` is called, when the request times out, or when the original
-   * `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+   * either when the request times out, or when the original `AbortSignal` is aborted. Updates
+   * `pendingCount$` when the request is started/finalized.
    *
    * @param request
    * @options

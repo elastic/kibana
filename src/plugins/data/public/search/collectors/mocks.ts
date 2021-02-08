@@ -11,7 +11,8 @@ import { SearchUsageCollector } from './types';
 export function createSearchUsageCollectorMock(): jest.Mocked<SearchUsageCollector> {
   return {
     trackQueryTimedOut: jest.fn(),
-    trackQueriesCancelled: jest.fn(),
+    trackSessionIndicatorTourLoading: jest.fn(),
+    trackSessionIndicatorTourRestored: jest.fn(),
     trackSessionSentToBackground: jest.fn(),
     trackSessionSavedResults: jest.fn(),
     trackSessionRestored: jest.fn(),

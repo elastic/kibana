@@ -4,7 +4,7 @@
 
 ## SearchInterceptor.search() method
 
-Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort either when `cancelPending` is called, when the request times out, or when the original `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
+Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort either when the request times out, or when the original `AbortSignal` is aborted. Updates `pendingCount$` when the request is started/finalized.
 
 <b>Signature:</b>
 

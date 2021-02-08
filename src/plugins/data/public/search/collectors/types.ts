@@ -8,7 +8,6 @@
 
 export enum SEARCH_EVENT_TYPE {
   QUERY_TIMED_OUT = 'queryTimedOut',
-  QUERIES_CANCELLED = 'queriesCancelled',
   SESSION_INDICATOR_TOUR_LOADING = 'sessionIndicatorTourLoading',
   SESSION_INDICATOR_TOUR_RESTORED = 'sessionIndicatorTourRestored',
   SESSION_SENT_TO_BACKGROUND = 'sessionSentToBackground',
@@ -21,7 +20,6 @@ export enum SEARCH_EVENT_TYPE {
 
 export interface SearchUsageCollector {
   trackQueryTimedOut: () => Promise<void>;
-  trackQueriesCancelled: () => Promise<void>;
   trackSessionIndicatorTourLoading: () => Promise<void>;
   trackSessionIndicatorTourRestored: () => Promise<void>;
   trackSessionSentToBackground: () => Promise<void>;
