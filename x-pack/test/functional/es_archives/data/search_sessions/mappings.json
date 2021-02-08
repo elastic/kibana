@@ -310,6 +310,9 @@
             "created": {
               "type": "date"
             },
+            "touched": {
+              "type": "date"
+            },
             "expires": {
               "type": "date"
             },
@@ -323,6 +326,9 @@
             },
             "name": {
               "type": "keyword"
+            },
+            "persisted": {
+              "type": "boolean"
             },
             "restoreState": {
               "enabled": false,

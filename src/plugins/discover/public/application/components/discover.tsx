@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './discover.scss';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -41,6 +41,8 @@ import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { getTopNavLinks } from './top_nav/get_top_nav_links';
 
 const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
   <DocTableLegacy {...props} />
@@ -77,10 +79,11 @@ export function Discover({
   state,
   timefilterUpdateHandler,
   timeRange,
-  topNavMenu,
   updateQuery,
   updateSavedQueryId,
+  unmappedFieldsConfig,
 }: DiscoverProps) {
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const isMobile = () => {
@@ -90,7 +93,24 @@ export function Discover({
 
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const services = getServices();
+  const services = useMemo(() => getServices(), []);
+  const topNavMenu = useMemo(
+    () =>
+      getTopNavLinks({
+        getFieldCounts: opts.getFieldCounts,
+        indexPattern,
+        inspectorAdapters: opts.inspectorAdapters,
+        navigateTo: opts.navigateTo,
+        savedSearch: opts.savedSearch,
+        services,
+        state: opts.stateContainer,
+        onOpenInspector: () => {
+          // prevent overlapping
+          setExpandedDoc(undefined);
+        },
+      }),
+    [indexPattern, opts, services]
+  );
   const { TopNavMenu } = services.navigation.ui;
   const { trackUiMetric } = services;
   const { savedSearch, indexPatternList, config } = opts;
@@ -102,6 +122,13 @@ export function Discover({
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+
+  const columns = useMemo(() => {
+    if (!state.columns) {
+      return [];
+    }
+    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
+  }, [state, useNewFieldsApi]);
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -127,7 +154,7 @@ export function Discover({
           <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
             <EuiFlexItem grow={false}>
               <SidebarMemoized
-                columns={state.columns || []}
+                columns={columns}
                 fieldCounts={fieldCounts}
                 hits={rows}
                 indexPatternList={indexPatternList}
@@ -139,6 +166,7 @@ export function Discover({
                 setIndexPattern={setIndexPattern}
                 isClosed={isSidebarClosed}
                 trackUiMetric={trackUiMetric}
+                unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
               />
             </EuiFlexItem>
@@ -277,7 +305,7 @@ export function Discover({
                         </h2>
                         {isLegacy && rows && rows.length && (
                           <DocTableLegacyMemoized
-                            columns={state.columns || []}
+                            columns={columns}
                             indexPattern={indexPattern}
                             minimumVisibleRows={minimumVisibleRows}
                             rows={rows}
@@ -309,12 +337,14 @@ export function Discover({
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
                               columns={getDisplayedColumns(state.columns, indexPattern)}
+                              expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
+                              setExpandedDoc={setExpandedDoc}
                               showTimeCol={
                                 !config.get('doc_table:hideTimeColumn', false) &&
                                 !!indexPattern.timeFieldName

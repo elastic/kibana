@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import sinon from 'sinon';
@@ -56,15 +56,35 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({ client, stats, log }),
       ]);
 
-      expect((client.indices.getAlias as sinon.SinonSpy).calledOnce).toBe(true);
-      expect((client.indices.getAlias as sinon.SinonSpy).args[0][0]).toEqual({
-        name: 'existing-index',
-        ignore: [404],
-      });
-      expect((client.indices.delete as sinon.SinonSpy).calledOnce).toBe(true);
-      expect((client.indices.delete as sinon.SinonSpy).args[0][0]).toEqual({
-        index: ['actual-index'],
-      });
+      expect((client.indices.getAlias as sinon.SinonSpy).args).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "name": Array [
+                "existing-index",
+              ],
+            },
+            Object {
+              "ignore": Array [
+                404,
+              ],
+            },
+          ],
+        ]
+      `);
+
+      expect((client.indices.delete as sinon.SinonSpy).args).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "index": Array [
+                "actual-index",
+              ],
+            },
+          ],
+        ]
+      `);
+
       sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 3); // one failed create because of existing
     });
 

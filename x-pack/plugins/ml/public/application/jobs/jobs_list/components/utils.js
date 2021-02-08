@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { each } from 'lodash';
@@ -372,11 +373,14 @@ export function filterJobs(jobs, clauses) {
 // start datafeed modal.
 export function checkForAutoStartDatafeed() {
   const job = mlJobService.tempJobCloningObjects.job;
+  const datafeed = mlJobService.tempJobCloningObjects.datafeed;
   if (job !== undefined) {
     mlJobService.tempJobCloningObjects.job = undefined;
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
-    const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
+    mlJobService.tempJobCloningObjects.datafeed = undefined;
+    mlJobService.tempJobCloningObjects.createdBy = undefined;
+
+    const hasDatafeed = typeof datafeed === 'object' && Object.keys(datafeed).length > 0;
+    const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
     return {
       id: job.job_id,
       hasDatafeed,
