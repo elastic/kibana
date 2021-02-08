@@ -21,11 +21,12 @@ import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
   query: PivotQuery,
-  combinedRuntimeMappings?: any
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
 ): UseIndexDataReturnType => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
@@ -168,9 +169,8 @@ export const useIndexData = (
   }, [
     indexPattern.title,
     indexPatternFields,
-    combinedRuntimeMappings,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, pagination, sortingColumns]),
+    JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
   useEffect(() => {

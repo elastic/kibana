@@ -165,7 +165,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
 export const getDataGridSchemaFromESFieldType = (
-  fieldType: ES_FIELD_TYPES | undefined
+  fieldType: ES_FIELD_TYPES | undefined | RuntimeField['type']
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.
