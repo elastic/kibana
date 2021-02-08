@@ -236,6 +236,7 @@ export {
 export {
   DiscoveredPlugin,
   Plugin,
+  AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
