@@ -14,17 +14,22 @@ import {
   Logger,
 } from '../../../../src/core/server';
 
+import { ConfigType } from './config';
 import { createConfig$ } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
+import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
+  private context: PluginInitializerContext;
+  private readonly osqueryAppContextService = new OsqueryAppContextService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get();
+    this.context = initializerContext;
+    this.logger = initializerContext.logger.get();
   }
 
   public async setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
@@ -37,9 +42,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     const router = core.http.createRouter();
 
+    const osqueryContext: OsqueryAppContext = {
+      logFactory: this.context.logger,
+      service: this.osqueryAppContextService,
+      config: (): Promise<ConfigType> => Promise.resolve(config),
+    };
+
     initSavedObjects(core.savedObjects);
-    // Register server side APIs
-    defineRoutes(router);
+    defineRoutes(router, osqueryContext);
 
     core.getStartServices().then(([_, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
@@ -50,10 +60,23 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('osquery: Started');
+    const registerIngestCallback = plugins.fleet?.registerExternalCallback;
+
+    this.osqueryAppContextService.start({
+      ...plugins.fleet,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      config: this.config!,
+      logger: this.logger,
+      registerIngestCallback,
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.logger.debug('osquery: Stopped');
+    this.osqueryAppContextService.stop();
+  }
 }

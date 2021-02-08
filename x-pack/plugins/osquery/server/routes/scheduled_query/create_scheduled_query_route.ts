@@ -14,31 +14,29 @@ import {
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 
-export const createSavedQueryRoute = (router: IRouter) => {
+export const createScheduledQueryRoute = (router: IRouter, osqueryContext) => {
   router.post(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/internal/osquery/scheduled',
       validate: {
-        body: buildRouteValidation<
-          typeof createSavedQueryRequestSchema,
-          CreateSavedQueryRequestSchemaDecoded
-        >(createSavedQueryRequestSchema),
+        body: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, response) => {
+      console.log(context);
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
-
-      const { title, description, command } = request.body;
-
-      const savedQuerySO = await savedObjectsClient.create(savedQuerySavedObjectType, {
-        title,
-        description,
-        command,
-        created: Date.now(),
-      });
+      const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+      const integration = await packagePolicyService.create(
+        savedObjectsClient,
+        esClient,
+        callCluster,
+        request.body
+      );
 
       return response.ok({
-        body: savedQuerySO,
+        body: integration,
       });
     }
   );

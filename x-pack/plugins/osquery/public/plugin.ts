@@ -13,8 +13,14 @@ import {
   CoreStart,
 } from 'src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { OsqueryPluginSetup, OsqueryPluginStart, AppPluginStartDependencies } from './types';
+import {
+  OsqueryPluginSetup,
+  OsqueryPluginStart,
+  StartPlugins,
+  AppPluginStartDependencies,
+} from './types';
 import { PLUGIN_NAME } from '../common';
+import { LazyOsqueryManagedPolicyCreateExtension } from './fleet_integration/lazy_osquery_managed_policy_create_extension';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -57,9 +63,26 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     return {};
   }
 
-  public start(core: CoreStart): OsqueryPluginStart {
+  public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
+    if (plugins.fleet) {
+      const { registerExtension } = plugins.fleet;
+
+      registerExtension({
+        package: 'osquery_elastic_managed',
+        view: 'package-policy-create',
+        component: LazyOsqueryManagedPolicyCreateExtension,
+      });
+
+      registerExtension({
+        package: 'osquery_elastic_managed',
+        view: 'package-policy-edit',
+        component: LazyOsqueryManagedPolicyCreateExtension,
+      });
+    }
+
     return {};
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   public stop() {}
 }

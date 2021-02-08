@@ -8,29 +8,23 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
-import { savedQuerySavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const findSavedQueryRoute = (router: IRouter) => {
+export const findScheduledQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(
     {
-      path: '/internal/osquery/saved_query',
+      path: '/internal/osquery/scheduled_query',
       validate: {
         query: schema.object({}, { unknowns: 'allow' }),
       },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
-
-      const savedQueries = await savedObjectsClient.find({
-        type: savedQuerySavedObjectType,
-        page: parseInt(request.query.pageIndex, 10) + 1,
-        perPage: request.query.pageSize,
-        sortField: request.query.sortField,
-        sortOrder: request.query.sortDirection,
-      });
+      const kuery = 'ingest-package-policies.attributes.package.name: osquery_elastic_managed';
+      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+      const policies = await packagePolicyService.list(context.core.savedObjects.client, { kuery });
 
       return response.ok({
-        body: savedQueries,
+        body: policies,
       });
     }
   );

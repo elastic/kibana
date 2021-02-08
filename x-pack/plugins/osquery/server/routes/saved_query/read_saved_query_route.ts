@@ -13,7 +13,7 @@ import { savedQuerySavedObjectType } from '../../../common/types';
 export const readSavedQueryRoute = (router: IRouter) => {
   router.get(
     {
-      path: '/api/osquery/saved_query/{id}',
+      path: '/internal/osquery/saved_query/{id}',
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },

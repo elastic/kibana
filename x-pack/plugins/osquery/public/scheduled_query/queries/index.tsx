@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { map } from 'lodash/fp';
 import { EuiBasicTable, EuiButton, EuiButtonIcon, EuiCodeBlock } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useQuery, useQueryClient, useMutation } from 'react-query';
+import { useQuery } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 
-const QueriesPageComponent = () => {
+const ScheduledQueriesPageComponent = () => {
   const { push } = useHistory();
-  const queryClient = useQueryClient();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState('updated_at');
@@ -26,17 +24,10 @@ const QueriesPageComponent = () => {
   const { http } = useKibana().services;
   const newQueryLinkProps = useRouterNavigate('queries/new');
 
-  const deleteSavedQueriesMutation = useMutation(
-    (payload) => http.delete(`/internal/osquery/saved_query`, { body: JSON.stringify(payload) }),
-    {
-      onSuccess: () => queryClient.invalidateQueries('savedQueryList'),
-    }
-  );
-
   const { data = {} } = useQuery(
-    ['savedQueryList', { pageIndex, pageSize, sortField, sortDirection }],
+    ['scheduledQueryList', { pageIndex, pageSize, sortField, sortDirection }],
     () =>
-      http.get('/internal/osquery/saved_query', {
+      http.get('/internal/osquery/scheduled_query', {
         query: {
           pageIndex,
           pageSize,
@@ -46,11 +37,11 @@ const QueriesPageComponent = () => {
       }),
     {
       keepPreviousData: true,
-      // Refetch the data every 10 seconds
+      // Refetch the data every 5 seconds
       refetchInterval: 5000,
     }
   );
-  const { total = 0, saved_objects: savedQueries } = data;
+  const { total = 0, items: savedQueries } = data;
 
   const toggleDetails = useCallback(
     (item) => () => {
@@ -58,11 +49,11 @@ const QueriesPageComponent = () => {
       if (itemIdToExpandedRowMapValues[item.id]) {
         delete itemIdToExpandedRowMapValues[item.id];
       } else {
-        itemIdToExpandedRowMapValues[item.id] = (
-          <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-            {item.attributes.command}
+        itemIdToExpandedRowMapValues[item.id] = item.inputs[0].streams.map((stream) => (
+          <EuiCodeBlock key={stream} language="sql" fontSize="m" paddingSize="m">
+            {`${stream.vars.query.value} every ${stream.vars.interval.value}s`}
           </EuiCodeBlock>
-        );
+        ));
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
@@ -80,19 +71,19 @@ const QueriesPageComponent = () => {
     [itemIdToExpandedRowMap, toggleDetails]
   );
 
-  const handleEditClick = useCallback((item) => push(`/queries/${item.id}`), [push]);
+  const handleEditClick = useCallback((item) => push(`/scheduled_queries/${item.id}`), [push]);
 
   const columns = useMemo(
     () => [
       {
-        field: 'attributes.title',
+        field: 'name',
         name: 'Query name',
         sortable: true,
         truncateText: true,
       },
       {
-        field: 'attributes.description',
-        name: 'Description',
+        field: 'enabled',
+        name: 'Active',
         sortable: true,
         truncateText: true,
       },
@@ -160,22 +151,11 @@ const QueriesPageComponent = () => {
     []
   );
 
-  const handleDeleteClick = useCallback(() => {
-    const selectedItemsIds = map<string>('id', selectedItems);
-    deleteSavedQueriesMutation.mutate({ savedQueryIds: selectedItemsIds });
-  }, [deleteSavedQueriesMutation, selectedItems]);
-
   return (
     <div>
-      {!selectedItems.length ? (
-        <EuiButton fill {...newQueryLinkProps}>
-          {'New query'}
-        </EuiButton>
-      ) : (
-        <EuiButton color="danger" iconType="trash" onClick={handleDeleteClick}>
-          {`Delete ${selectedItems.length} Queries`}
-        </EuiButton>
-      )}
+      <EuiButton fill {...newQueryLinkProps}>
+        {'New query'}
+      </EuiButton>
 
       {savedQueries && (
         <EuiBasicTable
@@ -195,4 +175,4 @@ const QueriesPageComponent = () => {
   );
 };
 
-export const QueriesPage = React.memo(QueriesPageComponent);
+export const ScheduledQueriesPage = React.memo(ScheduledQueriesPageComponent);

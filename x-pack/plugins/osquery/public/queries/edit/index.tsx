@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery } from 'react-query';
 
@@ -23,10 +24,10 @@ const EditSavedQueryPageComponent = () => {
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
 
   const { isLoading, data: actionDetails } = useQuery(['savedQuery', { savedQueryId }], () =>
-    http.get(`/api/osquery/saved_query/${savedQueryId}`)
+    http.get(`/internal/osquery/saved_query/${savedQueryId}`)
   );
   const updateSavedQueryMutation = useMutation((payload) =>
-    http.put(`/api/osquery/saved_query/${savedQueryId}`, { body: JSON.stringify(payload) })
+    http.put(`/internal/osquery/saved_query/${savedQueryId}`, { body: JSON.stringify(payload) })
   );
 
   const { form: savedQueryForm } = useForm({
@@ -52,7 +53,7 @@ const EditSavedQueryPageComponent = () => {
   });
 
   const createActionMutation = useMutation((payload: Record<string, any>) =>
-    http.post('/api/osquery/action', {
+    http.post('/internal/osquery/action', {
       body: JSON.stringify({ ...payload, command: savedQueryFormData.command }),
     })
   );
