@@ -1,7 +1,7 @@
 {
   "include": [],
   "references": [
-    { "path": "./src/core/tsconfig.json" },
+    { "path": "./bazel/bin/src/core/tsconfig.json" },
     { "path": "./src/plugins/advanced_settings/tsconfig.json" },
     { "path": "./src/plugins/apm_oss/tsconfig.json" },
     { "path": "./src/plugins/bfetch/tsconfig.json" },

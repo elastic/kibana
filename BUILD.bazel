@@ -2,8 +2,17 @@
 # other packages builds and need to be included as inputs
 exports_files(
   [
+    "tsconfig.base.json",
     "tsconfig.json",
     "package.json"
   ],
   visibility = ["//visibility:public"]
+)
+
+
+filegroup(
+  name = "build_ts_refs",
+  srcs = [
+      "//src/core:build_ts_refs"
+  ],
 )

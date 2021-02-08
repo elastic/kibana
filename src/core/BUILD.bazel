@@ -1,0 +1,66 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+
+exports_files(["tsconfig.json"], visibility = ["//visibility:public"])
+
+SRCS = glob(
+  [
+    "public/**/*",
+    "server/**/*",
+    "test_helpers/**/*",
+    "utils/**/*",
+    "types/**/*",
+    "index.ts"
+  ],
+)
+
+#SRC_NPM_DEPS = [
+#    "//packages/kbn-babel-preset",
+#    "//packages/kbn-dev-utils",
+#    "@npm//@babel/core",
+#    "@npm//babel-loader",
+#    "@npm//del",
+#    "@npm//getopts",
+#    "@npm//intl-format-cache",
+#    "@npm//intl-messageformat",
+#    "@npm//intl-relativeformat",
+#    "@npm//prop-types",
+#    "@npm//react",
+#    "@npm//react-intl",
+#    "@npm//supports-color",
+#]
+#
+#TSC_TYPES_DEPS = [
+#    "@npm//typescript",
+#    "@npm//@types/angular",
+#    "@npm//@types/intl-relativeformat",
+#    "@npm//@types/jest",
+#    "@npm//@types/react",
+#    "@npm//@types/react-intl",
+#]
+#
+
+SRC_NPM_DEPS = []
+
+TSC_TYPES_DEPS = []
+
+ALL_DEPS = SRC_NPM_DEPS + TSC_TYPES_DEPS
+
+ts_config(
+    name = "tsconfig",
+    src = "//src/core:tsconfig.json",
+    deps = [
+        "//:tsconfig.base.json",
+    ],
+)
+
+ts_project(
+    name = "tsc",
+    composite = True,
+    declaration = True,
+    declaration_map = True,
+    emit_declaration_only = True,
+    tsconfig = "tsconfig",
+    srcs = SRCS,
+    # deps = ALL_DEPS,
+    out_dir = "target_types",
+)
