@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -46,7 +45,7 @@ describe('SearchSessionService', () => {
 
   beforeEach(async () => {
     savedObjectsClient = savedObjectsClientMock.create();
-    const config$ = new BehaviorSubject<ConfigSchema>({
+    const config: ConfigSchema = {
       search: {
         sessions: {
           enabled: true,
@@ -59,13 +58,13 @@ describe('SearchSessionService', () => {
           management: {} as any,
         },
       },
-    });
+    };
     const mockLogger: any = {
       debug: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
     };
-    service = new SearchSessionService(mockLogger, config$);
+    service = new SearchSessionService(mockLogger, config);
     const coreStart = coreMock.createStart();
     const mockTaskManager = taskManagerMock.createStart();
     await flushPromises();
