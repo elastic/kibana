@@ -57,7 +57,7 @@ export function parseKibanaPlatformPlugin(manifestPath: string): KibanaPlatformP
   }
 
   return {
-    relativeDirectory: Path.dirname(manifestPath).slice(REPO_ROOT.length),
+    relativeDirectory: Path.relative(REPO_ROOT, Path.dirname(manifestPath)),
     directory: Path.dirname(manifestPath),
     manifestPath,
     manifest: {
