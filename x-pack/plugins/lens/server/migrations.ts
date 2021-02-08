@@ -83,6 +83,29 @@ interface XYStatePost77 {
   layers: Array<Partial<XYLayerPre77>>;
 }
 
+interface DatatableStatePre711 {
+  layers: Array<{
+    layerId: string;
+    columns: string[];
+  }>;
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
+}
+interface DatatableStatePost711 {
+  layerId: string;
+  columns: Array<{
+    columnId: string;
+    width?: number;
+    hidden?: boolean;
+  }>;
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
+}
+
 /**
  * Removes the `lens_auto_date` subexpression from a stored expression
  * string. For example: aggConfigs={lens_auto_date aggConfigs="JSON string"}
@@ -334,6 +357,36 @@ const removeSuggestedPriority: SavedObjectMigrationFn<LensDocShape, LensDocShape
   return newDoc;
 };
 
+const transformTableState: SavedObjectMigrationFn<
+  LensDocShape<DatatableStatePre711>,
+  LensDocShape<DatatableStatePost711>
+> = (doc) => {
+  // nothing to do for non-datatable visualizations
+  if (doc.attributes.visualizationType !== 'lnsDatatable')
+    return (doc as unknown) as SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>>;
+  const oldState = doc.attributes.state.visualization;
+  const layer = oldState.layers[0] || {
+    layerId: '',
+    columns: [],
+  };
+  // put together new saved object format
+  const newDoc: SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>> = {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      state: {
+        ...doc.attributes.state,
+        visualization: {
+          sorting: oldState.sorting,
+          layerId: layer.layerId,
+          columns: layer.columns.map((columnId) => ({ columnId })),
+        },
+      },
+    },
+  };
+  return newDoc;
+};
+
 export const migrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -341,4 +394,5 @@ export const migrations: SavedObjectMigrationMap = {
   '7.8.0': (doc, context) => addTimeFieldToEsaggs(removeLensAutoDate(doc, context), context),
   '7.10.0': extractReferences,
   '7.11.0': removeSuggestedPriority,
+  '7.12.0': transformTableState,
 };
