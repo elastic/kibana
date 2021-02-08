@@ -41,7 +41,7 @@ export interface SpacesApiUiComponent {
   /**
    * Provides a context that is required to render all Spaces components.
    */
-  SpacesContext: FunctionComponent;
+  SpacesContext: FunctionComponent<SpacesContextProps>;
   /**
    * Displays the tags for given saved object.
    */
@@ -50,6 +50,16 @@ export interface SpacesApiUiComponent {
    * Displays a corresponding list of spaces for a given list of saved object namespaces.
    */
   SpaceList: FunctionComponent<SpaceListProps>;
+}
+
+/**
+ * @public
+ */
+export interface SpacesContextProps {
+  /**
+   * If a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space.
+   */
+  feature?: string;
 }
 
 /**

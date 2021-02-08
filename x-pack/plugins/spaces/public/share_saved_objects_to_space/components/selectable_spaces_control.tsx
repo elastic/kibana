@@ -25,11 +25,11 @@ import { NoSpacesAvailable } from './no_spaces_available';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
-import { SpaceTarget } from '../types';
+import { SpaceData } from '../../types';
 import { useSpaces } from '../../spaces_context';
 
 interface Props {
-  spaces: SpaceTarget[];
+  spaces: SpaceData[];
   selectedSpaceIds: string[];
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
@@ -39,31 +39,38 @@ interface Props {
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
 const ROW_HEIGHT = 40;
-const partiallyAuthorizedTooltip = {
-  checked: i18n.translate(
-    'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.checked',
-    { defaultMessage: 'You need additional privileges to deselect this space.' }
-  ),
-  unchecked: i18n.translate(
-    'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked',
-    { defaultMessage: 'You need additional privileges to select this space.' }
-  ),
-};
-const partiallyAuthorizedSpaceProps = (checked: boolean) => ({
-  append: (
-    <EuiIconTip
-      content={checked ? partiallyAuthorizedTooltip.checked : partiallyAuthorizedTooltip.unchecked}
-      position="left"
-      type="iInCircle"
-    />
-  ),
-  disabled: true,
-});
-const activeSpaceProps = {
-  append: <EuiBadge color="hollow">Current</EuiBadge>,
-  disabled: true,
-  checked: 'on' as 'on',
-};
+const APPEND_ACTIVE_SPACE = <EuiBadge color="hollow">Current</EuiBadge>;
+const APPEND_CANNOT_SELECT = (
+  <EuiIconTip
+    content={i18n.translate(
+      'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked',
+      { defaultMessage: 'You need additional privileges to select this space.' }
+    )}
+    position="left"
+    type="iInCircle"
+  />
+);
+const APPEND_CANNOT_DESELECT = (
+  <EuiIconTip
+    content={i18n.translate(
+      'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.checked',
+      { defaultMessage: 'You need additional privileges to deselect this space.' }
+    )}
+    position="left"
+    type="iInCircle"
+  />
+);
+const APPEND_FEATURE_IS_DISABLED = (
+  <EuiIconTip
+    content={i18n.translate('xpack.spaces.management.shareToSpace.featureIsDisabledTooltip', {
+      defaultMessage:
+        'This feature is disabled in this space, it will have no effect unless the feature is enabled again.',
+    })}
+    position="left"
+    type="alert"
+    color="warning"
+  />
+);
 
 export const SelectableSpacesControl = (props: Props) => {
   const {
@@ -80,9 +87,11 @@ export const SelectableSpacesControl = (props: Props) => {
     !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const options = spaces
-    .sort((a, b) => (a.id === activeSpaceId ? -1 : b.id === activeSpaceId ? 1 : 0))
+    .filter(({ id, isFeatureDisabled }) => !isFeatureDisabled || selectedSpaceIds.includes(id)) // filter out spaces that are not already selected and have the feature disabled in that space
+    .sort(createSpacesComparator(activeSpaceId))
     .map<SpaceOption>((space) => {
       const checked = selectedSpaceIds.includes(space.id);
+      const additionalProps = getAdditionalProps(space, activeSpaceId, checked);
       return {
         label: space.name,
         prepend: <SpaceAvatar space={space} size={'s'} />,
@@ -90,8 +99,7 @@ export const SelectableSpacesControl = (props: Props) => {
         ['data-space-id']: space.id,
         ['data-test-subj']: `sts-space-selector-row-${space.id}`,
         ...(isGlobalControlChecked && { disabled: true }),
-        ...(space.isPartiallyAuthorized && partiallyAuthorizedSpaceProps(checked)),
-        ...(space.id === activeSpaceId && activeSpaceProps),
+        ...additionalProps,
       };
     });
 
@@ -205,3 +213,47 @@ export const SelectableSpacesControl = (props: Props) => {
     </EuiFormRow>
   );
 };
+
+/**
+ * Gets additional props for the selection option.
+ */
+function getAdditionalProps(space: SpaceData, activeSpaceId: string | false, checked: boolean) {
+  if (space.id === activeSpaceId) {
+    return {
+      append: APPEND_ACTIVE_SPACE,
+      disabled: true,
+      checked: 'on' as 'on',
+    };
+  } else if (space.isPartiallyAuthorized) {
+    return {
+      append: (
+        <>
+          {checked ? APPEND_CANNOT_DESELECT : APPEND_CANNOT_SELECT}
+          {space.isFeatureDisabled ? APPEND_FEATURE_IS_DISABLED : null}
+        </>
+      ),
+      disabled: true,
+    };
+  } else if (space.isFeatureDisabled) {
+    return {
+      append: APPEND_FEATURE_IS_DISABLED,
+    };
+  }
+}
+
+/**
+ * Given the active space, create a comparator to sort a SpaceData array so that the active space is at the beginning, and space(s) for
+ * which the current feature is disabled are all at the end.
+ */
+function createSpacesComparator(activeSpaceId: string | false) {
+  return (a: SpaceData, b: SpaceData) => {
+    if (a.id === activeSpaceId) {
+      return -1;
+    } else if (b.id === activeSpaceId) {
+      return 1;
+    } else if (a.isFeatureDisabled !== b.isFeatureDisabled) {
+      return a.isFeatureDisabled ? 1 : -1;
+    }
+    return 0;
+  };
+}

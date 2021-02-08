@@ -7,7 +7,8 @@
 
 import * as React from 'react';
 import { SpacesManager } from '../spaces_manager';
-import { SpacesReactContext, SpacesReactContextValue, KibanaServices, SpacesData } from './types';
+import { SpacesData } from '../types';
+import { SpacesReactContext, SpacesReactContextValue, KibanaServices } from './types';
 
 const { useContext, createElement, createContext } = React;
 

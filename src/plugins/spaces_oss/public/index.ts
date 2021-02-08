@@ -19,6 +19,7 @@ export {
   SpacesApi,
   SpacesApiUi,
   SpacesApiUiComponent,
+  SpacesContextProps,
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
   SpaceListProps,

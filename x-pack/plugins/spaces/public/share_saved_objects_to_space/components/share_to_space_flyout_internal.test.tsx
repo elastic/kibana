@@ -39,6 +39,7 @@ interface SetupOpts {
   enableCreateCopyCallout?: boolean;
   enableCreateNewSpaceLink?: boolean;
   enableSpaceAgnosticBehavior?: boolean;
+  mockFeatureId?: string; // optional feature ID to use for the SpacesContext
 }
 
 const setup = async (opts: SetupOpts = {}) => {
@@ -110,7 +111,7 @@ const setup = async (opts: SetupOpts = {}) => {
   // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
   // the ShareToSpaceFlyout component renders the internal flyout inside of the context wrapper
   const wrapper = mountWithIntl(
-    <SpacesContext>
+    <SpacesContext feature={opts.mockFeatureId}>
       <ShareToSpaceFlyout
         savedObjectTarget={savedObjectToShare}
         onUpdate={onUpdate}
@@ -550,6 +551,8 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   describe('space selection', () => {
+    const mockFeatureId = 'some-feature';
+
     const mockSpaces = [
       {
         // normal "fully authorized" space selection option -- not the active space
@@ -558,10 +561,23 @@ describe('ShareToSpaceFlyout', () => {
         disabledFeatures: [],
       },
       {
-        // "partially authorized" space selection option -- not the active space
+        // normal "fully authorized" space selection option, with a disabled feature -- not the active space
         id: 'space-2',
         name: 'Space 2',
+        disabledFeatures: [mockFeatureId],
+      },
+      {
+        // "partially authorized" space selection option -- not the active space
+        id: 'space-3',
+        name: 'Space 3',
         disabledFeatures: [],
+        authorizedPurposes: { shareSavedObjectsIntoSpace: false },
+      },
+      {
+        // "partially authorized" space selection option, with a disabled feature -- not the active space
+        id: 'space-4',
+        name: 'Space 4',
+        disabledFeatures: [mockFeatureId],
         authorizedPurposes: { shareSavedObjectsIntoSpace: false },
       },
       {
@@ -572,7 +588,8 @@ describe('ShareToSpaceFlyout', () => {
       },
     ];
 
-    const expectActiveSpace = (option: any) => {
+    const expectActiveSpace = (option: any, { spaceId }: { spaceId: string }) => {
+      expect(option['data-space-id']).toEqual(spaceId);
       expect(option.append).toMatchInlineSnapshot(`
         <EuiBadge
           color="hollow"
@@ -584,92 +601,145 @@ describe('ShareToSpaceFlyout', () => {
       expect(option.checked).toEqual('on');
       expect(option.disabled).toEqual(true);
     };
-    const expectInactiveSpace = (option: any, checked: boolean) => {
-      expect(option.append).toBeUndefined();
-      expect(option.checked).toEqual(checked ? 'on' : undefined);
-      expect(option.disabled).toBeUndefined();
-    };
-    const expectPartiallyAuthorizedSpace = (option: any, checked: boolean) => {
-      if (checked) {
+    const expectNeedAdditionalPrivileges = (
+      option: any,
+      {
+        spaceId,
+        checked,
+        featureIsDisabled,
+      }: { spaceId: string; checked: boolean; featureIsDisabled?: boolean }
+    ) => {
+      expect(option['data-space-id']).toEqual(spaceId);
+      if (checked && featureIsDisabled) {
         expect(option.append).toMatchInlineSnapshot(`
-          <EuiIconTip
-            content="You need additional privileges to deselect this space."
-            position="left"
-            type="iInCircle"
-          />
+          <React.Fragment>
+            <EuiIconTip
+              content="You need additional privileges to deselect this space."
+              position="left"
+              type="iInCircle"
+            />
+            <EuiIconTip
+              color="warning"
+              content="This feature is disabled in this space, it will have no effect unless the feature is enabled again."
+              position="left"
+              type="alert"
+            />
+          </React.Fragment>
+        `);
+      } else if (checked && !featureIsDisabled) {
+        expect(option.append).toMatchInlineSnapshot(`
+          <React.Fragment>
+            <EuiIconTip
+              content="You need additional privileges to deselect this space."
+              position="left"
+              type="iInCircle"
+            />
+          </React.Fragment>
+        `);
+      } else if (!checked && !featureIsDisabled) {
+        expect(option.append).toMatchInlineSnapshot(`
+          <React.Fragment>
+            <EuiIconTip
+              content="You need additional privileges to select this space."
+              position="left"
+              type="iInCircle"
+            />
+          </React.Fragment>
         `);
       } else {
-        expect(option.append).toMatchInlineSnapshot(`
-          <EuiIconTip
-            content="You need additional privileges to select this space."
-            position="left"
-            type="iInCircle"
-          />
-        `);
+        throw new Error('Unexpected test case!');
       }
       expect(option.checked).toEqual(checked ? 'on' : undefined);
       expect(option.disabled).toEqual(true);
     };
+    const expectFeatureIsDisabled = (option: any, { spaceId }: { spaceId: string }) => {
+      expect(option['data-space-id']).toEqual(spaceId);
+      expect(option.append).toMatchInlineSnapshot(`
+        <EuiIconTip
+          color="warning"
+          content="This feature is disabled in this space, it will have no effect unless the feature is enabled again."
+          position="left"
+          type="alert"
+        />
+      `);
+      expect(option.checked).toEqual('on');
+      expect(option.disabled).toBeUndefined();
+    };
+    const expectInactiveSpace = (
+      option: any,
+      { spaceId, checked }: { spaceId: string; checked: boolean }
+    ) => {
+      expect(option['data-space-id']).toEqual(spaceId);
+      expect(option.append).toBeUndefined();
+      expect(option.checked).toEqual(checked ? 'on' : undefined);
+      expect(option.disabled).toBeUndefined();
+    };
 
     describe('without enableSpaceAgnosticBehavior', () => {
-      it('correctly defines space selection options when spaces are not selected', async () => {
-        const namespaces = ['my-active-space']; // the saved object's current namespaces; it will always exist in at least the active namespace
+      it('correctly defines space selection options', async () => {
+        const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
         const { wrapper } = await setup({ mockSpaces, namespaces });
 
         const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-        const selectOptions = selectable.prop('options');
-        expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
-        expectActiveSpace(selectOptions[0]);
-        expect(selectOptions[1]['data-space-id']).toEqual('space-1');
-        expectInactiveSpace(selectOptions[1], false);
-        expect(selectOptions[2]['data-space-id']).toEqual('space-2');
-        expectPartiallyAuthorizedSpace(selectOptions[2], false);
+        const options = selectable.prop('options');
+        expect(options).toHaveLength(5);
+        expectActiveSpace(options[0], { spaceId: 'my-active-space' });
+        expectInactiveSpace(options[1], { spaceId: 'space-1', checked: true });
+        expectInactiveSpace(options[2], { spaceId: 'space-2', checked: false });
+        expectNeedAdditionalPrivileges(options[3], { spaceId: 'space-3', checked: true });
+        expectNeedAdditionalPrivileges(options[4], { spaceId: 'space-4', checked: false });
       });
 
-      it('correctly defines space selection options when spaces are selected', async () => {
-        const namespaces = ['my-active-space', 'space-1', 'space-2']; // the saved object's current namespaces
-        const { wrapper } = await setup({ mockSpaces, namespaces });
+      describe('with a SpacesContext for a specific feature', () => {
+        it('correctly defines space selection options when affected spaces are not selected', async () => {
+          const namespaces = ['my-active-space']; // the saved object's current namespaces
+          const { wrapper } = await setup({ mockSpaces, namespaces, mockFeatureId });
 
-        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-        const selectOptions = selectable.prop('options');
-        expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
-        expectActiveSpace(selectOptions[0]);
-        expect(selectOptions[1]['data-space-id']).toEqual('space-1');
-        expectInactiveSpace(selectOptions[1], true);
-        expect(selectOptions[2]['data-space-id']).toEqual('space-2');
-        expectPartiallyAuthorizedSpace(selectOptions[2], true);
+          const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+          const options = selectable.prop('options');
+          expect(options).toHaveLength(3);
+          expectActiveSpace(options[0], { spaceId: 'my-active-space' });
+          expectInactiveSpace(options[1], { spaceId: 'space-1', checked: false });
+          expectNeedAdditionalPrivileges(options[2], { spaceId: 'space-3', checked: false });
+          // space-2 and space-4 are omitted, because they are not selected and the current feature is disabled in those spaces
+        });
+
+        it('correctly defines space selection options when affected spaces are already selected', async () => {
+          const namespaces = ['my-active-space', 'space-1', 'space-2', 'space-3', 'space-4']; // the saved object's current namespaces
+          const { wrapper } = await setup({ mockSpaces, namespaces, mockFeatureId });
+
+          const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+          const options = selectable.prop('options');
+          expect(options).toHaveLength(5);
+          expectActiveSpace(options[0], { spaceId: 'my-active-space' });
+          expectInactiveSpace(options[1], { spaceId: 'space-1', checked: true });
+          expectNeedAdditionalPrivileges(options[2], { spaceId: 'space-3', checked: true });
+          // space-2 and space-4 are at the end, because they are selected and the current feature is disabled in those spaces
+          expectFeatureIsDisabled(options[3], { spaceId: 'space-2' });
+          expectNeedAdditionalPrivileges(options[4], {
+            spaceId: 'space-4',
+            checked: true,
+            featureIsDisabled: true,
+          });
+        });
       });
     });
 
     describe('with enableSpaceAgnosticBehavior', () => {
       const enableSpaceAgnosticBehavior = true;
 
-      it('correctly defines space selection options when spaces are not selected', async () => {
-        const namespaces = ['my-active-space']; // the saved object's current namespaces; it will always exist in at least the active namespace
+      it('correctly defines space selection options', async () => {
+        const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
         const { wrapper } = await setup({ enableSpaceAgnosticBehavior, mockSpaces, namespaces });
 
         const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-        const selectOptions = selectable.prop('options');
-        expect(selectOptions[0]['data-space-id']).toEqual('space-1');
-        expectInactiveSpace(selectOptions[0], false);
-        expect(selectOptions[1]['data-space-id']).toEqual('space-2');
-        expectPartiallyAuthorizedSpace(selectOptions[1], false);
-        expect(selectOptions[2]['data-space-id']).toEqual('my-active-space');
-        expectInactiveSpace(selectOptions[2], true);
-      });
-
-      it('correctly defines space selection options when spaces are selected', async () => {
-        const namespaces = ['my-active-space', 'space-1', 'space-2']; // the saved object's current namespaces
-        const { wrapper } = await setup({ enableSpaceAgnosticBehavior, mockSpaces, namespaces });
-
-        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-        const selectOptions = selectable.prop('options');
-        expect(selectOptions[0]['data-space-id']).toEqual('space-1');
-        expectInactiveSpace(selectOptions[0], true);
-        expect(selectOptions[1]['data-space-id']).toEqual('space-2');
-        expectPartiallyAuthorizedSpace(selectOptions[1], true);
-        expect(selectOptions[2]['data-space-id']).toEqual('my-active-space');
-        expectInactiveSpace(selectOptions[2], true);
+        const options = selectable.prop('options');
+        expect(options).toHaveLength(5);
+        expectInactiveSpace(options[0], { spaceId: 'space-1', checked: true });
+        expectInactiveSpace(options[1], { spaceId: 'space-2', checked: false });
+        expectNeedAdditionalPrivileges(options[2], { spaceId: 'space-3', checked: true });
+        expectNeedAdditionalPrivileges(options[3], { spaceId: 'space-4', checked: false });
+        expectInactiveSpace(options[4], { spaceId: 'my-active-space', checked: true });
       });
     });
   });

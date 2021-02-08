@@ -13,10 +13,9 @@ import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { SpaceListProps } from '../../../../../src/plugins/spaces_oss/public';
-import { SpaceTarget } from '../share_saved_objects_to_space/types';
+import { SpacesData, SpaceData } from '../types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { useSpaces } from '../spaces_context';
-import { SpacesData } from '../spaces_context/types';
 import { SpaceAvatar } from '../space_avatar';
 
 const DEFAULT_DISPLAY_LIMIT = 5;
@@ -44,7 +43,7 @@ export const SpaceListInternal = ({
   const isSharedToAllSpaces = namespaces?.includes(ALL_SPACES_ID);
   const unauthorizedCount = (namespaces?.filter((namespace) => namespace === UNKNOWN_SPACE) ?? [])
     .length;
-  let displayedSpaces: SpaceTarget[];
+  let displayedSpaces: SpaceData[];
   let button: ReactNode = null;
 
   if (isSharedToAllSpaces) {
@@ -60,16 +59,23 @@ export const SpaceListInternal = ({
     ];
   } else {
     const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
-    const authorizedSpaceTargets: SpaceTarget[] = [];
+    const enabledSpaceTargets: SpaceData[] = [];
+    const disabledSpaceTargets: SpaceData[] = [];
     authorized.forEach((namespace) => {
       const spaceTarget = spacesData.spacesMap.get(namespace);
       if (spaceTarget === undefined) {
         // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
-        authorizedSpaceTargets.push({ id: namespace, name: namespace });
+        enabledSpaceTargets.push({ id: namespace, name: namespace });
       } else if (enableSpaceAgnosticBehavior || !spaceTarget.isActiveSpace) {
-        authorizedSpaceTargets.push(spaceTarget);
+        if (spaceTarget.isFeatureDisabled) {
+          disabledSpaceTargets.push(spaceTarget);
+        } else {
+          enabledSpaceTargets.push(spaceTarget);
+        }
       }
     });
+    const authorizedSpaceTargets = [...enabledSpaceTargets, ...disabledSpaceTargets];
+
     displayedSpaces =
       isExpanded || !displayLimit
         ? authorizedSpaceTargets
@@ -115,11 +121,14 @@ export const SpaceListInternal = ({
 
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-      {displayedSpaces.map((space) => (
-        <EuiFlexItem grow={false} key={space.id}>
-          <SpaceAvatar space={space} size={'s'} />
-        </EuiFlexItem>
-      ))}
+      {displayedSpaces.map((space) => {
+        const color = space.isFeatureDisabled ? 'hollow' : space.color;
+        return (
+          <EuiFlexItem grow={false} key={space.id}>
+            <SpaceAvatar space={{ ...space, color }} size={'s'} />
+          </EuiFlexItem>
+        );
+      })}
       {unauthorizedCountBadge}
       {button}
     </EuiFlexGroup>

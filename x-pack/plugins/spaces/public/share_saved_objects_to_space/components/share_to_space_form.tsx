@@ -9,11 +9,12 @@ import './share_to_space_form.scss';
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ShareOptions, SpaceTarget } from '../types';
+import { SpaceData } from '../../types';
+import { ShareOptions } from '../types';
 import { ShareModeControl } from './share_mode_control';
 
 interface Props {
-  spaces: SpaceTarget[];
+  spaces: SpaceData[];
   objectNoun: string;
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;

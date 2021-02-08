@@ -21,10 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { SpaceTarget } from '../types';
+import { SpaceData } from '../../types';
 
 interface Props {
-  spaces: SpaceTarget[];
+  spaces: SpaceData[];
   objectNoun: string;
   canShareToAllSpaces: boolean;
   selectedSpaceIds: string[];

@@ -30,8 +30,9 @@ import type {
 } from 'src/plugins/spaces_oss/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { SpacesManager } from '../../spaces_manager';
+import { SpaceData } from '../../types';
 import { ShareToSpaceForm } from './share_to_space_form';
-import { ShareOptions, SpaceTarget } from '../types';
+import { ShareOptions } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { useSpaces } from '../../spaces_context';
 
@@ -133,7 +134,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
 
   const [{ isLoading, spaces }, setSpacesState] = useState<{
     isLoading: boolean;
-    spaces: SpaceTarget[];
+    spaces: SpaceData[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
     const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObjectTarget.type);

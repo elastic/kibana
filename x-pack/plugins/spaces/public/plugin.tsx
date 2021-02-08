@@ -98,7 +98,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     plugins.spacesOss.registerSpacesApi(this.spacesApi);
 
-    return {};
+    return this.spacesApi;
   }
 
   public start(core: CoreStart) {
