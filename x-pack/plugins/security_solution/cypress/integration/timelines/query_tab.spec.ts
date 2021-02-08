@@ -27,7 +27,6 @@ import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Timeline query tab', () => {
   let timelineId: string | null = null;
-  let noteId: string | null = null;
   before(() => {
     cleanKibana();
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
@@ -41,7 +40,6 @@ describe('Timeline query tab', () => {
         const note = timeline.notes;
         addNoteToTimeline(note, timelineId!).should((response) => {
           expect(response.status).to.equal(200);
-          noteId = response.body.data.persistNote.note.noteId;
           waitForTimelinesPanelToBeLoaded();
           openTimelineById(timelineId!)
             .click({ force: true })

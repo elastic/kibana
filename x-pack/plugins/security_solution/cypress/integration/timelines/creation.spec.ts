@@ -10,10 +10,8 @@ import { timeline } from '../../objects/timeline';
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
-  NOTES_TAB_BUTTON,
   NOTES_TEXT,
   PIN_EVENT,
-  QUERY_TAB_BUTTON,
   TIMELINE_FILTER,
 } from '../../screens/timeline';
 
