@@ -70,7 +70,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   const anomalyParams = {
     sourceId: 'default',
-    anomalyThreshold: source?.configuration.anomalyThreshold || '0',
+    anomalyThreshold: source?.configuration.anomalyThreshold || 0,
     startTime,
     endTime,
     defaultSortOptions: {

@@ -45,5 +45,5 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
       },
     },
   ],
-  anomalyThreshold: '50',
+  anomalyThreshold: 50,
 };

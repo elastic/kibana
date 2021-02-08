@@ -34,7 +34,7 @@ export const createMetricsHostsAnomaliesQuery = ({
   pagination,
 }: {
   jobIds: string[];
-  anomalyThreshold: string;
+  anomalyThreshold: number;
   startTime: number;
   endTime: number;
   sort: Sort;
@@ -45,7 +45,7 @@ export const createMetricsHostsAnomaliesQuery = ({
 
   const filters = [
     ...createJobIdsFilters(jobIds),
-    ...createAnomalyScoreFilter(+anomalyThreshold),
+    ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];

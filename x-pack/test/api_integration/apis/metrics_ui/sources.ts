@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(configuration?.fields.timestamp).to.be('@timestamp');
         expect(configuration?.fields.container).to.be('container.id');
         expect(configuration?.logColumns).to.have.length(3);
-        expect(configuration?.anomalyThreshold).to.be('50');
+        expect(configuration?.anomalyThreshold).to.be(50);
         expect(status?.logIndicesExist).to.be(true);
         expect(status?.metricIndicesExist).to.be(true);
       });

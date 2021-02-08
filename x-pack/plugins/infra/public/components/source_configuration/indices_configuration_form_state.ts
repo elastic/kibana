@@ -24,7 +24,7 @@ interface FormState {
   podField: string;
   tiebreakerField: string;
   timestampField: string;
-  anomalyThreshold: string;
+  anomalyThreshold: number;
 }
 
 type FormStateChanges = Partial<FormState>;
@@ -201,5 +201,5 @@ const defaultFormState: FormState = {
   podField: '',
   tiebreakerField: '',
   timestampField: '',
-  anomalyThreshold: '',
+  anomalyThreshold: 0,
 };

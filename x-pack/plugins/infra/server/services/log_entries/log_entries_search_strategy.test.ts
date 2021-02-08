@@ -279,7 +279,7 @@ const createSourceConfigurationMock = (): InfraSource => ({
       timestamp: 'TIMESTAMP_FIELD',
       tiebreaker: 'TIEBREAKER_FIELD',
     },
-    anomalyThreshold: '20',
+    anomalyThreshold: 20,
   },
 });
 

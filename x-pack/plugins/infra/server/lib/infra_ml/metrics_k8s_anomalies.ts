@@ -76,7 +76,7 @@ async function getCompatibleAnomaliesJobIds(
 export async function getMetricK8sAnomalies(
   context: InfraPluginRequestHandlerContext & { infra: Required<InfraRequestHandlerContext> },
   sourceId: string,
-  anomalyThreshold: string,
+  anomalyThreshold: number,
   startTime: number,
   endTime: number,
   metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
@@ -160,7 +160,7 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
 
 async function fetchMetricK8sAnomalies(
   mlSystem: MlSystem,
-  anomalyThreshold: string,
+  anomalyThreshold: number,
   jobIds: string[],
   startTime: number,
   endTime: number,

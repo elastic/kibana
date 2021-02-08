@@ -147,7 +147,7 @@ export const useMetricsHostsAnomaliesResults = ({
   endTime: number;
   startTime: number;
   sourceId: string;
-  anomalyThreshold: string;
+  anomalyThreshold: number;
   defaultSortOptions: Sort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetMetricsHostsAnomaliesDatasetsError?: (error: Error) => void;
@@ -300,7 +300,7 @@ export const useMetricsHostsAnomaliesResults = ({
 
 interface RequestArgs {
   sourceId: string;
-  anomalyThreshold: string;
+  anomalyThreshold: number;
   startTime: number;
   endTime: number;
   metric: Metric;

@@ -62,7 +62,7 @@ export const getMetricsK8sAnomaliesRequestPayloadRT = rt.type({
     rt.type({
       // the ID of the source configuration
       sourceId: rt.string,
-      anomalyThreshold: rt.string,
+      anomalyThreshold: rt.number,
       // the time range to fetch the log entry anomalies from
       timeRange: timeRangeRT,
     }),

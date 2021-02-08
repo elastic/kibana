@@ -34,7 +34,7 @@ export const createMetricsK8sAnomaliesQuery = ({
   pagination,
 }: {
   jobIds: string[];
-  anomalyThreshold: string;
+  anomalyThreshold: number;
   startTime: number;
   endTime: number;
   sort: Sort;
@@ -45,7 +45,7 @@ export const createMetricsK8sAnomaliesQuery = ({
 
   const filters = [
     ...createJobIdsFilters(jobIds),
-    ...createAnomalyScoreFilter(+anomalyThreshold),
+    ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];

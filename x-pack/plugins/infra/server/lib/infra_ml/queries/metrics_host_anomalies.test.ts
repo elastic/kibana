@@ -10,7 +10,7 @@ import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 describe('createMetricsHostAnomaliesQuery', () => {
   const jobIds = ['kibana-metrics-ui-default-default-hosts_memory_usage'];
-  const anomalyThreshold = '30';
+  const anomalyThreshold = 30;
   const startTime = 1612454527112;
   const endTime = 1612541227112;
   const sort: Sort = { field: 'anomalyScore', direction: 'desc' };

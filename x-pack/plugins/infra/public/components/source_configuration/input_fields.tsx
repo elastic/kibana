@@ -70,7 +70,7 @@ export const createInputRangeFieldProps = <
 }: {
   errors: FieldErrorMessage[];
   name: string;
-  onChange: (newValue: string, isValid: boolean) => void;
+  onChange: (newValue: number, isValid: boolean) => void;
   value: Value;
 }): InputRangeFieldProps<Value, FieldElement, ButtonElement> => ({
   error: errors,
@@ -79,11 +79,11 @@ export const createInputRangeFieldProps = <
   onChange: (
     evt: React.ChangeEvent<FieldElement> | React.MouseEvent<ButtonElement>,
     isValid: boolean
-  ) => onChange(evt.currentTarget.value, isValid),
+  ) => onChange(+evt.currentTarget.value, isValid),
   value,
 });
 
-export const validateInputFieldNotEmpty = (value: string) =>
+export const validateInputFieldNotEmpty = (value: React.ReactText) =>
   value === ''
     ? [
         <FormattedMessage
