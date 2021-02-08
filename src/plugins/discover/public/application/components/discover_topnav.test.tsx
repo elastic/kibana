@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test/jest';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverServices } from '../../build_services';
 import { AppState, GetStateReturn } from '../angular/discover_state';
@@ -17,14 +17,16 @@ import { createFilterManagerMock } from '../../../../data/public/query/filter_ma
 import { uiSettingsMock as mockUiSettings } from '../../__mocks__/ui_settings';
 import { IndexPatternAttributes } from '../../../../data/common/index_patterns';
 import { SavedObject } from '../../../../../core/types';
-import { navigationPluginMock } from '../../../../navigation/public/mocks';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { RequestAdapter } from '../../../../inspector/common/adapters/request';
+import { TopNavMenu } from '../../../../navigation/public';
 
 function getProps(): DiscoverTopNavProps {
   const state = ({} as unknown) as AppState;
   const services = ({
-    navigation: navigationPluginMock.createStartContract(),
+    navigation: {
+      ui: { TopNavMenu },
+    },
     capabilities: {
       discover: {
         save: true,
@@ -58,8 +60,9 @@ function getProps(): DiscoverTopNavProps {
 }
 
 describe('Discover topnav component', () => {
-  test('renders correctly', () => {
-    const component = shallowWithIntl(<DiscoverTopNav {...getProps()} />);
-    expect(component).toMatchSnapshot();
+  test('setHeaderActionMenu was called', () => {
+    const props = getProps();
+    mountWithIntl(<DiscoverTopNav {...props} />);
+    expect(props.opts.setHeaderActionMenu).toHaveBeenCalled();
   });
 });
