@@ -136,7 +136,9 @@ describe('TransactionOverview', () => {
       expect(getByText(container, 'firstType')).toBeInTheDocument();
       expect(getByText(container, 'secondType')).toBeInTheDocument();
 
-      fireEvent.click(getByText(container, 'firstType'));
+      fireEvent.change(getByText(container, 'firstType').parentElement!, {
+        target: { value: 'firstType' },
+      });
 
       expect(history.push).toHaveBeenCalled();
       expect(history.location.search).toEqual(
