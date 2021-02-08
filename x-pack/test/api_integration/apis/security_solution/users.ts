@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -21,7 +22,8 @@ const IP = '0.0.0.0';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('Users', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/90135
+  describe.skip('Users', () => {
     describe('With auditbeat', () => {
       before(() => esArchiver.load('auditbeat/default'));
       after(() => esArchiver.unload('auditbeat/default'));
