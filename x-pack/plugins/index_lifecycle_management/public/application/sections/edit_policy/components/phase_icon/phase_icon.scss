@@ -7,7 +7,7 @@
   border-radius: 50%;
   background-color: $euiColorLightestShade;
   &--disabled {
-    margin-top: calc(#{$euiSizeS} - 2px);
+    margin-top: $euiSizeS;
     width: $euiSize;
     height: $euiSize;
   }

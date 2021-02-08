@@ -2,7 +2,6 @@
   .euiCommentEvent {
     &__header {
       padding: $euiSize;
-      background-color: $euiColorEmptyShade;
     }
     &__body {
       padding: $euiSize;
@@ -16,6 +15,13 @@
     padding-top: $euiSize;
     &::before {
       height: calc(100% + #{$euiSizeXXL});
+    }
+  }
+  &--enabled {
+    .euiCommentEvent {
+      &__header {
+        background-color: $euiColorEmptyShade;
+      }
     }
   }
 }

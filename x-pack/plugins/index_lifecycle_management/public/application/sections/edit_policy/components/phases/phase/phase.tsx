@@ -94,7 +94,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
       username={phaseTitle}
       actions={minAge}
       timelineIcon={<PhaseIcon enabled={enabled} phase={phase} />}
-      className={'ilmPhase'}
+      className={`ilmPhase ${enabled ? 'ilmPhase--enabled' : ''}`}
     >
       <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
         {i18nTexts.editPolicy.descriptions[phase]}
