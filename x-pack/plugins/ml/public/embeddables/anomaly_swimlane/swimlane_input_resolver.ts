@@ -55,7 +55,7 @@ function getJobsObservable(
     distinctUntilChanged(isEqual),
     switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
     catchError((e) => {
-      setErrorHandler(e.body ?? e.message);
+      setErrorHandler(e.body ?? e);
       return of(undefined);
     })
   );

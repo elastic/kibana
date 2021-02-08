@@ -154,7 +154,7 @@ describe('useSwimlaneInputResolver', () => {
       } as Partial<AnomalySwimlaneEmbeddableInput>);
     });
 
-    expect(result.current[6]).toBe('Invalid job');
+    expect(result.current[6]?.message).toBe('Invalid job');
   });
 });
 
