@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ServerApiError } from '../../../../common/types';
@@ -76,6 +76,8 @@ export const TrustedAppsNotifications = memo(() => {
   const editMode = useTrustedAppsSelector(isEdit);
   const toasts = useToasts();
 
+  const [wasAlreadyHandled] = useState(new WeakSet());
+
   if (deletionError && deletionDialogEntry) {
     toasts.addDanger(getDeletionErrorMessage(deletionError, deletionDialogEntry));
   }
@@ -84,7 +86,13 @@ export const TrustedAppsNotifications = memo(() => {
     toasts.addSuccess(getDeletionSuccessMessage(deletionDialogEntry));
   }
 
-  if (creationSuccessful && creationDialogNewEntry) {
+  if (
+    creationSuccessful &&
+    creationDialogNewEntry &&
+    !wasAlreadyHandled.has(creationDialogNewEntry)
+  ) {
+    wasAlreadyHandled.add(creationDialogNewEntry);
+
     toasts.addSuccess(
       (editMode && getUpdateSuccessMessage(creationDialogNewEntry)) ||
         getCreationSuccessMessage(creationDialogNewEntry)
