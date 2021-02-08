@@ -993,6 +993,7 @@ if (doc['task.runAt'].size()!=0) {
       const tasks = [
         {
           _id: 'task:aaa',
+          _index: '.kibana_task_manager',
           _source: {
             type: 'task',
             task: {
@@ -1014,6 +1015,7 @@ if (doc['task.runAt'].size()!=0) {
         },
         {
           _id: 'task:bbb',
+          _index: '.kibana_task_manager',
           _source: {
             type: 'task',
             task: {

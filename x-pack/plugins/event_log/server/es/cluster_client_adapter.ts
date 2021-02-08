@@ -7,9 +7,10 @@
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
-import { reject, isUndefined } from 'lodash';
+import { reject, isUndefined, isNumber } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
+import { estypes } from '@elastic/elasticsearch';
 import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
@@ -135,14 +136,12 @@ export class ClusterClientAdapter {
   }
 
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
-    let result;
     try {
       const esClient = await this.elasticsearchClientPromise;
-      result = (await esClient.indices.existsTemplate({ name })).body;
+      return (await esClient.indices.existsTemplate({ name })).body.exists;
     } catch (err) {
       throw new Error(`error checking existance of index template: ${err.message}`);
     }
-    return result as boolean;
   }
 
   public async createIndexTemplate(name: string, template: Record<string, unknown>): Promise<void> {
@@ -162,14 +161,12 @@ export class ClusterClientAdapter {
   }
 
   public async doesAliasExist(name: string): Promise<boolean> {
-    let result;
     try {
       const esClient = await this.elasticsearchClientPromise;
-      result = (await esClient.indices.existsAlias({ name })).body;
+      return (await esClient.indices.existsAlias({ name })).body.exists;
     } catch (err) {
       throw new Error(`error checking existance of initial index: ${err.message}`);
     }
-    return result as boolean;
   }
 
   public async createIndex(
@@ -228,64 +225,67 @@ export class ClusterClientAdapter {
       });
       throw err;
     }
-    const body = {
-      size: perPage,
-      from: (page - 1) * perPage,
-      sort: { [sort_field]: { order: sort_order } },
-      query: {
-        bool: {
-          filter: dslFilterQuery,
-          must: reject(
-            [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.rel': {
-                              value: SAVED_OBJECT_REL_PRIMARY,
-                            },
-                          },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: type,
-                            },
-                          },
-                        },
-                        {
-                          terms: {
-                            // default maximum of 65,536 terms, configurable by index.max_terms_count
-                            'kibana.saved_objects.id': ids,
-                          },
-                        },
-                        namespaceQuery,
-                      ],
+    const musts: estypes.QueryContainer[] = [
+      {
+        nested: {
+          path: 'kibana.saved_objects',
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'kibana.saved_objects.rel': {
+                      value: SAVED_OBJECT_REL_PRIMARY,
                     },
                   },
                 },
-              },
-              start && {
-                range: {
-                  '@timestamp': {
-                    gte: start,
+                {
+                  term: {
+                    'kibana.saved_objects.type': {
+                      value: type,
+                    },
                   },
                 },
-              },
-              end && {
-                range: {
-                  '@timestamp': {
-                    lte: end,
+                {
+                  terms: {
+                    // default maximum of 65,536 terms, configurable by index.max_terms_count
+                    'kibana.saved_objects.id': ids,
                   },
                 },
-              },
-            ],
-            isUndefined
-          ),
+                namespaceQuery,
+              ],
+            },
+          },
+        },
+      },
+    ];
+    if (start) {
+      musts.push({
+        range: {
+          '@timestamp': {
+            gte: start,
+          },
+        },
+      });
+    }
+    if (end) {
+      musts.push({
+        range: {
+          '@timestamp': {
+            lte: end,
+          },
+        },
+      });
+    }
+
+    const body: estypes.SearchRequest['body'] = {
+      size: perPage,
+      from: (page - 1) * perPage,
+      sort: [{ [sort_field]: { order: sort_order } }],
+      query: {
+        bool: {
+          filter: dslFilterQuery,
+          must: reject(musts, isUndefined),
         },
       },
     };
@@ -295,7 +295,7 @@ export class ClusterClientAdapter {
         body: {
           hits: { hits, total },
         },
-      } = await esClient.search({
+      } = await esClient.search<IValidatedEvent>({
         index,
         track_total_hits: true,
         body,
@@ -303,8 +303,8 @@ export class ClusterClientAdapter {
       return {
         page,
         per_page: perPage,
-        total: total.value,
-        data: hits.map((hit: { _source: unknown }) => hit._source) as IValidatedEvent[],
+        total: isNumber(total) ? total : total.value,
+        data: hits.map((hit) => hit._source),
       };
     } catch (err) {
       throw new Error(

@@ -217,12 +217,12 @@ describe('doesIndexTemplateExist', () => {
   });
 
   test('should return true when call cluster returns true', async () => {
-    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(true));
+    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse({ exists: true }));
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return false when call cluster returns false', async () => {
-    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
+    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse({ exists: false }));
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
   });
 
@@ -248,7 +248,7 @@ describe('createIndexTemplate', () => {
 
   test(`should throw error if index template still doesn't exist after error is thrown`, async () => {
     clusterClient.indices.putTemplate.mockRejectedValueOnce(new Error('Fail'));
-    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(false));
+    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse({ exists: false }));
     await expect(
       clusterClientAdapter.createIndexTemplate('foo', { args: true })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating index template: Fail"`);
@@ -256,7 +256,7 @@ describe('createIndexTemplate', () => {
 
   test('should not throw error if index template exists after error is thrown', async () => {
     clusterClient.indices.putTemplate.mockRejectedValueOnce(new Error('Fail'));
-    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(true));
+    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse({ exists: true }));
     await clusterClientAdapter.createIndexTemplate('foo', { args: true });
   });
 });
@@ -270,12 +270,12 @@ describe('doesAliasExist', () => {
   });
 
   test('should return true when call cluster returns true', async () => {
-    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse(true));
+    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse({ exists: true }));
     await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(true);
   });
 
   test('should return false when call cluster returns false', async () => {
-    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse(false));
+    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse({ exists: false }));
     await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(false);
   });
 
@@ -327,7 +327,14 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
         },
       })
     );
@@ -408,7 +415,14 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
         },
       })
     );
@@ -491,7 +505,14 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
         },
       })
     );
@@ -517,7 +538,14 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
         },
       })
     );
@@ -608,7 +636,14 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
         },
       })
     );
