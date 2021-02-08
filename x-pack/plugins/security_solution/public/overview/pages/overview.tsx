@@ -48,7 +48,7 @@ const OverviewComponent = () => {
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-
+  console.log({ indexPattern });
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
   }, []);

@@ -8,7 +8,12 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import { KibanaIndexPatterns, ManageScopeInit, SourcererScopeName } from './model';
+import {
+  KibanaIndexPatterns,
+  ManageScopeInit,
+  SelectedPatterns,
+  SourcererScopeName,
+} from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 
@@ -32,12 +37,12 @@ export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; 
 
 export const setSelectedIndexPatterns = actionCreator<{
   id: SourcererScopeName;
-  selectedPatterns: string[];
+  selectedPatterns: SelectedPatterns;
   eventType?: TimelineEventsType;
 }>('SET_SELECTED_INDEX_PATTERNS');
 
 export const initTimelineIndexPatterns = actionCreator<{
   id: SourcererScopeName;
-  selectedPatterns: string[];
+  selectedPatterns: SelectedPatterns;
   eventType?: TimelineEventsType;
 }>('INIT_TIMELINE_INDEX_PATTERNS');

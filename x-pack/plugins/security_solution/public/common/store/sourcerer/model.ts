@@ -22,6 +22,16 @@ export enum SourcererScopeName {
   timeline = 'timeline',
 }
 
+export type SelectedPatterns = Array<{
+  /**
+   * if pattern is a KIP, the string will be the saved object id of the KIP
+   */
+  id: 'config' | 'detections' | string;
+  /**
+   * name of the pattern
+   */
+  title: string;
+}>;
 export interface ManageScope {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
@@ -30,7 +40,7 @@ export interface ManageScope {
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
-  selectedPatterns: string[];
+  selectedPatterns: SelectedPatterns;
 }
 
 export interface ManageScopeInit extends Partial<ManageScope> {

@@ -7,16 +7,17 @@
 
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
-import { SourcererModel, SourcererScopeName } from './model';
+import { SelectedPatterns, SourcererModel, SourcererScopeName } from './model';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
 export interface Args {
   eventType?: TimelineEventsType;
   id: SourcererScopeName;
-  selectedPatterns: string[];
+  selectedPatterns: SelectedPatterns;
   state: SourcererModel;
 }
 export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {
+  console.log('createDefaultIndexPatterns', { eventType, id, selectedPatterns, state });
   const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
   const newSelectedPatterns = selectedPatterns.filter(
     (sp) =>

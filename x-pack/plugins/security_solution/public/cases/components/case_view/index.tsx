@@ -147,7 +147,7 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
       alertsQuery,
-      selectedPatterns[0]
+      selectedPatterns[0].title
     );
 
     const alerts = useMemo(

@@ -135,6 +135,9 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
+  const indexNames: string[] = useMemo(() => selectedPatterns.map(({ title }) => title), [
+    selectedPatterns,
+  ]);
   const handleStartDragToTimeline = useCallback(() => {
     startDragToTimeline();
     if (closePopOver != null) {
@@ -365,7 +368,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                   browserFields={browserFields}
                   field={field}
                   indexPattern={indexPattern}
-                  indexNames={selectedPatterns}
+                  indexNames={indexNames}
                   onFilterAdded={onFilterAdded}
                   timelineId={timelineId ?? undefined}
                   toggleTopN={toggleTopN}

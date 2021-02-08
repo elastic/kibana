@@ -50,7 +50,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    selectedPatterns.map((indexSelected) => ({
+    selectedPatterns.map(({ pattern: indexSelected }) => ({
       label: indexSelected,
       value: indexSelected,
     }))
@@ -60,7 +60,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
 
   const onChangeIndexPattern = useCallback(
-    (newSelectedPatterns: string[]) => {
+    (newSelectedPatterns: sourcererModel.SelectedPatterns) => {
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: scopeId,
