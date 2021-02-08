@@ -19,8 +19,10 @@ import {
   deleteTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
+  updateTrustedApp,
 } from './service';
-import { TrustedAppNotFoundError } from './errors';
+import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+import { toUpdateTrustedApp } from '../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
@@ -175,6 +177,100 @@ describe('service', () => {
         macos: 30,
         total: 130,
       });
+    });
+  });
+
+  describe('updateTrustedApp', () => {
+    beforeEach(() => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+
+      exceptionsListClient.updateExceptionListItem.mockImplementationOnce(async (listItem) => {
+        return {
+          _version: listItem._version || '123',
+          id: listItem.id || '123',
+          comments: [],
+          created_at: '11/11/2011T11:11:11.111',
+          created_by: 'admin',
+          description: listItem.description || '',
+          entries: listItem.entries || [],
+          item_id: listItem.itemId || '',
+          list_id: 'endpoint_trusted_apps',
+          meta: undefined,
+          name: listItem.name || '',
+          namespace_type: listItem.namespaceType || '',
+          os_types: listItem.osTypes || '',
+          tags: listItem.tags || [],
+          type: 'simple',
+          tie_breaker_id: '123',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
+        };
+      });
+    });
+
+    afterEach(() => jest.resetAllMocks());
+
+    it('should update exception item with trusted app data', async () => {
+      const trustedAppForUpdate = toUpdateTrustedApp(TRUSTED_APP);
+      trustedAppForUpdate.name = 'updated name';
+      trustedAppForUpdate.description = 'updated description';
+      trustedAppForUpdate.entries = [trustedAppForUpdate.entries[0]];
+
+      await expect(
+        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, trustedAppForUpdate)
+      ).resolves.toEqual({
+        data: {
+          created_at: '11/11/2011T11:11:11.111',
+          created_by: 'admin',
+          description: 'updated description',
+          effectScope: {
+            type: 'global',
+          },
+          entries: [
+            {
+              field: 'process.hash.*',
+              operator: 'included',
+              type: 'match',
+              value: '1234234659af249ddf3e40864e9fb241',
+            },
+          ],
+          id: '123',
+          name: 'updated name',
+          os: 'linux',
+          version: 'abc123',
+        },
+      });
+    });
+
+    it('should throw a Not Found error if trusted app is not found prior to making update', async () => {
+      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
+      await expect(
+        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, toUpdateTrustedApp(TRUSTED_APP))
+      ).rejects.toBeInstanceOf(TrustedAppNotFoundError);
+    });
+
+    it('should throw a Version Conflict error if update fails with 409', async () => {
+      exceptionsListClient.updateExceptionListItem.mockReset();
+      exceptionsListClient.updateExceptionListItem.mockRejectedValueOnce(
+        Object.assign(new Error('conflict'), { output: { statusCode: 409 } })
+      );
+
+      await expect(
+        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, toUpdateTrustedApp(TRUSTED_APP))
+      ).rejects.toBeInstanceOf(TrustedAppVersionConflictError);
+    });
+
+    it('should throw Not Found if exception item is not found during update', async () => {
+      exceptionsListClient.updateExceptionListItem.mockReset();
+      exceptionsListClient.updateExceptionListItem.mockResolvedValueOnce(null);
+
+      exceptionsListClient.getExceptionListItem.mockReset();
+      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(EXCEPTION_LIST_ITEM);
+      exceptionsListClient.getExceptionListItem.mockResolvedValueOnce(null);
+
+      await expect(
+        updateTrustedApp(exceptionsListClient, TRUSTED_APP.id, toUpdateTrustedApp(TRUSTED_APP))
+      ).rejects.toBeInstanceOf(TrustedAppNotFoundError);
     });
   });
 });
