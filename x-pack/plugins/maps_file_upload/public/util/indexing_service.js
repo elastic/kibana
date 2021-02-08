@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { http as httpService } from './http_service';
@@ -119,7 +120,7 @@ async function writeToIndex(indexingDetails) {
   const { appName, index, data, settings, mappings, ingestPipeline } = indexingDetails;
 
   return await httpService({
-    url: `/api/fileupload/import`,
+    url: `/api/maps/fileupload/import`,
     method: 'POST',
     ...(query ? { query } : {}),
     data: {

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useEffect, FunctionComponent } from 'react';
@@ -285,6 +285,57 @@ describe('<UseField />', () => {
 
       expect(testBed.exists('memoized-component')).toEqual(true);
       expect(formHook?.getFormData()).toEqual({ name: 'myName' });
+    });
+  });
+
+  describe('change handlers', () => {
+    const onError = jest.fn();
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    const getTestComp = (fieldConfig: FieldConfig) => {
+      const TestComp = () => {
+        const { form } = useForm<any>();
+
+        return (
+          <Form form={form}>
+            <UseField path="name" config={fieldConfig} data-test-subj="myField" onError={onError} />
+          </Form>
+        );
+      };
+      return TestComp;
+    };
+
+    const setup = (fieldConfig: FieldConfig) => {
+      return registerTestBed(getTestComp(fieldConfig), {
+        memoryRouter: { wrapComponent: false },
+      })() as TestBed;
+    };
+
+    it('calls onError when validation state changes', async () => {
+      const {
+        form: { setInputValue },
+      } = setup({
+        validations: [
+          {
+            validator: ({ value }) => (value === '1' ? undefined : { message: 'oops!' }),
+          },
+        ],
+      });
+
+      expect(onError).toBeCalledTimes(0);
+      await act(async () => {
+        setInputValue('myField', '0');
+      });
+      expect(onError).toBeCalledTimes(1);
+      expect(onError).toBeCalledWith(['oops!']);
+      await act(async () => {
+        setInputValue('myField', '1');
+      });
+      expect(onError).toBeCalledTimes(2);
+      expect(onError).toBeCalledWith(null);
     });
   });
 });

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
@@ -54,6 +54,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   await run(Tasks.ReplaceFavicon);
   await run(Tasks.CreateEmptyDirsAndFiles);
   await run(Tasks.CreateReadme);
+  await run(Tasks.BuildBazelPackages);
   await run(Tasks.BuildPackages);
   await run(Tasks.BuildKibanaPlatformPlugins);
   await run(Tasks.TranspileBabel);
@@ -107,7 +108,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   if (options.createDockerContexts) {
-    // control w/ --docker-contexts or --skip-os-packages
+    // control w/ --skip-docker-contexts
     await run(Tasks.CreateDockerContexts);
   }
 

@@ -4097,6 +4097,9 @@
         "xpackDashboardMode:roles": {
           "type": "keyword"
         },
+        "securitySolution:ipReputationLinks": {
+          "type": "keyword"
+        },
         "visualize:enableLabs": {
           "type": "boolean"
         },
@@ -4114,9 +4117,6 @@
         },
         "visualization:tileMap:maxPrecision": {
           "type": "long"
-        },
-        "securitySolution:ipReputationLinks": {
-          "type": "keyword"
         },
         "csv:separator": {
           "type": "keyword"

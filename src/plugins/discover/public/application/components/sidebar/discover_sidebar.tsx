@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './discover_sidebar.scss';
@@ -104,6 +104,27 @@ export interface DiscoverSidebarProps {
    * Shows index pattern and a button that displays the sidebar in a flyout
    */
   useFlyout?: boolean;
+
+  /**
+   * an object containing properties for proper handling of unmapped fields in the UI
+   */
+  unmappedFieldsConfig?: {
+    /**
+     * callback function to change the value of `showUnmappedFields` flag
+     * @param value new value to set
+     */
+    onChangeUnmappedFields: (value: boolean) => void;
+    /**
+     * determines whether to display unmapped fields
+     * configurable through the switch in the UI
+     */
+    showUnmappedFields: boolean;
+    /**
+     * determines if we should display an option to toggle showUnmappedFields value in the first place
+     * this value is not configurable through the UI
+     */
+    showUnmappedFieldsDefaultValue: boolean;
+  };
 }
 
 export function DiscoverSidebar({
@@ -123,6 +144,7 @@ export function DiscoverSidebar({
   trackUiMetric,
   useNewFieldsApi = false,
   useFlyout = false,
+  unmappedFieldsConfig,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
@@ -145,14 +167,30 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-
   const {
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
+    () =>
+      groupFields(
+        fields,
+        columns,
+        popularLimit,
+        fieldCounts,
+        fieldFilter,
+        useNewFieldsApi,
+        !!unmappedFieldsConfig?.showUnmappedFields
+      ),
+    [
+      fields,
+      columns,
+      popularLimit,
+      fieldCounts,
+      fieldFilter,
+      useNewFieldsApi,
+      unmappedFieldsConfig?.showUnmappedFields,
+    ]
   );
 
   const fieldTypes = useMemo(() => {
@@ -239,6 +277,9 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              useNewFieldsApi={useNewFieldsApi}
+              onChangeUnmappedFields={unmappedFieldsConfig?.onChangeUnmappedFields}
+              showUnmappedFields={unmappedFieldsConfig?.showUnmappedFieldsDefaultValue}
             />
           </form>
         </EuiFlexItem>

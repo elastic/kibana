@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -85,7 +86,7 @@ export const Groups: React.FC = () => {
   const headerAction = (
     <EuiFlexGroup responsive={false} gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiButton data-test-subj="AddGroupButton" fill={true} onClick={openNewGroupModal}>
+        <EuiButton data-test-subj="AddGroupButton" fill onClick={openNewGroupModal}>
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
             defaultMessage: 'Create a group',
           })}
