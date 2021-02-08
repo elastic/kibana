@@ -1,0 +1,21 @@
+[[discover-search-for-relevance]]
+=== Discover - Search for relevance
+
+Sometimes you might be unsure, which documents match your question best. 
+For this case, Elasticsearch can jump in to help.  Let's have a look at an example. You're a searching
+a certain flight, you know it was starting or landing in `Warsaw`, but it could also be `Venice` and there 
+were clear conditions. That's enough for an initial search.
+
+1. Select `kibana_sample_data_flight` using the index pattern selector
+2. Switch to <<lucene-query, Lucene query syntax>> 
+3. Search for `Warsaw OR Venice OR Clear`
+4. Choose a time range that contains data
+5. Add `_score` to the document table and sort by `_score` 
+6. Remove sorting by `Time`
+
+This result should help you to narrow you search, Elasticsearch is returning a `_score`, the higher the `_score`
+the better it matches your query.
+
+[role="screenshot"]
+image::images/discover-search-for-relevance.png["Example of a search for relevance",width="80%"]
+

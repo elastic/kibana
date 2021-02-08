@@ -198,7 +198,6 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 [float]
 === What’s next?
 
-
 * <<kuery-query, Learn more about the structure of a KQL query>>.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
@@ -208,6 +207,8 @@ the table columns that display by default, and more.
 * <<dashboard,Create a dashboard>> with even more visualizations of your findings, such as treemaps, metrics, and tables.
 
 * <<reporting-getting-started, Present your findings in a report>>.
+
+* <<discover-search-for-relevance, Search for relevance>>.
 
 --
 
