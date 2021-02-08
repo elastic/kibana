@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCode,
   EuiDescriptionList,
   EuiFieldText,
@@ -99,12 +100,14 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
     return <EuiDescriptionList type={'row'} compressed={true} listItems={listItems} />;
   }
 );
+
 export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   alertingApiService,
   alertParams,
 }) => {
   const [lookBehindInterval, setLookBehindInterval] = useState<string>();
   const [areResultsVisible, setAreResultVisible] = useState<boolean>(true);
+  const [previewError, setPreviewError] = useState<Error | undefined>();
   const [previewResponse, setPreviewResponse] = useState<PreviewResponse | undefined>();
 
   const validators = useMemo(
@@ -112,7 +115,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
     []
   );
 
-  const errors = useMemo(() => validators(lookBehindInterval), [lookBehindInterval]);
+  const validationErrors = useMemo(() => validators(lookBehindInterval), [lookBehindInterval]);
 
   useEffect(
     function resetPreview() {
@@ -129,7 +132,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       });
       setPreviewResponse(response);
     } catch (e) {
-      // TODO handle error
+      setPreviewError(e);
     }
   }, [alertParams, lookBehindInterval]);
 
@@ -147,10 +150,26 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       alertParams.jobSelection?.groupIds?.length! > 0) &&
     !!alertParams.resultType &&
     !!alertParams.severity &&
-    errors === null;
+    validationErrors === null;
 
-  const isInvalid = lookBehindInterval !== undefined && !!errors;
+  const isInvalid = lookBehindInterval !== undefined && !!validationErrors;
 
+  if (previewError) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.ml.previewAlert.previewErrorTitle"
+            defaultMessage="Unable to load the preview"
+          />
+        }
+        color="danger"
+        iconType="alert"
+      >
+        <p>{previewError.message}</p>
+      </EuiCallOut>
+    );
+  }
   return (
     <>
       <EuiFlexGroup gutterSize="s" alignItems={'flexEnd'}>
