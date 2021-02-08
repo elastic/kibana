@@ -597,4 +597,77 @@ describe('Lens migrations', () => {
       expect(layersWithSuggestedPriority).toEqual(0);
     });
   });
+
+  describe('7.12.0 restructure datatable state', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mock-saved-object-id',
+      attributes: {
+        state: {
+          datasourceStates: {
+            indexpattern: {},
+          },
+          visualization: {
+            layers: [
+              {
+                layerId: 'first',
+                columns: ['a', 'b', 'c'],
+              },
+            ],
+            sorting: {
+              columnId: 'a',
+              direction: 'asc',
+            },
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+        title: 'Table',
+        visualizationType: 'lnsDatatable',
+      },
+    };
+
+    it('should not touch non datatable visualization', () => {
+      const xyChart = {
+        ...example,
+        attributes: { ...example.attributes, visualizationType: 'xy' },
+      };
+      const result = migrations['7.12.0'](xyChart, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result).toBe(xyChart);
+    });
+
+    it('should remove layer array and reshape state', () => {
+      const result = migrations['7.12.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      expect(result.attributes.state.visualization).toEqual({
+        layerId: 'first',
+        columns: [
+          {
+            columnId: 'a',
+          },
+          {
+            columnId: 'b',
+          },
+          {
+            columnId: 'c',
+          },
+        ],
+        sorting: {
+          columnId: 'a',
+          direction: 'asc',
+        },
+      });
+      // should leave other parts alone
+      expect(result.attributes.state.datasourceStates).toEqual(
+        example.attributes.state.datasourceStates
+      );
+      expect(result.attributes.state.query).toEqual(example.attributes.state.query);
+      expect(result.attributes.state.filters).toEqual(example.attributes.state.filters);
+      expect(result.attributes.title).toEqual(example.attributes.title);
+    });
+  });
 });
