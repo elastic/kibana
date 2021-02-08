@@ -17,5 +17,5 @@ This result should help you to narrow you search, Elasticsearch is returning a `
 the better it matches your query.
 
 [role="screenshot"]
-image::images/discover-search-for-relevance.png["Example of a search for relevance",width="80%"]
+image::images/discover-search-for-relevance.png["Example of a search for relevance"]
 

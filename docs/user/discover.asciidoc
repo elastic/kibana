@@ -217,3 +217,5 @@ include::{kib-repo-dir}/management/index-patterns.asciidoc[]
 include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
 
 include::{kib-repo-dir}/discover/search.asciidoc[]
+
+include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
