@@ -103,6 +103,16 @@ export enum TaskRunResult {
   Failed = 'Failed',
 }
 
+// A ConcreteTaskInstance which we *know* has a `startedAt` Date on it
+type ConcreteTaskInstanceWithStartedAt = ConcreteTaskInstance & { startedAt: Date };
+
+// The three possible stages for a Task Runner - Pending -> ReadyToRun -> Ran
+type PendingTask = TaskRunning<TaskRunningStage.PENDING, ConcreteTaskInstance>;
+type ReadyToRunTask = TaskRunning<TaskRunningStage.READY_TO_RUN, ConcreteTaskInstanceWithStartedAt>;
+type RanTask = TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>;
+
+type TaskRunningInstance = PendingTask | ReadyToRunTask | RanTask;
+
 /**
  * Runs a background task, ensures that errors are properly handled,
  * allows for cancellation.
@@ -578,11 +588,9 @@ function performanceStopMarkingTaskAsRunning() {
   );
 }
 
-type ConcreteTaskInstanceWithStartedAt = ConcreteTaskInstance & { startedAt: Date };
-type PendingTask = TaskRunning<TaskRunningStage.PENDING, ConcreteTaskInstance>;
-type ReadyToRunTask = TaskRunning<TaskRunningStage.READY_TO_RUN, ConcreteTaskInstanceWithStartedAt>;
-type RanTask = TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>;
-type TaskRunningInstance = PendingTask | ReadyToRunTask | RanTask;
+// A type that extracts the Instance type out of TaskRunningStage
+// This helps us to better communicate to the developer what the expected "stage"
+// in a specific place in the code might be
 type InstanceOf<S extends TaskRunningStage, T> = T extends TaskRunning<S, infer I> ? I : never;
 
 function isPending(taskRunning: TaskRunningInstance): taskRunning is PendingTask {
