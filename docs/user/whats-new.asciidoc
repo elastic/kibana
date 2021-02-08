@@ -16,7 +16,7 @@ Other versions: {kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
-// tag::notable-highlights
+// tag::notable-highlights[]
 
 [float]
 [[alerting-generally-available]]
