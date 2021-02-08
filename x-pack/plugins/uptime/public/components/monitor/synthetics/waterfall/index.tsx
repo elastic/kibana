@@ -12,6 +12,6 @@ export { useFlyout } from './components/use_flyout';
 export {
   WaterfallData,
   WaterfallDataEntry,
-  WaterfallMetaData,
-  WaterfallMetaDataEntry,
+  WaterfallMetadata,
+  WaterfallMetadataEntry,
 } from './types';

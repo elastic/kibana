@@ -12,7 +12,7 @@ import {
   FriendlyFlyoutLabels,
   FriendlyTimingLabels,
   Timings,
-  MetaData,
+  Metadata,
 } from './types';
 import { mockMoment } from '../../../../../lib/helper/test_helpers';
 import { WaterfallDataEntry } from '../../waterfall/types';
@@ -543,43 +543,43 @@ describe('getSeriesAndDomain', () => {
   });
 
   it.each([
-    [FriendlyFlyoutLabels[MetaData.MimeType], 'text/css'],
-    [FriendlyFlyoutLabels[MetaData.RequestStart], '0.000 ms'],
+    [FriendlyFlyoutLabels[Metadata.MimeType], 'text/css'],
+    [FriendlyFlyoutLabels[Metadata.RequestStart], '0.000 ms'],
     [FriendlyTimingLabels[Timings.Dns], '3.560 ms'],
     [FriendlyTimingLabels[Timings.Connect], '25.721 ms'],
     [FriendlyTimingLabels[Timings.Ssl], '55.387 ms'],
     [FriendlyTimingLabels[Timings.Wait], '34.578 ms'],
     [FriendlyTimingLabels[Timings.Receive], '0.552 ms'],
-    [FriendlyFlyoutLabels[MetaData.BytesDownloaded], '1.000 KB'],
-  ])('handles metaData details formatting', (name, value) => {
-    const { metaData } = getSeriesAndDomain(networkItems);
-    const metaDataEntry = metaData[0];
+    [FriendlyFlyoutLabels[Metadata.BytesDownloaded], '1.000 KB'],
+  ])('handles metadata details formatting', (name, value) => {
+    const { metadata } = getSeriesAndDomain(networkItems);
+    const metadataEntry = metadata[0];
     expect(
-      metaDataEntry.details.find((item) => item.value === value && item.name === name)
+      metadataEntry.details.find((item) => item.value === value && item.name === name)
     ).toBeDefined();
   });
 
-  it('handles metaData headers formatting', () => {
-    const { metaData } = getSeriesAndDomain(networkItems);
-    const metaDataEntry = metaData[0];
-    metaDataEntry.requestHeaders?.forEach((header) => {
+  it('handles metadata headers formatting', () => {
+    const { metadata } = getSeriesAndDomain(networkItems);
+    const metadataEntry = metadata[0];
+    metadataEntry.requestHeaders?.forEach((header) => {
       expect(header).toEqual({ name: header.name, value: header.value });
     });
-    metaDataEntry.responseHeaders?.forEach((header) => {
+    metadataEntry.responseHeaders?.forEach((header) => {
       expect(header).toEqual({ name: header.name, value: header.value });
     });
   });
 
   it('handles certificate formatting', () => {
-    const { metaData } = getSeriesAndDomain([networkItems[0]]);
-    const metaDataEntry = metaData[0];
-    expect(metaDataEntry.certificates).toEqual([
+    const { metadata } = getSeriesAndDomain([networkItems[0]]);
+    const metadataEntry = metadata[0];
+    expect(metadataEntry.certificates).toEqual([
       { name: 'Issuer', value: networkItems[0].certificates?.issuer },
       { name: 'Valid from', value: moment(networkItems[0].certificates?.validFrom).format('L LT') },
       { name: 'Valid until', value: moment(networkItems[0].certificates?.validTo).format('L LT') },
       { name: 'Common name', value: networkItems[0].certificates?.subjectName },
     ]);
-    metaDataEntry.responseHeaders?.forEach((header) => {
+    metadataEntry.responseHeaders?.forEach((header) => {
       expect(header).toEqual({ name: header.name, value: header.value });
     });
   });

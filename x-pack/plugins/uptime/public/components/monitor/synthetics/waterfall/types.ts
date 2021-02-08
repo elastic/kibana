@@ -16,25 +16,25 @@ export interface WaterfallDataSeriesConfigProperties {
   showTooltip: boolean;
 }
 
-export interface WaterfallMetaDataItem {
+export interface WaterfallMetadataItem {
   name: string;
   value?: string;
 }
 
-export interface WaterfallMetaDataEntry {
+export interface WaterfallMetadataEntry {
   x: number;
   url: string;
-  requestHeaders?: WaterfallMetaDataItem[];
-  responseHeaders?: WaterfallMetaDataItem[];
-  certificates?: WaterfallMetaDataItem[];
-  details: WaterfallMetaDataItem[];
+  requestHeaders?: WaterfallMetadataItem[];
+  responseHeaders?: WaterfallMetadataItem[];
+  certificates?: WaterfallMetadataItem[];
+  details: WaterfallMetadataItem[];
 }
 
 export type WaterfallDataEntry = PlotProperties & {
   config: WaterfallDataSeriesConfigProperties & Record<string, unknown>;
 };
 
-export type WaterfallMetaData = WaterfallMetaDataEntry[];
+export type WaterfallMetadata = WaterfallMetadataEntry[];
 
 export type WaterfallData = WaterfallDataEntry[];
 

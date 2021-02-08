@@ -18,7 +18,7 @@ export enum Timings {
   Receive = 'receive',
 }
 
-export enum MetaData {
+export enum Metadata {
   BytesDownloaded = 'bytesDownloaded',
   CertificateIssuer = 'certificateIssuer',
   CertificateIssueDate = 'certificateIssueDate',
@@ -62,44 +62,44 @@ export const FriendlyTimingLabels = {
 };
 
 export const FriendlyFlyoutLabels = {
-  [MetaData.MimeType]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.contentType',
+  [Metadata.MimeType]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.contentType',
     {
       defaultMessage: 'Content type',
     }
   ),
-  [MetaData.RequestStart]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.requestStart',
+  [Metadata.RequestStart]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.requestStart',
     {
       defaultMessage: 'Request start',
     }
   ),
-  [MetaData.BytesDownloaded]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.bytesDownloaded',
+  [Metadata.BytesDownloaded]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloaded',
     {
       defaultMessage: 'Bytes downloaded',
     }
   ),
-  [MetaData.CertificateIssuer]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.certificateIssuer',
+  [Metadata.CertificateIssuer]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssuer',
     {
       defaultMessage: 'Issuer',
     }
   ),
-  [MetaData.CertificateIssueDate]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.certificateIssueDate',
+  [Metadata.CertificateIssueDate]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssueDate',
     {
       defaultMessage: 'Valid from',
     }
   ),
-  [MetaData.CertificateExpiryDate]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.certificateExpiryDate',
+  [Metadata.CertificateExpiryDate]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateExpiryDate',
     {
       defaultMessage: 'Valid until',
     }
   ),
-  [MetaData.CertificateSubject]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metaData.certificateSubject',
+  [Metadata.CertificateSubject]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateSubject',
     {
       defaultMessage: 'Common name',
     }
@@ -117,7 +117,7 @@ export const TIMING_ORDER = [
 ] as const;
 
 export const META_DATA_ORDER_FLYOUT = [
-  MetaData.MimeType,
+  Metadata.MimeType,
   Timings.Dns,
   Timings.Connect,
   Timings.Ssl,

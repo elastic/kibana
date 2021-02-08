@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useRef } from 'react';
 
 import styled from 'styled-components';
@@ -11,7 +13,7 @@ import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle, EuiSpacer } from '
 import { i18n } from '@kbn/i18n';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
-import { WaterfallMetaDataEntry } from '../types';
+import { WaterfallMetadataEntry } from '../types';
 import { OnFlyoutClose } from './use_flyout';
 import { METRIC_TYPE, useUiTracker } from '../../../../../../../observability/public';
 
@@ -45,7 +47,7 @@ const FlyoutContainer = styled(EuiFlyout)`
 `;
 
 export interface WaterfallFlyoutProps {
-  flyoutData?: WaterfallMetaDataEntry;
+  flyoutData?: WaterfallMetadataEntry;
   onFlyoutClose: OnFlyoutClose;
   isFlyoutVisible?: boolean;
 }

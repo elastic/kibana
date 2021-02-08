@@ -77,7 +77,7 @@ interface Props {
 export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
   const [networkData] = useState<NetworkItems>(data);
 
-  const { series, domain, metaData } = useMemo(() => {
+  const { series, domain, metadata } = useMemo(() => {
     return getSeriesAndDomain(networkData);
   }, [networkData]);
 
@@ -96,7 +96,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     onSidebarClick,
     isFlyoutVisible,
     onFlyoutClose,
-  } = useFlyout(metaData);
+  } = useFlyout(metadata);
 
   return (
     <WaterfallProvider
@@ -106,7 +106,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
       onSidebarClick={onSidebarClick}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
-      metaData={metaData}
+      metadata={metadata}
       renderTooltipItem={useCallback((tooltipProps) => {
         return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
       }, [])}

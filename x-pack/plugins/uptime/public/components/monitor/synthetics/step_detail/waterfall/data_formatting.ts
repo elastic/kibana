@@ -17,12 +17,12 @@ import {
   MimeType,
   MimeTypesMap,
   Timings,
-  MetaData,
+  Metadata,
   TIMING_ORDER,
   SidebarItems,
   LegendItems,
 } from './types';
-import { WaterfallData, WaterfallMetaData } from '../../waterfall';
+import { WaterfallData, WaterfallMetadata } from '../../waterfall';
 import { NetworkEvent } from '../../../../../../common/runtime_types';
 
 export const extractItems = (data: NetworkEvent[]): NetworkItems => {
@@ -59,7 +59,7 @@ const getFriendlyTooltipValue = ({
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
 
-const getFriendlyMetaDataValue = ({ value, postFix }: { value?: number; postFix?: string }) => {
+const getFriendlyMetadataValue = ({ value, postFix }: { value?: number; postFix?: string }) => {
   // value === -1 indicates timing data cannot be extracted
   if (value === undefined || value === -1) {
     return undefined;
@@ -108,13 +108,13 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
   };
 
   const series: WaterfallData = [];
-  const metaData: WaterfallMetaData = [];
+  const metadata: WaterfallMetadata = [];
 
   items.forEach((item, index) => {
     const mimeTypeColour = getColourForMimeType(item.mimeType);
     let currentOffset = getCurrentOffset(item, zeroOffset);
     let timingFound = false;
-    metaData.push(formatMetaData({ item, index, requestStart: currentOffset }));
+    metadata.push(formatMetadata({ item, index, requestStart: currentOffset }));
 
     if (!item.timings) {
       series.push({
@@ -187,7 +187,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
 
   const yValues = series.map((serie) => serie.y);
   const domain = { min: 0, max: Math.max(...yValues) };
-  return { series, domain, metaData };
+  return { series, domain, metadata };
 };
 
 const formatHeaders = (headers?: Record<string, unknown>) => {
@@ -200,7 +200,7 @@ const formatHeaders = (headers?: Record<string, unknown>) => {
   }));
 };
 
-const formatMetaData = ({
+const formatMetadata = ({
   item,
   index,
   requestStart,
@@ -220,57 +220,57 @@ const formatMetaData = ({
     certificates: certificates
       ? [
           {
-            name: FriendlyFlyoutLabels[MetaData.CertificateIssuer],
+            name: FriendlyFlyoutLabels[Metadata.CertificateIssuer],
             value: certificates.issuer,
           },
           {
-            name: FriendlyFlyoutLabels[MetaData.CertificateIssueDate],
+            name: FriendlyFlyoutLabels[Metadata.CertificateIssueDate],
             value: certificates.validFrom
               ? moment(certificates.validFrom).format('L LT')
               : undefined,
           },
           {
-            name: FriendlyFlyoutLabels[MetaData.CertificateExpiryDate],
+            name: FriendlyFlyoutLabels[Metadata.CertificateExpiryDate],
             value: certificates.validTo ? moment(certificates.validTo).format('L LT') : undefined,
           },
           {
-            name: FriendlyFlyoutLabels[MetaData.CertificateSubject],
+            name: FriendlyFlyoutLabels[Metadata.CertificateSubject],
             value: certificates.subjectName,
           },
         ]
       : undefined,
     details: [
-      { name: FriendlyFlyoutLabels[MetaData.MimeType], value: mimeType },
+      { name: FriendlyFlyoutLabels[Metadata.MimeType], value: mimeType },
       {
-        name: FriendlyFlyoutLabels[MetaData.RequestStart],
-        value: getFriendlyMetaDataValue({ value: requestStart, postFix: 'ms' }),
+        name: FriendlyFlyoutLabels[Metadata.RequestStart],
+        value: getFriendlyMetadataValue({ value: requestStart, postFix: 'ms' }),
       },
       {
         name: FriendlyTimingLabels[Timings.Dns],
-        value: getFriendlyMetaDataValue({ value: dns, postFix: 'ms' }),
+        value: getFriendlyMetadataValue({ value: dns, postFix: 'ms' }),
       },
       {
         name: FriendlyTimingLabels[Timings.Connect],
-        value: getFriendlyMetaDataValue({ value: getConnectingTime(connect, ssl), postFix: 'ms' }),
+        value: getFriendlyMetadataValue({ value: getConnectingTime(connect, ssl), postFix: 'ms' }),
       },
       {
         name: FriendlyTimingLabels[Timings.Ssl],
-        value: getFriendlyMetaDataValue({ value: ssl, postFix: 'ms' }),
+        value: getFriendlyMetadataValue({ value: ssl, postFix: 'ms' }),
       },
       {
         name: FriendlyTimingLabels[Timings.Wait],
-        value: getFriendlyMetaDataValue({ value: wait, postFix: 'ms' }),
+        value: getFriendlyMetadataValue({ value: wait, postFix: 'ms' }),
       },
       {
         name: FriendlyTimingLabels[Timings.Receive],
-        value: getFriendlyMetaDataValue({
+        value: getFriendlyMetadataValue({
           value: contentDownloaded,
           postFix: 'ms',
         }),
       },
       {
-        name: FriendlyFlyoutLabels[MetaData.BytesDownloaded],
-        value: getFriendlyMetaDataValue({
+        name: FriendlyFlyoutLabels[Metadata.BytesDownloaded],
+        value: getFriendlyMetadataValue({
           value: bytesDownloaded ? bytesDownloaded / 1000 : undefined,
           postFix: 'KB',
         }),

@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, Context } from 'react';
-import { WaterfallData, WaterfallDataEntry, WaterfallMetaData } from '../types';
+import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
 import { OnSidebarClick } from '../components/use_flyout';
 
 export interface IWaterfallContext {
@@ -16,7 +16,7 @@ export interface IWaterfallContext {
   onSidebarClick?: OnSidebarClick;
   sidebarItems?: unknown[];
   legendItems?: unknown[];
-  metaData: WaterfallMetaData;
+  metadata: WaterfallMetadata;
   renderTooltipItem: (
     item: WaterfallDataEntry['config']['tooltipProps'],
     index?: number
@@ -32,7 +32,7 @@ interface ProviderProps {
   onSidebarClick?: IWaterfallContext['onSidebarClick'];
   sidebarItems?: IWaterfallContext['sidebarItems'];
   legendItems?: IWaterfallContext['legendItems'];
-  metaData: IWaterfallContext['metaData'];
+  metadata: IWaterfallContext['metadata'];
   renderTooltipItem: IWaterfallContext['renderTooltipItem'];
 }
 
@@ -42,7 +42,7 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   onSidebarClick,
   sidebarItems,
   legendItems,
-  metaData,
+  metadata,
   renderTooltipItem,
   totalNetworkRequests,
   fetchedNetworkRequests,
@@ -53,7 +53,7 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
         data,
         sidebarItems,
         legendItems,
-        metaData,
+        metadata,
         onSidebarClick,
         renderTooltipItem,
         totalNetworkRequests,

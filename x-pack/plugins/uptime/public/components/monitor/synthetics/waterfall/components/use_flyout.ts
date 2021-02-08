@@ -14,7 +14,7 @@ import {
   XYChartElementEvent,
 } from '@elastic/charts';
 
-import { WaterfallMetaData, WaterfallMetaDataEntry } from '../types';
+import { WaterfallMetadata, WaterfallMetadataEntry } from '../types';
 
 interface OnSidebarClickParams {
   buttonRef: ButtonRef;
@@ -25,15 +25,15 @@ export type ButtonRef = RefObject<HTMLButtonElement | null>;
 export type OnSidebarClick = (params: OnSidebarClickParams) => void;
 export type OnFlyoutClose = () => void;
 
-export const useFlyout = (metaData: WaterfallMetaData) => {
+export const useFlyout = (metadata: WaterfallMetadata) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [flyoutData, setFlyoutData] = useState<WaterfallMetaDataEntry | undefined>(undefined);
+  const [flyoutData, setFlyoutData] = useState<WaterfallMetadataEntry | undefined>(undefined);
   const [currentSidebarItemRef, setCurrentSidebarItemRef] = useState<
     RefObject<HTMLButtonElement | null>
   >();
 
   const handleFlyout = useCallback(
-    (flyoutEntry: WaterfallMetaDataEntry) => {
+    (flyoutEntry: WaterfallMetadataEntry) => {
       setFlyoutData(flyoutEntry);
       setIsFlyoutVisible(true);
     },
@@ -49,10 +49,10 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
     ([elementData]) => {
       setIsFlyoutVisible(false);
       const { datum } = (elementData as XYChartElementEvent)[0];
-      const metaDataEntry = metaData[datum.config.id];
-      handleFlyout(metaDataEntry);
+      const metadataEntry = metadata[datum.config.id];
+      handleFlyout(metadataEntry);
     },
-    [metaData, handleFlyout]
+    [metadata, handleFlyout]
   );
 
   const onProjectionClick: ProjectionClickListener = useCallback(
@@ -60,11 +60,11 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
       setIsFlyoutVisible(false);
       const { x } = projectionData as ProjectedValues;
       if (typeof x === 'number' && x >= 0) {
-        const metaDataEntry = metaData[x];
-        handleFlyout(metaDataEntry);
+        const metadataEntry = metadata[x];
+        handleFlyout(metadataEntry);
       }
     },
-    [metaData, handleFlyout]
+    [metadata, handleFlyout]
   );
 
   const onSidebarClick: OnSidebarClick = useCallback(
@@ -72,12 +72,12 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
       if (isFlyoutVisible && buttonRef === currentSidebarItemRef) {
         setIsFlyoutVisible(false);
       } else {
-        const metaDataEntry = metaData[networkItemIndex];
+        const metadataEntry = metadata[networkItemIndex];
         setCurrentSidebarItemRef(buttonRef);
-        handleFlyout(metaDataEntry);
+        handleFlyout(metadataEntry);
       }
     },
-    [currentSidebarItemRef, handleFlyout, isFlyoutVisible, metaData, setIsFlyoutVisible]
+    [currentSidebarItemRef, handleFlyout, isFlyoutVisible, metadata, setIsFlyoutVisible]
   );
 
   return {
