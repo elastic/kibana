@@ -189,9 +189,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   public readonly getVariableList = (
     context: ActionFactoryContext
   ): UrlTemplateEditorVariable[] => {
+    const globalScopeValues = this.deps.getGlobalScope();
     const eventVariables = getEventVariableList(context);
     const contextVariables = getContextVariableList(context);
-    const globalVariables = getGlobalVariableList();
+    const globalVariables = getGlobalVariableList(globalScopeValues);
 
     return [...eventVariables, ...contextVariables, ...globalVariables];
   };

@@ -7,26 +7,34 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+import { UrlDrilldownGlobalScope } from '../../../../../ui_actions_enhanced/public';
 import type { UrlTemplateEditorVariable } from '../../../../../../../src/plugins/kibana_react/public';
 
 const kind = monaco.languages.CompletionItemKind.Constant;
 const sortPrefix = '3.';
 
-const globalVariables: readonly UrlTemplateEditorVariable[] = [
-  {
-    label: 'kibanaUrl',
-    sortText: sortPrefix + 'kibanaUrl',
-    title: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation.title', {
-      defaultMessage: 'Link to Kibana homepage.',
-    }),
-    documentation: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation', {
-      defaultMessage:
-        'Kibana base URL. Useful for creating URL drilldowns that navigate within Kibana.',
-    }),
-    kind,
-  },
-];
+export const getGlobalVariableList = (
+  values: UrlDrilldownGlobalScope
+): UrlTemplateEditorVariable[] => {
+  const globalVariables: UrlTemplateEditorVariable[] = [
+    {
+      label: 'kibanaUrl',
+      sortText: sortPrefix + 'kibanaUrl',
+      title: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation.title', {
+        defaultMessage: 'Link to Kibana homepage.',
+      }),
+      documentation: i18n.translate('xpack.urlDrilldown.global.kibanaUrl.documentation', {
+        defaultMessage:
+          'Kibana base URL. Useful for creating URL drilldowns that navigate within Kibana.' +
+          '\n\n' +
+          'Value: {value}',
+        values: {
+          value: values.kibanaUrl,
+        },
+      }),
+      kind,
+    },
+  ];
 
-export const getGlobalVariableList = (): UrlTemplateEditorVariable[] => {
-  return [...globalVariables];
+  return globalVariables;
 };
