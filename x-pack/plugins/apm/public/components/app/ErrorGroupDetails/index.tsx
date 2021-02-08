@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -23,7 +24,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { SearchBar } from '../../shared/search_bar';
@@ -70,24 +70,27 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
 
-  const { data: errorGroupData } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
-        params: {
-          path: {
-            serviceName,
-            groupId,
+  const { data: errorGroupData } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/services/{serviceName}/errors/{groupId}',
+          params: {
+            path: {
+              serviceName,
+              groupId,
+            },
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+            },
           },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, groupId, uiFilters]);
+        });
+      }
+    },
+    [serviceName, start, end, groupId, uiFilters]
+  );
 
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,

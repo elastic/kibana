@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import './layer_panel.scss';
 
 import React, { useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
-import { StateSetter, Visualization } from '../../../types';
+import { StateSetter, Visualization, DraggedOperation, DropType } from '../../../types';
 import {
   DragContext,
   DragDropIdentifier,
@@ -113,13 +115,19 @@ export function LayerPanel(
   const layerDatasourceOnDrop = layerDatasource.onDrop;
 
   const onDrop = useMemo(() => {
-    return (droppedItem: DragDropIdentifier, targetItem: DragDropIdentifier) => {
-      const { columnId, groupId, layerId: targetLayerId, isNew } = (targetItem as unknown) as {
-        groupId: string;
-        columnId: string;
-        layerId: string;
-        isNew?: boolean;
-      };
+    return (
+      droppedItem: DragDropIdentifier,
+      targetItem: DragDropIdentifier,
+      dropType?: DropType
+    ) => {
+      if (!dropType) {
+        return;
+      }
+      const {
+        columnId,
+        groupId,
+        layerId: targetLayerId,
+      } = (targetItem as unknown) as DraggedOperation; // TODO: correct misleading name
 
       const filterOperations =
         groups.find(({ groupId: gId }) => gId === targetItem.groupId)?.filterOperations ||
@@ -129,10 +137,9 @@ export function LayerPanel(
         ...layerDatasourceDropProps,
         droppedItem,
         columnId,
-        groupId,
         layerId: targetLayerId,
-        isNew,
         filterOperations,
+        dropType,
       });
       if (dropResult) {
         updateVisualization(
@@ -315,7 +322,6 @@ export function LayerPanel(
                   </ReorderProvider>
                   {group.supportsMoreColumns ? (
                     <EmptyDimensionButton
-                      dragDropContext={dragDropContext}
                       group={group}
                       groupIndex={groupIndex}
                       layerId={layerId}
