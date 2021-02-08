@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RefObject, useCallback, useState } from 'react';
@@ -68,11 +69,15 @@ export const useFlyout = (metaData: WaterfallMetaData) => {
 
   const onSidebarClick: OnSidebarClick = useCallback(
     ({ buttonRef, networkItemIndex }) => {
-      const metaDataEntry = metaData[networkItemIndex];
-      setCurrentSidebarItemRef(buttonRef);
-      handleFlyout(metaDataEntry);
+      if (isFlyoutVisible && buttonRef === currentSidebarItemRef) {
+        setIsFlyoutVisible(false);
+      } else {
+        const metaDataEntry = metaData[networkItemIndex];
+        setCurrentSidebarItemRef(buttonRef);
+        handleFlyout(metaDataEntry);
+      }
     },
-    [metaData, handleFlyout]
+    [currentSidebarItemRef, handleFlyout, isFlyoutVisible, metaData, setIsFlyoutVisible]
   );
 
   return {
