@@ -538,7 +538,6 @@
     "@types/sinon": "^7.0.13",
     "@types/source-map-support": "^0.5.3",
     "@types/stats-lite": "^2.2.0",
-    "@types/strip-ansi": "^5.2.1",
     "@types/strong-log-transformer": "^1.0.0",
     "@types/styled-components": "^5.1.0",
     "@types/supertest": "^2.0.5",

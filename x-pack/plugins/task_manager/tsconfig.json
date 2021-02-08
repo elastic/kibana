@@ -13,7 +13,7 @@
     "server/**/*.json",
   ],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
   ]
 }

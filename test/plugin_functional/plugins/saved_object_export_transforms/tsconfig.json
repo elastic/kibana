@@ -11,6 +11,6 @@
   ],
   "exclude": [],
   "references": [
-    { "path": "../../../../src/core/tsconfig.json" }
+    { "path": "../../../../bazel/bin/src/core/tsconfig.json" }
   ]
 }

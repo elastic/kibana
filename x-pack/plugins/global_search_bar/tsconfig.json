@@ -9,7 +9,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../global_search/tsconfig.json" },
     { "path": "../saved_objects_tagging/tsconfig.json" },

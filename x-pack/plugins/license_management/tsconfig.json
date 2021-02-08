@@ -15,7 +15,7 @@
     "__mocks__/*",
   ],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/telemetry_management_section/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },

@@ -2,9 +2,9 @@
 # other packages builds and need to be included as inputs
 exports_files(
   [
+    "package.json",
     "tsconfig.base.json",
     "tsconfig.json",
-    "package.json"
   ],
   visibility = ["//visibility:public"]
 )

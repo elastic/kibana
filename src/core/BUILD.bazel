@@ -1,3 +1,4 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "copy_to_bin")
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 
 exports_files(["tsconfig.json"], visibility = ["//visibility:public"])
@@ -13,67 +14,106 @@ SRCS = glob(
   ],
 )
 
-#SRC_NPM_DEPS = [
-#    "//packages/kbn-babel-preset",
-#    "//packages/kbn-dev-utils",
-#    "@npm//@babel/core",
-#    "@npm//babel-loader",
-#    "@npm//del",
-#    "@npm//getopts",
-#    "@npm//intl-format-cache",
-#    "@npm//intl-messageformat",
-#    "@npm//intl-relativeformat",
-#    "@npm//prop-types",
-#    "@npm//react",
-#    "@npm//react-intl",
-#    "@npm//supports-color",
-#]
-#
-#TSC_TYPES_DEPS = [
-#    "@npm//typescript",
-#    "@npm//@types/angular",
-#    "@npm//@types/intl-relativeformat",
-#    "@npm//@types/jest",
-#    "@npm//@types/react",
-#    "@npm//@types/react-intl",
-#]
-#
-
-SRC_NPM_DEPS = []
-
-TSC_TYPES_DEPS = [
-    "@npm//@testing-library/jest-dom",
-    "@npm//@types/flot",
-    "@npm//@types/jest",
-    "@npm//jest-styled-components",
-    "@npm//@types/node"
+NPM_DEPS = [
+  "@npm//@elastic/apm-rum",
+  "@npm//@elastic/eui",
+  "@npm//@elastic/elasticsearch",
+  "@npm//@elastic/numeral",
+  "@npm//@hapi/boom",
+  "@npm//@kbn/analytics",
+  "@npm//@kbn/config-schema",
+  "@npm//@kbn/config",
+  "@npm//@kbn/dev-utils",
+  "@npm//@kbn/i18n",
+  "@npm//@kbn/legacy-logging",
+  "@npm//@kbn/std",
+  "@npm//@kbn/test",
+  "@npm//@kbn/test-subj-selector",
+  "@npm//@kbn/utility-types",
+  "@npm//@testing-library/jest-dom",
+  "@npm//@types/chance",
+  "@npm//@types/classnames",
+  "@npm//@types/elasticsearch",
+  "@npm//@types/enzyme",
+  "@npm//@types/flot",
+  "@npm//@types/getos",
+  "@npm//@types/globby",
+  "@npm//@types/hapi__cookie",
+  "@npm//@types/hapi__h2o2",
+  "@npm//@types/hapi__hapi",
+  "@npm//@types/hapi__inert",
+  "@npm//@types/has-ansi",
+  "@npm//@types/history",
+  "@npm//@types/joi",
+  "@npm//@types/json-stable-stringify",
+  "@npm//@types/lodash",
+  "@npm//@types/mock-fs",
+  "@npm//@types/moment-timezone",
+  "@npm//@types/mustache",
+  "@npm//@types/node",
+  "@npm//@types/node-forge",
+  "@npm//@types/parse-link-header",
+  "@npm//@types/react-router-dom",
+  "@npm//@types/request",
+  "@npm//@types/semver",
+  "@npm//@types/sinon",
+  "@npm//@types/supertest",
+  "@npm//@types/type-detect",
+  "@npm//@types/uuid",
+  "@npm//@types/xml2js",
+  "@npm//axios",
+  "@npm//chalk",
+  "@npm//elastic-apm-node",
+  "@npm//enzyme",
+  "@npm//execa",
+  "@npm//exit-hook",
+  "@npm//fp-ts",
+  "@npm//jest",
+  "@npm//jest-cli",
+  "@npm//jest-styled-components",
+  "@npm//moment",
+  "@npm//p-map",
+  "@npm//query-string",
+  "@npm//react",
+  "@npm//react-dom",
+  "@npm//react-markdown",
+  "@npm//react-use",
+  "@npm//rxjs",
+  "@npm//strip-ansi"
 ]
 
-ALL_DEPS = SRC_NPM_DEPS + TSC_TYPES_DEPS
-
 ts_config(
-    name = "tsconfig",
-    src = "//src/core:tsconfig.json",
-    deps = [
-        "//:tsconfig.base.json",
-    ],
+  name = "tsconfig",
+  src = "//src/core:tsconfig.json",
+  deps = [
+    "//:tsconfig.base.json",
+  ],
 )
 
 ts_project(
-    name = "tsc",
-    composite = True,
-    declaration = True,
-    declaration_map = True,
-    emit_declaration_only = True,
-    incremental = True,
-    tsconfig = "tsconfig",
-    srcs = SRCS,
-    deps = ALL_DEPS,
-    out_dir = "target_types",
+  name = "tsc",
+  composite = True,
+  declaration = True,
+  declaration_map = True,
+  emit_declaration_only = True,
+  incremental = True,
+  tsconfig = "tsconfig",
+  srcs = SRCS,
+  deps = NPM_DEPS
 )
 
-alias(
-    name = "build_ts_refs",
-    actual = "tsc",
-    visibility = ["//visibility:public"],
+copy_to_bin(
+  name = "copy_tsconfig",
+  srcs = [
+      "tsconfig.json"
+  ]
+)
+
+filegroup(
+  name = "build_ts_refs",
+  srcs = [
+    ":copy_tsconfig",
+    ":tsc"
+  ],
+  visibility = ["//visibility:public"],
 )

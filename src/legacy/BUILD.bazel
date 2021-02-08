@@ -1,0 +1,16 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "server/**/*",
+    "ui/**/*",
+    "utils/**/*"
+  ],
+)
+
+js_library(
+    name = "legacy",
+    srcs = SRCS,
+    deps = [],
+    visibility = ["//visibility:public"],
+)

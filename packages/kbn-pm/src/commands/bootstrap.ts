@@ -41,6 +41,9 @@ export const BootstrapCommand: ICommand = {
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     await runBazel(['build', '//packages:build']);
 
+    // Build configures ts project refs with Bazel
+    await runBazel(['build', '//:build_ts_refs']);
+
     // Install monorepo npm dependencies outside of the Bazel managed ones
     for (const batch of batchedNonBazelProjects) {
       for (const project of batch) {

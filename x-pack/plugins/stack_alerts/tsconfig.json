@@ -14,7 +14,7 @@
     "common/*"
   ],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../alerts/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json" },

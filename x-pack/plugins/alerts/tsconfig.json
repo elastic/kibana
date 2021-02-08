@@ -15,7 +15,7 @@
     "common/*"
   ],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../actions/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../security/tsconfig.json" },

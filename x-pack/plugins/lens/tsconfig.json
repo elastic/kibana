@@ -16,7 +16,7 @@
       "../../typings/**/*"
     ],
     "references": [
-      { "path": "../../../src/core/tsconfig.json" },
+      { "path": "../../../bazel/bin/src/core/tsconfig.json" },
       { "path": "../task_manager/tsconfig.json" },
       { "path": "../global_search/tsconfig.json"},
       { "path": "../saved_objects_tagging/tsconfig.json"},
