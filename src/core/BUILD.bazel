@@ -41,7 +41,13 @@ SRCS = glob(
 
 SRC_NPM_DEPS = []
 
-TSC_TYPES_DEPS = []
+TSC_TYPES_DEPS = [
+    "@npm//@testing-library/jest-dom",
+    "@npm//@types/flot",
+    "@npm//@types/jest",
+    "@npm//jest-styled-components",
+    "@npm//@types/node"
+]
 
 ALL_DEPS = SRC_NPM_DEPS + TSC_TYPES_DEPS
 
@@ -59,8 +65,15 @@ ts_project(
     declaration = True,
     declaration_map = True,
     emit_declaration_only = True,
+    incremental = True,
     tsconfig = "tsconfig",
     srcs = SRCS,
-    # deps = ALL_DEPS,
+    deps = ALL_DEPS,
     out_dir = "target_types",
+)
+
+alias(
+    name = "build_ts_refs",
+    actual = "tsc",
+    visibility = ["//visibility:public"],
 )
