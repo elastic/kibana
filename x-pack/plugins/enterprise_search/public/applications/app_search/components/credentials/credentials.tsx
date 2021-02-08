@@ -106,7 +106,7 @@ export const Credentials: React.FC = () => {
               <EuiButton
                 color="primary"
                 data-test-subj="CreateAPIKeyButton"
-                fill={true}
+                fill
                 onClick={() => showCredentialsForm()}
               >
                 {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
