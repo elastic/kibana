@@ -90,7 +90,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
 }
 
-export class VectorLayer extends AbstractLayer {
+export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
 
   protected readonly _style: IVectorStyle;
