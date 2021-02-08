@@ -48,7 +48,7 @@ const FETCH_RESULTS_DEBOUNCE_MS = 500;
 function getJobsObservable(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
   anomalyDetectorService: AnomalyDetectorService,
-  setErrorHandler: (e: any) => void
+  setErrorHandler: (e: Error) => void
 ) {
   return embeddableInput.pipe(
     pluck('jobIds'),
