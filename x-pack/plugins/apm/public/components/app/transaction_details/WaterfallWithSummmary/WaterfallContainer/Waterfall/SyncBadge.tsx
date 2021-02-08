@@ -11,10 +11,10 @@ import React from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { px, units } from '../../../../../../style/variables';
 
-const SpanBadge = (euiStyled(EuiBadge)`
+const SpanBadge = euiStyled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
-` as unknown) as typeof EuiBadge;
+`;
 
 interface SyncBadgeProps {
   /**

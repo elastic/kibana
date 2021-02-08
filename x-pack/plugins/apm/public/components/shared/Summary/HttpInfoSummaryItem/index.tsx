@@ -12,9 +12,9 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import { units, px, truncate, unit } from '../../../../style/variables';
 import { HttpStatusBadge } from '../HttpStatusBadge';
 
-const HttpInfoBadge = (euiStyled(EuiBadge)`
+const HttpInfoBadge = euiStyled(EuiBadge)`
   margin-right: ${px(units.quarter)};
-` as unknown) as typeof EuiBadge;
+`;
 
 const Url = euiStyled('span')`
   display: inline-block;
