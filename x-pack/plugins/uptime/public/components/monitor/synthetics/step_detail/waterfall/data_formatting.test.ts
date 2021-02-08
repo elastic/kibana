@@ -5,7 +5,12 @@
  * 2.0.
  */
 import moment from 'moment';
-import { colourPalette, getConnectingTime, getSeriesAndDomain } from './data_formatting';
+import {
+  colourPalette,
+  getConnectingTime,
+  getSeriesAndDomain,
+  getSidebarItems,
+} from './data_formatting';
 import {
   NetworkItems,
   MimeType,
@@ -218,6 +223,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#dcd4c4",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#dcd4c4",
@@ -232,6 +238,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#54b399",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#54b399",
@@ -246,6 +253,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#da8b45",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#da8b45",
@@ -260,6 +268,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#edc5a2",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#edc5a2",
@@ -274,6 +283,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#d36086",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#d36086",
@@ -288,6 +298,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#b0c9e0",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#b0c9e0",
@@ -302,6 +313,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#ca8eae",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#ca8eae",
@@ -316,6 +328,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#dcd4c4",
             "id": 1,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#dcd4c4",
@@ -330,6 +343,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#d36086",
             "id": 1,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#d36086",
@@ -344,6 +358,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#b0c9e0",
             "id": 1,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#b0c9e0",
@@ -358,6 +373,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#9170b8",
             "id": 1,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#9170b8",
@@ -380,6 +396,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#dcd4c4",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#dcd4c4",
@@ -394,6 +411,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#54b399",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#54b399",
@@ -408,6 +426,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#da8b45",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#da8b45",
@@ -422,6 +441,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#edc5a2",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#edc5a2",
@@ -436,6 +456,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#d36086",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#d36086",
@@ -450,6 +471,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#b0c9e0",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#b0c9e0",
@@ -464,6 +486,7 @@ describe('getSeriesAndDomain', () => {
           "config": Object {
             "colour": "#ca8eae",
             "id": 0,
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#ca8eae",
@@ -477,6 +500,7 @@ describe('getSeriesAndDomain', () => {
         Object {
           "config": Object {
             "colour": "#9170b8",
+            "isHighlighted": true,
             "showTooltip": true,
             "tooltipProps": Object {
               "colour": "#9170b8",
@@ -498,6 +522,7 @@ describe('getSeriesAndDomain', () => {
         Object {
           "config": Object {
             "colour": "",
+            "isHighlighted": true,
             "showTooltip": false,
             "tooltipProps": undefined,
           },
@@ -509,12 +534,82 @@ describe('getSeriesAndDomain', () => {
     `);
   });
 
+  it('handles formatting when there is no timing information available', () => {
+    const actual = getSeriesAndDomain(networkItemsWithoutAnyTimings);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "domain": Object {
+          "max": 0,
+          "min": 0,
+        },
+        "metadata": Array [
+          Object {
+            "certificates": undefined,
+            "details": Array [
+              Object {
+                "name": "Content type",
+                "value": "text/javascript",
+              },
+              Object {
+                "name": "Request start",
+                "value": "0.000 ms",
+              },
+              Object {
+                "name": "DNS",
+                "value": undefined,
+              },
+              Object {
+                "name": "Connecting",
+                "value": undefined,
+              },
+              Object {
+                "name": "TLS",
+                "value": undefined,
+              },
+              Object {
+                "name": "Waiting (TTFB)",
+                "value": undefined,
+              },
+              Object {
+                "name": "Content downloading",
+                "value": undefined,
+              },
+              Object {
+                "name": "Bytes downloaded",
+                "value": undefined,
+              },
+            ],
+            "requestHeaders": undefined,
+            "responseHeaders": undefined,
+            "url": "file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js",
+            "x": 0,
+          },
+        ],
+        "series": Array [
+          Object {
+            "config": Object {
+              "colour": "",
+              "isHighlighted": true,
+              "showTooltip": false,
+              "tooltipProps": undefined,
+            },
+            "x": 0,
+            "y": 0,
+            "y0": 0,
+          },
+        ],
+        "totalHighlightedRequests": 1,
+      }
+    `);
+  });
+
   it('handles formatting when the timings object is undefined', () => {
     const { series } = getSeriesAndDomain(networkItemsWithoutTimingsObject);
     expect(series).toMatchInlineSnapshot(`
       Array [
         Object {
           "config": Object {
+            "isHighlighted": true,
             "showTooltip": false,
           },
           "x": 0,
@@ -582,5 +677,41 @@ describe('getSeriesAndDomain', () => {
     metadataEntry.responseHeaders?.forEach((header) => {
       expect(header).toEqual({ name: header.name, value: header.value });
     });
+  });
+  it('counts the total number of highlighted items', () => {
+    // only one CSS file in this array of network Items
+    const actual = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    expect(actual.totalHighlightedRequests).toBe(1);
+  });
+
+  it('adds isHighlighted to waterfall entry when filter matches', () => {
+    // only one CSS file in this array of network Items
+    const { series } = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    series.forEach((item) => {
+      if (item.x === 0) {
+        expect(item.config.isHighlighted).toBe(true);
+      } else {
+        expect(item.config.isHighlighted).toBe(false);
+      }
+    });
+  });
+
+  it('adds isHighlighted to waterfall entry when query matches', () => {
+    // only the second item matches this query
+    const { series } = getSeriesAndDomain(networkItems, false, 'director', []);
+    series.forEach((item) => {
+      if (item.x === 1) {
+        expect(item.config.isHighlighted).toBe(true);
+      } else {
+        expect(item.config.isHighlighted).toBe(false);
+      }
+    });
+  });
+});
+
+describe('getSidebarItems', () => {
+  it('passes the item index offset by 1 to offsetIndex for visual display', () => {
+    const actual = getSidebarItems(networkItems, false, '', []);
+    expect(actual[0].offsetIndex).toBe(1);
   });
 });

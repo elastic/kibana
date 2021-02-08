@@ -26,15 +26,21 @@ describe('getChunks', () => {
 
 describe('Component', () => {
   const url = 'http://www.elastic.co';
-  it('renders truncated text', () => {
-    const { getByText } = render(<MiddleTruncatedText text={longString} url={url} />);
+  it('renders truncated text and aria label', () => {
+    const { getByText, getByLabelText } = render(
+      <MiddleTruncatedText text={longString} ariaLabel={longString} url={url} />
+    );
 
     expect(getByText(first)).toBeInTheDocument();
     expect(getByText(last)).toBeInTheDocument();
+
+    expect(getByLabelText(longString)).toBeInTheDocument();
   });
 
   it('renders screen reader only text', () => {
-    const { getByTestId } = render(<MiddleTruncatedText text={longString} url={url} />);
+    const { getByTestId } = render(
+      <MiddleTruncatedText text={longString} ariaLabel={longString} url={url} />
+    );
 
     const { getByText } = within(getByTestId('middleTruncatedTextSROnly'));
 
@@ -42,7 +48,9 @@ describe('Component', () => {
   });
 
   it('renders external link', () => {
-    const { getByText } = render(<MiddleTruncatedText text={longString} url={url} />);
+    const { getByText } = render(
+      <MiddleTruncatedText text={longString} ariaLabel={longString} url={url} />
+    );
     const link = getByText('Open resource in new tab').closest('a');
 
     expect(link).toHaveAttribute('href', url);
@@ -52,7 +60,12 @@ describe('Component', () => {
   it('renders a button when onClick function is passed', () => {
     const handleClick = jest.fn();
     const { getByTestId } = render(
-      <MiddleTruncatedText text={longString} url={url} onClick={handleClick} />
+      <MiddleTruncatedText
+        text={longString}
+        ariaLabel={longString}
+        url={url}
+        onClick={handleClick}
+      />
     );
     const button = getByTestId('middleTruncatedTextButton');
     fireEvent.click(button);

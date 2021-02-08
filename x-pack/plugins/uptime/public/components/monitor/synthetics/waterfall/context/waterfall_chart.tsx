@@ -7,14 +7,19 @@
 
 import React, { createContext, useContext, Context } from 'react';
 import { WaterfallData, WaterfallDataEntry, WaterfallMetadata } from '../types';
-import { OnSidebarClick } from '../components/use_flyout';
+import { OnSidebarClick, OnElementClick, OnProjectionClick } from '../components/use_flyout';
+import { SidebarItems } from '../../step_detail/waterfall/types';
 
 export interface IWaterfallContext {
   totalNetworkRequests: number;
+  highlightedNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: WaterfallData;
+  onElementClick?: OnElementClick;
+  onProjectionClick?: OnProjectionClick;
   onSidebarClick?: OnSidebarClick;
-  sidebarItems?: unknown[];
+  showOnlyHighlightedNetworkRequests: boolean;
+  sidebarItems?: SidebarItems;
   legendItems?: unknown[];
   metadata: WaterfallMetadata;
   renderTooltipItem: (
@@ -27,9 +32,13 @@ export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
   totalNetworkRequests: number;
+  highlightedNetworkRequests: number;
   fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
+  onElementClick?: IWaterfallContext['onElementClick'];
+  onProjectionClick?: IWaterfallContext['onProjectionClick'];
   onSidebarClick?: IWaterfallContext['onSidebarClick'];
+  showOnlyHighlightedNetworkRequests: IWaterfallContext['showOnlyHighlightedNetworkRequests'];
   sidebarItems?: IWaterfallContext['sidebarItems'];
   legendItems?: IWaterfallContext['legendItems'];
   metadata: IWaterfallContext['metadata'];
@@ -39,24 +48,32 @@ interface ProviderProps {
 export const WaterfallProvider: React.FC<ProviderProps> = ({
   children,
   data,
+  onElementClick,
+  onProjectionClick,
   onSidebarClick,
+  showOnlyHighlightedNetworkRequests,
   sidebarItems,
   legendItems,
   metadata,
   renderTooltipItem,
   totalNetworkRequests,
+  highlightedNetworkRequests,
   fetchedNetworkRequests,
 }) => {
   return (
     <WaterfallContext.Provider
       value={{
         data,
+        showOnlyHighlightedNetworkRequests,
         sidebarItems,
         legendItems,
         metadata,
+        onElementClick,
+        onProjectionClick,
         onSidebarClick,
         renderTooltipItem,
         totalNetworkRequests,
+        highlightedNetworkRequests,
         fetchedNetworkRequests,
       }}
     >

@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { IWaterfallContext, useWaterfallContext } from '../context/waterfall_chart';
 import {
@@ -14,6 +13,7 @@ import {
   WaterfallChartSidebarContainerInnerPanel,
   WaterfallChartSidebarContainerFlexGroup,
   WaterfallChartSidebarFlexItem,
+  WaterfallChartSidebarWrapper,
 } from './styles';
 import { WaterfallChartProps } from './waterfall_chart';
 
@@ -27,8 +27,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
   const handleSidebarClick = useMemo(() => onSidebarClick, [onSidebarClick]);
 
   return (
-    <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-      <WaterfallChartSidebarContainer height={items.length * FIXED_AXIS_HEIGHT}>
+    <WaterfallChartSidebarWrapper grow={SIDEBAR_GROW_SIZE}>
+      <WaterfallChartSidebarContainer
+        height={items.length * FIXED_AXIS_HEIGHT}
+        data-test-subj="wfSidebarContainer"
+      >
         <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
           <WaterfallChartSidebarContainerFlexGroup
             direction="column"
@@ -45,6 +48,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
           </WaterfallChartSidebarContainerFlexGroup>
         </WaterfallChartSidebarContainerInnerPanel>
       </WaterfallChartSidebarContainer>
-    </EuiFlexItem>
+    </WaterfallChartSidebarWrapper>
   );
 };

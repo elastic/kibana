@@ -23,6 +23,8 @@ interface OnSidebarClickParams {
 
 export type ButtonRef = RefObject<HTMLButtonElement | null>;
 export type OnSidebarClick = (params: OnSidebarClickParams) => void;
+export type OnProjectionClick = ProjectionClickListener;
+export type OnElementClick = ElementClickListener;
 export type OnFlyoutClose = () => void;
 
 export const useFlyout = (metadata: WaterfallMetadata) => {

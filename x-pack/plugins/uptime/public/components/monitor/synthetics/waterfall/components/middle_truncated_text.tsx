@@ -12,6 +12,7 @@ import { EuiButtonEmpty, EuiLink, EuiScreenReaderOnly, EuiToolTip } from '@elast
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface Props {
+  ariaLabel: string;
   text: string;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   setButtonRef?: (ref: HTMLButtonElement | HTMLAnchorElement | null) => void;
@@ -71,7 +72,7 @@ export const getChunks = (text: string) => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ text, url, onClick, setButtonRef }: Props) => {
+export const MiddleTruncatedText = ({ ariaLabel, text, url, onClick, setButtonRef }: Props) => {
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
@@ -81,7 +82,7 @@ export const MiddleTruncatedText = ({ text, url, onClick, setButtonRef }: Props)
       <EuiScreenReaderOnly>
         <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
       </EuiScreenReaderOnly>
-      <OuterContainer>
+      <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
         <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
           <>
             {onClick ? (

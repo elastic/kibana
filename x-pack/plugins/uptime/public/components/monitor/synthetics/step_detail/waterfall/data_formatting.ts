@@ -58,6 +58,21 @@ const getFriendlyTooltipValue = ({
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
+export const isHighlightedItem = (
+  item: NetworkItem,
+  query?: string,
+  activeFilters: string[] = []
+) => {
+  if (!query && activeFilters?.length === 0) {
+    return true;
+  }
+
+  const matchQuery = query ? item.url?.includes(query) : true;
+  const matchFilters =
+    activeFilters.length > 0 ? activeFilters.includes(MimeTypesMap[item.mimeType!]) : true;
+
+  return !!(matchQuery && matchFilters);
+};
 
 const getFriendlyMetadataValue = ({ value, postFix }: { value?: number; postFix?: string }) => {
   // value === -1 indicates timing data cannot be extracted
@@ -74,16 +89,6 @@ const getFriendlyMetadataValue = ({ value, postFix }: { value?: number; postFix?
   return formattedValue;
 };
 
-const getValueForOffset = (item: NetworkItem): number => {
-  return item.requestSentTime;
-};
-
-const getCurrentOffset = (item: NetworkItem, zeroOffset: number): number => {
-  const offsetValue = getValueForOffset(item);
-
-  return offsetValue - zeroOffset;
-};
-
 export const getConnectingTime = (connect?: number, ssl?: number) => {
   if (ssl && connect && ssl > 0) {
     return connect - ssl;
@@ -92,7 +97,15 @@ export const getConnectingTime = (connect?: number, ssl?: number) => {
   }
 };
 
-export const getSeriesAndDomain = (items: NetworkItems) => {
+export const getSeriesAndDomain = (
+  items: NetworkItems,
+  onlyHighlighted = false,
+  query?: string,
+  activeFilters?: string[]
+) => {
+  const getValueForOffset = (item: NetworkItem) => {
+    return item.requestSentTime;
+  };
   // The earliest point in time a request is sent or started. This will become our notion of "0".
   let zeroOffset = Infinity;
   items.forEach((i) => (zeroOffset = Math.min(zeroOffset, getValueForOffset(i))));
@@ -109,12 +122,17 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
 
   const series: WaterfallData = [];
   const metadata: WaterfallMetadata = [];
+  let totalHighlightedRequests = 0;
 
   items.forEach((item, index) => {
     const mimeTypeColour = getColourForMimeType(item.mimeType);
-    let currentOffset = getCurrentOffset(item, zeroOffset);
-    let timingFound = false;
+    const offsetValue = getValueForOffset(item);
+    let currentOffset = offsetValue - zeroOffset;
     metadata.push(formatMetadata({ item, index, requestStart: currentOffset }));
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    if (isHighlighted) {
+      totalHighlightedRequests++;
+    }
 
     if (!item.timings) {
       series.push({
@@ -122,17 +140,20 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         y0: 0,
         y: 0,
         config: {
+          isHighlighted,
           showTooltip: false,
         },
       });
       return;
     }
 
+    let timingValueFound = false;
+
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
-      const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
       if (value && value >= 0) {
-        timingFound = true;
+        timingValueFound = true;
+        const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
         const y = currentOffset + value;
 
         series.push({
@@ -142,6 +163,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
           config: {
             id: index,
             colour,
+            isHighlighted,
             showTooltip: true,
             tooltipProps: {
               value: getFriendlyTooltipValue({
@@ -160,7 +182,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     /* if no specific timing values are found, use the total time
      * if total time is not available use 0, set showTooltip to false,
      * and omit tooltip props */
-    if (!timingFound) {
+    if (!timingValueFound) {
       const total = item.timings.total;
       const hasTotal = total !== -1;
       series.push({
@@ -168,6 +190,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         y0: hasTotal ? currentOffset : 0,
         y: hasTotal ? currentOffset + item.timings.total : 0,
         config: {
+          isHighlighted,
           colour: hasTotal ? mimeTypeColour : '',
           showTooltip: hasTotal,
           tooltipProps: hasTotal
@@ -187,7 +210,13 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
 
   const yValues = series.map((serie) => serie.y);
   const domain = { min: 0, max: Math.max(...yValues) };
-  return { series, domain, metadata };
+
+  let filteredSeries = series;
+  if (onlyHighlighted) {
+    filteredSeries = series.filter((item) => item.config.isHighlighted);
+  }
+
+  return { series: filteredSeries, domain, metadata, totalHighlightedRequests };
 };
 
 const formatHeaders = (headers?: Record<string, unknown>) => {
@@ -279,11 +308,22 @@ const formatMetadata = ({
   };
 };
 
-export const getSidebarItems = (items: NetworkItems): SidebarItems => {
-  return items.map((item) => {
+export const getSidebarItems = (
+  items: NetworkItems,
+  onlyHighlighted: boolean,
+  query: string,
+  activeFilters: string[]
+): SidebarItems => {
+  const sideBarItems = items.map((item, index) => {
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    const offsetIndex = index + 1;
     const { url, status, method } = item;
-    return { url, status, method };
+    return { url, status, method, isHighlighted, offsetIndex, index };
   });
+  if (onlyHighlighted) {
+    return sideBarItems.filter((item) => item.isHighlighted);
+  }
+  return sideBarItems;
 };
 
 export const getLegendItems = (): LegendItems => {
@@ -306,6 +346,7 @@ export const getLegendItems = (): LegendItems => {
       { name: FriendlyMimetypeLabels[mimeType], colour: MIME_TYPE_PALETTE[mimeType] },
     ];
   });
+
   return [...timingItems, ...mimeTypeItems];
 };
 

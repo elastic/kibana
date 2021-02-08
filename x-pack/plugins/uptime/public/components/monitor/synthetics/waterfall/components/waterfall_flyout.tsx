@@ -85,7 +85,7 @@ export const WaterfallFlyout = ({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
-              <MiddleTruncatedText text={url} url={url} />
+              <MiddleTruncatedText text={url} url={url} ariaLabel={url} />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
