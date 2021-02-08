@@ -3459,6 +3459,9 @@
         },
         "disabledFeatures": {
           "properties": {
+            "DYNAMIC_KEY": {
+              "type": "long"
+            },
             "stackAlerts": {
               "type": "long"
             },

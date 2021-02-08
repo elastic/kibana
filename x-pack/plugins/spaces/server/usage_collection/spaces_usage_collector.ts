@@ -126,6 +126,9 @@ export interface UsageData extends UsageStats {
   count?: number;
   usesFeatureControls?: boolean;
   disabledFeatures: {
+    // "feature": number;
+    [key: string]: number | undefined;
+    // Known registered features
     stackAlerts?: number;
     actions?: number;
     enterpriseSearch?: number;
@@ -173,6 +176,9 @@ export function getSpacesUsageCollector(
     schema: {
       usesFeatureControls: { type: 'boolean' },
       disabledFeatures: {
+        // "feature": number;
+        DYNAMIC_KEY: { type: 'long' },
+        // Known registered features
         stackAlerts: { type: 'long' },
         actions: { type: 'long' },
         enterpriseSearch: { type: 'long' },
