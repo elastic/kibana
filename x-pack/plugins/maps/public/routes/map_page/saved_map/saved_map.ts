@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -287,8 +288,12 @@ export class SavedMap {
 
     const prevTitle = this._attributes.title;
     const prevDescription = this._attributes.description;
+    const prevTags = this._tags;
     this._attributes.title = newTitle;
     this._attributes.description = newDescription;
+    if (newTags) {
+      this._tags = newTags;
+    }
     this._syncAttributesWithStore();
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
@@ -311,6 +316,7 @@ export class SavedMap {
       // Error toast displayed by wrapAttributes
       this._attributes.title = prevTitle;
       this._attributes.description = prevDescription;
+      this._tags = prevTags;
       return;
     }
 

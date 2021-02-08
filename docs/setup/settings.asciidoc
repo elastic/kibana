@@ -205,6 +205,9 @@ the username and password that the {kib} server uses to perform maintenance
 on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
+| `enterpriseSearch.host`
+  | The URL of your Enterprise Search instance
+
 | `interpreter.enableInVisualize`
   | Enables use of interpreter in Visualize. *Default: `true`*
 

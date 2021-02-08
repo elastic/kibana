@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import { VisualizeConstants } from '../../../src/plugins/visualize/public/application/visualize_constants';
+
+interface VisualizeSaveModalArgs {
+  saveAsNew?: boolean;
+  redirectToOrigin?: boolean;
+}
 
 export function VisualizePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -321,11 +326,27 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    public async saveVisualization(
-      vizName: string,
-      { saveAsNew = false, redirectToOrigin = false } = {}
-    ) {
+    public async saveVisualization(vizName: string, saveModalArgs: VisualizeSaveModalArgs = {}) {
       await this.ensureSavePanelOpen();
+
+      await this.setSaveModalValues(vizName, saveModalArgs);
+      log.debug('Click Save Visualization button');
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+
+      // Confirm that the Visualization has actually been saved
+      await testSubjects.existOrFail('saveVisualizationSuccess');
+      const message = await common.closeToast();
+      await header.waitUntilLoadingHasFinished();
+      await common.waitForSaveModalToClose();
+
+      return message;
+    }
+
+    public async setSaveModalValues(
+      vizName: string,
+      { saveAsNew, redirectToOrigin }: VisualizeSaveModalArgs = {}
+    ) {
       await testSubjects.setValue('savedObjectTitle', vizName);
 
       const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
@@ -341,17 +362,6 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         log.debug('redirect to origin checkbox exists. Setting its state to', state);
         await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
-      log.debug('Click Save Visualization button');
-
-      await testSubjects.click('confirmSaveSavedObjectButton');
-
-      // Confirm that the Visualization has actually been saved
-      await testSubjects.existOrFail('saveVisualizationSuccess');
-      const message = await common.closeToast();
-      await header.waitUntilLoadingHasFinished();
-      await common.waitForSaveModalToClose();
-
-      return message;
     }
 
     public async saveVisualizationExpectSuccess(

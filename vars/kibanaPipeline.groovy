@@ -89,6 +89,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def esTransportPort = "61${parallelId}3"
   def fleetPackageRegistryPort = "61${parallelId}4"
   def alertingProxyPort = "61${parallelId}5"
+  def corsTestServerPort = "61${parallelId}6"
   def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
@@ -100,6 +101,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
     "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
+    "TEST_CORS_SERVER_PORT=${corsTestServerPort}",
     "KBN_NP_PLUGINS_BUILT=true",
     "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
     "ALERTING_PROXY_PORT=${alertingProxyPort}",
@@ -126,8 +128,12 @@ def functionalTestProcess(String name, String script) {
   }
 }
 
-def ossCiGroupProcess(ciGroup) {
+def ossCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("ciGroup" + ciGroup) {
+    if (withDelay) {
+      sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    }
+
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
@@ -139,8 +145,11 @@ def ossCiGroupProcess(ciGroup) {
   }
 }
 
-def xpackCiGroupProcess(ciGroup) {
+def xpackCiGroupProcess(ciGroup, withDelay = false) {
   return functionalTestProcess("xpack-ciGroup" + ciGroup) {
+    if (withDelay) {
+      sleep((ciGroup-1)*30) // smooth out CPU spikes from ES startup
+    }
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
@@ -425,16 +434,31 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
 }
 
 def allCiTasks() {
-  withTasks {
-    tasks.check()
-    tasks.lint()
-    tasks.test()
-    tasks.functionalOss()
-    tasks.functionalXpack()
-  }
+  parallel([
+    general: {
+      withTasks {
+        tasks.check()
+        tasks.lint()
+        tasks.test()
+        tasks.functionalOss()
+        tasks.functionalXpack()
+      }
+    },
+    jest: {
+      workers.ci(name: 'jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+      }
+    },
+    xpackJest: {
+      workers.ci(name: 'xpack-jest', size: 'c2-8', ramDisk: true) {
+        scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh')()
+      }
+    },
+  ])
 }
 
 def pipelineLibraryTests() {
+  return
   whenChanged(['vars/', '.ci/pipeline-library/']) {
     workers.base(size: 'flyweight', bootstrapped: false, ramDisk: false) {
       dir('.ci/pipeline-library') {

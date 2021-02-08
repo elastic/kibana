@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -207,6 +208,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
+        awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
       };
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
@@ -490,6 +492,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       );
     }
     return false;
+  }
+
+  function isJobAwaitingNodeAssignment(job: CombinedJobWithStats) {
+    return job.node === undefined && job.state === JOB_STATE.OPENING;
   }
 
   return {

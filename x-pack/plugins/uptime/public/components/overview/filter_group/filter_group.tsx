@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -15,7 +16,7 @@ import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { MONITOR_ROUTE } from '../../../../common/constants';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 
-interface PresentationalComponentProps {
+interface Props {
   loading: boolean;
   overviewFilters: OverviewFilters;
 }
@@ -28,10 +29,7 @@ function isDisabled<T>(array?: T[]) {
   return array ? array.length === 0 : true;
 }
 
-export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
-  overviewFilters,
-  loading,
-}) => {
+export const FilterGroupComponent: React.FC<Props> = ({ overviewFilters, loading }) => {
   const { locations, ports, schemes, tags } = overviewFilters;
 
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
@@ -90,7 +88,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
             disabled: isDisabled(tags),
             items: tags ?? [],
             selectedItems: selectedTags,
-            title: filterLabels.TAGS,
+            title: filterLabels.TAG,
           },
         ]
       : []),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
@@ -485,7 +486,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
             <EuiSwitch
               name="transformCreateIndexPattern"
               label={i18n.translate('xpack.transform.stepCreateForm.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
+                defaultMessage: 'Create Kibana index pattern',
               })}
               checked={createIndexPattern === true}
               onChange={() => setCreateIndexPattern(!createIndexPattern)}
@@ -528,7 +529,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 label={i18n.translate(
                   'xpack.transform.stepDetailsForm.continuousModeDateFieldLabel',
                   {
-                    defaultMessage: 'Date field',
+                    defaultMessage: 'Date field for continuous mode',
                   }
                 )}
                 helpText={i18n.translate(

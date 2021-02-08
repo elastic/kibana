@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC } from 'react';
@@ -187,7 +188,8 @@ export const StepDefineSummary: FC<Props> = ({
           copyToClipboardDescription={i18n.translate(
             'xpack.transform.pivotPreview.copyClipboardTooltip',
             {
-              defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+              defaultMessage:
+                'Copy Dev Console statement of the transform preview to the clipboard.',
             }
           )}
           dataTestSubj="transformPivotPreview"

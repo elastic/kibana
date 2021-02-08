@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createAppContextStartContractMock } from '../../../../mocks';
@@ -164,6 +165,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [
@@ -450,6 +452,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [

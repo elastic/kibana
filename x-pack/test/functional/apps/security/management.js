@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -19,8 +20,7 @@ export default function ({ getService, getPageObjects }) {
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/61173
-  describe.skip('Management', function () {
+  describe('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.settings.navigateTo();
           await testSubjects.click('users');
-          await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
+          await PageObjects.settings.clickByButtonText('kibana_dashboard_only_user');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });

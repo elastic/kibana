@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useState } from 'react';
@@ -62,7 +63,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             setPrivilegeUser({
               isAuthenticated: privilege.is_authenticated,
               hasEncryptionKey: privilege.has_encryption_key,
-              hasIndexManage: privilege.index[indexName].manage,
+              hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
               hasIndexMaintenance: privilege.index[indexName].maintenance,
               hasIndexWrite:
                 privilege.index[indexName].create ||

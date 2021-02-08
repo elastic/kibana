@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { createContext, useContext, Context } from 'react';
 import { WaterfallData, WaterfallDataEntry } from '../types';
 
 export interface IWaterfallContext {
+  totalNetworkRequests: number;
+  fetchedNetworkRequests: number;
   data: WaterfallData;
   sidebarItems?: unknown[];
   legendItems?: unknown[];
@@ -20,6 +23,8 @@ export interface IWaterfallContext {
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
 interface ProviderProps {
+  totalNetworkRequests: number;
+  fetchedNetworkRequests: number;
   data: IWaterfallContext['data'];
   sidebarItems?: IWaterfallContext['sidebarItems'];
   legendItems?: IWaterfallContext['legendItems'];
@@ -32,9 +37,20 @@ export const WaterfallProvider: React.FC<ProviderProps> = ({
   sidebarItems,
   legendItems,
   renderTooltipItem,
+  totalNetworkRequests,
+  fetchedNetworkRequests,
 }) => {
   return (
-    <WaterfallContext.Provider value={{ data, sidebarItems, legendItems, renderTooltipItem }}>
+    <WaterfallContext.Provider
+      value={{
+        data,
+        sidebarItems,
+        legendItems,
+        renderTooltipItem,
+        totalNetworkRequests,
+        fetchedNetworkRequests,
+      }}
+    >
       {children}
     </WaterfallContext.Provider>
   );

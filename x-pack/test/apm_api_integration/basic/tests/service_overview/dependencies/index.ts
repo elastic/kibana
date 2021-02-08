@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import url from 'url';
-import { sortBy, pick, last } from 'lodash';
+import { sortBy, pick, last, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { Maybe } from '../../../../../../plugins/apm/typings/common';
 import { isFiniteNumber } from '../../../../../../plugins/apm/common/utils/is_finite_number';
@@ -298,7 +299,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         response = await supertest.get(
           url.format({
-            pathname: `/api/apm/services/opbeans-java/dependencies`,
+            pathname: `/api/apm/services/opbeans-python/dependencies`,
             query: {
               start,
               end,
@@ -317,14 +318,41 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns at least one item', () => {
         expect(response.body.length).to.be.greaterThan(0);
+
+        expectSnapshot(
+          omit(response.body[0], [
+            'errorRate.timeseries',
+            'throughput.timeseries',
+            'latency.timeseries',
+          ])
+        ).toMatchInline(`
+          Object {
+            "errorRate": Object {
+              "value": 0,
+            },
+            "impact": 1.97910470896139,
+            "latency": Object {
+              "value": 1043.99015586546,
+            },
+            "name": "redis",
+            "spanSubtype": "redis",
+            "spanType": "db",
+            "throughput": Object {
+              "value": 40.6333333333333,
+            },
+            "type": "external",
+          }
+        `);
       });
 
       it('returns the right names', () => {
         const names = response.body.map((item) => item.name);
         expectSnapshot(names.sort()).toMatchInline(`
           Array [
-            "opbeans-go",
+            "elasticsearch",
+            "opbeans-java",
             "postgresql",
+            "redis",
           ]
         `);
       });
@@ -336,7 +364,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(serviceNames.sort()).toMatchInline(`
           Array [
-            "opbeans-go",
+            "opbeans-java",
           ]
         `);
       });
@@ -350,12 +378,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(latencyValues).toMatchInline(`
           Array [
             Object {
-              "latency": 38506.4285714286,
-              "name": "opbeans-go",
+              "latency": 2568.40816326531,
+              "name": "elasticsearch",
             },
             Object {
-              "latency": 5908.77272727273,
+              "latency": 25593.875,
+              "name": "opbeans-java",
+            },
+            Object {
+              "latency": 28885.3293963255,
               "name": "postgresql",
+            },
+            Object {
+              "latency": 1043.99015586546,
+              "name": "redis",
             },
           ]
         `);
@@ -363,19 +399,68 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns the right throughput values', () => {
         const throughputValues = sortBy(
-          response.body.map((item) => ({ name: item.name, latency: item.throughput.value })),
+          response.body.map((item) => ({ name: item.name, throughput: item.throughput.value })),
           'name'
         );
 
         expectSnapshot(throughputValues).toMatchInline(`
           Array [
             Object {
-              "latency": 0.466666666666667,
-              "name": "opbeans-go",
+              "name": "elasticsearch",
+              "throughput": 13.0666666666667,
             },
             Object {
-              "latency": 3.66666666666667,
+              "name": "opbeans-java",
+              "throughput": 0.533333333333333,
+            },
+            Object {
               "name": "postgresql",
+              "throughput": 50.8,
+            },
+            Object {
+              "name": "redis",
+              "throughput": 40.6333333333333,
+            },
+          ]
+        `);
+      });
+
+      it('returns the right impact values', () => {
+        const impactValues = sortBy(
+          response.body.map((item) => ({
+            name: item.name,
+            impact: item.impact,
+            latency: item.latency.value,
+            throughput: item.throughput.value,
+          })),
+          'name'
+        );
+
+        expectSnapshot(impactValues).toMatchInline(`
+          Array [
+            Object {
+              "impact": 1.36961744704522,
+              "latency": 2568.40816326531,
+              "name": "elasticsearch",
+              "throughput": 13.0666666666667,
+            },
+            Object {
+              "impact": 0,
+              "latency": 25593.875,
+              "name": "opbeans-java",
+              "throughput": 0.533333333333333,
+            },
+            Object {
+              "impact": 100,
+              "latency": 28885.3293963255,
+              "name": "postgresql",
+              "throughput": 50.8,
+            },
+            Object {
+              "impact": 1.97910470896139,
+              "latency": 1043.99015586546,
+              "name": "redis",
+              "throughput": 40.6333333333333,
             },
           ]
         `);

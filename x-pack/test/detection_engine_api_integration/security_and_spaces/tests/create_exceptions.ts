@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -33,6 +34,8 @@ import {
   createExceptionListItem,
   waitForSignalsToBePresent,
   getSignalsByIds,
+  findImmutableRuleById,
+  getPrePackagedRulesStatus,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -45,12 +48,14 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id and add an exception list to the rule', async () => {
@@ -389,6 +394,83 @@ export default ({ getService }: FtrProviderContext) => {
             type,
           },
         ]);
+      });
+
+      it('should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
+        await installPrePackagedRules(supertest);
+
+        const { id, list_id, namespace_type, type } = await createExceptionList(
+          supertest,
+          getCreateExceptionListMinimalSchemaMock()
+        );
+
+        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+        // This rule has an existing exceptions_list that we are going to use
+        const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+
+        // add a second exceptions list as a user is allowed to add a second list to an immutable rule
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_id: '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+            exceptions_list: [
+              ...immutableRule.exceptions_list,
+              {
+                id,
+                list_id,
+                namespace_type,
+                type,
+              },
+            ],
+          })
+          .expect(200);
+
+        const body = await findImmutableRuleById(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
+
+        const bodyToCompare = removeServerGeneratedProperties(body.data[0]);
+        expect(bodyToCompare.rule_id).to.eql(immutableRule.rule_id); // Rule id should not change with a a patch
+        expect(bodyToCompare.immutable).to.eql(immutableRule.immutable); // Immutable should always stay the same which is true and never flip to false.
+        expect(bodyToCompare.version).to.eql(immutableRule.version); // The version should never update on a patch
+      });
+
+      it('should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
+        await installPrePackagedRules(supertest);
+
+        const { id, list_id, namespace_type, type } = await createExceptionList(
+          supertest,
+          getCreateExceptionListMinimalSchemaMock()
+        );
+
+        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+        // This rule has an existing exceptions_list that we are going to use
+        const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+
+        // add a second exceptions list as a user is allowed to add a second list to an immutable rule
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_id: '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+            exceptions_list: [
+              ...immutableRule.exceptions_list,
+              {
+                id,
+                list_id,
+                namespace_type,
+                type,
+              },
+            ],
+          })
+          .expect(200);
+
+        const status = await getPrePackagedRulesStatus(supertest);
+        expect(status.rules_not_installed).to.eql(0);
       });
 
       describe('tests with auditbeat data', () => {

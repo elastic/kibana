@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./authenticator');
@@ -119,6 +120,23 @@ describe('AuthenticationService', () => {
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
         authenticate = jest.requireMock('./authenticator').Authenticator.mock.instances[0]
           .authenticate;
+      });
+
+      it('returns error if license is not available.', async () => {
+        const mockResponse = httpServerMock.createLifecycleResponseFactory();
+
+        mockSetupAuthenticationParams.license.isLicenseAvailable.mockReturnValue(false);
+
+        await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
+
+        expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: 'License is not available.',
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+        });
+        expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
+        expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       });
 
       it('replies with no credentials when security is disabled in elasticsearch', async () => {

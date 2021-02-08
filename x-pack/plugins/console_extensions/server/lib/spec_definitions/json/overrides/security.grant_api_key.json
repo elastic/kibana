@@ -1,0 +1,15 @@
+{
+  "security.grant_api_key": {
+    "data_autocomplete_rules": {
+      "access_token": "",
+      "api_key": {
+        "expiration": "",
+        "name": "",
+        "role_descriptors": {}
+      },
+      "grant_type": "access_token",
+      "password": "",
+      "username": ""
+    }
+  }
+}

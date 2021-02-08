@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
@@ -31,7 +32,7 @@ export const deleteTransforms = async (
       // get the index the transform
       const transformResponse: {
         count: number;
-        transforms: Array<{
+        transforms?: Array<{
           dest: {
             index: string;
           };
@@ -39,6 +40,7 @@ export const deleteTransforms = async (
       } = await callCluster('transport.request', {
         method: 'GET',
         path: `/_transform/${transformId}`,
+        ignore: [404],
       });
 
       await stopTransforms([transformId], callCluster);
