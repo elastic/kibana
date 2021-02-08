@@ -44,14 +44,8 @@ All metrics are collected from the `tar.gz` archive produced for the linux platf
 [[ci-metric-distributable-file-count]] `distributable file count` ::
 The number of files included in the default distributable.
 
-[[ci-metric-oss-distributable-file-count]] `oss distributable file count` ::
-The number of files included in the OSS distributable.
-
 [[ci-metric-distributable-size]] `distributable size` ::
 The size, in bytes, of the default distributable. _(not reported on PRs)_
-
-[[ci-metric-oss-distributable-size]] `oss distributable size` ::
-The size, in bytes, of the OSS distributable. _(not reported on PRs)_
 
 
 [[ci-metric-types-saved-object-field-counts]]
