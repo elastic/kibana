@@ -619,16 +619,12 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
       });
-      // console.log(`releasing ${firstWithSingleConcurrency.id}`);
       await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
 
       // wait for second task to stall
       await retry.try(async () => {
         expect((await historyDocs(secondWithSingleConcurrency.id)).length).to.eql(1);
       });
-      // console.log(`second task ${secondWithSingleConcurrency.id} has ran`);
-
-      // console.log(`run ${firstWithSingleConcurrency.id} now`);
 
       // run the first task again using runNow - should fail due to concurrency concerns
       const failedRunNowResult = await runTaskNow({
