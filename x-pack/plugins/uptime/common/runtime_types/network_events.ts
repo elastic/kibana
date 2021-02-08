@@ -26,9 +26,6 @@ const CertificateDataType = t.partial({
   subjectName: t.string,
 });
 
-export type NetworkTimings = t.TypeOf<typeof NetworkTimingsType>;
-export type CertificateData = t.TypeOf<typeof CertificateDataType>;
-
 const NetworkEventType = t.intersection([
   t.type({
     timestamp: t.string,
@@ -49,6 +46,8 @@ const NetworkEventType = t.intersection([
   }),
 ]);
 
+export type NetworkTimings = t.TypeOf<typeof NetworkTimingsType>;
+export type CertificateData = t.TypeOf<typeof CertificateDataType>;
 export type NetworkEvent = t.TypeOf<typeof NetworkEventType>;
 
 export const SyntheticsNetworkEventsApiResponseType = t.type({
