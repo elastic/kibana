@@ -31,6 +31,7 @@ import type { SourceEditorArgs } from '../../../maps/public';
 import type { DataRequest } from '../../../maps/public';
 import type { SourceTooltipConfig } from '../../../maps/public';
 import type { IVectorSource } from '../../../maps/public';
+import { getResultsForJobId } from './util';
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
@@ -64,19 +65,12 @@ export class AnomalySource implements IVectorSource {
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
+    const results = await getResultsForJobId(this._descriptor.jobId, 'typical');
+
     return {
-      data: {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [0, 0],
-            },
-            properties: {},
-          },
-        ],
+      data: results,
+      meta: {
+        areResultsTrimmed: false, // only set this if data is incomplete (e.g. capping number of results to first 10k)
       },
     };
   }
@@ -198,7 +192,12 @@ export class AnomalySource implements IVectorSource {
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
-    throw new Error('not implemented');
+    return {
+      tooltipContent: i18n.translate('xpack.ml.maps.sourceTooltip', {
+        defaultMessage: `Shows anomalies`,
+      }),
+      areResultsTrimmed: false, // set to true if data is incomplete
+    };
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {

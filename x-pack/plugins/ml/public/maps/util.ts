@@ -7,6 +7,8 @@
 
 // import { ml } from '../../../../services/ml_api_service';
 
+import { FeatureCollection, Feature } from 'geojson';
+
 const DUMMY_JOB_LIST = [
   {
     jobId: 'foo',
@@ -27,13 +29,13 @@ const DUMMY_JOB_LIST = [
     jobId: 'bar',
     results: [
       {
-        typical: [10, 12],
-        actual: [14, 16],
+        typical: [-80, 40],
+        actual: [-81, 42],
         record_score: 5,
       },
       {
-        typical: [10, 12],
-        actual: [14, 16],
+        typical: [-79, 35],
+        actual: [-78, 34],
         record_score: 5,
       },
     ],
@@ -45,6 +47,29 @@ export async function getAnomalyJobList(): Promise<Array<{ jobId: string }>> {
   return DUMMY_JOB_LIST;
 }
 
-export async function getResultsForJobId() {
-  // console.log(ml);
+export async function getResultsForJobId(
+  jobId: string,
+  locationType: 'typical' | 'actual'
+): Promise<FeatureCollection> {
+  const job = DUMMY_JOB_LIST.find((j) => {
+    return j.jobId === jobId;
+  });
+
+  const features: Feature[] = job!.results.map((result) => {
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: locationType === 'typical' ? result.typical : result.actual,
+      },
+      properties: {
+        record_score: result.record_score,
+      },
+    };
+  });
+
+  return {
+    type: 'FeatureCollection',
+    features,
+  };
 }

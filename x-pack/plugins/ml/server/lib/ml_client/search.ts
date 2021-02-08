@@ -32,7 +32,6 @@ export function searchProvider(
     searchParams: RequestParams.Search<any>,
     jobIds: string[]
   ): Promise<ApiResponse<SearchResponse7<T>>> {
-    console.log('amnomlysearch');
     await jobIdsCheck('anomaly-detector', jobIds);
     const { asInternalUser } = client;
     const resp = await asInternalUser.search<SearchResponse7<T>>({

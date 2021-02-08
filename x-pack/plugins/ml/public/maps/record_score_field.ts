@@ -70,7 +70,7 @@ export class RecordScoreField implements IField {
   }
 
   getName(): string {
-    return this.getName();
+    return 'record_score';
   }
 
   getOrigin(): FIELD_ORIGIN {

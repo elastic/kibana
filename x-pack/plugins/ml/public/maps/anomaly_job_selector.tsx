@@ -7,31 +7,57 @@
 
 import React, { Component } from 'react';
 
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
-import { IFieldType } from '../../../../../src/plugins/data/common/index_patterns/fields';
+import { getAnomalyJobList } from './util';
 
 interface Props {
   onJobChange: (jobId: string) => void;
 }
 
 interface State {
-  jobId: string;
+  jobId?: string;
+  jobIdList?: Array<EuiComboBoxOptionOption<string>>;
 }
 
 export class AnomalyJobSelector extends Component<Props, State> {
-  private async _loadJobs() {}
+  private _isMounted: boolean = false;
 
-  componentDidMount(): void {
+  state: State = {};
+
+  private async _loadJobs() {
+    const jobList = await getAnomalyJobList();
+    const options = jobList.map((j) => {
+      return { label: j.jobId, value: j.jobId };
+    });
+    if (this._isMounted && !_.isEqual(options, this.state.jobIdList)) {
+      this.setState({
+        jobIdList: options,
+      });
+    }
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
     this._loadJobs();
   }
 
-  onJobIdSelect = (selectedOptions: Array<EuiComboBoxOptionOption<IFieldType>>) => {
-    this.props.onJobChange(selectedOptions[0].value!.name!);
+  componentDidMount(): void {
+    this._isMounted = true;
+    this._loadJobs();
+  }
+
+  onJobIdSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const jobId: string = selectedOptions[0].value!;
+    this.setState({ jobId });
+    this.props.onJobChange(jobId);
   };
 
   render() {
+    if (!this.state.jobIdList) {
+      return null;
+    }
+
+    const options = this.state.jobId ? [{ value: this.state.jobId, label: this.state.jobId }] : [];
     return (
       <EuiFormRow
         label={i18n.translate('xpack.ml.maps.jobIdLabel', {
@@ -39,7 +65,12 @@ export class AnomalyJobSelector extends Component<Props, State> {
         })}
         display="columnCompressed"
       >
-        <EuiComboBox singleSelection={true} onChange={this.onJobIdSelect} options={[]} />
+        <EuiComboBox
+          singleSelection={true}
+          onChange={this.onJobIdSelect}
+          options={this.state.jobIdList}
+          selectedOptions={options}
+        />
       </EuiFormRow>
     );
   }
