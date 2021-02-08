@@ -155,6 +155,7 @@ export class SearchInterceptor {
     const { signal: timeoutSignal } = timeoutController;
     const timeout$ = timeout ? timer(timeout) : NEVER;
     const subscription = timeout$.subscribe(() => {
+      this.deps.usageCollector?.trackQueryTimedOut();
       timeoutController.abort();
     });
 
