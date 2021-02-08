@@ -87,7 +87,7 @@ export const MultiCheckboxFacetsView: React.FC<Props> = ({
         options={checkboxGroupOptions}
         idToSelectedMap={idToSelectedMap}
         onChange={onChange}
-        compressed={true}
+        compressed
       />
       {showMore && (
         <>
