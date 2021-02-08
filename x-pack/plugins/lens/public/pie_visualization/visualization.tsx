@@ -274,7 +274,7 @@ export const getPieVisualization = ({
     ));
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     // not possible to break it?
     return undefined;
   },

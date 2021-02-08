@@ -425,10 +425,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessages(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
-        frame
-      );
+      const error = datatableVisualization.getErrorMessages({
+        layerId: 'a',
+        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+      });
 
       expect(error).toBeUndefined();
     });
@@ -444,10 +444,10 @@ describe('Datatable Visualization', () => {
         label: 'label',
       });
 
-      const error = datatableVisualization.getErrorMessages(
-        { layerId: 'a', columns: [{ columnId: 'b' }, { columnId: 'c' }] },
-        frame
-      );
+      const error = datatableVisualization.getErrorMessages({
+        layerId: 'a',
+        columns: [{ columnId: 'b' }, { columnId: 'c' }],
+      });
 
       expect(error).toBeUndefined();
     });

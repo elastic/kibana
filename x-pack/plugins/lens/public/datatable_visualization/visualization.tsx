@@ -266,7 +266,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     return undefined;
   },
 

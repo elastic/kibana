@@ -589,137 +589,119 @@ describe('xy_visualization', () => {
   describe('#getErrorMessages', () => {
     it("should not return an error when there's only one dimension (X or Y)", () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it('should not return an error when mixing different valid configurations in multiple layers', () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: ['a'],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['a'],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it("should not return an error when there's only one splitAccessor dimension configured", () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).not.toBeDefined();
 
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: ['a'],
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+          ],
+        })
       ).toEqual([
         {
           shortMessage: 'Missing Vertical axis.',
@@ -729,34 +711,31 @@ describe('xy_visualization', () => {
     });
     it('should return an error with batched messages for the same error with multiple layers', () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-              {
-                layerId: 'third',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+            {
+              layerId: 'third',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).toEqual([
         {
           shortMessage: 'Missing Vertical axis.',
@@ -766,32 +745,29 @@ describe('xy_visualization', () => {
     });
     it("should return an error when some layers are complete but other layers aren't", () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
-              },
-              {
-                layerId: 'third',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+            {
+              layerId: 'third',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+          ],
+        })
       ).toEqual([
         {
           shortMessage: 'Missing Vertical axis.',
