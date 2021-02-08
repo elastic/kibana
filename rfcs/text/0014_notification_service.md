@@ -6,21 +6,21 @@
 - [Summary](#summary)
 - [Motivation](#motivation)
 - [Detailed design](#detailed-design)
-    - [Unified Notification Service](#unified-notification-service)
-    - [Kibana Notification Service](#kibana-notification-service)
-        - [Kibana Notification Service key elements](#kibana-notification-service-key-elements)
-        - [Notification event](#notification-event)
-        - [Sourcing](#sourcing)
-        - [Notification System](#notification-system)
-            - [LocalRepository](#localrepository)
-                - [Notification model](#notification-model)
-                - [Notification storage](#notification-storage)
-            - [RemoteRepository](#remoterepository)
-        - [Delivery](#delivery)
-            - [List of notifications](#list-of-notifications)
-            - [Filtering](#filtering)
-            - [Notification Status](#notification-status)
-        - [Settings](#settings)
+  - [Unified Notification Service](#unified-notification-service)
+  - [Kibana Notification Service](#kibana-notification-service)
+    - [Kibana Notification Service key elements](#kibana-notification-service-key-elements)
+    - [Notification event](#notification-event)
+    - [Sourcing](#sourcing)
+    - [Notification System](#notification-system)
+      - [LocalRepository](#localrepository)
+        - [Notification model](#notification-model)
+        - [Notification storage](#notification-storage)
+      - [RemoteRepository](#remoterepository)
+    - [Delivery](#delivery)
+      - [List of notifications](#list-of-notifications)
+      - [Notification Status](#notification-status)
+    - [Settings](#settings)
+      - [Filtering](#filtering)
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
 - [Adoption strategy](#adoption-strategy)
@@ -74,7 +74,7 @@ Having UNS as a single source of truth reduces the disk space usage for the syst
 ### Notification event
 It consists of a message with an associated CTA to show to an end-user.
 *NotificationEvent* interface
-- `recipient_id: string []` - unique identifiers of all the recipients. It might be the same as elastic_id - the unique user identifier across all the company products. 
+- `recipient_id: string []` - unique identifiers of all the recipients. It might be the same as `elastic_id` (if the env supports it) - the unique user identifier across all the company products. 
 There is currently no way to unambiguously identify the user. WIP [#82725](https://github.com/elastic/kibana/issues/82725)
 - `priority: number` - to prioritize the delivery in case of async delivery mechanism.
 Where 0 - the standard priority, 10 - the critical priority. An event with high priority is processed first.
@@ -88,8 +88,8 @@ Shouldn’t be used in UI.
 - `content: NotificationContent` - see below.
 
 *NotificationContent* interface (see [UI component](https://github.com/elastic/eui/issues/4257))
-- `icon?: { euiIconType: string } | { url: string }` - icon on the left side of the title.
-Can be specified as an absolute url pointing to a public resource on the Internet (cannot point to a Kibana-hosted resource).
+- `icon?: { euiIconType: string }` - icon on the left side of the title.
+Compatible with all the types supported by euiIcon type: a predefined EUI icon name, URL to SVG file, data URL for SVG file.
 - `badge?: "critical"` - badge below the notification message.
 - `message: { i18n_key: string, values: object } | { text: string }` - a notification message is subject to i18n. 
 Locale might be changed on the Space level (on the User level in the future).
@@ -123,12 +123,8 @@ The list of supported notification sources:
     - Suggested trainings
     - Reminders for upcoming training
 
-From the Kibana’s point of view, we might split notification by their origin into two main categories:
-- *Internal sources* (Kibana plugins) create a Kibana-specific notification. Kibana controls the process of a notification lifecycle (creation, storage, teardown) and its content. 
-- *External sources* (Suggestion service, Cloud, Support and Training on Cloud) create notifications outside of Kibana, so it doesn’t control notifications lifecycle nor content.
-
-The on-premise Kibana collects and shows notifications from *internal* sources only.
-Cloud Kibana collects notifications from *internal* sources but shows in UI notifications from both *internal* and *external* sources.
+The on-premise Kibana collects and shows notifications created by Kibana only.
+Cloud Kibana collects notifications from Kibana, shows in UI notifications from Kibana itself and external sources.
 
 A source creates a notification as a reaction to an event.
 A notification might be addressed to:
@@ -155,7 +151,7 @@ Since the users in a group might have different roles and permissions, we have t
   The only available option for the current Kibana Security model. Considering the future integration with UNS,
   Kibana has to provide an HTTP API to check users' permissions are sufficient to see a notification.
   Unified Notification center performs a call to HTTP API to filter out notifications before rendering them in Cloud UI. 
-  This option adds a significant runtime performance penalty.
+  This option adds a significant runtime performance penalty. Moreover, it makes the rendering process dependent on Kibana instance availability. If one of them is temporarily unavailable, the UNS can't decide if a notification must be shown or not.
 
 ### Notification System
 Abstracts the way notifications are created, stored, configured, and retrieved.
@@ -237,7 +233,7 @@ It’s still not clear what functionality is supported by UNS, but we expect it 
 - Change a notification state.
 
 Kibana-specific entities shouldn’t leak to UNS: 
-- Kibana inlines notification message translations with i18n support.
+- Kibana sends message translations for all the supported locales.
 - Kibana-specific groups of recipients unfolded to a list of *recipient_id*.
 - *recipient_id* is set to *elastic_id*.
 
@@ -258,10 +254,6 @@ Kibana HTTP API:
 
 In one of the next phases of the project, we will have to do load testing and decide whether to consider the alternative
 to HTTP polling delivery mechanisms: passing information with a response header (as done for licensing), WebSockets, ServerSideEvents.
-
-#### Filtering
-Filtering allows users to hide notifications they aren’t interested in. Kibana UI attaches a list of filters when requesting notifications.
-Kibana stores applied filters in the browser local storage in order to keep them between page-reloads.
 
 #### Notification Status
 The delivery mechanism handles Notification status change performed by Kibana UI.
@@ -305,6 +297,10 @@ Provides HTTP API for Kibana UI to configure user-specific settings.
 Not provided in MVP, we might add in the future:
 - Unsubscribe from a source
 - Subscribe to a source
+
+#### Filtering
+Filtering allows users to hide notifications they aren’t interested in. Kibana UI attaches a list of filters when requesting notifications.
+Kibana stores filter as a part of User settings data to provide a seamless experience between different deployments on Cloud and user sessions.
 
 
 # Drawbacks
