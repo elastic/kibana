@@ -10,7 +10,7 @@ import { wrapError } from '../../utils';
 
 import { CasesStatusResponseRt, caseStatuses } from '../../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
-import { constructQueries, findCaseStatusStats } from '../helpers';
+import { constructQueryOptions } from '../helpers';
 
 export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -24,12 +24,11 @@ export function initGetCasesStatusApi({ caseService, router }: RouteDeps) {
 
         const [openCases, inProgressCases, closedCases] = await Promise.all([
           ...caseStatuses.map((status) => {
-            const statusQuery = constructQueries({ status });
-            return findCaseStatusStats({
+            const statusQuery = constructQueryOptions({ status });
+            return caseService.findCaseStatusStats({
               client,
               caseOptions: statusQuery.case,
               subCaseOptions: statusQuery.subCase,
-              caseService,
             });
           }),
         ]);

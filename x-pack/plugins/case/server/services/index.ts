@@ -16,6 +16,7 @@ import {
   SavedObjectReference,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsBulkResponse,
+  SavedObjectsFindResult,
 } from 'kibana/server';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
@@ -27,10 +28,17 @@ import {
   CommentPatchAttributes,
   SubCaseAttributes,
   AssociationType,
+  SubCaseResponse,
+  CommentType,
+  CaseType,
+  CaseResponse,
 } from '../../common/api';
-import { defaultSortField } from '../common';
-import { combineFilters } from '../routes/api/cases/helpers';
-import { transformNewSubCase } from '../routes/api/utils';
+import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
+import {
+  flattenCaseSavedObject,
+  flattenSubCaseSavedObject,
+  transformNewSubCase,
+} from '../routes/api/utils';
 import {
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -89,6 +97,12 @@ interface FindCasesArgs extends ClientArgs {
 }
 
 interface FindSubCasesByIDArgs extends FindCasesArgs {
+  ids: string[];
+}
+
+interface FindSubCasesStatusStats {
+  client: SavedObjectsClientContract;
+  options: SavedObjectFindOptions;
   ids: string[];
 }
 
@@ -151,7 +165,35 @@ interface GetUserArgs {
   response?: KibanaResponseFactory;
 }
 
-// TODO: split this up into comments, case, sub case, possibly more?
+interface SubCasesMapWithPageInfo {
+  subCasesMap: Map<string, SubCaseResponse[]>;
+  page: number;
+  perPage: number;
+}
+
+interface CaseCommentStats {
+  commentTotals: Map<string, number>;
+  alertTotals: Map<string, number>;
+}
+
+interface FindCommentsByAssociationArgs {
+  client: SavedObjectsClientContract;
+  id: string | string[];
+  associationType: AssociationType;
+  options?: SavedObjectFindOptions;
+}
+
+interface Collection {
+  case: SavedObjectsFindResult<ESCaseAttributes>;
+  subCases?: SubCaseResponse[];
+}
+
+interface CasesMapWithPageInfo {
+  casesMap: Map<string, CaseResponse>;
+  page: number;
+  perPage: number;
+}
+
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
@@ -188,6 +230,30 @@ export interface CaseServiceSetup {
   createSubCase(args: CreateSubCaseArgs): Promise<SavedObject<SubCaseAttributes>>;
   patchSubCase(args: PatchSubCase): Promise<SavedObjectsUpdateResponse<SubCaseAttributes>>;
   patchSubCases(args: PatchSubCases): Promise<SavedObjectsBulkUpdateResponse<SubCaseAttributes>>;
+  findSubCaseStatusStats(args: FindSubCasesStatusStats): Promise<number>;
+  getCommentsByAssociation(
+    args: FindCommentsByAssociationArgs
+  ): Promise<SavedObjectsFindResponse<CommentAttributes>>;
+  getCaseCommentStats(args: {
+    client: SavedObjectsClientContract;
+    ids: string[];
+    associationType: AssociationType;
+  }): Promise<CaseCommentStats>;
+  findSubCasesGroupByCase(args: {
+    client: SavedObjectsClientContract;
+    options?: SavedObjectFindOptions;
+    ids: string[];
+  }): Promise<SubCasesMapWithPageInfo>;
+  findCaseStatusStats(args: {
+    client: SavedObjectsClientContract;
+    caseOptions: SavedObjectFindOptions;
+    subCaseOptions?: SavedObjectFindOptions;
+  }): Promise<number>;
+  findCasesGroupedByID(args: {
+    client: SavedObjectsClientContract;
+    caseOptions: SavedObjectFindOptions;
+    subCaseOptions?: SavedObjectFindOptions;
+  }): Promise<CasesMapWithPageInfo>;
 }
 
 export class CaseService implements CaseServiceSetup {
@@ -195,6 +261,326 @@ export class CaseService implements CaseServiceSetup {
     private readonly log: Logger,
     private readonly authentication?: SecurityPluginSetup['authc']
   ) {}
+
+  /**
+   * Returns a map of all cases combined with their sub cases if they are collections.
+   */
+  public async findCasesGroupedByID({
+    client,
+    caseOptions,
+    subCaseOptions,
+  }: {
+    client: SavedObjectsClientContract;
+    caseOptions: SavedObjectFindOptions;
+    subCaseOptions?: SavedObjectFindOptions;
+  }): Promise<CasesMapWithPageInfo> {
+    const cases = await this.findCases({
+      client,
+      options: caseOptions,
+    });
+
+    const subCasesResp = await this.findSubCasesGroupByCase({
+      client,
+      options: subCaseOptions,
+      ids: cases.saved_objects
+        .filter((caseInfo) => caseInfo.type === CaseType.collection)
+        .map((caseInfo) => caseInfo.id),
+    });
+    const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
+      const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
+
+      /**
+       * This will include empty collections unless the query explicitly requested type === CaseType.individual, in which
+       * case we'd not have any collections anyway.
+       */
+      accMap.set(caseInfo.id, { case: caseInfo, subCases: subCasesForCase });
+      return accMap;
+    }, new Map<string, Collection>());
+
+    /**
+     * One potential optimization here is to get all comment stats for individual cases, parent cases, and sub cases
+     * in a single request. This can be done because comments that are for sub cases have a reference to both the sub case
+     * and the parent. The associationType field allows us to determine which type of case the comment is attached to.
+     *
+     * So we could use the ids for all the valid cases (individual cases and parents with sub cases) to grab everything.
+     * Once we have it we can build the maps.
+     *
+     * Currently we get all comment stats for all sub cases in one go and we get all comment stats for cases (individual and parent)
+     * in another request (the one below this comment).
+     */
+    const totalCommentsForCases = await this.getCaseCommentStats({
+      client,
+      ids: Array.from(casesMap.keys()),
+      associationType: AssociationType.case,
+    });
+
+    const casesWithComments = new Map<string, CaseResponse>();
+    for (const [id, caseInfo] of casesMap.entries()) {
+      casesWithComments.set(
+        id,
+        flattenCaseSavedObject({
+          savedObject: caseInfo.case,
+          totalComment: totalCommentsForCases.commentTotals.get(id) ?? 0,
+          totalAlerts: totalCommentsForCases.alertTotals.get(id) ?? 0,
+          subCases: caseInfo.subCases,
+        })
+      );
+    }
+
+    return {
+      casesMap: casesWithComments,
+      page: cases.page,
+      perPage: cases.per_page,
+    };
+  }
+
+  /**
+   * Retrieves the number of cases that exist with a given status (open, closed, etc).
+   * This also counts sub cases. Parent cases are excluded from the statistics.
+   */
+  public async findCaseStatusStats({
+    client,
+    caseOptions,
+    subCaseOptions,
+  }: {
+    client: SavedObjectsClientContract;
+    caseOptions: SavedObjectFindOptions;
+    subCaseOptions?: SavedObjectFindOptions;
+  }): Promise<number> {
+    const casesStats = await this.findCases({
+      client,
+      options: {
+        ...caseOptions,
+        fields: [],
+        page: 1,
+        perPage: 1,
+      },
+    });
+
+    /**
+     * This could be made more performant. What we're doing here is retrieving all cases
+     * that match the API request's filters instead of just counts. This is because we need to grab
+     * the ids for the parent cases that match those filters. Then we use those IDS to count how many
+     * sub cases those parents have to calculate the total amount of cases that are open, closed, or in-progress.
+     *
+     * Another solution would be to store ALL filterable fields on both a case and sub case. That we could do a single
+     * query for each type to calculate the totals using the filters. This has drawbacks though:
+     *
+     * We'd have to sync up the parent case's editable attributes with the sub case any time they were change to avoid
+     * them getting out of sync and causing issues when we do these types of stats aggregations. This would result in a lot
+     * of update requests if the user is editing their case details often. Which could potentially cause conflict failures.
+     *
+     * Another option is to prevent the ability from update the parent case's details all together once it's created. A user
+     * could instead modify the sub case details directly. This could be weird though because individual sub cases for the same
+     * parent would have different titles, tags, etc.
+     *
+     * Another potential issue with this approach is when you push a case and all its sub case information. If the sub cases
+     * don't have the same title and tags, we'd need to account for that as well.
+     */
+    const cases = await this.findCases({
+      client,
+      options: {
+        ...caseOptions,
+        // TODO: move this to a variable that the cases spec uses to define the field
+        fields: ['type'],
+        page: 1,
+        perPage: casesStats.total,
+      },
+    });
+
+    const caseIds = cases.saved_objects
+      .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
+      .map((caseInfo) => caseInfo.id);
+
+    let subCasesTotal = 0;
+
+    if (subCaseOptions) {
+      subCasesTotal = await this.findSubCaseStatusStats({
+        client,
+        options: subCaseOptions,
+        ids: caseIds,
+      });
+    }
+
+    const total =
+      cases.saved_objects.filter((caseInfo) => caseInfo.attributes.type !== CaseType.collection)
+        .length + subCasesTotal;
+
+    return total;
+  }
+
+  /**
+   * Retrieves the comments attached to a case or sub case.
+   */
+  public async getCommentsByAssociation({
+    client,
+    id,
+    associationType,
+    options,
+  }: FindCommentsByAssociationArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+    if (associationType === AssociationType.subCase) {
+      return this.getAllSubCaseComments({
+        client,
+        id,
+        options,
+      });
+    } else {
+      return this.getAllCaseComments({
+        client,
+        id,
+        options,
+      });
+    }
+  }
+
+  /**
+   * Returns the number of total comments and alerts for a case (or sub case)
+   */
+  public async getCaseCommentStats({
+    client,
+    ids,
+    associationType,
+  }: {
+    client: SavedObjectsClientContract;
+    ids: string[];
+    associationType: AssociationType;
+  }): Promise<CaseCommentStats> {
+    const refType =
+      associationType === AssociationType.case ? CASE_SAVED_OBJECT : SUB_CASE_SAVED_OBJECT;
+
+    const allComments = await Promise.all(
+      ids.map((id) =>
+        this.getCommentsByAssociation({
+          client,
+          associationType,
+          id,
+          options: { page: 1, perPage: 1 },
+        })
+      )
+    );
+
+    const alerts = await this.getCommentsByAssociation({
+      client,
+      associationType,
+      id: ids,
+      options: {
+        filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert})`,
+      },
+    });
+
+    const getID = (comments: SavedObjectsFindResponse<unknown>) => {
+      return comments.saved_objects.length > 0
+        ? comments.saved_objects[0].references.find((ref) => ref.type === refType)?.id
+        : undefined;
+    };
+
+    const groupedComments = allComments.reduce((acc, comments) => {
+      const id = getID(comments);
+      if (id) {
+        acc.set(id, comments.total);
+      }
+      return acc;
+    }, new Map<string, number>());
+
+    const groupedAlerts = groupTotalAlertsByID({ comments: alerts });
+    return { commentTotals: groupedComments, alertTotals: groupedAlerts };
+  }
+
+  /**
+   * Returns all the sub cases for a set of case IDs. Comment statistics are also returned.
+   */
+  public async findSubCasesGroupByCase({
+    client,
+    options,
+    ids,
+  }: {
+    client: SavedObjectsClientContract;
+    options?: SavedObjectFindOptions;
+    ids: string[];
+  }): Promise<SubCasesMapWithPageInfo> {
+    const getCaseID = (subCase: SavedObjectsFindResult<SubCaseAttributes>): string | undefined => {
+      return subCase.references.length > 0 ? subCase.references[0].id : undefined;
+    };
+
+    if (!options) {
+      return { subCasesMap: new Map<string, SubCaseResponse[]>(), page: 0, perPage: 0 };
+    }
+
+    const subCases = await this.findSubCases({
+      client,
+      options: {
+        ...options,
+        hasReference: ids.map((id) => {
+          return {
+            id,
+            type: CASE_SAVED_OBJECT,
+          };
+        }),
+      },
+    });
+
+    const subCaseComments = await this.getCaseCommentStats({
+      client,
+      ids: subCases.saved_objects.map((subCase) => subCase.id),
+      associationType: AssociationType.subCase,
+    });
+
+    const subCasesMap = subCases.saved_objects.reduce((accMap, subCase) => {
+      const parentCaseID = getCaseID(subCase);
+      if (parentCaseID) {
+        const subCaseFromMap = accMap.get(parentCaseID);
+
+        if (subCaseFromMap === undefined) {
+          const subCasesForID = [
+            flattenSubCaseSavedObject({
+              savedObject: subCase,
+              totalComment: subCaseComments.commentTotals.get(subCase.id) ?? 0,
+              totalAlerts: subCaseComments.alertTotals.get(subCase.id) ?? 0,
+            }),
+          ];
+          accMap.set(parentCaseID, subCasesForID);
+        } else {
+          subCaseFromMap.push(
+            flattenSubCaseSavedObject({
+              savedObject: subCase,
+              totalComment: subCaseComments.commentTotals.get(subCase.id) ?? 0,
+              totalAlerts: subCaseComments.alertTotals.get(subCase.id) ?? 0,
+            })
+          );
+        }
+      }
+      return accMap;
+    }, new Map<string, SubCaseResponse[]>());
+
+    return { subCasesMap, page: subCases.page, perPage: subCases.per_page };
+  }
+
+  /**
+   * Calculates the number of sub cases for a given set of options for a set of case IDs.
+   */
+  public async findSubCaseStatusStats({
+    client,
+    options,
+    ids,
+  }: FindSubCasesStatusStats): Promise<number> {
+    const subCases = await this.findSubCases({
+      client,
+      options: {
+        ...options,
+        page: 1,
+        perPage: 1,
+        fields: [],
+        hasReference: ids.map((id) => {
+          return {
+            id,
+            type: CASE_SAVED_OBJECT,
+          };
+        }),
+      },
+    });
+
+    return subCases.total;
+  }
 
   public async createSubCase({
     client,

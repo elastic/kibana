@@ -11,7 +11,6 @@ import { buildCommentUserActionItem } from '../../../../services/user_actions/he
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { getComments } from '../helpers';
 import { AssociationType } from '../../../../../common/api';
 
 export function initDeleteAllCommentsApi({ caseService, router, userActionService }: RouteDeps) {
@@ -37,9 +36,8 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
         const deleteDate = new Date().toISOString();
 
         const id = request.query?.subCaseID ?? request.params.case_id;
-        const comments = await getComments({
+        const comments = await caseService.getCommentsByAssociation({
           client,
-          caseService,
           id,
           associationType: request.query?.subCaseID
             ? AssociationType.subCase

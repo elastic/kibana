@@ -23,7 +23,6 @@ import {
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { getComments } from '../helpers';
 import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({
@@ -80,7 +79,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
               associationType,
             };
 
-        const theComments = await getComments(args);
+        const theComments = await caseService.getCommentsByAssociation(args);
         return response.ok({ body: CommentsResponseRt.encode(transformComments(theComments)) });
       } catch (error) {
         return response.customError(wrapError(error));

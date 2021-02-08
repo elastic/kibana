@@ -53,26 +53,6 @@ export class CaseClientImpl implements CaseClient {
     this._alertsService = clientArgs.alertsService;
   }
 
-  public get caseService(): CaseServiceSetup {
-    return this._caseService;
-  }
-
-  public get caseConfigureService(): CaseConfigureServiceSetup {
-    return this._caseConfigureService;
-  }
-
-  public get connectorMappingsService(): ConnectorMappingsServiceSetup {
-    return this._connectorMappingsService;
-  }
-
-  public get userActionService(): CaseUserActionServiceSetup {
-    return this._userActionService;
-  }
-
-  public get alertsService(): AlertServiceContract {
-    return this._alertsService;
-  }
-
   public async create(caseInfo: CasePostRequest) {
     return create({
       savedObjectsClient: this._savedObjectsClient,
