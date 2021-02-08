@@ -47,6 +47,7 @@ export class SearchSessionsMgmtApp {
 
     const { sessionsClient } = data.search;
     const api = new SearchSessionsMgmtAPI(sessionsClient, this.config, {
+      coreStart,
       notifications,
       urls: share.urlGenerators,
       application,

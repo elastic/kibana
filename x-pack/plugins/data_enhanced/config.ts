@@ -43,10 +43,6 @@ export const configSchema = schema.object({
       defaultExpiration: schema.duration({ defaultValue: '7d' }),
       management: schema.object({
         /**
-         * maxSessions controls how many saved search sessions we display per page on the management screen.
-         */
-        maxSessions: schema.number({ defaultValue: 10000 }),
-        /**
          * refreshInterval controls how often we refresh the management screen.
          */
         refreshInterval: schema.duration({ defaultValue: '10s' }),

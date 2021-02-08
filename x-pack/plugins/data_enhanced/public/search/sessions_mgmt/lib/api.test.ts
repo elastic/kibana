@@ -30,7 +30,6 @@ describe('Search Sessions Management API', () => {
       defaultExpiration: moment.duration('7d'),
       management: {
         expiresSoonWarning: moment.duration(1, 'days'),
-        maxSessions: 2000,
         refreshInterval: moment.duration(1, 'seconds'),
         refreshTimeout: moment.duration(10, 'minutes'),
       },
@@ -53,6 +52,7 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        coreStart: mockCoreStart,
         urls: mockUrls,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
@@ -81,6 +81,7 @@ describe('Search Sessions Management API', () => {
       sessionsClient.find = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        coreStart: mockCoreStart,
         urls: mockUrls,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
@@ -110,6 +111,7 @@ describe('Search Sessions Management API', () => {
       });
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        coreStart: mockCoreStart,
         urls: mockUrls,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
@@ -138,6 +140,7 @@ describe('Search Sessions Management API', () => {
 
     test('send cancel calls the cancel endpoint with a session ID', async () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        coreStart: mockCoreStart,
         urls: mockUrls,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
@@ -153,6 +156,7 @@ describe('Search Sessions Management API', () => {
       sessionsClient.delete = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        coreStart: mockCoreStart,
         urls: mockUrls,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
@@ -182,6 +186,7 @@ describe('Search Sessions Management API', () => {
 
     test('send extend throws an error for now', async () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        coreStart: mockCoreStart,
         urls: mockUrls,
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,

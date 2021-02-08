@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart, NotificationsStart, SavedObject } from 'kibana/public';
+import type { ApplicationStart, CoreStart, NotificationsStart, SavedObject } from 'kibana/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
@@ -82,6 +82,7 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
 };
 
 interface SearcgSessuibManagementDeps {
+  coreStart: CoreStart;
   urls: UrlGeneratorsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
@@ -99,6 +100,7 @@ export class SearchSessionsMgmtAPI {
       saved_objects: object[];
     }
 
+    const itemsPerPage = this.deps.coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
     const mgmtConfig = this.config.management;
 
     const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
@@ -106,7 +108,7 @@ export class SearchSessionsMgmtAPI {
     const fetch$ = from(
       this.sessionsClient.find({
         page: 1,
-        perPage: mgmtConfig.maxSessions,
+        perPage: itemsPerPage,
         sortField: 'created',
         sortOrder: 'asc',
         searchFields: ['persisted'],

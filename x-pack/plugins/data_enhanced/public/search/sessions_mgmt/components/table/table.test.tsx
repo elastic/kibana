@@ -33,7 +33,6 @@ describe('Background Search Session Management Table', () => {
       defaultExpiration: moment.duration('7d'),
       management: {
         expiresSoonWarning: moment.duration(1, 'days'),
-        maxSessions: 2000,
         refreshInterval: moment.duration(1, 'seconds'),
         refreshTimeout: moment.duration(10, 'minutes'),
       },
@@ -41,6 +40,7 @@ describe('Background Search Session Management Table', () => {
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+      coreStart: mockCoreStart,
       urls: mockUrls,
       notifications: mockCoreStart.notifications,
       application: mockCoreStart.application,
