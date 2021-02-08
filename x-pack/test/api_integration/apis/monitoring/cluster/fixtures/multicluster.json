@@ -98,6 +98,10 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "agentMode": false,
+      "container": false
     }
   },
   "alerts": {
@@ -214,6 +218,10 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "agentMode": false,
+      "container": false
     }
   },
   "alerts": {
@@ -326,6 +334,10 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "agentMode": false,
+      "container": false
     }
   },
   "alerts": {
