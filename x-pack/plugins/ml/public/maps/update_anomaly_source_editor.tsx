@@ -31,14 +31,17 @@ export class UpdateAnomalySourceEditor extends Component<Props, State> {
               <FormattedMessage id="xpack.ml.maps.settingsEditorLabel" defaultMessage="Anomalies" />
             </h6>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <TypicalActualSelector
+            onChange={(typicalActual: 'typical' | 'actual') => {
+              this.props.onChange({
+                propName: 'typicalActual',
+                value: typicalActual,
+              });
+            }}
+            typicalActual={this.props.typicalActual}
+          />
         </EuiPanel>
-        <EuiSpacer size="s" />
-        <TypicalActualSelector
-          onChange={(typicalActual: 'typical' | 'actual') => {
-            // console.log('do thing!', typicalActual);
-          }}
-          typicalActual={this.props.typicalActual}
-        />
       </Fragment>
     );
   }

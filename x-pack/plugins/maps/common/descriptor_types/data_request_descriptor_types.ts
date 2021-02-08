@@ -51,6 +51,11 @@ export type VectorSourceSyncMeta =
   | ESGeoGridSourceSyncMeta
   | ESGeoLineSourceSyncMeta
   | ESTermSourceSyncMeta
+  | {
+      // todo : needs to be extensible
+      jobId: string;
+      typicalActual: 'typical' | 'actual';
+    }
   | null;
 
 export type VectorSourceRequestMeta = MapFilters & {

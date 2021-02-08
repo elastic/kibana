@@ -43,8 +43,8 @@ export class TypicalActualSelector extends Component<Props, State> {
     const options = [{ value: this.props.typicalActual, label: this.props.typicalActual }];
     return (
       <EuiFormRow
-        label={i18n.translate('xpack.ml.maps.jobIdLabel', {
-          defaultMessage: 'JobId',
+        label={i18n.translate('xpack.ml.maps.typicalActualLabel', {
+          defaultMessage: 'Type',
         })}
         display="columnCompressed"
       >

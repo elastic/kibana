@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React, { ReactElement } from 'react';
 import {
   FieldFormatter,
   MAX_ZOOM,
@@ -32,6 +33,7 @@ import type { DataRequest } from '../../../maps/public';
 import type { SourceTooltipConfig } from '../../../maps/public';
 import type { IVectorSource } from '../../../maps/public';
 import { getResultsForJobId } from './util';
+import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
@@ -177,8 +179,13 @@ export class AnomalySource implements IVectorSource {
     return true;
   }
 
-  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): React.ReactElement<any> | null {
-    return null;
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
+    return (
+      <UpdateAnomalySourceEditor
+        onChange={onChange}
+        typicalActual={this._descriptor.typicalActual}
+      />
+    );
   }
 
   async supportsFitToBounds(): Promise<boolean> {
@@ -212,7 +219,10 @@ export class AnomalySource implements IVectorSource {
   }
 
   getSyncMeta(): VectorSourceSyncMeta | null {
-    return null;
+    return {
+      jobId: this._descriptor.jobId,
+      typicalActual: this._descriptor.typicalActual,
+    };
   }
 
   async getTooltipProperties(properties: { [p: string]: any } | null): Promise<ITooltipProperty[]> {
