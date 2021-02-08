@@ -858,7 +858,7 @@
                     }
                   }
                 },
-                "DYNAMIC_KEY": {
+                "data_frozen": {
                   "properties": {
                     "primary_shard_size_median_bytes": {
                       "type": "long"
