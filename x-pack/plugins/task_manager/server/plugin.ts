@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { first, map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Plugin,
@@ -45,7 +45,7 @@ export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
-  private config?: TaskManagerConfig;
+  private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
@@ -55,15 +55,11 @@ export class TaskManagerPlugin
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
+    this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.config = await this.initContext.config
-      .create<TaskManagerConfig>()
-      .pipe(first())
-      .toPromise();
-
+  public setup(core: CoreSetup): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);
