@@ -132,6 +132,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       });
       setPreviewResponse(response);
     } catch (e) {
+      setPreviewResponse(undefined);
       setPreviewError(e);
     }
   }, [alertParams, lookBehindInterval]);
@@ -154,22 +155,6 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
 
   const isInvalid = lookBehindInterval !== undefined && !!validationErrors;
 
-  if (previewError) {
-    return (
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.ml.previewAlert.previewErrorTitle"
-            defaultMessage="Unable to load the preview"
-          />
-        }
-        color="danger"
-        iconType="alert"
-      >
-        <p>{previewError.message}</p>
-      </EuiCallOut>
-    );
-  }
   return (
     <>
       <EuiFlexGroup gutterSize="s" alignItems={'flexEnd'}>
@@ -205,6 +190,21 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {previewError !== undefined && (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ml.previewAlert.previewErrorTitle"
+              defaultMessage="Unable to load the preview"
+            />
+          }
+          color="danger"
+          iconType="alert"
+        >
+          <p>{previewError.message}</p>
+        </EuiCallOut>
+      )}
 
       {previewResponse && sampleHits && (
         <>
