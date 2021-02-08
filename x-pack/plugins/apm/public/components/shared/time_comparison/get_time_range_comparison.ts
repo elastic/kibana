@@ -8,9 +8,8 @@
 import moment from 'moment';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
-import { useTheme } from '../../../hooks/use_theme';
 
-function getChartTheme(theme: EuiTheme) {
+export function getComparisonChartTheme(theme: EuiTheme) {
   return {
     areaSeriesStyle: {
       area: {
@@ -30,7 +29,7 @@ function getChartTheme(theme: EuiTheme) {
   };
 }
 
-export function useTimeRangeComparison({
+export function getTimeRangeComparison({
   comparisonType,
   start,
   end,
@@ -39,7 +38,6 @@ export function useTimeRangeComparison({
   start?: string;
   end?: string;
 }) {
-  const theme = useTheme();
   if (!comparisonType || !start || !end) {
     return {};
   }
@@ -64,6 +62,5 @@ export function useTimeRangeComparison({
   return {
     comparisonStart: startDate.subtract(daysToSubtract, 'days').toISOString(),
     comparisonEnd: endDate.subtract(daysToSubtract, 'days').toISOString(),
-    chartTheme: getChartTheme(theme),
   };
 }

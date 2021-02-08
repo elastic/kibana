@@ -15,7 +15,10 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { useTimeRangeComparison } from '../../shared/time_comparison/use_time_range_comparison';
+import {
+  getTimeRangeComparison,
+  getComparisonChartTheme,
+} from '../../shared/time_comparison/get_time_range_comparison';
 
 export function ServiceOverviewThroughputChart({
   height,
@@ -27,13 +30,12 @@ export function ServiceOverviewThroughputChart({
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionType } = useApmServiceContext();
   const { start, end, comparisonEnabled, comparisonType } = urlParams;
-  const { comparisonStart, comparisonEnd, chartTheme } = useTimeRangeComparison(
-    {
-      start,
-      end,
-      comparisonType,
-    }
-  );
+  const comparisonChartTheme = getComparisonChartTheme(theme);
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -81,7 +83,7 @@ export function ServiceOverviewThroughputChart({
         height={height}
         showAnnotations={false}
         fetchStatus={status}
-        customTheme={chartTheme}
+        customTheme={comparisonChartTheme}
         timeseries={[
           {
             data: data?.currentPeriod.throughput ?? [],
