@@ -122,8 +122,8 @@ const getSummary = ({
         }
         const linkValueField =
           item.linkField != null && data.find((d) => d.field === item.linkField);
-        const linkValue = getOr(null, 'originalValue.0', linkValueField);
-        const value = getOr(null, 'originalValue.0', field);
+        const linkValue = getOr(null, 'originalValue', linkValueField);
+        const value = getOr(null, 'originalValue', field);
         const category = field.category;
         const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
         const description = {
