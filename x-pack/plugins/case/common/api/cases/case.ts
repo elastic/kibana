@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -25,18 +26,14 @@ const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
 
-const CaseBasicNoTypeRt = rt.type({
+const CaseBasicRt = rt.type({
   description: rt.string,
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
+  type: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
-});
-
-const CaseBasicRt = rt.type({
-  ...CaseBasicNoTypeRt.props,
-  type: CaseTypeRt,
 });
 
 const CaseExternalServiceBasicRt = rt.type({
@@ -140,23 +137,12 @@ export const CasesFindResponseRt = rt.intersection([
 ]);
 
 export const CasePatchRequestRt = rt.intersection([
-  rt.partial(CaseBasicNoTypeRt.props),
-  rt.type({ id: rt.string, version: rt.string }),
-]);
-
-/**
- * This is so the convert request can just pass the request along to the internal
- * update functionality. We don't want to expose the type field in the API request though
- * so users can't change a collection back to a normal case.
- */
-export const CaseUpdateRequestRt = rt.intersection([
   rt.partial(CaseBasicRt.props),
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
-export const CasesUpdateRequestRt = rt.type({ cases: rt.array(CaseUpdateRequestRt) });
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 /**
@@ -171,8 +157,6 @@ export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
-// The update request is different from the patch request in that it allow updating the type field
-export type CasesUpdateRequest = rt.TypeOf<typeof CasesUpdateRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;

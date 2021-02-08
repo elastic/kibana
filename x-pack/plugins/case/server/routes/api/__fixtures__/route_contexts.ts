@@ -1,13 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'src/core/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { legacyClientMock } from 'src/core/server/elasticsearch/legacy/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { createExternalCaseClient } from '../../../client';
 import {
@@ -26,7 +25,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   actionsMock.listTypes.mockImplementation(() => Promise.resolve(getActionTypes()));
 
   const log = loggingSystemMock.create().get('case');
-  const esLegacyCluster = legacyClientMock.createScopedClusterClient();
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   const caseService = new CaseService(
     log,
@@ -68,7 +67,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
       getUserActions: jest.fn(),
     },
     alertsService,
-    callCluster: esLegacyCluster.callAsCurrentUser,
+    scopedClusterClient: esClient,
   });
 
   return context;

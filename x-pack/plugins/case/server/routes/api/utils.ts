@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { badRequest, boomify, isBoom } from '@hapi/boom';
@@ -41,6 +42,7 @@ import {
   ContextTypeGeneratedAlertRt,
   SubCasesFindResponse,
   AttributesTypeAlerts,
+  User,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -48,12 +50,18 @@ import { SortFieldCase, TotalCommentByCase } from './types';
 
 // TODO: refactor these functions to a common location, this is used by the caseClient too
 
-// TODO: maybe inline this
-export const transformNewSubCase = (createdAt: string): SubCaseAttributes => {
+export const transformNewSubCase = ({
+  createdAt,
+  createdBy,
+}: {
+  createdAt: string;
+  createdBy: User;
+}): SubCaseAttributes => {
   return {
     closed_at: null,
     closed_by: null,
     created_at: createdAt,
+    created_by: createdBy,
     status: CaseStatuses.open,
     updated_at: null,
     updated_by: null,
@@ -321,13 +329,19 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-const isUserContext = (
+/**
+ * A type narrowing function for user comments. Exporting so integration tests can use it.
+ */
+export const isUserContext = (
   context: CommentRequest | CommentAttributes
 ): context is CommentRequestUserType => {
   return context.type === CommentType.user;
 };
 
-const isAlertContext = (
+/**
+ * A type narrowing function for alert comments. Exporting so integration tests can use it.
+ */
+export const isAlertContext = (
   context: CommentRequest | CommentAttributes
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;

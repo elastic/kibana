@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
@@ -67,12 +68,12 @@ async function executor(
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
-  const { savedObjectsClient, callCluster } = services;
+  const { savedObjectsClient, scopedClusterClient } = services;
   // TODO: ??? calling a constructor in a curry generates this error, TypeError: _client.CaseClientImpl is not a constructor
   // const caseClient = new CaseClientImpl({
   const caseClient = createExternalCaseClient({
     savedObjectsClient,
-    callCluster,
+    scopedClusterClient,
     // TODO: refactor this
     request: {} as KibanaRequest,
     caseService,

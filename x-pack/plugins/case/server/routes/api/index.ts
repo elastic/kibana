@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { initDeleteCasesApi } from './cases/delete_cases';
@@ -33,6 +34,16 @@ import { RouteDeps } from './types';
 import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
 import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
 import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
+import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
+
+/**
+ * Default page number when interacting with the saved objects API.
+ */
+export const defaultPage = 1;
+/**
+ * Default number of results when interacting with the saved objects API.
+ */
+export const defaultPerPage = 20;
 
 export function initCaseApi(deps: RouteDeps) {
   // Cases
@@ -47,6 +58,7 @@ export function initCaseApi(deps: RouteDeps) {
   initGetSubCaseApi(deps);
   initPatchSubCasesApi(deps);
   initFindSubCasesApi(deps);
+  initDeleteSubCasesApi(deps);
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);

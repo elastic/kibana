@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, isPlainObject } from 'lodash';
@@ -20,10 +21,10 @@ import {
   CaseStatuses,
   CaseType,
   SavedObjectFindOptions,
-  AssociationType,
   CommentType,
   SubCaseResponse,
   SubCaseAttributes,
+  AssociationType,
 } from '../../../../common/api';
 import { ESConnectorFields, ConnectorTypeFields } from '../../../../common/api/connectors';
 import {
@@ -33,7 +34,7 @@ import {
 } from '../../../saved_object_types';
 import { flattenSubCaseSavedObject, sortToSnake } from '../utils';
 import { CaseServiceSetup } from '../../../services';
-import { countAlerts } from '../../../common';
+import { groupTotalAlertsByID } from '../../../common';
 
 // TODO: write unit tests for these functions
 export const combineFilters = (filters: string[] | undefined, operator: 'OR' | 'AND'): string => {
@@ -119,7 +120,7 @@ export const findSubCaseStatusStats = async ({
       hasReference: ids.map((id) => {
         return {
           id,
-          type: SUB_CASE_SAVED_OBJECT,
+          type: CASE_SAVED_OBJECT,
         };
       }),
     },
@@ -207,6 +208,35 @@ export const findCaseStatusStats = async ({
   return total;
 };
 
+interface FindCommentsArgs {
+  client: SavedObjectsClientContract;
+  caseService: CaseServiceSetup;
+  id: string | string[];
+  associationType: AssociationType;
+  options?: SavedObjectFindOptions;
+}
+export const getComments = async ({
+  client,
+  caseService,
+  id,
+  associationType,
+  options,
+}: FindCommentsArgs) => {
+  if (associationType === AssociationType.subCase) {
+    return caseService.getAllSubCaseComments({
+      client,
+      id,
+      options,
+    });
+  } else {
+    return caseService.getAllCaseComments({
+      client,
+      id,
+      options,
+    });
+  }
+};
+
 interface SubCaseStats {
   commentTotals: Map<string, number>;
   alertTotals: Map<string, number>;
@@ -216,43 +246,41 @@ export const getCaseCommentStats = async ({
   client,
   caseService,
   ids,
-  type,
+  associationType,
 }: {
   client: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   ids: string[];
-  type: typeof SUB_CASE_SAVED_OBJECT | typeof CASE_SAVED_OBJECT;
+  associationType: AssociationType;
 }): Promise<SubCaseStats> => {
+  const refType =
+    associationType === AssociationType.case ? CASE_SAVED_OBJECT : SUB_CASE_SAVED_OBJECT;
+
   const allComments = await Promise.all(
     ids.map((id) =>
-      caseService.getAllCaseComments({
+      getComments({
         client,
+        caseService,
+        associationType,
         id,
-        subCaseID: type === SUB_CASE_SAVED_OBJECT ? id : undefined,
-        options: {
-          fields: [],
-          page: 1,
-          perPage: 1,
-        },
+        options: { page: 1, perPage: 1 },
       })
     )
   );
 
-  const associationType =
-    type === SUB_CASE_SAVED_OBJECT ? AssociationType.subCase : AssociationType.case;
-
-  const alerts = await caseService.getAllCaseComments({
+  const alerts = await getComments({
     client,
+    caseService,
+    associationType,
     id: ids,
-    subCaseID: type === SUB_CASE_SAVED_OBJECT ? ids : undefined,
     options: {
-      filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}) AND ${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType: ${associationType}`,
+      filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert})`,
     },
   });
 
   const getID = (comments: SavedObjectsFindResponse<unknown>) => {
     return comments.saved_objects.length > 0
-      ? comments.saved_objects[0].references.find((ref) => ref.type === type)?.id
+      ? comments.saved_objects[0].references.find((ref) => ref.type === refType)?.id
       : undefined;
   };
 
@@ -264,22 +292,7 @@ export const getCaseCommentStats = async ({
     return acc;
   }, new Map<string, number>());
 
-  const getFindResultID = (comment: SavedObjectsFindResult<unknown>) => {
-    const refs = comment.references;
-    return refs.length > 0 ? refs.find((ref) => ref.type === type)?.id : undefined;
-  };
-
-  const groupedAlerts = alerts.saved_objects.reduce((acc, alertsInfo) => {
-    const id = getFindResultID(alertsInfo);
-    if (id) {
-      const totalAlerts = acc.get(id);
-      if (totalAlerts !== undefined) {
-        acc.set(id, totalAlerts + countAlerts(alertsInfo));
-      }
-      acc.set(id, countAlerts(alertsInfo));
-    }
-    return acc;
-  }, new Map<string, number>());
+  const groupedAlerts = groupTotalAlertsByID({ comments: alerts });
   return { commentTotals: groupedComments, alertTotals: groupedAlerts };
 };
 
@@ -328,29 +341,29 @@ export const findSubCases = async ({
     client,
     caseService,
     ids: subCases.saved_objects.map((subCase) => subCase.id),
-    type: SUB_CASE_SAVED_OBJECT,
+    associationType: AssociationType.subCase,
   });
 
   const subCasesMap = subCases.saved_objects.reduce((accMap, subCase) => {
-    const id = getCaseID(subCase);
-    if (id) {
-      const subCaseFromMap = accMap.get(id);
+    const parentCaseID = getCaseID(subCase);
+    if (parentCaseID) {
+      const subCaseFromMap = accMap.get(parentCaseID);
 
       if (subCaseFromMap === undefined) {
         const subCasesForID = [
           flattenSubCaseSavedObject({
             savedObject: subCase,
-            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
-            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+            totalComment: subCaseComments.commentTotals.get(subCase.id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(subCase.id) ?? 0,
           }),
         ];
-        accMap.set(id, subCasesForID);
+        accMap.set(parentCaseID, subCasesForID);
       } else {
         subCaseFromMap.push(
           flattenSubCaseSavedObject({
             savedObject: subCase,
-            totalComment: subCaseComments.commentTotals.get(id) ?? 0,
-            totalAlerts: subCaseComments.alertTotals.get(id) ?? 0,
+            totalComment: subCaseComments.commentTotals.get(subCase.id) ?? 0,
+            totalAlerts: subCaseComments.alertTotals.get(subCase.id) ?? 0,
           })
         );
       }

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { each, cloneDeep } from 'lodash';
@@ -15,7 +15,7 @@ import realHits from 'fixtures/real_hits.js';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { DiscoverSidebarProps } from './discover_sidebar';
+import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
@@ -130,5 +130,17 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'field-extension-showDetails').simulate('click');
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
+  });
+  it('renders sidebar with unmapped fields config', function () {
+    const unmappedFieldsConfig = {
+      onChangeUnmappedFields: jest.fn(),
+      showUnmappedFields: false,
+      showUnmappedFieldsDefaultValue: false,
+    };
+    const componentProps = { ...props, unmappedFieldsConfig };
+    const component = mountWithIntl(<DiscoverSidebarResponsive {...componentProps} />);
+    const discoverSidebar = component.find(DiscoverSidebar);
+    expect(discoverSidebar).toHaveLength(1);
+    expect(discoverSidebar.props().unmappedFieldsConfig).toEqual(unmappedFieldsConfig);
   });
 });

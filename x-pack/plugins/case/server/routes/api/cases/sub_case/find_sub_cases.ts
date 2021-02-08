@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -21,6 +22,7 @@ import { RouteDeps } from '../../types';
 import { escapeHatch, transformSubCases, wrapError } from '../../utils';
 import { SUB_CASES_URL } from '../../../../../common/constants';
 import { constructQueries, findSubCases, findSubCaseStatusStats } from '../helpers';
+import { defaultPage, defaultPerPage } from '../..';
 
 export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -48,6 +50,8 @@ export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
           caseService,
           options: {
             sortField: 'created_at',
+            page: defaultPage,
+            perPage: defaultPerPage,
             ...queryParams,
           },
         });
@@ -71,7 +75,8 @@ export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
               open,
               inProgress,
               closed,
-              total: subCases.subCasesMap.size,
+              // there should only be one entry in the map for the requested case ID
+              total: subCases.subCasesMap.get(request.params.case_id)?.length ?? 0,
             })
           ),
         });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -10,6 +11,7 @@ import { SubCaseResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenSubCaseSavedObject, wrapError } from '../../utils';
 import { SUB_CASE_DETAILS_URL } from '../../../../../common/constants';
+import { countAlertsForID } from '../../../../common';
 
 export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -21,14 +23,14 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
           sub_case_id: schema.string(),
         }),
         query: schema.object({
-          includeComments: schema.string({ defaultValue: 'true' }),
+          includeComments: schema.boolean({ defaultValue: true }),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const includeComments = JSON.parse(request.query.includeComments);
+        const includeComments = request.query.includeComments;
 
         const subCase = await caseService.getSubCase({
           client,
@@ -45,14 +47,13 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
           });
         }
 
-        const theComments = await caseService.getAllCaseComments({
+        const theComments = await caseService.getAllSubCaseComments({
           client,
-          id: request.params.case_id,
+          id: request.params.sub_case_id,
           options: {
             sortField: 'created_at',
             sortOrder: 'asc',
           },
-          subCaseID: request.params.sub_case_id,
         });
 
         return response.ok({
@@ -61,6 +62,10 @@ export function initGetSubCaseApi({ caseService, router }: RouteDeps) {
               savedObject: subCase,
               comments: theComments.saved_objects,
               totalComment: theComments.total,
+              totalAlerts: countAlertsForID({
+                comments: theComments,
+                id: request.params.sub_case_id,
+              }),
             })
           ),
         });

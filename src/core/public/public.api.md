@@ -474,6 +474,7 @@ export interface DocLinksStart {
             readonly installation: string;
             readonly configuration: string;
             readonly elasticsearchOutput: string;
+            readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
         };
@@ -482,6 +483,10 @@ export interface DocLinksStart {
         };
         readonly metricbeat: {
             readonly base: string;
+            readonly configure: string;
+            readonly httpEndpoint: string;
+            readonly install: string;
+            readonly start: string;
         };
         readonly enterpriseSearch: {
             readonly base: string;
@@ -575,6 +580,7 @@ export interface DocLinksStart {
             createPipeline: string;
             createTransformRequest: string;
             executeWatchActionModes: string;
+            indexExists: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;

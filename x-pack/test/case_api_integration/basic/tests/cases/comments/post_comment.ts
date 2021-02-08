@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -16,6 +17,7 @@ import {
   postCaseReq,
   postCommentUserReq,
   postCommentAlertReq,
+  postCollectionReq,
 } from '../../../../common/lib/mock';
 import { deleteCases, deleteCasesUserActions, deleteComments } from '../../../../common/lib/utils';
 import {
@@ -199,6 +201,20 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         })
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentAlertReq)
+        .expect(400);
+    });
+
+    it('400s when adding an alert to a collection case', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCollectionReq)
         .expect(200);
 
       await supertest

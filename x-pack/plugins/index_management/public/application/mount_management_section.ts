@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,7 +10,6 @@ import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { FleetSetup } from '../../../fleet/public';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
 import { ExtensionsService } from '../services';
@@ -50,7 +50,7 @@ export async function mountManagementSection(
   usageCollection: UsageCollectionSetup,
   params: ManagementAppMountParams,
   extensionsService: ExtensionsService,
-  fleet?: FleetSetup
+  isFleetEnabled: boolean
 ) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -80,7 +80,7 @@ export async function mountManagementSection(
     },
     plugins: {
       usageCollection,
-      fleet,
+      isFleetEnabled,
     },
     services: { httpService, notificationService, uiMetricService, extensionsService },
     history,

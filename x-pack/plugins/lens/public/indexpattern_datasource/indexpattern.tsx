@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -30,7 +31,7 @@ import { toExpression } from './to_expression';
 import {
   IndexPatternDimensionTrigger,
   IndexPatternDimensionEditor,
-  canHandleDrop,
+  getDropTypes,
   onDrop,
 } from './dimension_panel';
 import { IndexPatternDataPanel } from './datapanel';
@@ -43,7 +44,7 @@ import {
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
-import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -51,14 +52,8 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { DragDropIdentifier } from '../drag_drop/providers';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
-
-export type DraggedField = DragDropIdentifier & {
-  field: IndexPatternField;
-  indexPatternId: string;
-};
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -167,7 +162,7 @@ export function getIndexPatternDatasource({
       });
     },
 
-    toExpression,
+    toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
 
     renderDataPanel(
       domElement: Element,
@@ -313,8 +308,7 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
-
-    canHandleDrop,
+    getDropTypes,
     onDrop,
 
     // Reset the temporary invalid state when closing the editor, but don't

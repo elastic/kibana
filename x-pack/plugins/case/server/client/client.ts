@@ -1,19 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import {
-  ILegacyScopedClusterClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import {
   CaseClientFactoryArguments,
   CaseClient,
@@ -35,18 +27,11 @@ import {
   CaseUserActionServiceSetup,
   AlertServiceContract,
 } from '../services';
-import {
-  CasesPatchRequest,
-  CasesPatchRequestRt,
-  CasePostRequest,
-  excess,
-  throwErrors,
-} from '../../common/api';
+import { CasesPatchRequest, CasePostRequest } from '../../common/api';
 
 // TODO: rename
 export class CaseClientImpl implements CaseClient {
-  // TODO: we have to use the one that the actions API gives us which is deprecated, but we'll need it updated there first I think
-  private readonly _callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  private readonly _scopedClusterClient: ElasticsearchClient;
   private readonly _caseConfigureService: CaseConfigureServiceSetup;
   private readonly _caseService: CaseServiceSetup;
   private readonly _connectorMappingsService: ConnectorMappingsServiceSetup;
@@ -57,7 +42,7 @@ export class CaseClientImpl implements CaseClient {
 
   // TODO: refactor so these are created in the constructor instead of passed in
   constructor(clientArgs: CaseClientFactoryArguments) {
-    this._callCluster = clientArgs.callCluster;
+    this._scopedClusterClient = clientArgs.scopedClusterClient;
     this._caseConfigureService = clientArgs.caseConfigureService;
     this._caseService = clientArgs.caseService;
     this._connectorMappingsService = clientArgs.connectorMappingsService;
@@ -99,22 +84,13 @@ export class CaseClientImpl implements CaseClient {
     });
   }
 
-  /**
-   * This enforces the restriction of not changing the case type field
-   * @param args requested cases to be updated
-   */
-  public async update(args: CasesPatchRequest) {
-    const validatedCases = pipe(
-      excess(CasesPatchRequestRt).decode(args),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
+  public async update(cases: CasesPatchRequest) {
     return update({
       savedObjectsClient: this._savedObjectsClient,
       caseService: this._caseService,
       userActionService: this._userActionService,
       request: this.request,
-      cases: validatedCases,
+      cases,
       caseClient: this,
     });
   }
@@ -148,7 +124,7 @@ export class CaseClientImpl implements CaseClient {
     return updateAlertsStatus({
       ...args,
       alertsService: this._alertsService,
-      callCluster: this._callCluster,
+      scopedClusterClient: this._scopedClusterClient,
     });
   }
 }

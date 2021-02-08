@@ -1,14 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  ILegacyScopedClusterClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CaseClientPostRequest,
@@ -57,8 +54,7 @@ export interface CaseClientUpdateAlertsStatus {
 }
 
 export interface CaseClientFactoryArguments {
-  // TODO: we have to use the one that the actions API gives us which is deprecated, but we'll need it updated there first I think
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  scopedClusterClient: ElasticsearchClient;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   connectorMappingsService: ConnectorMappingsServiceSetup;

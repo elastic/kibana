@@ -1,15 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../plugins/case/common/constants';
+import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../../plugins/case/common/constants';
 import { postCaseReq, postCommentUserReq, findCasesResp } from '../../../common/lib/mock';
-import { deleteCases, deleteComments, deleteCasesUserActions } from '../../../common/lib/utils';
+import {
+  deleteAllCaseItems,
+  createSubCase,
+  setStatus,
+  CreateSubCaseResp,
+} from '../../../common/lib/utils';
+import { CasesFindResponse, CaseStatuses, CaseType } from '../../../../../plugins/case/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -17,9 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   describe('find_cases', () => {
     afterEach(async () => {
-      await deleteCases(es);
-      await deleteComments(es);
-      await deleteCasesUserActions(es);
+      await deleteAllCaseItems(es);
     });
 
     it('should return empty response', async () => {
@@ -239,6 +244,123 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.count_open_cases).to.eql(1);
       expect(body.count_closed_cases).to.eql(1);
       expect(body.count_in_progress_cases).to.eql(1);
+    });
+
+    describe('stats with sub cases', () => {
+      let collection: CreateSubCaseResp;
+      beforeEach(async () => {
+        collection = await createSubCase({ supertest });
+
+        const [, , { body: toCloseCase }] = await Promise.all([
+          setStatus({
+            supertest,
+            cases: [
+              {
+                id: collection.newSubCaseInfo.subCase!.id,
+                version: collection.newSubCaseInfo.subCase!.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+            type: 'sub_case',
+          }),
+          supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq),
+          supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCaseReq),
+        ]);
+
+        await setStatus({
+          supertest,
+          cases: [
+            {
+              id: toCloseCase.id,
+              version: toCloseCase.version,
+              status: CaseStatuses.closed,
+            },
+          ],
+          type: 'case',
+        });
+      });
+      it('correctly counts stats without using a filter', async () => {
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc`)
+          .expect(200);
+
+        expect(body.total).to.eql(3);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(1);
+      });
+
+      it('correctly counts stats with a filter for open cases', async () => {
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&status=open`)
+          .expect(200);
+
+        expect(body.total).to.eql(2);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(1);
+      });
+
+      it('correctly counts stats with a filter for individual cases', async () => {
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&type=${CaseType.individual}`)
+          .expect(200);
+
+        expect(body.total).to.eql(2);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(0);
+      });
+
+      it('correctly counts stats with a filter for collection cases with multiple sub cases', async () => {
+        // this will force the first sub case attached to the collection to be closed
+        // so we'll have one closed sub case and one open sub case
+        await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id });
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&type=${CaseType.collection}`)
+          .expect(200);
+
+        expect(body.total).to.eql(1);
+        expect(body.cases[0].subCases?.length).to.eql(2);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(0);
+      });
+
+      it('correctly counts stats with a filter for collection and open cases with multiple sub cases', async () => {
+        // this will force the first sub case attached to the collection to be closed
+        // so we'll have one closed sub case and one open sub case
+        await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id });
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(
+            `${CASES_URL}/_find?sortOrder=asc&type=${CaseType.collection}&status=${CaseStatuses.open}`
+          )
+          .expect(200);
+
+        expect(body.total).to.eql(1);
+        expect(body.cases[0].subCases?.length).to.eql(1);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(0);
+      });
+
+      it('correctly counts stats including a collection without sub cases', async () => {
+        // delete the sub case on the collection so that it doesn't have any sub cases
+        await supertest
+          .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCase!.id}"]`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(204);
+
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc`)
+          .expect(200);
+
+        expect(body.total).to.eql(3);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(0);
+      });
     });
 
     it('unhappy path - 400s when bad query supplied', async () => {

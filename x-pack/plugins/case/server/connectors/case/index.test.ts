@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -832,7 +833,6 @@ describe('case connector', () => {
           totalAlerts: 0,
           closed_at: null,
           closed_by: null,
-          converted_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
@@ -929,7 +929,6 @@ describe('case connector', () => {
               full_name: 'elastic',
               username: 'elastic',
             },
-            converted_by: null,
             description: 'This is a brand new case of a bad meanie defacing data',
             id: 'mock-id-1',
             external_service: null,
@@ -1009,7 +1008,6 @@ describe('case connector', () => {
             email: 'd00d@awesome.com',
             username: 'awesome',
           },
-          converted_by: null,
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
