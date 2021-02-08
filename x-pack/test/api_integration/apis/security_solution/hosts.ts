@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe.only('hosts', () => {
+  describe('hosts', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
             querySize: 1,
           },
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
       expect(hosts.edges.length).to.be(EDGE_LENGTH);
@@ -86,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
             querySize: 2,
           },
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
       expect(hosts.edges.length).to.be(EDGE_LENGTH);
@@ -136,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
           defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 

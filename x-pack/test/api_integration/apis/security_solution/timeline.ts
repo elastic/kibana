@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const client = getService('securitySolutionGraphQLClient');
 
-  describe.only('Timeline', () => {
+  describe('Timeline', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
@@ -88,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               interval: '12h',
             },
+            wait_for_completion_timeout: '10s',
           },
         })
         .then((resp) => {
@@ -124,6 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               interval: '12h',
             },
+            wait_for_completion_timeout: '10s',
           },
         })
         .then((resp) => {

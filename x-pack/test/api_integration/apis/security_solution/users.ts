@@ -22,7 +22,7 @@ const IP = '0.0.0.0';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe.only('Users', () => {
+  describe('Users', () => {
     describe('With auditbeat', () => {
       before(() => esArchiver.load('auditbeat/default'));
       after(() => esArchiver.unload('auditbeat/default'));
@@ -54,7 +54,6 @@ export default function ({ getService }: FtrProviderContext) {
             wait_for_completion_timeout: '10s',
           })
           .expect(200);
-        console.log('users', JSON.stringify(users));
         expect(users.edges.length).to.be(1);
         expect(users.totalCount).to.be(1);
         expect(users.edges[0].node.user!.id).to.eql(['0']);

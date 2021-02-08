@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe.only('Overview Host', () => {
+  describe('Overview Host', () => {
     describe('With auditbeat', () => {
       before(() => esArchiver.load('auditbeat/overview'));
       after(() => esArchiver.unload('auditbeat/overview'));
@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(overviewHost).to.eql(expectedResult);

@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe.only('Network Top N Flow', () => {
+  describe('Network Top N Flow', () => {
     describe('With filebeat', () => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
@@ -52,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -92,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -132,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
@@ -166,6 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 

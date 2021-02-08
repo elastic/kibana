@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe.only('uncommon_processes', () => {
+  describe('uncommon_processes', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
           defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
       expect(UncommonProcesses.edges.length).to.be(1);
@@ -71,6 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
           defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -98,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
           defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -125,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
           defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 

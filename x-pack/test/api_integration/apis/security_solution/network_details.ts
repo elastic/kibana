@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe.only('Network details', () => {
+  describe('Network details', () => {
     describe('With filebeat', () => {
       before(() => esArchiver.load('filebeat/default'));
       after(() => esArchiver.unload('filebeat/default'));
@@ -51,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
             factoryQueryType: NetworkQueries.details,
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 

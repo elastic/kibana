@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe.only('Tls Test with Packetbeat', () => {
+  describe('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
       before(() => esArchiver.load('packetbeat/tls'));
       after(() => esArchiver.unload('packetbeat/tls'));
@@ -112,6 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -142,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -177,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
@@ -206,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);

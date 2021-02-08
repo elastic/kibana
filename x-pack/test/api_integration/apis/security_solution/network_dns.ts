@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe.only('Network DNS', () => {
+  describe('Network DNS', () => {
     describe('With packetbeat', () => {
       before(() => esArchiver.load('packetbeat/dns'));
       after(() => esArchiver.unload('packetbeat/dns'));
@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -79,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
