@@ -8,7 +8,10 @@
 import { useCallback, useEffect } from 'react';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { SearchSessionIndicatorRef } from '../search_session_indicator';
-import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
+import {
+  SearchSessionState,
+  SearchUsageCollector,
+} from '../../../../../../../src/plugins/data/public';
 
 const TOUR_TAKING_TOO_LONG_TIMEOUT = 10000;
 export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;
@@ -18,7 +21,8 @@ export function useSearchSessionTour(
   storage: IStorageWrapper,
   searchSessionIndicatorRef: SearchSessionIndicatorRef | null,
   state: SearchSessionState,
-  searchSessionsDisabled: boolean
+  searchSessionsDisabled: boolean,
+  usageCollector?: SearchUsageCollector
 ) {
   const markOpenedDone = useCallback(() => {
     safeSet(storage, TOUR_TAKING_TOO_LONG_STEP_KEY);
@@ -36,6 +40,7 @@ export function useSearchSessionTour(
     if (state === SearchSessionState.Loading) {
       if (!safeHas(storage, TOUR_TAKING_TOO_LONG_STEP_KEY)) {
         timeoutHandle = window.setTimeout(() => {
+          usageCollector?.trackSessionIndicatorTourLoading();
           searchSessionIndicatorRef.openPopover();
         }, TOUR_TAKING_TOO_LONG_TIMEOUT);
       }
@@ -43,6 +48,7 @@ export function useSearchSessionTour(
 
     if (state === SearchSessionState.Restored) {
       if (!safeHas(storage, TOUR_RESTORE_STEP_KEY)) {
+        usageCollector?.trackSessionIndicatorTourRestored();
         searchSessionIndicatorRef.openPopover();
       }
     }
@@ -57,6 +63,7 @@ export function useSearchSessionTour(
     searchSessionsDisabled,
     markOpenedDone,
     markRestoredDone,
+    usageCollector,
   ]);
 
   return {

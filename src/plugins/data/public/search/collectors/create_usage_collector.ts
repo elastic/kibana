@@ -31,6 +31,14 @@ export const createUsageCollector = (
   return {
     trackQueryTimedOut: getCollector(METRIC_TYPE.LOADED, SEARCH_EVENT_TYPE.QUERY_TIMED_OUT),
     trackQueriesCancelled: getCollector(METRIC_TYPE.LOADED, SEARCH_EVENT_TYPE.QUERIES_CANCELLED),
+    trackSessionIndicatorTourLoading: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_LOADING
+    ),
+    trackSessionIndicatorTourRestored: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_RESTORED
+    ),
     trackSessionSentToBackground: getCollector(
       METRIC_TYPE.CLICK,
       SEARCH_EVENT_TYPE.SESSION_SENT_TO_BACKGROUND

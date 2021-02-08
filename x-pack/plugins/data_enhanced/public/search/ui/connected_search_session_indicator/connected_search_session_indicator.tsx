@@ -111,7 +111,8 @@ export const createConnectedSearchSessionIndicator = ({
       storage,
       searchSessionIndicator,
       state,
-      saveDisabled
+      saveDisabled,
+      usageCollector
     );
 
     const onOpened = useCallback(
