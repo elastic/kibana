@@ -18,7 +18,7 @@ export const alertingApiProvider = (httpService: HttpService) => {
       timeRange: string;
     }): Promise<PreviewResponse> {
       const body = JSON.stringify(params);
-      return httpService.http<any>({
+      return httpService.http<PreviewResponse>({
         path: `${ML_BASE_PATH}/alerting/preview`,
         method: 'POST',
         body,
