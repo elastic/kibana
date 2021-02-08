@@ -15,8 +15,8 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { MlLicense } from '../common/license';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { RouteGuard } from './lib/route_guard';
-import { AlertingPlugin } from '../../alerts/server';
-import { ActionsPlugin } from '../../actions/server';
+import type { AlertingPlugin } from '../../alerts/server';
+import type { ActionsPlugin } from '../../actions/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
