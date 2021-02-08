@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-jest.mock('../classes/layers/vector_layer/vector_layer', () => {});
+jest.mock('../classes/layers/vector_layer', () => {});
 jest.mock('../classes/layers/tiled_vector_layer/tiled_vector_layer', () => {});
 jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {});
-jest.mock('../classes/layers/heatmap_layer/heatmap_layer', () => {});
+jest.mock('../classes/layers/heatmap_layer', () => {});
 jest.mock('../classes/layers/vector_tile_layer/vector_tile_layer', () => {});
 jest.mock('../classes/joins/inner_join', () => {});
 jest.mock('../reducers/non_serializable_instances', () => ({

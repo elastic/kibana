@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { FeatureCollection, Feature } from 'geojson';
-import { FEATURE_ID_PROPERTY_NAME } from '../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 
 let idCounter = 0;
 

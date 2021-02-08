@@ -70,7 +70,7 @@ import { DataRequest } from '../../util/data_request';
 import { IStyle } from '../style';
 import { IStyleProperty } from './properties/style_property';
 import { IField } from '../../fields/field';
-import { IVectorLayer } from '../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IESAggField } from '../../fields/agg';
