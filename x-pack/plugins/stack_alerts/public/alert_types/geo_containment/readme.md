@@ -19,8 +19,6 @@ project. To edit it, open this file in your editor of choice, add the line descr
 the next step to the bottom of the file (or really anywhere) and save. For more details
 on different config modifications or on how to make production config modifications,
 see [the current docs](https://www.elastic.co/guide/en/kibana/current/settings.html)
-- Set the following configuration settings in your `config/kibana.yml`:
-`xpack.stack_alerts.enableGeoAlerting: true`
 
 ### 2. Run ES/Kibana dev env with ssl enabled
 - In two terminals, run the normal commands to launch both elasticsearch and kibana but 
