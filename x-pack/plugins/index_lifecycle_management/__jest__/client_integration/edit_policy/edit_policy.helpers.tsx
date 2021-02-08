@@ -174,11 +174,15 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   const setMinAgeUnits = (phase: Phases) =>
     createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`);
 
-  const setDataAllocation = (phase: Phases) => async (value: DataTierAllocationType) => {
+  const showDataAllocationOptions = (phase: Phases) => () => {
     act(() => {
       find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
     });
     component.update();
+  };
+
+  const setDataAllocation = (phase: Phases) => async (value: DataTierAllocationType) => {
+    showDataAllocationOptions(phase)();
     await act(async () => {
       switch (value) {
         case 'node_roles':
@@ -280,6 +284,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         enable: enable('warm'),
         setMinAgeValue: setMinAgeValue('warm'),
         setMinAgeUnits: setMinAgeUnits('warm'),
+        showDataAllocationOptions: showDataAllocationOptions('warm'),
         setDataAllocation: setDataAllocation('warm'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
         setReplicas: setReplicas('warm'),
@@ -293,6 +298,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         enable: enable('cold'),
         setMinAgeValue: setMinAgeValue('cold'),
         setMinAgeUnits: setMinAgeUnits('cold'),
+        showDataAllocationOptions: showDataAllocationOptions('cold'),
         setDataAllocation: setDataAllocation('cold'),
         setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
         setReplicas: setReplicas('cold'),
