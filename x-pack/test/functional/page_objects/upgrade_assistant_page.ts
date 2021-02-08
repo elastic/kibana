@@ -24,7 +24,7 @@ export function UpgradeAssistantPageProvider({ getPageObjects, getService }: Ftr
       return await retry.try(async () => {
         await common.navigateToApp('settings');
         await testSubjects.click('upgrade_assistant');
-        retry.waitFor('url to contain /upgrade_assistant', async () => {
+        await retry.waitFor('url to contain /upgrade_assistant', async () => {
           const url = await browser.getCurrentUrl();
           return url.includes('/upgrade_assistant');
         });
@@ -61,7 +61,7 @@ export function UpgradeAssistantPageProvider({ getPageObjects, getService }: Ftr
 
     async waitForTelemetryHidden() {
       const self = this;
-      retry.waitFor('Telemetry to disappear.', async () => {
+      await retry.waitFor('Telemetry to disappear.', async () => {
         return (await self.isTelemetryExists()) === false;
       });
     }
