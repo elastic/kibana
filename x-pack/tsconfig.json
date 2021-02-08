@@ -9,7 +9,6 @@
     "plugins/cross_cluster_replication/**/*",
     "plugins/fleet/**/*",
     "plugins/index_lifecycle_management/**/*",
-    "plugins/infra/**/*",
     "plugins/lists/**/*",
     "plugins/logstash/**/*",
     "plugins/monitoring/**/*",
