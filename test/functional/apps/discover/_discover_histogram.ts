@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartIntervalIconTip = await PageObjects.discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(true);
     });
-    it('1234 should allow hide/show histogram, persisted in url state', async () => {
+    it('should allow hide/show histogram, persisted in url state', async () => {
       const fromTime = 'Jan 01, 2010 @ 00:00:00.000';
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
       await prepareTest(fromTime, toTime);
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
     });
-    it('1234 should allow hiding the histogram, persisted in saved search', async () => {
+    it('should allow hiding the histogram, persisted in saved search', async () => {
       const fromTime = 'Jan 01, 2010 @ 00:00:00.000';
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
       const savedSearch = 'persisted hidden histogram';
