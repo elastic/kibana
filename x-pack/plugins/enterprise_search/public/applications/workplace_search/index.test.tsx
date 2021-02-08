@@ -63,7 +63,7 @@ describe('WorkplaceSearchConfigured', () => {
   });
 
   it('initializes app data with passed props', () => {
-    shallow(<WorkplaceSearchConfigured isFederatedAuth={true} />);
+    shallow(<WorkplaceSearchConfigured isFederatedAuth />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ isFederatedAuth: true });
   });
