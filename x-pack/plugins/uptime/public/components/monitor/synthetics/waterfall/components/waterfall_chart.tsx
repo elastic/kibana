@@ -65,7 +65,7 @@ export const WaterfallChart = ({
 
   const [height, setHeight] = useState<string>(maxHeight);
 
-  const shouldRenderSidebar = !!(sidebarItems && sidebarItems.length > 0 && renderSidebarItem);
+  const shouldRenderSidebar = !!(sidebarItems && renderSidebarItem);
   const shouldRenderLegend = !!(legendItems && legendItems.length > 0 && renderLegendItem);
 
   useEffect(() => {

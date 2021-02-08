@@ -59,6 +59,7 @@ const mockCore: () => any = () => {
       get: (key: string) => 'MMM D, YYYY @ HH:mm:ss.SSS',
       get$: (key: string) => of('MMM D, YYYY @ HH:mm:ss.SSS'),
     },
+    usageCollection: { reportUiCounter: () => {} },
   };
 
   return core;

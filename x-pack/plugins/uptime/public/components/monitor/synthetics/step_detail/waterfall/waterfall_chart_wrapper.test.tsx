@@ -19,6 +19,7 @@ import { MimeType } from './types';
 import {
   FILTER_POPOVER_OPEN_LABEL,
   FILTER_REQUESTS_LABEL,
+  FILTER_COLLAPSE_REQUESTS_LABEL,
 } from '../../waterfall/components/translations';
 
 const getHighLightedItems = (query: string, filters: string[]) => {
@@ -55,7 +56,6 @@ describe('waterfall chart wrapper', () => {
     });
 
     const highlightedItemsLength = getHighLightedItems(searchText, []).length;
-
     expect(getAllByTestId('sideBarHighlightedItem')).toHaveLength(highlightedItemsLength);
 
     expect(getAllByTestId('sideBarDimmedItem')).toHaveLength(
@@ -92,6 +92,42 @@ describe('waterfall chart wrapper', () => {
     expect(getAllByTestId('sideBarDimmedItem')).toHaveLength(
       NETWORK_EVENTS.events.length - highlightedItemsLength
     );
+  });
+
+  it('renders sidebar even when filter matches 0 resources', () => {
+    const { getAllByTestId, getByLabelText, getAllByText, queryAllByTestId } = render(
+      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
+    );
+
+    const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');
+
+    expect(sideBarItems).toHaveLength(5);
+
+    fireEvent.click(getByLabelText(FILTER_POPOVER_OPEN_LABEL));
+
+    fireEvent.click(getAllByText('CSS')[1]);
+
+    // inout has debounce effect so hence the timer
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    const highlightedItemsLength = getHighLightedItems('', [MimeType.Stylesheet]).length;
+
+    // no CSS items found
+    expect(queryAllByTestId('sideBarHighlightedItem')).toHaveLength(0);
+    expect(getAllByTestId('sideBarDimmedItem')).toHaveLength(
+      NETWORK_EVENTS.events.length - highlightedItemsLength
+    );
+
+    fireEvent.click(getByLabelText(FILTER_COLLAPSE_REQUESTS_LABEL));
+
+    // filter bar is still accessible even when no resources match filter
+    expect(getByLabelText(FILTER_REQUESTS_LABEL)).toBeInTheDocument();
+
+    // no resources items are in the chart as none match filter
+    expect(queryAllByTestId('sideBarHighlightedItem')).toHaveLength(0);
+    expect(queryAllByTestId('sideBarDimmedItem')).toHaveLength(0);
   });
 });
 

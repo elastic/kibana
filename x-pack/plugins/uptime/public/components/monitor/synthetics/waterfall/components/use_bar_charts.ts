@@ -13,11 +13,13 @@ export interface UseBarHookProps {
   data: IWaterfallContext['data'];
 }
 
-export const useBarCharts = ({ data = [] }: UseBarHookProps) => {
+export const useBarCharts = ({ data }: UseBarHookProps) => {
   const [charts, setCharts] = useState<Array<IWaterfallContext['data']>>([]);
 
   useEffect(() => {
-    if (data.length > 0) {
+    const chartsN: Array<IWaterfallContext['data']> = [];
+
+    if (data?.length > 0) {
       let chartIndex = 0;
       /* We want at most CANVAS_MAX_ITEMS **RESOURCES** per array.
        * Resources !== individual timing items, but are comprised of many individual timing
@@ -25,9 +27,6 @@ export const useBarCharts = ({ data = [] }: UseBarHookProps) => {
        * We must keep track of the number of unique resources added to the each array. */
       const uniqueResources = new Set();
       let lastIndex: number;
-
-      const chartsN: Array<IWaterfallContext['data']> = [];
-
       data.forEach((item) => {
         if (uniqueResources.size === CANVAS_MAX_ITEMS && item.x > lastIndex) {
           chartIndex++;
@@ -41,9 +40,9 @@ export const useBarCharts = ({ data = [] }: UseBarHookProps) => {
         }
         chartsN[chartIndex].push(item);
       });
-
-      setCharts(chartsN);
     }
+
+    setCharts(chartsN);
   }, [data]);
 
   return charts;
