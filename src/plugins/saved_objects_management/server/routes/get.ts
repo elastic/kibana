@@ -26,10 +26,14 @@ export const registerGetRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const managementService = await managementServicePromise;
-      const { client } = context.core.savedObjects;
-
       const { type, id } = req.params;
+      const managementService = await managementServicePromise;
+      const { getClient, typeRegistry } = context.core.savedObjects;
+      const includedHiddenTypes = [type].filter(
+        (entry) => typeRegistry.isHidden(entry) && typeRegistry.isImportableAndExportable(entry)
+      );
+
+      const client = getClient({ includedHiddenTypes });
       const findResponse = await client.get<any>(type, id);
 
       const enhancedSavedObject = injectMetaAttributes(findResponse, managementService);

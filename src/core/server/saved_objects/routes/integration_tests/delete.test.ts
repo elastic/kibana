@@ -26,7 +26,8 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
-    savedObjectsClient = handlerContext.savedObjects.client;
+    savedObjectsClient = handlerContext.savedObjects.getClient();
+    handlerContext.savedObjects.getClient.mockImplementation(() => savedObjectsClient);
 
     const router = httpSetup.createRouter('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();

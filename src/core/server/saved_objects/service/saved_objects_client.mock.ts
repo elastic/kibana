@@ -9,8 +9,8 @@
 import { SavedObjectsClientContract } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
-const create = () =>
-  (({
+const create = jest.fn(() => {
+  const mocked = ({
     errors: SavedObjectsErrorHelpers,
     create: jest.fn(),
     bulkCreate: jest.fn(),
@@ -25,6 +25,9 @@ const create = () =>
     addToNamespaces: jest.fn(),
     deleteFromNamespaces: jest.fn(),
     removeReferencesTo: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract>);
+  } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+
+  return mocked;
+});
 
 export const savedObjectsClientMock = { create };
