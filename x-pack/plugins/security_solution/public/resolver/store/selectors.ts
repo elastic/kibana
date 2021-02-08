@@ -83,8 +83,6 @@ export const treeParameterIndices = composeSelectors(
   dataSelectors.treeParamterIndices
 );
 
-export const eventIndices = composeSelectors(dataStateSelector, dataSelectors.eventIndices);
-
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
   dataSelectors.resolverComponentInstanceID

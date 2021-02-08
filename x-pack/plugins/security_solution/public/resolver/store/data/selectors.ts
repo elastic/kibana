@@ -344,14 +344,6 @@ export const treeParamterIndices = createSelector(treeParametersToFetch, (parame
   return parameters?.indices ?? [];
 });
 
-/**
- * Because the middlewares run in order, panel requests should use the indices
- * from the most recent tree response.
- */
-export const eventIndices = createSelector(lastResponseIndices, (lastIndices): string[] => {
-  return lastIndices ?? [];
-});
-
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,
   originID,
