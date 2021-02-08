@@ -50,7 +50,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
   const { startTimestamp, endTimestamp, targetPosition, isInitialized } = useContext(
     LogPositionState.Context
   );
-  const { filterQuery } = useContext(LogFilterState.Context);
+  const { filterQueryAsKuery } = useContext(LogFilterState.Context);
 
   // Don't render anything if the date range is incorrect.
   if (!startTimestamp || !endTimestamp) {
@@ -61,7 +61,7 @@ const LogEntriesStateProvider: React.FC = ({ children }) => {
     sourceId,
     startTimestamp,
     endTimestamp,
-    query: filterQuery ?? undefined,
+    query: filterQueryAsKuery?.expression ?? undefined,
     center: targetPosition ?? undefined,
   };
 

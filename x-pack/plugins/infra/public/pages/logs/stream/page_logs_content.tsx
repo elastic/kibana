@@ -62,7 +62,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     endDateExpression,
     updateDateRange,
   } = useContext(LogPositionState.Context);
-  const { applyLogFilterQuery } = useContext(LogFilterState.Context);
+  const { filterQuery, applyLogFilterQuery } = useContext(LogFilterState.Context);
 
   const {
     isReloading,
@@ -80,6 +80,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const prevStartTimestamp = usePrevious(startTimestamp);
   const prevEndTimestamp = usePrevious(endTimestamp);
+  const prevFilterQuery = usePrevious(filterQuery);
 
   // Refetch entries if...
   useEffect(() => {
@@ -96,7 +97,14 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       ((topCursor != null && targetPosition.time < topCursor.time) ||
         (bottomCursor != null && targetPosition.time > bottomCursor.time));
 
-    if (isFirstLoad || newDateRangeDoesNotOverlap || isCenterPointOutsideLoadedRange) {
+    const hasQueryChanged = filterQuery !== prevFilterQuery;
+
+    if (
+      isFirstLoad ||
+      newDateRangeDoesNotOverlap ||
+      isCenterPointOutsideLoadedRange ||
+      hasQueryChanged
+    ) {
       fetchEntries();
     }
   }, [
@@ -108,6 +116,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     targetPosition,
     topCursor,
     bottomCursor,
+    filterQuery,
+    prevFilterQuery,
   ]);
 
   const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } = useContext(
