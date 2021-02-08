@@ -15,12 +15,15 @@ import {
   EuiComment,
   EuiAccordion,
   EuiSpacer,
+  EuiBadge,
 } from '@elastic/eui';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { PhasesExceptDelete } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
+
 import { FormInternal } from '../../../types';
 
 import { UseField } from '../../../form';
@@ -28,13 +31,12 @@ import { UseField } from '../../../form';
 import { PhaseErrorIndicator } from './phase_error_indicator';
 
 import { MinAgeField } from '../shared_fields';
-
 import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
 import './phase.scss';
 
 interface Props {
-  phase: 'hot' | 'warm' | 'cold';
+  phase: PhasesExceptDelete;
 }
 
 export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
@@ -43,12 +45,13 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
     watch: [enabledPath],
   });
 
+  const isHotPhase = phase === 'hot';
   // hot phase is always enabled
-  const enabled = get(formData, enabledPath) || phase === 'hot';
+  const enabled = get(formData, enabledPath) || isHotPhase;
 
   const phaseTitle = (
     <EuiFlexGroup alignItems="center" gutterSize={'s'} wrap>
-      {phase !== 'hot' && (
+      {!isHotPhase && (
         <EuiFlexItem grow={false}>
           <UseField
             path={enabledPath}
@@ -67,13 +70,24 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
           <h2>{i18nTexts.editPolicy.titles[phase]}</h2>
         </EuiTitle>
       </EuiFlexItem>
+      {isHotPhase && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.phaseTitle.requiredBadge"
+              defaultMessage="Required"
+            />
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <PhaseErrorIndicator phase={phase} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
-  const minAge = phase !== 'hot' ? <MinAgeField phase={phase} /> : null;
+  // @ts-ignore
+  const minAge = !isHotPhase && enabled ? <MinAgeField phase={phase} /> : null;
 
   return (
     <EuiComment
@@ -82,31 +96,29 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
       timelineIcon={<PhaseIcon enabled={enabled} phase={phase} />}
       className={'ilmPhase'}
     >
-      <div className="ilmPhase__inner">
-        <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
-          {i18nTexts.editPolicy.descriptions[phase]}
-        </EuiText>
+      <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+        {i18nTexts.editPolicy.descriptions[phase]}
+      </EuiText>
 
-        {enabled && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiAccordion
-              id={`${phase}-settingsSwitch`}
-              buttonContent={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
-                  defaultMessage="Advanced settings"
-                />
-              }
-              buttonClassName="ilmSettingsButton"
-            >
-              <EuiSpacer />
-              {children}
-            </EuiAccordion>
-          </>
-        )}
-      </div>
-      <PhaseFooter phase={phase} />
+      {enabled && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id={`${phase}-settingsSwitch`}
+            buttonContent={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
+                defaultMessage="Advanced settings"
+              />
+            }
+            buttonClassName="ilmSettingsButton"
+            extraAction={<PhaseFooter phase={phase} />}
+          >
+            <EuiSpacer />
+            {children}
+          </EuiAccordion>
+        </>
+      )}
     </EuiComment>
   );
 };

@@ -251,7 +251,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
   const createToggleDeletePhaseActions = () => {
     const enablePhase = async () => {
       await act(async () => {
-        find('enableDeletePhaseLink').simulate('click');
+        find('enableDeletePhaseButton').simulate('click');
       });
       component.update();
     };

@@ -5,14 +5,17 @@
       background-color: $euiColorEmptyShade;
     }
     &__body {
-      padding: 0;
+      padding: $euiSize;
     }
-
-  }
-  &__inner {
-    padding: $euiSize;
   }
   .ilmSettingsButton {
     color: $euiColorPrimary;
+    padding: $euiSizeS;
+  }
+  .euiCommentTimeline {
+    padding-top: $euiSize;
+    &::before {
+      height: calc(100% + #{$euiSizeXXL});
+    }
   }
 }

@@ -89,7 +89,7 @@ describe('<EditPolicy />', () => {
                 unknown_setting: true,
               },
             },
-            min_age: '0ms',
+            min_age: '0d',
           },
         },
       });
@@ -255,7 +255,7 @@ describe('<EditPolicy />', () => {
                 "priority": 50,
               },
             },
-            "min_age": "0ms",
+            "min_age": "0d",
           }
         `);
       });
@@ -310,7 +310,7 @@ describe('<EditPolicy />', () => {
                     "number_of_shards": 123,
                   },
                 },
-                "min_age": "0ms",
+                "min_age": "0d",
               },
             },
           }

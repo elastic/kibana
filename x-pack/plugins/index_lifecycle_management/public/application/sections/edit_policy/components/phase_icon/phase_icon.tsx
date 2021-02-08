@@ -25,7 +25,7 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
           size={phase === 'delete' ? 'm' : 'l'}
         />
       ) : (
-        <EuiIcon className="ilmPhaseIcon__inner--disabled" type={'dot'} size={'l'} />
+        <EuiIcon className="ilmPhaseIcon__inner--disabled" type={'dot'} size={'s'} />
       )}
     </div>
   );

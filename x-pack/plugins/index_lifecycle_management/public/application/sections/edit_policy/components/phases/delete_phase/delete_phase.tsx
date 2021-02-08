@@ -73,9 +73,10 @@ export const DeletePhase: FunctionComponent = () => {
 
   return (
     <EuiComment
+      data-test-subj="delete-phaseContent"
       username={phaseTitle}
       actions={<MinAgeField phase={'delete'} />}
-      className="ilmDeletePhase"
+      className="ilmDeletePhase ilmPhase"
       timelineIcon={<PhaseIcon enabled={enabled} phase={'delete'} />}
     >
       <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>

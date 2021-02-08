@@ -10,7 +10,12 @@ import { useFormData } from '../../../../shared_imports';
 import { FormInternal } from '../types';
 import { UseField } from './index';
 
-export type PhaseTimingConfiguration = 'forever' | 'last' | 'disabled' | 'enabled';
+export interface PhaseTimingConfiguration {
+  /**
+   * Whether this is the final, non-delete, phase.
+   */
+  isFinalDataPhase: boolean;
+}
 
 const getPhaseTimingConfiguration = (
   formData: FormInternal
@@ -21,23 +26,17 @@ const getPhaseTimingConfiguration = (
 } => {
   const isWarmPhaseEnabled = formData?._meta?.warm?.enabled;
   const isColdPhaseEnabled = formData?._meta?.cold?.enabled;
-  if (formData?._meta?.delete?.enabled) {
-    return {
-      hot: !isWarmPhaseEnabled && !isColdPhaseEnabled ? 'last' : 'enabled',
-      warm: isWarmPhaseEnabled ? (isColdPhaseEnabled ? 'enabled' : 'last') : 'disabled',
-      cold: isColdPhaseEnabled ? 'last' : 'disabled',
-    };
-  }
   return {
-    hot: !isWarmPhaseEnabled && !isColdPhaseEnabled ? 'forever' : 'enabled',
-    warm: isWarmPhaseEnabled ? (isColdPhaseEnabled ? 'enabled' : 'forever') : 'disabled',
-    cold: isColdPhaseEnabled ? 'forever' : 'disabled',
+    hot: { isFinalDataPhase: !isWarmPhaseEnabled && !isColdPhaseEnabled },
+    warm: { isFinalDataPhase: isWarmPhaseEnabled && !isColdPhaseEnabled },
+    cold: { isFinalDataPhase: isColdPhaseEnabled },
   };
 };
 export interface PhaseTimings {
   hot: PhaseTimingConfiguration;
   warm: PhaseTimingConfiguration;
   cold: PhaseTimingConfiguration;
+  isDeletePhaseEnabled: boolean;
   setDeletePhaseEnabled: (enabled: boolean) => void;
 }
 
@@ -55,6 +54,7 @@ export const PhaseTimingsProvider: FunctionComponent = ({ children }) => {
           <PhaseTimingsContext.Provider
             value={{
               ...getPhaseTimingConfiguration(formData),
+              isDeletePhaseEnabled: formData?._meta?.delete?.enabled,
               setDeletePhaseEnabled: field.setValue,
             }}
           >
