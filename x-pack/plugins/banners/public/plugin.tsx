@@ -19,7 +19,7 @@ export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
     this.config = context.config.get<BannerClientConfig>();
   }
 
-  setup({ http }: CoreSetup<{}, {}>) {
+  setup({}: CoreSetup<{}, {}>) {
     return {};
   }
 
