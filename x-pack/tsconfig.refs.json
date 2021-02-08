@@ -24,6 +24,7 @@
     { "path": "./plugins/global_search/tsconfig.json" },
     { "path": "./plugins/graph/tsconfig.json" },
     { "path": "./plugins/grokdebugger/tsconfig.json" },
+    { "path": "./plugins/infra/tsconfig.json" },
     { "path": "./plugins/ingest_pipelines/tsconfig.json" },
     { "path": "./plugins/lens/tsconfig.json" },
     { "path": "./plugins/license_management/tsconfig.json" },
