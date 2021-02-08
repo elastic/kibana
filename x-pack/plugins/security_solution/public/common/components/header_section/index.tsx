@@ -77,7 +77,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
               </h2>
             </EuiTitle>
 
-            <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />
+            {subtitle && <Subtitle data-test-subj="header-section-subtitle" items={subtitle} />}
           </EuiFlexItem>
 
           {id && (

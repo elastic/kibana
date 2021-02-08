@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
+import { EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -61,11 +61,10 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     const SearchRowContent = useMemo(
       () => (
         <Fragment key="search-row-content">
-          {!!timelineFilter && timelineFilter}
           {!!templateTimelineFilter && templateTimelineFilter}
         </Fragment>
       ),
-      [timelineFilter, templateTimelineFilter]
+      [templateTimelineFilter]
     );
 
     return (
@@ -83,9 +82,14 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
 
         <EuiModalBody>
           <>
+            {!!timelineFilter && (
+              <>
+                {timelineFilter}
+                <EuiSpacer size="m" />
+              </>
+            )}
             <SearchRow
               data-test-subj="search-row"
-              favoriteCount={favoriteCount}
               onlyFavorites={onlyFavorites}
               onQueryChange={onQueryChange}
               onToggleOnlyFavorites={onToggleOnlyFavorites}

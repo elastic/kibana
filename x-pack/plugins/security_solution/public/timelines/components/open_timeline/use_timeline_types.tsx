@@ -5,7 +5,7 @@
  */
 import React, { useState, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { EuiTabs, EuiTab, EuiSpacer, EuiFilterButton } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { noop } from 'lodash/fp';
 import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../common/types/timeline';
@@ -22,7 +22,7 @@ export interface UseTimelineTypesArgs {
 export interface UseTimelineTypesResult {
   timelineType: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
-  timelineFilters: JSX.Element[];
+  timelineFilters: JSX.Element;
 }
 
 export const useTimelineTypes = ({
@@ -57,43 +57,22 @@ export const useTimelineTypes = ({
     (timelineTabsStyle: TimelineTabsStyle) => [
       {
         id: TimelineType.default,
-        name:
-          timelineTabsStyle === TimelineTabsStyle.filter
-            ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
-            : i18n.TAB_TIMELINES,
+        name: i18n.TAB_TIMELINES,
         href: formatUrl(getTimelineTabsUrl(TimelineType.default, urlSearch)),
         disabled: false,
-        withNext: true,
-        count:
-          timelineTabsStyle === TimelineTabsStyle.filter
-            ? defaultTimelineCount ?? undefined
-            : undefined,
+
         onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTimeline : noop,
       },
       {
         id: TimelineType.template,
-        name:
-          timelineTabsStyle === TimelineTabsStyle.filter
-            ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
-            : i18n.TAB_TEMPLATES,
+        name: i18n.TAB_TEMPLATES,
         href: formatUrl(getTimelineTabsUrl(TimelineType.template, urlSearch)),
         disabled: false,
-        withNext: false,
-        count:
-          timelineTabsStyle === TimelineTabsStyle.filter
-            ? templateTimelineCount ?? undefined
-            : undefined,
+
         onClick: timelineTabsStyle === TimelineTabsStyle.tab ? goToTemplateTimeline : noop,
       },
     ],
-    [
-      defaultTimelineCount,
-      templateTimelineCount,
-      urlSearch,
-      formatUrl,
-      goToTimeline,
-      goToTemplateTimeline,
-    ]
+    [urlSearch, formatUrl, goToTimeline, goToTemplateTimeline]
   );
 
   const onFilterClicked = useCallback(
@@ -135,21 +114,23 @@ export const useTimelineTypes = ({
   }, [tabName]);
 
   const timelineFilters = useMemo(() => {
-    return getFilterOrTabs(TimelineTabsStyle.filter).map((tab: TimelineTab) => (
-      <EuiFilterButton
-        data-test-subj={`open-timeline-modal-body-${TimelineTabsStyle.filter}-${tab.id}`}
-        hasActiveFilters={tab.id === timelineType}
-        key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
-        numFilters={tab.count}
-        onClick={(ev: { preventDefault: () => void }) => {
-          tab.onClick(ev);
-          onFilterClicked(tab.id, TimelineTabsStyle.filter);
-        }}
-        withNext={tab.withNext}
-      >
-        {tab.name}
-      </EuiFilterButton>
-    ));
+    return (
+      <EuiTabs>
+        {getFilterOrTabs(TimelineTabsStyle.filter).map((tab: TimelineTab) => (
+          <EuiTab
+            data-test-subj={`open-timeline-modal-body-${TimelineTabsStyle.filter}-${tab.id}`}
+            isSelected={tab.id === timelineType}
+            key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
+            onClick={(ev: { preventDefault: () => void }) => {
+              tab.onClick(ev);
+              onFilterClicked(tab.id, TimelineTabsStyle.filter);
+            }}
+          >
+            {tab.name}
+          </EuiTab>
+        ))}
+      </EuiTabs>
+    );
   }, [timelineType, getFilterOrTabs, onFilterClicked]);
 
   return {
