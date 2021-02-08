@@ -7,7 +7,6 @@
 import React, { useEffect } from 'react';
 import { useValues, useActions } from 'kea';
 import {
-  EuiButton,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -20,8 +19,8 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LicensingLogic } from '../../../shared/licensing';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { ENGINE_CREATION_PATH } from '../../routes';
-import { KibanaLogic } from '../../../shared/kibana';
 
 import { EngineIcon } from './assets/engine_icon';
 import { MetaEngineIcon } from './assets/meta_engine_icon';
@@ -75,14 +74,14 @@ export const EnginesOverview: React.FC = () => {
             </EuiTitle>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton
-              color="secondary"
+            <EuiButtonTo
+              color="primary"
               fill
               data-test-subj="appSearchEnginesEngineCreationButton"
-              onClick={() => KibanaLogic.values.navigateToUrl(ENGINE_CREATION_PATH)}
+              to={ENGINE_CREATION_PATH}
             >
               {CREATE_AN_ENGINE_BUTTON_LABEL}
-            </EuiButton>
+            </EuiButtonTo>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
