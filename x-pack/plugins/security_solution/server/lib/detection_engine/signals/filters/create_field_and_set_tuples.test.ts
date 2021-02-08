@@ -120,7 +120,7 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1')]);
+    expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1'])]);
   });
 
   test('it returns two matched sets as a JSON.stringify() set from the "events"', async () => {
@@ -133,7 +133,7 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
+    expect([...matchedSet]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
   });
 
   test('it returns an array as a set as a JSON.stringify() array from the "events"', async () => {
@@ -282,7 +282,7 @@ describe('filterEventsAgainstList', () => {
       exceptionItem,
       buildRuleMessage,
     });
-    expect([...matchedSet1]).toEqual([JSON.stringify('1.1.1.1'), JSON.stringify('2.2.2.2')]);
-    expect([...matchedSet2]).toEqual([JSON.stringify('3.3.3.3'), JSON.stringify('5.5.5.5')]);
+    expect([...matchedSet1]).toEqual([JSON.stringify(['1.1.1.1']), JSON.stringify(['2.2.2.2'])]);
+    expect([...matchedSet2]).toEqual([JSON.stringify(['3.3.3.3']), JSON.stringify(['5.5.5.5'])]);
   });
 });

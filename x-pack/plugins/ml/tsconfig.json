@@ -28,6 +28,7 @@
     { "path": "../license_management/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../maps/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
     { "path": "../alerts/tsconfig.json" },

@@ -34,7 +34,7 @@ describe('ResultView', () => {
 
   it('renders', () => {
     const wrapper = shallow(
-      <ResultView result={result} schemaForTypeHighlights={schema} isMetaEngine={true} />
+      <ResultView result={result} schemaForTypeHighlights={schema} isMetaEngine />
     );
     expect(wrapper.find(Result).props()).toEqual({
       result,

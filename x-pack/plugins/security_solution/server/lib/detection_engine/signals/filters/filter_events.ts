@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
 import { SearchResponse } from '../../../types';
 import { FilterEventsOptions } from './types';
 
@@ -22,13 +21,17 @@ export const filterEvents = <T>({
   return events.filter((item) => {
     return fieldAndSetTuples
       .map((tuple) => {
-        const eventItem = get(tuple.field, item._source);
-        if (eventItem == null) {
-          return true;
-        } else if (tuple.operator === 'included') {
+        const eventItem = item.fields ? item.fields[tuple.field] : undefined;
+        if (tuple.operator === 'included') {
+          if (eventItem == null) {
+            return true;
+          }
           // only create a signal if the event is not in the value list
           return !tuple.matchedSet.has(JSON.stringify(eventItem));
         } else if (tuple.operator === 'excluded') {
+          if (eventItem == null) {
+            return false;
+          }
           // only create a signal if the event is in the value list
           return tuple.matchedSet.has(JSON.stringify(eventItem));
         } else {
