@@ -13,6 +13,7 @@ import {
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
+  UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
 
 import {
@@ -21,6 +22,7 @@ import {
   createEntryNested,
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItemOptions,
+  updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
 
 const createExceptionListItemOptions = (
@@ -443,6 +445,45 @@ describe('mapping', () => {
           ],
         }
       );
+    });
+  });
+
+  describe('updatedTrustedAppToUpdateExceptionListItemOptions', () => {
+    it('should map to UpdateExceptionListItemOptions', () => {
+      const updatedTrustedApp: UpdateTrustedApp = {
+        name: 'Linux trusted app',
+        description: 'Linux Trusted App',
+        effectScope: { type: 'global' },
+        os: OperatingSystem.LINUX,
+        entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
+        version: 'abc',
+      };
+
+      expect(
+        updatedTrustedAppToUpdateExceptionListItemOptions(
+          exceptionListItemSchema({ id: 'original-id-here', item_id: 'original-item-id-here' }),
+          updatedTrustedApp
+        )
+      ).toEqual({
+        _version: 'abc',
+        comments: [],
+        description: 'Linux Trusted App',
+        entries: [
+          {
+            field: 'process.executable.caseless',
+            operator: 'included',
+            type: 'match',
+            value: '/bin/malware',
+          },
+        ],
+        id: 'original-id-here',
+        itemId: 'original-item-id-here',
+        name: 'Linux trusted app',
+        namespaceType: 'agnostic',
+        osTypes: ['linux'],
+        tags: ['policy:all'],
+        type: 'simple',
+      });
     });
   });
 });
