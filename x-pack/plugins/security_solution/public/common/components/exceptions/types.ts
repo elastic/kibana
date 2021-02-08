@@ -69,6 +69,7 @@ export interface FormattedBuilderEntry {
 }
 
 export interface EmptyEntry {
+  id: string;
   field: string | undefined;
   operator: OperatorEnum;
   type: OperatorTypeEnum.MATCH | OperatorTypeEnum.MATCH_ANY;
@@ -76,6 +77,7 @@ export interface EmptyEntry {
 }
 
 export interface EmptyListEntry {
+  id: string;
   field: string | undefined;
   operator: OperatorEnum;
   type: OperatorTypeEnum.LIST;
@@ -83,6 +85,7 @@ export interface EmptyListEntry {
 }
 
 export interface EmptyNestedEntry {
+  id: string;
   field: string | undefined;
   type: OperatorTypeEnum.NESTED;
   entries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists>;

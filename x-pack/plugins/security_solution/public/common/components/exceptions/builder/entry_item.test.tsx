@@ -58,6 +58,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: undefined,
           operator: isOperator,
           value: undefined,
@@ -85,6 +86,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOperator,
           value: '1234',
@@ -116,6 +118,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotOperator,
           value: '1234',
@@ -149,6 +152,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOneOfOperator,
           value: ['1234'],
@@ -182,6 +186,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotOneOfOperator,
           value: ['1234'],
@@ -215,6 +220,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isInListOperator,
           value: 'some-list-id',
@@ -248,6 +254,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotInListOperator,
           value: 'some-list-id',
@@ -281,6 +288,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: existsOperator,
           value: undefined,
@@ -317,6 +325,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: doesNotExistOperator,
           value: undefined,
@@ -353,6 +362,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: {
             name: 'extension.text',
             type: 'string',
@@ -410,6 +420,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOperator,
           value: '1234',
@@ -445,6 +456,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOperator,
           value: '1234',
@@ -480,6 +492,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotOperator,
           value: '1234',
@@ -515,6 +528,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isOneOfOperator,
           value: '1234',
@@ -550,6 +564,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('ip'),
           operator: isNotInListOperator,
           value: '1234',
@@ -590,6 +605,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('bytes'),
           operator: isOneOfOperator,
           value: '',
@@ -624,6 +640,7 @@ describe('BuilderEntryItem', () => {
     wrapper = mount(
       <BuilderEntryItem
         entry={{
+          id: '123',
           field: getField('bytes'),
           operator: isOneOfOperator,
           value: '',

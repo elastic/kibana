@@ -36,9 +36,6 @@ import {
   UpdateExceptionListItemSchema,
   EntryNested,
   OsTypeArray,
-  EntryExists,
-  EntryMatch,
-  EntryMatchAny,
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
@@ -181,11 +178,9 @@ export const filterExceptionItems = (
       // adding and stripping of the temporary ids to the api boundaries, the exception being
       // in the builder where an id is added to the exception item during creation
       const entries = exception.entries.filter((singleEntry) => {
+        const strippedSingleEntry = removeIdFromItem(singleEntry);
+
         if (singleEntry.type === 'nested') {
-          const strippedSingleEntry = removeIdFromItem({
-            ...singleEntry,
-            entries: singleEntry.entries.map((nestedEntry) => removeIdFromItem(nestedEntry)),
-          });
           const [validatedNestedEntry] = validate(strippedSingleEntry, entriesNested);
 
           if (validatedNestedEntry != null) {
@@ -194,7 +189,7 @@ export const filterExceptionItems = (
             return false;
           }
         } else {
-          const [validatedEntry] = validate(removeIdFromItem(singleEntry), entry);
+          const [validatedEntry] = validate(strippedSingleEntry, entry);
 
           if (validatedEntry != null) {
             return true;

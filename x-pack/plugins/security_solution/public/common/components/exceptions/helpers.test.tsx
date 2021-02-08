@@ -251,6 +251,7 @@ describe('Exception helpers', () => {
     test('it removes entry items with "value" of "undefined"', () => {
       const { entries, ...rest } = getExceptionListItemSchemaMock();
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: 'host.name',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -269,6 +270,7 @@ describe('Exception helpers', () => {
     test('it removes "match" entry items with "value" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: 'host.name',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -289,6 +291,7 @@ describe('Exception helpers', () => {
     test('it removes "match" entry items with "field" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: '',
         type: OperatorTypeEnum.MATCH,
         operator: OperatorEnum.INCLUDED,
@@ -309,6 +312,7 @@ describe('Exception helpers', () => {
     test('it removes "match_any" entry items with "field" of empty string', () => {
       const { entries, ...rest } = { ...getExceptionListItemSchemaMock() };
       const mockEmptyException: EmptyEntry = {
+        id: '123',
         field: '',
         type: OperatorTypeEnum.MATCH_ANY,
         operator: OperatorEnum.INCLUDED,

@@ -8,7 +8,7 @@
 import moment from 'moment';
 
 import { OsTypeArray } from './schemas/common';
-import { EntriesArray } from './schemas/types';
+import { EntriesArray, Entry, EntryMatch, EntryNested } from './schemas/types';
 import { EndpointEntriesArray } from './schemas/types/endpoint';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
 export const OLD_DATE_RELATIVE_TO_DATE_NOW = '2020-04-19T15:25:31.830Z';
@@ -86,19 +86,19 @@ export const ENTRIES_WITH_IDS: EntriesArray = [
         operator: 'included',
         type: 'match',
         value: 'some value',
-      },
+      } as EntryMatch & { id: string },
     ],
     field: 'some.parentField',
     id: '123',
     type: 'nested',
-  },
+  } as EntryNested & { id: string },
   {
     field: 'some.not.nested.field',
     id: '123',
     operator: 'included',
     type: 'match',
     value: 'some value',
-  },
+  } as Entry & { id: string },
 ];
 export const ITEM_TYPE = 'simple';
 export const OS_TYPES: OsTypeArray = ['windows'];

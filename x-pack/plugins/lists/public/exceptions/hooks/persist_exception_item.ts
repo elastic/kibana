@@ -48,12 +48,14 @@ export const usePersistExceptionItem = ({
       if (exceptionListItem != null) {
         try {
           setIsLoading(true);
-          if (isUpdateExceptionItem(exceptionListItem)) {
+          const transformedList = transformOutput(exceptionListItem);
+
+          if (isUpdateExceptionItem(transformedList)) {
             await updateExceptionListItem({
               http,
               // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
               // for context around the temporary `id`
-              listItem: transformOutput(exceptionListItem),
+              listItem: transformedList,
               signal: abortCtrl.signal,
             });
           } else {
@@ -61,7 +63,7 @@ export const usePersistExceptionItem = ({
               http,
               // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
               // for context around the temporary `id`
-              listItem: transformOutput(exceptionListItem),
+              listItem: transformedList,
               signal: abortCtrl.signal,
             });
           }

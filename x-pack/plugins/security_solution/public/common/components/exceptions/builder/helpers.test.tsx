@@ -54,6 +54,7 @@ const getMockIndexPattern = (): IIndexPattern => ({
 });
 
 const getMockBuilderEntry = (): FormattedBuilderEntry => ({
+  id: '123',
   field: getField('ip'),
   operator: isOperator,
   value: 'some value',
@@ -64,6 +65,7 @@ const getMockBuilderEntry = (): FormattedBuilderEntry => ({
 });
 
 const getMockNestedBuilderEntry = (): FormattedBuilderEntry => ({
+  id: '123',
   field: getField('nestedField.child'),
   operator: isOperator,
   value: 'some value',
@@ -81,6 +83,7 @@ const getMockNestedBuilderEntry = (): FormattedBuilderEntry => ({
 });
 
 const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
+  id: '123',
   field: { ...getField('nestedField.child'), name: 'nestedField', esTypes: ['nested'] },
   operator: isOperator,
   value: undefined,
@@ -225,6 +228,7 @@ describe('Exception builder helpers', () => {
 
       test('it returns nested fields that match parent value when "item.nested" is "child"', () => {
         const payloadItem: FormattedBuilderEntry = {
+          id: '123',
           field: getEndpointField('file.Ext.code_signature.status'),
           operator: isOperator,
           value: 'some value',
@@ -363,6 +367,7 @@ describe('Exception builder helpers', () => {
         undefined
       );
       const expected: FormattedBuilderEntry = {
+        id: '123',
         entryIndex: 0,
         field: {
           name: 'machine.os.raw.text',
@@ -399,6 +404,7 @@ describe('Exception builder helpers', () => {
         1
       );
       const expected: FormattedBuilderEntry = {
+        id: '123',
         entryIndex: 0,
         field: {
           aggregatable: false,
@@ -442,6 +448,7 @@ describe('Exception builder helpers', () => {
         undefined
       );
       const expected: FormattedBuilderEntry = {
+        id: '123',
         entryIndex: 0,
         field: {
           aggregatable: true,
@@ -486,6 +493,7 @@ describe('Exception builder helpers', () => {
       const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
       const expected: FormattedBuilderEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: undefined,
           nested: undefined,
@@ -507,6 +515,7 @@ describe('Exception builder helpers', () => {
       const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
       const expected: FormattedBuilderEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: {
             aggregatable: true,
@@ -525,6 +534,7 @@ describe('Exception builder helpers', () => {
           correspondingKeywordField: undefined,
         },
         {
+          id: '123',
           entryIndex: 1,
           field: {
             aggregatable: true,
@@ -561,6 +571,7 @@ describe('Exception builder helpers', () => {
       const output = getFormattedBuilderEntries(payloadIndexPattern, payloadItems);
       const expected: FormattedBuilderEntry[] = [
         {
+          id: '123',
           entryIndex: 0,
           field: {
             aggregatable: true,
@@ -579,6 +590,7 @@ describe('Exception builder helpers', () => {
           correspondingKeywordField: undefined,
         },
         {
+          id: '123',
           entryIndex: 1,
           field: {
             aggregatable: false,
@@ -594,6 +606,7 @@ describe('Exception builder helpers', () => {
           correspondingKeywordField: undefined,
         },
         {
+          id: '123',
           entryIndex: 0,
           field: {
             aggregatable: false,

@@ -9,11 +9,8 @@ import { flow } from 'fp-ts/lib/function';
 
 import {
   CreateExceptionListItemSchema,
+  EntriesArray,
   Entry,
-  EntryExists,
-  EntryMatch,
-  EntryMatchAny,
-  EntryNested,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '../../common';
@@ -98,17 +95,16 @@ export const addIdToExceptionItemEntries = (
 export const removeIdFromExceptionItemsEntries = (
   exceptionItem: CreateExceptionListItemSchema | UpdateExceptionListItemSchema
 ): CreateExceptionListItemSchema | UpdateExceptionListItemSchema => {
-  const entries = exceptionItem.entries.map((entry) => {
+  const { entries, ...itemInfo } = exceptionItem;
+  const entriesNoId = entries.map((entry) => {
     if (entry.type === 'nested') {
-      return removeIdFromItem<EntryNested>({
-        ...entry,
-        entries: entry.entries.map<EntryMatch | EntryMatchAny | EntryExists>((nestedEntry) =>
-          removeIdFromItem(nestedEntry)
-        ),
+      return removeIdFromItem({
+        ...itemInfo,
+        entries: entry.entries.map((nestedEntry) => removeIdFromItem(nestedEntry)),
       });
     } else {
       return removeIdFromItem<Entry>(entry);
     }
   });
-  return { ...exceptionItem, entries };
+  return { ...itemInfo, entries: entriesNoId as EntriesArray };
 };

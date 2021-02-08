@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
+
 import { IIndexPattern, IFieldType } from '../../../../../../../../src/plugins/data/common';
 import {
   Entry,
   OperatorTypeEnum,
   EntryNested,
   ExceptionListType,
-  EntryMatch,
-  EntryMatchAny,
-  EntryExists,
   entriesList,
   ListSchema,
   OperatorEnum,
+  EntryMatch,
+  EntryMatchAny,
+  EntryExists,
 } from '../../../../lists_plugin_deps';
 import {
   isOperator,
@@ -37,7 +39,6 @@ import {
 } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
 import exceptionableFields from '../exceptionable_fields.json';
-import { addIdToItem } from '../../../../../common';
 
 /**
  * Returns filtered index patterns based on the field - if a user selects to
@@ -141,7 +142,7 @@ export const getCorrespondingKeywordField = ({
  */
 export const getFormattedBuilderEntry = (
   indexPattern: IIndexPattern,
-  item: BuilderEntry,
+  item: BuilderEntry & { id?: string },
   itemIndex: number,
   parent: EntryNested | undefined,
   parentIndex: number | undefined
@@ -161,7 +162,7 @@ export const getFormattedBuilderEntry = (
           ? { ...foundField, name: foundField.name.split('.').slice(-1)[0] }
           : foundField,
       correspondingKeywordField,
-      id: item.id,
+      id: (item as typeof item & { id?: string }).id ?? `${itemIndex}`,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
       nested: 'child',
@@ -171,7 +172,7 @@ export const getFormattedBuilderEntry = (
   } else {
     return {
       field: foundField,
-      id: item.id,
+      id: (item as typeof item & { id?: string }).id ?? `${itemIndex}`,
       correspondingKeywordField,
       operator: getExceptionOperatorSelect(item),
       value: getEntryValue(item),
@@ -200,7 +201,7 @@ export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
  */
 export const getFormattedBuilderEntries = (
   indexPattern: IIndexPattern,
-  entries: BuilderEntry[],
+  entries: Array<BuilderEntry & { id?: string }>,
   parent?: EntryNested,
   parentIndex?: number
 ): FormattedBuilderEntry[] => {
@@ -218,7 +219,7 @@ export const getFormattedBuilderEntries = (
     } else {
       const parentEntry: FormattedBuilderEntry = {
         operator: isOperator,
-        id: item.id,
+        id: (item as typeof item & { id?: string }).id ?? `${index}`,
         nested: 'parent',
         field: isNewNestedEntry
           ? undefined
@@ -286,6 +287,7 @@ export const getUpdatedEntriesOnDelete = (
       const { field } = itemOfInterest;
       const updatedItemOfInterest: EntryNested | EmptyNestedEntry = {
         field,
+        id: (itemOfInterest as typeof itemOfInterest & { id?: string }).id ?? `${entryIndex}`,
         type: OperatorTypeEnum.NESTED,
         entries: updatedEntryEntries,
       };
@@ -607,20 +609,20 @@ export const getEntryOnListChange = (
   };
 };
 
-export const getDefaultEmptyEntry = (): EmptyEntry =>
-  addIdToItem({
-    field: '',
-    type: OperatorTypeEnum.MATCH,
-    operator: OperatorEnum.INCLUDED,
-    value: '',
-  });
+export const getDefaultEmptyEntry = (): EmptyEntry => ({
+  id: uuid.v4(),
+  field: '',
+  type: OperatorTypeEnum.MATCH,
+  operator: OperatorEnum.INCLUDED,
+  value: '',
+});
 
-export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry =>
-  addIdToItem({
-    field: '',
-    type: OperatorTypeEnum.NESTED,
-    entries: [],
-  });
+export const getDefaultNestedEmptyEntry = (): EmptyNestedEntry => ({
+  id: uuid.v4(),
+  field: '',
+  type: OperatorTypeEnum.NESTED,
+  entries: [],
+});
 
 export const containsValueListEntry = (items: ExceptionsBuilderExceptionItem[]): boolean =>
   items.some((item) => item.entries.some((entry) => entry.type === OperatorTypeEnum.LIST));
