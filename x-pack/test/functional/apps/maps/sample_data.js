@@ -150,7 +150,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
           'flights_map',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.0001);
+        expect(percentDifference).to.be.lessThan(0.02);
       });
     });
 
