@@ -98,6 +98,12 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     ) {
       return [];
     }
+    const oldColumnSettings: Record<string, ColumnState> = {};
+    if (state) {
+      state.columns.forEach((column) => {
+        oldColumnSettings[column.columnId] = column;
+      });
+    }
     const title =
       table.changeType === 'unchanged'
         ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
@@ -126,8 +132,12 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
+          ...(state || {}),
           layerId: table.layerId,
-          columns: table.columns.map((col) => ({ columnId: col.columnId })),
+          columns: table.columns.map((col) => ({
+            ...(oldColumnSettings[col.columnId] || {}),
+            columnId: col.columnId,
+          })),
         },
         previewIcon: LensIconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
