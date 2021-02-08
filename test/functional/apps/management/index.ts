@@ -14,13 +14,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('management', function () {
     before(async () => {
       await esArchiver.unload('logstash_functional');
-      await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
     });
 
     after(async () => {
       await esArchiver.unload('makelogs');
-      await esArchiver.unload('empty_kibana');
     });
 
     describe('', function () {
