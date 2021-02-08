@@ -131,9 +131,10 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
         timeRange: lookBehindInterval!,
       });
       setPreviewResponse(response);
+      setPreviewError(undefined);
     } catch (e) {
       setPreviewResponse(undefined);
-      setPreviewError(e);
+      setPreviewError(e.body ?? e);
     }
   }, [alertParams, lookBehindInterval]);
 
@@ -192,18 +193,21 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       </EuiFlexGroup>
 
       {previewError !== undefined && (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.ml.previewAlert.previewErrorTitle"
-              defaultMessage="Unable to load the preview"
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>{previewError.message}</p>
-        </EuiCallOut>
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.ml.previewAlert.previewErrorTitle"
+                defaultMessage="Unable to load the preview"
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <p>{previewError.message}</p>
+          </EuiCallOut>
+        </>
       )}
 
       {previewResponse && sampleHits && (
@@ -224,28 +228,30 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                 </strong>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color={'primary'}
-                size="xs"
-                onClick={setAreResultVisible.bind(null, !areResultsVisible)}
-              >
-                {areResultsVisible ? (
-                  <FormattedMessage
-                    id="xpack.ml.previewAlert.hideResultsButtonLabel"
-                    defaultMessage="Hide results"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ml.previewAlert.showResultsButtonLabel"
-                    defaultMessage="Show results"
-                  />
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {sampleHits.length > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color={'primary'}
+                  size="xs"
+                  onClick={setAreResultVisible.bind(null, !areResultsVisible)}
+                >
+                  {areResultsVisible ? (
+                    <FormattedMessage
+                      id="xpack.ml.previewAlert.hideResultsButtonLabel"
+                      defaultMessage="Hide results"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.ml.previewAlert.showResultsButtonLabel"
+                      defaultMessage="Show results"
+                    />
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
 
-          {areResultsVisible ? (
+          {areResultsVisible && sampleHits.length > 0 ? (
             <EuiPanel
               color="subdued"
               borderRadius="none"
