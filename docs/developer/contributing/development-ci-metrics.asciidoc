@@ -121,13 +121,20 @@ Changes to the {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits
 [[ci-metric-validating-limits]]
 === Validating `page load bundle size` limits
 
-Once you've fixed any issues discovered while diagnosing overages you probably should just push the changes to your PR and let CI validate them.
-
-If you have a pretty powerful dev machine, or the necessary patience/determination, you can validate the limits locally by running the following command:
+While you're trying to track down changes which will improve the bundle size, try running the following command locally:
 
 [source,shell]
 -----------
-node scripts/build_kibana_platform_plugins --validate-limits
+node scripts/build_kibana_platform_plugins --dist --watch --focus {pluginId}
+-----------
+
+This will build the front-end bundles for your plugin and only the plugins your plugin depends on. Whenever you make cahnges the bundles are rebuilt and you can inspect the metrics of that build in the `target/public/metrics.json` file within your plugin. This file will be updated as you save changes to the source and should be helpful to determine if your changes are lowering the `page load asset size` enough.
+
+If you only want to run the build once you can run:
+
+[source,shell]
+-----------
+node scripts/build_kibana_platform_plugins --validate-limits --focus {pluginId}
 -----------
 
 This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developmer machines will consume all of your machines resources for 20 minutes or more. If you'd like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.
