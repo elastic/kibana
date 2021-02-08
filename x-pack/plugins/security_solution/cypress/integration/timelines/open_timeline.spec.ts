@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { timeline } from '../../objects/timeline';
 
 import { TIMELINE_DESCRIPTION, TIMELINE_TITLE, OPEN_TIMELINE_MODAL } from '../../screens/timeline';
@@ -12,42 +14,51 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../../screens/timelines';
+import { addNoteToTimeline } from '../../tasks/api_calls/notes';
+
+import { createTimeline } from '../../tasks/api_calls/timelines';
+
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
+import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import {
-  addFilter,
-  addNameAndDescriptionToTimeline,
-  addNotesToTimeline,
   closeOpenTimelineModal,
-  closeTimeline,
   markAsFavorite,
+  openTimelineById,
   openTimelineFromSettings,
   pinFirstEvent,
-  populateTimeline,
-  waitForTimelineChanges,
+  waitForEventsPanelToBeLoaded,
 } from '../../tasks/timeline';
+import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { TIMELINES_URL } from '../../urls/navigation';
 
 describe('Open timeline', () => {
+  let timelineId: string | null = null;
   before(() => {
     cleanKibana();
-    loginAndWaitForPage(OVERVIEW_URL);
+    loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
 
-    openTimelineUsingToggle();
-    addNameAndDescriptionToTimeline(timeline);
-
-    populateTimeline();
-    addFilter(timeline.filter);
-    pinFirstEvent();
-    addNotesToTimeline(timeline.notes);
-    markAsFavorite();
-    waitForTimelineChanges();
-    closeTimeline();
+    createTimeline(timeline)
+      .then((response) => {
+        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+      })
+      .then(() => {
+        const note = timeline.notes;
+        addNoteToTimeline(note, timelineId!).should((response) => {
+          expect(response.status).to.equal(200);
+          waitForTimelinesPanelToBeLoaded();
+          openTimelineById(timelineId!)
+            .click({ force: true })
+            .then(() => {
+              waitForEventsPanelToBeLoaded();
+              pinFirstEvent();
+              markAsFavorite();
+            });
+        });
+      });
   });
-
   describe('Open timeline modal', () => {
     before(() => {
       openTimelineFromSettings();
