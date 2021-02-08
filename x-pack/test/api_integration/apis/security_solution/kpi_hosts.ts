@@ -98,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -119,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
@@ -141,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['filebeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.uniqueDestinationIps!).to.eql(expectedResult.uniqueDestinationIps);
@@ -224,6 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -245,6 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.authenticationsSuccess!).to.eql(expectedResult.authSuccess);
@@ -267,6 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
             defaultIndex: ['auditbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(body.uniqueDestinationIps!).to.eql(expectedResult.uniqueDestinationIps);

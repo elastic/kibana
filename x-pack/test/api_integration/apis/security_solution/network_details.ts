@@ -28,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
             factoryQueryType: NetworkQueries.details,
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
