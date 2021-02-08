@@ -121,9 +121,15 @@ pipeline {
 }
 
 def notifyStatus(String description, String status) {
-  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('pipeline'))
+  notify(context: 'end2end-for-apm-ui', description: description, status: status, targetUrl: getBlueoceanTabURL('pipeline'))
 }
 
 def notifyTestStatus(String description, String status) {
-  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanTabURL('tests'))
+  notify(context: 'end2end-for-apm-ui', description: description, status: status, targetUrl: getBlueoceanTabURL('tests'))
+}
+
+def notify(Map args = [:]) {
+  retryWithSleep(retries: 2, seconds: 5, backoff: true) {
+    githubNotify(context: args.context, description: args.description, status: args.status, targetUrl: args.targetUrl)
+  }
 }
