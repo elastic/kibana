@@ -45,7 +45,7 @@ TSC_TYPES_DEPS = [
     "@npm//@testing-library/jest-dom",
     "@npm//@types/flot",
     "@npm//@types/jest",
-    "@npm//sjest-styled-components",
+    "@npm//jest-styled-components",
     "@npm//@types/node"
 ]
 
