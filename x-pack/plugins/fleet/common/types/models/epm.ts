@@ -221,6 +221,7 @@ export interface RegistryDataStream {
   path: string;
   ingest_pipeline: string;
   elasticsearch?: RegistryElasticsearch;
+  dataset_is_prefix?: boolean;
 }
 
 export interface RegistryElasticsearch {
