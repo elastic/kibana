@@ -61,6 +61,12 @@ export const getAnomalies = async (
             })?.query,
           },
         },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
         sort: [{ record_score: { order: 'desc' } }],
       },
     },
