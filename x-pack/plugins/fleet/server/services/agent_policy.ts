@@ -36,7 +36,7 @@ import {
   FleetServerPolicy,
   AGENT_POLICY_INDEX,
 } from '../../common';
-import { AgentPolicyNameExistsError } from '../errors';
+import { AgentPolicyNameExistsError, AgentPolicyDeletionError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -446,6 +446,10 @@ class AgentPolicyService {
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new Error('Agent policy not found');
+    }
+
+    if (agentPolicy.is_managed) {
+      throw new AgentPolicyDeletionError(`Cannot delete managed policy ${id}`);
     }
 
     const {
