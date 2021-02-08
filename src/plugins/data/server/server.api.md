@@ -886,6 +886,7 @@ export class IndexPatternsFetcher {
         type?: string;
         rollupIndex?: string;
     }): Promise<FieldDescriptor[]>;
+    validatePatternListActive(patternList: string[]): Promise<string[]>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceStart" needs to be exported by the entry point index.d.ts
