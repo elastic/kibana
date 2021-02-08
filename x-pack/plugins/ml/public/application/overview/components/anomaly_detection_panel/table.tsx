@@ -30,7 +30,10 @@ import { StatsBar, JobStatsBarStats } from '../../../components/stats_bar';
 // @ts-ignore
 import { JobSelectorBadge } from '../../../components/job_selector/job_selector_badge/index';
 import { toLocaleString } from '../../../util/string_utils';
-import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
+import {
+  getFormattedSeverityScore,
+  getSeverityColor,
+} from '../../../../../common/util/anomaly_utils';
 
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
@@ -125,7 +128,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
           return (
             // @ts-ignore
             <EuiHealth color={color} compressed="true">
-              {score >= 1 ? Math.floor(score) : '< 1'}
+              {getFormattedSeverityScore(score)}
             </EuiHealth>
           );
         }

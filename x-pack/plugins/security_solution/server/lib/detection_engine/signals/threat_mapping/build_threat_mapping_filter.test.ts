@@ -133,10 +133,16 @@ describe('build_threat_mapping_filter', () => {
           },
         ],
         threatListItem: {
-          '@timestamp': '2020-09-09T21:59:13Z',
-          host: {
-            name: 'host-1',
-            // since ip is missing this entire AND clause should be dropped
+          _source: {
+            '@timestamp': '2020-09-09T21:59:13Z',
+            host: {
+              name: 'host-1',
+              // since ip is missing this entire AND clause should be dropped
+            },
+          },
+          fields: {
+            '@timestamp': ['2020-09-09T21:59:13Z'],
+            'host.name': ['host-1'],
           },
         },
       });
@@ -176,6 +182,10 @@ describe('build_threat_mapping_filter', () => {
             host: {
               name: 'host-1',
             },
+          },
+          fields: {
+            '@timestamp': ['2020-09-09T21:59:13Z'],
+            'host.name': ['host-1'],
           },
         },
       });
