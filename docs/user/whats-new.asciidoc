@@ -27,7 +27,7 @@ is officially recommended for use in production. *Alerting* guides you
 through building your alerts, provides seamless integration with
 *Elastic Security* and *Elastic Observability*, integrates with the external
 systems where your workflows run, and more. For more information,
-check out <<alerting-getting-started,Alerting and Actions>>.
+check out {kibana-ref}/alerting-getting-started.html[Alerting and Actions].
 
 [role="screenshot"]
 image::user/images/highlights-alerting.png[Alerts and actions]
@@ -50,6 +50,10 @@ provide credentials. This is useful if you want your users to skip the
 login step when you embed dashboards in another application or set up a demo
 {kib} instance in your internal network, while keeping other security features intact.
 To get started with anonymous access, check out {kibana-ref}/kibana-authentication.html#anonymous-authentication[the docs].
+
+[role="screenshot"]
+image::user/images/highlights-security-anon-acess-7-11.gif[Demo that shows how anonymous access works]
+
 
 Also in 7.11, {kib}’s audit logging was completely
 revamped. When configured, {kib} will record a
@@ -222,7 +226,8 @@ image::user/images/highlights-table-row-trigger.png[Drilldown table row trigger]
 
 Custom labels are especially useful for displaying long field names in much shorter versions.
 These labels appear in *Discover*, *Maps*, and *Visualize* (not yet in TSVB, but coming soon).
-To add a custom label to a field, go to *Stack Management > Index Pattern*. Details are in <<managing-fields,the documentation>>.
+To add a custom label to a field, go to *Stack Management > Index Pattern*. Details are in
+{kibana-ref}/managing-fields.html[the documentation].
 
 [role="screenshot"]
 image::user/images/highlights-custom-field-labels.png[Drilldown table row trigger]
@@ -232,11 +237,11 @@ image::user/images/highlights-custom-field-labels.png[Drilldown table row trigge
 [[ml-jobs-space]]
 === {ml-cap} jobs are now space-aware
 
-{anomaly-detect-cap} and {dfanalytics} jobs are space-aware starting in 7.11. 
-{kibana-ref}/xpack-spaces.html[Spaces] enable you to organize your {ml} jobs 
-and other {kib} saved objects into meaningful categories. Once a {ml} job is 
-limited to a {kib} space, users only see the job if they are assigned to the 
-same space. Extra checks for spaces have been added when deleting jobs, and a 
+{anomaly-detect-cap} and {dfanalytics} jobs are space-aware starting in 7.11.
+{kibana-ref}/xpack-spaces.html[Spaces] enable you to organize your {ml} jobs
+and other {kib} saved objects into meaningful categories. Once a {ml} job is
+limited to a {kib} space, users only see the job if they are assigned to the
+same space. Extra checks for spaces have been added when deleting jobs, and a
 warning is shown if any jobs are missing their saved objects.
 
 
@@ -244,11 +249,11 @@ warning is shown if any jobs are missing their saved objects.
 [[index-data-visualizer-design]]
 === Index Data Visualizer has new design
 
-The {ml-cap} Data Visualizer provides a view into your indices to give a better 
-understanding of the fields in the data set prior to creating {anomaly-detect} 
-or {dfanalytics-jobs}. The Data Visualizer went through a major redesign and the 
-previous card based display is switched to a table. It has the benefit of a more 
-compact layout, a new document count chart, and expanded rows for viewing 
+The {ml-cap} Data Visualizer provides a view into your indices to give a better
+understanding of the fields in the data set prior to creating {anomaly-detect}
+or {dfanalytics-jobs}. The Data Visualizer went through a major redesign and the
+previous card based display is switched to a table. It has the benefit of a more
+compact layout, a new document count chart, and expanded rows for viewing
 details on individual fields.
 
 [role="screenshot"]
@@ -259,11 +264,11 @@ image::user/images/highlights-index-data-vis-design.png[Index data visualizer ta
 [[single-metric-viewer-nav]]
 === Enhanced navigation for the Single Metric Viewer
 
-The new navigation enables you to explore the results of the {anomaly-jobs} 
-easier and provides more control for selecting the partitioning field in the 
-Single Metric Viewer. An indication of the maximum anomaly score for each value 
-is now displayed, and you have the possibility to sort matches by score or name 
-and to limit the selection to values which are anomalous over the selected time 
+The new navigation enables you to explore the results of the {anomaly-jobs}
+easier and provides more control for selecting the partitioning field in the
+Single Metric Viewer. An indication of the maximum anomaly score for each value
+is now displayed, and you have the possibility to sort matches by score or name
+and to limit the selection to values which are anomalous over the selected time
 range.
 
 [role="screenshot"]
