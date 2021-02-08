@@ -29,7 +29,6 @@ describe('engine routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/engines',
-        payload: 'query',
       });
 
       registerEnginesRoutes({

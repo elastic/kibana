@@ -27,9 +27,12 @@ import {
 
 import { HeatmapVisParams } from '../../../heatmap';
 import { LabelsPanel } from './labels_panel';
+import { getHeatmapCollections } from './../../collections';
+
+const heatmapCollections = getHeatmapCollections();
 
 function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
-  const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
+  const { stateParams, uiState, setValue, setValidity, setTouched } = props;
   const [valueAxis] = stateParams.valueAxes;
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
@@ -65,7 +68,7 @@ function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <BasicOptions {...props} />
+        <BasicOptions {...props} legendPositions={heatmapCollections.legendPositions} />
 
         <SwitchOption
           label={i18n.translate('visTypeVislib.editors.heatmap.highlightLabel', {
@@ -96,7 +99,7 @@ function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
 
         <ColorSchemaOptions
           colorSchema={stateParams.colorSchema}
-          colorSchemas={vis.type.editorConfig.collections.colorSchemas}
+          colorSchemas={heatmapCollections.colorSchemas}
           invertColors={stateParams.invertColors}
           uiState={uiState}
           setValue={setValue as SetColorSchemaOptionsValue}
@@ -107,7 +110,7 @@ function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
           label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorScaleLabel', {
             defaultMessage: 'Color scale',
           })}
-          options={vis.type.editorConfig.collections.scales}
+          options={heatmapCollections.scales}
           paramName="type"
           value={valueAxis.scale.type}
           setValue={setValueAxisScale}

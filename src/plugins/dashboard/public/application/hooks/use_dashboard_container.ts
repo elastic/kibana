@@ -7,7 +7,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import _ from 'lodash';
 import { History } from 'history';
 
 import { useKibana } from '../../services/kibana_react';
@@ -15,6 +14,7 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
+  ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
 } from '../../services/embeddable';
@@ -72,8 +72,10 @@ export const useDashboardContainer = (
       .getStateTransfer()
       .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, true);
 
+    let canceled = false;
+    let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
-      const newContainer = await dashboardFactory.create(
+      pendingContainer = await dashboardFactory.create(
         getDashboardContainerInput({
           dashboardCapabilities,
           dashboardStateManager,
@@ -84,12 +86,27 @@ export const useDashboardContainer = (
         })
       );
 
-      if (!newContainer || isErrorEmbeddable(newContainer)) {
+      // already new container is being created
+      // no longer interested in the pending one
+      if (canceled) {
+        try {
+          pendingContainer?.destroy();
+          pendingContainer = null;
+        } catch (e) {
+          // destroy could throw if something has already destroyed the container
+          // eslint-disable-next-line no-console
+          console.warn(e);
+        }
+
+        return;
+      }
+
+      if (!pendingContainer || isErrorEmbeddable(pendingContainer)) {
         return;
       }
 
       // inject switch view mode callback for the empty screen to use
-      newContainer.switchViewMode = (newViewMode: ViewMode) =>
+      pendingContainer.switchViewMode = (newViewMode: ViewMode) =>
         dashboardStateManager.switchViewMode(newViewMode);
 
       // If the incoming embeddable is newly created, or doesn't exist in the current panels list,
@@ -98,17 +115,28 @@ export const useDashboardContainer = (
         incomingEmbeddable &&
         (!incomingEmbeddable?.embeddableId ||
           (incomingEmbeddable.embeddableId &&
-            !newContainer.getInput().panels[incomingEmbeddable.embeddableId]))
+            !pendingContainer.getInput().panels[incomingEmbeddable.embeddableId]))
       ) {
         dashboardStateManager.switchViewMode(ViewMode.EDIT);
-        newContainer.addNewEmbeddable<EmbeddableInput>(
+        pendingContainer.addNewEmbeddable<EmbeddableInput>(
           incomingEmbeddable.type,
           incomingEmbeddable.input
         );
       }
-      setDashboardContainer(newContainer);
+      setDashboardContainer(pendingContainer);
     })();
-    return () => setDashboardContainer(null);
+    return () => {
+      canceled = true;
+      try {
+        pendingContainer?.destroy();
+      } catch (e) {
+        // destroy could throw if something has already destroyed the container
+        // eslint-disable-next-line no-console
+        console.warn(e);
+      }
+
+      setDashboardContainer(null);
+    };
   }, [
     dashboardCapabilities,
     dashboardStateManager,
