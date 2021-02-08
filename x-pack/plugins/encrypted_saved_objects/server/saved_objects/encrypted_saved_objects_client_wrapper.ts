@@ -15,6 +15,7 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
@@ -257,8 +258,8 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.openPointInTimeForType(type, options);
   }
 
-  public async closePointInTime(id: string) {
-    return await this.options.baseClient.closePointInTime(id);
+  public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this.options.baseClient.closePointInTime(id, options);
   }
 
   /**

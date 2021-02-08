@@ -343,6 +343,11 @@ export interface SavedObjectsOpenPointInTimeResponse {
 /**
  * @public
  */
+export type SavedObjectsClosePointInTimeOptions = SavedObjectsBaseOptions;
+
+/**
+ * @public
+ */
 export interface SavedObjectsClosePointInTimeResponse {
   /**
    * If true, all search contexts associated with the PIT id are
@@ -565,7 +570,7 @@ export class SavedObjectsClient {
    * via the Elasticsearch client, and is included in the Saved Objects Client
    * as a convenience for consumers who are using `openPointInTimeForType`.
    */
-  async closePointInTime(id: string) {
-    return await this._repository.closePointInTime(id);
+  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this._repository.closePointInTime(id, options);
   }
 }

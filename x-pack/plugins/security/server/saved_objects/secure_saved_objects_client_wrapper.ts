@@ -18,6 +18,7 @@ import {
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUtils,
@@ -591,8 +592,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return pit;
   }
 
-  public async closePointInTime(id: string) {
-    const response = await this.baseClient.closePointInTime(id);
+  public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    const response = await this.baseClient.closePointInTime(id, options);
 
     this.auditLogger.log(
       savedObjectEvent({

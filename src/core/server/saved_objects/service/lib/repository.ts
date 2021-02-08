@@ -36,6 +36,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsOpenPointInTimeResponse,
@@ -1881,9 +1882,13 @@ export class SavedObjectsRepository {
    * ```
    *
    * @param {string} id
-   * @returns {promise} - { id: string }
+   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
+   * @returns {promise} - {@link SavedObjectsClosePointInTimeResponse}
    */
-  async closePointInTime(id: string): Promise<SavedObjectsClosePointInTimeResponse> {
+  async closePointInTime(
+    id: string,
+    options?: SavedObjectsClosePointInTimeOptions
+  ): Promise<SavedObjectsClosePointInTimeResponse> {
     const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
       body: { id },
     });

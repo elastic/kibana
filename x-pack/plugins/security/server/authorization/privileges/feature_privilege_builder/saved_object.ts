@@ -9,7 +9,13 @@ import { flatten, uniq } from 'lodash';
 import { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-const readOperations: string[] = ['bulk_get', 'get', 'find', 'open_point_in_time'];
+const readOperations: string[] = [
+  'bulk_get',
+  'get',
+  'find',
+  'open_point_in_time',
+  'close_point_in_time',
+];
 const writeOperations: string[] = [
   'create',
   'bulk_create',

@@ -15,6 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
@@ -406,7 +407,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * via the Elasticsearch client, and is included in the Saved Objects Client
    * as a convenience for consumers who are using `openPointInTimeForType`.
    */
-  async closePointInTime(id: string) {
-    return await this.client.closePointInTime(id);
+  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this.client.closePointInTime(id, options);
   }
 }
