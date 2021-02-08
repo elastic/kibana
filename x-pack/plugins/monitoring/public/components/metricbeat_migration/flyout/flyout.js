@@ -225,13 +225,12 @@ export class Flyout extends Component {
 
   getDocumentationTitle() {
     const { productName } = this.props;
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
 
     let documentationUrl = null;
     if (productName === KIBANA_SYSTEM_ID) {
-      documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`;
+      documentationUrl = Legacy.shims.docLinks.links.monitoring.monitorKibana;
     } else if (productName === ELASTICSEARCH_SYSTEM_ID) {
-      documentationUrl = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/configuring-metricbeat.html`;
+      documentationUrl = Legacy.shims.docLinks.links.monitoring.monitorElasticsearch;
     }
 
     if (!documentationUrl) {
