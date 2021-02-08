@@ -45,6 +45,7 @@ export const anomalyLayerWizard: LayerWizard = {
         type: 'VECTOR',
         sourceDescriptor: AnomalySource.createDescriptor({
           jobId: sourceConfig.jobId,
+          typicalActual: sourceConfig.typicalActual,
         }),
         style: {
           type: 'VECTOR',

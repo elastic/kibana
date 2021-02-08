@@ -10,26 +10,73 @@ import React, { Component } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelector } from './anomaly_job_selector';
+import { TypicalActualSelector } from './typical_actual_selector';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
 }
 
 interface State {
-  jobId: string;
+  jobId?: string;
+  typicalActual?: 'typical' | 'actual';
 }
 
 export class CreateAnomalySourceEditor extends Component<Props, State> {
-  previewLayer = (jobId: string) => {
-    this.props.onSourceConfigChange({
-      jobId,
-    });
+  private _isMounted: boolean = false;
+  state: State = {};
+
+  private configChange() {
+    if (this.state.jobId) {
+      this.props.onSourceConfigChange({
+        jobId: this.state.jobId,
+        typicalActual: this.state.typicalActual,
+      });
+    }
+  }
+
+  componentDidMount(): void {
+    this._isMounted = true;
+  }
+
+  private onTypicalActualChange = (typicalActual: 'typical' | 'actual') => {
+    if (!this._isMounted) {
+      return;
+    }
+    this.setState(
+      {
+        typicalActual,
+      },
+      () => {
+        this.configChange();
+      }
+    );
+  };
+
+  private previewLayer = (jobId: string) => {
+    if (!this._isMounted) {
+      return;
+    }
+    this.setState(
+      {
+        jobId,
+      },
+      () => {
+        this.configChange();
+      }
+    );
   };
 
   render() {
+    const selector = this.state.jobId ? (
+      <TypicalActualSelector
+        onChange={this.onTypicalActualChange}
+        typicalActual={this.state.typicalActual || 'typical'}
+      />
+    ) : null;
     return (
       <EuiPanel>
         <AnomalyJobSelector onJobChange={this.previewLayer} />
+        {selector}
       </EuiPanel>
     );
   }

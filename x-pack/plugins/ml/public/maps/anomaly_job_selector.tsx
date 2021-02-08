@@ -46,10 +46,16 @@ export class AnomalyJobSelector extends Component<Props, State> {
     this._loadJobs();
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   onJobIdSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const jobId: string = selectedOptions[0].value!;
-    this.setState({ jobId });
-    this.props.onJobChange(jobId);
+    if (this._isMounted) {
+      this.setState({ jobId });
+      this.props.onJobChange(jobId);
+    }
   };
 
   render() {

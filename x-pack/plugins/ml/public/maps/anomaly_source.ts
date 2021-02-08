@@ -35,6 +35,7 @@ import { getResultsForJobId } from './util';
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
+  typicalActual: 'typical' | 'actual';
 }
 
 export class AnomalySource implements IVectorSource {
@@ -43,6 +44,7 @@ export class AnomalySource implements IVectorSource {
     return {
       type: SOURCE_TYPES.ML_ANOMALY,
       jobId: typeof descriptor.jobId === 'string' ? descriptor.jobId : 'foobar',
+      typicalActual: descriptor.typicalActual || 'typical',
     };
   }
 
@@ -65,7 +67,10 @@ export class AnomalySource implements IVectorSource {
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
-    const results = await getResultsForJobId(this._descriptor.jobId, 'typical');
+    const results = await getResultsForJobId(
+      this._descriptor.jobId,
+      this._descriptor.typicalActual
+    );
 
     return {
       data: results,
@@ -83,6 +88,7 @@ export class AnomalySource implements IVectorSource {
     return {
       type: this._descriptor.type,
       jobId: this._descriptor.jobId,
+      typicalActual: this._descriptor.typicalActual,
     };
   }
 
@@ -120,8 +126,9 @@ export class AnomalySource implements IVectorSource {
 
   async getDisplayName(): Promise<string> {
     return i18n.translate('xpack.ml.maps.anomalySource.displayLabel', {
-      defaultMessage: 'Anomaly Layer for jobId {jobId}',
+      defaultMessage: '{typicalActual} for {jobId}',
       values: {
+        typicalActual: this._descriptor.typicalActual,
         jobId: this._descriptor.jobId,
       },
     });
