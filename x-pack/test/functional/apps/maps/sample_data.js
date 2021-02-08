@@ -14,6 +14,9 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
+  // Only update the baseline images from Jenkins session images after comparing them
+  // These tests might fail locally because of scaling factors and resolution.
+
   describe('maps loaded from sample data', () => {
     before(async () => {
       const SAMPLE_DATA_RANGE = `[
