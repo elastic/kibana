@@ -77,7 +77,9 @@ source test/scripts/jenkins_test_setup_xpack.sh
 
 # Start Metricbeat
 echo "Starting metricbeat"
-nohup $KIBANA_DIR/metricbeat-install/metricbeat > $KIBANA_DIR/metricbeat-install/metricbeat.log 2>&1 &
+pushd $KIBANA_DIR/metricbeat-install
+nohup ./metricbeat > metricbeat.log 2>&1 &
+popd
 
 echo " -> run gatling load testing"
 export GATLING_SIMULATIONS="$simulations"
