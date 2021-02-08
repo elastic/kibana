@@ -154,7 +154,8 @@ export function getColumns({
       ),
       width: px(unit * 5),
       render: (_, { name }) => {
-        const impact = transactionGroupComparisonStatistics?.[name]?.impact;
+        const impact =
+          transactionGroupComparisonStatistics?.[name]?.impact ?? 0;
         return <ImpactBar value={impact} size="m" />;
       },
     },
