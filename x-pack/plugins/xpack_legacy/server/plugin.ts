@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
@@ -25,11 +24,9 @@ interface SetupPluginDeps {
 export class XpackLegacyPlugin implements Plugin {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup, { usageCollection }: SetupPluginDeps) {
+  public setup(core: CoreSetup, { usageCollection }: SetupPluginDeps) {
     const router = core.http.createRouter();
-    const globalConfig = await this.initContext.config.legacy.globalConfig$
-      .pipe(first())
-      .toPromise();
+    const globalConfig = this.initContext.config.legacy.get();
     const serverInfo = core.http.getServerInfo();
 
     registerSettingsRoute({

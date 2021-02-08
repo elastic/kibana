@@ -35,7 +35,8 @@ export default function ({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  describe('indices', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/64473
+  describe.skip('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {

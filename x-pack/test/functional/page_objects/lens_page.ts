@@ -413,6 +413,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async switchToVisualization(subVisualizationId: string) {
       await this.openChartSwitchPopover();
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async openChartSwitchPopover() {
@@ -594,10 +595,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRow"]:nth-child(${
-          rowIndex + 2 // this is a bit specific for EuiDataGrid: the first row is the Header
-        }) [data-test-subj="dataGridRowCell"]:nth-child(${colIndex + 1})`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
+          rowIndex * columnNumber + colIndex + 2
+        })`
       );
     },
 
