@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-import * as vegaLite from 'vega-lite/build-es5/vega-lite';
-import * as vega from 'vega/build-es5/vega';
-
-export { vega, vegaLite };
+require('../src/setup_node_env/no_transpilation');
+require('@kbn/dev-utils').shipCiStatsCli();
