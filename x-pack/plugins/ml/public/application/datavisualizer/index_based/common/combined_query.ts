@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { EntityCell } from './entity_cell';
+export interface CombinedQuery {
+  searchString: string | { [key: string]: any };
+  searchQueryLanguage: string;
+}
