@@ -275,7 +275,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
         tap((response) => {
           if (!options.sessionId || !response.id || options.isRestore) return;
-          deps.searchSessionsClient.trackId(request, response.id, options);
+          // intentionally swallow tracking error, as it shouldn't fail the search
+          deps.searchSessionsClient.trackId(request, response.id, options).catch((trackErr) => {
+            this.logger.error(trackErr);
+          });
         })
       );
     } catch (e) {
