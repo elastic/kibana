@@ -29,6 +29,7 @@ test('getTopNavLinks result', () => {
     indexPattern: indexPatternMock,
     inspectorAdapters: inspectorPluginMock,
     navigateTo: jest.fn(),
+    onOpenInspector: jest.fn(),
     savedSearch: savedSearchMock,
     services,
     state,
