@@ -1,0 +1,28 @@
+[[actions-api]]
+== Actions and Connectors APIs
+
+Manage your {kib} actions.
+
+The following {kib} actions APIs are available: 
+
+* <<actions-api-get, Get action API>> to retrieve a single {kib} action by ID
+
+* <<actions-api-get-all, Get all actions API>> to retrieve all {kib} actions
+
+* <<actions-api-list, List all action types API>> to retrieve a list of all {kib} action types
+
+* <<actions-api-create, Create action API>> to create {kib} action
+
+* <<actions-api-update, Update action API>> to update the attributes for an existing {kib} action
+
+* <<actions-api-execute, Execute action API>> to execute a {kib} action by ID
+
+* <<actions-delete, Delete action API>> to remove {kib} action by ID
+
+include::actions/get.asciidoc[]
+include::actions/get_all.asciidoc[]
+include::actions/list.asciidoc[]
+include::actions/create.asciidoc[]
+include::actions/update.asciidoc[]
+include::actions/execute.asciidoc[]
+include::actions/delete.asciidoc[]
