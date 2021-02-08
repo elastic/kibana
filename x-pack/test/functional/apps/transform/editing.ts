@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('editing', function () {
     const transformConfigWithPivot = getTransformConfig();
-    // const transformConfigWithLatest = getLatestTransformConfig();
+    const transformConfigWithLatest = getLatestTransformConfig();
 
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
@@ -41,10 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithPivot.id,
         transformConfigWithPivot
       );
-      // await transform.api.createAndRunTransform(
-      //   transformConfigWithLatest.id,
-      //   transformConfigWithLatest
-      // );
+      await transform.api.createAndRunTransform(
+        transformConfigWithLatest.id,
+        transformConfigWithLatest
+      );
 
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();
@@ -53,8 +53,8 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
-      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
 
