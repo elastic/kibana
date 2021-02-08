@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { UseField, useFormData, ES_FIELD_TYPES, useFormContext } from '../../../shared_imports';
@@ -19,6 +19,7 @@ export const FormatField = ({
   fieldFormats,
   uiSettings,
 }: Omit<FormatSelectEditorProps, 'onChange' | 'onError' | 'esTypes'>) => {
+  const isMounted = useRef(false);
   const [{ type }] = useFormData<FieldFormInternal>({ watch: ['name', 'type'] });
   const { getFields, isSubmitted } = useFormContext();
   const [formatError, setFormatError] = useState<string | undefined>();
@@ -39,7 +40,10 @@ export const FormatField = ({
   }, [formatError, getFields]);
 
   useEffect(() => {
-    getFields().format.reset();
+    if (isMounted.current) {
+      getFields().format.reset();
+    }
+    isMounted.current = true;
   }, [type, getFields]);
 
   return (
