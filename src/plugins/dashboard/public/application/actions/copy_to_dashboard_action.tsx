@@ -9,7 +9,7 @@
 import React from 'react';
 import { OverlayStart } from '../../../../../core/public';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { IEmbeddable } from '../../services/embeddable';
+import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
 import { toMountPoint } from '../../services/kibana_react';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
@@ -38,8 +38,9 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
 
   constructor(
     private overlays: OverlayStart,
-    private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider'],
-    private capabilities: DashboardCopyToCapabilities
+    private stateTransfer: EmbeddableStateTransfer,
+    private capabilities: DashboardCopyToCapabilities,
+    private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']
   ) {}
 
   public getDisplayName({ embeddable }: CopyToDashboardActionContext) {
@@ -69,12 +70,15 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    // const session = this.overlays.openModal(
-    this.overlays.openModal(
+    const session = this.overlays.openModal(
       toMountPoint(
         <CopyToDashboardModal
           PresentationUtilContext={this.PresentationUtilContext}
+          closeModal={() => session.close()}
+          stateTransfer={this.stateTransfer}
           capabilities={this.capabilities}
+          dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
+          embeddable={embeddable}
         />
       ),
       {

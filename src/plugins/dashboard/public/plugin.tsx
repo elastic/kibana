@@ -341,7 +341,7 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications, overlays } = core;
-    const { uiActions, data, share, presentationUtil } = plugins;
+    const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
@@ -382,11 +382,12 @@ export class DashboardPlugin
 
       const copyToDashboardAction = new CopyToDashboardAction(
         overlays,
-        presentationUtil.ContextProvider,
+        embeddable.getStateTransfer(),
         {
           canCreateNew: Boolean(core.application.capabilities.dashboard.createNew),
           canEditExisting: !Boolean(core.application.capabilities.dashboard.hideWriteControls),
-        }
+        },
+        presentationUtil.ContextProvider
       );
       uiActions.registerAction(copyToDashboardAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);

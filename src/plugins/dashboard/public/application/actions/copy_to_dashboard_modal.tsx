@@ -5,8 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { omit } from 'lodash';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFormRow,
   EuiModalBody,
   EuiModalFooter,
@@ -19,35 +22,63 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
 import { DashboardPicker } from '../../services/presentation_util';
+import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
+import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
+import { createDashboardEditUrl, DashboardConstants } from '../..';
 
 interface CopyToDashboardModalProps {
-  PresentationUtilContext: React.FC;
   capabilities: DashboardCopyToCapabilities;
+  stateTransfer: EmbeddableStateTransfer;
+  PresentationUtilContext: React.FC;
+  embeddable: IEmbeddable;
+  dashboardId?: string;
+  closeModal: () => void;
 }
 
 export function CopyToDashboardModal({
   PresentationUtilContext,
+  stateTransfer,
   capabilities,
+  dashboardId,
+  embeddable,
+  closeModal,
 }: CopyToDashboardModalProps) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
   );
 
+  const onSubmit = useCallback(() => {
+    const state = {
+      input: omit(embeddable.getInput(), 'id'),
+      type: embeddable.type,
+    };
+
+    const path =
+      dashboardOption === 'existing' && selectedDashboard
+        ? `#${createDashboardEditUrl(selectedDashboard.id, true)}`
+        : `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
+
+    closeModal();
+    stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      state,
+      path,
+    });
+  }, [dashboardOption, embeddable, selectedDashboard, stateTransfer, closeModal]);
+
   return (
     <PresentationUtilContext>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Modal title</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{dashboardCopyToDashboardAction.getDisplayName()}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <>
-          <EuiFormRow label="testLabel" hasChildLabel={false}>
+          <EuiFormRow hasChildLabel={false}>
             <EuiPanel color="subdued" hasShadow={false} data-test-subj="add-to-dashboard-options">
               <div>
                 {capabilities.canEditExisting && (
                   <>
-                    {' '}
                     <EuiRadio
                       checked={dashboardOption === 'existing'}
                       id="existing-dashboard-option"
@@ -63,6 +94,7 @@ export function CopyToDashboardModal({
                     <div className="savAddDashboard__searchDashboards">
                       <DashboardPicker
                         isDisabled={dashboardOption !== 'existing'}
+                        idsToOmit={dashboardId ? [dashboardId] : undefined}
                         onChange={(dashboard) => setSelectedDashboard(dashboard)}
                       />
                     </div>
@@ -71,11 +103,11 @@ export function CopyToDashboardModal({
                 )}
                 {capabilities.canCreateNew && (
                   <>
-                    {' '}
                     <EuiRadio
                       checked={dashboardOption === 'new'}
                       id="new-dashboard-option"
                       name="dashboard-option"
+                      disabled={!dashboardId}
                       label={i18n.translate(
                         'presentationUtil.saveModalDashboard.newDashboardOptionLabel',
                         {
@@ -93,7 +125,19 @@ export function CopyToDashboardModal({
         </>
       </EuiModalBody>
 
-      <EuiModalFooter>footer</EuiModalFooter>
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={() => closeModal()}>
+          {dashboardCopyToDashboardAction.getCancelButtonName()}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          data-test-subj="confirmSaveSavedObjectButton"
+          onClick={onSubmit}
+          disabled={dashboardOption === 'existing' && !selectedDashboard}
+        >
+          {dashboardCopyToDashboardAction.getAcceptButtonName()}
+        </EuiButton>
+      </EuiModalFooter>
     </PresentationUtilContext>
   );
 }

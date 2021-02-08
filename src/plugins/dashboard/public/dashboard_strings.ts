@@ -77,8 +77,16 @@ export const dashboardFeatureCatalog = {
 */
 export const dashboardCopyToDashboardAction = {
   getDisplayName: () =>
-    i18n.translate('dashboard.panel.copyToDashboard', {
+    i18n.translate('dashboard.panel.copyToDashboard.title', {
       defaultMessage: 'Copy to dashboard',
+    }),
+  getCancelButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.cancel', {
+      defaultMessage: 'Cancel',
+    }),
+  getAcceptButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.goToDashboard', {
+      defaultMessage: 'Copy and go',
     }),
 };
 
