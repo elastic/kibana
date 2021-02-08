@@ -34,7 +34,8 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   useEffect(() => {
     const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
-services.embeddable.getStateTransfer().getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+      services.embeddable.getStateTransfer().getIncomingEditorState(VisualizeConstants.APP_ID) ||
+      {};
     setOriginatingApp(value);
     setValueInput(valueInputValue);
     setEmbeddableId(embeddableIdValue);
