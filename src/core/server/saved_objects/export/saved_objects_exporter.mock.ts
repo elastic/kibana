@@ -8,14 +8,14 @@
 
 import { ISavedObjectsExporter } from './saved_objects_exporter';
 
-const createExporterMock = jest.fn(() => {
+const createExporterMock = () => {
   const mock: jest.Mocked<ISavedObjectsExporter> = {
     exportByObjects: jest.fn(),
     exportByTypes: jest.fn(),
   };
 
   return mock;
-});
+};
 
 export const savedObjectsExporterMock = {
   create: createExporterMock,

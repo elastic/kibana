@@ -43,9 +43,9 @@ describe('POST /api/saved_objects/_export', () => {
     exporter = handlerContext.savedObjects.getExporter();
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    handlerContext.savedObjects.getExporter.mockImplementation(
-      () => exporter as ReturnType<typeof savedObjectsExporterMock.create>
-    );
+    handlerContext.savedObjects.getExporter = jest
+      .fn()
+      .mockImplementation(() => exporter as ReturnType<typeof savedObjectsExporterMock.create>);
 
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsExport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail

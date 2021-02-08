@@ -68,9 +68,9 @@ describe(`POST ${URL}`, () => {
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
     });
-    handlerContext.savedObjects.getImporter.mockImplementation(
-      () => importer as jest.Mocked<SavedObjectsImporter>
-    );
+    handlerContext.savedObjects.getImporter = jest
+      .fn()
+      .mockImplementation(() => importer as jest.Mocked<SavedObjectsImporter>);
 
     const router = httpSetup.createRouter('/internal/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
