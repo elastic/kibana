@@ -750,9 +750,20 @@ export class DataRecognizer {
       datafeeds.map(async (datafeed) => {
         try {
           await this.saveDatafeed(datafeed);
-          return { id: datafeed.id, success: true, started: false };
+          return {
+            id: datafeed.id,
+            success: true,
+            started: false,
+            awaitingMlNodeAllocation: false,
+          };
         } catch ({ body }) {
-          return { id: datafeed.id, success: false, started: false, error: body };
+          return {
+            id: datafeed.id,
+            success: false,
+            started: false,
+            awaitingMlNodeAllocation: false,
+            error: body,
+          };
         }
       })
     );
