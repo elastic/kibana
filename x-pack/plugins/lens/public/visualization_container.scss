@@ -15,3 +15,11 @@
     position: static; // Let the progress indicator position itself against the outer parent
   }
 }
+
+.lnsExpressionRendererEmbeddedError {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}

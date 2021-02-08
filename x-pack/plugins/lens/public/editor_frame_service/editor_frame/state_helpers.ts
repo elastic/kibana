@@ -18,6 +18,9 @@ import {
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
+import { getActiveDatasourceIdFromDoc } from './state_management';
+import { ErrorMessage } from '../types';
+import { getMissingCurrentDatasource, getMissingVisualizationTypeError } from '../error_helper';
 
 export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
@@ -72,7 +75,7 @@ export async function persistedStateToExpression(
   datasources: Record<string, Datasource>,
   visualizations: Record<string, Visualization>,
   doc: Document
-): Promise<Ast | null> {
+): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
     state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
     visualizationType,
@@ -80,7 +83,12 @@ export async function persistedStateToExpression(
     title,
     description,
   } = doc;
-  if (!visualizationType) return null;
+  if (!visualizationType) {
+    return {
+      ast: null,
+      errors: [{ shortMessage: '', longMessage: getMissingVisualizationTypeError() }],
+    };
+  }
   const visualization = visualizations[visualizationType!];
   const datasourceStates = await initializeDatasources(
     datasources,
@@ -97,15 +105,33 @@ export async function persistedStateToExpression(
 
   const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
 
-  return buildExpression({
-    title,
-    description,
+  const datasourceId = getActiveDatasourceIdFromDoc(doc);
+  if (datasourceId == null) {
+    return {
+      ast: null,
+      errors: [{ shortMessage: '', longMessage: getMissingCurrentDatasource() }],
+    };
+  }
+  const validationResult = validateDatasourceAndVisualization(
+    datasources[datasourceId],
+    datasourceStates[datasourceId].state,
     visualization,
     visualizationState,
-    datasourceMap: datasources,
-    datasourceStates,
-    datasourceLayers,
-  });
+    { datasourceLayers } as FramePublicAPI
+  );
+
+  return {
+    ast: buildExpression({
+      title,
+      description,
+      visualization,
+      visualizationState,
+      datasourceMap: datasources,
+      datasourceStates,
+      datasourceLayers,
+    }),
+    errors: validationResult,
+  };
 }
 
 export const validateDatasourceAndVisualization = (
@@ -114,12 +140,7 @@ export const validateDatasourceAndVisualization = (
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
   frameAPI: FramePublicAPI
-):
-  | Array<{
-      shortMessage: string;
-      longMessage: string;
-    }>
-  | undefined => {
+): ErrorMessage[] | undefined => {
   const layersGroups = currentVisualizationState
     ? currentVisualization
         ?.getLayerIds(currentVisualizationState)

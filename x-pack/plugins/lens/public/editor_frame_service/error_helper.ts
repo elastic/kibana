@@ -51,3 +51,15 @@ export function getOriginalRequestErrorMessage(error?: ExpressionRenderError | n
     }
   }
 }
+
+export function getMissingVisualizationTypeError() {
+  return i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
+    defaultMessage: 'Visualization type not found.',
+  });
+}
+
+export function getMissingCurrentDatasource() {
+  return i18n.translate('xpack.lens.editorFrame.expressionMissingDatasource', {
+    defaultMessage: 'Could not find datasource for the visualization',
+  });
+}

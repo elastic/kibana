@@ -51,6 +51,7 @@ import { IndexPatternsContract } from '../../../../../../src/plugins/data/public
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
+import type { ErrorMessage } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -77,7 +78,9 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
-  documentToExpression: (doc: Document) => Promise<Ast | null>;
+  documentToExpression: (
+    doc: Document
+  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
   editable: boolean;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
@@ -99,6 +102,7 @@ export class Embeddable
   private subscription: Subscription;
   private isInitialized = false;
   private activeData: Partial<DefaultInspectorAdapters> | undefined;
+  private errors: ErrorMessage[] | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -225,8 +229,9 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
-    const expression = await this.deps.documentToExpression(this.savedVis);
-    this.expression = expression ? toExpression(expression) : null;
+    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
+    this.errors = errors;
+    this.expression = ast ? toExpression(ast) : null;
     await this.initializeOutput();
     this.isInitialized = true;
     if (this.domNode) {
@@ -282,6 +287,7 @@ export class Embeddable
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
+        errors={this.errors}
         searchContext={this.getMergedSearchContext()}
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
         searchSessionId={this.externalSearchContext.searchSessionId}
