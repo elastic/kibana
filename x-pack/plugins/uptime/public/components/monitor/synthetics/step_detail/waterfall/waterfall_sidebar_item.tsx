@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,7 +18,7 @@ interface SidebarItemProps {
 }
 
 export const WaterfallSidebarItem = ({ item, renderFilterScreenReaderText }: SidebarItemProps) => {
-  const { status, offsetIndex } = item;
+  const { status, offsetIndex, isHighlighted } = item;
 
   const isErrorStatusCode = (statusCode: number) => {
     const is400 = statusCode >= 400 && statusCode <= 499;
@@ -26,7 +27,6 @@ export const WaterfallSidebarItem = ({ item, renderFilterScreenReaderText }: Sid
     return is400 || is500 || isSpecific300;
   };
 
-  const isHighlighted = item.isHighlighted;
   const text = `${offsetIndex}. ${item.url}`;
   const ariaLabel = `${
     isHighlighted && renderFilterScreenReaderText
