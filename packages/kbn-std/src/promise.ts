@@ -20,3 +20,7 @@ export function withTimeout<T>({
     new Promise((resolve, reject) => setTimeout(() => reject(new Error(errorMessage)), timeout)),
   ]) as Promise<T>;
 }
+
+export function isPromise<T>(maybePromise: T | Promise<T>): maybePromise is Promise<T> {
+  return maybePromise ? typeof (maybePromise as Promise<T>).then === 'function' : false;
+}
