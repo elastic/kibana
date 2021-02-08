@@ -143,6 +143,10 @@ export const createConnectedSearchSessionIndicator = ({
       sessionService.cancel();
     }, []);
 
+    const onViewSearchSessions = useCallback(() => {
+      usageCollector?.trackViewSessionsList();
+    }, []);
+
     if (!sessionService.isSessionStorageReady()) return null;
     return (
       <RedirectAppLinks application={application}>
@@ -155,6 +159,7 @@ export const createConnectedSearchSessionIndicator = ({
           onSaveResults={onSaveResults}
           onCancel={onCancel}
           onOpened={onOpened}
+          onViewSearchSessions={onViewSearchSessions}
         />
       </RedirectAppLinks>
     );

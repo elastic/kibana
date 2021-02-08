@@ -30,6 +30,7 @@ export interface SearchSessionIndicatorProps {
   onContinueInBackground?: () => void;
   onCancel?: () => void;
   viewSearchSessionsLink?: string;
+  onViewSearchSessions?: () => void;
   onSaveResults?: () => void;
 
   saveDisabled?: boolean;
@@ -77,10 +78,13 @@ const ContinueInBackgroundButton = ({
 
 const ViewAllSearchSessionsButton = ({
   viewSearchSessionsLink = 'management/kibana/search_sessions',
+  onViewSearchSessions = () => {},
   buttonProps = {},
 }: ActionButtonProps) => (
+  // eslint-disable-next-line @elastic/eui/href-or-on-click
   <EuiButtonEmpty
     href={viewSearchSessionsLink}
+    onClick={onViewSearchSessions}
     data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
     {...buttonProps}
   >

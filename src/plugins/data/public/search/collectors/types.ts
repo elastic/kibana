@@ -16,6 +16,7 @@ export enum SEARCH_EVENT_TYPE {
   SESSION_RELOADED = 'sessionReloaded',
   SESSION_EXTENDED = 'sessionExtended',
   SESSION_CANCELLED = 'sessionCancelled',
+  SESSION_VIEW_LIST = 'sessionViewList',
 }
 
 export interface SearchUsageCollector {
@@ -28,4 +29,5 @@ export interface SearchUsageCollector {
   trackSessionReloaded: () => Promise<void>;
   trackSessionExtended: () => Promise<void>;
   trackSessionCancelled: () => Promise<void>;
+  trackViewSessionsList: () => Promise<void>;
 }

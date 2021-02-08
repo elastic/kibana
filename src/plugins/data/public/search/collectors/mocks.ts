@@ -19,5 +19,6 @@ export function createSearchUsageCollectorMock(): jest.Mocked<SearchUsageCollect
     trackSessionReloaded: jest.fn(),
     trackSessionExtended: jest.fn(),
     trackSessionCancelled: jest.fn(),
+    trackViewSessionsList: jest.fn(),
   };
 }
