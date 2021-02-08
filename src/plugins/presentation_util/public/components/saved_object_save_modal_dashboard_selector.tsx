@@ -21,7 +21,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { pluginServices } from '../services';
 import { DashboardPicker, DashboardPickerProps } from './dashboard_picker';
 
 import './saved_object_save_modal_dashboard.scss';
