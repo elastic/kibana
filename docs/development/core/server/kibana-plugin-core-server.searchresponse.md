@@ -19,6 +19,7 @@ export interface SearchResponse<T = unknown>
 |  [\_shards](./kibana-plugin-core-server.searchresponse._shards.md) | <code>ShardsResponse</code> |  |
 |  [aggregations](./kibana-plugin-core-server.searchresponse.aggregations.md) | <code>any</code> |  |
 |  [hits](./kibana-plugin-core-server.searchresponse.hits.md) | <code>{</code><br/><code>        total: number;</code><br/><code>        max_score: number;</code><br/><code>        hits: Array&lt;{</code><br/><code>            _index: string;</code><br/><code>            _type: string;</code><br/><code>            _id: string;</code><br/><code>            _score: number;</code><br/><code>            _source: T;</code><br/><code>            _version?: number;</code><br/><code>            _explanation?: Explanation;</code><br/><code>            fields?: any;</code><br/><code>            highlight?: any;</code><br/><code>            inner_hits?: any;</code><br/><code>            matched_queries?: string[];</code><br/><code>            sort?: string[];</code><br/><code>        }&gt;;</code><br/><code>    }</code> |  |
+|  [pit\_id](./kibana-plugin-core-server.searchresponse.pit_id.md) | <code>string</code> |  |
 |  [timed\_out](./kibana-plugin-core-server.searchresponse.timed_out.md) | <code>boolean</code> |  |
 |  [took](./kibana-plugin-core-server.searchresponse.took.md) | <code>number</code> |  |
 

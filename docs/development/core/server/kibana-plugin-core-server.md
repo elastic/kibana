@@ -155,6 +155,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCheckConflictsResponse](./kibana-plugin-core-server.savedobjectscheckconflictsresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-core-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-core-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
+|  [SavedObjectsClosePointInTimeResponse](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.md) |  |
 |  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
@@ -188,6 +189,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMappingProperties](./kibana-plugin-core-server.savedobjectsmappingproperties.md) | Describe the fields of a [saved object type](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md)<!-- -->. |
 |  [SavedObjectsMigrationLogger](./kibana-plugin-core-server.savedobjectsmigrationlogger.md) |  |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-server.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
+|  [SavedObjectsOpenPointInTimeOptions](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.md) |  |
+|  [SavedObjectsOpenPointInTimeResponse](./kibana-plugin-core-server.savedobjectsopenpointintimeresponse.md) |  |
 |  [SavedObjectsRawDoc](./kibana-plugin-core-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
 |  [SavedObjectsRawDocParseOptions](./kibana-plugin-core-server.savedobjectsrawdocparseoptions.md) | Options that can be specified when using the saved objects serializer to parse a raw document. |
 |  [SavedObjectsRemoveReferencesToOptions](./kibana-plugin-core-server.savedobjectsremovereferencestooptions.md) |  |
@@ -301,6 +304,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientFactory](./kibana-plugin-core-server.savedobjectsclientfactory.md) | Describes the factory used to create instances of the Saved Objects Client. |
 |  [SavedObjectsClientFactoryProvider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) | Provider to invoke to retrieve a [SavedObjectsClientFactory](./kibana-plugin-core-server.savedobjectsclientfactory.md)<!-- -->. |
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
+|  [SavedObjectsClosePointInTimeOptions](./kibana-plugin-core-server.savedobjectsclosepointintimeoptions.md) |  |
 |  [SavedObjectsExportTransform](./kibana-plugin-core-server.savedobjectsexporttransform.md) | Transformation function used to mutate the exported objects of the associated type.<!-- -->A type's export transform function will be executed once per user-initiated export, for all objects of that type. |
 |  [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) field.<!-- -->Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation |
 |  [SavedObjectsImportHook](./kibana-plugin-core-server.savedobjectsimporthook.md) | A hook associated with a specific saved object type, that will be invoked during the import process. The hook will have access to the objects of the registered type.<!-- -->Currently, the only supported feature for import hooks is to return warnings to be displayed in the UI when the import succeeds. The only interactions the hook can have with the import process is via the hook's response. Mutating the objects inside the hook's code will have no effect. |

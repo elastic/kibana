@@ -1197,9 +1197,14 @@ export interface SavedObjectsFindOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    pit?: {
+        id: string;
+        keepAlive?: string;
+    };
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
+    searchAfter?: unknown[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
@@ -1224,6 +1229,8 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
     page: number;
     // (undocumented)
     perPage: number;
+    // (undocumented)
+    pit_id?: string;
     // (undocumented)
     total: number;
 }
