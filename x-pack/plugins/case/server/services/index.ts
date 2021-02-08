@@ -32,6 +32,7 @@ import {
   CommentType,
   CaseType,
   CaseResponse,
+  caseTypeField,
 } from '../../common/api';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import {
@@ -381,8 +382,7 @@ export class CaseService implements CaseServiceSetup {
       client,
       options: {
         ...caseOptions,
-        // TODO: move this to a variable that the cases spec uses to define the field
-        fields: ['type'],
+        fields: [caseTypeField],
         page: 1,
         perPage: casesStats.total,
       },

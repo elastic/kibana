@@ -15,6 +15,8 @@ import {
   createSubCase,
   setStatus,
   CreateSubCaseResp,
+  createCaseAction,
+  deleteCaseAction,
 } from '../../../common/lib/utils';
 import { CasesFindResponse, CaseStatuses, CaseType } from '../../../../../plugins/case/common/api';
 
@@ -248,8 +250,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('stats with sub cases', () => {
       let collection: CreateSubCaseResp;
+      let actionID: string;
+      before(async () => {
+        actionID = await createCaseAction(supertest);
+      });
+      after(async () => {
+        await deleteCaseAction(supertest, actionID);
+      });
       beforeEach(async () => {
-        collection = await createSubCase({ supertest });
+        collection = await createSubCase({ supertest, actionID });
 
         const [, , { body: toCloseCase }] = await Promise.all([
           setStatus({
@@ -315,7 +324,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('correctly counts stats with a filter for collection cases with multiple sub cases', async () => {
         // this will force the first sub case attached to the collection to be closed
         // so we'll have one closed sub case and one open sub case
-        await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id });
+        await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
         const { body }: { body: CasesFindResponse } = await supertest
           .get(`${CASES_URL}/_find?sortOrder=asc&type=${CaseType.collection}`)
           .expect(200);
@@ -330,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('correctly counts stats with a filter for collection and open cases with multiple sub cases', async () => {
         // this will force the first sub case attached to the collection to be closed
         // so we'll have one closed sub case and one open sub case
-        await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id });
+        await createSubCase({ supertest, caseID: collection.newSubCaseInfo.id, actionID });
         const { body }: { body: CasesFindResponse } = await supertest
           .get(
             `${CASES_URL}/_find?sortOrder=asc&type=${CaseType.collection}&status=${CaseStatuses.open}`

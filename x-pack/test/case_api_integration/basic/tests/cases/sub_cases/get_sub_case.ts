@@ -16,9 +16,11 @@ import {
   subCaseResp,
 } from '../../../../common/lib/mock';
 import {
+  createCaseAction,
   createSubCase,
   defaultCreateSubComment,
   deleteAllCaseItems,
+  deleteCaseAction,
 } from '../../../../common/lib/utils';
 import {
   getCaseCommentsUrl,
@@ -36,12 +38,19 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('get_sub_case', () => {
+    let actionID: string;
+    before(async () => {
+      actionID = await createCaseAction(supertest);
+    });
+    after(async () => {
+      await deleteCaseAction(supertest, actionID);
+    });
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
     it('should return a case', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
       const { body }: { body: SubCaseResponse } = await supertest
         .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCase!.id))
@@ -62,7 +71,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return the correct number of alerts with multiple types of alerts', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
       const { body: singleAlert }: { body: CollectionWithSubCaseResponse } = await supertest
         .post(getCaseCommentsUrl(caseInfo.id))

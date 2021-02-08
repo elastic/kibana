@@ -12,7 +12,12 @@ import {
   SUB_CASES_PATCH_DEL_URL,
 } from '../../../../../../plugins/case/common/constants';
 import { postCommentUserReq } from '../../../../common/lib/mock';
-import { createSubCase, deleteAllCaseItems } from '../../../../common/lib/utils';
+import {
+  createCaseAction,
+  createSubCase,
+  deleteAllCaseItems,
+  deleteCaseAction,
+} from '../../../../common/lib/utils';
 import { getSubCaseDetailsUrl } from '../../../../../../plugins/case/common/api/helpers';
 import { CollectionWithSubCaseResponse } from '../../../../../../plugins/case/common/api';
 
@@ -22,12 +27,19 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   describe('delete_sub_cases', () => {
+    let actionID: string;
+    before(async () => {
+      actionID = await createCaseAction(supertest);
+    });
+    after(async () => {
+      await deleteCaseAction(supertest, actionID);
+    });
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
     it('should delete a sub case', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
       expect(caseInfo.subCase?.id).to.not.eql(undefined);
 
       const { body: subCase } = await supertest
@@ -51,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`should delete a sub case's comments when that case gets deleted`, async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
       expect(caseInfo.subCase?.id).to.not.eql(undefined);
 
       // there should be two comments on the sub case now

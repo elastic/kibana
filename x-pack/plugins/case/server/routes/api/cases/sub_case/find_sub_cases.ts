@@ -44,6 +44,11 @@ export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
         );
 
         const ids = [request.params.case_id];
+        const { subCase: subCaseQueryOptions } = constructQueryOptions({
+          status: queryParams.status,
+          sortByField: queryParams.sortField,
+        });
+
         const subCases = await caseService.findSubCasesGroupByCase({
           client,
           ids,
@@ -52,15 +57,19 @@ export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
             page: defaultPage,
             perPage: defaultPerPage,
             ...queryParams,
+            ...subCaseQueryOptions,
           },
         });
 
         const [open, inProgress, closed] = await Promise.all([
           ...caseStatuses.map((status) => {
-            const { subCase } = constructQueryOptions({ status });
+            const { subCase: statusQueryOptions } = constructQueryOptions({
+              status,
+              sortByField: queryParams.sortField,
+            });
             return caseService.findSubCaseStatusStats({
               client,
-              options: subCase ?? {},
+              options: statusQueryOptions ?? {},
               ids,
             });
           }),

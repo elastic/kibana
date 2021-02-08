@@ -19,6 +19,11 @@ export enum CaseType {
   individual = 'individual',
 }
 
+/**
+ * Exposing the field used to define the case type so that it can be used for filtering in saved object find queries.
+ */
+export const caseTypeField = 'type';
+
 const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
 
 const SettingsRt = rt.type({
@@ -30,7 +35,7 @@ const CaseBasicRt = rt.type({
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
-  type: CaseTypeRt,
+  [caseTypeField]: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
 });
