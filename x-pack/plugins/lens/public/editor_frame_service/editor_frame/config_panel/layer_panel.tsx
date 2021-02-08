@@ -142,14 +142,12 @@ export function LayerPanel(
         dropType,
       });
       if (dropResult) {
-        updateVisualization(
-          setDimension({
-            columnId,
-            groupId,
-            layerId: targetLayerId,
-            prevState: props.visualizationState,
-          })
-        );
+        const newVisState = setDimension({
+          columnId,
+          groupId,
+          layerId: targetLayerId,
+          prevState: props.visualizationState,
+        });
 
         if (typeof dropResult === 'object') {
           // When a column is moved, we delete the reference to the old
@@ -157,9 +155,11 @@ export function LayerPanel(
             removeDimension({
               columnId: dropResult.deleted,
               layerId: targetLayerId,
-              prevState: props.visualizationState,
+              prevState: newVisState,
             })
           );
+        } else {
+          updateVisualization(newVisState);
         }
       }
     };
