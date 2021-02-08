@@ -26,6 +26,7 @@ export async function deleteIndex(options: {
   const getIndicesToDelete = async () => {
     const resp = await client.indices.getAlias(
       {
+        // @ts-expect-error `GetAliasRequest` does not allow the `name` parameter to be a `string[]`
         name: indices,
       },
       {

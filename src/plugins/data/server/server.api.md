@@ -1295,27 +1295,26 @@ export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage): {
 export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal | undefined) => TransportRequestPromise<T>;
 
 // @internal
-export function shimHitsTotal(response: estypes.SearchResponse<any>, { legacyHitsTotal }?: ISearchOptions): {
+export function shimHitsTotal(response: estypes.SearchResponse<unknown>, { legacyHitsTotal }?: ISearchOptions): {
     hits: {
         total: any;
-        hits: estypes.Hit<any>[];
-        max_score: number;
+        hits: estypes.Hit<unknown>[];
+        max_score?: number | undefined;
     };
-    aggregations: Record<string, estypes.Aggregate>;
-    _clusters: estypes.ClusterStatistics;
-    documents: any[];
-    fields: Record<string, estypes.LazyDocument>;
-    max_score: number;
-    num_reduce_phases: number;
-    profile: estypes.Profile;
-    pit_id: string;
-    _scroll_id: string;
-    _shards: estypes.ShardStatistics;
-    suggest: estypes.SuggestDictionary<any>;
-    terminated_early: boolean;
-    timed_out: boolean;
     took: number;
-    total: number;
+    timed_out: boolean;
+    _shards: estypes.ShardStatistics;
+    aggregations?: Record<string, estypes.Aggregate> | undefined;
+    _clusters?: estypes.ClusterStatistics | undefined;
+    documents?: unknown[] | undefined;
+    fields?: Record<string, estypes.LazyDocument> | undefined;
+    max_score?: number | undefined;
+    num_reduce_phases?: number | undefined;
+    profile?: estypes.Profile | undefined;
+    pit_id?: string | undefined;
+    _scroll_id?: string | undefined;
+    suggest?: estypes.SuggestDictionary<unknown> | undefined;
+    terminated_early?: boolean | undefined;
 };
 
 // Warning: (ae-missing-release-tag) "shouldReadFieldFromDocValues" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

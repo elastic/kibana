@@ -41,7 +41,7 @@ export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unkno
  * @internal
  */
 export function shimHitsTotal(
-  response: SearchResponse<unknown>,
+  response: estypes.SearchResponse<unknown>,
   { legacyHitsTotal = true }: ISearchOptions = {}
 ) {
   if (!legacyHitsTotal) return response;

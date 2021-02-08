@@ -9,7 +9,7 @@
 import { Transform, Readable } from 'stream';
 import { inspect } from 'util';
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, estypes } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { Stats } from '../stats';
@@ -17,12 +17,9 @@ import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 
 interface DocRecord {
-  value: {
+  value: estypes.IndexState & {
     index: string;
     type: string;
-    settings: Record<string, any>;
-    mappings: Record<string, any>;
-    aliases: Record<string, any>;
   };
 }
 
@@ -64,6 +61,7 @@ export function createCreateIndexStream({
         }
 
         await client.indices.create({
+          // @ts-expect-error `CreateIndexRequest` do not currently allow the `method` parameter to be specified
           method: 'PUT',
           index,
           body: {
