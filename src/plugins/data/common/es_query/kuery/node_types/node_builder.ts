@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { KueryNode, nodeTypes } from '../types';
@@ -16,12 +16,10 @@ export const nodeBuilder = {
       nodeTypes.literal.buildNode(false),
     ]);
   },
-  or: ([first, ...args]: KueryNode[]): KueryNode => {
-    return args.length ? nodeTypes.function.buildNode('or', [first, nodeBuilder.or(args)]) : first;
+  or: (nodes: KueryNode[]): KueryNode => {
+    return nodes.length > 1 ? nodeTypes.function.buildNode('or', nodes) : nodes[0];
   },
-  and: ([first, ...args]: KueryNode[]): KueryNode => {
-    return args.length
-      ? nodeTypes.function.buildNode('and', [first, nodeBuilder.and(args)])
-      : first;
+  and: (nodes: KueryNode[]): KueryNode => {
+    return nodes.length > 1 ? nodeTypes.function.buildNode('and', nodes) : nodes[0];
   },
 };

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
@@ -10,7 +12,7 @@ import {
   CoreStart,
   ElasticsearchServiceStart,
   Logger,
-  Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
@@ -167,7 +169,7 @@ export interface FleetStartContract {
 }
 
 export class FleetPlugin
-  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
+  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
   private cloud: CloudSetup | undefined;

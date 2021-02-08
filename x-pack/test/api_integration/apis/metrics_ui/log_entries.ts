@@ -1,26 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-
-import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
-
 import {
   LOG_ENTRIES_PATH,
   logEntriesRequestRT,
   logEntriesResponseRT,
 } from '../../../../plugins/infra/common/http_api';
-
 import {
-  LogTimestampColumn,
   LogFieldColumn,
   LogMessageColumn,
+  LogTimestampColumn,
 } from '../../../../plugins/infra/common/log_entry';
-
+import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const KEY_WITHIN_DATA_RANGE = {

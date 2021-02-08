@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('DELETE /api/saved_objects_tagging/tags/{id}', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/90552
+  describe.skip('DELETE /api/saved_objects_tagging/tags/{id}', () => {
     beforeEach(async () => {
       await esArchiver.load('delete_with_references');
     });
