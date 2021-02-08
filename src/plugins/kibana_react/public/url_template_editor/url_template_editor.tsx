@@ -45,6 +45,30 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   onEditor,
   Editor = CodeEditor,
 }) => {
+  const refEditor = React.useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const handleEditor = React.useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
+    refEditor.current = editor;
+
+    if (onEditor) {
+      onEditor(editor);
+    }
+  }, []);
+
+  const handleKeyDown = React.useCallback((event: React.KeyboardEvent) => {
+    const editor = refEditor.current;
+    if (!editor) return;
+
+    if (event.key === 'Escape') {
+      if (editor.hasWidgetFocus()) {
+        // Don't propagate Escape click if Monaco editor is focused, this allows
+        // user to close the autocomplete widget with Escape button without
+        // closing the EUI flyout.
+        event.stopPropagation();
+        editor.trigger('editor', 'hideSuggestWidget', []);
+      }
+    }
+  }, []);
+
   React.useEffect(() => {
     if (!variables) {
       return;
@@ -88,13 +112,13 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   }, [variables]);
 
   return (
-    <div className={'urlTemplateEditor__container'}>
+    <div className={'urlTemplateEditor__container'} onKeyDown={handleKeyDown}>
       <Editor
         languageId={LANG}
         height={height}
         value={value}
         onChange={onChange}
-        editorDidMount={onEditor}
+        editorDidMount={handleEditor}
         options={{
           fontSize: 14,
           highlightActiveIndentGuide: false,
