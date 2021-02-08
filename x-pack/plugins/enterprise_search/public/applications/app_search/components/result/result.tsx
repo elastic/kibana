@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo } from 'react';
-import { generatePath } from 'react-router-dom';
 import classNames from 'classnames';
 
 import './result.scss';
@@ -14,6 +14,7 @@ import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
+import { generateEncodedPath } from '../../utils/encode_path_params';
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 
 import { Schema } from '../../../shared/types';
@@ -52,7 +53,7 @@ export const Result: React.FC<Props> = ({
     if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
 
-  const documentLink = generatePath(ENGINE_DOCUMENT_DETAIL_PATH, {
+  const documentLink = generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
     engineName: resultMeta.engine,
     documentId: resultMeta.id,
   });
@@ -135,7 +136,7 @@ export const Result: React.FC<Props> = ({
                 { defaultMessage: 'Visit document details' }
               )}
             >
-              <EuiIcon type="popout" />
+              <EuiIcon type="eye" />
             </a>
           </ReactRouterHelper>
         )}

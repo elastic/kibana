@@ -1,28 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { catchError, first, map } from 'rxjs/operators';
-import { CoreStart, KibanaRequest } from 'src/core/server';
+import { catchError, first } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  ISearchClient,
   ISearchOptions,
 } from '../../../common/search';
-import { shimHitsTotal } from './shim_hits_total';
-
-type GetScopedProider = (coreStart: CoreStart) => (request: KibanaRequest) => ISearchClient;
+import { ISearchStart } from '../types';
 
 export function registerBsearchRoute(
   bfetch: BfetchServerSetup,
-  coreStartPromise: Promise<[CoreStart, {}, {}]>,
-  getScopedProvider: GetScopedProider
+  getScoped: ISearchStart['asScoped']
 ): void {
   bfetch.addBatchProcessingRoute<
     { request: IKibanaSearchRequest; options?: ISearchOptions },
@@ -34,20 +29,11 @@ export function registerBsearchRoute(
        * @throws `KibanaServerError`
        */
       onBatchItem: async ({ request: requestData, options }) => {
-        const coreStart = await coreStartPromise;
-        const search = getScopedProvider(coreStart[0])(request);
+        const search = getScoped(request);
         return search
           .search(requestData, options)
           .pipe(
             first(),
-            map((response) => {
-              return {
-                ...response,
-                ...{
-                  rawResponse: shimHitsTotal(response.rawResponse),
-                },
-              };
-            }),
             catchError((err) => {
               // Re-throw as object, to get attributes passed to the client
               // eslint-disable-next-line no-throw-literal

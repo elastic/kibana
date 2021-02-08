@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { tap } from 'rxjs/operators';
@@ -22,7 +23,8 @@ export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
-    await esClient.asCurrentUser.asyncSearch.delete({ id });
+    const client = esClient.asCurrentUser.eql;
+    await client.delete({ id });
   }
 
   return {
@@ -42,11 +44,11 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getDefaultAsyncGetParams()
+          ? getDefaultAsyncGetParams(options)
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getDefaultAsyncGetParams(),
+              ...getDefaultAsyncGetParams(options),
               ...request.params,
             };
         const promise = id

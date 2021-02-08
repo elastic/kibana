@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject } from 'rxjs';
@@ -23,7 +23,7 @@ export class SavedObjectsManagementPlugin
     this.logger = this.context.logger.get();
   }
 
-  public async setup({ http, capabilities }: CoreSetup) {
+  public setup({ http, capabilities }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
@@ -35,7 +35,7 @@ export class SavedObjectsManagementPlugin
     return {};
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.logger.debug('Starting up SavedObjectsManagement plugin');
     const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
     this.managementService$.next(managementService);
