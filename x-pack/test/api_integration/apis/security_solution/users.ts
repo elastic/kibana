@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
             inspect: false,
           })
           .expect(200);
-
+        console.log('users', JSON.stringify(users));
         expect(users.edges.length).to.be(1);
         expect(users.totalCount).to.be(1);
         expect(users.edges[0].node.user!.id).to.eql(['0']);
