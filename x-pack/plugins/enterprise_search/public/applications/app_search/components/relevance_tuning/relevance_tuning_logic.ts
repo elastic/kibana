@@ -304,15 +304,15 @@ export const RelevanceTuningLogic = kea<
     getSearchResults: async (_, breakpoint) => {
       await breakpoint(250);
 
+      const query = values.query;
+      if (!query) return actions.clearSearchResults();
+
       const { engineName } = EngineLogic.values;
       const { http } = HttpLogic.values;
-      const query = values.query;
       const { search_fields: searchFields, boosts } = removeBoostStateProps(values.searchSettings);
-      if (!query) {
-        return actions.clearSearchResults();
-      }
-      actions.setResultsLoading(true);
       const url = `/api/app_search/engines/${engineName}/search_settings_search`;
+
+      actions.setResultsLoading(true);
 
       try {
         const response = await http.post(url, {
