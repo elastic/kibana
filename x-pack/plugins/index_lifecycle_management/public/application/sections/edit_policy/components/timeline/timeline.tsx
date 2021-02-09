@@ -6,15 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import React, { FunctionComponent, memo } from 'react';
-import {
-  EuiIcon,
-  EuiIconProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
 
@@ -25,15 +20,13 @@ import {
   AbsoluteTimings,
 } from '../../lib';
 
-import './timeline.scss';
-import { InfinityIconSvg } from './infinity_icon.svg';
+import { InfinityIcon } from '../infinity_icon';
+
 import { TimelinePhaseText } from './components';
 
 const exists = (v: unknown) => v != null;
 
-const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
-  <EuiIcon type={InfinityIconSvg} {...props} />
-);
+import './timeline.scss';
 
 const toPercent = (n: number, total: number) => (n / total) * 100;
 
