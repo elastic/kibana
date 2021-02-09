@@ -34,13 +34,13 @@ export const Legend: React.FC<LegendProps> = ({ items, render }) => {
 
   return (
     <WaterfallChartLegendContainer>
-      <EuiFlexGroup gutterSize="none" justifyContent="center">
+      <EuiFlexGroup gutterSize="none" justifyContent="center" wrap={true}>
         {timingLegends.map((item, index) => {
           return <EuiFlexItem key={index}>{render(item, index)}</EuiFlexItem>;
         })}
         {mimeLegends.length > 0 && (
           <EuiFlexItem grow={3}>
-            <EuiText>
+            <EuiText className="eui-textNoWrap">
               <span>{FriendlyTimingLabels[Timings.Receive]}</span>
               <InlineFlexGroup gutterSize="none">
                 (
