@@ -15,7 +15,7 @@ a flight that arrived or departed from `Warsaw` or `Venice` when the weather was
 * If you don't see any results, open the time filter and select a time range that contains data.
 * From the list of *Available fields*, add `_score` to the document table.
 * Sort the table by descending scores.
-* Now the result is sorted by `Time` (1) and `_score` (2).  To sort only by _score you've
+* Now the result is sorted by `Time` (1) and `_score` (2).  To sort only by `_score` you've
  to remove sorting by `Time`
 [role="screenshot"]
 image::images/discover-search-for-relevance.png["Example of a search for relevance"]
