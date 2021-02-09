@@ -7,25 +7,34 @@
 
 import * as rt from 'io-ts';
 
+import { ActionResult, ActionType } from '../../../../actions/common';
 import { JiraFieldsRT } from './jira';
 import { ResilientFieldsRT } from './resilient';
-import { ServiceNowFieldsRT } from './servicenow';
+import { ServiceNowITSMFieldsRT } from './servicenow_itsm';
+import { ServiceNowSIRFieldsRT } from './servicenow_sir';
 
 export * from './jira';
-export * from './servicenow';
+export * from './servicenow_itsm';
+export * from './servicenow_sir';
 export * from './resilient';
 export * from './mappings';
+
+export type ActionConnector = ActionResult;
+export type ActionTypeConnector = ActionType;
 
 export const ConnectorFieldsRt = rt.union([
   JiraFieldsRT,
   ResilientFieldsRT,
-  ServiceNowFieldsRT,
+  ServiceNowITSMFieldsRT,
+  ServiceNowSIRFieldsRT,
   rt.null,
 ]);
+
 export enum ConnectorTypes {
   jira = '.jira',
   resilient = '.resilient',
-  servicenow = '.servicenow',
+  serviceNowITSM = '.servicenow',
+  serviceNowSIR = '.servicenow-sir',
   none = '.none',
 }
 
@@ -39,9 +48,14 @@ const ConnectorResillientTypeFieldsRt = rt.type({
   fields: rt.union([ResilientFieldsRT, rt.null]),
 });
 
-const ConnectorServiceNowTypeFieldsRt = rt.type({
-  type: rt.literal(ConnectorTypes.servicenow),
-  fields: rt.union([ServiceNowFieldsRT, rt.null]),
+const ConnectorServiceNowITSMTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.serviceNowITSM),
+  fields: rt.union([ServiceNowITSMFieldsRT, rt.null]),
+});
+
+const ConnectorServiceNowSIRTypeFieldsRt = rt.type({
+  type: rt.literal(ConnectorTypes.serviceNowSIR),
+  fields: rt.union([ServiceNowSIRFieldsRT, rt.null]),
 });
 
 const ConnectorNoneTypeFieldsRt = rt.type({
@@ -52,7 +66,8 @@ const ConnectorNoneTypeFieldsRt = rt.type({
 export const ConnectorTypeFieldsRt = rt.union([
   ConnectorJiraTypeFieldsRt,
   ConnectorResillientTypeFieldsRt,
-  ConnectorServiceNowTypeFieldsRt,
+  ConnectorServiceNowITSMTypeFieldsRt,
+  ConnectorServiceNowSIRTypeFieldsRt,
   ConnectorNoneTypeFieldsRt,
 ]);
 
@@ -66,6 +81,12 @@ export const CaseConnectorRt = rt.intersection([
 
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;
+export type ConnectorJiraTypeFields = rt.TypeOf<typeof ConnectorJiraTypeFieldsRt>;
+export type ConnectorResillientTypeFields = rt.TypeOf<typeof ConnectorResillientTypeFieldsRt>;
+export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
+  typeof ConnectorServiceNowITSMTypeFieldsRt
+>;
+export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorServiceNowSIRTypeFieldsRt>;
 
 // we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
 export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;

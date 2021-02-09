@@ -153,49 +153,22 @@ describe('ServiceNowITSMParamsFields renders', () => {
     });
   });
 
-  test('it transforms the urgencies to options correctly', async () => {
+  test('it transforms the options correctly', async () => {
     const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
     act(() => {
       onChoices(useGetChoicesResponse.choices);
     });
 
     wrapper.update();
-    expect(wrapper.find('[data-test-subj="urgencySelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
-    ]);
-  });
-
-  test('it transforms the severities to options correctly', async () => {
-    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
-    act(() => {
-      onChoices(useGetChoicesResponse.choices);
-    });
-
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
-    ]);
-  });
-
-  test('it transforms the impacts to options correctly', async () => {
-    const wrapper = mount(<ServiceNowITSMParamsFields {...defaultProps} />);
-    act(() => {
-      onChoices(useGetChoicesResponse.choices);
-    });
-
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="impactSelect"]').first().prop('options')).toEqual([
-      { value: '1', text: '1 - Critical' },
-      { value: '2', text: '2 - High' },
-      { value: '3', text: '3 - Moderate' },
-      { value: '4', text: '4 - Low' },
-    ]);
+    const testers = ['severity', 'urgency', 'impact'];
+    testers.forEach((subj) =>
+      expect(wrapper.find(`[data-test-subj="${subj}Select"]`).first().prop('options')).toEqual([
+        { value: '1', text: '1 - Critical' },
+        { value: '2', text: '2 - High' },
+        { value: '3', text: '3 - Moderate' },
+        { value: '4', text: '4 - Low' },
+      ])
+    );
   });
 
   describe('UI updates', () => {

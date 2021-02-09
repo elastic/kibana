@@ -11,7 +11,7 @@ import { nextTick } from '@kbn/test/jest';
 
 import { BoostType } from './types';
 
-import { RelevanceTuningLogic } from './relevance_tuning_logic';
+import { RelevanceTuningLogic } from './';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
