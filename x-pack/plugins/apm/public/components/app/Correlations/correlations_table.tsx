@@ -19,6 +19,7 @@ import { asInteger, asPercent } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { createHref, push } from '../../shared/Links/url_helpers';
+import { ImpactBar } from '../../shared/ImpactBar';
 
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -54,6 +55,17 @@ export function CorrelationsTable<T extends SignificantTerm>({
       ),
       render: (_: any, term: T) => {
         return <EuiBadge>{Math.round(term.score)}</EuiBadge>;
+      },
+    },
+    {
+      width: '100px',
+      field: 'impact',
+      name: i18n.translate(
+        'xpack.apm.correlations.correlationsTable.impactLabel',
+        { defaultMessage: 'Impact' }
+      ),
+      render: (_: any, term: T) => {
+        return <ImpactBar value={term.impact * 100} />;
       },
     },
     {
