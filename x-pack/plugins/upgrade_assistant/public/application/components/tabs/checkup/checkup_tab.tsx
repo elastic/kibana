@@ -95,7 +95,11 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
     <>
       <EuiSpacer />
       <EuiText grow={false}>
-        <p>
+        <p
+          data-test-subj={`upgradeAssistant${
+            checkupLabel.charAt(0).toUpperCase() + checkupLabel.slice(1)
+          }TabDetail`}
+        >
           <FormattedMessage
             id="xpack.upgradeAssistant.checkupTab.tabDetail"
             defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."

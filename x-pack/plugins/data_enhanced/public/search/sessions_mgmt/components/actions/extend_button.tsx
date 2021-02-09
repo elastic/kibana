@@ -58,7 +58,9 @@ const ExtendConfirm = ({
         onCancel={onConfirmDismiss}
         onConfirm={async () => {
           setIsLoading(true);
-          await api.sendExtend(id, `${extendByDuration.asMilliseconds()}ms`);
+          await api.sendExtend(id, `${newExpiration.toISOString()}`);
+          setIsLoading(false);
+          onConfirmDismiss();
           onActionComplete();
         }}
         confirmButtonText={confirm}

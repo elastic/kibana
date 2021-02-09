@@ -10,6 +10,11 @@ import styled from 'styled-components';
 import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
+interface Props {
+  ariaLabel: string;
+  text: string;
+}
+
 const OuterContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -50,14 +55,14 @@ export const getChunks = (text: string) => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ text }: { text: string }) => {
+export const MiddleTruncatedText = ({ ariaLabel, text }: Props) => {
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
 
   return (
     <>
-      <OuterContainer>
+      <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
         <EuiScreenReaderOnly>
           <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
         </EuiScreenReaderOnly>
