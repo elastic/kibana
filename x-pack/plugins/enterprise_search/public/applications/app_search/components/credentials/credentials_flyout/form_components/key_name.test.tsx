@@ -8,7 +8,9 @@
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { FormKeyName } from './';

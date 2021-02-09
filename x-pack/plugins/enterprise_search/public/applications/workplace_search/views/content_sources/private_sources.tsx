@@ -13,10 +13,14 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../applications/shared/licensing';
-
-import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
-
+import { Loading } from '../../../shared/loading';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { AppLogic } from '../../app_logic';
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
+import { ContentSection } from '../../components/shared/content_section';
+import { SourcesTable } from '../../components/shared/sources_table';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import {
   AND,
@@ -34,16 +38,8 @@ import {
   LICENSE_CALLOUT_TITLE,
   LICENSE_CALLOUT_DESCRIPTION,
 } from './constants';
-
-import { Loading } from '../../../shared/loading';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { ContentSection } from '../../components/shared/content_section';
-import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-
-import { AppLogic } from '../../app_logic';
-import { SourcesView } from './sources_view';
 import { SourcesLogic } from './sources_logic';
+import { SourcesView } from './sources_view';
 
 // TODO: Remove this after links in Kibana sidenav
 interface SidebarLink {
@@ -109,7 +105,7 @@ export const PrivateSources: React.FC = () => {
   const privateSourcesTable = (
     <ContentSection>
       <SourcesTable
-        showDetails={true}
+        showDetails
         onSearchableToggle={setSourceSearchability}
         sources={privateContentSources}
       />

@@ -7,10 +7,10 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { mockKibanaValues, setMockActions, setMockValues } from '../../../../../__mocks__';
-
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { Loading } from '../../../../../shared/loading';

@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import { EuiFlyoutBody, EuiForm } from '@elastic/eui';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
-import { CredentialsLogic } from '../credentials_logic';
 import { ApiTokenTypes } from '../constants';
+import { CredentialsLogic } from '../credentials_logic';
 
 import {
   FormKeyName,

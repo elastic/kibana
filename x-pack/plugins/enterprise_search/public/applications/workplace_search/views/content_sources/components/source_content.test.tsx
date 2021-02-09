@@ -8,8 +8,11 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
+import { meta } from '../../../__mocks__/meta.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import {
@@ -21,12 +24,9 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { meta } from '../../../__mocks__/meta.mock';
-import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
-
+import { Loading } from '../../../../../applications/shared/loading';
 import { DEFAULT_META } from '../../../../shared/constants';
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { Loading } from '../../../../../applications/shared/loading';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 
 import { SourceContent } from './source_content';
