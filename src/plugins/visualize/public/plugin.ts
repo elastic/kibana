@@ -132,7 +132,7 @@ export class VisualizePlugin
     setUISettings(core.uiSettings);
 
     core.application.register({
-      id: 'visualize',
+      id: VisualizeConstants.APP_ID,
       title: 'Visualize',
       order: 8000,
       euiIconType: 'logoKibana',
@@ -147,7 +147,9 @@ export class VisualizePlugin
         // allows the urlTracker to only save URLs that are not linked to an originatingApp
         this.isLinkedToOriginatingApp = () => {
           return Boolean(
-            pluginsStart.embeddable.getStateTransfer().getIncomingEditorState()?.originatingApp
+            pluginsStart.embeddable
+              .getStateTransfer()
+              .getIncomingEditorState(VisualizeConstants.APP_ID)?.originatingApp
           );
         };
 

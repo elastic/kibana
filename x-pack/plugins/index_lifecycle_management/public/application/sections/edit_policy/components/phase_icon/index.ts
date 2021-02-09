@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ActiveHighlight } from './active_highlight';
+export { PhaseIcon } from './phase_icon';
