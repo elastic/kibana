@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import { EuiFormRow, EuiSelect, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AppLogic } from '../../../../app_logic';
-import { CredentialsLogic } from '../../credentials_logic';
 import { TOKEN_TYPE_DESCRIPTION, TOKEN_TYPE_INFO, DOCS_HREF } from '../../constants';
+import { CredentialsLogic } from '../../credentials_logic';
 
 export const FormKeyType: React.FC = () => {
   const { myRole } = useValues(AppLogic);
