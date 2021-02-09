@@ -46,7 +46,7 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
   }
 };
 
-export const ScriptField = React.memo(({ existingConcreteFields = [], links }: Props) => {
+export const ScriptField = React.memo(({ existingConcreteFields, links }: Props) => {
   const editorValidationTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const [painlessContext, setPainlessContext] = useState<PainlessContext>(

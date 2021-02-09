@@ -112,6 +112,12 @@ const FieldEditorFlyoutContentComponent = ({
   }, [onSave, submit]);
 
   const namesNotAllowed = indexPattern.fields.map((fld) => fld.name);
+  const existingConcreteFields = indexPattern.fields
+    .filter((fld) => fld.isMapped)
+    .map((fld) => ({
+      name: fld.name,
+      type: fld.esTypes![0]!,
+    }));
 
   return (
     <>
@@ -131,7 +137,7 @@ const FieldEditorFlyoutContentComponent = ({
             links={getLinks(docLinks)}
             field={field}
             onChange={setFormState}
-            ctx={{ fieldTypeToProcess, namesNotAllowed }}
+            ctx={{ fieldTypeToProcess, namesNotAllowed, existingConcreteFields }}
           />
         )}
       </EuiFlyoutBody>
