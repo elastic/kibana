@@ -20,6 +20,7 @@ describe('Session service', () => {
   let sessionService: ISessionService;
   let state$: BehaviorSubject<SearchSessionState>;
   let nowProvider: jest.Mocked<NowProviderInternalContract>;
+  let userHasAccessToSearchSessions = true;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
@@ -38,7 +39,7 @@ describe('Session service', () => {
                 ...coreStart.application.capabilities,
                 management: {
                   kibana: {
-                    [SEARCH_SESSIONS_MANAGEMENT_ID]: true,
+                    [SEARCH_SESSIONS_MANAGEMENT_ID]: userHasAccessToSearchSessions,
                   },
                 },
               },
@@ -225,5 +226,26 @@ describe('Session service', () => {
     });
     sessionService.start();
     await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
+  });
+
+  describe("user doesn't have access to search session", () => {
+    beforeAll(() => {
+      userHasAccessToSearchSessions = false;
+    });
+    afterAll(() => {
+      userHasAccessToSearchSessions = true;
+    });
+
+    test("getSearchOptions doesn't return sessionId", () => {
+      const sessionId = sessionService.start();
+      expect(sessionService.getSearchOptions(sessionId)).toBeNull();
+    });
+
+    test('save() throws', async () => {
+      sessionService.start();
+      await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"No access to search sessions"`
+      );
+    });
   });
 });

@@ -96,6 +96,7 @@ export class SessionService {
     );
 
     getStartServices().then(([coreStart]) => {
+      // using management?.kibana? we infer if any of the apps allows current user to store sessions
       this.hasAccessToSearchSessions =
         coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
 
@@ -229,6 +230,7 @@ export class SessionService {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     if (!this.curApp) throw new Error('No current app id');
+    if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
     const [name, { initialState, restoreState, urlGeneratorId }] = await Promise.all([
