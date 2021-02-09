@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { SidebarItem } from '../waterfall/types';
 import { MiddleTruncatedText } from '../../waterfall';
 import { SideBarItemHighlighter } from '../../waterfall/components/styles';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
 
+type ButtonRef = HTMLButtonElement | null | HTMLAnchorElement | undefined;
+
 interface SidebarItemProps {
   item: SidebarItem;
   renderFilterScreenReaderText?: boolean;
-  onClick: (params: any) => void;
+  onClick?: ({
+    buttonRef,
+    networkItemIndex,
+  }: {
+    buttonRef: ButtonRef;
+    networkItemIndex: number;
+  }) => void;
 }
 
 export const WaterfallSidebarItem = ({
@@ -23,12 +31,12 @@ export const WaterfallSidebarItem = ({
   renderFilterScreenReaderText,
   onClick,
 }: SidebarItemProps) => {
-  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null | HTMLAnchorElement>();
+  const [buttonRef, setButtonRef] = useState<ButtonRef>();
   const { status, offsetIndex, index, isHighlighted, url } = item;
 
-  const handleSidebarClick = useCallback(() => {
+  const handleSidebarClick = useMemo(() => {
     if (onClick) {
-      onClick({ buttonRef, networkItemIndex: index });
+      return () => onClick({ buttonRef, networkItemIndex: index });
     }
   }, [buttonRef, index, onClick]);
 
