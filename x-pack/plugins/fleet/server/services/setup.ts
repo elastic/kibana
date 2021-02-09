@@ -193,7 +193,7 @@ async function putFleetRole(callCluster: CallESAsCurrentUser) {
       indices: [
         {
           names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-          privileges: ['create_doc', 'indices:admin/auto_create'],
+          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],
     },
