@@ -119,7 +119,7 @@ describe('EventsViewer', () => {
   let testProps = {
     defaultModel: eventsDefaultModel,
     end: to,
-    id: 'test-stateful-events-viewer',
+    id: TimelineId.test,
     start: from,
     scopeId: SourcererScopeName.timeline,
   };

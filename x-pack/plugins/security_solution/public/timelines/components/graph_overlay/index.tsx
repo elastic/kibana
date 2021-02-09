@@ -175,6 +175,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
   } else if (timelineId === TimelineId.active) {
     sourcereScope = SourcererScopeName.timeline;
   }
+
   const { selectedPatterns } = useSourcererScope(sourcereScope);
   return (
     <OverlayContainer
