@@ -13,9 +13,17 @@
     "alerts",
     "triggersActionsUi"
   ],
-  "optionalPlugins": ["ml", "observability", "home"],
+  "optionalPlugins": ["ml", "observability", "home", "embeddable"],
   "server": true,
   "ui": true,
   "configPath": ["xpack", "infra"],
-  "requiredBundles": ["observability", "licenseManagement", "kibanaUtils", "kibanaReact", "home"]
+  "requiredBundles": [
+    "observability",
+    "licenseManagement",
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "ml",
+    "embeddable"
+  ]
 }
