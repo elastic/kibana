@@ -81,6 +81,7 @@ export function CopyToDashboardModal({
                   <>
                     <EuiRadio
                       checked={dashboardOption === 'existing'}
+                      data-test-subj="add-to-existing-dashboard-option"
                       id="existing-dashboard-option"
                       name="dashboard-option"
                       label={i18n.translate(
@@ -105,6 +106,7 @@ export function CopyToDashboardModal({
                   <>
                     <EuiRadio
                       checked={dashboardOption === 'new'}
+                      data-test-subj="add-to-new-dashboard-option"
                       id="new-dashboard-option"
                       name="dashboard-option"
                       disabled={!dashboardId}
@@ -126,12 +128,12 @@ export function CopyToDashboardModal({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={() => closeModal()}>
+        <EuiButtonEmpty data-test-subj="cancelCopyToButton" onClick={() => closeModal()}>
           {dashboardCopyToDashboardAction.getCancelButtonName()}
         </EuiButtonEmpty>
         <EuiButton
           fill
-          data-test-subj="confirmSaveSavedObjectButton"
+          data-test-subj="confirmCopyToButton"
           onClick={onSubmit}
           disabled={dashboardOption === 'existing' && !selectedDashboard}
         >

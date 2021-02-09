@@ -17,6 +17,7 @@ const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
+const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
 
 export function DashboardPanelActionsProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -144,6 +145,19 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
         await this.openContextMenu();
       }
       await testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async openCopyToModalByTitle(title?: string) {
+      log.debug(`copyPanelTo(${title})`);
+      if (title) {
+        const panelOptions = await this.getPanelHeading(title);
+        await this.openContextMenu(panelOptions);
+      } else {
+        await this.openContextMenu();
+      }
+      const isActionVisible = await testSubjects.exists(COPY_PANEL_TO_DATA_TEST_SUBJ);
+      if (!isActionVisible) await this.clickContextMenuMoreItem();
+      await testSubjects.click(COPY_PANEL_TO_DATA_TEST_SUBJ);
     }
 
     async openInspectorByTitle(title: string) {

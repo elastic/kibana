@@ -53,7 +53,14 @@ export function DashboardPicker(props: DashboardPickerProps) {
         setDashboardOptions(
           objects
             .filter((d) => !props.idsToOmit || !props.idsToOmit.includes(d.id))
-            .map((d) => ({ value: d.id, label: d.attributes.title }))
+            .map((d) => ({
+              value: d.id,
+              label: d.attributes.title,
+              'data-test-subj': `dashboard-picker-option-${d.attributes.title.replaceAll(
+                ' ',
+                '-'
+              )}`,
+            }))
         );
       }
 
@@ -69,6 +76,7 @@ export function DashboardPicker(props: DashboardPickerProps) {
 
   return (
     <EuiComboBox
+      data-test-subj="dashboardPickerInput"
       placeholder={i18n.translate('presentationUtil.dashboardPicker.searchDashboardPlaceholder', {
         defaultMessage: 'Search dashboards...',
       })}
