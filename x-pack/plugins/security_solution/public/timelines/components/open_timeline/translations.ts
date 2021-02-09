@@ -331,7 +331,7 @@ export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
 export const SELECT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.selectTimelineDescription',
   {
-    defaultMessage: 'Select a security timeline or timeline template to import',
+    defaultMessage: 'Select a security timeline or timeline template file to import',
   }
 );
 
