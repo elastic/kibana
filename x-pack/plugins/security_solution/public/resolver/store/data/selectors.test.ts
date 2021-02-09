@@ -665,14 +665,11 @@ describe('data state', () => {
     });
   });
   describe('when the resolver tree response is complete, still use non-default indices', () => {
-    const originID = 'c';
-    const firstChildID = 'd';
-    const secondChildID = 'e';
     beforeEach(() => {
       const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
-        originID,
-        firstChildID,
-        secondChildID,
+        originID: 'a',
+        firstChildID: 'b',
+        secondChildID: 'c',
       });
       const { schema, dataSource } = endpointSourceSchema();
       actions = [
@@ -689,29 +686,44 @@ describe('data state', () => {
             },
           },
         },
+      ];
+    });
+    it('should have an empty array for tree parameter indices, and a non empty array for event indices', () => {
+      const treeParameterIndices = selectors.treeParameterIndices(state());
+      expect(treeParameterIndices.length).toBe(0);
+      const eventIndices = selectors.eventIndices(state());
+      expect(eventIndices.length).toBe(1);
+    });
+  });
+  describe('when the resolver tree response is pending use non-default indices', () => {
+    beforeEach(() => {
+      actions = [
         {
-          type: 'serverReturnedResolverData',
+          type: 'appReceivedNewExternalProperties',
           payload: {
-            result: resolverTree,
-            dataSource,
-            schema,
-            parameters: {
-              databaseDocumentID: '',
-              indices: ['someNonDefaultIndex'],
-              filters: {},
-            },
+            databaseDocumentID: '',
+            resolverComponentInstanceID: '',
+            locationSearch: '',
+            indices: ['someNonDefaultIndex', 'someOtherIndex'],
+            shouldUpdate: false,
+            filters: {},
+          },
+        },
+        {
+          type: 'appRequestedResolverData',
+          payload: {
+            databaseDocumentID: '',
+            indices: ['someNonDefaultIndex', 'someOtherIndex'],
+            filters: {},
           },
         },
       ];
     });
-    it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
-      const graphables = selectors.graphableNodes(state());
-      expect(graphables.length).toBe(3);
-      for (const node of graphables) {
-        expect(() => {
-          selectors.ariaFlowtoCandidate(state())(nodeModel.nodeID(node)!);
-        }).not.toThrow();
-      }
+    it('should have an empty array for tree parameter indices, and a non empty array for event indices', () => {
+      const treeParameterIndices = selectors.treeParameterIndices(state());
+      expect(treeParameterIndices.length).toBe(0);
+      const eventIndices = selectors.eventIndices(state());
+      expect(eventIndices.length).toBe(2);
     });
   });
 });
