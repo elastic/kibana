@@ -9,14 +9,14 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningDataFrameAnalyticsScatterplotProvider({
+export function MachineLearningDataFrameAnalyticsCanvasElementProvider({
   getService,
 }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');
   const testSubjects = getService('testSubjects');
 
-  return new (class AnalyticsScatterplot {
-    public async assertScatterplotMatrix(
+  return new (class AnalyticsCanvasElement {
+    public async assertCanvasElement(
       dataTestSubj: string,
       expectedColorStats: Array<{
         key: string;
@@ -24,16 +24,15 @@ export function MachineLearningDataFrameAnalyticsScatterplotProvider({
       }>
     ) {
       await testSubjects.existOrFail(dataTestSubj);
-      await testSubjects.existOrFail('mlScatterplotMatrix');
 
       const actualColorStats = await canvasElement.getColorStats(
-        `[data-test-subj="mlScatterplotMatrix"] canvas`,
+        `[data-test-subj="${dataTestSubj}"] canvas`,
         expectedColorStats,
         1
       );
       expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
         true,
-        `Color stats for scatterplot matrix should be within tolerance. Expected: '${JSON.stringify(
+        `Color stats for canvas element should be within tolerance. Expected: '${JSON.stringify(
           expectedColorStats
         )}' (got '${JSON.stringify(actualColorStats)}')`
       );

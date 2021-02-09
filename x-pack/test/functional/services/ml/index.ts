@@ -18,7 +18,7 @@ import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 import { MachineLearningDataFrameAnalyticsEditProvider } from './data_frame_analytics_edit';
 import { MachineLearningDataFrameAnalyticsResultsProvider } from './data_frame_analytics_results';
-import { MachineLearningDataFrameAnalyticsScatterplotProvider } from './data_frame_analytics_scatterplot';
+import { MachineLearningDataFrameAnalyticsCanvasElementProvider } from './data_frame_analytics_canvas_element';
 import { MachineLearningDataFrameAnalyticsMapProvider } from './data_frame_analytics_map';
 import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
@@ -65,7 +65,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
-  const dataFrameAnalyticsScatterplot = MachineLearningDataFrameAnalyticsScatterplotProvider(
+  const dataFrameAnalyticsCanvasElement = MachineLearningDataFrameAnalyticsCanvasElementProvider(
     context
   );
 
@@ -110,7 +110,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataFrameAnalyticsResults,
     dataFrameAnalyticsMap,
     dataFrameAnalyticsTable,
-    dataFrameAnalyticsScatterplot,
+    dataFrameAnalyticsCanvasElement,
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,

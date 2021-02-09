@@ -217,7 +217,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       {splom === undefined || vegaSpec === undefined ? (
         <VegaChartLoading />
       ) : (
-        <>
+        <div data-test-subj="mlScatterplotMatrix">
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow
@@ -298,7 +298,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
           </EuiFlexGroup>
 
           <VegaChart vegaSpec={vegaSpec} />
-        </>
+        </div>
       )}
     </>
   );

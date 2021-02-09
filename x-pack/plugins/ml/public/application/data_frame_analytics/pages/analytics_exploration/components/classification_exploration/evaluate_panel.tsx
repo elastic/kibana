@@ -393,7 +393,10 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
               />
             )}
             {!isLoadingRocCurve && errorRocCurve === null && rocCurveData.length > 0 && (
-              <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
+              <div
+                className="mlDataFrameAnalyticsClassification__evaluateSectionContent"
+                data-test-subj="mlDFAnalyticsClassificationExplorationRocCurveChart"
+              >
                 <VegaChart
                   vegaSpec={getRocCurveChartVegaLiteSpec(
                     classificationClasses,
