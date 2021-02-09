@@ -3445,6 +3445,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/docs-utils@link:packages/kbn-docs-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-archiver@link:packages/kbn-es-archiver":
   version "0.0.0"
   uid ""
@@ -3498,10 +3502,6 @@
   uid ""
 
 "@kbn/pm@link:packages/kbn-pm":
-  version "0.0.0"
-  uid ""
-
-"@kbn/release-notes@link:packages/kbn-release-notes":
   version "0.0.0"
   uid ""
 

@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { buildApiDocs } from './build_api_docs';
-
-buildApiDocs();
+export * from './release_notes';
+export * from './api_docs';
