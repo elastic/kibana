@@ -8,6 +8,7 @@
 import React, { FC, memo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import { CallOutType, CallOutMessage } from './callout_types';
 import { CallOutDismissButton } from './callout_dismiss_button';
 
@@ -55,6 +56,8 @@ const getDefaultIconType = (type: CallOutType): string => {
       return 'help';
     case 'danger':
       return 'alert';
+    default:
+      return assertUnreachable(type);
   }
 };
 
