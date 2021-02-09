@@ -424,7 +424,12 @@ export const areLayersLoaded = createSelector(
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.isDataLoaded()) {
+      if (
+        layer.isVisible() &&
+        layer.showAtZoomLevel(zoom) &&
+        !layer.hasErrors() &&
+        !layer.isDataLoaded()
+      ) {
         return false;
       }
     }
