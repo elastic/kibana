@@ -32,17 +32,14 @@ export default ({ getService }: FtrProviderContext) => {
     describe('field distribution', () => {
       it('should return a 404 for missing index patterns', async () => {
         await supertest
-          .post('/api/lens/index_stats/logstash/field')
+          .post('/api/lens/index_stats/123/field')
           .set(COMMON_HEADERS)
           .send({
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
             timeFieldName: '@timestamp',
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
+            fieldName: 'bytes',
           })
           .expect(404);
       });
@@ -55,10 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
+            fieldName: 'bytes',
           })
           .expect(200);
 
@@ -73,11 +67,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
+            fieldName: 'bytes',
           })
           .expect(200);
 
@@ -184,11 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: '@timestamp',
-              type: 'date',
-            },
+            fieldName: '@timestamp',
           })
           .expect(200);
 
@@ -221,11 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'geo.src',
-              type: 'string',
-            },
+            fieldName: 'geo.src',
           })
           .expect(200);
 
@@ -288,11 +270,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'ip',
-              type: 'ip',
-            },
+            fieldName: 'ip',
           })
           .expect(200);
 
@@ -355,14 +333,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'scripted date',
-              type: 'date',
-              scripted: true,
-              script: '1234',
-              lang: 'painless',
-            },
+            fieldName: 'scripted_date',
           })
           .expect(200);
 
@@ -387,14 +358,7 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: { match_all: {} },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'scripted string',
-              type: 'string',
-              scripted: true,
-              script: 'return "hello"',
-              lang: 'painless',
-            },
+            fieldName: 'scripted_string',
           })
           .expect(200);
 
@@ -425,11 +389,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
             fromDate: TEST_START_TIME,
             toDate: TEST_END_TIME,
-            timeFieldName: '@timestamp',
-            field: {
-              name: 'bytes',
-              type: 'number',
-            },
+            fieldName: 'bytes',
           })
           .expect(200);
 

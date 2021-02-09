@@ -116,24 +116,6 @@ describe('IndexPattern Field Item', () => {
     );
   });
 
-  it('should request field stats without a time field, if the index pattern has none', async () => {
-    indexPattern.timeFieldName = undefined;
-    core.http.post.mockImplementationOnce(() => {
-      return Promise.resolve({});
-    });
-    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} />);
-
-    await act(async () => {
-      clickField(wrapper, 'bytes');
-    });
-
-    expect(core.http.post).toHaveBeenCalledWith('/api/lens/index_stats/1/field', expect.anything());
-    // Function argument types not detected correctly (https://github.com/microsoft/TypeScript/issues/26591)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { body } = (core.http.post.mock.calls[0] as any)[1];
-    expect(JSON.parse(body)).not.toHaveProperty('timeFieldName');
-  });
-
   it('should request field stats every time the button is clicked', async () => {
     let resolveFunction: (arg: unknown) => void;
 
@@ -159,7 +141,6 @@ describe('IndexPattern Field Item', () => {
         },
         fromDate: 'now-7d',
         toDate: 'now',
-        timeFieldName: 'timestamp',
         fieldName: 'bytes',
       }),
     });
@@ -237,7 +218,6 @@ describe('IndexPattern Field Item', () => {
         },
         fromDate: 'now-14d',
         toDate: 'now-7d',
-        timeFieldName: 'timestamp',
         fieldName: 'bytes',
       }),
     });

@@ -11,6 +11,7 @@ import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
+import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
 import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
@@ -31,7 +32,6 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             dslQuery: schema.object({}, { unknowns: 'allow' }),
             fromDate: schema.string(),
             toDate: schema.string(),
-            timeFieldName: schema.maybe(schema.string()),
             fieldName: schema.string(),
           },
           { unknowns: 'allow' }
@@ -40,7 +40,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, timeFieldName, fieldName, dslQuery } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery } = req.body;
 
       const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
@@ -50,15 +50,16 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
         esClient
       );
 
-      const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
-
-      const field = indexPattern.fields.find((f) => f.name === fieldName);
-
-      if (!field) {
-        throw new Error(`Field {fieldName} not found in index pattern ${indexPattern.title}`);
-      }
-
       try {
+        const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
+
+        const timeFieldName = indexPattern.timeFieldName;
+        const field = indexPattern.fields.find((f) => f.name === fieldName);
+
+        if (!field) {
+          throw new Error(`Field {fieldName} not found in index pattern ${indexPattern.title}`);
+        }
+
         const filter = timeFieldName
           ? [
               {
@@ -108,6 +109,9 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           body: await getStringSamples(search, field),
         });
       } catch (e) {
+        if (e instanceof SavedObjectNotFound) {
+          return res.notFound();
+        }
         if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
