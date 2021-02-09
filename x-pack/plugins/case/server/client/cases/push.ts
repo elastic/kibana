@@ -181,6 +181,7 @@ export const push = async ({
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
+        includeSubCaseComments: true,
       }),
     ]);
   } catch (e) {
