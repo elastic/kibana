@@ -58,9 +58,6 @@ jest.mock('../../../../triggers_actions_ui/public', () => {
     getIndexPatterns: () => {
       return ['index1', 'index2'];
     },
-    firstFieldOption: () => {
-      return { text: 'Select a field', value: '' };
-    },
     getTimeFieldOptions: () => {
       return [
         {
