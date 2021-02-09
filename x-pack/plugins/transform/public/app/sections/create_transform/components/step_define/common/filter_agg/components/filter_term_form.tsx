@@ -26,7 +26,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   selectedField,
 }) => {
   const api = useApi();
-  const { indexPattern } = useContext(CreateTransformWizardContext);
+  const { indexPattern, runtimeMappings } = useContext(CreateTransformWizardContext);
   const toastNotifications = useToastNotifications();
 
   const [options, setOptions] = useState([]);
@@ -38,6 +38,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       const esSearchRequest = {
         index: indexPattern!.title,
         body: {
+          ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
           query: {
             wildcard: {
               [selectedField!]: {
