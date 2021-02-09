@@ -21,7 +21,20 @@ interface Props extends CreateAnalyticsFormProps {
 export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors }) => {
   const { setFormState } = actions;
 
-  const { eta, featureBagFraction, gamma, lambda, maxTrees, randomizeSeed } = state.form;
+  const {
+    alpha,
+    downsampleFactor,
+    eta,
+    etaGrowthRatePerTree,
+    featureBagFraction,
+    gamma,
+    lambda,
+    maxOptimizationRoundsPerHyperparameter,
+    maxTrees,
+    randomizeSeed,
+    softTreeDepthLimit,
+    softTreeDepthTolerance,
+  } = state.form;
 
   return (
     <Fragment>
@@ -200,6 +213,215 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             isInvalid={randomizeSeed !== undefined && typeof randomizeSeed !== 'number'}
             value={getNumberValue(randomizeSeed)}
             step={1}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.alphaLabel', {
+            defaultMessage: 'Alpha',
+          })}
+          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.alphaText', {
+            defaultMessage:
+              'Multiplies a term based on tree depth in the regularized loss. Higher values result in shallower trees and faster training times. Must be greater than or equal to 0. ',
+          })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ALPHA] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ALPHA]}
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.alphaInputAriaLabel', {
+              defaultMessage: 'Multiplies a term based on tree depth in the regularized loss',
+            })}
+            data-test-subj="mlAnalyticsCreateJobWizardAlphaInput"
+            onChange={(e) =>
+              setFormState({ alpha: e.target.value === '' ? undefined : +e.target.value })
+            }
+            step={0.001}
+            min={0}
+            value={getNumberValue(alpha)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.downsampleFactorLabel', {
+            defaultMessage: 'Downsample factor',
+          })}
+          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.downsampleFactorText', {
+            defaultMessage:
+              'Controls the fraction of data that is used to compute the derivatives of the loss function for tree training. Must be between 0 and 1.',
+          })}
+          isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.DOWNSAMPLE_FACTOR] !== undefined}
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.DOWNSAMPLE_FACTOR]}
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.downsampleFactorInputAriaLabel',
+              {
+                defaultMessage:
+                  'Controls the fraction of data that is used to compute the derivatives of the loss function for tree training',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardDownsampleFactorInput"
+            onChange={(e) =>
+              setFormState({
+                downsampleFactor: e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
+            step={0.001}
+            min={0}
+            max={1}
+            value={getNumberValue(downsampleFactor)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.etaGrowthRatePerTreeLabel', {
+            defaultMessage: 'Eta growth rate per tree',
+          })}
+          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.etaGrowthRatePerTreeText', {
+            defaultMessage:
+              'Specifies the rate at which eta increases for each new tree that is added to the forest. Must be between 0.5 and 2.',
+          })}
+          isInvalid={
+            advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA_GROWTH_RATE_PER_TREE] !== undefined
+          }
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA_GROWTH_RATE_PER_TREE]}
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.downsampleFactorInputAriaLabel',
+              {
+                defaultMessage:
+                  'Specifies the rate at which eta increases for each new tree that is added to the forest.',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardEtaGrowthRatePerTreeInput"
+            onChange={(e) =>
+              setFormState({
+                etaGrowthRatePerTree: e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
+            step={0.001}
+            min={0.5}
+            max={2}
+            value={getNumberValue(etaGrowthRatePerTree)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.ml.dataframe.analytics.create.maxOptimizationRoundsPerHyperparameterLabel',
+            {
+              defaultMessage: 'Max optimization rounds per hyperparameter',
+            }
+          )}
+          helpText={i18n.translate(
+            'xpack.ml.dataframe.analytics.create.maxOptimizationRoundsPerHyperparameterText',
+            {
+              defaultMessage:
+                'Multiplier responsible for determining the maximum number of hyperparameter optimization steps in the Bayesian optimization procedure.',
+            }
+          )}
+          isInvalid={
+            advancedParamErrors[
+              ANALYSIS_ADVANCED_FIELDS.MAX_OPTIMIZATION_ROUNDS_PER_HYPERPARAMETER
+            ] !== undefined
+          }
+          error={
+            advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.MAX_OPTIMIZATION_ROUNDS_PER_HYPERPARAMETER]
+          }
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.maxOptimizationRoundsPerHyperparameterInputAriaLabel',
+              {
+                defaultMessage:
+                  'Multiplier responsible for determining the maximum number of hyperparameter optimization steps in the Bayesian optimization procedure. Must be an integer between 0 and 20.',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardMaxOptimizationRoundsPerHyperparameterInput"
+            onChange={(e) =>
+              setFormState({
+                maxOptimizationRoundsPerHyperparameter:
+                  e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
+            min={0}
+            max={20}
+            step={1}
+            value={getNumberValue(maxOptimizationRoundsPerHyperparameter)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.softTreeDepthLimitLabel', {
+            defaultMessage: 'Soft tree depth limit',
+          })}
+          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.softTreeDepthLimitText', {
+            defaultMessage:
+              'Tree depth limit that increases regularized loss when exceeded. Must be greater than or equal to 0. ',
+          })}
+          isInvalid={
+            advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_LIMIT] !== undefined
+          }
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_LIMIT]}
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.softTreeDepthLimitInputAriaLabel',
+              {
+                defaultMessage: 'Tree depth limit that increases regularized loss when exceeded',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardSoftTreeDepthLimitInput"
+            onChange={(e) =>
+              setFormState({
+                softTreeDepthLimit: e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
+            step={0.001}
+            min={0}
+            value={getNumberValue(softTreeDepthLimit)}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.softTreeDepthToleranceLabel', {
+            defaultMessage: 'Soft tree depth tolerance',
+          })}
+          helpText={i18n.translate(
+            'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceText',
+            {
+              defaultMessage:
+                'Controls how quickly the regularized loss increases when the tree depth exceeds soft_tree_depth_limit. Must be greater than or equal to 0.01. ',
+            }
+          )}
+          isInvalid={
+            advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_TOLERANCE] !== undefined
+          }
+          error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_TOLERANCE]}
+        >
+          <EuiFieldNumber
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceInputAriaLabel',
+              {
+                defaultMessage: 'Tree depth limit that increases regularized loss when exceeded',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardSoftTreeDepthToleranceInput"
+            onChange={(e) =>
+              setFormState({
+                softTreeDepthTolerance: e.target.value === '' ? undefined : +e.target.value,
+              })
+            }
+            step={0.001}
+            min={0.01}
+            value={getNumberValue(softTreeDepthTolerance)}
           />
         </EuiFormRow>
       </EuiFlexItem>
