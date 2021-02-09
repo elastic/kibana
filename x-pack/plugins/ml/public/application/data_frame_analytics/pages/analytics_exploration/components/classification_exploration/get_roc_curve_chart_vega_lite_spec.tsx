@@ -42,7 +42,8 @@ export interface RocCurveDataRow extends RocCurveItem {
 
 export const getRocCurveChartVegaLiteSpec = (
   classificationClasses: string[],
-  data: RocCurveDataRow[]
+  data: RocCurveDataRow[],
+  legendTitle: string
 ): TopLevelSpec => {
   // we append two rows which make up the data for the diagonal baseline
   data.push({ tpr: 0, fpr: 0, threshold: 1, class_name: BASELINE });
@@ -75,6 +76,9 @@ export const getRocCurveChartVegaLiteSpec = (
         type: LEGEND_TYPES.NOMINAL,
         scale: {
           range: colorRangeNominal,
+        },
+        legend: {
+          title: legendTitle,
         },
       },
       size: {

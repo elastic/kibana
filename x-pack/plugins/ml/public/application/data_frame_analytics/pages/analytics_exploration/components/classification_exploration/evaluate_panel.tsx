@@ -23,7 +23,7 @@ import {
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { VegaChart, VegaChartLoading } from '../../../../../components/vega_chart';
 import { ErrorCallout } from '../error_callout';
-import { DataFrameAnalyticsConfig } from '../../../../common';
+import { getDependentVar, DataFrameAnalyticsConfig } from '../../../../common';
 import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import { ResultsSearchQuery } from '../../../../common/analytics';
 
@@ -384,7 +384,11 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                 {!isLoadingRocCurve && rocCurveData.length > 0 && (
                   <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
                     <VegaChart
-                      vegaSpec={getRocCurveChartVegaLiteSpec(classificationClasses, rocCurveData)}
+                      vegaSpec={getRocCurveChartVegaLiteSpec(
+                        classificationClasses,
+                        rocCurveData,
+                        getDependentVar(jobConfig.analysis)
+                      )}
                     />
                   </div>
                 )}
