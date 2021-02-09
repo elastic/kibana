@@ -6,16 +6,10 @@
  */
 
 import _ from 'lodash';
-import { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
+import { DatasourceDimensionDropProps } from '../../types';
 import { OperationType } from '../indexpattern';
-import {
-  getAvailableOperationsByMetadata,
-  getSortScoreByPriority,
-  getOperationTypesForField,
-} from '../operations';
-import { IndexPatternPrivateState, IndexPatternField } from '../types';
-
-import { operationDefinitions } from '../operations/definitions';
+import { getAvailableOperationsByMetadata } from '../operations';
+import { IndexPatternPrivateState } from '../types';
 
 export interface OperationSupportMatrix {
   operationByField: Partial<Record<string, Set<OperationType>>>;
