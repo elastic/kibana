@@ -75,7 +75,7 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
 
         <EuiHorizontalRule />
 
-        <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+        <SearchSessionsMgmtTable {...tableProps} />
       </EuiPageContent>
     </EuiPageBody>
   );

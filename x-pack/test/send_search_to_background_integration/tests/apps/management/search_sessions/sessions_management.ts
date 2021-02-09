@@ -50,6 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.waitFor(`wait for first item to complete`, async function () {
           const s = await PageObjects.searchSessionsManagement.getList();
+          if (!s[0]) {
+            log.warning(`Expected item is not in the table!`);
+          } else {
+            log.debug(`First item status: ${s[0].status}`);
+          }
           return s[0] && s[0].status === 'complete';
         });
 
