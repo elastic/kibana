@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty, EuiLink, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiToolTip, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface Props {
@@ -20,13 +20,11 @@ interface Props {
 }
 
 const OuterContainer = styled.span`
-  &&& {
-    display: inline-flex;
-    align-items: center;
-
-    .euiToolTipAnchor {
-      min-width: 0;
-    }
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  .euiToolTipAnchor {
+    min-width: 0;
   }
 `; // NOTE: min-width: 0 ensures flexbox and no-wrap children can co-exist
 
@@ -34,8 +32,7 @@ const InnerContainer = styled.span`
   overflow: hidden;
   display: flex;
   align-items: center;
-  min-width: 0;
-`; // NOTE: min-width: 0 ensures flexbox and no-wrap children can co-exist
+`;
 
 const FirstChunk = styled.span`
   text-overflow: ellipsis;
@@ -72,51 +69,49 @@ export const getChunks = (text: string) => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ ariaLabel, text, url, onClick, setButtonRef }: Props) => {
+export const MiddleTruncatedText = ({ ariaLabel, text, onClick, setButtonRef, url }: Props) => {
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
 
   return (
-    <>
+    <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
       <EuiScreenReaderOnly>
         <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
       </EuiScreenReaderOnly>
-      <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
-        <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
-          <>
-            {onClick ? (
-              <StyledButton
-                onClick={onClick}
-                data-test-subj="middleTruncatedTextButton"
-                buttonRef={setButtonRef}
-              >
-                <InnerContainer>
-                  <FirstChunk>{chunks.first}</FirstChunk>
-                  <LastChunk>{chunks.last}</LastChunk>
-                </InnerContainer>
-              </StyledButton>
-            ) : (
-              <InnerContainer aria-hidden={true}>
+      <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
+        <>
+          {onClick ? (
+            <StyledButton
+              onClick={onClick}
+              data-test-subj="middleTruncatedTextButton"
+              buttonRef={setButtonRef}
+            >
+              <InnerContainer>
                 <FirstChunk>{chunks.first}</FirstChunk>
                 <LastChunk>{chunks.last}</LastChunk>
               </InnerContainer>
-            )}
-          </>
-        </EuiToolTip>
-        <span>
-          <EuiLink href={url} external target="_blank">
-            <EuiScreenReaderOnly>
-              <span>
-                <FormattedMessage
-                  id="xpack.uptime.synthetics.waterfall.resource.externalLink"
-                  defaultMessage="Open resource in new tab"
-                />
-              </span>
-            </EuiScreenReaderOnly>
-          </EuiLink>
-        </span>
-      </OuterContainer>
-    </>
+            </StyledButton>
+          ) : (
+            <InnerContainer aria-hidden={true}>
+              <FirstChunk>{chunks.first}</FirstChunk>
+              <LastChunk>{chunks.last}</LastChunk>
+            </InnerContainer>
+          )}
+        </>
+      </EuiToolTip>
+      <span>
+        <EuiLink href={url} external target="_blank">
+          <EuiScreenReaderOnly>
+            <span>
+              <FormattedMessage
+                id="xpack.uptime.synthetics.waterfall.resource.externalLink"
+                defaultMessage="Open resource in new tab"
+              />
+            </span>
+          </EuiScreenReaderOnly>
+        </EuiLink>
+      </span>
+    </OuterContainer>
   );
 };
