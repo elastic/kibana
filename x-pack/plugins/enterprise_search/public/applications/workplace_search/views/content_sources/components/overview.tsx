@@ -9,8 +9,6 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -30,7 +28,21 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { Loading } from '../../../../shared/loading';
+import { EuiPanelTo } from '../../../../shared/react_router_helpers';
+import { AppLogic } from '../../../app_logic';
+import aclImage from '../../../assets/supports_acl.svg';
+import { ComponentLoader } from '../../../components/shared/component_loader';
+import { CredentialItem } from '../../../components/shared/credential_item';
+import { LicenseBadge } from '../../../components/shared/license_badge';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import {
+  RECENT_ACTIVITY_TITLE,
+  CREDENTIALS_TITLE,
+  DOCUMENTATION_LINK_TITLE,
+} from '../../../constants';
 import {
   CUSTOM_SOURCE_DOCS_URL,
   DOCUMENT_PERMISSIONS_DOCS_URL,
@@ -38,12 +50,6 @@ import {
   EXTERNAL_IDENTITIES_DOCS_URL,
   getGroupPath,
 } from '../../../routes';
-
-import {
-  RECENT_ACTIVITY_TITLE,
-  CREDENTIALS_TITLE,
-  DOCUMENTATION_LINK_TITLE,
-} from '../../../constants';
 import {
   SOURCES_NO_CONTENT_TITLE,
   CONTENT_SUMMARY_TITLE,
@@ -70,17 +76,6 @@ import {
   DOC_PERMISSIONS_DESCRIPTION,
   CUSTOM_CALLOUT_TITLE,
 } from '../constants';
-
-import { AppLogic } from '../../../app_logic';
-
-import { ComponentLoader } from '../../../components/shared/component_loader';
-import { CredentialItem } from '../../../components/shared/credential_item';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { LicenseBadge } from '../../../components/shared/license_badge';
-import { Loading } from '../../../../shared/loading';
-import { EuiPanelTo } from '../../../../shared/react_router_helpers';
-
-import aclImage from '../../../assets/supports_acl.svg';
 import { SourceLogic } from '../source_logic';
 
 export const Overview: React.FC = () => {
