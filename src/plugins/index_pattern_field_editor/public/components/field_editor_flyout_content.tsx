@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -24,7 +24,7 @@ import {
 import { DocLinksStart, CoreStart } from 'src/core/public';
 
 import { Field, InternalFieldType, PluginStart, EsRuntimeField } from '../types';
-import { getLinks } from '../lib';
+import { getLinks, RuntimeFieldPainlessError } from '../lib';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 
@@ -72,7 +72,7 @@ export interface Props {
   /** The internal field type we are dealing with (concrete|runtime)*/
   fieldTypeToProcess: InternalFieldType;
   /** Handler to validate the script  */
-  runtimeFieldValidator: (field: EsRuntimeField) => Promise<Record<string, any> | null>;
+  runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
 
@@ -104,19 +104,36 @@ const FieldEditorFlyoutContentComponent = ({
       ? async () => ({ isValid: true, data: field })
       : async () => ({ isValid: false, data: {} as Field }),
   });
+
+  const [painlessSyntaxError, setPainlessSyntaxError] = useState<RuntimeFieldPainlessError | null>(
+    null
+  );
+
   const { submit, isValid: isFormValid, isSubmitted } = formState;
+  const isSaveButtonDisabled = isFormValid === false || painlessSyntaxError !== null;
+
+  const clearSyntaxError = useCallback(() => setPainlessSyntaxError(null), []);
+
+  const syntaxError = useMemo(
+    () => ({
+      error: painlessSyntaxError,
+      clear: clearSyntaxError,
+    }),
+    [painlessSyntaxError, clearSyntaxError]
+  );
 
   const onClickSave = useCallback(async () => {
     const { isValid, data } = await submit();
 
     if (isValid) {
       if (data.script) {
-        const syntaxError = await runtimeFieldValidator({
+        const error = await runtimeFieldValidator({
           type: data.type,
           script: data.script,
         });
 
-        console.log('ERROR?', syntaxError); // eslint-disable-line
+        setPainlessSyntaxError(error);
+        return;
       }
 
       onSave(data);
@@ -148,6 +165,7 @@ const FieldEditorFlyoutContentComponent = ({
             field={field}
             onChange={setFormState}
             ctx={{ fieldTypeToProcess, namesNotAllowed, existingConcreteFields }}
+            syntaxError={syntaxError}
           />
         )}
       </EuiFlyoutBody>
@@ -155,7 +173,7 @@ const FieldEditorFlyoutContentComponent = ({
       <EuiFlyoutFooter>
         {FieldEditor && (
           <>
-            {isSubmitted && isFormValid === false && (
+            {isSubmitted && isSaveButtonDisabled && (
               <>
                 <EuiCallOut
                   title={i18nTexts.formErrorsCalloutTitle}
@@ -184,6 +202,7 @@ const FieldEditorFlyoutContentComponent = ({
                   onClick={onClickSave}
                   data-test-subj="fieldSaveButton"
                   fill
+                  disabled={isSaveButtonDisabled}
                 >
                   {i18nTexts.saveButtonLabel}
                 </EuiButton>

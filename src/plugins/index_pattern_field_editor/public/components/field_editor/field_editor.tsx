@@ -34,6 +34,7 @@ import {
   ScriptField,
   FormatField,
   PopularityField,
+  ScriptSyntaxError,
 } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
@@ -85,6 +86,7 @@ export interface Props {
      */
     existingConcreteFields: Array<{ name: string; type: string }>;
   };
+  syntaxError: ScriptSyntaxError;
 }
 
 const geti18nTexts = () => ({
@@ -159,6 +161,7 @@ const FieldEditorComponent = ({
   fieldFormatEditors,
   fieldFormats,
   uiSettings,
+  syntaxError,
   ctx: { fieldTypeToProcess, namesNotAllowed, existingConcreteFields },
 }: Props) => {
   const { form } = useForm<Field, FieldFormInternal>({
@@ -234,7 +237,11 @@ const FieldEditorComponent = ({
           formFieldPath="__meta__.isValueVisible"
           withDividerRule
         >
-          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
+          <ScriptField
+            existingConcreteFields={existingConcreteFields}
+            links={links}
+            syntaxError={syntaxError}
+          />
         </FormRow>
       )}
 

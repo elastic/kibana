@@ -10,4 +10,4 @@ export { deserializeField } from './serialization';
 
 export { getLinks } from './documentation';
 
-export { getRuntimeFieldValidator } from './runtime_field_validation';
+export { getRuntimeFieldValidator, RuntimeFieldPainlessError } from './runtime_field_validation';

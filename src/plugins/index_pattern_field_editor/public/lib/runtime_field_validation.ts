@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { i18n } from '@kbn/i18n';
 
 import { DataPublicPluginStart } from '../shared_imports';
 import { EsRuntimeField } from '../types';
@@ -71,7 +72,12 @@ const parseEsError = (error?: Error): RuntimeFieldPainlessError | null => {
   }
 
   return {
-    message: 'Error compiling the painless script',
+    message: i18n.translate(
+      'indexPatternFieldEditor.editor.form.scriptEditor.compileErrorMessage',
+      {
+        defaultMessage: 'Error compiling the painless script',
+      }
+    ),
     position: scriptError.position ?? null,
     scriptStack: scriptError.script_stack ?? [],
     reason: scriptError.caused_by?.reason ?? '',

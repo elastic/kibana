@@ -9,7 +9,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiCode, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { PainlessLang, PainlessContext } from '@kbn/monaco';
 
 import {
@@ -19,12 +19,19 @@ import {
   FieldConfig,
   CodeEditor,
 } from '../../../shared_imports';
+import { RuntimeFieldPainlessError } from '../../../lib';
 import { schema } from '../form_schema';
 import type { FieldFormInternal } from '../field_editor';
 
 interface Props {
   links: { runtimePainless: string };
   existingConcreteFields?: Array<{ name: string; type: string }>;
+  syntaxError: ScriptSyntaxError;
+}
+
+export interface ScriptSyntaxError {
+  error: RuntimeFieldPainlessError | null;
+  clear: () => void;
 }
 
 const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessContext => {
@@ -46,7 +53,7 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
   }
 };
 
-export const ScriptField = React.memo(({ existingConcreteFields, links }: Props) => {
+export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxError }: Props) => {
   const editorValidationTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const [painlessContext, setPainlessContext] = useState<PainlessContext>(
@@ -60,7 +67,11 @@ export const ScriptField = React.memo(({ existingConcreteFields, links }: Props)
     existingConcreteFields
   );
 
-  const [{ type }] = useFormData<FieldFormInternal>({ watch: 'type' });
+  const [{ type, script: { source } = { source: '' } }] = useFormData<FieldFormInternal>({
+    watch: ['type', 'script.source'],
+  });
+
+  const { clear: clearSyntaxError } = syntaxError;
 
   const sourceFieldConfig: FieldConfig<string> = useMemo(() => {
     return {
@@ -106,70 +117,101 @@ export const ScriptField = React.memo(({ existingConcreteFields, links }: Props)
     setPainlessContext(mapReturnTypeToPainlessContext(type[0]!.value!));
   }, [type]);
 
+  useEffect(() => {
+    // Whenever the source changes we clear potential syntax errors
+    clearSyntaxError();
+  }, [source, clearSyntaxError]);
+
   return (
     <UseField<string> path="script.source" config={sourceFieldConfig}>
       {({ value, setValue, label, isValid, getErrorsMessages }) => {
         return (
-          <EuiFormRow
-            label={label}
-            error={getErrorsMessages()}
-            isInvalid={!isValid}
-            helpText={
-              <FormattedMessage
-                id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
-                defaultMessage="Runtime fields without a script retrieve values from {source}. If the field doesn't exist in _source, a search request returns no value. {learnMoreLink}"
-                values={{
-                  learnMoreLink: (
-                    <EuiLink
-                      href={links.runtimePainless}
-                      target="_blank"
-                      external
-                      data-test-subj="painlessSyntaxLearnMoreLink"
-                    >
-                      {i18n.translate(
-                        'indexPatternFieldEditor.editor.form.script.learnMoreLinkText',
-                        {
-                          defaultMessage: 'Learn about script syntax.',
-                        }
-                      )}
-                    </EuiLink>
-                  ),
-                  source: <EuiCode>{'_source'}</EuiCode>,
+          <>
+            <EuiFormRow
+              label={label}
+              error={syntaxError.error !== null ? syntaxError.error.message : getErrorsMessages()}
+              isInvalid={syntaxError.error !== null || !isValid}
+              helpText={
+                <FormattedMessage
+                  id="indexPatternFieldEditor.editor.form.source.scriptFieldHelpText"
+                  defaultMessage="Runtime fields without a script retrieve values from {source}. If the field doesn't exist in _source, a search request returns no value. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink
+                        href={links.runtimePainless}
+                        target="_blank"
+                        external
+                        data-test-subj="painlessSyntaxLearnMoreLink"
+                      >
+                        {i18n.translate(
+                          'indexPatternFieldEditor.editor.form.script.learnMoreLinkText',
+                          {
+                            defaultMessage: 'Learn about script syntax.',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                    source: <EuiCode>{'_source'}</EuiCode>,
+                  }}
+                />
+              }
+              fullWidth
+            >
+              <CodeEditor
+                languageId={PainlessLang.ID}
+                suggestionProvider={suggestionProvider}
+                width="100%"
+                height="300px"
+                value={value}
+                onChange={setValue}
+                editorDidMount={(editor) => setEditorId(editor.getModel()?.id)}
+                options={{
+                  fontSize: 12,
+                  minimap: {
+                    enabled: false,
+                  },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  wrappingIndent: 'indent',
+                  automaticLayout: true,
+                  suggest: {
+                    snippetsPreventQuickSuggestions: false,
+                  },
                 }}
+                data-test-subj="scriptField"
+                aria-label={i18n.translate(
+                  'indexPatternFieldEditor.editor.form.scriptEditorAriaLabel',
+                  {
+                    defaultMessage: 'Script editor',
+                  }
+                )}
               />
-            }
-            fullWidth
-          >
-            <CodeEditor
-              languageId={PainlessLang.ID}
-              suggestionProvider={suggestionProvider}
-              width="100%"
-              height="300px"
-              value={value}
-              onChange={setValue}
-              editorDidMount={(editor) => setEditorId(editor.getModel()?.id)}
-              options={{
-                fontSize: 12,
-                minimap: {
-                  enabled: false,
-                },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-                automaticLayout: true,
-                suggest: {
-                  snippetsPreventQuickSuggestions: false,
-                },
-              }}
-              data-test-subj="scriptField"
-              aria-label={i18n.translate(
-                'indexPatternFieldEditor.editor.form.scriptEditorAriaLabel',
-                {
-                  defaultMessage: 'Script editor',
-                }
-              )}
-            />
-          </EuiFormRow>
+            </EuiFormRow>
+
+            {/* Help the user debug the error by showing where it failed in the script */}
+            {syntaxError.error !== null && (
+              <>
+                <EuiSpacer />
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate(
+                      'indexPatternFieldEditor.editor.form.scriptEditor.debugErrorMessage',
+                      {
+                        defaultMessage: 'Syntax error detail',
+                      }
+                    )}
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiCodeBlock
+                  // @ts-ignore
+                  whiteSpace="pre"
+                >
+                  {syntaxError.error.scriptStack.join('\n')}
+                </EuiCodeBlock>
+              </>
+            )}
+          </>
         );
       }}
     </UseField>
