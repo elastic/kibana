@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
 
 import {
@@ -20,8 +21,8 @@ import {
   EuiLinkProps,
 } from '@elastic/eui';
 
-import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { TelemetryLogic } from '../../../shared/telemetry';
 
 interface OnboardingCardProps {
   title: React.ReactNode;

@@ -9,7 +9,9 @@ import '../../../../__mocks__/kea.mock';
 import { mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { EmptyState } from './';

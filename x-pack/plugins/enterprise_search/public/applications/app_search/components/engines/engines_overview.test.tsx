@@ -9,6 +9,7 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { LoadingState, EmptyState } from './components';

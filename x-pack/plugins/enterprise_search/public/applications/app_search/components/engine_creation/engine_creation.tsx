@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useActions, useValues } from 'kea';
+
 import {
   EuiForm,
   EuiFlexGroup,
@@ -23,10 +25,10 @@ import {
   EuiButton,
   EuiPanel,
 } from '@elastic/eui';
-import { useActions, useValues } from 'kea';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
 import {
   ALLOWED_CHARS_NOTE,
   ENGINE_CREATION_FORM_ENGINE_LANGUAGE_LABEL,

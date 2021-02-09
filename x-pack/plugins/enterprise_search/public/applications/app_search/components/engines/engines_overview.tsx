@@ -6,7 +6,9 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import {
   EuiPageContent,
   EuiPageContentHeader,
@@ -16,19 +18,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { ENGINE_CREATION_PATH } from '../../routes';
 
 import { EngineIcon } from './assets/engine_icon';
 import { MetaEngineIcon } from './assets/meta_engine_icon';
-import { CREATE_AN_ENGINE_BUTTON_LABEL, ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
-import { EnginesTable } from './engines_table';
+import { CREATE_AN_ENGINE_BUTTON_LABEL, ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
 import { EnginesLogic } from './engines_logic';
+import { EnginesTable } from './engines_table';
 
 import './engines_overview.scss';
 

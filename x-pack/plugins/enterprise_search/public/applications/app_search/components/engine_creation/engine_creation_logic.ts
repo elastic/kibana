@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
 import { generatePath } from 'react-router-dom';
 
-import { ENGINE_PATH } from '../../routes';
-import { formatApiName } from '../../utils/format_api_name';
+import { kea, MakeLogicType } from 'kea';
+
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
+import { ENGINE_PATH } from '../../routes';
+import { formatApiName } from '../../utils/format_api_name';
 
 import { DEFAULT_LANGUAGE, ENGINE_CREATION_SUCCESS_MESSAGE } from './constants';
 

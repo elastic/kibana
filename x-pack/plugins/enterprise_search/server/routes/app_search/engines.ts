@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
+import { RouteDependencies } from '../../plugin';
 
 interface EnginesResponse {
   results: object[];

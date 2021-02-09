@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
+
 import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../shared/telemetry';
-import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { EnginesOverviewHeader } from './header';
