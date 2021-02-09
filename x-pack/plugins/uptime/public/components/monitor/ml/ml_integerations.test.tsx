@@ -14,11 +14,12 @@ import { coreMock } from 'src/core/public/mocks';
 
 const core = coreMock.createStart();
 describe('ML Integrations', () => {
+  let spy1: any;
   beforeEach(() => {
     const spy = jest.spyOn(redux, 'useDispatch');
     spy.mockReturnValue(jest.fn());
 
-    const spy1 = jest.spyOn(redux, 'useSelector');
+    spy1 = jest.spyOn(redux, 'useSelector');
     spy1.mockReturnValue(true);
   });
 
@@ -28,6 +29,7 @@ describe('ML Integrations', () => {
   });
 
   it('renders without errors', () => {
+    spy1.mockReturnValue([]);
     const wrapper = renderWithRouter(
       <KibanaContextProvider
         services={{ ...core, triggersActionsUi: { getEditAlertFlyout: jest.fn() } }}

@@ -11,7 +11,7 @@ import * as reactRouterDom from 'react-router-dom';
 import { Ping } from '../../../common/runtime_types';
 import { MonitorPageTitle } from './monitor_title';
 import { renderWithRouter } from '../../lib';
-import { mockReduxHooks } from '../../lib/helper/test_helpers';
+import { mockReduxHooks, mockStateForSelector } from '../../lib/helper/test_helpers';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -59,10 +59,21 @@ describe('MonitorTitle component', () => {
   beforeEach(() => {
     mockReactRouterDomHooks({ useParamsResponse: { monitorId: defaultMonitorIdEncoded } });
     mockReduxHooks(defaultMonitorStatus);
+    mockStateForSelector({
+      monitorStatus: {
+        loading: false,
+        status: defaultMonitorStatus,
+      },
+    });
   });
 
   it('renders the monitor heading and EnableMonitorAlert toggle', () => {
-    mockReduxHooks(monitorStatusWithName);
+    mockStateForSelector({
+      monitorStatus: {
+        loading: false,
+        status: monitorStatusWithName,
+      },
+    });
     const component = renderWithRouter(<MonitorPageTitle />);
     expect(component.find('h1').text()).toBe(monitorName);
     expect(component.find('[data-test-subj="uptimeDisplayDefineConnector"]').length).toBe(1);

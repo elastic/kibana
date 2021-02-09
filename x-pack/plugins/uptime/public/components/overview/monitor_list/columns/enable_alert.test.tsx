@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EnableMonitorAlert } from './enable_alert';
-import * as redux from 'react-redux';
 import {
   mountWithRouterRedux,
   renderWithRouterRedux,
@@ -16,32 +15,27 @@ import {
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
+import { mockAppState, mockStateForSelector } from '../../../../lib/helper/test_helpers';
 
 describe('EnableAlertComponent', () => {
   let defaultConnectors: string[] = [];
-  let alerts: any = [];
+  const alerts: any = [];
+  const defaultState = {
+    alerts: {
+      ...mockAppState.alerts,
+      alerts: {
+        data: alerts,
+        loading: false,
+      },
+    },
+    dynamicSettings: {
+      loading: false,
+      settings: Object.assign(DYNAMIC_SETTINGS_DEFAULTS, { defaultConnectors }),
+    },
+  };
 
   beforeEach(() => {
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
-
-    jest.spyOn(redux, 'useSelector').mockImplementation((fn, d) => {
-      if (fn.name === 'selectDynamicSettings') {
-        return {
-          settings: Object.assign(DYNAMIC_SETTINGS_DEFAULTS, {
-            defaultConnectors,
-          }),
-        };
-      }
-      if (fn.name === 'alertsSelector') {
-        return {
-          data: {
-            data: alerts,
-          },
-          loading: false,
-        };
-      }
-      return {};
-    });
+    mockStateForSelector(defaultState);
   });
 
   it('shallow renders without errors for valid props', () => {
@@ -97,7 +91,14 @@ describe('EnableAlertComponent', () => {
   });
 
   it('does not displays define connectors when there is connector', () => {
-    defaultConnectors = ['infra-slack-connector-id'];
+    mockStateForSelector({
+      dynamicSettings: {
+        loading: false,
+        settings: Object.assign(DYNAMIC_SETTINGS_DEFAULTS, {
+          defaultConnectors: ['infra-slack-connector-id'],
+        }),
+      },
+    });
     const wrapper = mountWithRouterRedux(
       <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />
     );
@@ -106,8 +107,22 @@ describe('EnableAlertComponent', () => {
   });
 
   it('displays disable when alert is there', () => {
-    alerts = [{ id: 'test-alert', params: { search: 'testMonitor' } }];
-    defaultConnectors = ['infra-slack-connector-id'];
+    const data: any = [{ id: 'test-alert', params: { search: 'testMonitor' } }];
+    mockStateForSelector({
+      ...defaultState,
+      alerts: {
+        ...defaultState.alerts,
+        alerts: {
+          data: {
+            data,
+            page: 0,
+            perPage: 1,
+            total: 1,
+          },
+          loading: false,
+        },
+      },
+    });
 
     const wrapper = mountWithRouterRedux(
       <EnableMonitorAlert monitorId={'testMonitor'} monitorName={'My website'} />

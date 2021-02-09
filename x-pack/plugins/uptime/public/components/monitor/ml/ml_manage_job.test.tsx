@@ -11,6 +11,7 @@ import { ManageMLJobComponent } from './manage_ml_job';
 import * as redux from 'react-redux';
 import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { mockAppState, mockStateForSelector } from '../../../lib/helper/test_helpers';
 
 const core = coreMock.createStart();
 describe('Manage ML Job', () => {
@@ -25,8 +26,12 @@ describe('Manage ML Job', () => {
   });
 
   it('renders without errors', () => {
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
-    jest.spyOn(redux, 'useSelector').mockReturnValue(true);
+    mockStateForSelector({
+      ml: {
+        ...mockAppState.ml,
+        mlJob: { loading: true, data: null },
+      },
+    });
 
     const wrapper = renderWithRouter(
       <KibanaContextProvider

@@ -10,7 +10,7 @@ import moment from 'moment';
 import { PageHeader } from './page_header';
 import { Ping } from '../../../../common/runtime_types';
 import { renderWithRouter } from '../../../lib';
-import { mockReduxHooks } from '../../../lib/helper/test_helpers';
+import { mockStateForSelector } from '../../../lib/helper/test_helpers';
 
 describe('PageHeader', () => {
   const monitorName = 'sample monitor';
@@ -34,7 +34,7 @@ describe('PageHeader', () => {
   };
 
   beforeEach(() => {
-    mockReduxHooks(defaultMonitorStatus);
+    mockStateForSelector({ monitorStatus: { status: defaultMonitorStatus, loading: false } });
   });
 
   it('does not render dynamic elements by default', () => {
