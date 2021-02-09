@@ -16,43 +16,10 @@ import {
   Timings,
   MimeTypesMap,
 } from './types';
-import {
-  WaterfallProvider,
-  WaterfallChart,
-  MiddleTruncatedText,
-  RenderItem,
-} from '../../waterfall';
+import { WaterfallProvider, WaterfallChart, RenderItem } from '../../waterfall';
 import { WaterfallFilter } from './waterfall_filter';
 import { LegendItem } from './legend_item';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
-
-export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
-  const { status } = item;
-
-  const isErrorStatusCode = (statusCode: number) => {
-    const is400 = statusCode >= 400 && statusCode <= 499;
-    const is500 = statusCode >= 500 && statusCode <= 599;
-    const isSpecific300 = statusCode === 301 || statusCode === 307 || statusCode === 308;
-    return is400 || is500 || isSpecific300;
-  };
-
-  return (
-    <>
-      {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
-      ) : (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
-          </EuiFlexItem>
-          <EuiFlexItem component="span" grow={false}>
-            <EuiBadge color="danger">{status}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </>
-  );
-};
 
 interface Props {
   total: number;
