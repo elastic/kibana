@@ -13,7 +13,7 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export function getServiceNodeMetadata({
   serviceName,

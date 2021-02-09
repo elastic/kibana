@@ -12,7 +12,7 @@ import {
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getTransaction({
   transactionId,

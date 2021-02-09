@@ -15,7 +15,7 @@ import {
 } from '../../../../common/apm_saved_object_constants';
 import { APMConfig } from '../../..';
 import { APMRequestHandlerContext } from '../../../routes/typings';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'get'>;
 

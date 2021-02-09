@@ -16,7 +16,7 @@ import {
   UIProcessorEvent,
 } from '../../../common/processor_event';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 interface IndexPatternTitleAndFields {
   title: string;

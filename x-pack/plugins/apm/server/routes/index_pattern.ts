@@ -14,7 +14,7 @@ import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_patt
 import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_pattern';
 import { getApmIndices } from '../lib/settings/apm_indices/get_apm_indices';
 import { UIProcessorEvent } from '../../common/processor_event';
-import { withApmSpan } from '../utils/with_span';
+import { withApmSpan } from '../utils/with_apm_span';
 
 export const staticIndexPatternRoute = createRoute((core) => ({
   endpoint: 'POST /api/apm/index_pattern/static',

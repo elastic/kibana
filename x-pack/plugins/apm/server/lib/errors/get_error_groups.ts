@@ -16,7 +16,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getErrorGroupsProjection } from '../../projections/errors';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 import { getErrorName } from '../helpers/get_error_name';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 

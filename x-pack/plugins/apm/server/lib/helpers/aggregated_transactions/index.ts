@@ -14,7 +14,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getHasAggregatedTransactions({
   start,

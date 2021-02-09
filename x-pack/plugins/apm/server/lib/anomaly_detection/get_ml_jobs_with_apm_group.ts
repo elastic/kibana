@@ -6,7 +6,7 @@
  */
 
 import { MlPluginSetup } from '../../../../ml/server';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 import { APM_ML_JOB_GROUP } from './constants';
 
 // returns ml jobs containing "apm" group

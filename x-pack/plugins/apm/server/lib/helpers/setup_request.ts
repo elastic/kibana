@@ -27,7 +27,7 @@ import {
   APMInternalClient,
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933

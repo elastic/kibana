@@ -15,7 +15,7 @@ import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export function getServiceTransactionTypes({
   setup,

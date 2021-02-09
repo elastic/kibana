@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';

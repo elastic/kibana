@@ -19,7 +19,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
 import { processSignificantTermAggs } from '../process_significant_term_aggs';
 import { getLatencyDistribution } from './get_latency_distribution';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getCorrelationsForSlowTransactions({
   serviceName,

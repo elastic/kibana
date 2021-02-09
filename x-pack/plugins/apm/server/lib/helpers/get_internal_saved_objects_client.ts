@@ -7,7 +7,7 @@
 
 import { CoreSetup } from 'src/core/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export type InternalSavedObjectsClient = PromiseReturnType<
   typeof getInternalSavedObjectsClient

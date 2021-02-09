@@ -13,7 +13,7 @@ import {
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
-import { withApmSpan } from '../../utils/with_span';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export function getServiceAgentName({
   serviceName,

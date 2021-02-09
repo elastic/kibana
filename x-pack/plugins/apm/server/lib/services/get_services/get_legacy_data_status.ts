@@ -8,7 +8,7 @@
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup) {

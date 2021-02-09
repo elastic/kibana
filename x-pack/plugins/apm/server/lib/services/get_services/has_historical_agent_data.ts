@@ -6,7 +6,7 @@
  */
 
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem

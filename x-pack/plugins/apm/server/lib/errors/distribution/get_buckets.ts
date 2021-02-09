@@ -12,7 +12,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { rangeFilter } from '../../../../common/utils/range_filter';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({

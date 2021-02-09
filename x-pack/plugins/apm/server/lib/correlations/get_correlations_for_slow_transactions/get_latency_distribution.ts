@@ -13,7 +13,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { TopSigTerm } from '../process_significant_term_aggs';
 import { getMaxLatency } from './get_max_latency';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getLatencyDistribution({
   setup,

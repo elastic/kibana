@@ -29,7 +29,7 @@ import {
   getOutcomeAggregation,
 } from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
-import { withApmSpan } from '../../../utils/with_span';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 interface AggregationParams {
   setup: ServicesItemsSetup;
