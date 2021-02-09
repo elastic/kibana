@@ -342,7 +342,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}."
+              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}"
               values={{
                 learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
               }}
