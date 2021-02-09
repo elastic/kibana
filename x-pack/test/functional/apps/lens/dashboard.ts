@@ -194,5 +194,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
       await find.existsByLinkText('lnsPieVis');
     });
+
+    it('should show validation messages if any error appears', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.clickCreateNewLink();
+      await dashboardAddPanel.clickVisType('lens');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'moving_average',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        operation: 'sum',
+        field: 'bytes',
+      });
+      await PageObjects.lens.closeDimensionEditor();
+
+      // remove the x dimension to trigger the validation error
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+      await PageObjects.lens.saveAndReturn();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('embeddable-lens-failure');
+    });
   });
 }

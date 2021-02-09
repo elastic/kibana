@@ -65,7 +65,7 @@ export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
       <EuiFlexItem>
         <FormattedMessage
           id="xpack.lens.embeddable.moreErrors"
-          defaultMessage="(Edit in Lens editor to see all errors)"
+          defaultMessage="(Edit in Lens editor to see more errors)"
         />
       </EuiFlexItem>
     ) : null;
@@ -76,6 +76,7 @@ export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
         justifyContent="center"
         alignItems="center"
         style={{ maxWidth: '100%' }}
+        data-test-subj="embeddable-lens-failure"
       >
         <EuiFlexItem grow={false}>
           <EuiIcon type="alert" size="xl" color="danger" />
