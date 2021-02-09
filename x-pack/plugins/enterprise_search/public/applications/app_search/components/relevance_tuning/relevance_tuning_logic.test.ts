@@ -400,6 +400,17 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
+    describe('setSearchSettings', () => {
+      it('updates search results whenever search settings are changed', () => {
+        mount();
+        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
+
+        RelevanceTuningLogic.actions.setSearchSettings(searchSettings);
+
+        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
+      });
+    });
+
     describe('onSearchSettingsSuccess', () => {
       it('should save the response, trigger a new search, and then scroll to the top', () => {
         mount();
@@ -509,7 +520,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('toggleSearchField', () => {
-      it('updates search weight to 1 in search fields and then triggers a new search when enabling', () => {
+      it('updates search weight to 1 in search fields when enabling', () => {
         mount({
           searchSettings: {
             ...searchSettings,
@@ -521,7 +532,6 @@ describe('RelevanceTuningLogic', () => {
           },
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.toggleSearchField('foo', false);
 
@@ -536,10 +546,9 @@ describe('RelevanceTuningLogic', () => {
             },
           },
         });
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
-      it('removes fields from search fields and triggers a new search when disabling', () => {
+      it('removes fields from search fields when disabling', () => {
         mount({
           searchSettings: {
             ...searchSettings,
@@ -551,24 +560,21 @@ describe('RelevanceTuningLogic', () => {
           },
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.toggleSearchField('bar', true);
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
           ...searchSettings,
         });
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
     });
 
     describe('updateFieldWeight', () => {
-      it('updates the search weight in search fields and then triggers a new search', () => {
+      it('updates the search weight in search fields', () => {
         mount({
           searchSettings,
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.updateFieldWeight('foo', 3);
 
@@ -580,7 +586,6 @@ describe('RelevanceTuningLogic', () => {
             },
           },
         });
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
       it('will round decimal numbers', () => {
@@ -666,7 +671,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('deleteBoost', () => {
-      it('deletes the boost with the given name and index and updates search results', () => {
+      it('deletes the boost with the given name and index', () => {
         mount({
           searchSettings: {
             ...searchSettings,
@@ -686,11 +691,9 @@ describe('RelevanceTuningLogic', () => {
         });
         confirmSpy.mockImplementation(() => true);
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.deleteBoost('foo', 1);
 
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
           ...searchSettings,
           boosts: {
@@ -753,7 +756,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('updateBoostFactor', () => {
-      it('updates the boost factor of the target boost and updates search results', () => {
+      it('updates the boost factor of the target boost', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -761,7 +764,6 @@ describe('RelevanceTuningLogic', () => {
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.updateBoostFactor('foo', 1, 5);
 
@@ -771,7 +773,6 @@ describe('RelevanceTuningLogic', () => {
             type: 'functional',
           })
         );
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
       it('will round decimal numbers', () => {
@@ -804,7 +805,6 @@ describe('RelevanceTuningLogic', () => {
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.updateBoostValue('foo', 1, 1, 'a');
 
@@ -815,7 +815,6 @@ describe('RelevanceTuningLogic', () => {
             value: ['a', 'a', 'c'],
           })
         );
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
       it('will create a new array if no array exists yet for value', () => {
@@ -840,7 +839,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('updateBoostCenter', () => {
-      it('will update the boost center and update search reusults', () => {
+      it('will update the boost center', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -849,7 +848,6 @@ describe('RelevanceTuningLogic', () => {
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.updateBoostCenter('foo', 1, 5);
 
@@ -860,7 +858,6 @@ describe('RelevanceTuningLogic', () => {
             center: 5,
           })
         );
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
       it('will also work with strings', () => {
@@ -934,7 +931,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('addBoostValue', () => {
-      it('will add an empty boost values and update search reusults', () => {
+      it('will add an empty boost value', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -943,7 +940,6 @@ describe('RelevanceTuningLogic', () => {
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.addBoostValue('foo', 1);
 
@@ -954,7 +950,6 @@ describe('RelevanceTuningLogic', () => {
             value: ['a', ''],
           })
         );
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
       it('will add two empty boost values if none exist yet', () => {
@@ -1000,7 +995,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('removeBoostValue', () => {
-      it('will remove a boost value and update search reusults', () => {
+      it('will remove a boost value', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -1009,7 +1004,6 @@ describe('RelevanceTuningLogic', () => {
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.removeBoostValue('foo', 1, 1);
 
@@ -1020,7 +1014,6 @@ describe('RelevanceTuningLogic', () => {
             value: ['a', 'c'],
           })
         );
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
       it('will do nothing if boost values do not exist', () => {
@@ -1031,17 +1024,15 @@ describe('RelevanceTuningLogic', () => {
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.removeBoostValue('foo', 1, 1);
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).not.toHaveBeenCalled();
-        expect(RelevanceTuningLogic.actions.getSearchResults).not.toHaveBeenCalled();
       });
     });
 
     describe('updateBoostSelectOption', () => {
-      it('will update the boost and update search reusults', () => {
+      it('will update the boost', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
@@ -1049,7 +1040,6 @@ describe('RelevanceTuningLogic', () => {
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-        jest.spyOn(RelevanceTuningLogic.actions, 'getSearchResults');
 
         RelevanceTuningLogic.actions.updateBoostSelectOption('foo', 1, 'function', 'exponential');
 
@@ -1060,7 +1050,6 @@ describe('RelevanceTuningLogic', () => {
             function: 'exponential',
           })
         );
-        expect(RelevanceTuningLogic.actions.getSearchResults).toHaveBeenCalled();
       });
 
       it('can also update operation', () => {

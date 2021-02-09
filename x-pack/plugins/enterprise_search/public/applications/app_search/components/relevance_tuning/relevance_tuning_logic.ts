@@ -330,6 +330,9 @@ export const RelevanceTuningLogic = kea<
         flashAPIErrors(e);
       }
     },
+    setSearchSettings: () => {
+      actions.getSearchResults();
+    },
     onSearchSettingsSuccess: ({ searchSettings }) => {
       actions.setSearchSettingsResponse(searchSettings);
       actions.getSearchResults();
@@ -384,7 +387,6 @@ export const RelevanceTuningLogic = kea<
           ...(!disableField && { [name]: { weight: 1 } }),
         },
       });
-      actions.getSearchResults();
     },
     updateFieldWeight: ({ name, weight }) => {
       const { searchSettings } = values;
@@ -401,7 +403,6 @@ export const RelevanceTuningLogic = kea<
           },
         },
       });
-      actions.getSearchResults();
     },
     addBoost: ({ name, type }) => {
       const { searchSettings } = values;
@@ -442,7 +443,6 @@ export const RelevanceTuningLogic = kea<
           ...searchSettings,
           boosts: updatedBoosts,
         });
-        actions.getSearchResults();
       }
     },
     updateBoostFactor: ({ name, index, factor }) => {
@@ -458,7 +458,6 @@ export const RelevanceTuningLogic = kea<
           [name]: updatedBoosts,
         },
       });
-      actions.getSearchResults();
     },
     updateBoostValue: ({ name, boostIndex, valueIndex, value }) => {
       const { searchSettings } = values;
@@ -478,7 +477,6 @@ export const RelevanceTuningLogic = kea<
           [name]: updatedBoosts,
         },
       });
-      actions.getSearchResults();
     },
     updateBoostCenter: ({ name, boostIndex, value }) => {
       const { searchSettings } = values;
@@ -494,7 +492,6 @@ export const RelevanceTuningLogic = kea<
           [name]: updatedBoosts,
         },
       });
-      actions.getSearchResults();
     },
     addBoostValue: ({ name, boostIndex }) => {
       const { searchSettings } = values;
@@ -513,7 +510,6 @@ export const RelevanceTuningLogic = kea<
           [name]: updatedBoosts,
         },
       });
-      actions.getSearchResults();
     },
     removeBoostValue: ({ name, boostIndex, valueIndex }) => {
       const { searchSettings } = values;
@@ -531,7 +527,6 @@ export const RelevanceTuningLogic = kea<
           [name]: updatedBoosts,
         },
       });
-      actions.getSearchResults();
     },
     updateBoostSelectOption: ({ name, boostIndex, optionType, value }) => {
       const { searchSettings } = values;
@@ -546,7 +541,6 @@ export const RelevanceTuningLogic = kea<
           [name]: updatedBoosts,
         },
       });
-      actions.getSearchResults();
     },
     updateSearchValue: (query) => {
       actions.setSearchQuery(query);
