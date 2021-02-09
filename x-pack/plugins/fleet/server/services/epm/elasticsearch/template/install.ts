@@ -17,7 +17,13 @@ import {
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
-import { generateMappings, generateTemplateName, getTemplate } from './template';
+import {
+  generateMappings,
+  generateTemplateName,
+  generateTemplateIndexPattern,
+  getTemplate,
+  getTemplatePriority,
+} from './template';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
@@ -293,6 +299,9 @@ export async function installTemplate({
 }): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataStream);
+  const templateIndexPattern = generateTemplateIndexPattern(dataStream);
+  const templatePriority = getTemplatePriority(dataStream);
+
   let pipelineName;
   if (dataStream.ingest_pipeline) {
     pipelineName = getPipelineNameForInstallation({
@@ -310,11 +319,12 @@ export async function installTemplate({
 
   const template = getTemplate({
     type: dataStream.type,
-    templateName,
+    templateIndexPattern,
     mappings,
     pipelineName,
     packageName,
     composedOfTemplates,
+    templatePriority,
     ilmPolicy: dataStream.ilm_policy,
     hidden: dataStream.hidden,
   });

@@ -6803,7 +6803,7 @@
   dependencies:
     "@types/webpack" "*"
 
-"@types/webpack-sources@*":
+"@types/webpack-sources@*", "@types/webpack-sources@^0.1.4":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@types/webpack-sources/-/webpack-sources-0.1.5.tgz#be47c10f783d3d6efe1471ff7f042611bd464a92"
   integrity sha512-zfvjpp7jiafSmrzJ2/i3LqOyTYTuJ7u1KOXlKgDlvsj9Rr0x7ZiYu5lZbXwobL7lmsRNtPXlBfmaUD8eU2Hu8w==
