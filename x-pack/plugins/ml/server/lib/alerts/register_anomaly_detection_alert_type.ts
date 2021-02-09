@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { KibanaRequest } from 'kibana/server';
 import {
   ML_ALERT_TYPES,
   ML_ALERT_TYPES_CONFIG,
@@ -113,7 +114,11 @@ export function registerAnomalyDetectionAlertType({
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     async executor({ services, params }) {
-      const { execute } = mlSharedServices.alertingServiceProvider(services.savedObjectsClient);
+      const fakeRequest = {} as KibanaRequest;
+      const { execute } = mlSharedServices.alertingServiceProvider(
+        services.savedObjectsClient,
+        fakeRequest
+      );
       const executionResult = await execute(params);
 
       if (executionResult) {
