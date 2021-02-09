@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { withTimeout } from './promise';
+import { withTimeout, isPromise } from './promise';
 
 const delay = (ms: number, resolveValue?: any) =>
   new Promise((resolve) => setTimeout(resolve, ms, resolveValue));
@@ -48,5 +48,32 @@ describe('withTimeout', () => {
         errorMessage: 'error-message',
       })
     ).rejects.toMatchInlineSnapshot(`[Error: from-promise]`);
+  });
+});
+
+describe('isPromise', () => {
+  it('returns true when arg is a Promise', () => {
+    expect(isPromise(Promise.resolve('foo'))).toEqual(true);
+    expect(isPromise(Promise.reject('foo').catch(() => undefined))).toEqual(true);
+  });
+
+  it('returns false when arg is not a Promise', () => {
+    expect(isPromise(12)).toEqual(false);
+    expect(isPromise('foo')).toEqual(false);
+    expect(isPromise({ hello: 'dolly' })).toEqual(false);
+    expect(isPromise([1, 2, 3])).toEqual(false);
+  });
+
+  it('returns false for objects with a non-function `then` property', () => {
+    expect(isPromise({ then: 'bar' })).toEqual(false);
+  });
+
+  it('returns false for null and undefined', () => {
+    expect(isPromise(null)).toEqual(false);
+    expect(isPromise(undefined)).toEqual(false);
+  });
+
+  it('returns true for Promise-Like objects', () => {
+    expect(isPromise({ then: () => 12 })).toEqual(true);
   });
 });
