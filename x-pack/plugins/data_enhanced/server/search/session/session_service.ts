@@ -110,7 +110,7 @@ export class SearchSessionService
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         try {
           this.logger.debug(`Object not found | ${sessionId}`);
-          return await this.create(deps, sessionId, attributes);
+          return await this.create(deps, user, sessionId, attributes);
         } catch (createError) {
           if (
             SavedObjectsErrorHelpers.isConflictError(createError) &&
@@ -150,10 +150,6 @@ export class SearchSessionService
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
 
-    const realmType = user?.authentication_realm.type;
-    const realmName = user?.authentication_realm.name;
-    const username = user?.username;
-
     return this.updateOrCreate(deps, user, sessionId, {
       name,
       appId,
@@ -161,18 +157,21 @@ export class SearchSessionService
       initialState,
       restoreState,
       persisted: true,
-      realmType,
-      realmName,
-      username,
     });
   };
 
   private create = (
     { savedObjectsClient }: SearchSessionDependencies,
+    user: AuthenticatedUser | null,
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`create | ${sessionId}`);
+
+    const realmType = user?.authentication_realm.type;
+    const realmName = user?.authentication_realm.name;
+    const username = user?.username;
+
     return savedObjectsClient.create<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       {
@@ -185,6 +184,9 @@ export class SearchSessionService
         touched: new Date().toISOString(),
         idMapping: {},
         persisted: false,
+        realmType,
+        realmName,
+        username,
         ...attributes,
       },
       { id: sessionId }
