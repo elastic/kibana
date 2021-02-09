@@ -63,12 +63,12 @@ async function getCompatibleAnomaliesJobIds(
 export async function getMetricK8sAnomalies(
   context: Required<InfraRequestHandlerContext>,
   sourceId: string,
+  anomalyThreshold: ANOMALY_THRESHOLD,
   startTime: number,
   endTime: number,
   metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   sort: Sort,
   pagination: Pagination,
-  scoreThreshold: ANOMALY_THRESHOLD = ANOMALY_THRESHOLD.MAJOR,
   influencerFilter?: InfluencerFilter
 ) {
   const finalizeMetricsK8sAnomaliesSpan = startTracingSpan('get metrics k8s entry anomalies');
@@ -96,12 +96,12 @@ export async function getMetricK8sAnomalies(
     timing: { spans: fetchLogEntryAnomaliesSpans },
   } = await fetchMetricK8sAnomalies(
     context.mlSystem,
+    anomalyThreshold,
     jobIds,
     startTime,
     endTime,
     sort,
     pagination,
-    scoreThreshold,
     influencerFilter
   );
 
@@ -149,12 +149,12 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
 
 async function fetchMetricK8sAnomalies(
   mlSystem: MlSystem,
+  anomalyThreshold: ANOMALY_THRESHOLD,
   jobIds: string[],
   startTime: number,
   endTime: number,
   sort: Sort,
   pagination: Pagination,
-  scoreThreshold: ANOMALY_THRESHOLD,
   influencerFilter?: InfluencerFilter | undefined
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
@@ -167,15 +167,15 @@ async function fetchMetricK8sAnomalies(
 
   const results = decodeOrThrow(metricsK8sAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsK8sAnomaliesQuery(
+      createMetricsK8sAnomaliesQuery({
         jobIds,
+        anomalyThreshold,
         startTime,
         endTime,
         sort,
-        expandedPagination,
-        scoreThreshold,
-        influencerFilter
-      ),
+        pagination: expandedPagination,
+        influencerFilter,
+      }),
       jobIds
     )
   );

@@ -9,7 +9,7 @@ import { LogicMounter } from '../../../__mocks__';
 
 import { BoostType } from './types';
 
-import { RelevanceTuningLogic } from './relevance_tuning_logic';
+import { RelevanceTuningLogic } from './';
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);

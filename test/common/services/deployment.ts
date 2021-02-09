@@ -35,17 +35,7 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
      * Useful for functional testing in cloud environment
      */
     async isOss() {
-      const baseUrl = this.getEsHostPort();
-      const username = config.get('servers.elasticsearch.username');
-      const password = config.get('servers.elasticsearch.password');
-      const response = await fetch(baseUrl + '/_xpack', {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-        },
-      });
-      return response.status !== 200;
+      return config.get('kbnTestServer.serverArgs').indexOf('--oss') > -1;
     },
 
     async isCloud(): Promise<boolean> {

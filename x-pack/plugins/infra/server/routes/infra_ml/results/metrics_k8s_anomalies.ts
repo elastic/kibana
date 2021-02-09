@@ -33,6 +33,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       const {
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
@@ -53,6 +54,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
         } = await getMetricK8sAnomalies(
           requestContext.infra,
           sourceId,
+          anomalyThreshold,
           startTime,
           endTime,
           metric,

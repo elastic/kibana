@@ -28,21 +28,29 @@ const sortToMlFieldMap = {
   startTime: 'timestamp',
 };
 
-export const createMetricsHostsAnomaliesQuery = (
-  jobIds: string[],
-  startTime: number,
-  endTime: number,
-  sort: Sort,
-  pagination: Pagination,
-  scoreThreshold: ANOMALY_THRESHOLD,
-  influencerFilter: InfluencerFilter | undefined
-) => {
+export const createMetricsHostsAnomaliesQuery = ({
+  jobIds,
+  anomalyThreshold,
+  startTime,
+  endTime,
+  sort,
+  pagination,
+  influencerFilter,
+}: {
+  jobIds: string[];
+  anomalyThreshold: ANOMALY_THRESHOLD;
+  startTime: number;
+  endTime: number;
+  sort: Sort;
+  pagination: Pagination;
+  influencerFilter?: InfluencerFilter;
+}) => {
   const { field } = sort;
   const { pageSize } = pagination;
 
   const filters = [
     ...createJobIdsFilters(jobIds),
-    ...createAnomalyScoreFilter(scoreThreshold),
+    ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];

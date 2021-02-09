@@ -63,12 +63,12 @@ async function getCompatibleAnomaliesJobIds(
 export async function getMetricsHostsAnomalies(
   context: Required<InfraRequestHandlerContext>,
   sourceId: string,
+  anomalyThreshold: ANOMALY_THRESHOLD,
   startTime: number,
   endTime: number,
   metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
   sort: Sort,
   pagination: Pagination,
-  scoreThreshold: ANOMALY_THRESHOLD = ANOMALY_THRESHOLD.MAJOR,
   influencerFilter?: InfluencerFilter
 ) {
   const finalizeMetricsHostsAnomaliesSpan = startTracingSpan('get metrics hosts entry anomalies');
@@ -97,12 +97,12 @@ export async function getMetricsHostsAnomalies(
       timing: { spans: fetchLogEntryAnomaliesSpans },
     } = await fetchMetricsHostsAnomalies(
       context.mlSystem,
+      anomalyThreshold,
       jobIds,
       startTime,
       endTime,
       sort,
       pagination,
-      scoreThreshold,
       influencerFilter
     );
 
@@ -153,12 +153,12 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
 
 async function fetchMetricsHostsAnomalies(
   mlSystem: MlSystem,
+  anomalyThreshold: ANOMALY_THRESHOLD,
   jobIds: string[],
   startTime: number,
   endTime: number,
   sort: Sort,
   pagination: Pagination,
-  scoreThreshold: ANOMALY_THRESHOLD,
   influencerFilter?: InfluencerFilter
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
@@ -171,15 +171,15 @@ async function fetchMetricsHostsAnomalies(
 
   const results = decodeOrThrow(metricsHostsAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsHostsAnomaliesQuery(
+      createMetricsHostsAnomaliesQuery({
         jobIds,
+        anomalyThreshold,
         startTime,
         endTime,
         sort,
-        expandedPagination,
-        scoreThreshold,
-        influencerFilter
-      ),
+        pagination: expandedPagination,
+        influencerFilter,
+      }),
       jobIds
     )
   );

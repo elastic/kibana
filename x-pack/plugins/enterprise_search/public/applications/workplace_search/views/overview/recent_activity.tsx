@@ -7,19 +7,19 @@
 
 import React from 'react';
 
-import moment from 'moment';
 import { useValues, useActions } from 'kea';
+import moment from 'moment';
 
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ContentSection } from '../../components/shared/content_section';
-import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
-import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
-import { RECENT_ACTIVITY_TITLE } from '../../constants';
-
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
+import { ContentSection } from '../../components/shared/content_section';
+import { RECENT_ACTIVITY_TITLE } from '../../constants';
+import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
+
 import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
