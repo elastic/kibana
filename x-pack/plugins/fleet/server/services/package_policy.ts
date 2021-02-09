@@ -304,7 +304,7 @@ class PackagePolicyService {
       }
     }
 
-    let inputs = await restOfPackagePolicy.inputs.map((input) =>
+    let inputs = restOfPackagePolicy.inputs.map((input) =>
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
