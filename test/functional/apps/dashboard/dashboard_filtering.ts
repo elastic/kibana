@@ -106,11 +106,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb metric is filtered', async () => {
-        await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
+        await dashboardExpect.tsvbMetricValuesExist(['custom template']);
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['', '']);
       });
 
       it('saved search is filtered', async () => {
@@ -168,11 +168,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb metric is filtered', async () => {
-        await dashboardExpect.tsvbMetricValuesExist(['0 custom template']);
+        await dashboardExpect.tsvbMetricValuesExist(['custom template']);
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['', '']);
       });
 
       it('saved search is filtered', async () => {
