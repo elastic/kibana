@@ -319,6 +319,58 @@ export interface ElasticsearchMetricbeatSource {
         license?: ElasticsearchLegacySource['license'];
         state?: {};
         status?: string;
+        version?: string;
+        indices?: {
+          total?: number;
+          docs?: {
+            total?: number;
+          };
+          shards?: {
+            count?: number;
+            primaries?: number;
+          };
+          store?: {
+            size?: {
+              bytes?: number;
+            };
+          };
+        };
+        nodes?: {
+          count?: number;
+          jvm?: {
+            max_uptime?: {
+              ms?: number;
+            };
+            memory?: {
+              heap?: {
+                used?: {
+                  bytes?: number;
+                };
+                max?: {
+                  bytes?: number;
+                };
+              };
+            };
+          };
+          fs?: {
+            total?: {
+              available?: {
+                bytes?: number;
+              };
+              total?: {
+                bytes?: number;
+              };
+            };
+            summary?: {
+              available?: {
+                bytes?: number;
+              };
+              total?: {
+                bytes?: number;
+              };
+            };
+          };
+        };
       };
     };
   };

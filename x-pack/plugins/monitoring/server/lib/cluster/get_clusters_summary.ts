@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { pick, omit, get } from 'lodash';
-import { ElasticsearchModifiedSource, ElasticsearchLegacySource } from '../../../common/types/es';
+import { omit, get } from 'lodash';
+import {
+  ElasticsearchModifiedSource,
+  ElasticsearchLegacySource,
+  ElasticsearchMetricbeatSource,
+} from '../../../common/types/es';
 // @ts-ignore
 import { calculateOverallStatus } from '../calculate_overall_status';
 // @ts-ignore
@@ -26,7 +30,6 @@ export function getClustersSummary(
   return clusters.map((cluster) => {
     const {
       isSupported,
-      version,
       logstash,
       kibana,
       ml,
@@ -39,8 +42,13 @@ export function getClustersSummary(
     } = cluster;
 
     const license = cluster.license || cluster.elasticsearch?.cluster?.stats?.license;
+    const version = cluster.version || cluster.elasticsearch?.cluster?.stats?.version;
     const clusterUuid = cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id;
-    const clusterStats = cluster.cluster_stats || cluster.elasticsearch?.cluster?.stats;
+    const clusterStats:
+      | ElasticsearchLegacySource['cluster_stats']
+      | NonNullable<
+          NonNullable<ElasticsearchMetricbeatSource['elasticsearch']>['cluster']
+        >['stats'] = cluster.cluster_stats || cluster.elasticsearch?.cluster?.stats;
 
     const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
 
@@ -62,21 +70,28 @@ export function getClustersSummary(
       expiry_date_in_millis: licenseExpiry,
     } = license;
 
-    const indices = pick(clusterStats?.indices, ['count', 'docs', 'shards', 'store']);
+    const indices = {
+      count: clusterStats?.indices?.count ?? clusterStats?.indices?.total,
+      docs: clusterStats?.indices?.docs,
+      shards: clusterStats?.indices?.shards,
+      store: clusterStats?.indice?.store,
+    };
 
     const jvm = {
-      max_uptime_in_millis: clusterStats?.nodes?.jvm?.max_uptime_in_millis,
-      mem: clusterStats?.nodes?.jvm?.mem,
+      max_uptime_in_millis:
+        clusterStats?.nodes?.jvm?.max_uptime_in_millis ?? clusterStats?.nodes?.jvm?.max_uptime?.ms,
+      mem: clusterStats?.nodes?.jvm?.mem ?? clusterStats?.nodes?.jvm?.memory,
     };
 
     const nodes = {
       fs: clusterStats?.nodes?.fs,
       count: {
-        total: clusterStats?.nodes?.count?.total,
+        total: clusterStats?.nodes?.count?.total ?? clusterStats?.nodes?.count,
       },
       jvm,
     };
-    const { status } = cluster.cluster_state ?? { status: null };
+    const { status } = cluster.cluster_state ??
+      cluster?.elasticsearch?.cluster?.stats ?? { status: null };
 
     return {
       isSupported,

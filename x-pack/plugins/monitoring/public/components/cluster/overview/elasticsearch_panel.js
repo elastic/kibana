@@ -58,7 +58,7 @@ import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
 const calculateShards = (shards) => {
-  const total = get(shards, 'total', 0);
+  const total = get(shards, 'count', get(shards, 'total', 0));
   let primaries = get(shards, 'primaries', 'N/A');
   let replicas = 'N/A';
 
@@ -437,8 +437,16 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esJvmHeap">
                 <BytesPercentageUsage
-                  usedBytes={get(nodes, 'jvm.mem.heap_used_in_bytes')}
-                  maxBytes={get(nodes, 'jvm.mem.heap_max_in_bytes')}
+                  usedBytes={get(
+                    nodes,
+                    'jvm.mem.heap.used.bytes',
+                    get(nodes, 'jvm.mem.heap_used_in_bytes')
+                  )}
+                  maxBytes={get(
+                    nodes,
+                    'jvm.mem.heap.max.bytes',
+                    get(nodes, 'jvm.mem.heap.heap_max_in_bytes')
+                  )}
                 />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
