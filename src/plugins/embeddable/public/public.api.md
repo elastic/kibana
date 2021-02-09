@@ -17,6 +17,7 @@ import Boom from '@hapi/boom';
 import { CoreSetup as CoreSetup_2 } from 'src/core/public';
 import { CoreSetup as CoreSetup_3 } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'kibana/public';
+import * as CSS from 'csstype';
 import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
 import { Ensure } from '@kbn/utility-types';
@@ -58,6 +59,7 @@ import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PluginInitializerContext } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_3 } from 'kibana/public';
+import * as PropTypes from 'prop-types';
 import { PublicContract } from '@kbn/utility-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
@@ -123,7 +125,8 @@ export interface Adapters {
 //
 // @public (undocumented)
 export class AddPanelAction implements Action_3<ActionContext_2> {
-    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React.ComponentType<any>);
+    // Warning: (ae-forgotten-export) The symbol "React" needs to be exported by the entry point index.d.ts
+    constructor(getFactory: EmbeddableStart_2['getEmbeddableFactory'], getAllFactories: EmbeddableStart_2['getEmbeddableFactories'], overlays: OverlayStart_2, notifications: NotificationsStart_2, SavedObjectFinder: React_2.ComponentType<any>);
     // (undocumented)
     execute(context: ActionExecutionContext_2<ActionContext_2>): Promise<void>;
     // (undocumented)
