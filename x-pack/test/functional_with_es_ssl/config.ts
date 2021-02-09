@@ -46,7 +46,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './apps/triggers_actions_ui'),
       resolve(__dirname, './apps/uptime'),
-      resolve(__dirname, './apps/test_app'),
     ],
     apps: {
       ...xpackFunctionalConfig.get('apps'),
