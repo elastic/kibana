@@ -12,21 +12,23 @@ import {
   EuiBasicTable,
   EuiLink,
   EuiTableFieldDataColumnType,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
-import { useGetPackageInstallStatus } from '../../hooks';
-import { InstallStatus } from '../../../../types';
-import { useLink } from '../../../../hooks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../common/constants';
-import { useUrlPagination } from '../../../../hooks';
+import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
+import { InstallStatus } from '../../../../../types';
+import { useLink, useStartServices, useUrlPagination } from '../../../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { LinkAndRevision, LinkAndRevisionProps, } from '../../../../../components';
+import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
+import { useGetPackageInstallStatus } from '../../../hooks';
 import {
   PackagePolicyAndAgentPolicy,
   usePackagePoliciesWithAgentPolicy,
 } from './use_package_policies_with_agent_policy';
-import { LinkAndRevision, LinkAndRevisionProps } from '../../../../components';
 import { Persona } from './persona';
-import { LinkedAgentCount } from '../../../../components/linked_agent_count';
 
 const IntegrationDetailsLink = memo<{
   packagePolicy: PackagePolicyAndAgentPolicy['packagePolicy'];
@@ -52,16 +54,20 @@ const AgentPolicyDetailLink = memo<{
   children: ReactNode;
 }>(({ agentPolicyId, revision, children }) => {
   const { getHref } = useLink();
+  const { application } = useStartServices();
+
   return (
-    <LinkAndRevision
-      className="eui-textTruncate"
-      revision={revision}
-      href={getHref('policy_details', {
-        policyId: agentPolicyId,
-      })}
-    >
-      {children}
-    </LinkAndRevision>
+    <RedirectAppLinks application={application}>
+      <LinkAndRevision
+        className="eui-textTruncate"
+        revision={revision}
+        href={getHref('policy_details', {
+          policyId: agentPolicyId,
+        })}
+      >
+        {children}
+      </LinkAndRevision>
+    </RedirectAppLinks>
   );
 });
 
@@ -69,8 +75,9 @@ interface PackagePoliciesPanelProps {
   name: string;
   version: string;
 }
-export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProps) => {
+export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { getPath } = useLink();
+  const { application } = useStartServices();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -139,12 +146,14 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         width: '8ch',
         render({ packagePolicy, agentPolicy }: PackagePolicyAndAgentPolicy) {
           return (
-            <LinkedAgentCount
-              count={agentPolicy?.agents ?? 0}
-              agentPolicyId={packagePolicy.policy_id}
-              className="eui-textTruncate"
-              data-test-subj="rowAgentCount"
-            />
+            <RedirectAppLinks application={application}>
+              <LinkedAgentCount
+                count={agentPolicy?.agents ?? 0}
+                agentPolicyId={packagePolicy.policy_id}
+                className="eui-textTruncate"
+                data-test-subj="rowAgentCount"
+              />
+            </RedirectAppLinks>
           );
         },
       },
@@ -173,7 +182,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
         },
       },
     ],
-    []
+    [application]
   );
 
   const noItemsMessage = useMemo(() => {
@@ -197,18 +206,23 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
   if (packageInstallStatus.status !== InstallStatus.installed) {
-    return <Redirect to={getPath('integration_details', { pkgkey: `${name}-${version}` })} />;
+    return <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />;
   }
 
   return (
-    <EuiBasicTable
-      items={data?.items || []}
-      columns={columns}
-      loading={isLoading}
-      data-test-subj="integrationPolicyTable"
-      pagination={tablePagination}
-      onChange={handleTableOnChange}
-      noItemsMessage={noItemsMessage}
-    />
+    <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexItem grow={1} />
+      <EuiFlexItem grow={6}>
+        <EuiBasicTable
+          items={data?.items || []}
+          columns={columns}
+          loading={isLoading}
+          data-test-subj="integrationPolicyTable"
+          pagination={tablePagination}
+          onChange={handleTableOnChange}
+          noItemsMessage={noItemsMessage}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
