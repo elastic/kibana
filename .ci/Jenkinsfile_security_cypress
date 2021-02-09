@@ -11,7 +11,7 @@ kibanaPipeline(timeoutMinutes: 180) {
     catchError {
       withEnv([
         'CI_PARALLEL_PROCESS_NUMBER=1',
-        'IGNORE_SHIP_CI_STATS_ERROR=true'
+        'IGNORE_SHIP_CI_STATS_ERROR=true',
       ]) {
         def job = 'xpack-securityCypress'
 
