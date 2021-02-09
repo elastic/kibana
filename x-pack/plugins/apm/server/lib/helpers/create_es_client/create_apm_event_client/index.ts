@@ -6,29 +6,29 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { unwrapEsResponse } from '../../../../../../observability/server';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import {
   ElasticsearchClient,
   KibanaRequest,
 } from '../../../../../../../../src/core/server';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../../../typings/elasticsearch';
-import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
-import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
+import { unwrapEsResponse } from '../../../../../../observability/server';
+import { ProcessorEvent } from '../../../../../common/processor_event';
+import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
-import { unpackProcessorEvents } from './unpack_processor_events';
+import { Span } from '../../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import {
   callAsyncWithDebug,
-  getDebugTitle,
   getDebugBody,
+  getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
+import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
+import { unpackProcessorEvents } from './unpack_processor_events';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -36,13 +36,15 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
 };
 
+// These keys shoul all be `ProcessorEvent.x`, but until TypeScript 4.2 we're inlining them here.
+// See https://github.com/microsoft/TypeScript/issues/37888
 type TypeOfProcessorEvent<T extends ProcessorEvent> = {
-  [ProcessorEvent.error]: APMError;
-  [ProcessorEvent.transaction]: Transaction;
-  [ProcessorEvent.span]: Span;
-  [ProcessorEvent.metric]: Metric;
-  [ProcessorEvent.onboarding]: unknown;
-  [ProcessorEvent.sourcemap]: unknown;
+  error: APMError;
+  transaction: Transaction;
+  span: Span;
+  metric: Metric;
+  onboarding: unknown;
+  sourcemap: unknown;
 }[T];
 
 type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
