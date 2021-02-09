@@ -700,7 +700,7 @@ describe('<EditPolicy />', () => {
             const { component } = testBed;
             component.update();
           });
-          test('hiding default, recommended option', async () => {
+          test('removes default, recommended option', async () => {
             const { actions, find } = testBed;
             await actions.warm.enable(true);
             actions.warm.showDataAllocationOptions();
@@ -716,8 +716,7 @@ describe('<EditPolicy />', () => {
             httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
             httpRequestsMockHelpers.setListNodes({
               nodesByAttributes: { test: ['123'] },
-              // On cloud, even if there are data_* roles set, the default, recommended allocation option should not
-              // be available.
+              // On cloud, even if there are data_* roles set, the default, recommended allocation option should *not* be available when legacy node role config is present
               nodesByRoles: { data_hot: ['123'] },
               isUsingDeprecatedDataRoleConfig: true,
             });
@@ -738,7 +737,7 @@ describe('<EditPolicy />', () => {
             const { component } = testBed;
             component.update();
           });
-          test('hiding default, recommended option', async () => {
+          test('offers default, recommended option', async () => {
             const { actions, find } = testBed;
             await actions.warm.enable(true);
             actions.warm.showDataAllocationOptions();
@@ -756,9 +755,9 @@ describe('<EditPolicy />', () => {
             // simulate creating a new policy
             httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('')]);
             httpRequestsMockHelpers.setListNodes({
-              isUsingDeprecatedDataRoleConfig: false,
               nodesByAttributes: { test: ['123'] },
               nodesByRoles: { data: ['123'] },
+              isUsingDeprecatedDataRoleConfig: false,
             });
             httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
@@ -781,9 +780,9 @@ describe('<EditPolicy />', () => {
           beforeEach(async () => {
             httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
             httpRequestsMockHelpers.setListNodes({
-              isUsingDeprecatedDataRoleConfig: false,
               nodesByAttributes: { test: ['123'] },
               nodesByRoles: { data_hot: ['123'] },
+              isUsingDeprecatedDataRoleConfig: false,
             });
             httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 

@@ -44,8 +44,6 @@ interface Props {
   description: React.ReactNode;
 }
 
-const V_8_0_0 = '8.0.0';
-
 /**
  * Top-level layout control for the data tier allocation field.
  */
@@ -55,7 +53,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
   } = useKibana();
 
   const isPreV8 = useMemo(() => {
-    return semver.lt(stackVersion, V_8_0_0);
+    return semver.lt(stackVersion, '8.0.0');
   }, [stackVersion]);
   const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
   const [formData] = useFormData({ watch: dataTierAllocationTypePath });

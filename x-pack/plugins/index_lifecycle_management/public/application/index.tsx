@@ -31,9 +31,7 @@ export const renderApp = (
 ): UnmountCallback => {
   render(
     <I18nContext>
-      <KibanaContextProvider
-        services={{ cloud, breadcrumbService, license, stackVersion: '7.12.0' }}
-      >
+      <KibanaContextProvider services={{ cloud, breadcrumbService, license, stackVersion }}>
         <AppWithRouter
           history={history}
           navigateToApp={navigateToApp}
