@@ -1,3 +1,6 @@
+/* Fixed width so we can align it with the padding of the AUC ROC chart. */
+$labelColumnWidth: 80px;
+
 /*
   Workaround for EuiDataGrid within a Flex Layout,
   this tricks browsers treating the width as a px value instead of %
@@ -22,8 +25,7 @@
 
 .mlDataFrameAnalyticsClassification__actualLabel {
   float: left;
-  /* Fixed width so we can align it with the padding of the AUC ROC chart. */
-  width: 80px;
+  width: $labelColumnWidth;
   padding-top: $euiSize * 4;
 }
 
@@ -33,7 +35,7 @@
 .mlDataFrameAnalyticsClassification__dataGridMinWidth {
   float: left;
   min-width: 480px;
-  width: calc(100% - 80px);
+  width: calc(100% - $labelColumnWidth);
 
   .euiDataGridRowCell--boolean {
     text-transform: none;
