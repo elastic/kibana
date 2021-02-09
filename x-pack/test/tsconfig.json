@@ -46,6 +46,11 @@
     { "path": "../plugins/code/tsconfig.json" },
     { "path": "../plugins/console_extensions/tsconfig.json" },
     { "path": "../plugins/dashboard_mode/tsconfig.json" },
+    { "path": "../plugins/enterprise_search/tsconfig.json" },
+    { "path": "../plugins/fleet/tsconfig.json" },
+    { "path": "../plugins/global_search/tsconfig.json" },
+    { "path": "../plugins/global_search_providers/tsconfig.json" },
+    { "path": "../plugins/features/tsconfig.json" },
     { "path": "../plugins/data_enhanced/tsconfig.json" },
     { "path": "../plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "../plugins/encrypted_saved_objects/tsconfig.json" },
@@ -77,6 +82,10 @@
     { "path": "../plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../plugins/upgrade_assistant/tsconfig.json" },
-    { "path": "../plugins/watcher/tsconfig.json" }
+    { "path": "../plugins/watcher/tsconfig.json" },
+    { "path": "../plugins/runtime_fields/tsconfig.json" },
+    { "path": "../plugins/index_management/tsconfig.json" },
+    { "path": "../plugins/watcher/tsconfig.json" },
+    { "path": "../plugins/uptime/tsconfig.json" }
   ]
 }

@@ -8,13 +8,13 @@
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { px, units } from '../../../../../../style/variables';
 
-const SpanBadge = (styled(EuiBadge)`
+const SpanBadge = euiStyled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
-` as unknown) as typeof EuiBadge;
+`;
 
 export interface SyncBadgeProps {
   /**
