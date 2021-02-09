@@ -32,9 +32,10 @@ import {
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 import { updateExceptionListItemImplementationMock } from './test_utils';
+import { Logger } from '@kbn/logging';
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
-  _version: '123',
+  _version: 'abc123',
   id: '123',
   comments: [],
   created_at: '11/11/2011T11:11:11.111',
@@ -84,11 +85,27 @@ const TRUSTED_APP: TrustedApp = {
 };
 
 describe('handlers', () => {
-  const createAppContextMock = () => ({
-    logFactory: loggingSystemMock.create(),
-    service: new EndpointAppContextService(),
-    config: () => Promise.resolve(createMockConfig()),
-  });
+  const createAppContextMock = () => {
+    const context = {
+      logFactory: loggingSystemMock.create(),
+      service: new EndpointAppContextService(),
+      config: () => Promise.resolve(createMockConfig()),
+    };
+
+    // Ensure that `logFactory.get()` always returns the same instance for the same given prefix
+    const instances = new Map<string, ReturnType<typeof context.logFactory.get>>();
+    const logFactoryGetMock = context.logFactory.get.getMockImplementation();
+    context.logFactory.get.mockImplementation(
+      (prefix): Logger => {
+        if (!instances.has(prefix)) {
+          instances.set(prefix, logFactoryGetMock!(prefix)!);
+        }
+        return instances.get(prefix)!;
+      }
+    );
+
+    return context;
+  };
 
   let appContextMock: ReturnType<typeof createAppContextMock> = createAppContextMock();
   let exceptionsListClient: jest.Mocked<ExceptionListClient> = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
@@ -117,7 +134,11 @@ describe('handlers', () => {
   });
 
   describe('getTrustedAppsDeleteRouteHandler', () => {
-    const deleteTrustedAppHandler = getTrustedAppsDeleteRouteHandler(appContextMock);
+    let deleteTrustedAppHandler: ReturnType<typeof getTrustedAppsDeleteRouteHandler>;
+
+    beforeEach(() => {
+      deleteTrustedAppHandler = getTrustedAppsDeleteRouteHandler(appContextMock);
+    });
 
     it('should return ok when trusted app deleted', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -135,6 +156,8 @@ describe('handlers', () => {
 
     it('should return notFound when trusted app missing', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
+
+      exceptionsListClient.deleteExceptionListItem.mockResolvedValue(null);
 
       await deleteTrustedAppHandler(
         createHandlerContextMock(),
@@ -163,7 +186,11 @@ describe('handlers', () => {
   });
 
   describe('getTrustedAppsCreateRouteHandler', () => {
-    const createTrustedAppHandler = getTrustedAppsCreateRouteHandler(appContextMock);
+    let createTrustedAppHandler: ReturnType<typeof getTrustedAppsCreateRouteHandler>;
+
+    beforeEach(() => {
+      createTrustedAppHandler = getTrustedAppsCreateRouteHandler(appContextMock);
+    });
 
     it('should return ok with body when trusted app created', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -197,7 +224,11 @@ describe('handlers', () => {
   });
 
   describe('getTrustedAppsListRouteHandler', () => {
-    const getTrustedAppsListHandler = getTrustedAppsListRouteHandler(appContextMock);
+    let getTrustedAppsListHandler: ReturnType<typeof getTrustedAppsListRouteHandler>;
+
+    beforeEach(() => {
+      getTrustedAppsListHandler = getTrustedAppsListRouteHandler(appContextMock);
+    });
 
     it('should return ok with list when no errors', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -241,7 +272,11 @@ describe('handlers', () => {
   });
 
   describe('getTrustedAppsSummaryHandler', () => {
-    const getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
+    let getTrustedAppsSummaryHandler: ReturnType<typeof getTrustedAppsSummaryRouteHandler>;
+
+    beforeEach(() => {
+      getTrustedAppsSummaryHandler = getTrustedAppsSummaryRouteHandler(appContextMock);
+    });
 
     it('should return ok with list when no errors', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
@@ -307,11 +342,11 @@ describe('handlers', () => {
   });
 
   describe('getTrustedAppsUpdateRouteHandler', () => {
-    const updateHandler = getTrustedAppsUpdateRouteHandler(appContextMock);
-
+    let updateHandler: ReturnType<typeof getTrustedAppsUpdateRouteHandler>;
     let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
 
     beforeEach(() => {
+      updateHandler = getTrustedAppsUpdateRouteHandler(appContextMock);
       mockResponse = httpServerMock.createResponseFactory();
     });
 
@@ -353,7 +388,7 @@ describe('handlers', () => {
             id: '123',
             name: 'linux trusted app 1',
             os: 'linux',
-            version: '123',
+            version: 'abc123',
           },
         },
       });

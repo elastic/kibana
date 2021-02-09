@@ -11,7 +11,7 @@ export const updateExceptionListItemImplementationMock: ExceptionListClient['upd
   listItem
 ) => {
   return {
-    _version: listItem._version || '123',
+    _version: listItem._version || 'abc123',
     id: listItem.id || '123',
     comments: [],
     created_at: '11/11/2011T11:11:11.111',
