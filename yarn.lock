@@ -1840,10 +1840,10 @@
   resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/lucene-parser/-/@logrhythm/lucene-parser-3.4.0.tgz#19274929b73c83713c3597febe71a0c62ff2a5e9"
   integrity sha1-GSdJKbc8g3E8NZf+vnGgxi/ypek=
 
-"@logrhythm/nm-web-shared@1.28.0":
-  version "1.28.0"
-  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/nm-web-shared/-/@logrhythm/nm-web-shared-1.28.0.tgz#bd6cca1c3720f7366b6e0c5d7eca8054471abd07"
-  integrity sha1-vWzKHDcg9zZrbgxdfsqAVEcavQc=
+"@logrhythm/nm-web-shared@1.29.0":
+  version "1.29.0"
+  resolved "https://logrhythm.jfrog.io/logrhythm/api/npm/npm-virtual/@logrhythm/nm-web-shared/-/@logrhythm/nm-web-shared-1.29.0.tgz#d133c5834702eb541341d1c1fcaae014677d7c20"
+  integrity sha1-0TPFg0cC61QTQdHB/KrgFGd9fCA=
 
 "@logrhythm/webui@^5.9.15":
   version "5.9.15"
