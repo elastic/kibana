@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -168,6 +169,7 @@ function getClusterStyleDescriptor(
 }
 
 export interface BlendedVectorLayerArguments {
+  chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
 }
@@ -204,7 +206,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       this._documentStyle,
       this._clusterSource
     );
-    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
+    this._clusterStyle = new VectorStyle(
+      clusterStyleDescriptor,
+      this._clusterSource,
+      this,
+      options.chartsPaletteServiceGetColor
+    );
 
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
@@ -316,7 +323,10 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         const abortController = new AbortController();
         syncContext.registerCancelCallback(requestToken, () => abortController.abort());
         const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-        const resp = await searchSource.fetch({ abortSignal: abortController.signal });
+        const resp = await searchSource.fetch({
+          abortSignal: abortController.signal,
+          sessionId: syncContext.dataFilters.searchSessionId,
+        });
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
         isSyncClustered = resp.hits.total > maxResultWindow;
         const countData = { isSyncClustered } as CountData;

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -39,11 +39,6 @@ describe('GroupSelection', () => {
       title: 'Vis with alias Url',
       aliasApp: 'aliasApp',
       aliasPath: '#/aliasApp',
-      disabled: true,
-      promoTooltip: {
-        description: 'Learn More',
-        link: '#/anotherUrl',
-      },
       description: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
@@ -225,41 +220,6 @@ describe('GroupSelection', () => {
       'visType-vis2',
       'visType-visWithAliasUrl',
     ]);
-  });
-
-  it('should render disabled aliases with a disabled class', () => {
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').exists()).toBe(true);
-    expect(
-      wrapper
-        .find('[data-test-subj="visType-visWithAliasUrl"]')
-        .at(1)
-        .hasClass('euiCard-isDisabled')
-    ).toBe(true);
-  });
-
-  it('should render a basic badge with link for disabled aliases with promoTooltip', () => {
-    const wrapper = mountWithIntl(
-      <GroupSelection
-        visTypesRegistry={visTypesRegistry(_visTypes as BaseVisType[])}
-        docLinks={docLinks as DocLinksStart}
-        toggleGroups={jest.fn()}
-        onVisTypeSelected={jest.fn()}
-        showExperimental={true}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="visTypeBadge"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test-subj="visTypeBadge"]').at(0).prop('tooltipContent')).toBe(
-      'Learn More'
-    );
   });
 
   it('should not show tools experimental visualizations if showExperimentalis false', () => {

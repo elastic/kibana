@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { groupBy } from 'lodash';
@@ -10,8 +11,7 @@ import React from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationInfo } from '../../../../../../../../src/core/server/elasticsearch/legacy/api_types';
+import { DeprecationInfo } from '../../../../../common/types';
 import { LevelFilterOption } from '../../types';
 
 const LocalizedOptions: { [option: string]: string } = {

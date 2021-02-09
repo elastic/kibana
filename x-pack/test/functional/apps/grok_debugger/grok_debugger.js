@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export default function ({ getService, getPageObjects }) {
@@ -11,8 +12,7 @@ export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['grokDebugger']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/84440
-  describe.skip('grok debugger app', function () {
+  describe('grok debugger app', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');

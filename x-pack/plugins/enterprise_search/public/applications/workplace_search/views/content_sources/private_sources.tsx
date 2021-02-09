@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -9,12 +10,30 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../applications/shared/licensing';
 
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
+
+import {
+  AND,
+  PRIVATE_LINK_TITLE,
+  PRIVATE_CAN_CREATE_PAGE_TITLE,
+  PRIVATE_VIEW_ONLY_PAGE_TITLE,
+  PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
+  PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
+  PRIVATE_HEADER_TITLE,
+  PRIVATE_HEADER_DESCRIPTION,
+  PRIVATE_SHARED_SOURCES_TITLE,
+  PRIVATE_EMPTY_TITLE,
+  SHARED_EMPTY_TITLE,
+  SHARED_EMPTY_DESCRIPTION,
+  LICENSE_CALLOUT_TITLE,
+  LICENSE_CALLOUT_DESCRIPTION,
+} from './constants';
 
 import { Loading } from '../../../shared/loading';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
@@ -36,17 +55,6 @@ interface SidebarLink {
   dataTestSubj?: string;
   onClick?(): void;
 }
-
-const PRIVATE_LINK_TITLE = 'Add a private content source';
-const PRIVATE_CAN_CREATE_PAGE_TITLE = 'Manage private content sources';
-const PRIVATE_VIEW_ONLY_PAGE_TITLE = 'Review Group Sources';
-const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION =
-  'Review the status of all sources shared with your Group.';
-const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION =
-  'Review the status of all connected private sources, and manage private sources for your account.';
-const PRIVATE_HEADER_TITLE = 'My private content sources';
-const PRIVATE_HEADER_DESCRIPTION = 'Private content sources are available only to you.';
-const PRIVATE_SHARED_SOURCES_TITLE = 'Shared content sources';
 
 export const PrivateSources: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
@@ -101,7 +109,7 @@ export const PrivateSources: React.FC = () => {
   const privateSourcesTable = (
     <ContentSection>
       <SourcesTable
-        showDetails={true}
+        showDetails
         onSearchableToggle={setSourceSearchability}
         sources={privateContentSources}
       />
@@ -112,7 +120,7 @@ export const PrivateSources: React.FC = () => {
     <ContentSection className="zero-state__private-sources">
       <EuiPanel className="euiPanel--inset">
         <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt iconType="lock" title={<h2>You have no private sources</h2>} />
+        <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
         <EuiSpacer size="xxl" />
       </EuiPanel>
     </ContentSection>
@@ -124,13 +132,8 @@ export const PrivateSources: React.FC = () => {
         <EuiSpacer size="xxl" />
         <EuiEmptyPrompt
           iconType={noSharedSourcesIcon}
-          title={<h2>No content source available</h2>}
-          body={
-            <p>
-              Once content sources are shared with you, they will be displayed here, and available
-              via the search experience.
-            </p>
-          }
+          title={<h2>{SHARED_EMPTY_TITLE}</h2>}
+          body={<p>{SHARED_EMPTY_DESCRIPTION}</p>}
         />
         <EuiSpacer size="xxl" />
       </EuiPanel>
@@ -140,16 +143,21 @@ export const PrivateSources: React.FC = () => {
   const hasPrivateSources = privateContentSources?.length > 0;
   const privateSources = hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState;
 
-  const groupsSentence = `${groups.slice(0, groups.length - 1).join(', ')}, and ${groups.slice(
+  const groupsSentence = `${groups.slice(0, groups.length - 1).join(', ')}, ${AND} ${groups.slice(
     -1
   )}`;
 
   const sharedSources = (
     <ContentSection
       title={PRIVATE_SHARED_SOURCES_TITLE}
-      description={`You have access to the following sources through the group${
-        groups.length === 1 ? '' : 's'
-      } ${groupsSentence}.`}
+      description={i18n.translate(
+        'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description',
+        {
+          defaultMessage:
+            'You have access to the following sources through the {groups, plural, one {group} other {groups}} {groupsSentence}.',
+          values: { groups: groups.length, groupsSentence },
+        }
+      )}
     >
       <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
     </ContentSection>
@@ -157,8 +165,8 @@ export const PrivateSources: React.FC = () => {
 
   const licenseCallout = (
     <>
-      <EuiCallOut title="Private Sources are no longer available" iconType="iInCircle">
-        <p>Contact your search experience administrator for more information.</p>
+      <EuiCallOut title={LICENSE_CALLOUT_TITLE} iconType="iInCircle">
+        <p>{LICENSE_CALLOUT_DESCRIPTION}</p>
       </EuiCallOut>
       <EuiSpacer />
     </>

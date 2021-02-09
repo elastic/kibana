@@ -223,7 +223,7 @@ experimental[] Access the Elastic Map Service files via the same mechanism:
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
@@ -237,7 +237,7 @@ format: {property: "features"}
 [[vega-with-a-map]]
 ==== Vega with a Map
 
-To enable *Maps*, the graph must specify `type=map` in the host configuration:
+experimental[] To enable *Maps*, the graph must specify `type=map` in the host configuration:
 
 [source,yaml]
 ----
@@ -251,8 +251,13 @@ To enable *Maps*, the graph must specify `type=map` in the host configuration:
       "longitude": -74,   // default 0
       "zoom": 7,          // default 2
 
-      // defaults to "default". Use false to disable base layer.
+      // Defaults to 'true', disables the base map layer.
       "mapStyle": false,
+
+      // When 'mapStyle' is 'undefined' or 'true', sets the EMS-layer for the map.
+      // May either be: "road_map", "road_map_desaturated", "dark_map".
+      // If 'emsTileServiceId' is 'undefined', it falls back to the auto-switch-dark-light behavior.
+      "emsTileServiceId": "road_map",
 
       // default 0
       "minZoom": 5,
@@ -261,7 +266,7 @@ To enable *Maps*, the graph must specify `type=map` in the host configuration:
       // or 25 when base is disabled
       "maxZoom": 13,
 
-      // defaults to true, shows +/- buttons to zoom in/out
+      // Defaults to 'true', shows +/- buttons to zoom in/out
       "zoomControl": false,
 
       // Defaults to 'false', disables mouse wheel zoom. If set to
@@ -289,7 +294,7 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
 ----
 url: {
   // "type" defaults to "elasticsearch" otherwise
-  type: emsfile
+  %type%: emsfile
   // Name of the file, exactly as in the Region map visualization
   name: World Countries
 }
@@ -335,7 +340,7 @@ Use the contextual *Inspect* tool to gain insights into different elements.
 
 [float]
 [[inspect-elasticsearch-requests]]
-======= Inspect {es} requests
+====== Inspect {es} requests
 
 *Vega* uses the {ref}/search-search.html[{es} search API] to get documents and aggregation
 results from {es}. To troubleshoot these requests, click *Inspect*, which shows the most recent requests.

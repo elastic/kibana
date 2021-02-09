@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../classes/layers/vector_layer/vector_layer', () => {});
@@ -10,11 +11,6 @@ jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {
 jest.mock('../classes/layers/heatmap_layer/heatmap_layer', () => {});
 jest.mock('../classes/layers/vector_tile_layer/vector_tile_layer', () => {});
 jest.mock('../classes/joins/inner_join', () => {});
-jest.mock('../reducers/non_serializable_instances', () => ({
-  getInspectorAdapters: () => {
-    return {};
-  },
-}));
 jest.mock('../kibana_services', () => ({
   getTimeFilter: () => ({
     getTime: () => {

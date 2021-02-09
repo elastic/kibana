@@ -1,13 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT } from './constants';
+
+interface Props {
+  ariaLabel: string;
+  text: string;
+}
 
 const OuterContainer = styled.div`
   width: 100%;
@@ -49,14 +55,14 @@ export const getChunks = (text: string) => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ text }: { text: string }) => {
+export const MiddleTruncatedText = ({ ariaLabel, text }: Props) => {
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
 
   return (
     <>
-      <OuterContainer>
+      <OuterContainer aria-label={ariaLabel} data-test-subj="middleTruncatedTextContainer">
         <EuiScreenReaderOnly>
           <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
         </EuiScreenReaderOnly>

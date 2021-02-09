@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { DeprecationInfo } from '../../../../src/core/server/elasticsearch/legacy/api_types';
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
@@ -165,6 +164,23 @@ export interface UpgradeAssistantTelemetrySavedObjectAttributes {
   [key: string]: any;
 }
 
+export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
+export interface DeprecationInfo {
+  level: MIGRATION_DEPRECATION_LEVEL;
+  message: string;
+  url: string;
+  details?: string;
+}
+
+export interface IndexSettingsDeprecationInfo {
+  [indexName: string]: DeprecationInfo[];
+}
+export interface DeprecationAPIResponse {
+  cluster_settings: DeprecationInfo[];
+  ml_settings: DeprecationInfo[];
+  node_settings: DeprecationInfo[];
+  index_settings: IndexSettingsDeprecationInfo;
+}
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;

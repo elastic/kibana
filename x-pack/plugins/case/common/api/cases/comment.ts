@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -38,6 +39,14 @@ export const CommentRequestRt = ContextBasicRt;
 
 export const CommentResponseRt = rt.intersection([
   CommentAttributesRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
+export const CommentResponseTypeAlertsRt = rt.intersection([
+  AttributesTypeAlertsRt,
   rt.type({
     id: rt.string,
     version: rt.string,
@@ -83,6 +92,7 @@ export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
+export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
 export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;

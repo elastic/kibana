@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -106,7 +107,7 @@ describe('CaseView ', () => {
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
 
   const data = caseProps.caseData;
   const defaultGetCase = {
@@ -143,8 +144,11 @@ describe('CaseView ', () => {
 
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
-    usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
+    usePostPushToServiceMock.mockImplementation(() => ({
+      isLoading: false,
+      pushCaseToExternalService,
+    }));
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useQueryAlertsMock.mockImplementation(() => ({
       loading: false,
       data: { hits: { hits: alertsHit } },
@@ -377,7 +381,7 @@ describe('CaseView ', () => {
 
       wrapper.update();
 
-      expect(postPushToService).toHaveBeenCalled();
+      expect(pushCaseToExternalService).toHaveBeenCalled();
     });
   });
 
@@ -507,7 +511,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowITSM,
                 fields: null,
               },
             }}
@@ -555,7 +559,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowITSM,
                 fields: null,
               },
             }}
@@ -703,6 +707,40 @@ describe('CaseView ', () => {
       const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('settings');
       expect(updateObject.updateValue).toEqual({ syncAlerts: false });
+    });
+  });
+
+  describe('Callouts', () => {
+    it('it shows the danger callout when a connector has been deleted', async () => {
+      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent {...caseProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeTruthy();
+      });
+    });
+
+    it('it does NOT shows the danger callout when connectors are loading', async () => {
+      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: true }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent {...caseProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeFalsy();
+      });
     });
   });
 });

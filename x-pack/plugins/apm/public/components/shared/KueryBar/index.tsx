@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { startsWith, uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   esKuery,
   IIndexPattern,
@@ -23,7 +24,7 @@ import { getBoolFilter } from './get_bool_filter';
 import { Typeahead } from './Typeahead';
 import { useProcessorEvent } from './use_processor_event';
 
-const Container = styled.div`
+const Container = euiStyled.div`
   margin-bottom: 10px;
 `;
 

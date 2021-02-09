@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
@@ -17,6 +18,7 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import { UrlForwardingSetup } from '../../../../src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
@@ -38,8 +40,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
-import { PLUGIN_ID_OSS } from '../../../../src/plugins/lens_oss/common/constants';
+import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
@@ -72,6 +73,7 @@ export interface LensPluginStartDependencies {
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export interface LensPublicStart {
@@ -173,8 +175,14 @@ export class LensPlugin {
       return deps.dashboard.dashboardFeatureFlagConfig;
     };
 
+    const getPresentationUtilContext = async () => {
+      const [, deps] = await core.getStartServices();
+      const { ContextProvider } = deps.presentationUtil;
+      return ContextProvider;
+    };
+
     core.application.register({
-      id: 'lens',
+      id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
@@ -184,6 +192,7 @@ export class LensPlugin {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
           getByValueFeatureFlag,
+          getPresentationUtilContext,
         });
       },
     });
@@ -208,8 +217,6 @@ export class LensPlugin {
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
     const frameStart = this.editorFrameService.start(core, startDependencies);
     this.createEditorFrame = frameStart.createInstance;
-    // unregisters the OSS alias
-    startDependencies.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);

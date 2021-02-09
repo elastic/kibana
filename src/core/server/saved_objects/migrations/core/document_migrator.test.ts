@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockUuidv5 } from './__mocks__';
@@ -204,20 +204,6 @@ describe('DocumentMigrator', () => {
       expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
       );
-    });
-
-    it('coerces the current Kibana version if it has a hyphen', () => {
-      const validDefinition = {
-        kibanaVersion: '3.2.0-SNAPSHOT',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.2.0',
-          namespaceType: 'multiple',
-        }),
-        minimumConvertVersion: '0.0.0',
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(validDefinition)).not.toThrowError();
     });
 
     it('validates convertToMultiNamespaceTypeVersion is not used on a patch version', () => {

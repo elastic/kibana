@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -40,14 +41,14 @@ describe('PATCH comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1].comment).toEqual(
       'Update my comment'
@@ -70,14 +71,14 @@ describe('PATCH comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1].alertId).toEqual(
       'new-id'
@@ -101,14 +102,14 @@ describe('PATCH comment', () => {
         body: requestAttributes,
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -129,14 +130,14 @@ describe('PATCH comment', () => {
         },
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -160,14 +161,14 @@ describe('PATCH comment', () => {
         body: requestAttributes,
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -189,14 +190,14 @@ describe('PATCH comment', () => {
         },
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -218,14 +219,14 @@ describe('PATCH comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
     expect(response.payload.message).toEqual('You cannot change the type of the comment.');
@@ -246,14 +247,14 @@ describe('PATCH comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(409);
   });
 
@@ -272,14 +273,14 @@ describe('PATCH comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
     expect(response.payload.isBoom).toEqual(true);
   });

@@ -34,7 +34,7 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   indexPatternManagement: 154222
-  infra: 197873
+  infra: 204800
   fleet: 415829
   ingestPipelines: 58003
   inputControlVis: 172675
@@ -44,7 +44,6 @@ pageLoadAssetSize:
   kibanaReact: 161921
   kibanaUtils: 198829
   lens: 96624
-  lensOss: 19341
   licenseManagement: 41817
   licensing: 39008
   lists: 202261
@@ -53,9 +52,8 @@ pageLoadAssetSize:
   maps: 183610
   mapsLegacy: 116817
   mapsLegacyLicensing: 20214
-  mapsOss: 19284
   ml: 82187
-  monitoring: 50000
+  monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   observability: 89709
@@ -80,7 +78,7 @@ pageLoadAssetSize:
   tileMap: 65337
   timelion: 29920
   transform: 41007
-  triggersActionsUi: 170001
+  triggersActionsUi: 186732
   uiActions: 97717
   uiActionsEnhanced: 313011
   upgradeAssistant: 81241
@@ -105,4 +103,5 @@ pageLoadAssetSize:
   stackAlerts: 29684
   presentationUtil: 28545
   spacesOss: 18817
+  osquery: 107090
   mapsFileUpload: 23775

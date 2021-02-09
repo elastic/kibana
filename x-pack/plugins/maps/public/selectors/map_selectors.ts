@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
@@ -17,7 +18,10 @@ import { VectorStyle } from '../classes/styles/vector/vector_style';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
 import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  getChartsPaletteServiceGetColor,
+  getInspectorAdapters,
+} from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 import { InnerJoin } from '../classes/joins/inner_join';
@@ -54,7 +58,8 @@ import { ILayer } from '../classes/layers/layer';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters?: Adapters
+  inspectorAdapters?: Adapters,
+  chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -74,6 +79,7 @@ export function createLayerInstance(
         layerDescriptor: vectorLayerDescriptor,
         source: source as IVectorSource,
         joins,
+        chartsPaletteServiceGetColor,
       });
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
@@ -83,6 +89,7 @@ export function createLayerInstance(
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        chartsPaletteServiceGetColor,
       });
     case TiledVectorLayer.type:
       return new TiledVectorLayer({
@@ -169,6 +176,9 @@ export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.ma
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
+export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
+  map.mapState.searchSessionId;
+
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
@@ -220,7 +230,17 @@ export const getDataFilters = createSelector(
   getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
-  (mapExtent, mapBuffer, mapZoom, timeFilters, refreshTimerLastTriggeredAt, query, filters) => {
+  getSearchSessionId,
+  (
+    mapExtent,
+    mapBuffer,
+    mapZoom,
+    timeFilters,
+    refreshTimerLastTriggeredAt,
+    query,
+    filters,
+    searchSessionId
+  ) => {
     return {
       extent: mapExtent,
       buffer: mapBuffer,
@@ -229,6 +249,7 @@ export const getDataFilters = createSelector(
       refreshTimerLastTriggeredAt,
       query,
       filters,
+      searchSessionId,
     };
   }
 );
@@ -280,9 +301,10 @@ export const getSpatialFiltersLayer = createSelector(
 export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
-  (layerDescriptorList, inspectorAdapters) => {
+  getChartsPaletteServiceGetColor,
+  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor) => {
     return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(layerDescriptor, inspectorAdapters)
+      createLayerInstance(layerDescriptor, inspectorAdapters, chartsPaletteServiceGetColor)
     );
   }
 );

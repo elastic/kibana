@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
@@ -38,7 +39,7 @@ describe('TaskManagerPlugin', () => {
       pluginInitializerContext.env.instanceUuid = '';
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      expect(taskManagerPlugin.setup(coreMock.createSetup())).rejects.toEqual(
+      expect(() => taskManagerPlugin.setup(coreMock.createSetup())).toThrow(
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
       );
     });

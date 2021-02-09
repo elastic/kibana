@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiPageContent, EuiSteps, EuiText, EuiLink, EuiCallOut } from '@elastic/eui';
 
-import { CLOUD_DOCS_PREFIX, ENT_SEARCH_DOCS_PREFIX } from '../../constants';
+import { docLinks } from '../../doc_links';
 
 interface Props {
   productName: string;
@@ -34,10 +35,16 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   values={{
                     editDeploymentLink: cloudDeploymentLink ? (
                       <EuiLink href={cloudDeploymentLink + '/edit'} target="_blank">
-                        edit your deployment
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1LinkText',
+                          { defaultMessage: 'edit your deployment' }
+                        )}
                       </EuiLink>
                     ) : (
-                      'Visit the Elastic Cloud console'
+                      i18n.translate(
+                        'xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1LinkText',
+                        { defaultMessage: 'edit your deployment' }
+                      )
                     ),
                   }}
                 />
@@ -73,10 +80,13 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   values={{
                     optionsLink: (
                       <EuiLink
-                        href={`${ENT_SEARCH_DOCS_PREFIX}/configuration.html`}
+                        href={`${docLinks.enterpriseSearchBase}/configuration.html`}
                         target="_blank"
                       >
-                        configurable options
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.setupGuide.cloud.step3.instruction1LinkText',
+                          { defaultMessage: 'configurable options' }
+                        )}
                       </EuiLink>
                     ),
                   }}
@@ -115,10 +125,13 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                     productName,
                     configurePolicyLink: (
                       <EuiLink
-                        href={`${CLOUD_DOCS_PREFIX}/ec-configure-index-management.html`}
+                        href={`${docLinks.cloudBase}/ec-configure-index-management.html`}
                         target="_blank"
                       >
-                        configure an index lifecycle policy
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.setupGuide.cloud.step5.instruction1LinkText',
+                          { defaultMessage: 'configure an index lifecycle policy' }
+                        )}
                       </EuiLink>
                     ),
                   }}
