@@ -34,10 +34,9 @@ Plugins have access to three kinds of public services:
 We try to put only the most stable and fundamental code into `Core`, while more application focused functionality goes in a plugin, but the heuristic isn't
 clear, and we haven't done a great job of sticking to it. For example, notifications and toasts are core services, but data and search are plugin services.
 
-Today it looks like the left, where we should probably be closer to the diagram on the right. Core should be an implementation detail of the platform, and plugins 
-shouldn't need to understand the difference.
+Today it looks something like this.
 
-![Core vs platform plugins](assets/platform_core.png)
+![Core vs platform plugins vs plugins](assets/platform_plugins_core.png)
  
 <DocAccordion buttonContent="A bit of history">
 When the Kibana platform and plugin infrastructure was built, we thought of two types of code: core services, and other plugin services. We planned to keep the most stable and fundamental 
