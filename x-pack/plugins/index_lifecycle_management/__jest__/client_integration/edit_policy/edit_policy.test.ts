@@ -986,10 +986,11 @@ describe('<EditPolicy />', () => {
       const { actions } = testBed;
 
       await actions.cold.enable(true);
-      // form should exit pristine state
-      await actions.cold.setSearchableSnapshot('123');
       // introduce validation error
       await actions.cold.setSearchableSnapshot('');
+      runTimers();
+
+      await actions.savePolicy();
       runTimers();
 
       expect(actions.hasGlobalErrorCallout()).toBe(true);
