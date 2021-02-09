@@ -24,6 +24,7 @@ import {
 } from '../../../common/types/alerts';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
+import { MlJobsResponse } from '../../../common/types/job_service';
 
 function isDefined<T>(argument: T | undefined | null): argument is T {
   return argument !== undefined && argument !== null;
@@ -265,7 +266,9 @@ export function alertingServiceProvider(mlClient: MlClient) {
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).body.jobs;
+    const jobsResponse = (
+      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
+    ).body.jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
