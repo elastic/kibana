@@ -59,6 +59,7 @@ export function FieldIcon({
   ...rest
 }: FieldIconProps) {
   const token = typeToEuiIconMap[type] || defaultIcon;
+
   return (
     <EuiToken
       {...token}

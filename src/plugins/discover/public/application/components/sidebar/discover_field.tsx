@@ -225,28 +225,28 @@ export function DiscoverField({
   }
 
   const getFieldInfoIcon = () => {
-    if (field.type === 'conflict') {
-      return (
-        <EuiToolTip
-          position="bottom"
-          content={i18n.translate('discover.field.mappingConflict', {
-            defaultMessage:
-              'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
-              'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
-          })}
-        >
-          <EuiIcon
-            tabIndex={0}
-            type="alert"
-            title={i18n.translate('discover.field.mappingConflict.title', {
-              defaultMessage: 'Mapping Conflict',
-            })}
-            size="s"
-          />
-        </EuiToolTip>
-      );
+    if (field.type !== 'conflict') {
+      return null;
     }
-    return null;
+    return (
+      <EuiToolTip
+        position="bottom"
+        content={i18n.translate('discover.field.mappingConflict', {
+          defaultMessage:
+            'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
+            'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+        })}
+      >
+        <EuiIcon
+          tabIndex={0}
+          type="alert"
+          title={i18n.translate('discover.field.mappingConflict.title', {
+            defaultMessage: 'Mapping Conflict',
+          })}
+          size="s"
+        />
+      </EuiToolTip>
+    );
   };
 
   const fieldInfoIcon = getFieldInfoIcon();
