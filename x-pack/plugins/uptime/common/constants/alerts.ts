@@ -7,23 +7,33 @@
 
 import { ActionGroup } from '../../../alerts/common';
 
+export type MonitorStatusActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.monitorStatus'>;
+export type TLSActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.tls'>;
+export type DurationAnomalyActionGroup = ActionGroup<'xpack.uptime.alerts.actionGroups.durationAnomaly'>;
+
+export const MONITOR_STATUS: MonitorStatusActionGroup = {
+  id: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+  name: 'Uptime Down Monitor',
+};
+
+export const TLS: TLSActionGroup = {
+  id: 'xpack.uptime.alerts.actionGroups.tls',
+  name: 'Uptime TLS Alert',
+};
+
+export const DURATION_ANOMALY: DurationAnomalyActionGroup = {
+  id: 'xpack.uptime.alerts.actionGroups.durationAnomaly',
+  name: 'Uptime Duration Anomaly',
+};
+
 export const ACTION_GROUP_DEFINITIONS: {
-  MONITOR_STATUS: ActionGroup<'xpack.uptime.alerts.actionGroups.monitorStatus'>;
-  TLS: ActionGroup<'xpack.uptime.alerts.actionGroups.tls'>;
-  DURATION_ANOMALY: ActionGroup<'xpack.uptime.alerts.actionGroups.durationAnomaly'>;
+  MONITOR_STATUS: MonitorStatusActionGroup;
+  TLS: TLSActionGroup;
+  DURATION_ANOMALY: DurationAnomalyActionGroup;
 } = {
-  MONITOR_STATUS: {
-    id: 'xpack.uptime.alerts.actionGroups.monitorStatus',
-    name: 'Uptime Down Monitor',
-  },
-  TLS: {
-    id: 'xpack.uptime.alerts.actionGroups.tls',
-    name: 'Uptime TLS Alert',
-  },
-  DURATION_ANOMALY: {
-    id: 'xpack.uptime.alerts.actionGroups.durationAnomaly',
-    name: 'Uptime Duration Anomaly',
-  },
+  MONITOR_STATUS,
+  TLS,
+  DURATION_ANOMALY,
 };
 
 export const CLIENT_ALERT_TYPES = {
