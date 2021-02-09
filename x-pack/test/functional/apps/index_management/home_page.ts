@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await reloadIndicesButton.isDisplayed()).to.be(true);
     });
 
-    describe.only('Data streams', () => {
+    describe('Data streams', () => {
       it('renders the data streams tab', async () => {
         // Navigate to the data streams tab
         await pageObjects.indexManagement.changeTabs('data_streamsTab');
