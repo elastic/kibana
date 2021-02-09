@@ -17,7 +17,10 @@ import { VectorStyle } from '../classes/styles/vector/vector_style';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer';
 import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  getChartsPaletteServiceGetColor,
+  getInspectorAdapters,
+} from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 import { InnerJoin } from '../classes/joins/inner_join';
@@ -56,7 +59,8 @@ import { ILayer } from '../classes/layers/layer';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters?: Adapters
+  inspectorAdapters?: Adapters,
+  chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -76,6 +80,7 @@ export function createLayerInstance(
         layerDescriptor: vectorLayerDescriptor,
         source: source as IVectorSource,
         joins,
+        chartsPaletteServiceGetColor,
       });
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
@@ -88,6 +93,7 @@ export function createLayerInstance(
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        chartsPaletteServiceGetColor,
       });
     case TiledVectorLayer.type:
       return new TiledVectorLayer({
@@ -299,9 +305,10 @@ export const getSpatialFiltersLayer = createSelector(
 export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
-  (layerDescriptorList, inspectorAdapters) => {
+  getChartsPaletteServiceGetColor,
+  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor) => {
     return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(layerDescriptor, inspectorAdapters)
+      createLayerInstance(layerDescriptor, inspectorAdapters, chartsPaletteServiceGetColor)
     );
   }
 );

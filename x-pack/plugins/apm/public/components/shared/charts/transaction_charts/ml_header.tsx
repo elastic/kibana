@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { MLSingleMetricLink } from '../../Links/MachineLearningLinks/MLSingleMetricLink';
@@ -20,14 +20,14 @@ interface Props {
   mlJobId?: string;
 }
 
-const ShiftedIconWrapper = styled.span`
+const ShiftedIconWrapper = euiStyled.span`
   padding-right: 5px;
   position: relative;
   top: -1px;
   display: inline-block;
 `;
 
-const ShiftedEuiText = styled(EuiText)`
+const ShiftedEuiText = euiStyled(EuiText)`
   position: relative;
   top: 5px;
 `;

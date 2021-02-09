@@ -11,11 +11,6 @@ jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {
 jest.mock('../classes/layers/heatmap_layer', () => {});
 jest.mock('../classes/layers/vector_tile_layer/vector_tile_layer', () => {});
 jest.mock('../classes/joins/inner_join', () => {});
-jest.mock('../reducers/non_serializable_instances', () => ({
-  getInspectorAdapters: () => {
-    return {};
-  },
-}));
 jest.mock('../kibana_services', () => ({
   getTimeFilter: () => ({
     getTime: () => {

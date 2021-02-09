@@ -178,7 +178,8 @@ export class VectorStyle implements IVectorStyle {
   constructor(
     descriptor: VectorStyleDescriptor | null,
     source: IVectorSource,
-    layer: IVectorLayer
+    layer: IVectorLayer,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     this._source = source;
     this._layer = layer;
@@ -197,11 +198,13 @@ export class VectorStyle implements IVectorStyle {
     );
     this._lineColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_COLOR],
-      VECTOR_STYLES.LINE_COLOR
+      VECTOR_STYLES.LINE_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._fillColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.FILL_COLOR],
-      VECTOR_STYLES.FILL_COLOR
+      VECTOR_STYLES.FILL_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._lineWidthStyleProperty = this._makeSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LINE_WIDTH],
@@ -230,11 +233,13 @@ export class VectorStyle implements IVectorStyle {
     );
     this._labelColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR],
-      VECTOR_STYLES.LABEL_COLOR
+      VECTOR_STYLES.LABEL_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._labelBorderColorStyleProperty = this._makeColorProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_COLOR],
-      VECTOR_STYLES.LABEL_BORDER_COLOR
+      VECTOR_STYLES.LABEL_BORDER_COLOR,
+      chartsPaletteServiceGetColor
     );
     this._labelBorderSizeStyleProperty = new LabelBorderSizeProperty(
       this._descriptor.properties[VECTOR_STYLES.LABEL_BORDER_SIZE].options,
@@ -890,7 +895,8 @@ export class VectorStyle implements IVectorStyle {
 
   _makeColorProperty(
     descriptor: ColorStylePropertyDescriptor | undefined,
-    styleName: VECTOR_STYLES
+    styleName: VECTOR_STYLES,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
   ) {
     if (!descriptor || !descriptor.options) {
       return new StaticColorProperty({ color: '' }, styleName);
@@ -904,7 +910,8 @@ export class VectorStyle implements IVectorStyle {
         styleName,
         field,
         this._layer,
-        this._getFieldFormatter
+        this._getFieldFormatter,
+        chartsPaletteServiceGetColor
       );
     } else {
       throw new Error(`${descriptor} not implemented`);
