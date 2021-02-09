@@ -15,7 +15,6 @@ import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_i
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
   const { addCluster, deleteAllClusters } = registerRemoteClustersHelpers(supertest);
   const {
@@ -26,7 +25,7 @@ export default function ({ getService }) {
     unfollowAll,
   } = registerFollowerIndicesnHelpers(supertest);
 
-  const { createIndex, deleteAllIndices } = registerElasticSearchHelpers(es);
+  const { createIndex, deleteAllIndices } = registerElasticSearchHelpers(getService);
 
   describe('follower indices', function () {
     this.tags(['skipCloud']);

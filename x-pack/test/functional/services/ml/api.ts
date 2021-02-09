@@ -40,6 +40,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
   const kbnSupertest = getService('supertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
     async hasJobResults(jobId: string): Promise<boolean> {
@@ -165,7 +166,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async cleanMlIndices() {
-      await this.deleteIndices('.ml-*');
+      await esDeleteAllIndices('.ml-*');
     },
 
     async getJobState(jobId: string): Promise<JOB_STATE> {

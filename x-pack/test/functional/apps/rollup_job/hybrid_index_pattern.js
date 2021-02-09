@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
@@ -108,9 +109,12 @@ export default function ({ getService, getPageObjects }) {
         method: 'DELETE',
       });
 
-      await es.indices.delete({ index: rollupTargetIndexName });
-      await es.indices.delete({ index: `${regularIndexPrefix}*` });
-      await es.indices.delete({ index: `${rollupSourceIndexPrefix}*` });
+      await esDeleteAllIndices([
+        rollupTargetIndexName,
+        `${regularIndexPrefix}*`,
+        `${rollupSourceIndexPrefix}*`,
+      ]);
+
       await esArchiver.load('empty_kibana');
     });
   });
