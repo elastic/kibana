@@ -17,7 +17,6 @@ import {
   FormHook,
   UseField,
   TextField,
-  useFormData,
   RuntimeType,
   IndexPattern,
   DataPublicPluginStart,
@@ -27,7 +26,6 @@ import { Field, InternalFieldType, PluginStart } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
 import { getNameFieldConfig } from './lib';
-import { ShadowingFieldWarning } from './shadowing_field_warning';
 import {
   TypeField,
   CustomLabelField,
@@ -171,10 +169,8 @@ const FieldEditorComponent = ({
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted } = form;
-  const [{ name }] = useFormData<FieldFormInternal>({ form, watch: 'name' });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
-  const isShadowingField = existingConcreteFields.find((_field) => _field.name === name);
   const i18nTexts = geti18nTexts();
 
   useEffect(() => {
@@ -209,13 +205,6 @@ const FieldEditorComponent = ({
           <TypeField isDisabled={fieldTypeToProcess === 'concrete'} />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {isShadowingField && (
-        <>
-          <EuiSpacer />
-          <ShadowingFieldWarning />
-        </>
-      )}
 
       <EuiSpacer size="xl" />
 
