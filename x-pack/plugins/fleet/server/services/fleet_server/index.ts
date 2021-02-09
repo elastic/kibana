@@ -34,6 +34,11 @@ export async function startFleetServerSetup() {
     _onResolve = resolve;
   });
   const logger = appContextService.getLogger();
+  if (!appContextService.hasSecurity()) {
+    // Fleet will not work if security is not enabled
+    logger?.warn('Fleet need the security plugin to be enabled.');
+    return;
+  }
 
   try {
     // We need licence to be initialized before using the SO service.
