@@ -35,25 +35,20 @@ export const SpanWithMargin = styled.span`
 const DEFAULT_PAGE_SIZE = 10;
 
 // one second = 1 million micros
-const SECOND_AS_MICROS = 1000000;
+const ONE_SECOND_AS_MICROS = 1000000;
+
+// the limit for converting to seconds is >= 10 sec
+const MILLIS_LIMIT = ONE_SECOND_AS_MICROS * 10;
 
 export const formatDuration = (durationMicros: number) => {
-  if (durationMicros < SECOND_AS_MICROS) {
+  if (durationMicros < MILLIS_LIMIT) {
     return i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
       values: { millis: microsToMillis(durationMicros) },
       defaultMessage: '{millis} ms',
     });
   }
-  const seconds = (durationMicros / SECOND_AS_MICROS).toFixed(0);
+  const seconds = (durationMicros / ONE_SECOND_AS_MICROS).toFixed(0);
 
-  // we don't handle this case for millis because it's very unlikely, but for
-  // seconds we could frequently see incorrect plurality
-  if (seconds === '1') {
-    return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting.singular', {
-      values: { seconds },
-      defaultMessage: '{seconds} second',
-    });
-  }
   return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting', {
     values: { seconds },
     defaultMessage: '{seconds} seconds',
