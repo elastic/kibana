@@ -12,6 +12,7 @@ import { getShowMapsInspectorAdapter } from '../kibana_services';
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
 const SET_EVENT_HANDLERS = 'SET_EVENT_HANDLERS';
+const SET_CHARTS_PALETTE_SERVICE_GET_COLOR = 'SET_CHARTS_PALETTE_SERVICE_GET_COLOR';
 
 function createInspectorAdapters() {
   const inspectorAdapters = {
@@ -30,6 +31,7 @@ export function nonSerializableInstances(state, action = {}) {
       inspectorAdapters: createInspectorAdapters(),
       cancelRequestCallbacks: new Map(), // key is request token, value is cancel callback
       eventHandlers: {},
+      chartsPaletteServiceGetColor: null,
     };
   }
 
@@ -50,6 +52,12 @@ export function nonSerializableInstances(state, action = {}) {
         eventHandlers: action.eventHandlers,
       };
     }
+    case SET_CHARTS_PALETTE_SERVICE_GET_COLOR: {
+      return {
+        ...state,
+        chartsPaletteServiceGetColor: action.chartsPaletteServiceGetColor,
+      };
+    }
     default:
       return state;
   }
@@ -67,6 +75,11 @@ export const getCancelRequestCallbacks = ({ nonSerializableInstances }) => {
 export const getEventHandlers = ({ nonSerializableInstances }) => {
   return nonSerializableInstances.eventHandlers;
 };
+
+export function getChartsPaletteServiceGetColor({ nonSerializableInstances }) {
+  console.log('getChartsPaletteServiceGetColor', nonSerializableInstances);
+  return nonSerializableInstances.chartsPaletteServiceGetColor;
+}
 
 // Actions
 export const registerCancelCallback = (requestToken, callback) => {
@@ -104,3 +117,10 @@ export const setEventHandlers = (eventHandlers = {}) => {
     eventHandlers,
   };
 };
+
+export function setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor) {
+  return {
+    type: SET_CHARTS_PALETTE_SERVICE_GET_COLOR,
+    chartsPaletteServiceGetColor,
+  };
+}
