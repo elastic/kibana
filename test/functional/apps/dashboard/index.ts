@@ -81,6 +81,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
       // If we don't use the timestamp in the URL, the colors in the charts will be different.
       loadTestFile(require.resolve('./dashboard_snapshots'));
+      loadTestFile(require.resolve('./embeddable_library'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
