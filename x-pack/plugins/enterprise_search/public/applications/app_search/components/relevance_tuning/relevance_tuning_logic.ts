@@ -377,15 +377,14 @@ export const RelevanceTuningLogic = kea<
     },
     toggleSearchField: ({ name, disableField }) => {
       const { searchSettings } = values;
-      const { search_fields: searchFields } = searchSettings;
+
+      const searchFields = disableField
+        ? omit(searchSettings.search_fields, name)
+        : { ...searchSettings.search_fields, [name]: { weight: 1 } };
 
       actions.setSearchSettings({
         ...searchSettings,
-        boosts: searchSettings.boosts,
-        search_fields: {
-          ...omit(searchFields, name),
-          ...(!disableField && { [name]: { weight: 1 } }),
-        },
+        search_fields: searchFields,
       });
     },
     updateFieldWeight: ({ name, weight }) => {
@@ -394,7 +393,6 @@ export const RelevanceTuningLogic = kea<
 
       actions.setSearchSettings({
         ...searchSettings,
-        boosts: searchSettings.boosts,
         search_fields: {
           ...searchFields,
           [name]: {
