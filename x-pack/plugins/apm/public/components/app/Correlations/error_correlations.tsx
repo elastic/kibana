@@ -29,6 +29,7 @@ import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields } from './custom_fields';
 import { useFieldNames } from './useFieldNames';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
+import { useUiTracker } from '../../../../../observability/public';
 
 type CorrelationsApiResponse = NonNullable<
   APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -86,6 +87,9 @@ export function ErrorCorrelations({ onClose }: Props) {
       fieldNames,
     ]
   );
+
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+  trackApmEvent({ metric: 'view_errors_correlations' });
 
   return (
     <>

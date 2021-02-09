@@ -125,6 +125,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
               },
             });
             onFilter();
+            trackApmEvent({ metric: 'correlations_term_include_filter' });
           },
         },
         {
@@ -147,6 +148,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
               },
             });
             onFilter();
+            trackApmEvent({ metric: 'correlations_term_exclude_filter' });
           },
         },
       ],
