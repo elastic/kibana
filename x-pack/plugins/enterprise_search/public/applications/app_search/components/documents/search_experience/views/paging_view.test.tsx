@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { shallow } from 'enzyme';
+
 import { EuiPagination } from '@elastic/eui';
 
 import { PagingView } from './paging_view';

@@ -15,6 +15,7 @@ import { MAP_DESTROYED } from '../actions';
 export const DEFAULT_MAP_STORE_STATE = {
   ui: { ...DEFAULT_MAP_UI_STATE },
   map: { ...DEFAULT_MAP_STATE },
+  nonSerializableInstances: {},
 };
 
 export function createMapStore() {

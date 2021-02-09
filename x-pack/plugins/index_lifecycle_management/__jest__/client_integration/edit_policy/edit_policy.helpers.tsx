@@ -278,7 +278,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       savePolicy,
       hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
       timeline: {
-        hasRolloverIndicator: () => exists('timelineHotPhaseRolloverToolTip'),
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),

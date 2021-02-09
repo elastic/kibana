@@ -6,10 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions } from 'kea';
-import { useLocation } from 'react-router-dom';
 
 import { Loading } from '../../../../shared/loading';
 
