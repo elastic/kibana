@@ -260,13 +260,11 @@ export class SessionService {
    */
   public getSearchOptions(
     sessionId: string
-  ):
-    | Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>>
-    | { sessionId: undefined } {
+  ): Required<Pick<ISearchOptions, 'isRestore' | 'isStored'>> & { sessionId?: string } {
     // in case user doesn't have permissions to search session, do not forward sessionId to the server
     // because user most likely also doesn't have access to `background-session` SO
     if (!this.searchSessionsCapabilities?.create) {
-      return { sessionId: undefined };
+      return { sessionId: undefined, isRestore: false, isStored: false };
     }
 
     const isCurrentSession = this.isCurrentSession(sessionId);
