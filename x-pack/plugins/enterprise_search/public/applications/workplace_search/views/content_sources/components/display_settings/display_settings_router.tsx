@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-
-import { useValues } from 'kea';
 import { Route, Switch } from 'react-router-dom';
 
-import { AppLogic } from '../../../../app_logic';
+import { useValues } from 'kea';
 
+import { AppLogic } from '../../../../app_logic';
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
