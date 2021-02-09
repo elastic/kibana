@@ -103,6 +103,9 @@ export const createCaseAction = async (supertest: st.SuperTest<supertestAsPromis
   return createdAction.id;
 };
 
+/**
+ * Remove a connector
+ */
 export const deleteCaseAction = async (
   supertest: st.SuperTest<supertestAsPromised.Test>,
   id: string
