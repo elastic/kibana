@@ -64,18 +64,18 @@ describe('RollingFileAppender', () => {
   describe('`size-limit` policy with `numeric` strategy', () => {
     it('rolls the log file in the correct order', async () => {
       root = createRoot({
-        kind: 'rolling-file',
+        type: 'rolling-file',
         path: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'size-limit',
+          type: 'size-limit',
           size: '100b',
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 5,
           pattern: '.%i',
         },
@@ -109,18 +109,18 @@ describe('RollingFileAppender', () => {
 
     it('only keep the correct number of files', async () => {
       root = createRoot({
-        kind: 'rolling-file',
+        type: 'rolling-file',
         path: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'size-limit',
+          type: 'size-limit',
           size: '60b',
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 2,
           pattern: '-%i',
         },
@@ -158,19 +158,19 @@ describe('RollingFileAppender', () => {
   describe('`time-interval` policy with `numeric` strategy', () => {
     it('rolls the log file at the given interval', async () => {
       root = createRoot({
-        kind: 'rolling-file',
+        type: 'rolling-file',
         path: logFile,
         layout: {
-          kind: 'pattern',
+          type: 'pattern',
           pattern: '%message',
         },
         policy: {
-          kind: 'time-interval',
+          type: 'time-interval',
           interval: '1s',
           modulate: true,
         },
         strategy: {
-          kind: 'numeric',
+          type: 'numeric',
           max: 2,
           pattern: '-%i',
         },

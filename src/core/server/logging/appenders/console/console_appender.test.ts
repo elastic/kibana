@@ -12,7 +12,7 @@ jest.mock('../../layouts/layouts', () => {
   return {
     Layouts: {
       configSchema: schema.object({
-        kind: schema.literal('mock'),
+        type: schema.literal('mock'),
       }),
     },
   };
@@ -23,16 +23,16 @@ import { ConsoleAppender } from './console_appender';
 
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = ConsoleAppender.configSchema;
-  const validConfig = { kind: 'console', layout: { kind: 'mock' } };
+  const validConfig = { type: 'console', layout: { type: 'mock' } };
   expect(appenderSchema.validate(validConfig)).toEqual({
-    kind: 'console',
-    layout: { kind: 'mock' },
+    type: 'console',
+    layout: { type: 'mock' },
   });
 
-  const wrongConfig1 = { kind: 'not-console', layout: { kind: 'mock' } };
+  const wrongConfig1 = { type: 'not-console', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
+  const wrongConfig2 = { type: 'file', layout: { type: 'mock' }, path: 'path' };
   expect(() => appenderSchema.validate(wrongConfig2)).toThrow();
 });
 

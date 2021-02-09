@@ -213,7 +213,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         logging: {
           appendersTypesUsed: Array.from(
             Array.from(this.loggingConfig?.appenders.values() ?? [])
-              .reduce((acc, a) => acc.add(a.kind), new Set<string>())
+              .reduce((acc, a) => acc.add(a.type), new Set<string>())
               .values()
           ),
           loggersConfiguredCount: this.loggingConfig?.loggers.length ?? 0,

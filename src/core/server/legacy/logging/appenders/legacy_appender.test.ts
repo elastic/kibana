@@ -16,13 +16,13 @@ afterEach(() => (LegacyLoggingServer as any).mockClear());
 
 test('`configSchema` creates correct schema.', () => {
   const appenderSchema = LegacyAppender.configSchema;
-  const validConfig = { kind: 'legacy-appender', legacyLoggingConfig: { verbose: true } };
+  const validConfig = { type: 'legacy-appender', legacyLoggingConfig: { verbose: true } };
   expect(appenderSchema.validate(validConfig)).toEqual({
-    kind: 'legacy-appender',
+    type: 'legacy-appender',
     legacyLoggingConfig: { verbose: true },
   });
 
-  const wrongConfig = { kind: 'not-legacy-appender' };
+  const wrongConfig = { type: 'not-legacy-appender' };
   expect(() => appenderSchema.validate(wrongConfig)).toThrow();
 });
 

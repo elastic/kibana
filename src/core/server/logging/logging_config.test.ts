@@ -51,12 +51,12 @@ test('correctly fills in default config.', () => {
   expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
-    kind: 'console',
-    layout: { kind: 'pattern', highlight: true },
+    type: 'console',
+    layout: { type: 'pattern', highlight: true },
   });
   expect(configValue.appenders.get('console')).toEqual({
-    kind: 'console',
-    layout: { kind: 'pattern', highlight: true },
+    type: 'console',
+    layout: { type: 'pattern', highlight: true },
   });
 });
 
@@ -65,8 +65,8 @@ test('correctly fills in custom `appenders` config.', () => {
     config.schema.validate({
       appenders: {
         console: {
-          kind: 'console',
-          layout: { kind: 'pattern' },
+          type: 'console',
+          layout: { type: 'pattern' },
         },
       },
     })
@@ -75,13 +75,13 @@ test('correctly fills in custom `appenders` config.', () => {
   expect(configValue.appenders.size).toBe(2);
 
   expect(configValue.appenders.get('default')).toEqual({
-    kind: 'console',
-    layout: { kind: 'pattern', highlight: true },
+    type: 'console',
+    layout: { type: 'pattern', highlight: true },
   });
 
   expect(configValue.appenders.get('console')).toEqual({
-    kind: 'console',
-    layout: { kind: 'pattern' },
+    type: 'console',
+    layout: { type: 'pattern' },
   });
 });
 
@@ -101,8 +101,8 @@ test('correctly fills in custom `loggers` config.', () => {
     config.schema.validate({
       appenders: {
         file: {
-          kind: 'file',
-          layout: { kind: 'pattern' },
+          type: 'file',
+          layout: { type: 'pattern' },
           path: 'path',
         },
       },
@@ -167,8 +167,8 @@ describe('extend', () => {
       config.schema.validate({
         appenders: {
           file1: {
-            kind: 'file',
-            layout: { kind: 'pattern' },
+            type: 'file',
+            layout: { type: 'pattern' },
             path: 'path',
           },
         },
@@ -179,8 +179,8 @@ describe('extend', () => {
       config.schema.validate({
         appenders: {
           file2: {
-            kind: 'file',
-            layout: { kind: 'pattern' },
+            type: 'file',
+            layout: { type: 'pattern' },
             path: 'path',
           },
         },
@@ -200,8 +200,8 @@ describe('extend', () => {
       config.schema.validate({
         appenders: {
           file1: {
-            kind: 'file',
-            layout: { kind: 'pattern' },
+            type: 'file',
+            layout: { type: 'pattern' },
             path: 'path',
           },
         },
@@ -212,8 +212,8 @@ describe('extend', () => {
       config.schema.validate({
         appenders: {
           file1: {
-            kind: 'file',
-            layout: { kind: 'json' },
+            type: 'file',
+            layout: { type: 'json' },
             path: 'updatedPath',
           },
         },
@@ -221,8 +221,8 @@ describe('extend', () => {
     );
 
     expect(mergedConfigValue.appenders.get('file1')).toEqual({
-      kind: 'file',
-      layout: { kind: 'json' },
+      type: 'file',
+      layout: { type: 'json' },
       path: 'updatedPath',
     });
   });

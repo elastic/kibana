@@ -50,9 +50,9 @@ describe('request logging', () => {
             silent: true,
             appenders: {
               'test-console': {
-                kind: 'console',
+                type: 'console',
                 layout: {
-                  kind: 'pattern',
+                  type: 'pattern',
                   pattern: '%level|%logger|%message|%meta',
                 },
               },
@@ -96,9 +96,9 @@ describe('request logging', () => {
           silent: true,
           appenders: {
             'test-console': {
-              kind: 'console',
+              type: 'console',
               layout: {
-                kind: 'pattern',
+                type: 'pattern',
                 pattern: '%level|%logger|%message|%meta',
               },
             },

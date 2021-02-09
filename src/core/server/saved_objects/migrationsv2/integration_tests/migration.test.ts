@@ -45,10 +45,10 @@ describe('migration v2', () => {
         logging: {
           appenders: {
             file: {
-              kind: 'file',
+              type: 'file',
               path: join(__dirname, 'migration_test_kibana.log'),
               layout: {
-                kind: 'json',
+                type: 'json',
               },
             },
           },

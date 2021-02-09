@@ -148,15 +148,15 @@ export class LoggingConfig {
     [
       'default',
       {
-        kind: 'console',
-        layout: { kind: 'pattern', highlight: true },
+        type: 'console',
+        layout: { type: 'pattern', highlight: true },
       } as AppenderConfigType,
     ],
     [
       'console',
       {
-        kind: 'console',
-        layout: { kind: 'pattern', highlight: true },
+        type: 'console',
+        layout: { type: 'pattern', highlight: true },
       } as AppenderConfigType,
     ],
   ]);

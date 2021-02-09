@@ -20,24 +20,24 @@ beforeEach(() => {
 test('`createConfigSchema()` creates correct schema.', () => {
   const appenderSchema = FileAppender.configSchema;
 
-  const validConfig = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
+  const validConfig = { type: 'file', layout: { type: 'mock' }, path: 'path' };
   expect(appenderSchema.validate(validConfig)).toEqual({
-    kind: 'file',
-    layout: { kind: 'mock' },
+    type: 'file',
+    layout: { type: 'mock' },
     path: 'path',
   });
 
   const wrongConfig1 = {
-    kind: 'not-file',
-    layout: { kind: 'mock' },
+    type: 'not-file',
+    layout: { type: 'mock' },
     path: 'path',
   };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'file', layout: { kind: 'mock' } };
+  const wrongConfig2 = { type: 'file', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig2)).toThrow();
 
-  const wrongConfig3 = { kind: 'console', layout: { kind: 'mock' } };
+  const wrongConfig3 = { type: 'console', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig3)).toThrow();
 });
 

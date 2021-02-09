@@ -52,7 +52,7 @@ export class Appenders {
    * @returns Fully constructed `Appender` instance.
    */
   public static create(config: AppenderConfigType): DisposableAppender {
-    switch (config.kind) {
+    switch (config.type) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
       case 'file':

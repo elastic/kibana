@@ -20,20 +20,20 @@ import { LogLevel, LogRecord } from '@kbn/logging';
 import { RollingFileAppender, RollingFileAppenderConfig } from './rolling_file_appender';
 
 const config: RollingFileAppenderConfig = {
-  kind: 'rolling-file',
+  type: 'rolling-file',
   path: '/var/log/kibana.log',
   layout: {
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
     highlight: false,
   },
   policy: {
-    kind: 'time-interval',
+    type: 'time-interval',
     interval: moment.duration(4, 'hour'),
     modulate: true,
   },
   strategy: {
-    kind: 'numeric',
+    type: 'numeric',
     max: 5,
     pattern: '-%i',
   },

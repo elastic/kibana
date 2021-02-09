@@ -152,15 +152,15 @@ This policy will rotate the file when it reaches a predetermined size.
 logging:
   appenders:
     rolling-file:
-      kind: rolling-file
+      type: rolling-file
       path: /var/logs/kibana.log
       policy:
-        kind: size-limit
+        type: size-limit
         size: 50mb
       strategy:
         //... 
       layout:
-        kind: pattern
+        type: pattern
 ```
 
 The options are:
@@ -179,16 +179,16 @@ This policy will rotate the file every given interval of time.
 logging:
   appenders:
     rolling-file:
-      kind: rolling-file
+      type: rolling-file
       path: /var/logs/kibana.log
       policy:
-        kind: time-interval
+        type: time-interval
         interval: 10s
         modulate: true
       strategy:
         //... 
       layout:
-        kind: pattern
+        type: pattern
 ```
 
 The options are:
@@ -224,16 +224,16 @@ and will retains a fixed amount of rolled files.
 logging:
   appenders:
     rolling-file:
-      kind: rolling-file
+      type: rolling-file
       path: /var/logs/kibana.log
       policy:
         // ...
       strategy:
-        kind: numeric
+        type: numeric
         pattern: '-%i'
         max: 2
       layout:
-        kind: pattern
+        type: pattern
 ```
 
 For example, with this configuration:
@@ -277,22 +277,22 @@ Here is the configuration example that can be used to configure _loggers_, _appe
 logging:
   appenders:
     console:
-      kind: console
+      type: console
       layout:
-        kind: pattern
+        type: pattern
         highlight: true
     file:
-      kind: file
+      type: file
       path: /var/log/kibana.log
       layout:
-        kind: pattern
+        type: pattern
     custom:
-      kind: console
+      type: console
       layout:
-        kind: pattern
+        type: pattern
         pattern: "[%date][%level] %message"
     json-file-appender:
-      kind: file
+      type: file
       path: /var/log/kibana-json.log
 
   root:
@@ -444,16 +444,16 @@ logging:
     - context: plugins.myPlugin
       appenders: [console]
 ```
-Logs in a *file* if given file path. You should define a custom appender with `kind: file` 
+Logs in a *file* if given file path. You should define a custom appender with `type: file` 
 ```yaml
 
 logging:
   appenders:
     file:
-      kind: file
+      type: file
       path: /var/log/kibana.log
       layout:
-        kind: pattern
+        type: pattern
   loggers:
     - context: plugins.myPlugin
       appenders: [file]
@@ -493,9 +493,9 @@ to [specify timezone](#date) for `layout: pattern`.
 logging:
   appenders:
     custom-console:
-      kind: console
+      type: console
       layout:
-        kind: pattern
+        type: pattern
         highlight: true
         pattern: "[%level] [%date{ISO8601_TZ}{America/Los_Angeles}][%logger] %message"
 ```

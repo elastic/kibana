@@ -26,7 +26,7 @@ import { RollingFileManager } from './rolling_file_manager';
 import { RollingFileContext } from './rolling_file_context';
 
 export interface RollingFileAppenderConfig {
-  kind: 'rolling-file';
+  type: 'rolling-file';
   /**
    * The layout to use when writing log entries
    */
@@ -51,7 +51,7 @@ export interface RollingFileAppenderConfig {
  */
 export class RollingFileAppender implements DisposableAppender {
   public static configSchema = schema.object({
-    kind: schema.literal('rolling-file'),
+    type: schema.literal('rolling-file'),
     layout: Layouts.configSchema,
     path: schema.string(),
     policy: triggeringPolicyConfigSchema,

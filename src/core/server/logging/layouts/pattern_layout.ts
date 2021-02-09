@@ -32,7 +32,7 @@ export const patternSchema = schema.string({
 
 const patternLayoutSchema = schema.object({
   highlight: schema.maybe(schema.boolean()),
-  kind: schema.literal('pattern'),
+  type: schema.literal('pattern'),
   pattern: schema.maybe(patternSchema),
 });
 
@@ -47,7 +47,7 @@ const conversions: Conversion[] = [
 
 /** @internal */
 export interface PatternLayoutConfigType {
-  kind: 'pattern';
+  type: 'pattern';
   highlight?: boolean;
   pattern?: string;
 }

@@ -17,10 +17,10 @@ function createRoot() {
       silent: true, // set "true" in kbnTestServer
       appenders: {
         'test-console': {
-          kind: 'console',
+          type: 'console',
           layout: {
             highlight: false,
-            kind: 'pattern',
+            type: 'pattern',
             pattern: '%level|%logger|%message',
           },
         },
@@ -108,15 +108,15 @@ describe('logging service', () => {
     const CUSTOM_LOGGING_CONFIG: LoggerContextConfigInput = {
       appenders: {
         customJsonConsole: {
-          kind: 'console',
+          type: 'console',
           layout: {
-            kind: 'json',
+            type: 'json',
           },
         },
         customPatternConsole: {
-          kind: 'console',
+          type: 'console',
           layout: {
-            kind: 'pattern',
+            type: 'pattern',
             pattern: 'CUSTOM - PATTERN [%logger][%level] %message',
           },
         },
