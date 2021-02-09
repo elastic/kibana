@@ -6,7 +6,8 @@
  */
 
 export { FlashMessages } from './flash_messages';
-export { FlashMessagesLogic, IFlashMessage, mountFlashMessagesLogic } from './flash_messages_logic';
+export { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
+export { IFlashMessage } from './types';
 export { flashAPIErrors } from './handle_api_errors';
 export {
   setSuccessMessage,

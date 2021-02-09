@@ -8,22 +8,22 @@
 // TODO: Remove EuiPage & EuiPageBody before exposing full app
 
 import React, { useEffect } from 'react';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { useActions, useValues } from 'kea';
 
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
-import { AppLogic } from '../../app_logic';
-import { OverviewLogic } from './overview_logic';
-
 import { Loading } from '../../../shared/loading';
+import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
 import { ProductButton } from '../../components/shared/product_button';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
+import { OverviewLogic } from './overview_logic';
 import { RecentActivity } from './recent_activity';
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
