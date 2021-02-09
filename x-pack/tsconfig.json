@@ -15,6 +15,7 @@
     "plugins/discover_enhanced/**/*",
     "plugins/dashboard_mode/**/*",
     "plugins/dashboard_enhanced/**/*",
+    "plugins/fleet/**/*",
     "plugins/global_search/**/*",
     "plugins/global_search_providers/**/*",
     "plugins/graph/**/*",
