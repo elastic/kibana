@@ -71,6 +71,7 @@ export const getFieldEditorOpener = ({
     };
 
     const field = fieldName ? ctx.indexPattern.getFieldByName(fieldName) : undefined;
+
     if (fieldName && !field) {
       const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
         defaultMessage: "Field named '{fieldName}' not found on index pattern",

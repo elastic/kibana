@@ -134,7 +134,10 @@ const FieldEditorFlyoutContentComponent = ({
         });
 
         setPainlessSyntaxError(error);
-        return;
+
+        if (error) {
+          return;
+        }
       }
 
       onSave(data);
