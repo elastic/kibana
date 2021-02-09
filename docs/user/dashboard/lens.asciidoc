@@ -25,3 +25,70 @@ NOTE: The sum of all the *Other* fields can equal more than 100% by a small amou
 [float]
 [[lens-faq]]
 ==== Frequently asked questions
+
+====== How are pie chart slices sized exactly?
+
+====== How is the percentage chart calculating its percentages?
+
+====== How the Horizontal axis of multiple layers are merged in a chart?
+
+====== Can I show value labels for my chart?
+
+At the moment only a subset of *Lens* visualization allows to show value labels:
+
+* `Bar` / `Horizontal Bar` charts.
+
+[role="screenshot"]
+image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
+
+*Note*: Date histograms cannot show value labels even when a Bar chart is used.
+
+* `Pie` / `Donut` / `Treemap` charts (enabled by default)
+
+[role="screenshot"]
+image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
+
+====== Can I sort by multiple columns?
+
+*Lens* datatable does not currently support multiple columns sorting.
+// Perhaps point to Discover for this feature?
+
+====== How are IP addresses sorted?
+
+*Lens* datatable can sort IP addresses in both IPv4 and IPv6 format.
+For both formats each block of the IP address are compared and sorted, therefore it becomes easier to find addresses within the same subnet:
+
+[role="screenshot"]
+image::images/lens_ipv4_sorting.png[Lens datatable with IPv4 sorted field]
+
+When IP addresses of both format are found as field content, then IPv4 addresses are mapped into IPv6-mapped addresses, and sorted as IPv6 addresses.
+
+[role="screenshot"]
+image::images/lens_ip_mixed_sorting.png[Lens datatable with IPv4 and IPv6 sorted field]
+
+Note that the `Other` entry is always at the bottom of the sorting, no matter the direction.
+
+====== Is it possible to reduce or increase the number of suggestions in Lens?
+
+At the moment it is not possible to either increase or reduce the number of suggestions in the *Lens* editor.
+// Can we point to the hide/show issue?
+
+====== How can I include documents without the field in the operation?
+
+====== What is the "Other" category?
+
+====== Are multiple layers exported in CSV?
+
+Yes, when downloading CSV files out of a *Lens* visualization each layer produces a single CSV file with its columns.
+The name of each file, when multiple layers are detected, is a composition of the visualization name with the layer index.
+
+====== Is it possible to inspect the Elasticsearch query in Lens?
+
+At the moment it is not possible to inspect the Elasticsearch query for a *Lens* visualization.
+
+====== Is it possible to sort dimensions in a chart?
+
+====== What Elasticsearch functions are renamed in Lens?
+
+// Show a table here like the aggregation-reference in Kibana guide
+
