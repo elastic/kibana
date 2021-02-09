@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiButtonEmpty,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
@@ -316,9 +317,25 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           </EuiText>
         )}
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-            defaultMessage: 'Order by',
-          })}
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+                defaultMessage: 'Rank by',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderByHelp', {
+                  defaultMessage: `It controls the ranking system used to retrieve the Top values.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
           display="columnCompressed"
           fullWidth
         >
@@ -338,14 +355,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
+              defaultMessage: 'Rank by',
             })}
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
-            defaultMessage: 'Order direction',
-          })}
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+                defaultMessage: 'Rank direction',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderDirectionHelp', {
+                  defaultMessage: `It controls the ranking direction used to retrieve the Top values.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
           display="columnCompressed"
           fullWidth
         >
@@ -378,7 +411,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               )
             }
             aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
+              defaultMessage: 'Rank by',
             })}
           />
         </EuiFormRow>
