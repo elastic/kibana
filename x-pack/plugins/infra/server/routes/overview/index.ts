@@ -4,19 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import Boom from '@hapi/boom';
-import { schema } from '@kbn/config-schema';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import { findInventoryFields } from '../../../common/inventory_models';
-import { throwErrors } from '../../../common/runtime_types';
-import { OverviewRequestRT } from '../../../common/http_api/overview_api';
+import { createValidationFunction } from '../../../common/runtime_types';
+import { OverviewRequestRT, TopNodesRequestRT } from '../../../common/http_api/overview_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { createSearchClient } from '../../lib/create_search_client';
-
-const escapeHatch = schema.object({}, { unknowns: 'allow' });
+import { queryTopNodes } from './lib/get_top_nodes';
 
 interface OverviewESAggResponse {
   memory: { value: number };
@@ -30,17 +23,44 @@ export const initOverviewRoute = (libs: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
-      path: '/api/metrics/overview',
+      path: '/api/metrics/overview/top',
       validate: {
-        body: escapeHatch,
+        body: createValidationFunction(TopNodesRequestRT),
       },
     },
     async (requestContext, request, response) => {
       try {
-        const overviewRequest = pipe(
-          OverviewRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
+        const options = request.body;
+        const client = createSearchClient(requestContext, framework);
+        const source = await libs.sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          options.sourceId
         );
+
+        const topNResponse = await queryTopNodes(options, client, source);
+
+        return response.ok({
+          body: topNResponse,
+        });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
+
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: '/api/metrics/overview',
+      validate: {
+        body: createValidationFunction(OverviewRequestRT),
+      },
+    },
+    async (requestContext, request, response) => {
+      try {
+        const overviewRequest = request.body;
 
         const client = createSearchClient(requestContext, framework);
         const source = await libs.sources.getSourceConfiguration(
