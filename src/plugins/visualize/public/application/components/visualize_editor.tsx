@@ -55,7 +55,8 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   useEffect(() => {
     const { originatingApp: value } =
-      services.embeddable.getStateTransfer().getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+      services.embeddable.getStateTransfer().getIncomingEditorState(VisualizeConstants.APP_ID) ||
+      {};
     setOriginatingApp(value);
   }, [services]);
 
