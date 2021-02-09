@@ -10,8 +10,8 @@
     "data",
     "cloud",
     "features",
+    "fileUpload",
     "licensing",
-    "usageCollection",
     "share",
     "embeddable",
     "uiActions",
@@ -25,7 +25,8 @@
     "spaces",
     "management",
     "licenseManagement",
-    "maps"
+    "maps",
+    "lens"
   ],
   "server": true,
   "ui": true,

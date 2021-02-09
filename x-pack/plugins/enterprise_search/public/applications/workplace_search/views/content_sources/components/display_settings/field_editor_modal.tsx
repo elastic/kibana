@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FormEvent, useState } from 'react';
@@ -72,9 +73,9 @@ export const FieldEditorModal: React.FC = () => {
                 <EuiSelect
                   options={isEditing ? fieldOptions : availableFieldOptions}
                   name="field"
-                  required={true}
+                  required
                   className="field-selector"
-                  hasNoInitialSelection={true}
+                  hasNoInitialSelection
                   data-test-subj="AvailableFieldOptions"
                   value={fieldName}
                   disabled={!!isEditing}
@@ -84,7 +85,7 @@ export const FieldEditorModal: React.FC = () => {
               <EuiFormRow label="Label">
                 <EuiFieldText
                   name="label"
-                  required={true}
+                  required
                   data-test-subj="VisibleFieldName"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
@@ -94,7 +95,7 @@ export const FieldEditorModal: React.FC = () => {
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty onClick={toggleFieldEditorModal}>{CANCEL_BUTTON}</EuiButtonEmpty>
-            <EuiButton data-test-subj="FieldSubmitButton" color="primary" fill={true} type="submit">
+            <EuiButton data-test-subj="FieldSubmitButton" color="primary" fill type="submit">
               {ACTION_LABEL} {FIELD_LABEL}
             </EuiButton>
           </EuiModalFooter>

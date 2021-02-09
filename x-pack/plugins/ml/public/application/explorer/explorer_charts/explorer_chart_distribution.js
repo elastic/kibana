@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -19,7 +20,11 @@ import moment from 'moment';
 
 import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
-import { getSeverityColor, getSeverityWithLow } from '../../../../common/util/anomaly_utils';
+import {
+  getFormattedSeverityScore,
+  getSeverityColor,
+  getSeverityWithLow,
+} from '../../../../common/util/anomaly_utils';
 import {
   getChartType,
   getTickValues,
@@ -457,7 +462,7 @@ export class ExplorerChartDistribution extends React.Component {
 
       if (marker.anomalyScore !== undefined) {
         const score = parseInt(marker.anomalyScore);
-        const displayScore = score > 0 ? score : '< 1';
+        const displayScore = getFormattedSeverityScore(score);
         tooltipData.push({
           label: i18n.translate('xpack.ml.explorer.distributionChart.anomalyScoreLabel', {
             defaultMessage: 'anomaly score',

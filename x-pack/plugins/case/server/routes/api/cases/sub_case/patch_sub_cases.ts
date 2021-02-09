@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -26,11 +27,13 @@ import {
   ESCaseAttributes,
   SubCaseResponse,
   SubCasesResponseRt,
+  User,
 } from '../../../../../common/api';
-import { SUB_CASES_PATCH_URL } from '../../../../../common/constants';
+import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import { escapeHatch, flattenSubCaseSavedObject, isAlertCommentSO, wrapError } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
+import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;
@@ -125,11 +128,13 @@ async function getParentCases({
     caseIds: parentIDInfo.ids,
   });
 
-  const parentCaseErrors = parentCases.saved_objects.find((so) => so.error !== undefined);
+  const parentCaseErrors = parentCases.saved_objects.filter((so) => so.error !== undefined);
 
-  if (parentCaseErrors) {
+  if (parentCaseErrors.length > 0) {
     throw Boom.badRequest(
-      `Unable to find parent cases for sub cases, original error: ${parentCaseErrors.error?.message}`
+      `Unable to find parent cases: ${parentCaseErrors
+        .map((c) => c.id)
+        .join(', ')} for sub cases: ${subCaseIDs.join(', ')}`
     );
   }
 
@@ -140,6 +145,25 @@ async function getParentCases({
     });
     return acc;
   }, new Map<string, SavedObject<ESCaseAttributes>>());
+}
+
+function getValidUpdateRequests(
+  toUpdate: SubCasePatchRequest[],
+  subCasesMap: Map<string, SavedObject<SubCaseAttributes>>
+): SubCasePatchRequest[] {
+  const validatedSubCaseAttributes: SubCasePatchRequest[] = toUpdate.map((updateCase) => {
+    const currentCase = subCasesMap.get(updateCase.id);
+    return currentCase != null
+      ? getCaseToUpdate(currentCase.attributes, {
+          ...updateCase,
+        })
+      : { id: updateCase.id, version: updateCase.version };
+  });
+
+  return validatedSubCaseAttributes.filter((updateCase: SubCasePatchRequest) => {
+    const { id, version, ...updateCaseAttributes } = updateCase;
+    return Object.keys(updateCaseAttributes).length > 0;
+  });
 }
 
 async function update({
@@ -167,22 +191,7 @@ async function update({
 
   checkNonExistingOrConflict(query.subCases, subCasesMap);
 
-  // TODO: extract to new function
-  const validatedSubCaseAttributes: SubCasePatchRequest[] = query.subCases.map((updateCase) => {
-    const currentCase = subCasesMap.get(updateCase.id);
-    return currentCase != null
-      ? getCaseToUpdate(currentCase.attributes, {
-          ...updateCase,
-        })
-      : { id: updateCase.id, version: updateCase.version };
-  });
-
-  const nonEmptySubCaseRequests = validatedSubCaseAttributes.filter(
-    (updateCase: SubCasePatchRequest) => {
-      const { id, version, ...updateCaseAttributes } = updateCase;
-      return Object.keys(updateCaseAttributes).length > 0;
-    }
-  );
+  const nonEmptySubCaseRequests = getValidUpdateRequests(query.subCases, subCasesMap);
 
   if (nonEmptySubCaseRequests.length <= 0) {
     throw Boom.notAcceptable('All update fields are identical to current version.');
@@ -203,8 +212,11 @@ async function update({
     client,
     subCases: nonEmptySubCaseRequests.map((thisCase) => {
       const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
-      // TODO: type this
-      let closedInfo = {};
+      let closedInfo: { closed_at: string | null; closed_by: User | null } = {
+        closed_at: null,
+        closed_by: null,
+      };
+
       if (
         updateSubCaseAttributes.status &&
         updateSubCaseAttributes.status === CaseStatuses.closed
@@ -250,10 +262,9 @@ async function update({
   // TODO: extra to new function
   for (const subCaseToSync of subCasesToSyncAlertsFor) {
     const currentSubCase = subCasesMap.get(subCaseToSync.id);
-    const alertComments = await caseService.getAllCaseComments({
+    const alertComments = await caseService.getAllSubCaseComments({
       client,
       id: subCaseToSync.id,
-      subCaseID: subCaseToSync.id,
       options: {
         filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
       },
@@ -305,16 +316,16 @@ async function update({
     []
   );
 
-  // TODO: need to implement one for sub case
-  /* await userActionService.postUserActions({
+  // TODO: figure out what we need to save
+  await userActionService.postUserActions({
     client,
-    actions: buildCaseUserActions({
-      originalCases: bulkSubCases.saved_objects,
-      updatedCases: updatedCases.saved_objects,
-      actionDate: updatedDt,
+    actions: buildSubCaseUserActions({
+      originalSubCases: bulkSubCases.saved_objects,
+      updatedSubCases: updatedCases.saved_objects,
+      actionDate: updatedAt,
       actionBy: { email, full_name, username },
     }),
-  });*/
+  });
 
   return SubCasesResponseRt.encode(returnUpdatedSubCases);
 }
@@ -322,7 +333,7 @@ async function update({
 export function initPatchSubCasesApi({ router, caseService, userActionService }: RouteDeps) {
   router.patch(
     {
-      path: SUB_CASES_PATCH_URL,
+      path: SUB_CASES_PATCH_DEL_URL,
       validate: {
         body: escapeHatch,
       },

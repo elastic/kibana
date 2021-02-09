@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { first, map } from 'rxjs/operators';
@@ -128,7 +129,7 @@ export class CasePlugin {
       request: KibanaRequest
     ) => {
       return createExternalCaseClient({
-        callCluster: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+        scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
         caseService: this.caseService!,
@@ -169,7 +170,7 @@ export class CasePlugin {
       return {
         getCaseClient: () => {
           return new CaseClientImpl({
-            callCluster: context.core.elasticsearch.legacy.client.callAsCurrentUser,
+            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,
             caseConfigureService,

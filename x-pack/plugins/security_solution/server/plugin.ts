@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -116,6 +117,14 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
+const caseSavedObjects = [
+  'cases',
+  'cases-comments',
+  'cases-sub-case',
+  'cases-configure',
+  'cases-user-actions',
+];
+
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
@@ -215,14 +224,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
-            all: [
-              'alert',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
-              ...savedObjectTypes,
-            ],
+            all: ['alert', ...caseSavedObjects, ...savedObjectTypes],
             read: ['config'],
           },
           alerting: {
@@ -239,14 +241,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: [],
-            read: [
-              'config',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
-              ...savedObjectTypes,
-            ],
+            read: ['config', ...caseSavedObjects, ...savedObjectTypes],
           },
           alerting: {
             read: [SIGNALS_ID, NOTIFICATIONS_ID],

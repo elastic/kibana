@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case, CaseType } from '../../containers/types';
+import { Case, AllCaseType } from '../../containers/types';
 import { CasesColumns } from './columns';
 
 type ExpandedRowMap = Record<string, Element> | {};
@@ -46,7 +47,7 @@ export const getExpandedRowMap = ({
         ...subCase,
         caseParentId: curr.id,
         title: `${curr.title} ${index + 1}`,
-        type: CaseType.subCase,
+        type: AllCaseType.subCase,
       }));
       return {
         ...acc,

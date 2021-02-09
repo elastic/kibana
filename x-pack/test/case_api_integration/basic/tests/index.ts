@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -32,6 +33,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
     loadTestFile(require.resolve('./connectors/case'));
+    loadTestFile(require.resolve('./cases/sub_cases/delete_sub_cases'));
+    loadTestFile(require.resolve('./cases/sub_cases/get_sub_case'));
+    loadTestFile(require.resolve('./cases/sub_cases/find_sub_cases'));
 
     // Migrations
     loadTestFile(require.resolve('./cases/migrations'));

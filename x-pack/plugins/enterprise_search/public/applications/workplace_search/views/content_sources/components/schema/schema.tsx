@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -121,7 +122,7 @@ export const Schema: React.FC = () => {
                   <EuiFlexItem>{addFieldButton}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {percentageComplete < 100 ? (
-                      <EuiButton isLoading={true} fill={true}>
+                      <EuiButton isLoading fill>
                         {SCHEMA_UPDATING}
                       </EuiButton>
                     ) : (
@@ -129,7 +130,7 @@ export const Schema: React.FC = () => {
                         disabled={formUnchanged}
                         data-test-subj="UpdateTypesButton"
                         onClick={updateFields}
-                        fill={true}
+                        fill
                       >
                         {SCHEMA_SAVE_BUTTON}
                       </EuiButton>

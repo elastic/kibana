@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -21,10 +22,10 @@ import {
   CaseType,
   SavedObjectFindOptions,
   CaseResponse,
+  AssociationType,
 } from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
-import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
 import {
@@ -98,7 +99,7 @@ async function findCases({
     client,
     caseService,
     ids: Array.from(casesMap.keys()),
-    type: CASE_SAVED_OBJECT,
+    associationType: AssociationType.case,
   });
 
   const casesWithComments = new Map<string, CaseResponse>();

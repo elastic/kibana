@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -58,13 +59,9 @@ async function deleteSubCases({
   const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ client, ids: caseIds });
 
   const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
-  const commentsForSubCases = await caseService.getAllCaseComments({
+  const commentsForSubCases = await caseService.getAllSubCaseComments({
     client,
     id: subCaseIDs,
-    subCaseID: subCaseIDs,
-    options: {
-      fields: [],
-    },
   });
 
   // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted
@@ -153,7 +150,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: id,
-              fields: ['comment', 'description', 'status', 'tags', 'title'],
+              fields: ['comment', 'description', 'status', 'tags', 'title', 'sub_case'],
             })
           ),
         });
