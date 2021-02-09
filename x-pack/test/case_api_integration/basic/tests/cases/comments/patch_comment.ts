@@ -83,6 +83,36 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(patchedSubCaseUpdatedComment.subCase.comments[1].type).to.be(CommentType.user);
         expect(patchedSubCaseUpdatedComment.subCase.comments[1].comment).to.be(newComment);
       });
+
+      it('fails to update the generated alert comment type', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        await supertest
+          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: caseInfo.subCase!.comments![0].id,
+            version: caseInfo.subCase!.comments![0].version,
+            type: CommentType.alert,
+            alertId: 'test-id',
+            index: 'test-index',
+          })
+          .expect(400);
+      });
+
+      it('fails to update the generated alert comment by using another generated alert comment', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        await supertest
+          .patch(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            id: caseInfo.subCase!.comments![0].id,
+            version: caseInfo.subCase!.comments![0].version,
+            type: CommentType.generatedAlert,
+            alerts: [{ _id: 'id1' }],
+            index: 'test-index',
+          })
+          .expect(400);
+      });
     });
 
     it('should patch a comment', async () => {

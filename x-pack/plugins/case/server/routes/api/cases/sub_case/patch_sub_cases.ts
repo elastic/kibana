@@ -316,7 +316,6 @@ async function update({
     []
   );
 
-  // TODO: figure out what we need to save
   await userActionService.postUserActions({
     client,
     actions: buildSubCaseUserActions({

@@ -60,7 +60,8 @@ export function initDeleteAllCommentsApi({ caseService, router, userActionServic
               action: 'delete',
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
-              caseId: id,
+              caseId: request.params.case_id,
+              subCaseId: request.query?.subCaseID,
               commentId: comment.id,
               fields: ['comment'],
             })

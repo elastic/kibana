@@ -47,7 +47,6 @@ export interface CaseClientGet {
 
 export interface CaseClientPush {
   actionsClient: ActionsClient;
-  caseClient: CaseClient;
   caseId: string;
   connectorId: string;
 }

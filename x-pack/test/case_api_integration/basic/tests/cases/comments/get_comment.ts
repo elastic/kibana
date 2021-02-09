@@ -56,6 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(comment).to.eql(patchedCase.comments[0]);
     });
+
     it('should get a sub case comment', async () => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
       const { body: comment }: { body: CommentResponse } = await supertest
@@ -63,6 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
       expect(comment.type).to.be(CommentType.generatedAlert);
     });
+
     it('unhappy path - 404s when comment is not there', async () => {
       await supertest
         .get(`${CASES_URL}/fake-id/comments/fake-comment`)
