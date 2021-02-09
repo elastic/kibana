@@ -6,14 +6,12 @@
  */
 
 import React from 'react';
-
 import { shallow, ShallowWrapper } from 'enzyme';
-
 import { EuiButton } from '@elastic/eui';
 
 import { docLinks } from '../../../shared/doc_links';
-import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 
+import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 import { EmptyEngineOverview } from './engine_overview_empty';
 
 describe('EmptyEngineOverview', () => {
