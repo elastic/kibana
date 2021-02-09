@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
+import Boom, { isBoom, Boom as BoomType } from '@hapi/boom';
 
 import { SavedObjectsBulkUpdateResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
@@ -23,6 +23,16 @@ import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { CaseClientPush, CaseClientFactoryArguments } from '../types';
 import { createIncident, getCommentContextFromAttributes, isCommentAlertType } from './utils';
+
+const createError = (e: Error | BoomType, message: string): Error | BoomType => {
+  if (isBoom(e)) {
+    e.message = message;
+    e.output.payload.message = message;
+    return e;
+  }
+
+  return Error(message);
+};
 
 export const push = ({
   savedObjectsClient,
@@ -52,7 +62,8 @@ export const push = ({
       caseClient.getUserActions({ caseId }),
     ]);
   } catch (e) {
-    throw new Error(`Error getting case and/or connector and/or user actions: ${e.message}`);
+    const message = `Error getting case and/or connector and/or user actions: ${e.message}`;
+    throw createError(e, message);
   }
 
   // We need to change the logic when we support subcases
@@ -78,11 +89,8 @@ export const push = ({
       connectorType: connector.actionTypeId,
     });
   } catch (e) {
-    throw new Error(
-      e.isBoom
-        ? e.output.payload.message
-        : `Error getting mapping for connector with id ${connector.id}: ${e.message}`
-    );
+    const message = `Error getting mapping for connector with id ${connector.id}: ${e.message}`;
+    throw createError(e, message);
   }
 
   try {
@@ -95,7 +103,8 @@ export const push = ({
       alerts,
     });
   } catch (e) {
-    throw new Error(`Error creating incident for case with id ${theCase.id}: ${e.message}`);
+    const message = `Error creating incident for case with id ${theCase.id}: ${e.message}`;
+    throw createError(e, message);
   }
 
   const pushRes = await actionsClient.execute({
@@ -139,9 +148,8 @@ export const push = ({
       }),
     ]);
   } catch (e) {
-    throw new Error(
-      `Error getting user and/or case and/or case configuration and/or case comments: ${e.message}`
-    );
+    const message = `Error getting user and/or case and/or case configuration and/or case comments: ${e.message}`;
+    throw createError(e, message);
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -226,9 +234,8 @@ export const push = ({
       }),
     ]);
   } catch (e) {
-    throw new Error(
-      `Error updating case and/or comments and/or creating user action: ${e.message}`
-    );
+    const message = `Error updating case and/or comments and/or creating user action: ${e.message}`;
+    throw createError(e, message);
   }
   /* End of update case with push information */
 
