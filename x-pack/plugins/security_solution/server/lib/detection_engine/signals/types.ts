@@ -17,7 +17,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
-import { BaseSearchResponse, SearchResponse, TermAggregationBucket } from '../../types';
+import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -276,6 +276,19 @@ export interface ThresholdAggregationBucket extends TermAggregationBucket {
   cardinality_count: {
     value: number;
   };
+}
+
+export interface MultiAggBucket {
+  terms: string[];
+  docCount?: number | undefined;
+  topThresholdHits?:
+    | {
+        hits: {
+          hits: SearchHit[];
+        };
+      }
+    | undefined;
+  cardinalityCount?: number | undefined;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

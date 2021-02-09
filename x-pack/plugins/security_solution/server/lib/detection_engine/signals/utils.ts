@@ -851,7 +851,7 @@ export const createTotalHitsFromSearchResult = ({
 export const calculateThresholdSignalUuid = (
   ruleId: string,
   startedAt: Date,
-  thresholdField: string,
+  thresholdFields: string[],
   key?: string
 ): string => {
   // used to generate constant Threshold Signals ID when run with the same params
@@ -859,7 +859,7 @@ export const calculateThresholdSignalUuid = (
 
   const startedAtString = startedAt.toISOString();
   const keyString = key ?? '';
-  const baseString = `${ruleId}${startedAtString}${thresholdField}${keyString}`;
+  const baseString = `${ruleId}${startedAtString}${thresholdFields.join(',')}${keyString}`;
 
   return uuidv5(baseString, NAMESPACE_ID);
 };

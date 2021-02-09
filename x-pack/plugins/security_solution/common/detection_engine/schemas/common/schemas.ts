@@ -463,7 +463,6 @@ export const threshold = t.intersection([
   t.exact(
     t.type({
       field: t.union([t.string, t.array(t.string)]),
-      // field: t.array(t.string),
       value: PositiveIntegerGreaterThanZero,
     })
   ),
@@ -474,7 +473,7 @@ export const threshold = t.intersection([
     })
   ),
 ]);
-// TODO: codec to transform threshold field string to string[]
+// TODO: codec to transform threshold field string to string[] ?
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);

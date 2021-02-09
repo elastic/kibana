@@ -203,7 +203,7 @@ export const schema: FormSchema<DefineStepRule> = {
       helpText: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldHelpText',
         {
-          defaultMessage: 'Select a field to group results by',
+          defaultMessage: "Select fields to group by. Fields are joined together with 'AND'",
         }
       ),
     },
@@ -244,13 +244,13 @@ export const schema: FormSchema<DefineStepRule> = {
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdCardinalityFieldLabel',
         {
-          defaultMessage: 'Count by',
+          defaultMessage: 'Count',
         }
       ),
       helpText: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldCardinalityFieldHelpText',
         {
-          defaultMessage: 'Select a field to count results by',
+          defaultMessage: 'Select a field to check cardinality',
         }
       ),
     },
@@ -259,7 +259,7 @@ export const schema: FormSchema<DefineStepRule> = {
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdCardinalityValueFieldLabel',
         {
-          defaultMessage: 'Count',
+          defaultMessage: 'Unique values',
         }
       ),
       validations: [
