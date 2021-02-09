@@ -10,12 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 
 interface WhenExpressionProps {
-  value: InventoryItemType;
-  options: { [key: string]: { text: string; value: InventoryItemType } };
-  onChange: (value: InventoryItemType) => void;
+  value: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
+  onChange: (value: ANOMALY_THRESHOLD) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -31,9 +30,35 @@ interface WhenExpressionProps {
     | 'rightDown';
 }
 
-export const NodeTypeExpression = ({
+const options = {
+  [ANOMALY_THRESHOLD.CRITICAL]: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.criticalLabel', {
+      defaultMessage: 'Critical',
+    }),
+    value: ANOMALY_THRESHOLD.CRITICAL,
+  },
+  [ANOMALY_THRESHOLD.MAJOR]: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.majorLabel', {
+      defaultMessage: 'Major',
+    }),
+    value: ANOMALY_THRESHOLD.MAJOR,
+  },
+  [ANOMALY_THRESHOLD.MINOR]: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.minorLabel', {
+      defaultMessage: 'Minor',
+    }),
+    value: ANOMALY_THRESHOLD.MINOR,
+  },
+  [ANOMALY_THRESHOLD.WARNING]: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.severityScore.warningLabel', {
+      defaultMessage: 'Warning',
+    }),
+    value: ANOMALY_THRESHOLD.WARNING,
+  },
+};
+
+export const SeverityThresholdExpression = ({
   value,
-  options,
   onChange,
   popupPosition,
 }: WhenExpressionProps) => {
@@ -45,9 +70,9 @@ export const NodeTypeExpression = ({
         <EuiExpression
           data-test-subj="nodeTypeExpression"
           description={i18n.translate(
-            'xpack.infra.metrics.alertFlyout.expression.for.descriptionLabel',
+            'xpack.infra.metrics.alertFlyout.expression.severityScore.descriptionLabel',
             {
-              defaultMessage: 'For',
+              defaultMessage: 'Severity score is above',
             }
           )}
           value={options[value].text}
@@ -67,16 +92,16 @@ export const NodeTypeExpression = ({
       <div>
         <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
           <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.expression.for.popoverTitle"
-            defaultMessage="Node Type"
+            id="xpack.infra.metrics.alertFlyout.expression.severityScore.popoverTitle"
+            defaultMessage="Severity Score"
           />
         </ClosablePopoverTitle>
         <EuiSelect
-          data-test-subj="forExpressionSelect"
+          data-test-subj="severityExpressionSelect"
           value={value}
           fullWidth
           onChange={(e) => {
-            onChange(e.target.value as InventoryItemType);
+            onChange(Number(e.target.value) as ANOMALY_THRESHOLD);
             setAggTypePopoverOpen(false);
           }}
           options={Object.values(options).map((o) => o)}

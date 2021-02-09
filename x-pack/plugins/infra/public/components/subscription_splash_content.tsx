@@ -21,12 +21,12 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpStart } from 'src/core/public';
-import { LoadingPage } from '../../loading_page';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useTrialStatus } from '../../../hooks/use_trial_status';
+import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { euiStyled, EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { HttpStart } from '../../../../../src/core/public';
+import { useTrialStatus } from '../hooks/use_trial_status';
+import { LoadingPage } from '../components/loading_page';
 
 export const SubscriptionSplashContent: React.FC = () => {
   const { services } = useKibana<{ http: HttpStart }>();
@@ -39,7 +39,7 @@ export const SubscriptionSplashContent: React.FC = () => {
   if (loadState === 'pending') {
     return (
       <LoadingPage
-        message={i18n.translate('xpack.infra.logs.logAnalysis.splash.loadingMessage', {
+        message={i18n.translate('xpack.infra.ml.splash.loadingMessage', {
           defaultMessage: 'Checking license...',
         })}
       />
@@ -55,14 +55,14 @@ export const SubscriptionSplashContent: React.FC = () => {
   if (canStartTrial) {
     title = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.startTrialTitle"
+        id="xpack.infra.ml.splash.startTrialTitle"
         defaultMessage="To access anomaly detection, start a free trial"
       />
     );
 
     description = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
+        id="xpack.infra.ml.splash.startTrialDescription"
         defaultMessage="Our free trial includes machine learning features, which enable you to detect anomalies in your logs."
       />
     );
@@ -73,23 +73,20 @@ export const SubscriptionSplashContent: React.FC = () => {
         fill
         href={services.http.basePath.prepend('/app/management/stack/license_management')}
       >
-        <FormattedMessage
-          id="xpack.infra.logs.logAnalysis.splash.startTrialCta"
-          defaultMessage="Start trial"
-        />
+        <FormattedMessage id="xpack.infra.ml.splash.startTrialCta" defaultMessage="Start trial" />
       </EuiButton>
     );
   } else {
     title = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionTitle"
+        id="xpack.infra.ml.splash.updateSubscriptionTitle"
         defaultMessage="To access anomaly detection, upgrade to a Platinum Subscription"
       />
     );
 
     description = (
       <FormattedMessage
-        id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionDescription"
+        id="xpack.infra.ml.splash.updateSubscriptionDescription"
         defaultMessage="You must have a Platinum Subscription to use machine learning features."
       />
     );
@@ -97,7 +94,7 @@ export const SubscriptionSplashContent: React.FC = () => {
     cta = (
       <EuiButton fullWidth={false} fill href="https://www.elastic.co/subscriptions">
         <FormattedMessage
-          id="xpack.infra.logs.logAnalysis.splash.updateSubscriptionCta"
+          id="xpack.infra.ml.splash.updateSubscriptionCta"
           defaultMessage="Upgrade subscription"
         />
       </EuiButton>
@@ -105,58 +102,60 @@ export const SubscriptionSplashContent: React.FC = () => {
   }
 
   return (
-    <SubscriptionPage>
-      <EuiPageBody>
-        <SubscriptionPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2>{title}</h2>
-              </EuiTitle>
-              <EuiSpacer size="xl" />
-              <EuiText>
-                <p>{description}</p>
-              </EuiText>
-              <EuiSpacer />
-              <div>{cta}</div>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiImage
-                alt={i18n.translate('xpack.infra.logs.logAnalysis.splash.splashImageAlt', {
-                  defaultMessage: 'Placeholder image',
-                })}
-                url={services.http.basePath.prepend(
-                  '/plugins/infra/assets/anomaly_chart_minified.svg'
-                )}
-                size="fullWidth"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <SubscriptionPageFooter>
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.infra.logs.logAnalysis.splash.learnMoreTitle"
-                  defaultMessage="Want to learn more?"
+    <EuiThemeProvider>
+      <SubscriptionPage>
+        <EuiPageBody>
+          <SubscriptionPageContent verticalPosition="center" horizontalPosition="center">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h2>{title}</h2>
+                </EuiTitle>
+                <EuiSpacer size="xl" />
+                <EuiText>
+                  <p>{description}</p>
+                </EuiText>
+                <EuiSpacer />
+                <div>{cta}</div>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiImage
+                  alt={i18n.translate('xpack.infra.ml.splash.splashImageAlt', {
+                    defaultMessage: 'Placeholder image',
+                  })}
+                  url={services.http.basePath.prepend(
+                    '/plugins/infra/assets/anomaly_chart_minified.svg'
+                  )}
+                  size="fullWidth"
                 />
-              </h3>
-            </EuiTitle>
-            <EuiButtonEmpty
-              flush="left"
-              iconType="training"
-              target="_blank"
-              color="text"
-              href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
-            >
-              <FormattedMessage
-                id="xpack.infra.logs.logAnalysis.splash.learnMoreLink"
-                defaultMessage="Read documentation"
-              />
-            </EuiButtonEmpty>
-          </SubscriptionPageFooter>
-        </SubscriptionPageContent>
-      </EuiPageBody>
-    </SubscriptionPage>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <SubscriptionPageFooter>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.infra.ml.splash.learnMoreTitle"
+                    defaultMessage="Want to learn more?"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiButtonEmpty
+                flush="left"
+                iconType="training"
+                target="_blank"
+                color="text"
+                href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
+              >
+                <FormattedMessage
+                  id="xpack.infra.ml.splash.learnMoreLink"
+                  defaultMessage="Read documentation"
+                />
+              </EuiButtonEmpty>
+            </SubscriptionPageFooter>
+          </SubscriptionPageContent>
+        </EuiPageBody>
+      </SubscriptionPage>
+    </EuiThemeProvider>
   );
 };
 
