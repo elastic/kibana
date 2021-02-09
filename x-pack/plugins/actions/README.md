@@ -657,7 +657,7 @@ The following table describes the properties of the `incident` object.
 | externalId  | The id of the issue in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 | issueType   | The id of the issue type in Jira.                                                                                | string _(optional)_   |
 | priority    | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
-| labels      | An array of labels.                                                                                              | string[] _(optional)_ |
+| labels      | An array of labels. Labels cannot contain spaces.                                                                | string[] _(optional)_ |
 | parent      | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
 
 #### `subActionParams (getIncident)`

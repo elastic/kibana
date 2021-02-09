@@ -261,7 +261,25 @@
           },
           "state": {
             "agent": null,
-            "checks": ,
+            "checks": [
+              {
+                "agent": { "id": "8f9a37fb-573a-4fdc-9895-440a5b39c250", "__typename": "Agent" },
+                "container": null,
+                "kubernetes": null,
+                "monitor": {
+                  "ip": "127.0.0.1",
+                  "name": "localhost",
+                  "status": "up",
+                  "__typename": "CheckMonitor"
+                },
+                "observer": {
+                  "geo": { "name": null, "location": null, "__typename": "CheckGeo" },
+                  "__typename": "CheckObserver"
+                },
+                "timestamp": "1570538246143",
+                "__typename": "Check"
+              }
+            ],
             "geo": null,
             "observer": {
               "geo": { "name": [], "location": null, "__typename": "StateGeo" },
