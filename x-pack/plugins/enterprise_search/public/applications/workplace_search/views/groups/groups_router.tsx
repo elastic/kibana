@@ -6,21 +6,18 @@
  */
 
 import React, { useEffect } from 'react';
+import { Route, Switch } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { Route, Switch } from 'react-router-dom';
-
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
-import { GROUP_PATH, GROUPS_PATH } from '../../routes';
 import { NAV } from '../../constants';
-
-import { GroupsLogic } from './groups_logic';
+import { GROUP_PATH, GROUPS_PATH } from '../../routes';
 
 import { GroupRouter } from './group_router';
 import { Groups } from './groups';
+import { GroupsLogic } from './groups_logic';
 
 import './groups.scss';
 
