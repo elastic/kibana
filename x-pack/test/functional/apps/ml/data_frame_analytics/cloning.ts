@@ -15,7 +15,6 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing ES promotion, see https://github.com/elastic/kibana/issues/89980
   describe('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
