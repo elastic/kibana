@@ -36,8 +36,6 @@ import { ShareOptions } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { useSpaces } from '../../spaces_context';
 
-const DEFAULT_FLYOUT_ICON = 'share';
-const DEFAULT_OBJECT_ICON = 'empty';
 const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.management.shareToSpace.objectNoun', {
   defaultMessage: 'object',
 });
@@ -46,7 +44,7 @@ const arraysAreEqual = (a: unknown[], b: unknown[]) =>
   a.every((x) => b.includes(x)) && b.every((x) => a.includes(x));
 
 function createDefaultChangeSpacesHandler(
-  object: Required<ShareToSpaceSavedObjectTarget>,
+  object: Required<Omit<ShareToSpaceSavedObjectTarget, 'icon'>>,
   spacesManager: SpacesManager,
   toastNotifications: ToastsStart
 ) {
@@ -104,14 +102,14 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       type: object.type,
       id: object.id,
       namespaces: object.namespaces,
-      icon: object.icon || DEFAULT_OBJECT_ICON,
+      icon: object.icon,
       title: object.title || `${object.type} [id=${object.id}]`,
       noun: object.noun || DEFAULT_OBJECT_NOUN,
     }),
     [object]
   );
   const {
-    flyoutIcon = DEFAULT_FLYOUT_ICON,
+    flyoutIcon,
     flyoutTitle = i18n.translate('xpack.spaces.management.shareToSpace.flyoutTitle', {
       defaultMessage: 'Edit spaces for {objectNoun}',
       values: { objectNoun: savedObjectTarget.noun },
@@ -128,7 +126,10 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     onClose = () => null,
   } = props;
 
-  const [shareOptions, setShareOptions] = useState<ShareOptions>({ selectedSpaceIds: [] });
+  const [shareOptions, setShareOptions] = useState<ShareOptions>({
+    selectedSpaceIds: [],
+    initiallySelectedSpaceIds: [],
+  });
   const [canShareToAllSpaces, setCanShareToAllSpaces] = useState<boolean>(false);
   const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
 
@@ -141,10 +142,12 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     Promise.all([spacesDataPromise, getPermissions])
       .then(([spacesData, permissions]) => {
         const activeSpaceId = !enableSpaceAgnosticBehavior && spacesData.activeSpaceId;
+        const selectedSpaceIds = savedObjectTarget.namespaces.filter(
+          (spaceId) => spaceId !== activeSpaceId
+        );
         setShareOptions({
-          selectedSpaceIds: savedObjectTarget.namespaces.filter(
-            (spaceId) => spaceId !== activeSpaceId
-          ),
+          selectedSpaceIds,
+          initiallySelectedSpaceIds: selectedSpaceIds,
         });
         setCanShareToAllSpaces(permissions.shareToAllSpaces);
         setSpacesState({
@@ -168,12 +171,13 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   ]);
 
   const getSelectionChanges = () => {
-    const activeSpace = spaces.find((space) => space.isActiveSpace);
-    if (!activeSpace && !enableSpaceAgnosticBehavior) {
+    if (!spaces.length) {
       return { isSelectionChanged: false, spacesToAdd: [], spacesToRemove: [] };
     }
+    const activeSpaceId =
+      !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
     const initialSelection = savedObjectTarget.namespaces.filter(
-      (spaceId) => spaceId !== activeSpace?.id && spaceId !== UNKNOWN_SPACE
+      (spaceId) => spaceId !== activeSpaceId && spaceId !== UNKNOWN_SPACE
     );
     const { selectedSpaceIds } = shareOptions;
     const filteredSelection = selectedSpaceIds.filter((x) => x !== UNKNOWN_SPACE);
@@ -196,17 +200,16 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       (spaceId) => !filteredSelection.includes(spaceId)
     );
 
-    const spacesArray = activeSpace ? [activeSpace.id] : []; // if we have an active space, it is automatically selected
+    const spacesArray = activeSpaceId ? [activeSpaceId] : []; // if we have an active space, it is automatically selected
     const spacesToAdd = isSharedToAllSpaces
       ? [ALL_SPACES_ID]
       : isUnsharedFromAllSpaces
       ? [...spacesArray, ...selectedSpacesToAdd]
       : selectedSpacesToAdd;
-    const spacesToRemove = isUnsharedFromAllSpaces
-      ? [ALL_SPACES_ID]
-      : isSharedToAllSpaces
-      ? [...spacesArray, ...initialSelection]
-      : selectedSpacesToRemove;
+    const spacesToRemove =
+      isUnsharedFromAllSpaces || !isSharedToAllSpaces
+        ? selectedSpacesToRemove
+        : [...spacesArray, ...initialSelection];
     return { isSelectionChanged, spacesToAdd, spacesToRemove };
   };
   const { isSelectionChanged, spacesToAdd, spacesToRemove } = getSelectionChanges();
@@ -277,9 +280,11 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     <EuiFlyout onClose={onClose} maxWidth={500} data-test-subj="share-to-space-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type={flyoutIcon} />
-          </EuiFlexItem>
+          {flyoutIcon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="m" type={flyoutIcon} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiTitle size="m">
               <h2>{flyoutTitle}</h2>
@@ -289,9 +294,11 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={savedObjectTarget.icon} />
-          </EuiFlexItem>
+          {savedObjectTarget.icon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={savedObjectTarget.icon} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiText>
               <p>{savedObjectTarget.title}</p>

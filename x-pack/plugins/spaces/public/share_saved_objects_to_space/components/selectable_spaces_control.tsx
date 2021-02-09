@@ -27,10 +27,11 @@ import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
 import { SpaceData } from '../../types';
 import { useSpaces } from '../../spaces_context';
+import { ShareOptions } from '../types';
 
 interface Props {
   spaces: SpaceData[];
-  selectedSpaceIds: string[];
+  shareOptions: ShareOptions;
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
   enableSpaceAgnosticBehavior: boolean;
@@ -75,19 +76,23 @@ const APPEND_FEATURE_IS_DISABLED = (
 export const SelectableSpacesControl = (props: Props) => {
   const {
     spaces,
-    selectedSpaceIds,
+    shareOptions,
     onChange,
     enableCreateNewSpaceLink,
     enableSpaceAgnosticBehavior,
   } = props;
   const { services } = useSpaces();
   const { application, docLinks } = services;
+  const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;
 
   const activeSpaceId =
     !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const options = spaces
-    .filter(({ id, isFeatureDisabled }) => !isFeatureDisabled || selectedSpaceIds.includes(id)) // filter out spaces that are not already selected and have the feature disabled in that space
+    .filter(
+      // filter out spaces that are not already selected and have the feature disabled in that space
+      ({ id, isFeatureDisabled }) => !isFeatureDisabled || initiallySelectedSpaceIds.includes(id)
+    )
     .sort(createSpacesComparator(activeSpaceId))
     .map<SpaceOption>((space) => {
       const checked = selectedSpaceIds.includes(space.id);

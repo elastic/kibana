@@ -6,7 +6,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { createElement, Component } from 'react';
 
 import { sortBy } from 'lodash';
 import moment from 'moment';
@@ -16,6 +16,7 @@ import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
 import { JobSpacesList } from '../../../../components/job_spaces_list';
+import { PLUGIN_ID } from '../../../../../../common/constants/app';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
@@ -24,6 +25,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
+
+const EmptyFunctionComponent = ({ children }) =>
+  createElement('EmptyFunctionComponent', { children });
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
@@ -96,7 +100,7 @@ export class JobsList extends Component {
   }
 
   render() {
-    const { loading, isManagementTable, spacesEnabled } = this.props;
+    const { loading, isManagementTable, spacesApi } = this.props;
     const selectionControls = {
       selectable: (job) => job.deleting !== true,
       selectableMessage: (selectable, rowItem) =>
@@ -243,7 +247,7 @@ export class JobsList extends Component {
     ];
 
     if (isManagementTable === true) {
-      if (spacesEnabled === true) {
+      if (spacesApi) {
         // insert before last column
         columns.splice(columns.length - 1, 0, {
           name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
@@ -251,6 +255,7 @@ export class JobsList extends Component {
           }),
           render: (item) => (
             <JobSpacesList
+              spacesApi={spacesApi}
               spaceIds={item.spaceIds}
               jobId={item.id}
               jobType="anomaly-detector"
@@ -327,35 +332,38 @@ export class JobsList extends Component {
     };
 
     const selectedJobsClass = this.props.selectedJobsCount ? 'jobs-selected' : '';
+    const ContextWrapper = spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent;
 
     return (
-      <EuiBasicTable
-        data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
-        loading={loading === true}
-        noItemsMessage={
-          loading
-            ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
-                defaultMessage: 'Loading jobs…',
-              })
-            : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
-                defaultMessage: 'No jobs found',
-              })
-        }
-        itemId="id"
-        className={`jobs-list-table ${selectedJobsClass}`}
-        items={pageOfItems}
-        columns={columns}
-        pagination={pagination}
-        onChange={this.onTableChange}
-        selection={isManagementTable ? undefined : selectionControls}
-        itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-        isExpandable={true}
-        sorting={sorting}
-        hasActions={true}
-        rowProps={(item) => ({
-          'data-test-subj': `mlJobListRow row-${item.id}`,
-        })}
-      />
+      <ContextWrapper feature={PLUGIN_ID}>
+        <EuiBasicTable
+          data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
+          loading={loading === true}
+          noItemsMessage={
+            loading
+              ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
+                  defaultMessage: 'Loading jobs…',
+                })
+              : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
+                  defaultMessage: 'No jobs found',
+                })
+          }
+          itemId="id"
+          className={`jobs-list-table ${selectedJobsClass}`}
+          items={pageOfItems}
+          columns={columns}
+          pagination={pagination}
+          onChange={this.onTableChange}
+          selection={isManagementTable ? undefined : selectionControls}
+          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+          isExpandable={true}
+          sorting={sorting}
+          hasActions={true}
+          rowProps={(item) => ({
+            'data-test-subj': `mlJobListRow row-${item.id}`,
+          })}
+        />
+      </ContextWrapper>
     );
   }
 }

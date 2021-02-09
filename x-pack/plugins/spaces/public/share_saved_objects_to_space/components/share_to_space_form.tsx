@@ -88,7 +88,7 @@ export const ShareToSpaceForm = (props: Props) => {
         spaces={spaces}
         objectNoun={objectNoun}
         canShareToAllSpaces={canShareToAllSpaces}
-        selectedSpaceIds={shareOptions.selectedSpaceIds}
+        shareOptions={shareOptions}
         onChange={(selection) => setSelectedSpaceIds(selection)}
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}
         enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}

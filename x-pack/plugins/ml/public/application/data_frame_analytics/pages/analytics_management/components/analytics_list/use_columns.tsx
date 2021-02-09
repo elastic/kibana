@@ -33,7 +33,7 @@ import {
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
-import { JobSpacesList } from '../../../../../components/job_spaces_list';
+// import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -281,24 +281,25 @@ export const useColumns = (
   ];
 
   if (isManagementTable === true) {
-    if (spacesEnabled === true) {
-      // insert before last column
-      columns.splice(columns.length - 1, 0, {
-        name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
-          defaultMessage: 'Spaces',
-        }),
-        render: (item: DataFrameAnalyticsListRow) =>
-          Array.isArray(item.spaceIds) ? (
-            <JobSpacesList
-              spaceIds={item.spaceIds ?? []}
-              jobId={item.id}
-              jobType="data-frame-analytics"
-              refresh={refresh}
-            />
-          ) : null,
-        width: '90px',
-      });
-    }
+    // Note: this code path is commented because it is currently unreachable, it will need to be refactored to use the SpacesApi
+    // if (spacesEnabled === true) {
+    //   // insert before last column
+    //   columns.splice(columns.length - 1, 0, {
+    //     name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
+    //       defaultMessage: 'Spaces',
+    //     }),
+    //     render: (item: DataFrameAnalyticsListRow) =>
+    //       Array.isArray(item.spaceIds) ? (
+    //         <JobSpacesList
+    //           spaceIds={item.spaceIds ?? []}
+    //           jobId={item.id}
+    //           jobType="data-frame-analytics"
+    //           refresh={refresh}
+    //         />
+    //       ) : null,
+    //     width: '90px',
+    //   });
+    // }
     // Remove actions if Ml not enabled in current space
     if (isMlEnabledInSpace === false) {
       columns.pop();

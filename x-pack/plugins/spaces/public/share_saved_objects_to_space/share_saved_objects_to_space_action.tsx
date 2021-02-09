@@ -61,6 +61,7 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
     return (
       <ShareToSpaceFlyout
         savedObjectTarget={savedObjectTarget}
+        flyoutIcon="share"
         onUpdate={() => (this.isDataChanged = true)}
         onClose={this.onClose}
         enableCreateCopyCallout={true}

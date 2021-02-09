@@ -5,64 +5,87 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { JobSpacesFlyout } from '../job_spaces_selector';
-import { JobType } from '../../../../common/types/saved_objects';
-import { useSpacesContext } from '../../contexts/spaces';
-import { Space, SpaceAvatar } from '../../../../../spaces/public';
-
-export const ALL_SPACES_ID = '*';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { ShareToSpaceFlyoutProps } from 'src/plugins/spaces_oss/public';
+import {
+  JobType,
+  ML_SAVED_OBJECT_TYPE,
+  SavedObjectResult,
+} from '../../../../common/types/saved_objects';
+import type { SpacesPluginStart } from '../../../../../spaces/public';
+import { ml } from '../../services/ml_api_service';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
+  spacesApi: SpacesPluginStart;
   spaceIds: string[];
   jobId: string;
   jobType: JobType;
   refresh(): void;
 }
 
-function filterUnknownSpaces(ids: string[]) {
-  return ids.filter((id) => id !== '?');
-}
+const ALL_SPACES_ID = '*';
+const objectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.objectNoun', {
+  defaultMessage: 'job',
+});
 
-export const JobSpacesList: FC<Props> = ({ spaceIds, jobId, jobType, refresh }) => {
-  const { allSpaces } = useSpacesContext();
+export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, refresh }) => {
+  const { displayErrorToast } = useToastNotificationService();
 
   const [showFlyout, setShowFlyout] = useState(false);
-  const [spaces, setSpaces] = useState<Space[]>([]);
 
-  useEffect(() => {
-    const tempSpaces = spaceIds.includes(ALL_SPACES_ID)
-      ? [{ id: ALL_SPACES_ID, name: ALL_SPACES_ID, disabledFeatures: [], color: '#DDD' }]
-      : allSpaces.filter((s) => spaceIds.includes(s.id));
-    setSpaces(tempSpaces);
-  }, [spaceIds, allSpaces]);
+  async function changeSpacesHandler(spacesToAdd: string[], spacesToRemove: string[]) {
+    if (spacesToAdd.length) {
+      const resp = await ml.savedObjects.assignJobToSpace(jobType, [jobId], spacesToAdd);
+      handleApplySpaces(resp);
+    }
+    if (spacesToRemove.length && !spacesToAdd.includes(ALL_SPACES_ID)) {
+      const resp = await ml.savedObjects.removeJobFromSpace(jobType, [jobId], spacesToRemove);
+      handleApplySpaces(resp);
+    }
+    onClose();
+  }
 
   function onClose() {
     setShowFlyout(false);
     refresh();
   }
 
+  function handleApplySpaces(resp: SavedObjectResult) {
+    Object.entries(resp).forEach(([id, { success, error }]) => {
+      if (success === false) {
+        const title = i18n.translate('xpack.ml.management.jobsSpacesList.updateSpaces.error', {
+          defaultMessage: 'Error updating {id}',
+          values: { id },
+        });
+        displayErrorToast(error, title);
+      }
+    });
+  }
+
+  const { SpaceList, ShareToSpaceFlyout } = spacesApi.ui.components;
+  const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
+    savedObjectTarget: {
+      type: ML_SAVED_OBJECT_TYPE,
+      id: jobId,
+      namespaces: spaceIds,
+      title: jobId,
+      noun: objectNoun,
+    },
+    enableSpaceAgnosticBehavior: true,
+    changeSpacesHandler,
+    onClose,
+  };
+
   return (
     <>
       <EuiButtonEmpty onClick={() => setShowFlyout(true)} style={{ height: 'auto' }}>
-        <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-          {spaces.map((space) => (
-            <EuiFlexItem grow={false} key={space.id}>
-              <SpaceAvatar space={space} size={'s'} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <SpaceList namespaces={spaceIds} displayLimit={0} enableSpaceAgnosticBehavior={true} />
       </EuiButtonEmpty>
-      {showFlyout && (
-        <JobSpacesFlyout
-          jobId={jobId}
-          spaceIds={filterUnknownSpaces(spaceIds)}
-          jobType={jobType}
-          onClose={onClose}
-        />
-      )}
+      {showFlyout && <ShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
     </>
   );
 };

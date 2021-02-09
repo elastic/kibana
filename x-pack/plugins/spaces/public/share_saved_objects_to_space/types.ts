@@ -9,6 +9,7 @@ import { SavedObjectsImportRetry, SavedObjectsImportResponse } from 'src/core/pu
 
 export interface ShareOptions {
   selectedSpaceIds: string[];
+  initiallySelectedSpaceIds: string[];
 }
 
 export type ImportRetry = Omit<SavedObjectsImportRetry, 'replaceReferences'>;

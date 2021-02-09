@@ -22,12 +22,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ALL_SPACES_ID } from '../../../common/constants';
 import { SpaceData } from '../../types';
+import { ShareOptions } from '../types';
 
 interface Props {
   spaces: SpaceData[];
   objectNoun: string;
   canShareToAllSpaces: boolean;
-  selectedSpaceIds: string[];
+  shareOptions: ShareOptions;
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
   enableSpaceAgnosticBehavior: boolean;
@@ -69,7 +70,7 @@ export const ShareModeControl = (props: Props) => {
     spaces,
     objectNoun,
     canShareToAllSpaces,
-    selectedSpaceIds,
+    shareOptions,
     onChange,
     enableCreateNewSpaceLink,
     enableSpaceAgnosticBehavior,
@@ -79,6 +80,7 @@ export const ShareModeControl = (props: Props) => {
     return <EuiLoadingSpinner />;
   }
 
+  const { selectedSpaceIds } = shareOptions;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const shareToAllSpaces = {
     id: 'shareToAllSpaces',
@@ -172,7 +174,7 @@ export const ShareModeControl = (props: Props) => {
       >
         <SelectableSpacesControl
           spaces={spaces}
-          selectedSpaceIds={selectedSpaceIds}
+          shareOptions={shareOptions}
           onChange={onChange}
           enableCreateNewSpaceLink={enableCreateNewSpaceLink}
           enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
