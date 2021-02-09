@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,7 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
       {
         defaultMessage:
-          'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
+          'How long it takes to reach the rollover criteria in the hot phase can vary.',
       }
     ),
     searchableSnapshotInHotPhase: {
@@ -187,11 +188,14 @@ export const i18nTexts = {
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
         defaultMessage: 'Cold phase',
       }),
+      delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
+        defaultMessage: 'Delete Data',
+      }),
     },
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
         defaultMessage:
-          'This phase is required. You are actively querying and writing to your index. For faster updates, you can roll over the index when it gets too big or too old.',
+          'You actively store and query data in the hot phase. All policies have a hot phase.',
       }),
       warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
         defaultMessage:
@@ -201,6 +205,13 @@ export const i18nTexts = {
         defaultMessage:
           'You are querying your index less frequently, so you can allocate shards on significantly less performant hardware. Because your queries are slower, you can reduce the number of replicas.',
       }),
+      delete: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
+        {
+          defaultMessage:
+            'You no longer need your index.  You can define when it is safe to delete it.',
+        }
+      ),
     },
   },
 };

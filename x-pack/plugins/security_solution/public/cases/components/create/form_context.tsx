@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { noop } from 'lodash/fp';
 import { schema, FormProps } from './schema';
 import { Form, useForm } from '../../../shared_imports';
 import {
@@ -36,7 +37,7 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
   const { connectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
   const { postCase } = usePostCase();
-  const { postPushToService } = usePostPushToService();
+  const { pushCaseToExternalService } = usePostPushToService();
 
   const connectorId = useMemo(
     () =>
@@ -65,12 +66,9 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
         });
 
         if (updatedCase?.id && dataConnectorId !== 'none') {
-          await postPushToService({
+          await pushCaseToExternalService({
             caseId: updatedCase.id,
-            caseServices: {},
             connector: connectorToUpdate,
-            alerts: {},
-            updateCase: noop,
           });
         }
 
@@ -79,7 +77,7 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
         }
       }
     },
-    [connectors, postCase, onSuccess, postPushToService]
+    [connectors, postCase, onSuccess, pushCaseToExternalService]
   );
 
   const { form } = useForm<FormProps>({

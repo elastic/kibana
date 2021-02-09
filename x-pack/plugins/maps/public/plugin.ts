@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
@@ -63,6 +64,7 @@ import {
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
 import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -75,6 +77,7 @@ export interface MapsPluginSetupDependencies {
 }
 
 export interface MapsPluginStartDependencies {
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   mapsFileUpload: FileUploadStartContract;

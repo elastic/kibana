@@ -1,17 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
 
-import { ActionResult, ActionType } from '../../../../actions/common';
 import { UserRT } from '../user';
 import { CaseConnectorRt, ConnectorMappingsRt, ESCaseConnector } from '../connectors';
-
-export type ActionConnector = ActionResult;
-export type ActionTypeConnector = ActionType;
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { orderBy } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -25,6 +27,7 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -64,8 +67,6 @@ export async function getTransactionGroupsForPage({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions
   );
@@ -121,7 +122,11 @@ export async function getTransactionGroupsForPage({
           latencyAggregationType,
           aggregation: bucket.latency,
         }),
-        throughput: bucket.doc_count / deltaAsMinutes,
+        throughput: calculateThroughput({
+          start,
+          end,
+          value: bucket.doc_count,
+        }),
         errorRate,
       };
     }) ?? [];

@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Fs from 'fs';
+import Path from 'path';
 
 import dedent from 'dedent';
 import Yaml from 'js-yaml';
-import { createFailError, ToolingLog } from '@kbn/dev-utils';
+import { createFailError, ToolingLog, CiStatsMetrics } from '@kbn/dev-utils';
 
-import { OptimizerConfig, getMetrics, Limits } from './optimizer';
+import { OptimizerConfig, Limits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
 const DEFAULT_BUDGET = 15000;
@@ -33,7 +34,7 @@ export function readLimits(): Limits {
 }
 
 export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
-  const limitBundleIds = Object.keys(config.limits.pageLoadAssetSize || {});
+  const limitBundleIds = Object.keys(readLimits().pageLoadAssetSize || {});
   const configBundleIds = config.bundles.map((b) => b.id);
 
   const missingBundleIds = diff(configBundleIds, limitBundleIds);
@@ -75,15 +76,21 @@ interface UpdateBundleLimitsOptions {
 }
 
 export function updateBundleLimits({ log, config, dropMissing }: UpdateBundleLimitsOptions) {
-  const metrics = getMetrics(log, config);
+  const limits = readLimits();
+  const metrics: CiStatsMetrics = config.bundles
+    .map((bundle) =>
+      JSON.parse(Fs.readFileSync(Path.resolve(bundle.outputDir, 'metrics.json'), 'utf-8'))
+    )
+    .flat()
+    .sort((a, b) => a.id.localeCompare(b.id));
 
   const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = dropMissing
     ? {}
-    : config.limits.pageLoadAssetSize ?? {};
+    : limits.pageLoadAssetSize ?? {};
 
-  for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
+  for (const metric of metrics) {
     if (metric.group === 'page load bundle size') {
-      const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
+      const existingLimit = limits.pageLoadAssetSize?.[metric.id];
       pageLoadAssetSize[metric.id] =
         existingLimit != null && existingLimit >= metric.value
           ? existingLimit

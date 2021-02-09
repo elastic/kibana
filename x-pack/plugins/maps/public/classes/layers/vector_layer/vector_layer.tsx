@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -80,6 +81,7 @@ export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
+  chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
 
 export interface IVectorLayer extends ILayer {
@@ -118,13 +120,23 @@ export class VectorLayer extends AbstractLayer {
     return layerDescriptor as VectorLayerDescriptor;
   }
 
-  constructor({ layerDescriptor, source, joins = [] }: VectorLayerArguments) {
+  constructor({
+    layerDescriptor,
+    source,
+    joins = [],
+    chartsPaletteServiceGetColor,
+  }: VectorLayerArguments) {
     super({
       layerDescriptor,
       source,
     });
     this._joins = joins;
-    this._style = new VectorStyle(layerDescriptor.style, source, this);
+    this._style = new VectorStyle(
+      layerDescriptor.style,
+      source,
+      this,
+      chartsPaletteServiceGetColor
+    );
   }
 
   getSource(): IVectorSource {

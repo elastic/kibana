@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -63,9 +63,10 @@ function getLogMock() {
 }
 export default ({ getService }: FtrProviderContext) => {
   const esClient = getService('es');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Kibana index migration', () => {
-    before(() => esClient.indices.delete({ index: '.migrate-*' }));
+    before(() => esDeleteAllIndices('.migrate-*'));
 
     it('Migrates an existing index that has never been migrated before', async () => {
       const index = '.migration-a';
@@ -99,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       // Test that unrelated index templates are unaffected
@@ -233,7 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
@@ -347,7 +348,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       const result = await Promise.all([
@@ -445,7 +446,7 @@ export default ({ getService }: FtrProviderContext) => {
         BAZ_TYPE, // must be registered for reference transforms to be applied to objects of this type
       ];
 
-      await createIndex({ esClient, index });
+      await createIndex({ esClient, index, esDeleteAllIndices });
       await createDocs({ esClient, index, docs: originalDocs });
 
       await migrateIndex({
@@ -554,8 +555,17 @@ export default ({ getService }: FtrProviderContext) => {
   });
 };
 
-async function createIndex({ esClient, index }: { esClient: ElasticsearchClient; index: string }) {
-  await esClient.indices.delete({ index: `${index}*` }, { ignore: [404] });
+async function createIndex({
+  esClient,
+  index,
+  esDeleteAllIndices,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  esDeleteAllIndices: (pattern: string) => Promise<void>;
+}) {
+  await esDeleteAllIndices(`${index}*`);
+
   const properties = {
     type: { type: 'keyword' },
     foo: { properties: { name: { type: 'keyword' } } },

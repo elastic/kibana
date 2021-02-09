@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -10,6 +11,7 @@ import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { EMSSettings } from '../common/ems_settings';
+import { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -82,3 +84,22 @@ export const getShareService = () => pluginsStart.share;
 
 export const getIsAllowByValueEmbeddables = () =>
   pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+
+export async function getChartsPaletteServiceGetColor(): Promise<
+  ((value: string) => string) | null
+> {
+  const paletteRegistry: PaletteRegistry | null = pluginsStart.charts
+    ? await pluginsStart.charts.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
+}

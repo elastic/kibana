@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -263,6 +264,40 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         const { jobsWithTimerange } = jobServiceProvider(client, mlClient);
         const resp = await jobsWithTimerange();
 
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {post} /api/ml/jobs/job_for_cloning Get job for cloning
+   * @apiName GetJobForCloning
+   * @apiDescription Get the job configuration with auto generated fields excluded for cloning
+   *
+   * @apiSchema (body) jobIdSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/jobs/job_for_cloning',
+      validate: {
+        body: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { getJobForCloning } = jobServiceProvider(client, mlClient);
+        const { jobId } = request.body;
+
+        const resp = await getJobForCloning(jobId);
         return response.ok({
           body: resp,
         });

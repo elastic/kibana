@@ -1,37 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+
 import React, { FunctionComponent, memo } from 'react';
-import {
-  EuiIcon,
-  EuiIconProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
 import { PhasesExceptDelete } from '../../../../../../common/types';
 
 import {
   calculateRelativeFromAbsoluteMilliseconds,
-  normalizeTimingsToHumanReadable,
   PhaseAgeInMilliseconds,
   AbsoluteTimings,
 } from '../../lib';
 
-import './timeline.scss';
-import { InfinityIconSvg } from './infinity_icon.svg';
+import { InfinityIcon } from '../infinity_icon';
+
 import { TimelinePhaseText } from './components';
 
 const exists = (v: unknown) => v != null;
 
-const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
-  <EuiIcon type={InfinityIconSvg} {...props} />
-);
+import './timeline.scss';
 
 const toPercent = (n: number, total: number) => (n / total) * 100;
 
@@ -53,6 +46,12 @@ const msTimeToOverallPercent = (ms: number, totalMs: number) => {
 const SCORE_BUFFER_AMOUNT = 50;
 
 const i18nTexts = {
+  title: i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
+    defaultMessage: 'Policy Summary',
+  }),
+  description: i18n.translate('xpack.indexLifecycleMgmt.timeline.description', {
+    defaultMessage: 'This policy moves data through the following phases.',
+  }),
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
     defaultMessage: 'Hot phase',
   }),
@@ -72,6 +71,11 @@ const i18nTexts = {
   deleteIcon: {
     toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
       defaultMessage: 'Policy deletes the index after lifecycle phases complete.',
+    }),
+  },
+  foreverIcon: {
+    ariaLabel: i18n.translate('xpack.indexLifecycleMgmt.timeline.foreverIconToolTipContent', {
+      defaultMessage: 'Forever',
     }),
   },
 };
@@ -123,27 +127,23 @@ export const Timeline: FunctionComponent<Props> = memo(
     };
 
     const phaseAgeInMilliseconds = calculateRelativeFromAbsoluteMilliseconds(absoluteTimings);
-    const humanReadableTimings = normalizeTimingsToHumanReadable(phaseAgeInMilliseconds);
 
     const widths = calculateWidths(phaseAgeInMilliseconds);
 
     const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
       phaseAgeInMilliseconds.phases[phase] === Infinity ? (
-        <InfinityIcon aria-label={humanReadableTimings[phase]} />
-      ) : (
-        humanReadableTimings[phase]
-      );
+        <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
+      ) : null;
 
     return (
       <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
-                defaultMessage: 'Policy Timeline',
-              })}
-            </h2>
+            <h2>{i18nTexts.title}</h2>
           </EuiTitle>
+          <EuiText size="s" color="subdued">
+            {i18nTexts.description}
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <div
@@ -166,22 +166,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                   >
                     <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
                     <TimelinePhaseText
-                      phaseName={
-                        isUsingRollover ? (
-                          <>
-                            {i18nTexts.hotPhase}
-                            &nbsp;
-                            <div
-                              className="ilmTimeline__rolloverIcon"
-                              data-test-subj="timelineHotPhaseRolloverToolTip"
-                            >
-                              <EuiIconTip type="iInCircle" content={i18nTexts.rolloverTooltip} />
-                            </div>
-                          </>
-                        ) : (
-                          i18nTexts.hotPhase
-                        )
-                      }
+                      phaseName={i18nTexts.hotPhase}
                       durationInPhase={getDurationInPhaseContent('hot')}
                     />
                   </div>

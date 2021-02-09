@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { units, px, truncate, unit } from '../../../../style/variables';
 import { HttpStatusBadge } from '../HttpStatusBadge';
 
-const HttpInfoBadge = (styled(EuiBadge)`
+const HttpInfoBadge = euiStyled(EuiBadge)`
   margin-right: ${px(units.quarter)};
-` as unknown) as typeof EuiBadge;
+`;
 
-const Url = styled('span')`
+const Url = euiStyled('span')`
   display: inline-block;
   vertical-align: bottom;
   ${truncate(px(unit * 24))};
@@ -26,7 +27,7 @@ interface HttpInfoProps {
   url: string;
 }
 
-const Span = styled('span')`
+const Span = euiStyled('span')`
   white-space: nowrap;
 `;
 

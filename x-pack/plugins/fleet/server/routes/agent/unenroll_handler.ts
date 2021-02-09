@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RequestHandler } from 'src/core/server';
@@ -23,7 +24,7 @@ export const postAgentUnenrollHandler: RequestHandler<
     if (request.body?.force === true) {
       await AgentService.forceUnenrollAgent(soClient, esClient, request.params.agentId);
     } else {
-      await AgentService.unenrollAgent(soClient, request.params.agentId);
+      await AgentService.unenrollAgent(soClient, esClient, request.params.agentId);
     }
 
     const body: PostAgentUnenrollResponse = {};

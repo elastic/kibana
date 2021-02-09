@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FC, useCallback } from 'react';
 
 import { AppMountParameters, CoreSetup } from 'kibana/public';
@@ -21,7 +23,7 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
 import {
   LensEmbeddableInput,
   LensByReferenceInput,
@@ -55,7 +57,7 @@ export async function mountApp(
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
   const historyLocationState = params.history.location.state as HistoryLocationState;
-  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   const lensServices: LensAppServices = {
     data,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { Observable } from 'rxjs';
@@ -23,6 +24,7 @@ import {
   getTotalLoaded,
   searchUsageObserver,
   shimAbortSignal,
+  shimHitsTotal,
 } from '../../../../../src/plugins/data/server';
 import type { IAsyncSearchOptions } from '../../common';
 import { pollSearch } from '../../common';
@@ -33,10 +35,12 @@ import {
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { AsyncSearchResponse } from './types';
+import { ConfigSchema } from '../../config';
 import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>,
+  config: ConfigSchema,
+  legacyConfig$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy<IEsSearchRequest> => {
@@ -57,13 +61,17 @@ export const enhancedEsSearchStrategyProvider = (
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams()
-        : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
+        ? getDefaultAsyncGetParams(options)
+        : {
+            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, config, options)),
+            ...request.params,
+          };
       const promise = id
         ? client.get<AsyncSearchResponse>({ ...params, id })
         : client.submit<AsyncSearchResponse>(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
-      return toAsyncKibanaSearchResponse(body);
+      const response = shimHitsTotal(body.response, options);
+      return toAsyncKibanaSearchResponse({ ...body, response });
     };
 
     const cancel = async () => {
@@ -86,12 +94,12 @@ export const enhancedEsSearchStrategyProvider = (
     options: ISearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
-    const config = await config$.pipe(first()).toPromise();
+    const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
     const { body, index, ...params } = request.params!;
     const method = 'POST';
     const path = encodeURI(`/${index}/_rollup_search`);
     const querystring = {
-      ...getShardTimeout(config),
+      ...getShardTimeout(legacyConfig),
       ...(await getIgnoreThrottled(uiSettingsClient)),
       ...(await getDefaultSearchParams(uiSettingsClient)),
       ...params,
@@ -108,7 +116,7 @@ export const enhancedEsSearchStrategyProvider = (
       const esResponse = await shimAbortSignal(promise, options?.abortSignal);
       const response = esResponse.body as SearchResponse<any>;
       return {
-        rawResponse: response,
+        rawResponse: shimHitsTotal(response, options),
         ...getTotalLoaded(response),
       };
     } catch (e) {

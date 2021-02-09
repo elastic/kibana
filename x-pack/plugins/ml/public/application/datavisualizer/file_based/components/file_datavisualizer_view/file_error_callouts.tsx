@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -11,7 +12,7 @@ import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elast
 
 import numeral from '@elastic/numeral';
 import { ErrorResponse } from '../../../../../../common/types/errors';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../../common/constants/file_datavisualizer';
+import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../../../file_upload/common';
 
 interface FileTooLargeProps {
   fileSize: number;

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ValuesType } from 'utility-types';
 import { merge } from 'lodash';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/elasticsearch_fieldnames';
@@ -13,6 +15,7 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getMetrics } from './get_metrics';
 import { getDestinationMap } from './get_destination_map';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 
 export type ServiceDependencyItem = {
   name: string;
@@ -51,7 +54,6 @@ export async function getServiceDependencies({
   numBuckets: number;
 }): Promise<ServiceDependencyItem[]> {
   const { start, end } = setup;
-
   const [allMetrics, destinationMap] = await Promise.all([
     getMetrics({
       setup,
@@ -134,8 +136,6 @@ export async function getServiceDependencies({
       }
     );
 
-    const deltaAsMinutes = (end - start) / 60 / 1000;
-
     const destMetrics = {
       latency: {
         value:
@@ -150,11 +150,18 @@ export async function getServiceDependencies({
       throughput: {
         value:
           mergedMetrics.value.count > 0
-            ? mergedMetrics.value.count / deltaAsMinutes
+            ? calculateThroughput({
+                start,
+                end,
+                value: mergedMetrics.value.count,
+              })
             : null,
         timeseries: mergedMetrics.timeseries.map((point) => ({
           x: point.x,
-          y: point.count > 0 ? point.count / deltaAsMinutes : null,
+          y:
+            point.count > 0
+              ? calculateThroughput({ start, end, value: point.count })
+              : null,
         })),
       },
       errorRate: {
@@ -191,19 +198,26 @@ export async function getServiceDependencies({
   });
 
   const latencySums = metricsByResolvedAddress
-    .map((metrics) => metrics.latency.value)
+    .map(
+      (metric) => (metric.latency.value ?? 0) * (metric.throughput.value ?? 0)
+    )
     .filter(isFiniteNumber);
 
   const minLatencySum = Math.min(...latencySums);
   const maxLatencySum = Math.max(...latencySums);
 
-  return metricsByResolvedAddress.map((metric) => ({
-    ...metric,
-    impact:
-      metric.latency.value === null
-        ? 0
-        : ((metric.latency.value - minLatencySum) /
+  return metricsByResolvedAddress.map((metric) => {
+    const impact =
+      isFiniteNumber(metric.latency.value) &&
+      isFiniteNumber(metric.throughput.value)
+        ? ((metric.latency.value * metric.throughput.value - minLatencySum) /
             (maxLatencySum - minLatencySum)) *
-          100,
-  }));
+          100
+        : 0;
+
+    return {
+      ...metric,
+      impact,
+    };
+  });
 }
