@@ -12,6 +12,7 @@ import { setMockValues, setMockActions } from '../__mocks__';
 import React from 'react';
 
 import { Redirect } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
