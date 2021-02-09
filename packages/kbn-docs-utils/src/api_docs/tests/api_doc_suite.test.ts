@@ -16,6 +16,7 @@ import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, PluginApi, TextWithLinks, TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { getPluginApi } from '../get_plugin_api';
+import { groupPluginApi } from '../utils';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -92,7 +93,8 @@ beforeAll(() => {
 });
 
 it('Setup type is extracted', () => {
-  expect(doc.client.setup).toBeDefined();
+  const grouped = groupPluginApi(doc.client);
+  expect(grouped.setup).toBeDefined();
 });
 
 it('service mdx file was created', () => {
@@ -100,8 +102,9 @@ it('service mdx file was created', () => {
 });
 
 it('Setup type has comment', () => {
-  expect(doc.client.setup!.description).toBeDefined();
-  expect(doc.client.setup!.description).toMatchInlineSnapshot(`
+  const grouped = groupPluginApi(doc.client);
+  expect(grouped.setup!.description).toBeDefined();
+  expect(grouped.setup!.description).toMatchInlineSnapshot(`
     Array [
       "
     Access setup functionality from your plugin's setup function by adding the example
@@ -120,7 +123,7 @@ it('Setup type has comment', () => {
 });
 
 it('const exported from common folder is correct', () => {
-  const fooConst = doc.common.misc.find((c) => c.label === 'commonFoo');
+  const fooConst = doc.common.find((c) => c.label === 'commonFoo');
   expect(fooConst).toBeDefined();
 
   expect(fooConst!.source.path.replace(Path.sep, '/')).toContain(
@@ -130,20 +133,24 @@ it('const exported from common folder is correct', () => {
 });
 
 describe('functions', () => {
+  it('function referencing missing type has link removed', () => {
+    const fn = doc.client.find((c) => c.label === 'fnWithNonExportedRef');
+    expect(linkCount(fn?.signature!)).toBe(0);
+  });
   it('arrow function is exported correctly', () => {
-    const fn = doc.client.functions.find((c) => c.label === 'arrowFn');
+    const fn = doc.client.find((c) => c.label === 'arrowFn');
     // Using the same data as the not an arrow function so this is refactored.
     fnIsCorrect(fn);
   });
 
   it('non arrow function is exported correctly', () => {
-    const fn = doc.client.functions.find((c) => c.label === 'notAnArrowFn');
+    const fn = doc.client.find((c) => c.label === 'notAnArrowFn');
     // Using the same data as the arrow function so this is refactored.
     fnIsCorrect(fn);
   });
 
   it('crazyFunction is typed correctly', () => {
-    const fn = doc.client.functions!.find((c) => c.label === 'crazyFunction');
+    const fn = doc.client!.find((c) => c.label === 'crazyFunction');
 
     expect(fn).toBeDefined();
 
@@ -166,7 +173,7 @@ describe('functions', () => {
 
 describe('objects', () => {
   it('Object exported correctly', () => {
-    const obj = doc.client.objects.find((c) => c.label === 'aPretendNamespaceObj');
+    const obj = doc.client.find((c) => c.label === 'aPretendNamespaceObj');
     expect(obj).toBeDefined();
 
     const fn = obj?.children?.find((c) => c.label === 'notAnArrowFn');
@@ -201,19 +208,19 @@ describe('objects', () => {
 
 describe('Misc types', () => {
   it('Explicitly typed array is returned with the correct type', () => {
-    const aStrArray = doc.client.misc.find((c) => c.label === 'aStrArray');
+    const aStrArray = doc.client.find((c) => c.label === 'aStrArray');
     expect(aStrArray).toBeDefined();
     expect(aStrArray?.type).toBe(TypeKind.ArrayKind);
   });
 
   it('Implicitly typed array is returned with the correct type', () => {
-    const aNumArray = doc.client.misc.find((c) => c.label === 'aNumArray');
+    const aNumArray = doc.client.find((c) => c.label === 'aNumArray');
     expect(aNumArray).toBeDefined();
     expect(aNumArray?.type).toBe(TypeKind.ArrayKind);
   });
 
   it('Explicitly typed string is returned with the correct type', () => {
-    const aStr = doc.client.misc.find((c) => c.label === 'aStr');
+    const aStr = doc.client.find((c) => c.label === 'aStr');
     expect(aStr).toBeDefined();
     expect(aStr?.type).toBe(TypeKind.StringKind);
     // signature would be the same as type, so it should be removed.
@@ -221,20 +228,20 @@ describe('Misc types', () => {
   });
 
   it('Implicitly typed number is returned with the correct type', () => {
-    const aNum = doc.client.misc.find((c) => c.label === 'aNum');
+    const aNum = doc.client.find((c) => c.label === 'aNum');
     expect(aNum).toBeDefined();
     expect(aNum?.type).toBe(TypeKind.NumberKind);
   });
 
   it('aUnionProperty is exported as a CompoundType with a call signature', () => {
-    const prop = doc.client.misc.find((c) => c.label === 'aUnionProperty');
+    const prop = doc.client.find((c) => c.label === 'aUnionProperty');
     expect(prop).toBeDefined();
     expect(prop?.type).toBe(TypeKind.CompoundTypeKind);
     expect(linkCount(prop?.signature!)).toBe(1);
   });
 
   it('Function type is exported correctly', () => {
-    const fnType = doc.client.misc.find((c) => c.label === 'FnWithGeneric');
+    const fnType = doc.client.find((c) => c.label === 'FnWithGeneric');
     expect(fnType).toBeDefined();
     expect(fnType?.type).toBe(TypeKind.TypeKind);
     expect(fnType?.signature!).toMatchInlineSnapshot(`
@@ -251,7 +258,7 @@ describe('Misc types', () => {
 
 describe('interfaces and classes', () => {
   it('Basic interface exported correctly', () => {
-    const anInterface = doc.client.interfaces.find((c) => c.label === 'IReturnAReactComponent');
+    const anInterface = doc.client.find((c) => c.label === 'IReturnAReactComponent');
     expect(anInterface).toBeDefined();
 
     // Make sure it doesn't include a self referential link.
@@ -259,7 +266,7 @@ describe('interfaces and classes', () => {
   });
 
   it('Interface which extends exported correctly', () => {
-    const exampleInterface = doc.client.interfaces.find((c) => c.label === 'ExampleInterface');
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
     expect(exampleInterface?.signature).toBeDefined();
     expect(exampleInterface?.type).toBe(TypeKind.InterfaceKind);
@@ -284,7 +291,7 @@ describe('interfaces and classes', () => {
   });
 
   it('Non arrow function on interface is exported as function type', () => {
-    const exampleInterface = doc.client.interfaces.find((c) => c.label === 'ExampleInterface');
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
     const fn = exampleInterface!.children?.find((c) => c.label === 'aFn');
@@ -293,7 +300,7 @@ describe('interfaces and classes', () => {
   });
 
   it('Class exported correctly', () => {
-    const clss = doc.client.classes.find((c) => c.label === 'CrazyClass');
+    const clss = doc.client.find((c) => c.label === 'CrazyClass');
     expect(clss).toBeDefined();
     expect(clss?.signature).toBeDefined();
     expect(clss?.type).toBe(TypeKind.ClassKind);
@@ -301,6 +308,8 @@ describe('interfaces and classes', () => {
       Array [
         Object {
           "docId": "kibPluginAPluginApi",
+          "pluginId": "pluginA",
+          "scope": "public",
           "section": "def-public.CrazyClass",
           "text": "CrazyClass",
         },
@@ -311,7 +320,7 @@ describe('interfaces and classes', () => {
   });
 
   it('Function with generic inside interface is exported with function type', () => {
-    const exampleInterface = doc.client.interfaces.find((c) => c.label === 'ExampleInterface');
+    const exampleInterface = doc.client.find((c) => c.label === 'ExampleInterface');
     expect(exampleInterface).toBeDefined();
 
     const fnWithGeneric = exampleInterface?.children?.find((c) => c.label === 'aFnWithGen');

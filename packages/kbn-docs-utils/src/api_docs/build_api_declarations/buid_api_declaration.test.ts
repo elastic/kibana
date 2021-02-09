@@ -8,7 +8,6 @@
 
 import Path from 'path';
 import { Project, Node } from 'ts-morph';
-import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 
 import { TypeKind, ApiScope } from '../types';
@@ -30,15 +29,7 @@ function getNodeName(node: Node): string {
 }
 
 beforeAll(() => {
-  const tsConfigFilePath = Path.resolve(
-    REPO_ROOT,
-    'src',
-    'dev',
-    'build_api_docs',
-    'tests',
-    'src',
-    'tsconfig.json'
-  );
+  const tsConfigFilePath = Path.resolve(__dirname, '../tests/__fixtures__/src/tsconfig.json');
   const project = new Project({
     tsConfigFilePath,
   });

@@ -7,13 +7,7 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import {
-  addApiDeclarationToScope,
-  createEmptyScope,
-  getServiceForPath,
-  mergeScopeApi,
-  snakeToCamel,
-} from '../utils';
+import { getServiceForPath, snakeToCamel } from '../utils';
 import { PluginApi, ApiDeclaration } from '../types';
 import { writePluginDoc } from './write_plugin_mdx_docs';
 
@@ -30,13 +24,13 @@ export function splitApisByFolder(pluginDoc: PluginApi): PluginApi[] {
   const pluginDocDefsByFolder: { [key: string]: PluginApi } = {};
   const mainPluginDocDef = createServicePluginDocDef(pluginDoc);
 
-  mergeScopeApi(pluginDoc.client).forEach((dec: ApiDeclaration) => {
+  pluginDoc.client.forEach((dec: ApiDeclaration) => {
     addSection(dec, 'client', mainPluginDocDef, pluginDocDefsByFolder, pluginDoc.serviceFolders!);
   });
-  mergeScopeApi(pluginDoc.server).forEach((dec: ApiDeclaration) => {
+  pluginDoc.server.forEach((dec: ApiDeclaration) => {
     addSection(dec, 'server', mainPluginDocDef, pluginDocDefsByFolder, pluginDoc.serviceFolders!);
   });
-  mergeScopeApi(pluginDoc.common).forEach((dec: ApiDeclaration) => {
+  pluginDoc.common.forEach((dec: ApiDeclaration) => {
     addSection(dec, 'common', mainPluginDocDef, pluginDocDefsByFolder, pluginDoc.serviceFolders!);
   });
 
@@ -56,17 +50,17 @@ function addSection(
     if (!pluginServices[service]) {
       pluginServices[service] = createServicePluginDocDef(mainPluginDocDef, service);
     }
-    addApiDeclarationToScope(dec, pluginServices[service][scope]);
+    pluginServices[service][scope].push(dec);
   } else {
-    addApiDeclarationToScope(dec, mainPluginDocDef[scope]);
+    mainPluginDocDef[scope].push(dec);
   }
 }
 
 function createServicePluginDocDef(pluginDoc: PluginApi, service?: string): PluginApi {
   return {
     id: service ? pluginDoc.id + '.' + service : pluginDoc.id,
-    client: createEmptyScope(),
-    server: createEmptyScope(),
-    common: createEmptyScope(),
+    client: [],
+    server: [],
+    common: [],
   };
 }

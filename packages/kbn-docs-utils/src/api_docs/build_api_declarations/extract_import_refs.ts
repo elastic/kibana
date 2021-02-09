@@ -33,8 +33,6 @@ export function extractImportReferences(
   let pos = 0;
   let textSegment: string | undefined = text;
   const max = 5;
-
-  log.debug('Extracting references from ' + text);
   while (textSegment) {
     pos++;
     if (pos > max) break;
@@ -66,6 +64,8 @@ export function extractImportReferences(
           apiName: name,
         });
         texts.push({
+          pluginId: plugin.manifest.id,
+          scope: getScopeFromPath(path, log),
           docId: getPluginApiDocId(plugin.manifest.id, plugin.manifest.serviceFolders, path),
           section,
           text: name,

@@ -65,11 +65,9 @@ export interface Zed = { zed: string }`
 
   expect(mainDoc).toBeDefined();
 
-  expect(mainDoc?.client.misc.length).toBe(1);
-
   const serviceDoc = docs.find((d) => d.id === 'example.aService');
 
   expect(serviceDoc).toBeDefined();
 
-  expect(serviceDoc?.client.interfaces.length).toBe(1);
+  expect(serviceDoc?.client.length).toBe(3);
 });

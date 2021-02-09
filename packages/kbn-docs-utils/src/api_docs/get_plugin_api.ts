@@ -9,12 +9,11 @@
 import Path from 'path';
 import { Node, Project } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
-import { ApiScope, Lifecycle, ScopeApi } from './types';
+import { ApiScope, Lifecycle } from './types';
 import { ApiDeclaration, PluginApi } from './types';
 import { buildApiDeclaration } from './build_api_declarations/build_api_declaration';
 import { getDeclarationNodesForPluginScope } from './get_declaration_nodes_for_plugin';
 import { getSourceFileMatching } from './tsmorph_utils';
-import { addApiDeclarationToScope, createEmptyScope } from './utils';
 
 /**
  * Collects all the information neccessary to generate this plugins mdx api file(s).
@@ -25,9 +24,9 @@ export function getPluginApi(
   plugins: KibanaPlatformPlugin[],
   log: ToolingLog
 ): PluginApi {
-  const client = getScopeApi(project, plugin, ApiScope.CLIENT, plugins, log);
-  const server = getScopeApi(project, plugin, ApiScope.SERVER, plugins, log);
-  const common = getScopeApi(project, plugin, ApiScope.COMMON, plugins, log);
+  const client = getDeclarations(project, plugin, ApiScope.CLIENT, plugins, log);
+  const server = getDeclarations(project, plugin, ApiScope.SERVER, plugins, log);
+  const common = getDeclarations(project, plugin, ApiScope.COMMON, plugins, log);
   return {
     id: plugin.manifest.id,
     client,
@@ -42,13 +41,13 @@ export function getPluginApi(
  * @returns All exported ApiDeclarations for the given plugin and scope (client, server, common), broken into
  * groups of typescript kinds (functions, classes, interfaces, etc).
  */
-function getScopeApi(
+function getDeclarations(
   project: Project,
   plugin: KibanaPlatformPlugin,
   scope: ApiScope,
   plugins: KibanaPlatformPlugin[],
   log: ToolingLog
-): ScopeApi {
+): ApiDeclaration[] {
   const nodes = getDeclarationNodesForPluginScope(project, plugin, scope, log);
 
   const contractTypes = getContractTypeNames(project, plugin, scope);
@@ -69,21 +68,7 @@ function getScopeApi(
   }, []);
 
   // We have all the ApiDeclarations, now lets group them by typescript kinds.
-  return groupPluginApi(declarations);
-}
-
-/**
- * Groups ApiDeclarations by typescript kind - classes, functions, enums, etc, so they
- * can be displayed separately in the mdx files.
- */
-function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
-  const scope = createEmptyScope();
-
-  declarations.forEach((declaration) => {
-    addApiDeclarationToScope(declaration, scope);
-  });
-
-  return scope;
+  return declarations;
 }
 
 /**

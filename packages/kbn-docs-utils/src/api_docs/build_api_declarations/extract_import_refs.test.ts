@@ -9,7 +9,7 @@
 import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
 import { getPluginApiDocId } from '../utils';
 import { extractImportReferences } from './extract_import_refs';
-import { Reference } from '../types';
+import { ApiScope, Reference } from '../types';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
 
 const plugins: KibanaPlatformPlugin[] = [getKibanaPlatformPlugin('pluginA', 'plugin_a')];
@@ -37,6 +37,8 @@ it('test extractImportReference', () => {
     text: 'Bar',
     docId: getPluginApiDocId('plugin_a'),
     section: 'def-public.Bar',
+    pluginId: 'pluginA',
+    scope: ApiScope.CLIENT,
   });
 });
 

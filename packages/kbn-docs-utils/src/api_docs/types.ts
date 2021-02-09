@@ -67,9 +67,9 @@ export interface ScopeApi {
 export interface PluginApi {
   id: string;
   serviceFolders?: readonly string[];
-  client: ScopeApi;
-  server: ScopeApi;
-  common: ScopeApi;
+  client: ApiDeclaration[];
+  server: ApiDeclaration[];
+  common: ApiDeclaration[];
 }
 
 /**
@@ -94,6 +94,8 @@ export type TextWithLinks = Array<string | Reference>;
  * The information neccessary to build a DocLink.
  */
 export interface Reference {
+  pluginId: string;
+  scope: ApiScope;
   docId: string;
   section: string;
   text: string;

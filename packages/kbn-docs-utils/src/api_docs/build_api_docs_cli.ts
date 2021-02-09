@@ -15,8 +15,15 @@ import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
 import { ApiDeclaration, PluginApi } from './types';
-import { mergeScopeApi } from './utils';
 import { findPlugins } from './find_plugins';
+import { removeBrokenLinks } from './utils';
+
+export interface PluginInfo {
+  apiCount: number;
+  apiCountMissingComments: number;
+  id: string;
+  missingApiItems: string[];
+}
 
 export function runBuildApiDocsCli() {
   run(
@@ -25,11 +32,9 @@ export function runBuildApiDocsCli() {
 
       const plugins = findPlugins();
 
-      const pluginInfos: Array<{
-        apiCount: number;
-        apiCountMissingComments: number;
-        plugin: string;
-      }> = [];
+      const pluginInfos: {
+        [key: string]: PluginInfo;
+      } = {};
 
       const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
       if (!Fs.existsSync(outputFolder)) {
@@ -45,17 +50,32 @@ export function runBuildApiDocsCli() {
         });
       }
 
+      const pluginApiMap: { [key: string]: PluginApi } = {};
+      plugins.map((plugin) => {
+        pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log);
+      });
+
+      const missingApiItems: { [key: string]: string[] } = {};
+
       plugins.forEach((plugin) => {
-        const doc = getPluginApi(project, plugin, plugins, log);
+        const id = plugin.manifest.id;
+        const pluginApi = pluginApiMap[id];
+        removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap);
+      });
+
+      plugins.forEach((plugin) => {
+        const id = plugin.manifest.id;
+        const pluginApi = pluginApiMap[id];
         const info = {
-          plugin: plugin.manifest.id,
-          apiCount: countApiForPlugin(doc),
-          apiCountMissingComments: countMissingCommentsApiForPlugin(doc),
+          id,
+          apiCount: countApiForPlugin(pluginApi),
+          apiCountMissingComments: countMissingCommentsApiForPlugin(pluginApi),
+          missingApiItems: missingApiItems[id],
         };
 
         if (info.apiCount > 0) {
-          writePluginDocs(outputFolder, doc, log);
-          pluginInfos.push(info);
+          writePluginDocs(outputFolder, pluginApi, log);
+          pluginInfos[id] = info;
         }
       });
 
@@ -84,13 +104,13 @@ function getTsProject(repoPath: string) {
 
 function countMissingCommentsApiForPlugin(doc: PluginApi) {
   return (
-    mergeScopeApi(doc.client).reduce((sum, def) => {
+    doc.client.reduce((sum, def) => {
       return sum + countMissingCommentsForApi(def);
     }, 0) +
-    mergeScopeApi(doc.server).reduce((sum, def) => {
+    doc.server.reduce((sum, def) => {
       return sum + countMissingCommentsForApi(def);
     }, 0) +
-    mergeScopeApi(doc.common).reduce((sum, def) => {
+    doc.common.reduce((sum, def) => {
       return sum + countMissingCommentsForApi(def);
     }, 0)
   );
@@ -110,13 +130,13 @@ function countMissingCommentsForApi(doc: ApiDeclaration): number {
 
 function countApiForPlugin(doc: PluginApi) {
   return (
-    mergeScopeApi(doc.client).reduce((sum, def) => {
+    doc.client.reduce((sum, def) => {
       return sum + countApi(def);
     }, 0) +
-    mergeScopeApi(doc.server).reduce((sum, def) => {
+    doc.server.reduce((sum, def) => {
       return sum + countApi(def);
     }, 0) +
-    mergeScopeApi(doc.common).reduce((sum, def) => {
+    doc.common.reduce((sum, def) => {
       return sum + countApi(def);
     }, 0)
   );

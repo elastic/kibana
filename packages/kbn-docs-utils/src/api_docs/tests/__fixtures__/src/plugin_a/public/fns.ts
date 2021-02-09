@@ -68,3 +68,9 @@ export const crazyFunction = (
   { fn }: { fn: (foo: { param: string }) => number },
   { str }: { str: string }
 ) => () => () => fn({ param: str });
+
+interface ImNotExported {
+  foo: string;
+}
+
+export const fnWithNonExportedRef = (a: ImNotExported) => 'shi';

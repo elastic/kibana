@@ -11,7 +11,13 @@ import fs from 'fs';
 import Path from 'path';
 import dedent from 'dedent';
 import { PluginApi, ScopeApi } from '../types';
-import { countScopeApi, getPluginApiDocId, snakeToCamel, camelToSnake } from '../utils';
+import {
+  countScopeApi,
+  getPluginApiDocId,
+  snakeToCamel,
+  camelToSnake,
+  groupPluginApi,
+} from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
 
 /**
@@ -32,9 +38,7 @@ export function writePluginDocs(folder: string, doc: PluginApi, log: ToolingLog)
 }
 
 function hasPublicApi(doc: PluginApi): boolean {
-  return (
-    countScopeApi(doc.client) > 0 || countScopeApi(doc.server) > 0 || countScopeApi(doc.common) > 0
-  );
+  return doc.client.length > 0 || doc.server.length > 0 || doc.common.length > 0;
 }
 
 /**
@@ -74,11 +78,17 @@ import ${json} from './${fileName}.json';
 
 `) + '\n\n';
 
-  fs.writeFileSync(Path.resolve(folder, fileName + '.json'), JSON.stringify(doc));
+  const scopedDoc = {
+    ...doc,
+    client: groupPluginApi(doc.client),
+    common: groupPluginApi(doc.common),
+    server: groupPluginApi(doc.server),
+  };
+  fs.writeFileSync(Path.resolve(folder, fileName + '.json'), JSON.stringify(scopedDoc));
 
-  mdx += scopApiToMdx(doc.client, 'Client', json, 'client');
-  mdx += scopApiToMdx(doc.server, 'Server', json, 'server');
-  mdx += scopApiToMdx(doc.common, 'Common', json, 'common');
+  mdx += scopApiToMdx(scopedDoc.client, 'Client', json, 'client');
+  mdx += scopApiToMdx(scopedDoc.server, 'Server', json, 'server');
+  mdx += scopApiToMdx(scopedDoc.common, 'Common', json, 'common');
 
   fs.writeFileSync(Path.resolve(folder, fileName + '.mdx'), mdx);
 }

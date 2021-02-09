@@ -7,7 +7,16 @@
  */
 
 import { KibanaPlatformPlugin } from '@kbn/dev-utils';
-import { AnchorLink, ApiDeclaration, ScopeApi, TypeKind, Lifecycle } from './types';
+import {
+  AnchorLink,
+  ApiDeclaration,
+  ScopeApi,
+  TypeKind,
+  Lifecycle,
+  PluginApi,
+  Reference,
+  ApiScope,
+} from './types';
 
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -36,6 +45,20 @@ export function getPluginForPath(
 }
 
 /**
+ * Groups ApiDeclarations by typescript kind - classes, functions, enums, etc, so they
+ * can be displayed separately in the mdx files.
+ */
+export function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
+  const scope = createEmptyScope();
+
+  declarations.forEach((declaration) => {
+    addApiDeclarationToScope(declaration, scope);
+  });
+
+  return scope;
+}
+
+/**
  * If the file is at the top level, returns undefined, otherwise returns the
  * name of the first nested folder in the plugin. For example a path of
  * 'src/plugins/data/public/search_services/file.ts' would return 'search_service' while
@@ -53,23 +76,6 @@ export function getServiceForPath(path: string): string | undefined {
   } else if (commonMatchGroups && commonMatchGroups.length > 1) {
     return commonMatchGroups[1];
   }
-}
-
-export function mergeScopeApi(scope: ScopeApi): ApiDeclaration[] {
-  const api: ApiDeclaration[] = [];
-  if (scope.start) api.push(scope.start);
-  if (scope.setup) api.push(scope.setup);
-
-  api.push(
-    ...scope.classes,
-    ...scope.functions,
-    ...scope.interfaces,
-    ...scope.objects,
-    ...scope.enums,
-    ...scope.misc
-  );
-
-  return api;
 }
 
 export function getPluginApiDocId(
@@ -149,5 +155,48 @@ export function addApiDeclarationToScope(declaration: ApiDeclaration, scope: Sco
       default:
         scope.misc.push(declaration);
     }
+  }
+}
+
+export function removeBrokenLinks(
+  pluginApi: PluginApi,
+  missingApiItems: { [key: string]: string[] },
+  pluginApiMap: { [key: string]: PluginApi }
+) {
+  (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
+    pluginApi[scope].forEach((api) => {
+      if (api.signature) {
+        api.signature = api.signature.map((sig) => {
+          if (typeof sig !== 'string') {
+            const ref = sig as Reference;
+            if (apiItemExists(ref.text, ref.scope, pluginApiMap[ref.pluginId]) === false) {
+              if (missingApiItems[ref.pluginId] === undefined) {
+                missingApiItems[ref.pluginId] = [];
+              }
+              missingApiItems[ref.pluginId].push(`${ref.scope}.${ref.text}`);
+              return ref.text;
+            }
+          }
+          return sig;
+        });
+      }
+    });
+  });
+}
+
+function apiItemExists(name: string, scope: ApiScope, pluginApi: PluginApi): boolean {
+  return (
+    pluginApi[scopeAccessor(scope)].findIndex((dec: ApiDeclaration) => dec.label === name) >= 0
+  );
+}
+
+function scopeAccessor(scope: ApiScope): 'server' | 'common' | 'client' {
+  switch (scope) {
+    case ApiScope.CLIENT:
+      return 'client';
+    case ApiScope.SERVER:
+      return 'server';
+    default:
+      return 'common';
   }
 }
