@@ -153,8 +153,6 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
-
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
     });
   });
 
@@ -188,8 +186,6 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
-
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
     });
   });
 
@@ -233,8 +229,6 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
-
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
     });
   });
 
@@ -300,8 +294,6 @@ describe('handlers', () => {
           mockResponse
         )
       ).rejects.toThrowError(error);
-
-      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
     });
   });
 });

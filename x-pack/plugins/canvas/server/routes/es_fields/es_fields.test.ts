@@ -147,8 +147,8 @@ describe('Retrieve ES Fields', () => {
 
     callAsCurrentUserMock.mockRejectedValueOnce(new Error('Index not found'));
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toBe(500);
+    await expect(
+      routeHandler(mockRouteContext, request, kibanaResponseFactory)
+    ).rejects.toThrowError('Index not found');
   });
 });
