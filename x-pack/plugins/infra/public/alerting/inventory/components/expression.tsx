@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { debounce, pick } from 'lodash';
+import { debounce, pick, omit } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
@@ -21,6 +21,7 @@ import {
   EuiCheckbox,
   EuiToolTip,
   EuiIcon,
+  EuiHealth,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -423,9 +424,24 @@ const StyledExpression = euiStyled.div`
   padding: 0 4px;
 `;
 
+const StyledHealth = euiStyled(EuiHealth)`
+  margin-left: 4px;
+`;
+
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const { setAlertParams, expression, errors, expressionId, remove, canDelete, fields } = props;
-  const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
+  const {
+    metric,
+    comparator = Comparator.GT,
+    threshold = [],
+    customMetric,
+    warningThreshold = [],
+    warningComparator,
+  } = expression;
+
+  const [displayWarningThreshold, setDisplayWarningThreshold] = useState(
+    Boolean(warningThreshold?.length)
+  );
 
   const updateMetric = useCallback(
     (m?: SnapshotMetricType | string) => {
@@ -452,6 +468,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     [expressionId, expression, setAlertParams]
   );
 
+  const updateWarningComparator = useCallback(
+    (c?: string) => {
+      setAlertParams(expressionId, { ...expression, warningComparator: c as Comparator });
+    },
+    [expressionId, expression, setAlertParams]
+  );
+
   const updateThreshold = useCallback(
     (t) => {
       if (t.join() !== expression.threshold.join()) {
@@ -459,6 +482,58 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       }
     },
     [expressionId, expression, setAlertParams]
+  );
+
+  const updateWarningThreshold = useCallback(
+    (t) => {
+      if (t.join() !== expression.warningThreshold?.join()) {
+        setAlertParams(expressionId, { ...expression, warningThreshold: t });
+      }
+    },
+    [expressionId, expression, setAlertParams]
+  );
+
+  const toggleWarningThreshold = useCallback(() => {
+    if (!displayWarningThreshold) {
+      setDisplayWarningThreshold(true);
+      setAlertParams(expressionId, {
+        ...expression,
+        warningComparator: comparator,
+        warningThreshold: [],
+      });
+    } else {
+      setDisplayWarningThreshold(false);
+      setAlertParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
+    }
+  }, [
+    displayWarningThreshold,
+    setDisplayWarningThreshold,
+    setAlertParams,
+    comparator,
+    expression,
+    expressionId,
+  ]);
+
+  const criticalThresholdExpression = (
+    <ThresholdElement
+      comparator={comparator}
+      threshold={threshold}
+      updateComparator={updateComparator}
+      updateThreshold={updateThreshold}
+      errors={(errors.critical as IErrorObject) ?? {}}
+      metric={metric}
+    />
+  );
+
+  const warningThresholdExpression = displayWarningThreshold && (
+    <ThresholdElement
+      comparator={warningComparator || comparator}
+      threshold={warningThreshold}
+      updateComparator={updateWarningComparator}
+      updateThreshold={updateWarningThreshold}
+      errors={(errors.warning as IErrorObject) ?? {}}
+      metric={metric}
+    />
   );
 
   const ofFields = useMemo(() => {
@@ -515,25 +590,62 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 fields={fields}
               />
             </StyledExpression>
-            <StyledExpression>
-              <ThresholdExpression
-                thresholdComparator={comparator || Comparator.GT}
-                threshold={threshold}
-                onChangeSelectedThresholdComparator={updateComparator}
-                onChangeSelectedThreshold={updateThreshold}
-                errors={errors}
-              />
-            </StyledExpression>
-            {metric && (
-              <div
-                style={{
-                  alignSelf: 'center',
-                }}
-              >
-                <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
-              </div>
-            )}
+            {!displayWarningThreshold && criticalThresholdExpression}
           </StyledExpressionRow>
+          {displayWarningThreshold && (
+            <>
+              <StyledExpressionRow>
+                {criticalThresholdExpression}
+                <StyledHealth color="danger">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.criticalThreshold"
+                    defaultMessage="Alert"
+                  />
+                </StyledHealth>
+              </StyledExpressionRow>
+              <StyledExpressionRow>
+                {warningThresholdExpression}
+                <StyledHealth color="warning">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.warningThreshold"
+                    defaultMessage="Warning"
+                  />
+                </StyledHealth>
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                    {
+                      defaultMessage: 'Remove warningThreshold',
+                    }
+                  )}
+                  iconSize="s"
+                  color={'subdued'}
+                  iconType={'crossInACircleFilled'}
+                  onClick={toggleWarningThreshold}
+                />
+              </StyledExpressionRow>
+            </>
+          )}
+          {!displayWarningThreshold && (
+            <>
+              {' '}
+              <EuiSpacer size={'xs'} />
+              <StyledExpressionRow>
+                <EuiButtonEmpty
+                  color={'primary'}
+                  flush={'left'}
+                  size="xs"
+                  iconType={'plusInCircleFilled'}
+                  onClick={toggleWarningThreshold}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
+                    defaultMessage="Add warning threshold"
+                  />
+                </EuiButtonEmpty>
+              </StyledExpressionRow>
+            </>
+          )}
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
@@ -549,6 +661,38 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         )}
       </EuiFlexGroup>
       <EuiSpacer size={'s'} />
+    </>
+  );
+};
+
+const ThresholdElement: React.FC<{
+  updateComparator: (c?: string) => void;
+  updateThreshold: (t?: number[]) => void;
+  threshold: InventoryMetricConditions['threshold'];
+  comparator: InventoryMetricConditions['comparator'];
+  errors: IErrorObject;
+  metric?: SnapshotMetricType;
+}> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
+  return (
+    <>
+      <StyledExpression>
+        <ThresholdExpression
+          thresholdComparator={comparator || Comparator.GT}
+          threshold={threshold}
+          onChangeSelectedThresholdComparator={updateComparator}
+          onChangeSelectedThreshold={updateThreshold}
+          errors={errors}
+        />
+      </StyledExpression>
+      {metric && (
+        <div
+          style={{
+            alignSelf: 'center',
+          }}
+        >
+          <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
+        </div>
+      )}
     </>
   );
 };
