@@ -16,6 +16,7 @@ import {
   IndexFieldsStrategyRequest,
   BeatFields,
 } from '../../../common/search_strategy/index_fields';
+import { SourcererPatternType } from '../../../public/common/store/sourcerer/model';
 
 export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
@@ -25,59 +26,68 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
-
+  const rawResponse = {
+    timed_out: false,
+    took: -1,
+    _shards: {
+      total: -1,
+      successful: -1,
+      failed: -1,
+      skipped: -1,
+    },
+    hits: {
+      total: -1,
+      max_score: -1,
+      hits: [
+        {
+          _index: '',
+          _type: '',
+          _id: '',
+          _score: -1,
+          _source: null,
+        },
+      ],
+    },
+  };
   return {
     search: (request, options, { esClient }) =>
       from(
         new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
           const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
-          const dedupeIndices = dedupeIndexName(request.indices);
-
-          const responsesIndexFields = await Promise.all(
-            dedupeIndices
-              .map((index) =>
-                indexPatternsFetcher.getFieldsForWildcard({
-                  pattern: index,
-                })
-              )
-              .map((p) => p.catch((e) => false))
-          );
+          // const dedupeIndices = selectedPatterns.length > 1 ? dedupeIndexName(request.selectedPatterns);
+          let responsesIndexFields: FieldDescriptor[] = [];
+          let selectedIndexNames: string[] = [];
           let indexFields: IndexField[] = [];
-
-          if (!request.onlyCheckIfIndicesExist) {
-            indexFields = await formatIndexFields(
-              beatFields,
-              responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
-              dedupeIndices
+          console.log('request', JSON.stringify(request));
+          if (
+            request.selectedPatterns.length === 1 &&
+            request.selectedPatterns[0].id !== SourcererPatternType.config &&
+            request.selectedPatterns[0].id !== SourcererPatternType.detections
+          ) {
+            // selected pattern is a KIP, get fields from KIP API
+            selectedIndexNames = [request.selectedPatterns[0].title];
+            // responsesIndexFields = something!
+            console.log('here we are, a KIP!!', request.selectedPatterns);
+            responsesIndexFields = await indexPatternsFetcher.getFieldsForWildcard({
+              pattern: selectedIndexNames.join(),
+            });
+          } else if (request.selectedPatterns.length > 0) {
+            selectedIndexNames = dedupeIndexName(
+              request.selectedPatterns.map(({ title }) => title)
             );
+            responsesIndexFields = await indexPatternsFetcher.getFieldsForWildcard({
+              pattern: selectedIndexNames.join(),
+            });
+          }
+
+          if (!request.onlyCheckIfIndicesExist && responsesIndexFields.length > 0) {
+            indexFields = await formatIndexFields(beatFields, responsesIndexFields);
           }
 
           return resolve({
             indexFields,
-            indicesExist: dedupeIndices.filter((index, i) => responsesIndexFields[i] !== false),
-            rawResponse: {
-              timed_out: false,
-              took: -1,
-              _shards: {
-                total: -1,
-                successful: -1,
-                failed: -1,
-                skipped: -1,
-              },
-              hits: {
-                total: -1,
-                max_score: -1,
-                hits: [
-                  {
-                    _index: '',
-                    _type: '',
-                    _id: '',
-                    _score: -1,
-                    _source: null,
-                  },
-                ],
-              },
-            },
+            indicesExist: selectedIndexNames,
+            rawResponse,
           });
         })
       ),
@@ -118,17 +128,10 @@ const missingFields: FieldDescriptor[] = [
  * in size at a time calling this function repeatedly. This function should be as optimized as possible
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
  * any n^2 operations.
- * @param indexesAlias The index alias
+ * @param beatFields The generated beat documentation
  * @param index The index its self
- * @param indexesAliasIdx The index within the alias
  */
-export const createFieldItem = (
-  beatFields: BeatFields,
-  indexesAlias: string[],
-  index: FieldDescriptor,
-  indexesAliasIdx: number
-): IndexField => {
-  const alias = indexesAlias[indexesAliasIdx];
+export const createFieldItem = (beatFields: BeatFields, index: FieldDescriptor): IndexField => {
   const splitIndexName = index.name.split('.');
   const indexName =
     splitIndexName[splitIndexName.length - 1] === 'text'
@@ -141,48 +144,7 @@ export const createFieldItem = (
   return {
     ...beatIndex,
     ...index,
-    indexes: [alias],
   };
-};
-
-/**
- * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
- * in size at a time when being called. This function should be as optimized as possible
- * and should avoid any and all creation of new arrays, iterating over the arrays or performing
- * any n^2 operations. The `.push`, and `forEach` operations are expected within this function
- * to speed up performance.
- *
- * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
- * has already consumed a lot of the event loop processing up to this function and we want to give
- * I/O opportunity to occur by scheduling this on the next loop.
- * @param responsesIndexFields The response index fields to loop over
- * @param indexesAlias The index aliases such as filebeat-*
- */
-export const formatFirstFields = async (
-  beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[][],
-  indexesAlias: string[]
-): Promise<IndexField[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(
-        responsesIndexFields.reduce(
-          (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
-            missingFields.forEach((index) => {
-              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              accumulator.push(item);
-            });
-            indexFields.forEach((index) => {
-              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              accumulator.push(item);
-            });
-            return accumulator;
-          },
-          []
-        )
-      );
-    });
-  });
 };
 
 /**
@@ -196,29 +158,24 @@ export const formatFirstFields = async (
  * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
  * has already consumed a lot of the event loop processing up to this function and we want to give
  * I/O opportunity to occur by scheduling this on the next loop.
- * @param fields The index fields to create the secondary fields for
+ * @param beatFields The generated beat documentation
+ * @param responsesIndexFields  The response index fields to format
  */
-export const formatSecondFields = async (fields: IndexField[]): Promise<IndexField[]> => {
+export const formatFieldsResponsibly = async (
+  beatFields: BeatFields,
+  responsesIndexFields: FieldDescriptor[]
+): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const indexFieldNameHash: Record<string, number> = {};
-      const reduced = fields.reduce((accumulator: IndexField[], indexfield: IndexField) => {
-        const alreadyExistingIndexField = indexFieldNameHash[indexfield.name];
-        if (alreadyExistingIndexField != null) {
-          const existingIndexField = accumulator[alreadyExistingIndexField];
-          if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
-            accumulator[alreadyExistingIndexField].description = indexfield.description;
-          }
-          accumulator[alreadyExistingIndexField].indexes = Array.from(
-            new Set([...existingIndexField.indexes, ...indexfield.indexes])
-          );
-          return accumulator;
-        }
-        accumulator.push(indexfield);
-        indexFieldNameHash[indexfield.name] = accumulator.length - 1;
-        return accumulator;
-      }, []);
-      resolve(reduced);
+      resolve(
+        [...missingFields, ...responsesIndexFields].reduce(
+          (accumulator: IndexField[], fieldDescriptor: FieldDescriptor) => {
+            const item = createFieldItem(beatFields, fieldDescriptor);
+            return [...accumulator, item];
+          },
+          []
+        )
+      );
     });
   });
 };
@@ -229,15 +186,13 @@ export const formatSecondFields = async (fields: IndexField[]): Promise<IndexFie
  * NOTE: This will have array sizes up to 4.7 megs in size at a time when being called.
  * This function should be as optimized as possible and should avoid any and all creation
  * of new arrays, iterating over the arrays or performing any n^2 operations.
+ * @param beatFields The generated beat documentation
  * @param responsesIndexFields  The response index fields to format
- * @param indexesAlias The index alias
  */
 export const formatIndexFields = async (
   beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[][],
-  indexesAlias: string[]
+  responsesIndexFields: FieldDescriptor[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
-  const secondFields = await formatSecondFields(fields);
-  return secondFields;
+  const fields = await formatFieldsResponsibly(beatFields, responsesIndexFields);
+  return fields;
 };

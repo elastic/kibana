@@ -55,6 +55,7 @@ import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { PreviewQuery, Threshold } from '../query_preview';
+import { SourcererPatternType } from '../../../../common/store/sourcerer/model';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -168,7 +169,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ruleType = formRuleType || initialState.ruleType;
   const queryBarQuery =
     formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
-  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex([
+    {
+      title: index.join(),
+      id: SourcererPatternType.detections,
+    },
+  ]);
   const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
     (groupAcc, [groupName, groupValue]) => {
       return {
@@ -191,7 +197,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
-  ] = useFetchIndex(threatIndex);
+  ] = useFetchIndex([
+    {
+      title: threatIndex.join(),
+      id: SourcererPatternType.detections,
+    },
+  ]);
 
   // reset form when rule type changes
   useEffect(() => {

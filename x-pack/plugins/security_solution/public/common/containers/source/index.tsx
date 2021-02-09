@@ -22,7 +22,7 @@ import {
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SelectablePatterns, SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
 
@@ -121,7 +121,7 @@ interface FetchIndexReturn {
 }
 
 export const useFetchIndex = (
-  indexNames: string[],
+  selectedPatterns: SelectablePatterns,
   onlyCheckIfIndicesExist: boolean = false
 ): [boolean, FetchIndexReturn] => {
   const { data, notifications } = useKibana().services;
@@ -132,20 +132,20 @@ export const useFetchIndex = (
   const [state, setState] = useState<FetchIndexReturn>({
     browserFields: DEFAULT_BROWSER_FIELDS,
     docValueFields: DEFAULT_DOC_VALUE_FIELDS,
-    indexes: indexNames,
+    indexes: selectedPatterns.map(({ title }) => title),
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
 
   const indexFieldsSearch = useCallback(
-    (iNames) => {
+    (newSelectedPatterns) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         const searchSubscription$ = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: iNames, onlyCheckIfIndicesExist },
+            { selectedPatterns: newSelectedPatterns, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'securitySolutionIndexFields',
@@ -198,10 +198,16 @@ export const useFetchIndex = (
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
-      indexFieldsSearch(indexNames);
+    if (
+      !isEmpty(selectedPatterns) &&
+      !isEqual(
+        previousIndexesName.current,
+        selectedPatterns.map(({ title }) => title)
+      )
+    ) {
+      indexFieldsSearch(selectedPatterns);
     }
-  }, [indexNames, indexFieldsSearch, previousIndexesName]);
+  }, [selectedPatterns, indexFieldsSearch, previousIndexesName]);
 
   return [isLoading, state];
 };
@@ -210,14 +216,13 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const dispatch = useDispatch();
-  const indexNamesSelectedSelector = useMemo(
-    () => sourcererSelectors.getIndexNamesSelectedSelector(),
+  const indexPatternsSelectedSelector = useMemo(
+    () => sourcererSelectors.getIndexPatternsSelectedSelector(),
     []
   );
-  const { indexNames, previousIndexNames } = useDeepEqualSelector<{
-    indexNames: string[];
-    previousIndexNames: string;
-  }>((state) => indexNamesSelectedSelector(state, sourcererScopeName));
+  const { selectedPatterns } = useDeepEqualSelector<{
+    selectedPatterns: SelectablePatterns;
+  }>((state) => indexPatternsSelectedSelector(state, sourcererScopeName));
 
   const setLoading = useCallback(
     (loading: boolean) => {
@@ -227,14 +232,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   const indexFieldsSearch = useCallback(
-    (indicesName) => {
+    (selectedPatterns) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         const searchSubscription$ = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: indicesName, onlyCheckIfIndicesExist: false },
+            { selectedPatterns, onlyCheckIfIndicesExist: false },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'securitySolutionIndexFields',
@@ -293,8 +298,9 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   useEffect(() => {
-    if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
-      indexFieldsSearch(indexNames);
+    //  && previousIndexNames !== selectedPatterns.sort().join()
+    if (!isEmpty(selectedPatterns)) {
+      indexFieldsSearch(selectedPatterns);
     }
-  }, [indexNames, indexFieldsSearch, previousIndexNames]);
+  }, [selectedPatterns, indexFieldsSearch]);
 };

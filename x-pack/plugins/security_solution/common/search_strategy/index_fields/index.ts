@@ -12,6 +12,7 @@ import {
   IFieldSubType,
 } from '../../../../../../src/plugins/data/common';
 import { DocValueFields, Maybe } from '../common';
+import { SelectablePatterns } from '../../../public/common/store/sourcerer/model';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
@@ -29,8 +30,6 @@ export interface IndexField {
   category: string;
   /** Example of field's value */
   example?: Maybe<string | number>;
-  /** whether the field's belong to an alias index */
-  indexes: Array<Maybe<string>>;
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
@@ -51,7 +50,7 @@ export interface IndexField {
 export type BeatFields = Record<string, FieldInfo>;
 
 export interface IndexFieldsStrategyRequest extends IEsSearchRequest {
-  indices: string[];
+  selectedPatterns: SelectablePatterns;
   onlyCheckIfIndicesExist: boolean;
 }
 

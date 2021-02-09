@@ -8,7 +8,14 @@
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
-import { SourcererScopeById, ManageScope, KibanaIndexPatterns, SourcererScopeName } from './model';
+import {
+  KibanaIndexPatterns,
+  ManageScope,
+  SelectablePatterns,
+  SourcererPatternType,
+  SourcererScopeById,
+  SourcererScopeName,
+} from './model';
 
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
@@ -45,48 +52,61 @@ export const configIndexPatternsSelector = () =>
     sourcererConfigIndexPatternsSelector,
     (configIndexPatterns) => configIndexPatterns
   );
+export const getIndexPatternsSelectedSelector = () => {
+  const getScopeSelector = scopeIdSelector();
+  const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
+  return (state: State, scopeId: SourcererScopeName): { selectedPatterns: SelectablePatterns } => {
+    const scope = getScopeSelector(state, scopeId);
+    const configIndexPatterns = getConfigIndexPatternsSelector(state);
+    return {
+      selectedPatterns:
+        scope.selectedPatterns.length === 0
+          ? configIndexPatterns.map((title) => ({ title, id: SourcererPatternType.config }))
+          : scope.selectedPatterns,
+      // previousIndexNames: scope.indexPattern.title,
+    };
+  };
+};
 export const getIndexNamesSelectedSelector = () => {
   const getScopeSelector = scopeIdSelector();
   const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
-  const mapStateToProps = (
+  return (
     state: State,
     scopeId: SourcererScopeName
   ): { indexNames: string[]; previousIndexNames: string } => {
     const scope = getScopeSelector(state, scopeId);
     const configIndexPatterns = getConfigIndexPatternsSelector(state);
     return {
-      indexNames:
-        scope.selectedPatterns.length === 0
-          ? configIndexPatterns
-          : scope.selectedPatterns.map(({ title }) => title),
+      indexNames: scope.indexNames.length === 0 ? configIndexPatterns : scope.indexNames,
       previousIndexNames: scope.indexPattern.title,
     };
   };
-  return mapStateToProps;
 };
 
-export const getAllExistingIndexNamesSelector = () => {
+export const getAllSelectablePatternsSelector = () => {
   const getSignalIndexNameSelector = signalIndexNameSelector();
   const getConfigIndexPatternsSelector = configIndexPatternsSelector();
 
-  const mapStateToProps = (state: State): string[] => {
+  return (state: State): SelectablePatterns => {
     const signalIndexName = getSignalIndexNameSelector(state);
     const configIndexPatterns = getConfigIndexPatternsSelector(state);
-
+    const configAsSelectable = configIndexPatterns.map((title) => ({
+      title,
+      id: SourcererPatternType.config,
+    }));
     return signalIndexName != null
-      ? [...configIndexPatterns, signalIndexName]
-      : configIndexPatterns;
+      ? [...configAsSelectable, { title: signalIndexName, id: SourcererPatternType.detections }]
+      : configAsSelectable;
   };
-
-  return mapStateToProps;
 };
 
 const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();
+  // need to talk about this, it shouldn't be dont here i dont think
   // const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
   //   if (selectedPatternsStr.length > 0) {
   //     debugger;
@@ -105,21 +125,15 @@ export const getSourcererScopeSelector = () => {
     (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
   );
 
-  const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
+  return (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);
-    console.log('wha', scope);
-    // if (scope.selectedPatterns.length > 0) {
-    //   debugger;
-    // }
     // const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
 
     const indexPattern = getIndexPattern(scope.indexPattern, scope.indexNames.join());
-    console.log('indexPattern', indexPattern);
 
     return {
       ...scope,
       indexPattern,
     };
   };
-  return mapStateToProps;
 };

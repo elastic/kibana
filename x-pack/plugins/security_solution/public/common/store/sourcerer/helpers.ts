@@ -8,7 +8,7 @@
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
 import {
-  SelectedPatterns,
+  SelectablePatterns,
   SourcererModel,
   SourcererPatternType,
   SourcererScopeName,
@@ -18,7 +18,7 @@ import { TimelineEventsType } from '../../../../common/types/timeline';
 export interface Args {
   eventType?: TimelineEventsType;
   id: SourcererScopeName;
-  selectedPatterns: SelectedPatterns;
+  selectedPatterns: SelectablePatterns;
   state: SourcererModel;
 }
 export const createDefaultIndexPatterns = ({
@@ -26,7 +26,7 @@ export const createDefaultIndexPatterns = ({
   id,
   selectedPatterns,
   state,
-}: Args): { selectedPatterns: SelectedPatterns; indexNames: string[] } => {
+}: Args): { selectedPatterns: SelectablePatterns; indexNames: string[] } => {
   console.log('createDefaultIndexPatterns', { eventType, id, selectedPatterns, state });
   const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
   const newSelectedPatterns = selectedPatterns.filter(
@@ -35,9 +35,9 @@ export const createDefaultIndexPatterns = ({
       kibanaIndexPatterns.includes(sp) ||
       (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
   );
-  debugger;
+
   if (isEmpty(newSelectedPatterns)) {
-    let defaultIndexPatterns: SelectedPatterns = state.configIndexPatterns.map((title) => ({
+    let defaultIndexPatterns: SelectablePatterns = state.configIndexPatterns.map((title) => ({
       title,
       id: SourcererPatternType.config,
     }));
@@ -51,7 +51,7 @@ export const createDefaultIndexPatterns = ({
         },
       ];
     }
-    debugger;
+
     return {
       selectedPatterns: defaultIndexPatterns,
       indexNames: defaultIndexPatterns.map(({ title }) => title),
@@ -69,8 +69,8 @@ export const defaultIndexPatternByEventType = ({
 }: {
   state: SourcererModel;
   eventType?: TimelineEventsType;
-}): SelectedPatterns => {
-  let defaultIndexPatterns: SelectedPatterns = state.configIndexPatterns.map((title) => ({
+}): SelectablePatterns => {
+  let defaultIndexPatterns: SelectablePatterns = state.configIndexPatterns.map((title) => ({
     title,
     id: SourcererPatternType.config,
   }));

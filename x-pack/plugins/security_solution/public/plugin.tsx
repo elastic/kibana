@@ -9,38 +9,38 @@ import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import {
+  AppObservableLibs,
   PluginSetup,
   PluginStart,
   SetupPlugins,
   StartPlugins,
   StartServices,
-  AppObservableLibs,
   SubPlugins,
 } from './types';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
-  PluginInitializerContext,
-  Plugin as IPlugin,
   DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
+  Plugin as IPlugin,
+  PluginInitializerContext,
 } from '../../../../src/core/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 
 import {
-  APP_ID,
-  APP_ICON_SOLUTION,
+  APP_CASES_PATH,
   APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
-  APP_OVERVIEW_PATH,
-  APP_NETWORK_PATH,
-  APP_TIMELINES_PATH,
+  APP_ICON_SOLUTION,
+  APP_ID,
   APP_MANAGEMENT_PATH,
-  APP_CASES_PATH,
+  APP_NETWORK_PATH,
+  APP_OVERVIEW_PATH,
   APP_PATH,
+  APP_TIMELINES_PATH,
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
 } from '../common/constants';
@@ -48,13 +48,13 @@ import {
 import { SecurityPageName } from './app/types';
 import { manageOldSiemRoutes } from './helpers';
 import {
-  OVERVIEW,
+  ADMINISTRATION,
+  CASE,
+  DETECTION_ENGINE,
   HOSTS,
   NETWORK,
+  OVERVIEW,
   TIMELINES,
-  DETECTION_ENGINE,
-  CASE,
-  ADMINISTRATION,
 } from './app/home/translations';
 import {
   IndexFieldsStrategyRequest,
@@ -66,6 +66,7 @@ import { licenseService } from './common/hooks/use_license';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { SourcererPatternType } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -429,19 +430,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           timelines: timelinesSubPlugin,
           management: managementSubPlugin,
         },
-        configIndexPatterns,
       ] = await Promise.all([
         this.lazyApplicationDependencies(),
         startPlugins.data.indexPatterns.getIdsWithTitle(),
         this.subPlugins(),
-        startPlugins.data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
-            {
-              strategy: 'securitySolutionIndexFields',
-            }
-          )
-          .toPromise(),
       ]);
 
       let signal: { name: string | null } = { name: null };
@@ -485,7 +477,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
           {
             kibanaIndexPatterns,
-            configIndexPatterns: configIndexPatterns.indicesExist,
+            configIndexPatterns: defaultIndicesName,
             signalIndexName: signal.name,
           }
         ),

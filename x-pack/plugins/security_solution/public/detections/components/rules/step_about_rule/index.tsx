@@ -40,6 +40,7 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { SourcererPatternType } from '../../../../common/store/sourcerer/model';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -73,7 +74,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
-  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
+  const [indexPatternLoading, { indexPatterns }] = useFetchIndex([
+    {
+      title: Array.isArray(defineRuleData?.index)
+        ? (defineRuleData?.index ?? []).join()
+        : defineRuleData?.index ?? '',
+      id: SourcererPatternType.detections,
+    },
+  ]);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,

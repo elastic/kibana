@@ -47,6 +47,7 @@ import {
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
+import { SelectablePatterns } from '../../../common/store/sourcerer/model';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -110,11 +111,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const existingIndexNamesSelector = useMemo(
-      () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+    const selectablePatternsSelector = useMemo(
+      () => sourcererSelectors.getAllSelectablePatternsSelector(),
       []
     );
-    const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+    const selectablePatterns = useDeepEqualSelector<SelectablePatterns>(selectablePatternsSelector);
 
     const updateTimeline = useMemo(() => dispatchUpdateTimeline(dispatch), [dispatch]);
     const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
@@ -208,7 +209,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              indexNames: existingIndexNames,
+              indexNames: selectablePatterns,
               show: false,
             })
           );
@@ -224,7 +225,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         });
         refetch();
       },
-      [apolloClient, dispatch, existingIndexNames, refetch, timelineSavedObjectId]
+      [apolloClient, dispatch, selectablePatterns, refetch, timelineSavedObjectId]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(

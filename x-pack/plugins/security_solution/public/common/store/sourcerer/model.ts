@@ -28,7 +28,7 @@ export enum SourcererPatternType {
   kip = 'ip',
 }
 
-export type SelectedPatterns = Array<{
+export type SelectablePatterns = Array<{
   /**
    * if pattern is a KIP, the string will be the saved object id of the KIP
    */
@@ -47,7 +47,7 @@ export interface ManageScope {
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
-  selectedPatterns: SelectedPatterns;
+  selectedPatterns: SelectablePatterns;
 }
 
 export interface ManageScopeInit extends Partial<ManageScope> {
@@ -100,6 +100,6 @@ export const initialSourcererState: SourcererModel = {
 };
 
 export type FSourcererScopePatterns = {
-  [id in SourcererScopeName]: SelectedPatterns;
+  [id in SourcererScopeName]: SelectablePatterns;
 };
 export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;

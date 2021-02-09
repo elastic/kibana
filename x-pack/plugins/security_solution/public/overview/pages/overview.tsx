@@ -30,7 +30,7 @@ import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { Sourcerer } from '../../common/components/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { SourcererPatternType, SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
@@ -49,10 +49,18 @@ const OverviewComponent = () => {
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const { indicesExist, indexPattern, indexNames } = useSourcererScope();
   console.log({ indexPattern });
-  const endpointMetadataIndex = useMemo<string[]>(() => {
-    return [ENDPOINT_METADATA_INDEX];
+  const endpointMetadataIndex = useMemo<string>(() => {
+    return ENDPOINT_METADATA_INDEX;
   }, []);
-  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex, true);
+  const [, { indexExists: metadataIndexExists }] = useFetchIndex(
+    [
+      {
+        title: endpointMetadataIndex,
+        id: SourcererPatternType.detections,
+      },
+    ],
+    true
+  );
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(
     () => hasMessage('management', 'dismissEndpointNotice'),

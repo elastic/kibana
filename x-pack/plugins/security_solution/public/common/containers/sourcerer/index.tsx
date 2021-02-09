@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import {
-  SelectedPatterns,
+  SelectablePatterns,
   SourcererPatternType,
   SourcererScopeName,
 } from '../../store/sourcerer/model';
@@ -32,7 +32,7 @@ export const useInitSourcerer = (
     []
   );
   const ConfigIndexPatterns = useDeepEqualSelector(getConfigIndexPatternsSelector);
-  const configIndexPatternsWithId: SelectedPatterns = useMemo(
+  const configIndexPatternsWithId: SelectablePatterns = useMemo(
     () => ConfigIndexPatterns.map((title) => ({ id: SourcererPatternType.config, title })),
     [ConfigIndexPatterns]
   );

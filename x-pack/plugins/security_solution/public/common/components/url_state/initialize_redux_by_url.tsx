@@ -49,7 +49,7 @@ export const dispatchSetInitialStateFromUrl = (
         const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
           (key) => !(key === SourcererScopeName.default && pageName === SecurityPageName.detections)
         ) as SourcererScopeName[];
-        debugger;
+
         activeScopes.forEach((scope) =>
           dispatch(
             sourcererActions.setSelectedIndexPatterns({

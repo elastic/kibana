@@ -21,6 +21,7 @@ import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { sourcererSelectors } from '../../../../common/store';
+import { SelectablePatterns } from '../../../../common/store/sourcerer/model';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -38,11 +39,12 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const dispatch = useDispatch();
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+  const selectablePatternsSelector = useMemo(
+    () => sourcererSelectors.getAllSelectablePatternsSelector(),
     []
   );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  // this doesn't seem right. should this be the actively selected index names or all selectable index names??
+  const selectablePatterns = useDeepEqualSelector<SelectablePatterns>(selectablePatternsSelector);
 
   const handleClick = useCallback(() => {
     dispatch(
@@ -51,11 +53,11 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
         timelineId,
         event: {
           eventId,
-          indexName: existingIndexNames.join(','),
+          indexName: selectablePatterns.map(({ title }) => title).join(','),
         },
       })
     );
-  }, [dispatch, eventId, existingIndexNames, timelineId]);
+  }, [dispatch, eventId, selectablePatterns, timelineId]);
 
   return (
     <EuiButtonIcon

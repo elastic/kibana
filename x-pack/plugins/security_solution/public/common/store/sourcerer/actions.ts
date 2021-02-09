@@ -11,7 +11,7 @@ import { TimelineEventsType } from '../../../../common/types/timeline';
 import {
   KibanaIndexPatterns,
   ManageScopeInit,
-  SelectedPatterns,
+  SelectablePatterns,
   SourcererScopeName,
 } from './model';
 
@@ -37,12 +37,12 @@ export const setSourcererScopeLoading = actionCreator<{ id: SourcererScopeName; 
 
 export const setSelectedIndexPatterns = actionCreator<{
   id: SourcererScopeName;
-  selectedPatterns: SelectedPatterns;
+  selectedPatterns: SelectablePatterns;
   eventType?: TimelineEventsType;
 }>('SET_SELECTED_INDEX_PATTERNS');
 
 export const initTimelineIndexPatterns = actionCreator<{
   id: SourcererScopeName;
-  selectedPatterns: SelectedPatterns;
+  selectedPatterns: SelectablePatterns;
   eventType?: TimelineEventsType;
 }>('INIT_TIMELINE_INDEX_PATTERNS');

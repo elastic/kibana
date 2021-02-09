@@ -20,7 +20,7 @@ import {
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SelectablePatterns, SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
 
 interface Props {
@@ -31,11 +31,11 @@ interface Props {
 
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
+  const selectablePatternsSelector = useMemo(
+    () => sourcererSelectors.getAllSelectablePatternsSelector(),
     []
   );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  const selectablePatterns = useDeepEqualSelector<SelectablePatterns>(selectablePatternsSelector);
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
@@ -46,7 +46,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: SourcererScopeName.timeline,
-          selectedPatterns: existingIndexNames,
+          selectedPatterns: selectablePatterns,
         })
       );
       dispatch(
@@ -55,7 +55,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           columns: defaultHeaders,
           show,
           timelineType,
-          indexNames: existingIndexNames,
+          indexNames: selectablePatterns.map(({ title }) => title),
         })
       );
       dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
@@ -78,7 +78,7 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
       }
     },
     [
-      existingIndexNames,
+      selectablePatterns,
       dispatch,
       globalTimeRange,
       setTimelineFullScreen,

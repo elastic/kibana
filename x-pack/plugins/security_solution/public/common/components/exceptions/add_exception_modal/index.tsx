@@ -57,6 +57,7 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { SourcererPatternType } from '../../../store/sourcerer/model';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -122,12 +123,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? signalIndexName : ''), [
     signalIndexName,
   ]);
-  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
-    memoSignalIndexName
-  );
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex([
+    {
+      title: memoSignalIndexName,
+      id: SourcererPatternType.detections,
+    },
+  ]);
 
   const memoMlJobIds = useMemo(
     () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
@@ -137,13 +141,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const memoRuleIndices = useMemo(() => {
     if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+      return jobs[0].results_index_name ? `.ml-anomalies-${jobs[0].results_index_name}` : '';
     } else {
-      return ruleIndices;
+      return ruleIndices.join();
     }
   }, [jobs, ruleIndices]);
 
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex([
+    {
+      title: memoRuleIndices,
+      id: SourcererPatternType.detections,
+    },
+  ]);
   const onError = useCallback(
     (error: Error): void => {
       addError(error, { title: i18n.ADD_EXCEPTION_ERROR });

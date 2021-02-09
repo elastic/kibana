@@ -27,8 +27,8 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { State } from '../../../../common/store';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { sourcererModel, State } from '../../../../common/store';
+import { SourcererPatternType, SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
@@ -118,6 +118,8 @@ interface PickEventTypeProps {
   onChangeEventTypeAndIndexesName: (value: TimelineEventsType, indexNames: string[]) => void;
 }
 
+type ComboOptions = Array<EuiComboBoxOptionOption<string> & { key: string }>;
+
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   eventType = 'all',
   onChangeEventTypeAndIndexesName,
@@ -130,26 +132,31 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    sourcererScope.selectedPatterns.map((indexSelected) => ({
+  const [selectedOptions, setSelectedOptions] = useState<ComboOptions>(
+    sourcererScope.selectedPatterns.map(({ title: indexSelected, id: key }) => ({
       label: indexSelected,
       value: indexSelected,
+      key,
     }))
   );
+  const configAsSelectable: sourcererModel.SelectablePatterns = useMemo(
+    () => configIndexPatterns.map((title) => ({ title, id: SourcererPatternType.config })),
+    [configIndexPatterns]
+  );
 
-  const indexesPatternOptions = useMemo(
+  const indexesPatternOptions: ComboOptions = useMemo(
     () =>
       [
-        ...configIndexPatterns,
-        ...kibanaIndexPatterns.map((kip) => kip.title),
-        signalIndexName,
-      ].reduce<Array<EuiComboBoxOptionOption<string>>>((acc, index) => {
+        ...configAsSelectable,
+        ...kibanaIndexPatterns,
+        { title: signalIndexName, id: SourcererPatternType.detections },
+      ].reduce<ComboOptions>((acc, { title: index, id: key }) => {
         if (index != null && !acc.some((o) => o.label.includes(index))) {
-          return [...acc, { label: index, value: index }];
+          return [...acc, { label: index, value: index, key }];
         }
         return acc;
       }, []),
-    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
+    [configAsSelectable, kibanaIndexPatterns, signalIndexName]
   );
 
   const renderOption = useCallback(
@@ -183,7 +190,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setFilterEventType('custom');
       }
 
-      setSelectedOptions(newSelectedOptions);
+      setSelectedOptions(newSelectedOptions as ComboOptions);
     },
     [configIndexPatterns, signalIndexName]
   );
@@ -193,16 +200,21 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       setFilterEventType(filter);
       if (filter === 'all') {
         setSelectedOptions(
-          [...configIndexPatterns, signalIndexName ?? ''].map((indexSelected) => ({
+          [
+            ...configAsSelectable,
+            { title: signalIndexName ?? '', id: SourcererPatternType.detections },
+          ].map(({ title: indexSelected, id: key }) => ({
             label: indexSelected,
             value: indexSelected,
+            key,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          configIndexPatterns.map((indexSelected) => ({
+          configAsSelectable.map(({ title: indexSelected, id: key }) => ({
             label: indexSelected,
             value: indexSelected,
+            key,
           }))
         );
       } else if (filter === 'alert') {
@@ -210,6 +222,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           {
             label: signalIndexName ?? '',
             value: signalIndexName ?? '',
+            key: SourcererPatternType.detections,
           },
         ]);
       } else if (filter === 'kibana') {
@@ -217,11 +230,12 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           kibanaIndexPatterns.map((kip) => ({
             label: kip.title,
             value: kip.title,
+            key: kip.id,
           }))
         );
       }
     },
-    [configIndexPatterns, kibanaIndexPatterns, signalIndexName]
+    [configAsSelectable, kibanaIndexPatterns, signalIndexName]
   );
 
   const togglePopover = useCallback(
@@ -241,9 +255,10 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   const resetDataSources = useCallback(() => {
     setSelectedOptions(
-      sourcererScope.selectedPatterns.map((indexSelected) => ({
+      sourcererScope.selectedPatterns.map(({ title: indexSelected, id: key }) => ({
         label: indexSelected,
         value: indexSelected,
+        key,
       }))
     );
     setFilterEventType(eventType);
@@ -313,10 +328,13 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   useEffect(() => {
-    const newSelectedOptions = sourcererScope.selectedPatterns.map((indexSelected) => ({
-      label: indexSelected,
-      value: indexSelected,
-    }));
+    const newSelectedOptions = sourcererScope.selectedPatterns.map(
+      ({ title: indexSelected, id: key }) => ({
+        label: indexSelected,
+        value: indexSelected,
+        key,
+      })
+    );
     setSelectedOptions((prevSelectedOptions) => {
       if (!deepEqual(newSelectedOptions, prevSelectedOptions)) {
         return newSelectedOptions;
