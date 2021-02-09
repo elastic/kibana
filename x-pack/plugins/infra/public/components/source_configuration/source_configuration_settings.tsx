@@ -75,7 +75,7 @@ export const SourceConfigurationSettings = ({
     source,
   ]);
 
-  const { hasInfraMLCapabilites } = useInfraMLCapabilitiesContext();
+  const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;

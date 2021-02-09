@@ -38,12 +38,12 @@ export const evaluateCondition = async ({
       mlAnomalyDetectors,
     },
     sourceId ?? 'default',
+    threshold,
     startTime,
     endTime,
     metric,
     { field: 'anomalyScore', direction: 'desc' },
     { pageSize: 100 },
-    threshold,
     influencerFilter
   );
 
