@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { first, map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   Plugin,
@@ -44,7 +46,7 @@ export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private taskManagerId?: string;
-  private config?: TaskManagerConfig;
+  private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
   private middleware: Middleware = createInitialMiddleware();
@@ -54,15 +56,11 @@ export class TaskManagerPlugin
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
+    this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
   }
 
-  public async setup(core: CoreSetup): Promise<TaskManagerSetupContract> {
-    this.config = await this.initContext.config
-      .create<TaskManagerConfig>()
-      .pipe(first())
-      .toPromise();
-
+  public setup(core: CoreSetup): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
     setupSavedObjects(core.savedObjects, this.config);

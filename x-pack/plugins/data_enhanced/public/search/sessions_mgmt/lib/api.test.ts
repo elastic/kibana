@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
@@ -11,14 +12,14 @@ import { coreMock } from 'src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import type { SessionsMgmtConfigSchema } from '../';
+import type { SessionsConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../common/search';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
-let mockConfig: SessionsMgmtConfigSchema;
+let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 
 describe('Search Sessions Management API', () => {
@@ -26,11 +27,14 @@ describe('Search Sessions Management API', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     mockConfig = {
-      expiresSoonWarning: moment.duration('1d'),
-      maxSessions: 2000,
-      refreshInterval: moment.duration('1s'),
-      refreshTimeout: moment.duration('10m'),
-    };
+      defaultExpiration: moment.duration('7d'),
+      management: {
+        expiresSoonWarning: moment.duration(1, 'days'),
+        maxSessions: 2000,
+        refreshInterval: moment.duration(1, 'seconds'),
+        refreshTimeout: moment.duration(10, 'minutes'),
+      },
+    } as any;
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
   });
@@ -57,9 +61,8 @@ describe('Search Sessions Management API', () => {
         Array [
           Object {
             "actions": Array [
-              "reload",
               "extend",
-              "cancel",
+              "delete",
             ],
             "appId": "pizza",
             "created": undefined,
@@ -93,8 +96,11 @@ describe('Search Sessions Management API', () => {
     test('handle timeout error', async () => {
       mockConfig = {
         ...mockConfig,
-        refreshInterval: moment.duration(1, 'hours'),
-        refreshTimeout: moment.duration(1, 'seconds'),
+        management: {
+          ...mockConfig.management,
+          refreshInterval: moment.duration(1, 'hours'),
+          refreshTimeout: moment.duration(1, 'seconds'),
+        },
       };
 
       sessionsClient.find = jest.fn().mockImplementation(async () => {
@@ -139,7 +145,7 @@ describe('Search Sessions Management API', () => {
       await api.sendCancel('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'The search session was canceled and expired.',
+        title: 'The search session was deleted.',
       });
     });
 
@@ -155,34 +161,8 @@ describe('Search Sessions Management API', () => {
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
-        { title: 'Failed to cancel the search session!' }
+        { title: 'Failed to delete the search session!' }
       );
-    });
-  });
-
-  describe('reload', () => {
-    beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
-        return {
-          saved_objects: [
-            {
-              id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: SearchSessionStatus.COMPLETE },
-            },
-          ],
-        } as SavedObjectsFindResponse;
-      });
-    });
-
-    test('send cancel calls the cancel endpoint with a session ID', async () => {
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
-        notifications: mockCoreStart.notifications,
-        application: mockCoreStart.application,
-      });
-      await api.reloadSearchSession('www.myurl.com');
-
-      expect(mockCoreStart.application.navigateToUrl).toHaveBeenCalledWith('www.myurl.com');
     });
   });
 

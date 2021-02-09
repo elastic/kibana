@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -21,8 +22,16 @@ jest.mock('../../../legacy_shims', () => ({
     shims: {
       kfetch: jest.fn(),
       docLinks: {
-        ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-        DOC_LINK_VERSION: 'current',
+        links: {
+          monitoring: {
+            monitorKibana: 'jest-metadata-mock-url',
+            monitorElasticsearch: 'jest-metadata-mock-url',
+          },
+          metricbeat: {
+            install: 'jest-metadata-mock-url',
+            configure: 'jest-metadata-mock-url',
+          },
+        },
       },
     },
   },

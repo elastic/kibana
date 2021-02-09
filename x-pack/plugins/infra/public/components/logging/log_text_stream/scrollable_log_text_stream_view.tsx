@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
@@ -25,7 +26,7 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
 import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 interface ScrollableLogTextStreamViewProps {

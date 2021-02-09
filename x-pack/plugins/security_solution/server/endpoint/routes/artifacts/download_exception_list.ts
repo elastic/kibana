@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   IRouter,
   SavedObjectsClientContract,
@@ -52,7 +54,11 @@ export function registerDownloadExceptionListRoute(
       // The ApiKey must be associated with an enrolled Fleet agent
       try {
         scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
-        await authenticateAgentWithAccessToken(scopedSOClient, req);
+        await authenticateAgentWithAccessToken(
+          scopedSOClient,
+          context.core.elasticsearch.client.asInternalUser,
+          req
+        );
       } catch (err) {
         if ((err.isBoom ? err.output.statusCode : err.statusCode) === 401) {
           return res.unauthorized();

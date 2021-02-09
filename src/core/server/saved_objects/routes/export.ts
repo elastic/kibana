@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -18,7 +18,7 @@ import {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportError,
 } from '../export';
-import { validateTypes, validateObjects } from './utils';
+import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -163,7 +163,7 @@ export const registerExportRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const cleaned = cleanOptions(req.body);
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()

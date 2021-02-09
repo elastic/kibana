@@ -30,7 +30,7 @@ In your child application, place a `ChildDragDropProvider` at the root of that, 
 
 This enables your child application to share the same drag / drop context as the root application.
 
-## Dragging
+## DragDropIdentifier
 
 An item can be both draggable and droppable at the same time, but for simplicity's sake, we'll treat these two cases separately.
 
@@ -56,7 +56,7 @@ const { dragging } = useContext(DragContext);
 return (
   <DragDrop
     className="axis"
-    droppable={dragging && canHandleDrop(dragging)}
+    dropType={getDropTypes(dragging)}
     onDrop={(item) => onChange([...items, item])}
   >
     {items.map((x) => (
@@ -86,11 +86,14 @@ The children `DragDrop` components must have props defined as in the example:
         key={f.id}
         draggable
         droppable
-        dragType="reorder"
+        dragType="move"
         dropType="reorder"
-        itemsInGroup={fields.map((f) => f.id)} // consists ids of all reorderable elements in the group, eg. ['3', '5', '1']
+        reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
         value={{
           id: f.id,
+          humanData: {
+            label: 'Label'
+          }
         }}
         onDrop={/*handler*/}
       >

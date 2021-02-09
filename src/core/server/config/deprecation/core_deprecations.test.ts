@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
@@ -234,6 +234,68 @@ describe('core deprecations', () => {
       expect(
         applyCoreDeprecations({ csp: { rules: [`worker-src blob:`] } }).migrated.csp.rules
       ).toEqual([`worker-src blob:`]);
+    });
+  });
+
+  describe('logging.events.ops', () => {
+    it('warns when ops events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { ops: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.ops\\" has been deprecated and will be removed in 8.0. To access ops data moving forward, please enable debug logs for the \\"metrics.ops\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+        ]
+      `);
+    });
+
+    it('does not warn when other events are configured', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { log: '*' } },
+      });
+      expect(messages).toEqual([]);
+    });
+  });
+
+  describe('logging.events.request and logging.events.response', () => {
+    it('warns when request and response events are used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { request: '*', response: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+        ]
+      `);
+    });
+
+    it('warns when only request event is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { request: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+        ]
+      `);
+    });
+
+    it('warns when only response event is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { response: '*' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.request\\" and \\"logging.events.response\\" have been deprecated and will be removed in 8.0. To access request and/or response data moving forward, please enable debug logs for the \\"http.server.response\\" context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md",
+        ]
+      `);
+    });
+
+    it('does not warn when other events are configured', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { log: '*' } },
+      });
+      expect(messages).toEqual([]);
     });
   });
 });

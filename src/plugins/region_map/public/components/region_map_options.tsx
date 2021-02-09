@@ -1,20 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { truncatedColorSchemas } from '../../../charts/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { SelectOption, SwitchOption, NumberInputOption } from '../../../vis_default_editor/public';
 import { WmsOptions } from '../../../maps_legacy/public';
 import { RegionMapVisParams } from '../region_map_types';
+import { getTmsLayers, getVectorLayers } from '../kibana_services';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
@@ -26,14 +28,16 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
   value: name,
 });
 
+const tmsLayers = getTmsLayers();
+const vectorLayers = getVectorLayers();
+const vectorLayerOptions = vectorLayers.map(mapLayerForOption);
+
 export type RegionMapOptionsProps = {
   getServiceSettings: () => Promise<IServiceSettings>;
-} & VisOptionsProps<RegionMapVisParams>;
+} & VisEditorOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const { getServiceSettings, stateParams, vis, setValue } = props;
-  const { vectorLayers } = vis.type.editorConfig.collections;
-  const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
+  const { getServiceSettings, stateParams, setValue } = props;
   const fieldOptions = useMemo(
     () =>
       ((stateParams.selectedLayer && stateParams.selectedLayer.fields) || []).map(
@@ -61,7 +65,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
         setEmsHotLink(newLayer);
       }
     },
-    [vectorLayers, setEmsHotLink, setValue]
+    [setEmsHotLink, setValue]
   );
 
   const setField = useCallback(
@@ -178,7 +182,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
           label={i18n.translate('regionMap.visParams.colorSchemaLabel', {
             defaultMessage: 'Color schema',
           })}
-          options={vis.type.editorConfig.collections.colorSchemas}
+          options={truncatedColorSchemas}
           paramName="colorSchema"
           value={stateParams.colorSchema}
           setValue={setValue}
@@ -197,7 +201,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
       <EuiSpacer size="s" />
 
-      <WmsOptions {...props} />
+      <WmsOptions setValue={setValue} stateParams={stateParams} tmsLayers={tmsLayers} />
     </>
   );
 }

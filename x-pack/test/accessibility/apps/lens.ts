@@ -1,21 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'home', 'settings', 'lens']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker', 'home', 'lens']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/88926
-  // FLAKY: https://github.com/elastic/kibana/issues/88927
-  // FLAKY: https://github.com/elastic/kibana/issues/88929
-  describe.skip('Lens', () => {
+  describe('Lens', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
@@ -35,17 +33,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('lens', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
       await a11y.testAppSnapshot();
     });
 
     it('lens XY chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: 'timestamp',
+        operation: 'terms',
+        field: 'DestCityName',
       });
 
       await PageObjects.lens.configureDimension({
@@ -75,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('dimension configuration panel', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_xDimensionPanel > lns-empty-dimension');
       await a11y.testAppSnapshot();

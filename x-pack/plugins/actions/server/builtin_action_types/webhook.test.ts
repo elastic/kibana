@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Services } from '../types';
@@ -279,43 +280,52 @@ describe('execute()', () => {
     });
 
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-          Object {
-            "auth": Object {
-              "password": "123",
-              "username": "abc",
-            },
-            "axios": undefined,
-            "data": "some data",
-            "headers": Object {
-              "aheader": "a value",
-            },
-            "logger": Object {
-              "context": Array [],
-              "debug": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "response from webhook action \\"some-id\\": [HTTP 200] ",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
+      Object {
+        "auth": Object {
+          "password": "123",
+          "username": "abc",
+        },
+        "axios": undefined,
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
+        "data": "some data",
+        "headers": Object {
+          "aheader": "a value",
+        },
+        "logger": Object {
+          "context": Array [],
+          "debug": [MockFunction] {
+            "calls": Array [
+              Array [
+                "response from webhook action \\"some-id\\": [HTTP 200] ",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
               },
-              "error": [MockFunction],
-              "fatal": [MockFunction],
-              "get": [MockFunction],
-              "info": [MockFunction],
-              "log": [MockFunction],
-              "trace": [MockFunction],
-              "warn": [MockFunction],
-            },
-            "method": "post",
-            "proxySettings": undefined,
-            "url": "https://abc.def/my-webhook",
-          }
+            ],
+          },
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        "method": "post",
+        "url": "https://abc.def/my-webhook",
+      }
     `);
   });
 
@@ -338,39 +348,48 @@ describe('execute()', () => {
     });
 
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
-          Object {
-            "axios": undefined,
-            "data": "some data",
-            "headers": Object {
-              "aheader": "a value",
-            },
-            "logger": Object {
-              "context": Array [],
-              "debug": [MockFunction] {
-                "calls": Array [
-                  Array [
-                    "response from webhook action \\"some-id\\": [HTTP 200] ",
-                  ],
-                ],
-                "results": Array [
-                  Object {
-                    "type": "return",
-                    "value": undefined,
-                  },
-                ],
+      Object {
+        "axios": undefined,
+        "configurationUtilities": Object {
+          "ensureActionTypeEnabled": [MockFunction],
+          "ensureHostnameAllowed": [MockFunction],
+          "ensureUriAllowed": [MockFunction],
+          "getProxySettings": [MockFunction],
+          "isActionTypeEnabled": [MockFunction],
+          "isHostnameAllowed": [MockFunction],
+          "isRejectUnauthorizedCertificatesEnabled": [MockFunction],
+          "isUriAllowed": [MockFunction],
+        },
+        "data": "some data",
+        "headers": Object {
+          "aheader": "a value",
+        },
+        "logger": Object {
+          "context": Array [],
+          "debug": [MockFunction] {
+            "calls": Array [
+              Array [
+                "response from webhook action \\"some-id\\": [HTTP 200] ",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
               },
-              "error": [MockFunction],
-              "fatal": [MockFunction],
-              "get": [MockFunction],
-              "info": [MockFunction],
-              "log": [MockFunction],
-              "trace": [MockFunction],
-              "warn": [MockFunction],
-            },
-            "method": "post",
-            "proxySettings": undefined,
-            "url": "https://abc.def/my-webhook",
-          }
+            ],
+          },
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        "method": "post",
+        "url": "https://abc.def/my-webhook",
+      }
     `);
   });
 

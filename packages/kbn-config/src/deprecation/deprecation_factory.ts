@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
@@ -45,26 +45,6 @@ const _rename = (
   return config;
 };
 
-const _copy = (
-  config: Record<string, any>,
-  rootPath: string,
-  originKey: string,
-  destinationKey: string
-) => {
-  const originPath = getPath(rootPath, originKey);
-  const originValue = get(config, originPath);
-  if (originValue === undefined) {
-    return config;
-  }
-
-  const destinationPath = getPath(rootPath, destinationKey);
-  const destinationValue = get(config, destinationPath);
-  if (destinationValue === undefined) {
-    set(config, destinationPath, originValue);
-  }
-  return config;
-};
-
 const _unused = (
   config: Record<string, any>,
   rootPath: string,
@@ -88,12 +68,6 @@ const renameFromRoot = (oldKey: string, newKey: string, silent?: boolean): Confi
   rootPath,
   log
 ) => _rename(config, '', log, oldKey, newKey, silent);
-
-export const copyFromRoot = (originKey: string, destinationKey: string): ConfigDeprecation => (
-  config,
-  rootPath,
-  log
-) => _copy(config, '', originKey, destinationKey);
 
 const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
   _unused(config, rootPath, log, unusedKey);

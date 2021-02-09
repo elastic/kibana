@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockedKeys } from '@kbn/utility-types/jest';
@@ -13,14 +14,14 @@ import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { SearchSessionStatus } from '../../../../../common/search';
-import { SessionsMgmtConfigSchema } from '../../';
+import { SessionsConfigSchema } from '../../';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
-let mockConfig: SessionsMgmtConfigSchema;
+let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
 let api: SearchSessionsMgmtAPI;
 
@@ -29,11 +30,14 @@ describe('Background Search Session Management Table', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     mockConfig = {
-      expiresSoonWarning: moment.duration(1, 'days'),
-      maxSessions: 2000,
-      refreshInterval: moment.duration(1, 'seconds'),
-      refreshTimeout: moment.duration(10, 'minutes'),
-    };
+      defaultExpiration: moment.duration('7d'),
+      management: {
+        expiresSoonWarning: moment.duration(1, 'days'),
+        maxSessions: 2000,
+        refreshInterval: moment.duration(1, 'seconds'),
+        refreshTimeout: moment.duration(10, 'minutes'),
+      },
+    } as any;
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
@@ -134,7 +138,10 @@ describe('Background Search Session Management Table', () => {
       sessionsClient.find = jest.fn();
       mockConfig = {
         ...mockConfig,
-        refreshInterval: moment.duration(10, 'seconds'),
+        management: {
+          ...mockConfig.management,
+          refreshInterval: moment.duration(10, 'seconds'),
+        },
       };
 
       await act(async () => {
@@ -162,8 +169,11 @@ describe('Background Search Session Management Table', () => {
 
       mockConfig = {
         ...mockConfig,
-        refreshInterval: moment.duration(1, 'day'),
-        refreshTimeout: moment.duration(2, 'days'),
+        management: {
+          ...mockConfig.management,
+          refreshInterval: moment.duration(1, 'day'),
+          refreshTimeout: moment.duration(2, 'days'),
+        },
       };
 
       await act(async () => {

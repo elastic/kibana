@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { isEmpty, omit } from 'lodash';
+import { isEmpty, omit, merge } from 'lodash';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
   processSignificantTermAggs,
@@ -134,8 +135,7 @@ export async function getErrorRateTimeSeries({
       extended_bounds: { min: start, max: end },
     },
     aggs: {
-      // TODO: add support for metrics
-      outcomes: getOutcomeAggregation({ searchAggregatedTransactions: false }),
+      outcomes: getOutcomeAggregation(),
     },
   };
 
@@ -147,13 +147,12 @@ export async function getErrorRateTimeSeries({
       };
       return acc;
     },
-    {} as Record<
-      string,
-      {
+    {} as {
+      [key: string]: {
         filter: AggregationOptionsByType['filter'];
         aggs: { timeseries: typeof timeseriesAgg };
-      }
-    >
+      };
+    }
   );
 
   const params = {
@@ -162,32 +161,25 @@ export async function getErrorRateTimeSeries({
     body: {
       size: 0,
       query: { bool: { filter: backgroundFilters } },
-      aggs: {
-        // overall aggs
-        timeseries: timeseriesAgg,
-
-        // per term aggs
-        ...perTermAggs,
-      },
+      aggs: merge({ timeseries: timeseriesAgg }, perTermAggs),
     },
   };
 
   const response = await apmEventClient.search(params);
-  type Agg = NonNullable<typeof response.aggregations>;
+  const { aggregations } = response;
 
-  if (!response.aggregations) {
+  if (!aggregations) {
     return {};
   }
 
   return {
     overall: {
       timeseries: getTransactionErrorRateTimeSeries(
-        response.aggregations.timeseries.buckets
+        aggregations.timeseries.buckets
       ),
     },
     significantTerms: topSigTerms.map((topSig, index) => {
-      // @ts-expect-error
-      const agg = response.aggregations[`term_${index}`] as Agg;
+      const agg = aggregations[`term_${index}`]!;
 
       return {
         ...topSig,

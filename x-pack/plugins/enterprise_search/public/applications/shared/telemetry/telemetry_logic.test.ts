@@ -1,23 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
-
 import { JSON_HEADER as headers } from '../../../../common/constants';
-import { mockHttpValues } from '../../__mocks__/http_logic.mock';
+import { LogicMounter, mockHttpValues } from '../../__mocks__';
 
-import { TelemetryLogic } from './';
+import { TelemetryLogic } from './telemetry_logic';
 
 describe('Telemetry logic', () => {
+  const { mount, getListeners } = new LogicMounter(TelemetryLogic);
   const { http } = mockHttpValues;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
-    TelemetryLogic.mount();
+    mount();
   });
 
   describe('sendTelemetry', () => {
@@ -36,11 +35,7 @@ describe('Telemetry logic', () => {
 
     it('throws an error if the telemetry endpoint fails', async () => {
       http.put.mockImplementationOnce(() => Promise.reject());
-
-      // To capture thrown errors, we have to call the listener fn directly
-      // instead of using `TelemetryLogic.actions.sendTelemetry` - this is
-      // due to how Kea invokes/wraps action fns by design.
-      const { sendTelemetry } = (TelemetryLogic.inputs[0] as any).listeners({ actions: {} });
+      const { sendTelemetry } = getListeners();
 
       await expect(sendTelemetry({ action: '', metric: '', product: '' })).rejects.toThrow(
         'Unable to send telemetry'

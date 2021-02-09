@@ -194,6 +194,16 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
+// @public @deprecated
+export interface AsyncPlugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
+    // (undocumented)
+    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    // (undocumented)
+    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+    // (undocumented)
+    stop?(): void;
+}
+
 // @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
@@ -474,6 +484,7 @@ export interface DocLinksStart {
             readonly installation: string;
             readonly configuration: string;
             readonly elasticsearchOutput: string;
+            readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
         };
@@ -482,6 +493,15 @@ export interface DocLinksStart {
         };
         readonly metricbeat: {
             readonly base: string;
+            readonly configure: string;
+            readonly httpEndpoint: string;
+            readonly install: string;
+            readonly start: string;
+        };
+        readonly enterpriseSearch: {
+            readonly base: string;
+            readonly appSearchBase: string;
+            readonly workplaceSearchBase: string;
         };
         readonly heartbeat: {
             readonly base: string;
@@ -570,6 +590,7 @@ export interface DocLinksStart {
             createPipeline: string;
             createTransformRequest: string;
             executeWatchActionModes: string;
+            indexExists: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
@@ -979,15 +1000,15 @@ export { PackageInfo }
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
-    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
     // (undocumented)
-    start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+    start(core: CoreStart, plugins: TPluginsStart): TStart;
     // (undocumented)
     stop?(): void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = object, TPluginsStart extends object = object> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart> | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext<ConfigSchema extends object = object> {
@@ -1502,6 +1523,7 @@ export interface UiSettingsParams<T = unknown> {
     requiresPageReload?: boolean;
     // (undocumented)
     schema: Type<T>;
+    sensitive?: boolean;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;

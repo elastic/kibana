@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
@@ -12,7 +13,7 @@ import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react'
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
-import { SessionsMgmtConfigSchema } from '../..';
+import { SessionsConfigSchema } from '../..';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';
@@ -26,7 +27,7 @@ interface Props {
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
   timezone: string;
-  config: SessionsMgmtConfigSchema;
+  config: SessionsConfigSchema;
 }
 
 export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props }: Props) {
@@ -35,9 +36,10 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props 
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
   const showLatestResultsHandler = useRef<Function>();
-  const refreshInterval = useMemo(() => moment.duration(config.refreshInterval).asMilliseconds(), [
-    config.refreshInterval,
-  ]);
+  const refreshInterval = useMemo(
+    () => moment.duration(config.management.refreshInterval).asMilliseconds(),
+    [config.management.refreshInterval]
+  );
 
   // Debounce rendering the state of the Refresh button
   useDebounce(

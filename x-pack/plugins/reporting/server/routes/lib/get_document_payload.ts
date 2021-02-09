@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-ignore
 import contentDisposition from 'content-disposition';
 import { get } from 'lodash';
-import { CSV_JOB_TYPE } from '../../../common/constants';
+import { CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ExportTypesRegistry, statuses } from '../../lib';
 import { ReportDocument } from '../../lib/store';
 import { TaskRunResult } from '../../lib/tasks';
 import { ExportTypeDefinition } from '../../types';
 
-interface ErrorFromPayload {
+export interface ErrorFromPayload {
   message: string;
 }
 
@@ -33,7 +34,7 @@ const getTitle = (exportType: ExportTypeDefinition, title?: string): string =>
 const getReportingHeaders = (output: TaskRunResult, exportType: ExportTypeDefinition) => {
   const metaDataHeaders: Record<string, boolean> = {};
 
-  if (exportType.jobType === CSV_JOB_TYPE) {
+  if (exportType.jobType === CSV_JOB_TYPE_DEPRECATED) {
     const csvContainsFormulas = get(output, 'csv_contains_formulas', false);
     const maxSizedReach = get(output, 'max_size_reached', false);
 

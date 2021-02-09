@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
@@ -195,6 +196,13 @@ export const actionLicenses: ActionLicense[] = [
   {
     id: '.servicenow',
     name: 'ServiceNow',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.jira',
+    name: 'Jira',
     enabled: true,
     enabledInConfig: true,
     enabledInLicense: true,

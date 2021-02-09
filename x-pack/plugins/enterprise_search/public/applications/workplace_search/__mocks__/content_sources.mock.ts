@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mergeServerAndStaticData } from '../views/content_sources/sources_logic';
@@ -323,3 +324,14 @@ export const mostRecentIndexJob = {
   activeReindexJobId: '123',
   numDocumentsWithErrors: 1,
 };
+
+export const contentItems = [
+  {
+    id: '1234',
+    last_updated: '2021-01-21',
+  },
+  {
+    id: '1235',
+    last_updated: '2021-01-20',
+  },
+];
