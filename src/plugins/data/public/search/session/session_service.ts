@@ -20,6 +20,7 @@ import {
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -68,6 +69,7 @@ export class SessionService {
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
   private curApp?: string;
+  private hasAccessToSearchSessions: boolean = false;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -94,6 +96,9 @@ export class SessionService {
     );
 
     getStartServices().then(([coreStart]) => {
+      this.hasAccessToSearchSessions =
+        coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
+
       // Apps required to clean up their sessions before unmounting
       // Make sure that apps don't leave sessions open.
       this.subscription.add(
@@ -115,6 +120,15 @@ export class SessionService {
         })
       );
     });
+  }
+
+  /**
+   * If user has access to search sessions
+   * This resolves to `true` in case at least one app allows user to create search session
+   * In this case search session management is available
+   */
+  public hasAccess() {
+    return this.hasAccessToSearchSessions;
   }
 
   /**
@@ -247,11 +261,21 @@ export class SessionService {
 
   /**
    * Infers search session options for sessionId using current session state
+   *
+   * In case user doesn't has access to `search-session` SO returns null,
+   * meaning that sessionId and other session parameters shouldn't be used when doing searches
+   *
    * @param sessionId
    */
   public getSearchOptions(
     sessionId: string
-  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> {
+  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> | null {
+    // in case user doesn't have permissions to search session, do not forward sessionId to the server
+    // because user most likely also doesn't have access to `search-session` SO
+    if (!this.hasAccessToSearchSessions) {
+      return null;
+    }
+
     const isCurrentSession = this.isCurrentSession(sessionId);
     return {
       sessionId,

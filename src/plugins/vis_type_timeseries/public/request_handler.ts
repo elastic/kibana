@@ -48,6 +48,8 @@ export const metricsRequestHandler = async ({
       });
 
     try {
+      const searchSessionOptions =
+        searchSessionId && dataSearch.session.getSearchOptions(searchSessionId);
       return await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
@@ -58,8 +60,8 @@ export const metricsRequestHandler = async ({
           filters: input?.filters,
           panels: [visParams],
           state: uiStateObj,
-          ...(searchSessionId && {
-            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          ...(searchSessionOptions && {
+            searchSession: searchSessionOptions,
           }),
         }),
       });
