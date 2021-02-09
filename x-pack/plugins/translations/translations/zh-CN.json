@@ -19292,7 +19292,6 @@
     "xpack.securitySolution.open.timeline.exportSelectedButton": "导出所选",
     "xpack.securitySolution.open.timeline.favoriteSelectedButton": "收藏所选",
     "xpack.securitySolution.open.timeline.favoritesTooltip": "收藏夹",
-    "xpack.securitySolution.open.timeline.filterByTimelineTypesTitle": "仅 {timelineType}",
     "xpack.securitySolution.open.timeline.lastModifiedTableHeader": "最后修改时间",
     "xpack.securitySolution.open.timeline.missingSavedObjectIdTooltip": "缺失 savedObjectId",
     "xpack.securitySolution.open.timeline.modifiedByTableHeader": "修改者",
