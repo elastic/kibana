@@ -1,19 +1,81 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { DataPublicPluginStart } from '../shared_imports';
 import { EsRuntimeField } from '../types';
 
-const parseEsError = (error: Record<string, any>): Record<string, any> => {
-  if (error === undefined) {
-    return {};
+export interface RuntimeFieldPainlessError {
+  message: string;
+  reason: string;
+  position: {
+    offset: number;
+    start: number;
+    end: number;
+  } | null;
+  scriptStack: string[];
+}
+
+type Error = Record<string, any>;
+
+/**
+ * We are only interested in "script_exception" error type
+ */
+const getScriptExceptionErrorOnShard = (error: Error): Error | null => {
+  if (error.type === 'script_exception') {
+    return error;
   }
-  return {};
+
+  if (!error.caused_by) {
+    return null;
+  }
+
+  // Recursively try to get a script exception error
+  return getScriptExceptionErrorOnShard(error.caused_by);
+};
+
+/**
+ * We get the first script exception error on any failing shard.
+ * The UI can only display one error at the time so there is no need
+ * to look any further.
+ */
+const getScriptExceptionError = (error: Error): Error | null => {
+  if (error === undefined || !Array.isArray(error.failed_shards)) {
+    return null;
+  }
+
+  let scriptExceptionError = null;
+  for (const err of error.failed_shards) {
+    scriptExceptionError = getScriptExceptionErrorOnShard(err.reason);
+
+    if (scriptExceptionError !== null) {
+      break;
+    }
+  }
+  return scriptExceptionError;
+};
+
+const parseEsError = (error?: Error): RuntimeFieldPainlessError | null => {
+  if (error === undefined) {
+    return null;
+  }
+
+  const scriptError = getScriptExceptionError(error.caused_by);
+
+  if (scriptError === null) {
+    return null;
+  }
+
+  return {
+    message: 'Error compiling the painless script',
+    position: scriptError.position ?? null,
+    scriptStack: scriptError.script_stack ?? [],
+    reason: scriptError.caused_by?.reason ?? '',
+  };
 };
 
 /**
@@ -42,5 +104,7 @@ export const getRuntimeFieldValidator = (
     })
     .toPromise()
     .then(() => null)
-    .catch((e) => parseEsError(e.attributes));
+    .catch((e) => {
+      return parseEsError(e.attributes);
+    });
 };

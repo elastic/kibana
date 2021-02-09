@@ -37,7 +37,7 @@ export type InternalFieldType = 'concrete' | 'runtime';
 
 export interface Field {
   name: string;
-  type?: RuntimeField['type'] | string;
+  type: RuntimeField['type'] | string;
   script?: RuntimeField['script'];
   customLabel?: string;
   popularity?: number;

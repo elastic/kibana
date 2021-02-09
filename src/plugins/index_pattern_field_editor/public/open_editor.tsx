@@ -16,7 +16,6 @@ import {
   IndexPatternField,
   DataPublicPluginStart,
   IndexPattern,
-  DataPublicPluginStart,
 } from './shared_imports';
 
 import { InternalFieldType } from './types';

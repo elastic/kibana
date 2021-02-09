@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { dataPluginMock } from '../../../data/public/mocks';
 import { registerTestBed, TestBed, noop, docLinks } from '../test_utils';
 import { Field } from '../types';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
 
-const dataStart = dataPluginMock.createStartContract();
-
-const setup = (props: Props = defaultProps) =>
+const setup = (props?: Props) =>
   registerTestBed(FieldEditorFlyoutContent, {
     memoryRouter: { wrapComponent: false },
   })(props) as TestBed;
@@ -28,7 +25,7 @@ const defaultProps: Props = {
   fieldFormats: {} as any,
   fieldFormatEditors: {} as any,
   fieldTypeToProcess: 'runtime',
-  search: dataStart.search,
+  runtimeFieldValidator: () => Promise.resolve(null),
 };
 
 describe('<FieldEditorFlyoutContent />', () => {

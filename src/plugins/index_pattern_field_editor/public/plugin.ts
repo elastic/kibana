@@ -32,8 +32,6 @@ export class IndexPatternFieldEditorPlugin
     } = core;
     const { data } = plugins;
 
-    const { data } = plugins;
-
     return {
       fieldFormatEditors,
       openEditor: getFieldEditorOpener({
