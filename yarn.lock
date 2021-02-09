@@ -2178,7 +2178,7 @@
 
 "@elastic/elasticsearch@github:elastic/elasticsearch-js#type-definitions":
   version "8.0.0-SNAPSHOT.9f33e3c7"
-  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/f904c49ebe948c0c3611c42cfa16a036ca1dff0d"
+  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/4eef8687e44314acfc924ad64f0cfa1e08d68ecb"
   dependencies:
     debug "^4.1.1"
     hpagent "^0.1.1"
