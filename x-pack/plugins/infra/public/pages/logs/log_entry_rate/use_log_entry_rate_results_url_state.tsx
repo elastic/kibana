@@ -69,7 +69,7 @@ export const useLogAnalysisResultsUrlState = () => {
     value: TimeRange;
     lastChangedTime: number;
   }>(() => ({
-    value: stringToNumericTimeRange({ start: timeRange.startTime, end: timeRange.endTime }),
+    value: stringToNumericTimeRange({ start: urlTimeRange.startTime, end: urlTimeRange.endTime }),
     lastChangedTime: Date.now(),
   }));
 
@@ -85,13 +85,13 @@ export const useLogAnalysisResultsUrlState = () => {
 
   const setTimeRange = useCallback(
     (selectedTime: { start: string; end: string }) => {
-      _setTimeRange({
+      setUrlTimeRange({
         startTime: selectedTime.start,
         endTime: selectedTime.end,
       });
       handleQueryTimeRangeChange(selectedTime);
     },
-    [_setTimeRange, handleQueryTimeRangeChange]
+    [setUrlTimeRange, handleQueryTimeRangeChange]
   );
 
   const handleTimeFilterChange = useCallback(
@@ -104,7 +104,7 @@ export const useLogAnalysisResultsUrlState = () => {
 
   useSyncKibanaTimeFilterTime(
     TIME_DEFAULTS,
-    { from: timeRange.startTime, to: timeRange.endTime },
+    { from: urlTimeRange.startTime, to: urlTimeRange.endTime },
     handleTimeFilterChange
   );
 
@@ -119,8 +119,8 @@ export const useLogAnalysisResultsUrlState = () => {
   useInterval(
     () => {
       handleQueryTimeRangeChange({
-        start: timeRange.startTime,
-        end: timeRange.endTime,
+        start: urlTimeRange.startTime,
+        end: urlTimeRange.endTime,
       });
     },
     autoRefresh.isPaused ? null : autoRefresh.interval
@@ -128,7 +128,7 @@ export const useLogAnalysisResultsUrlState = () => {
 
   return {
     timeRange: queryTimeRange,
-    friendlyTimeRange: timeRange,
+    friendlyTimeRange: urlTimeRange,
     setTimeRange,
     autoRefresh,
     setAutoRefresh,
