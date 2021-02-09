@@ -10,7 +10,7 @@
     "share",
     "inspector"
   ],
-  "serviceFolders": ["search", "index_patterns", "query", "autocomplete", "ui"],
+  "serviceFolders": ["search", "index_patterns", "query", "autocomplete", "ui", "field_formats"],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],
   "requiredBundles": [
