@@ -31,7 +31,7 @@ export async function hasRumData({ setup }: { setup: Setup & SetupTimeRange }) {
         },
         aggs: {
           services: {
-            filter: rangeQuery(start, end),
+            filter: rangeQuery(start, end)[0],
             aggs: {
               mostTraffic: {
                 terms: {
