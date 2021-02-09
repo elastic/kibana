@@ -51,24 +51,20 @@ export const getSearchFilters = ({
   filterOptions: Record<string, string | null>;
   defaultSearchTerm: string;
 }): Record<string, string | null> => {
-  try {
-    const fieldClauses = query?.ast.getFieldClauses();
+  const fieldClauses = query?.ast.getFieldClauses();
 
-    if (fieldClauses != null && fieldClauses.length > 0) {
-      const filtersReduced = fieldClauses.reduce<Record<string, string | null>>(
-        (acc, { field, value }) => {
-          acc[field] = `${value}`;
+  if (fieldClauses != null && fieldClauses.length > 0) {
+    const filtersReduced = fieldClauses.reduce<Record<string, string | null>>(
+      (acc, { field, value }) => {
+        acc[field] = `${value}`;
 
-          return acc;
-        },
-        filterOptions
-      );
+        return acc;
+      },
+      filterOptions
+    );
 
-      return filtersReduced;
-    }
-
-    return { [defaultSearchTerm]: searchValue };
-  } catch {
-    return { [defaultSearchTerm]: searchValue };
+    return filtersReduced;
   }
+
+  return { [defaultSearchTerm]: searchValue };
 };

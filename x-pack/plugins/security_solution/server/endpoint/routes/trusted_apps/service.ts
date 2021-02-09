@@ -55,7 +55,7 @@ export const getTrustedAppsList = async (
     perPage,
     filter: undefined,
     namespaceType: 'agnostic',
-    sortField: 'name.keyword',
+    sortField: 'name',
     sortOrder: 'asc',
   });
 
