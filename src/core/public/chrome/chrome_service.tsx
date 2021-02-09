@@ -119,6 +119,7 @@ export class ChromeService {
     const bodyClasses$ = combineLatest([headerBanner$, this.isVisible$!]).pipe(
       map(([headerBanner, isVisible]) => {
         return [
+          'kbnBody',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
         ];

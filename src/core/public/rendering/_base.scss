@@ -31,10 +31,27 @@
   }
 }
 
-.coreSystemRootDomElement {
-  @include euiHeaderAffordForFixed($kbnHeaderOffset);
+// adapted from euiHeaderAffordForFixed as we need to handle the top banner
+@mixin kbnAffordForHeader($headerHeight) {
+  padding-top: $headerHeight;
+
+  .euiFlyout,
+  .euiCollapsibleNav {
+    top: $headerHeight;
+    height: calc(100% - #{$headerHeight});
+  }
+}
+
+.kbnBody {
+  @include kbnAffordForHeader($kbnHeaderOffset);
 
   &.kbnBody--hasHeaderBanner {
-    @include euiHeaderAffordForFixed($kbnHeaderOffsetWithBanner);
+    @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
+  }
+  &.kbnBody--chromeHidden {
+    @include kbnAffordForHeader(0);
+  }
+  &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
+    @include kbnAffordForHeader($kbnHeaderBannerHeight);
   }
 }

@@ -10,11 +10,6 @@
   overflow: hidden;
 }
 
-.mapFullScreen {
-  // sass-lint:disable no-important
-  height: 100vh !important;
-}
-
 #react-maps-root {
   flex-grow: 1;
   display: flex;
