@@ -27,12 +27,12 @@ function createRoot() {
       },
       loggers: [
         {
-          context: 'parent',
+          name: 'parent',
           appenders: ['test-console'],
           level: 'warn',
         },
         {
-          context: 'parent.child',
+          name: 'parent.child',
           appenders: ['test-console'],
           level: 'error',
         },
@@ -42,7 +42,7 @@ function createRoot() {
 }
 
 describe('logging service', () => {
-  describe('logs according to context hierarchy', () => {
+  describe('logs according to context name hierarchy', () => {
     let root: ReturnType<typeof createRoot>;
     let mockConsoleLog: jest.SpyInstance;
     beforeAll(async () => {
@@ -61,7 +61,7 @@ describe('logging service', () => {
       await root.shutdown();
     });
 
-    it('uses the most specific context', () => {
+    it('uses the most specific context name', () => {
       const logger = root.logger.get('parent.child');
 
       logger.error('error from "parent.child" context');
@@ -74,7 +74,7 @@ describe('logging service', () => {
       );
     });
 
-    it('uses parent context', () => {
+    it('uses parent context name', () => {
       const logger = root.logger.get('parent.another-child');
 
       logger.error('error from "parent.another-child" context');
@@ -104,7 +104,7 @@ describe('logging service', () => {
     });
   });
 
-  describe('custom context configuration', () => {
+  describe('custom context name configuration', () => {
     const CUSTOM_LOGGING_CONFIG: LoggerContextConfigInput = {
       appenders: {
         customJsonConsole: {
@@ -123,12 +123,12 @@ describe('logging service', () => {
       },
 
       loggers: [
-        { context: 'debug_json', appenders: ['customJsonConsole'], level: 'debug' },
-        { context: 'debug_pattern', appenders: ['customPatternConsole'], level: 'debug' },
-        { context: 'info_json', appenders: ['customJsonConsole'], level: 'info' },
-        { context: 'info_pattern', appenders: ['customPatternConsole'], level: 'info' },
+        { name: 'debug_json', appenders: ['customJsonConsole'], level: 'debug' },
+        { name: 'debug_pattern', appenders: ['customPatternConsole'], level: 'debug' },
+        { name: 'info_json', appenders: ['customJsonConsole'], level: 'info' },
+        { name: 'info_pattern', appenders: ['customPatternConsole'], level: 'info' },
         {
-          context: 'all',
+          name: 'all',
           appenders: ['customJsonConsole', 'customPatternConsole'],
           level: 'debug',
         },

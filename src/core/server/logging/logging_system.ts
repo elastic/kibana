@@ -79,7 +79,7 @@ export class LoggingSystem implements LoggerFactory {
    * loggingSystem.setContextConfig(
    *   ['plugins', 'data'],
    *   {
-   *     loggers: [{ context: 'search', appenders: ['default'] }]
+   *     loggers: [{ name: 'search', appenders: ['default'] }]
    *   }
    * )
    * ```
@@ -95,9 +95,7 @@ export class LoggingSystem implements LoggerFactory {
       // Automatically prepend the base context to the logger sub-contexts
       loggers: contextConfig.loggers.map((l) => ({
         ...l,
-        context: LoggingConfig.getLoggerContext(
-          l.context.length > 0 ? [context, l.context] : [context]
-        ),
+        name: LoggingConfig.getLoggerContext(l.name.length > 0 ? [context, l.name] : [context]),
       })),
     });
 

@@ -84,7 +84,7 @@ Object {
 }
 `;
 
-exports[`uses \`root\` logger if context is not specified. 1`] = `
+exports[`uses \`root\` logger if context name is not specified. 1`] = `
 Array [
   Array [
     "[2012-01-31T23:33:22.011Z][INFO ][root] This message goes to a root context.",

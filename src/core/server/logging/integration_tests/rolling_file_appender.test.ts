@@ -25,7 +25,7 @@ function createRoot(appenderConfig: any) {
       },
       loggers: [
         {
-          context: 'test.rolling.file',
+          name: 'test.rolling.file',
           appenders: ['rolling-file'],
           level: 'debug',
         },

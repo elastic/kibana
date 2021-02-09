@@ -233,7 +233,7 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
     },
     loggers: [
       {
-        context: 'audit.ecs',
+        name: 'audit.ecs',
         level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
         appenders: ['auditTrailAppender'],
       },

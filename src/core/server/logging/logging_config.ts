@@ -51,7 +51,7 @@ const levelSchema = schema.oneOf(
  */
 export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  context: schema.string(),
+  name: schema.string(),
   level: levelSchema,
 });
 
@@ -182,8 +182,8 @@ export class LoggingConfig {
   public extend(contextConfig: LoggerContextConfigType) {
     // Use a Map to de-dupe any loggers for the same context. contextConfig overrides existing config.
     const mergedLoggers = new Map<string, LoggerConfigType>([
-      ...this.configType.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
-      ...contextConfig.loggers.map((l) => [l.context, l] as [string, LoggerConfigType]),
+      ...this.configType.loggers.map((l) => [l.name, l] as [string, LoggerConfigType]),
+      ...contextConfig.loggers.map((l) => [l.name, l] as [string, LoggerConfigType]),
     ]);
 
     const mergedConfig: LoggingConfigType = {
@@ -204,13 +204,10 @@ export class LoggingConfig {
   private fillLoggersConfig(loggingConfig: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggers = [
-      { context: ROOT_CONTEXT_NAME, ...loggingConfig.root },
-      ...loggingConfig.loggers,
-    ];
+    const loggers = [{ name: ROOT_CONTEXT_NAME, ...loggingConfig.root }, ...loggingConfig.loggers];
 
     const loggerConfigByContext = new Map(
-      loggers.map((loggerConfig) => toTuple(loggerConfig.context, loggerConfig))
+      loggers.map((loggerConfig) => toTuple(loggerConfig.name, loggerConfig))
     );
 
     for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
@@ -247,7 +244,7 @@ function getAppenders(
   loggerConfig: LoggerConfigType,
   loggerConfigByContext: Map<string, LoggerConfigType>
 ) {
-  let currentContext = loggerConfig.context;
+  let currentContext = loggerConfig.name;
   let appenders = loggerConfig.appenders;
 
   while (appenders.length === 0) {

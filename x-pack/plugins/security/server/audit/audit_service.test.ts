@@ -275,8 +275,8 @@ describe('#createLoggingConfig', () => {
             "appenders": Array [
               "auditTrailAppender",
             ],
-            "context": "audit.ecs",
             "level": "info",
+            "name": "audit.ecs",
           },
         ],
       }

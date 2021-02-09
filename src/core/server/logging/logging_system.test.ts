@@ -46,7 +46,7 @@ test('uses default memory buffer logger until config is provided', () => {
   const logger = system.get('test', 'context');
   logger.trace('trace message');
 
-  // We shouldn't create new buffer appender for another context.
+  // We shouldn't create new buffer appender for another context name.
   const anotherLogger = system.get('test', 'context2');
   anotherLogger.fatal('fatal message', { some: 'value' });
 
@@ -106,8 +106,8 @@ test('appends records via multiple appenders.', async () => {
         file: { type: 'file', layout: { type: 'pattern' }, fileName: 'path' },
       },
       loggers: [
-        { appenders: ['file'], context: 'tests', level: 'warn' },
-        { context: 'tests.child', level: 'error' },
+        { appenders: ['file'], name: 'tests', level: 'warn' },
+        { name: 'tests.child', level: 'error' },
       ],
     })
   );
@@ -121,7 +121,7 @@ test('appends records via multiple appenders.', async () => {
   expect(mockStreamWrite.mock.calls[1][0]).toMatchSnapshot('file logs');
 });
 
-test('uses `root` logger if context is not specified.', async () => {
+test('uses `root` logger if context name is not specified.', async () => {
   await system.upgrade(
     config.schema.validate({
       appenders: { default: { type: 'console', layout: { type: 'pattern' } } },
@@ -192,7 +192,7 @@ test('setContextConfig() updates config with relative contexts', async () => {
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   testsLogger.warn('tests log to default!');
@@ -247,7 +247,7 @@ test('setContextConfig() updates config for a root context', async () => {
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: '', appenders: ['custom'], level: 'debug' }],
+    loggers: [{ name: '', appenders: ['custom'], level: 'debug' }],
   });
 
   testsLogger.warn('tests log to default!');
@@ -273,7 +273,7 @@ test('setContextConfig() updates config for a root context', async () => {
   );
 });
 
-test('custom context configs are applied on subsequent calls to update()', async () => {
+test('custom context name configs are applied on subsequent calls to update()', async () => {
   await system.setContextConfig(['tests', 'child'], {
     appenders: new Map([
       [
@@ -281,7 +281,7 @@ test('custom context configs are applied on subsequent calls to update()', async
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   // Calling upgrade after setContextConfig should not throw away the context-specific config
@@ -310,7 +310,7 @@ test('custom context configs are applied on subsequent calls to update()', async
   );
 });
 
-test('subsequent calls to setContextConfig() for the same context override the previous config', async () => {
+test('subsequent calls to setContextConfig() for the same context name override the previous config', async () => {
   await system.upgrade(
     config.schema.validate({
       appenders: { default: { type: 'console', layout: { type: 'json' } } },
@@ -325,7 +325,7 @@ test('subsequent calls to setContextConfig() for the same context override the p
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   // Call again, this time with level: 'warn' and a different pattern
@@ -339,7 +339,7 @@ test('subsequent calls to setContextConfig() for the same context override the p
         },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
   });
 
   const logger = system.get('tests', 'child', 'grandchild');
@@ -360,7 +360,7 @@ test('subsequent calls to setContextConfig() for the same context override the p
   );
 });
 
-test('subsequent calls to setContextConfig() for the same context can disable the previous config', async () => {
+test('subsequent calls to setContextConfig() for the same context name can disable the previous config', async () => {
   await system.upgrade(
     config.schema.validate({
       appenders: { default: { type: 'console', layout: { type: 'json' } } },
@@ -375,7 +375,7 @@ test('subsequent calls to setContextConfig() for the same context can disable th
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ context: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
   });
 
   // Call again, this time no customizations (effectively disabling)
