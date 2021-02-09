@@ -18,7 +18,7 @@ export const MissingEmbeddableFactoryCallout: React.FC<{ embeddableType: string 
       color="warning"
       title={i18n.translate('xpack.infra.missingEmebeddableFactoryCallout', {
         defaultMessage:
-          "{embeddableType} embeddable is unavailable. This can happen if the embeddable plugin isn't enabled",
+          "{embeddableType} embeddable is unavailable. This can happen if the embeddable plugin isn't enabled.",
         values: { embeddableType },
       })}
     />
