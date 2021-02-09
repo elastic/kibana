@@ -15,13 +15,12 @@ import { API_BASE_PATH } from './constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
   const {
     createComponentTemplate,
     cleanUpComponentTemplates,
     deleteComponentTemplate,
-  } = initElasticsearchHelpers(es);
+  } = initElasticsearchHelpers(getService);
 
   describe('Component templates', function () {
     after(async () => {

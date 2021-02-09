@@ -16,14 +16,12 @@ import { DEFAULT_POLICY_NAME } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('es');
-
   const {
     createIndex,
     createComposableIndexTemplate,
     createDataStream,
     cleanUp: cleanUpEsResources,
-  } = initElasticsearchHelpers(es);
+  } = initElasticsearchHelpers(getService);
 
   const {
     loadPolicies,
