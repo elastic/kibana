@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
+  const browser = getService('browser');
 
   describe('security', () => {
     before(async () => {
@@ -41,6 +42,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not render the "Stack" section', async () => {
         await PageObjects.common.navigateToApp('management');
+        // temporary stability fix until https://github.com/elastic/kibana/issues/90770 is fixed
+        await browser.refresh();
         const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
         expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
       });
