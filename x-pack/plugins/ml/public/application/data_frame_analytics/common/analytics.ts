@@ -148,7 +148,7 @@ export interface ConfusionMatrix {
   other_predicted_class_doc_count: number;
 }
 
-export interface AucRocCurveItem {
+export interface RocCurveItem {
   fpr: number;
   threshold: number;
   tpr: number;
@@ -160,7 +160,7 @@ export interface ClassificationEvaluateResponse {
       confusion_matrix: ConfusionMatrix[];
     };
     auc_roc?: {
-      curve?: AucRocCurveItem[];
+      curve?: RocCurveItem[];
       value: number;
     };
   };
@@ -448,7 +448,7 @@ interface LoadEvalDataConfig {
   ignoreDefaultQuery?: boolean;
   jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
-  aucRocClassName?: string;
+  rocCurveClassName?: string;
   includeMulticlassConfusionMatrix?: boolean;
 }
 
@@ -462,7 +462,7 @@ export const loadEvalData = async ({
   ignoreDefaultQuery,
   jobType,
   requiresKeyword,
-  aucRocClassName,
+  rocCurveClassName,
   includeMulticlassConfusionMatrix = true,
 }: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
@@ -480,8 +480,8 @@ export const loadEvalData = async ({
   const metrics: EvaluateMetrics = {
     classification: {
       ...(includeMulticlassConfusionMatrix ? { multiclass_confusion_matrix: {} } : {}),
-      ...(aucRocClassName !== undefined
-        ? { auc_roc: { include_curve: true, class_name: aucRocClassName } }
+      ...(rocCurveClassName !== undefined
+        ? { auc_roc: { include_curve: true, class_name: rocCurveClassName } }
         : {}),
     },
     regression: {

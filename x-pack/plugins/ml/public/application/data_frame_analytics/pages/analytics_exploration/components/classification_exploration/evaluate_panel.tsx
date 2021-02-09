@@ -29,7 +29,7 @@ import { ResultsSearchQuery } from '../../../../common/analytics';
 
 import { ExpandableSection, HEADER_ITEMS_LOADING } from '../expandable_section';
 
-import { getAucRocChartVegaLiteSpec } from './get_auc_roc_chart_vega_lite_spec';
+import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_spec';
 
 import {
   getColumnData,
@@ -39,7 +39,7 @@ import {
 } from './column_data';
 
 import { isTrainingFilter } from './is_training_filter';
-import { useAucRoc } from './use_auc_roc';
+import { useRocCurve } from './use_roc_curve';
 import { useConfusionMatrix } from './use_confusion_matrix';
 
 export interface EvaluatePanelProps {
@@ -152,11 +152,11 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   }, [confusionMatrixData]);
 
   const {
-    aucRocData,
+    rocCurveData,
     classificationClasses,
-    error: errorAucRoc,
-    isLoading: isLoadingAucRoc,
-  } = useAucRoc(jobConfig, searchQuery, visibleColumns);
+    error: errorRocCurve,
+    isLoading: isLoadingRocCurve,
+  } = useRocCurve(jobConfig, searchQuery, visibleColumns);
 
   const renderCellValue = ({
     rowIndex,
@@ -355,8 +355,8 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
               </>
             ) : null}
             {/* AUC ROC Chart */}
-            {Array.isArray(errorAucRoc) && errorAucRoc.map((e) => <ErrorCallout error={e} />)}
-            {errorAucRoc === null && (
+            {Array.isArray(errorRocCurve) && errorRocCurve.map((e) => <ErrorCallout error={e} />)}
+            {errorRocCurve === null && (
               <>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup gutterSize="none">
@@ -381,14 +381,14 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                {!isLoadingAucRoc && aucRocData.length > 0 && (
+                {!isLoadingRocCurve && rocCurveData.length > 0 && (
                   <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
                     <VegaChart
-                      vegaSpec={getAucRocChartVegaLiteSpec(classificationClasses, aucRocData)}
+                      vegaSpec={getRocCurveChartVegaLiteSpec(classificationClasses, rocCurveData)}
                     />
                   </div>
                 )}
-                {isLoadingAucRoc && <VegaChartLoading />}
+                {isLoadingRocCurve && <VegaChartLoading />}
               </>
             )}
           </>

@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 
 import { LEGEND_TYPES } from '../../../../../components/vega_chart';
 
-import { AucRocCurveItem } from '../../../../common/analytics';
+import { RocCurveItem } from '../../../../common/analytics';
 
 const GRAY = euiPaletteGray(1)[0];
 const BASELINE = 'baseline';
@@ -36,13 +36,13 @@ function getColorRangeNominal(classificationClasses: string[]) {
   return colorRangeNominal;
 }
 
-export interface AucRocDataRow extends AucRocCurveItem {
+export interface RocCurveDataRow extends RocCurveItem {
   class_name: string;
 }
 
-export const getAucRocChartVegaLiteSpec = (
+export const getRocCurveChartVegaLiteSpec = (
   classificationClasses: string[],
-  data: AucRocDataRow[]
+  data: RocCurveDataRow[]
 ): TopLevelSpec => {
   // we append two rows which make up the data for the diagonal baseline
   data.push({ tpr: 0, fpr: 0, threshold: 1, class_name: BASELINE });
@@ -64,10 +64,10 @@ export const getAucRocChartVegaLiteSpec = (
       },
     },
     data: {
-      name: 'auc-roc-data',
+      name: 'roc-curve-data',
     },
     datasets: {
-      'auc-roc-data': data,
+      'roc-curve-data': data,
     },
     encoding: {
       color: {

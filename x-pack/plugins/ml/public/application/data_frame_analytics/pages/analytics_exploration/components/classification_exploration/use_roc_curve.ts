@@ -9,8 +9,8 @@ import { useState, useEffect } from 'react';
 
 import {
   isClassificationEvaluateResponse,
-  AucRocCurveItem,
   ResultsSearchQuery,
+  RocCurveItem,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
@@ -26,29 +26,29 @@ import { ACTUAL_CLASS_ID } from './column_data';
 
 import { isTrainingFilter } from './is_training_filter';
 
-interface AucRocDataRow extends AucRocCurveItem {
+interface RocCurveDataRow extends RocCurveItem {
   class_name: string;
 }
 
-export const useAucRoc = (
+export const useRocCurve = (
   jobConfig: DataFrameAnalyticsConfig,
   searchQuery: ResultsSearchQuery,
   visibleColumns: string[]
 ) => {
   const classificationClasses = visibleColumns.filter((d) => d !== ACTUAL_CLASS_ID);
 
-  const [aucRocData, setAucRocData] = useState<AucRocDataRow[]>([]);
+  const [rocCurveData, setRocCurveData] = useState<RocCurveDataRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<null | string[]>(null);
 
   useEffect(() => {
-    async function loadAucRocData() {
+    async function loadRocCurveData() {
       setIsLoading(true);
 
       const dependentVariable = getDependentVar(jobConfig.analysis);
       const resultsField = jobConfig.dest.results_field;
 
-      const newAucRocData: AucRocDataRow[] = [];
+      const newRocCurveData: RocCurveDataRow[] = [];
 
       let requiresKeyword = false;
       const errors: string[] = [];
@@ -61,7 +61,7 @@ export const useAucRoc = (
       }
 
       for (let i = 0; i < classificationClasses.length; i++) {
-        const aucRocClassName = classificationClasses[i];
+        const rocCurveClassName = classificationClasses[i];
         const evalData = await loadEvalData({
           isTraining: isTrainingFilter(searchQuery, resultsField),
           index: jobConfig.dest.index,
@@ -71,7 +71,7 @@ export const useAucRoc = (
           searchQuery,
           jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
           requiresKeyword,
-          aucRocClassName,
+          rocCurveClassName,
           includeMulticlassConfusionMatrix: false,
         });
 
@@ -80,25 +80,25 @@ export const useAucRoc = (
           evalData.eval &&
           isClassificationEvaluateResponse(evalData.eval)
         ) {
-          const aucRocDataForClass = (evalData.eval?.classification?.auc_roc?.curve || []).map(
+          const rocCurveDataForClass = (evalData.eval?.classification?.auc_roc?.curve || []).map(
             (d) => ({
-              class_name: aucRocClassName,
+              class_name: rocCurveClassName,
               ...d,
             })
           );
-          newAucRocData.push(...aucRocDataForClass);
+          newRocCurveData.push(...rocCurveDataForClass);
         } else if (evalData.error !== null) {
           errors.push(evalData.error);
         }
       }
 
       setError(errors.length > 0 ? errors : null);
-      setAucRocData(newAucRocData);
+      setRocCurveData(newRocCurveData);
       setIsLoading(false);
     }
 
-    loadAucRocData();
+    loadRocCurveData();
   }, [JSON.stringify([jobConfig, searchQuery, visibleColumns])]);
 
-  return { aucRocData, classificationClasses, error, isLoading };
+  return { rocCurveData, classificationClasses, error, isLoading };
 };
