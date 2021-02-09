@@ -8,9 +8,9 @@
 import React from 'react';
 
 import { useActions } from 'kea';
-import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { GroupsLogic } from '../groups_logic';
 
