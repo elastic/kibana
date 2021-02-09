@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
 /**
@@ -24,7 +24,7 @@ const tableHeight = 282;
  *
  * Hide the empty message when we don't yet have any items and are still loading.
  */
-const ServiceOverviewTableContainerDiv = styled.div<{
+const ServiceOverviewTableContainerDiv = euiStyled.div<{
   isEmptyAndLoading: boolean;
   shouldUseMobileLayout: boolean;
 }>`
