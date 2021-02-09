@@ -9,6 +9,15 @@
 import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
+import { catchAndReturnBoomErrors } from './utils';
+import Boom from '@hapi/boom';
+import {
+  KibanaRequest,
+  RequestHandler,
+  RequestHandlerContext,
+  KibanaResponseFactory,
+  kibanaResponseFactory,
+} from '../../';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -141,5 +150,71 @@ describe('validateObjects', () => {
         allowedTypes
       )
     ).toBeUndefined();
+  });
+});
+
+describe('catchAndReturnBoomErrors', () => {
+  let context: RequestHandlerContext;
+  let request: KibanaRequest<any, any, any>;
+  let response: KibanaResponseFactory;
+
+  const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
+    return handler();
+  };
+
+  beforeEach(() => {
+    context = {} as any;
+    request = {} as any;
+    response = kibanaResponseFactory;
+  });
+
+  it('should pass-though call parameters to the handler', async () => {
+    const handler = jest.fn();
+    const wrapped = catchAndReturnBoomErrors(handler);
+    await wrapped(context, request, response);
+    expect(handler).toHaveBeenCalledWith(context, request, response);
+  });
+
+  it('should pass-though result from the handler', async () => {
+    const handler = createHandler(() => {
+      return 'handler-response';
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    const result = await wrapped(context, request, response);
+    expect(result).toBe('handler-response');
+  });
+
+  it('should intercept and convert thrown Boom errors', async () => {
+    const handler = createHandler(() => {
+      throw Boom.notFound('not there');
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    const result = await wrapped(context, request, response);
+    expect(result.status).toBe(404);
+    expect(result.payload).toEqual({
+      error: 'Not Found',
+      message: 'not there',
+      statusCode: 404,
+    });
+  });
+
+  it('should re-throw non-Boom errors', async () => {
+    const handler = createHandler(() => {
+      throw new Error('something went bad');
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    await expect(wrapped(context, request, response)).rejects.toMatchInlineSnapshot(
+      `[Error: something went bad]`
+    );
+  });
+
+  it('should re-throw Boom internal/500 errors', async () => {
+    const handler = createHandler(() => {
+      throw Boom.internal();
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    await expect(wrapped(context, request, response)).rejects.toMatchInlineSnapshot(
+      `[Error: Internal Server Error]`
+    );
   });
 });

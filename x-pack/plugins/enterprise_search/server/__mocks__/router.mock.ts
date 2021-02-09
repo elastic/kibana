@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import {
   IRouter,
   KibanaRequest,
   RequestHandlerContext,
   RouteValidatorConfig,
 } from 'src/core/server';
+import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 
 /**
  * Test helper that mocks Kibana's router and DRYs out various helper (callRoute, schema validation)
@@ -23,7 +23,6 @@ type PayloadType = 'params' | 'query' | 'body';
 interface IMockRouter {
   method: MethodType;
   path: string;
-  payload?: PayloadType;
 }
 interface IMockRouterRequest {
   body?: object;
@@ -39,11 +38,10 @@ export class MockRouter {
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, path, payload }: IMockRouter) {
+  constructor({ method, path }: IMockRouter) {
     this.createRouter();
     this.method = method;
     this.path = path;
-    this.payload = payload;
   }
 
   public createRouter = () => {
@@ -62,16 +60,17 @@ export class MockRouter {
    */
 
   public validateRoute = (request: MockRouterRequest) => {
-    if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
-
     const route = this.findRouteRegistration();
     const [config] = route;
     const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
+    const payloads = Object.keys(request) as PayloadType[];
 
-    const payloadValidation = validate[this.payload] as { validate(request: KibanaRequest): void };
-    const payloadRequest = request[this.payload] as KibanaRequest;
+    payloads.forEach((payload: PayloadType) => {
+      const payloadValidation = validate[payload] as { validate(request: KibanaRequest): void };
+      const payloadRequest = request[payload] as KibanaRequest;
 
-    payloadValidation.validate(payloadRequest);
+      payloadValidation.validate(payloadRequest);
+    });
   };
 
   public shouldValidate = (request: MockRouterRequest) => {
@@ -99,7 +98,6 @@ export class MockRouter {
 // const mockRouter = new MockRouter({
 //   method: 'get',
 //   path: '/api/app_search/test',
-//   payload: 'body'
 // });
 //
 // beforeEach(() => {

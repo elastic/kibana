@@ -70,7 +70,7 @@ export const mappings: TestMappings = {
       action_type: 'append',
     },
   ],
-  [ConnectorTypes.servicenow]: [
+  [ConnectorTypes.serviceNowITSM]: [
     {
       source: 'title',
       target: 'short_description',
@@ -611,7 +611,7 @@ export const formatFieldsTestData: FormatFieldsTestData[] = [
       { id: 'upon_reject', name: 'Upon reject', required: false, type: 'text' },
     ],
     fields: serviceNowFields,
-    type: ConnectorTypes.servicenow,
+    type: ConnectorTypes.serviceNowITSM,
   },
 ];
 export const mockGetFieldsResponse = {
