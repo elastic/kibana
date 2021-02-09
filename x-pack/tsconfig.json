@@ -14,6 +14,7 @@
     "plugins/discover_enhanced/**/*",
     "plugins/dashboard_mode/**/*",
     "plugins/dashboard_enhanced/**/*",
+    "plugins/fleet/**/*",
     "plugins/global_search/**/*",
     "plugins/global_search_providers/**/*",
     "plugins/graph/**/*",
@@ -60,6 +61,7 @@
     "plugins/remote_clusters/**/*",
     "plugins/cross_cluster_replication/**/*",
     "plugins/index_lifecycle_management/**/*",
+    "plugins/uptime/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -153,6 +155,7 @@
     { "path": "./plugins/rollup/tsconfig.json" },
     { "path": "./plugins/remote_clusters/tsconfig.json" },
     { "path": "./plugins/cross_cluster_replication/tsconfig.json"},
-    { "path": "./plugins/index_lifecycle_management/tsconfig.json"}
+    { "path": "./plugins/index_lifecycle_management/tsconfig.json"},
+    { "path": "./plugins/uptime/tsconfig.json" }
   ]
 }
