@@ -128,7 +128,7 @@ export async function suggest(
   argValueSuggestions: ArgValueSuggestions
 ) {
   try {
-    const result = await parseTimelionExpression(expression);
+    const result = parseTimelionExpression(expression);
 
     return await extractSuggestionsFromParsedResult(
       result,
