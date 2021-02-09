@@ -9,7 +9,7 @@ Provide a field, get its formatter
 <b>Signature:</b>
 
 ```typescript
-getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
+getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType, params?: Record<string, any>): FieldFormat;
 ```
 
 ## Parameters
@@ -17,6 +17,7 @@ getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFie
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  field | <code>IndexPatternField &#124; IndexPatternField['spec'] &#124; IFieldType</code> |  |
+|  params | <code>Record&lt;string, any&gt;</code> |  |
 
 <b>Returns:</b>
 

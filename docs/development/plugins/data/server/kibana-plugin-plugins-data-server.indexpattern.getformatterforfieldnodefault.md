@@ -9,7 +9,7 @@ Get formatter for a given field name. Return undefined if none exists
 <b>Signature:</b>
 
 ```typescript
-getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
+getFormatterForFieldNoDefault(fieldname: string, params?: Record<string, any>): FieldFormat | undefined;
 ```
 
 ## Parameters
@@ -17,6 +17,7 @@ getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  fieldname | <code>string</code> |  |
+|  params | <code>Record&lt;string, any&gt;</code> |  |
 
 <b>Returns:</b>
 

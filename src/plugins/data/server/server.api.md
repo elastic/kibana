@@ -758,8 +758,8 @@ export class IndexPattern implements IIndexPattern {
     };
     // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
-    getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
-    getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
+    getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType, params?: Record<string, any>): FieldFormat;
+    getFormatterForFieldNoDefault(fieldname: string, params?: Record<string, any>): FieldFormat | undefined;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternField" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
