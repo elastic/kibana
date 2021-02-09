@@ -67,6 +67,7 @@ uiRoutes.when('/beats/beats', {
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
+      this.onTableChangeRender = this.renderComponent;
 
       $scope.$watch(
         () => this.data,

@@ -83,6 +83,8 @@ uiRoutes.when('/kibana/instances', {
         );
       };
 
+      this.onTableChangeRender = renderReact;
+
       $scope.$watch(
         () => this.data,
         (data) => {
