@@ -68,7 +68,7 @@ describe(`POST ${URL}`, () => {
       typeRegistry: handlerContext.savedObjects.typeRegistry,
       importSizeLimit: 10000,
     });
-    handlerContext.savedObjects.importer.import.mockImplementation((options) =>
+    handlerContext.savedObjects.importer.import.mockImplementation((options: any) =>
       importer.import(options)
     );
 

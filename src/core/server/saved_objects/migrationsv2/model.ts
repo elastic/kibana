@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+// @ts-nocheck
+
 import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';

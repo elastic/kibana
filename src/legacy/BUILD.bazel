@@ -2,9 +2,8 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 SRCS = glob(
   [
-    "server/**/*",
-    "ui/**/*",
-    "utils/**/*"
+    "server/kbn_server.d.ts",
+    "server/kbn_server.js"
   ],
 )
 
