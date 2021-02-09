@@ -28,7 +28,7 @@ import { updateExceptionListItemImplementationMock } from './test_utils';
 const exceptionsListClient = listMock.getExceptionListClient() as jest.Mocked<ExceptionListClient>;
 
 const EXCEPTION_LIST_ITEM: ExceptionListItemSchema = {
-  _version: '123',
+  _version: 'abc123',
   id: '123',
   comments: [],
   created_at: '11/11/2011T11:11:11.111',

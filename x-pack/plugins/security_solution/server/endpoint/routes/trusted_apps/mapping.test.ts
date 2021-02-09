@@ -45,7 +45,7 @@ const createExceptionListItemOptions = (
 const exceptionListItemSchema = (
   item: Partial<ExceptionListItemSchema>
 ): ExceptionListItemSchema => ({
-  _version: '123',
+  _version: 'abc123',
   id: '',
   comments: [],
   created_at: '',
