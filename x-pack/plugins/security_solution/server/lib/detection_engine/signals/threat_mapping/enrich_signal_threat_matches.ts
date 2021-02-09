@@ -67,7 +67,8 @@ export const buildMatchedIndicator = ({
 
 export const enrichSignalThreatMatches = async (
   signals: SignalSearchResponse,
-  getMatchedThreats: GetMatchedThreats
+  getMatchedThreats: GetMatchedThreats,
+  indicatorPath?: string
 ): Promise<SignalSearchResponse> => {
   const signalHits = signals.hits.hits;
   if (signalHits.length === 0) {
@@ -78,8 +79,13 @@ export const enrichSignalThreatMatches = async (
   const signalMatches = uniqueHits.map((signalHit) => extractNamedQueries(signalHit));
   const matchedThreatIds = [...new Set(signalMatches.flat().map(({ id }) => id))];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
+  const defaultedIndicatorPath = indicatorPath ? indicatorPath : DEFAULT_INDICATOR_PATH;
   const matchedIndicators = signalMatches.map((queries) =>
-    buildMatchedIndicator({ queries, threats: matchedThreats })
+    buildMatchedIndicator({
+      indicatorPath: defaultedIndicatorPath,
+      queries,
+      threats: matchedThreats,
+    })
   );
 
   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {

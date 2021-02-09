@@ -427,6 +427,8 @@ describe('enrichSignalThreatMatches', () => {
     );
   });
 
+  it('enriches from a configured indicator path, if specified');
+
   it('merges duplicate matched signals into a single signal with multiple indicators', async () => {
     getMatchedThreats = async () => [
       getThreatListItemMock({

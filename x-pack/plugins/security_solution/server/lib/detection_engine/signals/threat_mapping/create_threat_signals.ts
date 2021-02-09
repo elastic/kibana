@@ -48,6 +48,7 @@ export const createThreatSignals = async ({
   threatLanguage,
   buildRuleMessage,
   threatIndex,
+  threatIndicatorPath,
   name,
   concurrentSearches,
   itemsPerSearch,
