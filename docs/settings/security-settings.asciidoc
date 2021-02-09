@@ -356,26 +356,26 @@ To enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>, specify wh
 [source,yaml]
 ----------------------------------------
 xpack.security.audit.appender:
-  kind: rolling-file
-  path: ./audit.log
+  type: rolling-file
+  fileName: ./audit.log
   policy:
-    kind: time-interval
+    type: time-interval
     interval: 24h <1>
   strategy:
-    kind: numeric
+    type: numeric
     max: 10 <2>
   layout:
-    kind: json
+    type: json
 ----------------------------------------
 <1> Rotates log files every 24 hours.
 <2> Keeps maximum of 10 log files before deleting older ones.
 
-| `xpack.security.audit.appender.kind`
+| `xpack.security.audit.appender.type`
 | Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
 
 Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-appender>> for appender specific settings.
 
-| `xpack.security.audit.appender.layout.kind`
+| `xpack.security.audit.appender.layout.type`
 | Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
 
 Refer to <<audit-logging-pattern-layout>> for layout specific settings.
@@ -396,7 +396,7 @@ The `file` appender writes to a file and can be configured using the following s
 
 [cols="2*<"]
 |======
-| `xpack.security.audit.appender.path`
+| `xpack.security.audit.appender.fileName`
 | Required. Full file path the log file should be written to.
 |======
 
@@ -408,14 +408,14 @@ The `rolling-file` appender writes to a file and rotates it using a rolling stra
 
 [cols="2*<"]
 |======
-| `xpack.security.audit.appender.path`
+| `xpack.security.audit.appender.fileName`
 | Required. Full file path the log file should be written to.
 
-| `xpack.security.audit.appender.policy.kind`
+| `xpack.security.audit.appender.policy.type`
 | Specifies when a rollover should occur. Allowed values are `size-limit` and `time-interval`. *Default:* `time-interval`.
 
 Refer to <<audit-logging-size-limit-policy>> and <<audit-logging-time-interval-policy>> for policy specific settings.
-| `xpack.security.audit.appender.strategy.kind`
+| `xpack.security.audit.appender.strategy.type`
 | Specifies how the rollover should occur. Only allowed value is currently `numeric`. *Default:* `numeric`
 
 Refer to <<audit-logging-numeric-strategy>> for strategy specific settings.
