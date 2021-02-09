@@ -8,6 +8,7 @@
 
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
@@ -88,7 +89,12 @@ class TableVis extends Component {
       });
     return (
       <tr key={row.key}>
-        <td>{rowDisplay}</td>
+        <td>
+          {rowDisplay ||
+            i18n.translate('visTypeTimeseries.emptyTextColumnValue', {
+              defaultMessage: '(empty)',
+            })}
+        </td>
         {columns}
       </tr>
     );

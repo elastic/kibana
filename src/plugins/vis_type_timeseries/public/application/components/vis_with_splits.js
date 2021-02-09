@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
@@ -22,7 +23,7 @@ export function visWithSplits(WrappedComponent) {
     const splitsVisData = visData[model.id].series.reduce((acc, series) => {
       const [seriesId, splitId] = series.id.split(':');
       const seriesModel = model.series.find((s) => s.id === seriesId);
-      if (!seriesModel || !splitId) return acc;
+      if (!seriesModel) return acc;
 
       const label = series.splitByLabel;
 
@@ -80,7 +81,12 @@ export function visWithSplits(WrappedComponent) {
             model={model}
             visData={newVisData}
             onBrush={props.onBrush}
-            additionalLabel={additionalLabel}
+            additionalLabel={
+              additionalLabel ||
+              i18n.translate('visTypeTimeseries.emptyTextColumnValue', {
+                defaultMessage: '(empty)',
+              })
+            }
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
           />

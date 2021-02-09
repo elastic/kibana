@@ -8,6 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { getLastValue } from '../../../../common/get_last_value';
 import { labelDateFormatter } from '../../components/lib/label_date_formatter';
 import reactcss from 'reactcss';
@@ -103,6 +104,7 @@ export class TopN extends Component {
       // if both are 0, the division returns NaN causing unexpected behavior.
       // For this it defaults to 0
       const width = 100 * (Math.abs(lastValue) / intervalLength) || 0;
+      const label = item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label;
 
       const styles = reactcss(
         {
@@ -128,7 +130,10 @@ export class TopN extends Component {
       return (
         <tr key={key} onClick={this.handleClick({ lastValue, ...item })} style={styles.row}>
           <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
-            {item.labelFormatted ? labelDateFormatter(item.labelFormatted) : item.label}
+            {label ||
+              i18n.translate('visTypeTimeseries.emptyTextColumnValue', {
+                defaultMessage: '(empty)',
+              })}
           </td>
           <td width="100%" className="tvbVisTopN__bar">
             <div className="tvbVisTopN__innerBar" style={styles.innerBar}>
