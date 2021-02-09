@@ -355,46 +355,55 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
               </>
             ) : null}
             {/* AUC ROC Chart */}
-            {Array.isArray(errorRocCurve) && errorRocCurve.map((e) => <ErrorCallout error={e} />)}
-            {errorRocCurve === null && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiFlexGroup gutterSize="none">
-                  <EuiTitle size="xxs">
-                    <span>
-                      <FormattedMessage
-                        id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocTitle"
-                        defaultMessage="Receiver operating characteristic (ROC) curve"
-                      />
-                    </span>
-                  </EuiTitle>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
-                      content={i18n.translate(
-                        'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocInfoTooltip',
-                        {
-                          defaultMessage:
-                            'The receiver operating characteristic (ROC) curve is a plot that represents the performance of the classification process at different predicted probability thresholds.',
-                        }
-                      )}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                {!isLoadingRocCurve && rocCurveData.length > 0 && (
-                  <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
-                    <VegaChart
-                      vegaSpec={getRocCurveChartVegaLiteSpec(
-                        classificationClasses,
-                        rocCurveData,
-                        getDependentVar(jobConfig.analysis)
-                      )}
-                    />
-                  </div>
-                )}
-                {isLoadingRocCurve && <VegaChartLoading />}
-              </>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="none">
+              <EuiTitle size="xxs">
+                <span>
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocTitle"
+                    defaultMessage="Receiver operating characteristic (ROC) curve"
+                  />
+                </span>
+              </EuiTitle>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
+                  content={i18n.translate(
+                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionRocInfoTooltip',
+                    {
+                      defaultMessage:
+                        'The receiver operating characteristic (ROC) curve is a plot that represents the performance of the classification process at different predicted probability thresholds.',
+                    }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {Array.isArray(errorRocCurve) && (
+              <ErrorCallout
+                error={
+                  <>
+                    {errorRocCurve.map((e) => (
+                      <>
+                        {e}
+                        <br />
+                      </>
+                    ))}
+                  </>
+                }
+              />
             )}
+            {!isLoadingRocCurve && errorRocCurve === null && rocCurveData.length > 0 && (
+              <div className="mlDataFrameAnalyticsClassification__evaluateSectionContent">
+                <VegaChart
+                  vegaSpec={getRocCurveChartVegaLiteSpec(
+                    classificationClasses,
+                    rocCurveData,
+                    getDependentVar(jobConfig.analysis)
+                  )}
+                />
+              </div>
+            )}
+            {isLoadingRocCurve && <VegaChartLoading />}
           </>
         }
       />

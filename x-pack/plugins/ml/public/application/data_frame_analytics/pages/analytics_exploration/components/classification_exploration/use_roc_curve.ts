@@ -22,7 +22,7 @@ import {
   DataFrameAnalyticsConfig,
 } from '../../../../common';
 
-import { ACTUAL_CLASS_ID } from './column_data';
+import { ACTUAL_CLASS_ID, OTHER_CLASS_ID } from './column_data';
 
 import { isTrainingFilter } from './is_training_filter';
 
@@ -35,7 +35,9 @@ export const useRocCurve = (
   searchQuery: ResultsSearchQuery,
   visibleColumns: string[]
 ) => {
-  const classificationClasses = visibleColumns.filter((d) => d !== ACTUAL_CLASS_ID);
+  const classificationClasses = visibleColumns.filter(
+    (d) => d !== ACTUAL_CLASS_ID && d !== OTHER_CLASS_ID
+  );
 
   const [rocCurveData, setRocCurveData] = useState<RocCurveDataRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
