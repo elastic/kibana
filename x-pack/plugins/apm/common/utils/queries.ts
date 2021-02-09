@@ -26,11 +26,15 @@ export function environmentQuery(environment?: string): QueryContainer[] {
   return [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
 }
 
-export function rangeQuery(start: number, end: number): QueryContainer[] {
+export function rangeQuery(
+  start: number,
+  end: number,
+  field = '@timestamp'
+): QueryContainer[] {
   return [
     {
       range: {
-        '@timestamp': {
+        [field]: {
           gte: start,
           lte: end,
           format: 'epoch_millis',
