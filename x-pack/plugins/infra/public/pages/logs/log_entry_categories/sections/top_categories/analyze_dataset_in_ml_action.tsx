@@ -6,12 +6,13 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-
+import React, { useCallback } from 'react';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { TimeRange } from '../../../../../../common/time/time_range';
-import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
+import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 
 export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   categorizationJobId: string;
@@ -19,12 +20,31 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   dataset: string;
   timeRange: TimeRange;
 }> = ({ categorizationJobId, categoryId, dataset, timeRange }) => {
-  const linkProps = useLinkProps(
-    getEntitySpecificSingleMetricViewerLink(categorizationJobId, timeRange, {
-      'event.dataset': dataset,
-      mlcategory: `${categoryId}`,
-    })
-  );
+  const {
+    services: { ml, http, application },
+  } = useKibanaContextForPlugin();
+
+  const viewAnomalyInMachineLearningLink = useMlHref(ml, http.basePath.get(), {
+    page: ML_PAGES.SINGLE_METRIC_VIEWER,
+    pageState: {
+      jobIds: [categorizationJobId],
+      timeRange: {
+        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        mode: 'absolute',
+      },
+      entities: {
+        [partitionField]: dataset,
+        mlcategory: `${categoryId}`,
+      },
+    },
+  });
+
+  const mlLinkOnClick = useCallback(() => {
+    if (!viewAnomalyInMachineLearningLink) return;
+
+    application.navigateToUrl(viewAnomalyInMachineLearningLink);
+  }, [application, viewAnomalyInMachineLearningLink]);
 
   return (
     <EuiToolTip content={analyseCategoryDatasetInMlTooltipDescription} delay="long">
@@ -32,7 +52,8 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
         aria-label={analyseCategoryDatasetInMlButtonLabel}
         iconType="machineLearningApp"
         data-test-subj="analyzeCategoryDatasetInMlButton"
-        {...linkProps}
+        href={viewAnomalyInMachineLearningLink}
+        onClick={mlLinkOnClick}
       />
     </EuiToolTip>
   );

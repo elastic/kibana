@@ -9,6 +9,8 @@ import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
+import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
@@ -28,7 +30,6 @@ import {
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
-import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results/analyze_in_ml_button';
 import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';
 import {
   LogColumnConfiguration,
@@ -82,6 +83,9 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   timeRange,
   anomaly,
 }) => {
+  const {
+    services: { ml, http, application },
+  } = useKibanaContextForPlugin();
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const openMenu = useCallback(() => setIsMenuOpen(true), []);
@@ -114,15 +118,24 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     },
   });
 
-  const viewAnomalyInMachineLearningLinkProps = useLinkProps(
-    getEntitySpecificSingleMetricViewerLink(anomaly.jobId, timeRange, {
-      [partitionField]: dataset,
-      ...(isCategoryAnomaly(anomaly) ? { mlcategory: anomaly.categoryId } : {}),
-    })
-  );
+  const viewAnomalyInMachineLearningLink = useMlHref(ml, http.basePath.get(), {
+    page: ML_PAGES.SINGLE_METRIC_VIEWER,
+    pageState: {
+      jobIds: [anomaly.jobId],
+      timeRange: {
+        from: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        to: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+        mode: 'absolute',
+      },
+      entities: {
+        [partitionField]: dataset,
+        ...(isCategoryAnomaly(anomaly) ? { mlcategory: anomaly.categoryId } : {}),
+      },
+    },
+  });
 
   const menuItems = useMemo(() => {
-    if (!viewInStreamLinkProps.onClick || !viewAnomalyInMachineLearningLinkProps.onClick) {
+    if (!viewInStreamLinkProps.onClick || !viewAnomalyInMachineLearningLink) {
       return undefined;
     }
 
@@ -140,11 +153,17 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       },
       {
         label: VIEW_ANOMALY_IN_ML_LABEL,
-        onClick: viewAnomalyInMachineLearningLinkProps.onClick,
-        href: viewAnomalyInMachineLearningLinkProps.href,
+        onClick: () => application.navigateToUrl(viewAnomalyInMachineLearningLink),
+        href: viewAnomalyInMachineLearningLink,
       },
     ];
-  }, [id, openLogEntryFlyout, viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
+  }, [
+    id,
+    openLogEntryFlyout,
+    viewInStreamLinkProps,
+    viewAnomalyInMachineLearningLink,
+    application,
+  ]);
 
   return (
     <LogEntryRowWrapper
