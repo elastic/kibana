@@ -15,7 +15,6 @@ import {
 } from '../../../common/containers/use_full_screen';
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-
 import { GraphOverlay } from '.';
 
 jest.mock('../../../common/hooks/use_selector', () => ({
@@ -27,6 +26,10 @@ jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
   useTimelineFullScreen: jest.fn(),
 }));
+
+jest.mock('../../../resolver/view/use_resolver_query_params_cleaner');
+jest.mock('../../../resolver/view/use_state_syncing_actions');
+jest.mock('../../../resolver/view/use_sync_selected_node');
 
 describe('GraphOverlay', () => {
   beforeEach(() => {

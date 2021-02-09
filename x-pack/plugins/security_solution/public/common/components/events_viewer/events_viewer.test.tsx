@@ -155,7 +155,7 @@ describe('EventsViewer', () => {
               indexName: 'auditbeat-7.10.1-2020.12.18-000001',
             },
             tabType: 'query',
-            timelineId: 'test-stateful-events-viewer',
+            timelineId: TimelineId.test,
           },
           type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
         });
@@ -199,17 +199,22 @@ describe('EventsViewer', () => {
 
     defaultHeaders.forEach((header) => {
       test(`it renders the ${header.id} default EventsViewer column header`, () => {
+        testProps = {
+          ...testProps,
+          // Update with a new id, to force columns back to default.
+          id: TimelineId.test2,
+        };
         const wrapper = mount(
           <TestProviders>
             <StatefulEventsViewer {...testProps} />
           </TestProviders>
         );
 
-        defaultHeaders.forEach((h) =>
+        defaultHeaders.forEach((h) => {
           expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
             true
-          )
-        );
+          );
+        });
       });
     });
   });

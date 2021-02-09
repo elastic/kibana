@@ -91,7 +91,7 @@ describe('StatefulTimeline', () => {
     );
     expect(
       wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .find(`[data-timeline-id="test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
         .first()
         .exists()
     ).toEqual(true);
