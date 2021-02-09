@@ -59,6 +59,7 @@
     "plugins/rollup/**/*",
     "plugins/remote_clusters/**/*",
     "plugins/cross_cluster_replication/**/*",
+    "plugins/index_lifecycle_management/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
@@ -151,6 +152,7 @@
     { "path": "./plugins/watcher/tsconfig.json" },
     { "path": "./plugins/rollup/tsconfig.json" },
     { "path": "./plugins/remote_clusters/tsconfig.json" },
-    { "path": "./plugins/cross_cluster_replication/tsconfig.json"}
+    { "path": "./plugins/cross_cluster_replication/tsconfig.json"},
+    { "path": "./plugins/index_lifecycle_management/tsconfig.json"}
   ]
 }
