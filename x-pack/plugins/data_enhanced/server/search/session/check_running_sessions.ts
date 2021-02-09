@@ -148,9 +148,9 @@ export async function checkRunningSessions(
     await getAllSavedSearchSessions$(deps, config)
       .pipe(
         mergeMap(async (runningSearchSessionsResponse) => {
-          if (!runningSearchSessionsResponse.total) return;
+          logger.info(`Found ${runningSearchSessionsResponse.total} running sessions`);
 
-          logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
+          if (!runningSearchSessionsResponse.total) return;
 
           const updatedSessions = new Array<
             SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
