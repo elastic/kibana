@@ -10,7 +10,6 @@ import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
 } from '../../../common/http_api/log_analysis';
-import { DatasetFilter } from '../../../common/infra_ml';
 import { DeleteJobsResponsePayload } from './api/ml_cleanup';
 import { FetchJobStatusResponsePayload } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload } from './api/ml_get_module';
@@ -21,7 +20,7 @@ export { JobModelSizeStats, JobSummary } from './api/ml_get_jobs_summary_api';
 export interface SetUpModuleArgs {
   start?: number | undefined;
   end?: number | undefined;
-  datasetFilter?: DatasetFilter;
+  filter?: any;
   moduleSourceConfiguration: ModuleSourceConfiguration;
   partitionField?: string;
 }
