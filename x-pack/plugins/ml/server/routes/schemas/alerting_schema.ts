@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
 export const mlAnomalyDetectionAlertParams = schema.object({
   jobSelection: schema.object(
@@ -16,7 +17,9 @@ export const mlAnomalyDetectionAlertParams = schema.object({
     {
       validate: (v) => {
         if (!v.jobIds?.length && !v.groupIds?.length) {
-          return 'List of job IDs or group IDs is required';
+          return i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
+            defaultMessage: 'Job selection is required',
+          });
         }
       },
     }

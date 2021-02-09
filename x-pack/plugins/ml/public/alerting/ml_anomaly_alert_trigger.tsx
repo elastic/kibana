@@ -17,6 +17,7 @@ import { alertingApiProvider } from '../application/services/ml_api_service/aler
 import { PreviewAlertCondition } from './preview_alert_condition';
 import { ANOMALY_THRESHOLD } from '../../common';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import { ANOMALY_RESULT_TYPE } from '../../common/constants/anomalies';
 
 interface MlAnomalyAlertTriggerProps {
   alertParams: MlAnomalyDetectionAlertParams;
@@ -24,13 +25,13 @@ interface MlAnomalyAlertTriggerProps {
     key: T,
     value: MlAnomalyDetectionAlertParams[T]
   ) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  errors: Record<keyof MlAnomalyDetectionAlertParams, string[]>;
 }
 
 const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   alertParams,
   setAlertParams,
-  setAlertProperty,
+  errors,
 }) => {
   const {
     services: { http },
@@ -52,12 +53,9 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     if (alertParams.severity === undefined) {
       onAlertParamChange('severity')(ANOMALY_THRESHOLD.CRITICAL);
     }
-    if (alertParams.tags === undefined) {
-      setAlertProperty('tags', ['ml']);
+    if (alertParams.resultType === undefined) {
+      onAlertParamChange('resultType')(ANOMALY_RESULT_TYPE.BUCKET);
     }
-    return () => {
-      // Reset alert properties on unmount
-    };
   }, []);
 
   return (
@@ -66,6 +64,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         jobSelection={alertParams.jobSelection}
         adJobsApiService={adJobsApiService}
         onSelectionChange={useCallback(onAlertParamChange('jobSelection'), [])}
+        errors={errors.jobSelection}
       />
       <ResultTypeSelector
         value={alertParams.resultType}

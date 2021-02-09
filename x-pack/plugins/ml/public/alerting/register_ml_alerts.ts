@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { MlStartDependencies } from '../plugin';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
+import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 
 export function registerMlAlerts(
   alertTypeRegistry: MlStartDependencies['triggersActionsUi']['alertTypeRegistry']
 ) {
   alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
-    description: i18n.translate('xpack.ml.alertTypes.anomalyThreshold.description', {
+    description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
       defaultMessage: 'Alert when anomaly detection jobs results match the condition.',
     }),
     iconClass: 'bell',
@@ -24,12 +25,47 @@ export function registerMlAlerts(
       return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/ml-alerts.html`;
     },
     alertParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
-    validate: () => ({
-      errors: [],
-    }),
+    validate: (alertParams: MlAnomalyDetectionAlertParams) => {
+      const validationResult = {
+        errors: {
+          jobSelection: new Array<string>(),
+          severity: new Array<string>(),
+          resultType: new Array<string>(),
+        },
+      };
+
+      if (
+        !alertParams.jobSelection?.jobIds?.length &&
+        !alertParams.jobSelection?.groupIds?.length
+      ) {
+        validationResult.errors.jobSelection.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
+            defaultMessage: 'Job selection is required',
+          })
+        );
+      }
+
+      if (alertParams.severity === undefined) {
+        validationResult.errors.severity.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.severity.errorMessage', {
+            defaultMessage: 'Anomaly severity is required',
+          })
+        );
+      }
+
+      if (alertParams.resultType === undefined) {
+        validationResult.errors.resultType.push(
+          i18n.translate('xpack.ml.alertTypes.anomalyDetection.resultType.errorMessage', {
+            defaultMessage: 'Result type is required',
+          })
+        );
+      }
+
+      return validationResult;
+    },
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
-      'xpack.ml.alertTypes.anomalyThreshold.defaultActionMessage',
+      'xpack.ml.alertTypes.anomalyDetection.defaultActionMessage',
       {
         defaultMessage: `Elastic Stack Machine Learning Alert:
 - Job IDs: \\{\\{#context.jobIds\\}\\}\\{\\{context.jobIds\\}\\} - \\{\\{/context.jobIds\\}\\}
