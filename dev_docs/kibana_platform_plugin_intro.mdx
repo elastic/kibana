@@ -139,33 +139,6 @@ plugins to customize the Kibana experience. Examples of extension points are:
 - uiActions.registerAction
 - core.saedObjects.registerType
 
-## Registries
-
-Registries are a term you'll hear quite frequently when developing in Kibana.
-A registry is a collection of common things that can be manipulated via extension points.
-
-Examples of extension points that modify registries are:
-
-- core.application.register
-- embeddables.registerEmbeddableFactory
-- uiActions.registerAction
-- alerting.registerType
-
-Extension points that don't affect registries:
-
-- core.notifications.toasts.addSuccess
-- core.overlays.showModal
-
-Developers add specific implementations to registries. For example, the `LensEmbeddable` is
-a specific implementation of the generic `Embeddable` that the Lens plugin adds to the embeddable
-registry using `embeddables.registerEmbeddableFactory` extension point.
-
-<DocCallOut title="Common pitfall" color="warning">
-In most situations, extension points that affect registries should only be exposed from a plugins setup 
-<DocLink id="kibPlatformIntro" section="plugin-lifecycle" text="lifecycle"/>.
-Then you are garaunteed by the time your start method runs, the list won't change.
-</DocCallOut>
-
 ## Follow up material
 
 Learn how to build your own plugin by following <DocLink id="kibDevTutorialBuildAPlugin" />
