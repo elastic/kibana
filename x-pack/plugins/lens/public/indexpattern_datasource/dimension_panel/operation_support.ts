@@ -6,10 +6,13 @@
  */
 
 import _ from 'lodash';
-import { DatasourceDimensionDropProps } from '../../types';
+import { memoize } from 'lodash';
+import { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
 import { OperationType } from '../indexpattern';
-import { getAvailableOperationsByMetadata } from '../operations';
-import { IndexPatternPrivateState } from '../types';
+import { getAvailableOperationsByMetadata, getSortScoreByPriority } from '../operations';
+import { IndexPatternPrivateState, IndexPatternField } from '../types';
+
+import { operationDefinitions } from '../operations/definitions';
 
 export interface OperationSupportMatrix {
   operationByField: Partial<Record<string, Set<OperationType>>>;
@@ -60,4 +63,26 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
     operationWithoutField: supportedOperationsWithoutField,
     fieldByOperation: supportedFieldsByOperation,
   };
+};
+
+export const getOperationsForField = (
+  field: IndexPatternField,
+  filterOperations: (operation: OperationMetadata) => boolean
+): Set<string> | undefined => {
+  const supportedOperations: Set<OperationType> = new Set();
+  operationDefinitions
+    .sort(getSortScoreByPriority)
+    .filter((operation) => {
+      if (operation.input !== 'field') {
+        return false;
+      }
+      const possibleOperation = operation.getPossibleOperationForField(field);
+      return (
+        operation.input === 'field' && possibleOperation && filterOperations(possibleOperation)
+      );
+    })
+    .forEach((operation) => {
+      supportedOperations?.add(operation.type);
+    });
+  return supportedOperations.size ? supportedOperations : undefined;
 };
