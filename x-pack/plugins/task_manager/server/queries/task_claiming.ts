@@ -131,10 +131,25 @@ export class TaskClaiming {
   }
 
   private partitionIntoClaimingBatches(definitions: TaskTypeDictionary): TaskClaimingBatches {
-    const { limitedConcurrency, unlimitedConcurrency } = groupBy(
-      definitions.getAllDefinitions(),
-      (definition) => (definition.maxConcurrency ? 'limitedConcurrency' : 'unlimitedConcurrency')
+    const {
+      limitedConcurrency,
+      unlimitedConcurrency,
+      skippedTypes,
+    } = groupBy(definitions.getAllDefinitions(), (definition) =>
+      definition.maxConcurrency
+        ? 'limitedConcurrency'
+        : definition.maxConcurrency === 0
+        ? 'skippedTypes'
+        : 'unlimitedConcurrency'
     );
+
+    if (skippedTypes?.length) {
+      this.logger.info(
+        `Task Manager will never claim tasks of the following types as their "maxConcurrency" is set to 0: ${skippedTypes
+          .map(({ type }) => type)
+          .join(', ')}`
+      );
+    }
     return [
       ...(unlimitedConcurrency
         ? [asUnlimited(new Set(unlimitedConcurrency.map(({ type }) => type)))]

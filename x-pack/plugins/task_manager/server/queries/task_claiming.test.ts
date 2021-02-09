@@ -53,6 +53,53 @@ taskDefinitions.registerTaskDefinitions({
 });
 
 describe('TaskClaiming', () => {
+  test(`should log when a certain task type is skipped due to having a zero concurency configuration`, () => {
+    const definitions = new TaskTypeDictionary(mockLogger());
+    definitions.registerTaskDefinitions({
+      unlimited: {
+        title: 'unlimited',
+        createTaskRunner: jest.fn(),
+      },
+      anotherUnlimited: {
+        title: 'anotherUnlimited',
+        createTaskRunner: jest.fn(),
+      },
+      limitedToZero: {
+        title: 'limitedToZero',
+        maxConcurrency: 0,
+        createTaskRunner: jest.fn(),
+      },
+      limitedToOne: {
+        title: 'limitedToOne',
+        maxConcurrency: 1,
+        createTaskRunner: jest.fn(),
+      },
+      anotherLimitedToZero: {
+        title: 'anotherLimitedToZero',
+        maxConcurrency: 0,
+        createTaskRunner: jest.fn(),
+      },
+      limitedToTwo: {
+        title: 'limitedToTwo',
+        maxConcurrency: 2,
+        createTaskRunner: jest.fn(),
+      },
+    });
+
+    new TaskClaiming({
+      logger: taskManagerLogger,
+      definitions,
+      taskStore: taskStoreMock.create({ taskManagerId: '' }),
+      maxAttempts: 2,
+      getCapacity: () => 10,
+    });
+
+    expect(taskManagerLogger.info).toHaveBeenCalledTimes(1);
+    expect(taskManagerLogger.info.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"Task Manager will never claim tasks of the following types as their \\"maxConcurrency\\" is set to 0: limitedToZero, anotherLimitedToZero"`
+    );
+  });
+
   describe('claimAvailableTasks', () => {
     function initialiseTestClaiming({
       storeOpts = {},
@@ -416,6 +463,11 @@ if (doc['task.runAt'].size()!=0) {
           title: 'unlimited',
           createTaskRunner: jest.fn(),
         },
+        limitedToZero: {
+          title: 'limitedToZero',
+          maxConcurrency: 0,
+          createTaskRunner: jest.fn(),
+        },
         anotherUnlimited: {
           title: 'anotherUnlimited',
           createTaskRunner: jest.fn(),
@@ -481,7 +533,12 @@ if (doc['task.runAt'].size()!=0) {
             'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
           ],
           claimableTaskTypes: ['unlimited', 'anotherUnlimited', 'finalUnlimited'],
-          skippedTaskTypes: ['limitedToOne', 'anotherLimitedToOne', 'limitedToTwo'],
+          skippedTaskTypes: [
+            'limitedToZero',
+            'limitedToOne',
+            'anotherLimitedToOne',
+            'limitedToTwo',
+          ],
           taskMaxAttempts: {
             unlimited: maxAttempts,
           },
@@ -498,6 +555,7 @@ if (doc['task.runAt'].size()!=0) {
           claimableTaskTypes: ['limitedToOne'],
           skippedTaskTypes: [
             'unlimited',
+            'limitedToZero',
             'anotherUnlimited',
             'finalUnlimited',
             'anotherLimitedToOne',
@@ -519,6 +577,7 @@ if (doc['task.runAt'].size()!=0) {
           claimableTaskTypes: ['anotherLimitedToOne'],
           skippedTaskTypes: [
             'unlimited',
+            'limitedToZero',
             'anotherUnlimited',
             'finalUnlimited',
             'limitedToOne',
@@ -540,6 +599,7 @@ if (doc['task.runAt'].size()!=0) {
           claimableTaskTypes: ['limitedToTwo'],
           skippedTaskTypes: [
             'unlimited',
+            'limitedToZero',
             'anotherUnlimited',
             'finalUnlimited',
             'limitedToOne',
