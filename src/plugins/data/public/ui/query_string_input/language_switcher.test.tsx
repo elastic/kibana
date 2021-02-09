@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { QueryLanguageSwitcher } from './language_switcher';
+import QueryLanguageSwitcher from './language_switcher';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
@@ -65,5 +65,33 @@ describe('LanguageSwitcher', () => {
     component.find(EuiButtonEmpty).simulate('click');
     expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
     expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeTruthy();
+  });
+
+  describe('for eql', () => {
+    it('should show radio button for lucene, kql and eql', () => {
+      const component = mountWithIntl(
+        wrapInContext({
+          language: 'kuery',
+          onSelectLanguage: () => {
+            return;
+          },
+          includeEqlLanguage: true,
+        })
+      );
+      component.find(EuiButtonEmpty).simulate('click');
+      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+      expect(
+        component.find('[data-test-subj="languageRadioToggle"] div.euiRadio').exists()
+      ).toBeTruthy();
+      expect(
+        component.find('[data-test-subj="languageRadioToggle"] div.euiRadio').at(0).text()
+      ).toEqual('Lucene');
+      expect(
+        component.find('[data-test-subj="languageRadioToggle"] div.euiRadio').at(1).text()
+      ).toEqual('KQL');
+      expect(
+        component.find('[data-test-subj="languageRadioToggle"] div.euiRadio').at(2).text()
+      ).toEqual('EQL');
+    });
   });
 });

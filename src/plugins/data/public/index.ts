@@ -443,6 +443,7 @@ export {
   SearchBarProps,
   StatefulSearchBarProps,
   IndexPatternSelectProps,
+  QueryLanguageSwitcher,
   QueryStringInput,
   QueryStringInputProps,
 } from './ui';

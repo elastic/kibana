@@ -53,6 +53,7 @@ export interface QueryBarTopRowProps {
   dataTestSubj?: string;
   disableAutoFocus?: boolean;
   screenTitle?: string;
+  includeEqlLanguage?: boolean;
   indexPatterns?: Array<IIndexPattern | string>;
   isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
@@ -187,6 +188,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       <EuiFlexItem>
         <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
+          includeEqlLanguage={props.includeEqlLanguage}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
           query={props.query!}
