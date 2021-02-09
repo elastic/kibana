@@ -7,13 +7,13 @@
 
 import { KibanaVersionMismatchAlert } from './kibana_version_mismatch_alert';
 import { ALERT_KIBANA_VERSION_MISMATCH } from '../../common/constants';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_legacy_alerts', () => ({
-  fetchLegacyAlerts: jest.fn(),
+jest.mock('../lib/alerts/fetch_kibana_versions', () => ({
+  fetchKibanaVersions: jest.fn(),
 }));
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
@@ -22,6 +22,7 @@ jest.mock('../lib/alerts/fetch_clusters', () => ({
 jest.mock('../static_globals', () => ({
   Globals: {
     app: {
+      url: 'UNIT_TEST_URL',
       getLogger: () => ({ debug: jest.fn() }),
       config: {
         ui: {
@@ -70,16 +71,16 @@ describe('KibanaVersionMismatchAlert', () => {
     function FakeDate() {}
     FakeDate.prototype.valueOf = () => 1;
 
+    const ccs = undefined;
     const clusterUuid = 'abc123';
     const clusterName = 'testCluster';
-    const legacyAlert = {
-      prefix: 'This cluster is running with multiple versions of Kibana.',
-      message: 'Versions: [8.0.0, 7.2.1].',
-      metadata: {
-        severity: 1000,
-        cluster_uuid: clusterUuid,
+    const kibanaVersions = [
+      {
+        versions: ['8.0.0', '7.2.1'],
+        clusterUuid,
+        ccs,
       },
-    };
+    ];
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -101,8 +102,8 @@ describe('KibanaVersionMismatchAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [legacyAlert];
+      (fetchKibanaVersions as jest.Mock).mockImplementation(() => {
+        return kibanaVersions;
       });
       (fetchClusters as jest.Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
@@ -127,12 +128,19 @@ describe('KibanaVersionMismatchAlert', () => {
         alertStates: [
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
-            ccs: undefined,
-            nodeName: 'Kibana instance alert',
+            ccs,
+            itemLabel: undefined,
+            nodeId: undefined,
+            nodeName: undefined,
+            meta: {
+              ccs,
+              clusterUuid,
+              versions: ['8.0.0', '7.2.1'],
+            },
             ui: {
               isFiring: true,
               message: {
-                text: 'Multiple versions of Kibana ([8.0.0, 7.2.1]) running in this cluster.',
+                text: 'Multiple versions of Kibana (8.0.0, 7.2.1) running in this cluster.',
               },
               severity: 'warning',
               triggeredMS: 1,
@@ -142,21 +150,26 @@ describe('KibanaVersionMismatchAlert', () => {
         ],
       });
       expect(scheduleActions).toHaveBeenCalledWith('default', {
-        action: '[View instances](kibana/instances)',
+        action: `[View instances](UNIT_TEST_URL/app/monitoring#/kibana/instances?_g=(cluster_uuid:${clusterUuid}))`,
         actionPlain: 'Verify you have the same version across all instances.',
-        internalFullMessage:
-          'Kibana version mismatch alert is firing for testCluster. Kibana is running [8.0.0, 7.2.1]. [View instances](kibana/instances)',
+        internalFullMessage: `Kibana version mismatch alert is firing for testCluster. Kibana is running 8.0.0, 7.2.1. [View instances](UNIT_TEST_URL/app/monitoring#/kibana/instances?_g=(cluster_uuid:${clusterUuid}))`,
         internalShortMessage:
           'Kibana version mismatch alert is firing for testCluster. Verify you have the same version across all instances.',
-        versionList: '[8.0.0, 7.2.1]',
+        versionList: ['8.0.0', '7.2.1'],
         clusterName,
         state: 'firing',
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [];
+    it('should not fire actions if there is no mismatch', async () => {
+      (fetchKibanaVersions as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            versions: ['8.0.0'],
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new KibanaVersionMismatchAlert();
       const type = alert.getAlertType();
