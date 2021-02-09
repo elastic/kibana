@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { getSavedObjectsClient, getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { APP_ID, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 
 export class LoadListAndRender extends React.Component<{ stateTransfer: EmbeddableStateTransfer }> {
@@ -22,7 +22,7 @@ export class LoadListAndRender extends React.Component<{ stateTransfer: Embeddab
 
   componentDidMount() {
     this._isMounted = true;
-    this.props.stateTransfer.clearEditorState();
+    this.props.stateTransfer.clearEditorState(APP_ID);
     this._loadMapsList();
   }
 
