@@ -14,21 +14,37 @@ import { getMockArtifacts, toArtifactRecords } from './mocks';
 describe('manifest', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
   const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
-  const ARTIFACT_ID_0 =
+  const ARTIFACT_ID_EXCEPTIONS_MACOS =
     'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
-  const ARTIFACT_ID_1 =
+  const ARTIFACT_ID_EXCEPTIONS_WINDOWS =
     'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
-  const ARTIFACT_ID_2 =
+  const ARTIFACT_ID_TRUSTED_APPS_MACOS =
     'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
-  const ARTIFACT_ID_3 =
+  const ARTIFACT_ID_TRUSTED_APPS_WINDOWS =
     'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
 
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
   let ARTIFACTS_COPY: InternalArtifactCompleteSchema[] = [];
+  let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_COPY_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_COPY_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_COPY_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_COPY_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
   beforeAll(async () => {
     ARTIFACTS = await getMockArtifacts({ compress: true });
     ARTIFACTS_COPY = await getMockArtifacts({ compress: true });
+    ARTIFACT_EXCEPTIONS_MACOS = ARTIFACTS[0];
+    ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
+    ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[2];
+    ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[3];
+    ARTIFACT_COPY_EXCEPTIONS_MACOS = ARTIFACTS_COPY[0];
+    ARTIFACT_COPY_EXCEPTIONS_WINDOWS = ARTIFACTS_COPY[1];
+    ARTIFACT_COPY_TRUSTED_APPS_MACOS = ARTIFACTS_COPY[2];
+    ARTIFACT_COPY_TRUSTED_APPS_WINDOWS = ARTIFACTS_COPY[3];
   });
 
   describe('Manifest constructor', () => {
@@ -83,21 +99,23 @@ describe('manifest', () => {
     test('Adds default artifact', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      expect(manifest.getAllArtifacts()).toStrictEqual([ARTIFACTS[0]]);
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(true);
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(new Set());
+      expect(manifest.getAllArtifacts()).toStrictEqual([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
+        new Set()
+      );
     });
 
     test('Adds policy specific artifact', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
 
-      expect(manifest.getAllArtifacts()).toStrictEqual([ARTIFACTS[0]]);
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(false);
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(
+      expect(manifest.getAllArtifacts()).toStrictEqual([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(false);
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1])
       );
     });
@@ -105,12 +123,12 @@ describe('manifest', () => {
     test('Adds same artifact as default and policy specific', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
 
-      expect(manifest.getAllArtifacts()).toStrictEqual([ARTIFACTS[0]]);
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(true);
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(
+      expect(manifest.getAllArtifacts()).toStrictEqual([ARTIFACT_EXCEPTIONS_MACOS]);
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1])
       );
     });
@@ -118,51 +136,55 @@ describe('manifest', () => {
     test('Adds multiple artifacts as default and policy specific', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACTS[2]);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACTS[3]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
 
       expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 4));
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(true);
-      expect(manifest.isDefaultArtifact(ARTIFACTS[1])).toBe(false);
-      expect(manifest.isDefaultArtifact(ARTIFACTS[2])).toBe(true);
-      expect(manifest.isDefaultArtifact(ARTIFACTS[3])).toBe(true);
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(false);
+      expect(manifest.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_MACOS)).toBe(true);
+      expect(manifest.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_WINDOWS)).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1])
       );
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[1])).toStrictEqual(
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_WINDOWS)).toStrictEqual(
         new Set([TEST_POLICY_ID_2])
       );
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[2])).toStrictEqual(
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
       );
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[3])).toStrictEqual(new Set([]));
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_WINDOWS)).toStrictEqual(
+        new Set([])
+      );
     });
 
     test('Adding same artifact as default multiple times has no effect', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 1));
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(true);
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(new Set([]));
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
+        new Set([])
+      );
     });
 
     test('Adding same artifact as policy specific for same policy multiple times has no effect', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
 
       expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 1));
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(false);
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(false);
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1])
       );
     });
@@ -178,11 +200,11 @@ describe('manifest', () => {
     test('Returns only unique artifacts', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
       expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 2));
     });
@@ -192,7 +214,7 @@ describe('manifest', () => {
     test('Returns undefined for non existing artifact id', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       expect(manifest.getArtifact('non-existing-artifact-macos-v1')).toBeUndefined();
     });
@@ -200,19 +222,23 @@ describe('manifest', () => {
     test('Returns default artifact', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
-      expect(manifest.getArtifact(getArtifactId(ARTIFACTS[0]))).toStrictEqual(ARTIFACTS[0]);
+      expect(manifest.getArtifact(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))).toStrictEqual(
+        ARTIFACT_EXCEPTIONS_MACOS
+      );
     });
 
     test('Returns policy specific artifact', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
 
-      expect(manifest.getArtifact(getArtifactId(ARTIFACTS[0]))).toStrictEqual(ARTIFACTS[0]);
+      expect(manifest.getArtifact(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))).toStrictEqual(
+        ARTIFACT_EXCEPTIONS_MACOS
+      );
     });
   });
 
@@ -220,35 +246,35 @@ describe('manifest', () => {
     test('Returns false for artifact that is not in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      expect(manifest.containsArtifact(ARTIFACTS[1])).toBe(false);
+      expect(manifest.containsArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(false);
     });
 
     test('Returns true for default artifact that is in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
-      expect(manifest.containsArtifact(ARTIFACTS[1])).toBe(true);
+      expect(manifest.containsArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(true);
     });
 
     test('Returns true for policy specific artifact that is in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
 
-      expect(manifest.containsArtifact(ARTIFACTS[1])).toBe(true);
+      expect(manifest.containsArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(true);
     });
 
     test('Returns true for different instances but same ids', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
 
-      expect(manifest.containsArtifact(ARTIFACTS_COPY[0])).toBe(true);
+      expect(manifest.containsArtifact(ARTIFACT_COPY_EXCEPTIONS_MACOS)).toBe(true);
     });
   });
 
@@ -256,33 +282,33 @@ describe('manifest', () => {
     test('Returns undefined for artifact that is not in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      expect(manifest.isDefaultArtifact(ARTIFACTS[1])).toBeUndefined();
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBeUndefined();
     });
 
     test('Returns true for default artifact that is in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(true);
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
     });
 
     test('Returns false for policy specific artifact that is in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
 
-      expect(manifest.isDefaultArtifact(ARTIFACTS[0])).toBe(false);
+      expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(false);
     });
 
     test('Returns true for different instances but same ids', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      expect(manifest.isDefaultArtifact(ARTIFACTS_COPY[0])).toBe(true);
+      expect(manifest.isDefaultArtifact(ARTIFACT_COPY_EXCEPTIONS_MACOS)).toBe(true);
     });
   });
 
@@ -290,28 +316,30 @@ describe('manifest', () => {
     test('Returns undefined for artifact that is not in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
 
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[1])).toBeUndefined();
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_WINDOWS)).toBeUndefined();
     });
 
     test('Returns empty set for default artifact that is in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(new Set());
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
+        new Set()
+      );
     });
 
     test('Returns policy set for policy specific artifact that is in the manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_2);
 
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
       );
     });
@@ -319,12 +347,12 @@ describe('manifest', () => {
     test('Returns policy set for different instances but same ids', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_2);
 
-      expect(manifest.getArtifactTargetPolicies(ARTIFACTS_COPY[0])).toStrictEqual(
+      expect(manifest.getArtifactTargetPolicies(ARTIFACT_COPY_EXCEPTIONS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
       );
     });
@@ -342,9 +370,9 @@ describe('manifest', () => {
     test('Returns diff from empty manifest', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       expect(manifest.diff(Manifest.getDefault())).toStrictEqual({
         additions: ARTIFACTS.slice(0, 3),
@@ -356,21 +384,21 @@ describe('manifest', () => {
     test('Returns empty diff for equal manifests', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
-      manifest1.addEntry(ARTIFACTS[3]);
-      manifest1.addEntry(ARTIFACTS[3], TEST_POLICY_ID_2);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS, TEST_POLICY_ID_2);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
-      manifest2.addEntry(ARTIFACTS_COPY[2], TEST_POLICY_ID_1);
-      manifest2.addEntry(ARTIFACTS_COPY[2], TEST_POLICY_ID_2);
-      manifest2.addEntry(ARTIFACTS_COPY[3]);
-      manifest2.addEntry(ARTIFACTS_COPY[3], TEST_POLICY_ID_2);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_WINDOWS);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_WINDOWS, TEST_POLICY_ID_2);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
@@ -382,18 +410,18 @@ describe('manifest', () => {
     test('Returns additions diff properly', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
-      manifest2.addEntry(ARTIFACTS_COPY[2], TEST_POLICY_ID_2);
-      manifest2.addEntry(ARTIFACTS_COPY[3]);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_WINDOWS);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
-        additions: [ARTIFACTS_COPY[2], ARTIFACTS_COPY[3]],
+        additions: [ARTIFACT_COPY_TRUSTED_APPS_MACOS, ARTIFACT_COPY_TRUSTED_APPS_WINDOWS],
         removals: [],
         transitions: [],
       });
@@ -402,19 +430,19 @@ describe('manifest', () => {
     test('Returns removals diff properly', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
-      manifest1.addEntry(ARTIFACTS[3]);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
-        removals: [ARTIFACTS_COPY[2], ARTIFACTS_COPY[3]],
+        removals: [ARTIFACT_COPY_TRUSTED_APPS_MACOS, ARTIFACT_COPY_TRUSTED_APPS_WINDOWS],
         transitions: [],
       });
     });
@@ -422,84 +450,84 @@ describe('manifest', () => {
     test('Returns transitions from one policy to another in diff properly', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
       // policy transition
-      manifest2.addEntry(ARTIFACTS_COPY[2], TEST_POLICY_ID_2);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
         removals: [],
-        transitions: [ARTIFACTS_COPY[2]],
+        transitions: [ARTIFACT_COPY_TRUSTED_APPS_MACOS],
       });
     });
 
     test('Returns transitions from policy to default in diff properly', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
       // transition to default
-      manifest2.addEntry(ARTIFACTS_COPY[2]);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
         removals: [],
-        transitions: [ARTIFACTS_COPY[2]],
+        transitions: [ARTIFACT_COPY_TRUSTED_APPS_MACOS],
       });
     });
 
     test('Returns transitions from default to specific policy in diff properly', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2]);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
       // transition to specific policy
-      manifest2.addEntry(ARTIFACTS_COPY[2], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
         removals: [],
-        transitions: [ARTIFACTS_COPY[2]],
+        transitions: [ARTIFACT_COPY_TRUSTED_APPS_MACOS],
       });
     });
 
     test('Returns complex transitions diff properly', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
       // transition to default policy only
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
       // transition to second policy
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_2);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
       // transition to one policy only
-      manifest2.addEntry(ARTIFACTS_COPY[2], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
@@ -511,22 +539,22 @@ describe('manifest', () => {
     test('Returns complex diff properly', async () => {
       const manifest1 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest1.addEntry(ARTIFACTS[0]);
-      manifest1.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
-      manifest1.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
-      manifest1.addEntry(ARTIFACTS[3]);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest1.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
 
       const manifest2 = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.1' });
 
-      manifest2.addEntry(ARTIFACTS_COPY[0]);
-      manifest2.addEntry(ARTIFACTS_COPY[1], TEST_POLICY_ID_1);
-      manifest2.addEntry(ARTIFACTS_COPY[2], TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       expect(manifest2.diff(manifest1)).toStrictEqual({
-        additions: [ARTIFACTS_COPY[1]],
-        removals: [ARTIFACTS[3]],
-        transitions: [ARTIFACTS_COPY[0], ARTIFACTS_COPY[2]],
+        additions: [ARTIFACT_COPY_EXCEPTIONS_WINDOWS],
+        removals: [ARTIFACT_TRUSTED_APPS_WINDOWS],
+        transitions: [ARTIFACT_COPY_EXCEPTIONS_MACOS, ARTIFACT_COPY_TRUSTED_APPS_MACOS],
       });
     });
   });
@@ -545,17 +573,17 @@ describe('manifest', () => {
     test('Returns default policy manifest when no policy id provided', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1]);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       expect(manifest.toPackagePolicyManifest()).toStrictEqual({
         schema_version: 'v1',
         manifest_version: '1.0.0',
         artifacts: toArtifactRecords({
-          'endpoint-exceptionlist-windows-v1': ARTIFACTS[0],
-          'endpoint-exceptionlist-macos-v1': ARTIFACTS[1],
+          'endpoint-exceptionlist-windows-v1': ARTIFACT_EXCEPTIONS_MACOS,
+          'endpoint-exceptionlist-macos-v1': ARTIFACT_EXCEPTIONS_WINDOWS,
         }),
       });
     });
@@ -563,17 +591,17 @@ describe('manifest', () => {
     test('Returns default policy manifest when no policy specific artifacts present', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1]);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       expect(manifest.toPackagePolicyManifest(TEST_POLICY_ID_2)).toStrictEqual({
         schema_version: 'v1',
         manifest_version: '1.0.0',
         artifacts: toArtifactRecords({
-          'endpoint-exceptionlist-windows-v1': ARTIFACTS[0],
-          'endpoint-exceptionlist-macos-v1': ARTIFACTS[1],
+          'endpoint-exceptionlist-windows-v1': ARTIFACT_EXCEPTIONS_MACOS,
+          'endpoint-exceptionlist-macos-v1': ARTIFACT_EXCEPTIONS_WINDOWS,
         }),
       });
     });
@@ -581,17 +609,17 @@ describe('manifest', () => {
     test('Returns policy specific manifest when policy specific artifacts present', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1]);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
 
       expect(manifest.toPackagePolicyManifest(TEST_POLICY_ID_2)).toStrictEqual({
         schema_version: 'v1',
         manifest_version: '1.0.0',
         artifacts: toArtifactRecords({
-          'endpoint-exceptionlist-windows-v1': ARTIFACTS[2],
-          'endpoint-exceptionlist-macos-v1': ARTIFACTS[1],
+          'endpoint-exceptionlist-windows-v1': ARTIFACT_TRUSTED_APPS_MACOS,
+          'endpoint-exceptionlist-macos-v1': ARTIFACT_EXCEPTIONS_WINDOWS,
         }),
       });
     });
@@ -611,23 +639,23 @@ describe('manifest', () => {
     test('Returns populated saved object', async () => {
       const manifest = new Manifest({ schemaVersion: 'v1', semanticVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1]);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[3], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[3], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS, TEST_POLICY_ID_2);
 
       expect(manifest.toSavedObject()).toStrictEqual({
         schemaVersion: 'v1',
         semanticVersion: '1.0.0',
         artifacts: [
-          { artifactId: ARTIFACT_ID_0, policyId: undefined },
-          { artifactId: ARTIFACT_ID_1, policyId: undefined },
-          { artifactId: ARTIFACT_ID_1, policyId: TEST_POLICY_ID_1 },
-          { artifactId: ARTIFACT_ID_2, policyId: TEST_POLICY_ID_1 },
-          { artifactId: ARTIFACT_ID_3, policyId: TEST_POLICY_ID_1 },
-          { artifactId: ARTIFACT_ID_3, policyId: TEST_POLICY_ID_2 },
+          { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+          { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+          { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+          { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+          { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+          { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
         ],
       });
     });
@@ -639,28 +667,28 @@ describe('manifest', () => {
     });
 
     test('Returns false when there are additions', async () => {
-      const diff = { additions: [ARTIFACTS[0]], removals: [], transitions: [] };
+      const diff = { additions: [ARTIFACT_EXCEPTIONS_MACOS], removals: [], transitions: [] };
 
       expect(isEmptyManifestDiff(diff)).toBe(false);
     });
 
     test('Returns false when there are removals', async () => {
-      const diff = { additions: [], removals: [ARTIFACTS[0]], transitions: [] };
+      const diff = { additions: [], removals: [ARTIFACT_EXCEPTIONS_MACOS], transitions: [] };
 
       expect(isEmptyManifestDiff(diff)).toBe(false);
     });
 
     test('Returns false when there are transitions', async () => {
-      const diff = { additions: [], removals: [], transitions: [ARTIFACTS[0]] };
+      const diff = { additions: [], removals: [], transitions: [ARTIFACT_EXCEPTIONS_MACOS] };
 
       expect(isEmptyManifestDiff(diff)).toBe(false);
     });
 
     test('Returns false when there are all typesof changes', async () => {
       const diff = {
-        additions: [ARTIFACTS[0]],
-        removals: [ARTIFACTS[1]],
-        transitions: [ARTIFACTS[2]],
+        additions: [ARTIFACT_EXCEPTIONS_MACOS],
+        removals: [ARTIFACT_EXCEPTIONS_WINDOWS],
+        transitions: [ARTIFACT_TRUSTED_APPS_MACOS],
       };
 
       expect(isEmptyManifestDiff(diff)).toBe(false);

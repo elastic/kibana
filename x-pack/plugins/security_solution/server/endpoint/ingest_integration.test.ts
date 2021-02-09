@@ -91,10 +91,20 @@ describe('ingest_integration tests ', () => {
 
     const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
     const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
-    let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
+    const ARTIFACT_NAME_EXCEPTIONS_MACOS = 'endpoint-exceptionlist-macos-v1';
+    const ARTIFACT_NAME_TRUSTED_APPS_MACOS = 'endpoint-trustlist-macos-v1';
+    const ARTIFACT_NAME_TRUSTED_APPS_WINDOWS = 'endpoint-trustlist-windows-v1';
+    let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+    let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+    let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
+    let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
     beforeAll(async () => {
-      ARTIFACTS = await getMockArtifacts({ compress: true });
+      const artifacts = await getMockArtifacts({ compress: true });
+      ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
+      ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
+      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[2];
+      ARTIFACT_TRUSTED_APPS_WINDOWS = artifacts[3];
     });
 
     beforeEach(() => {
@@ -121,7 +131,7 @@ describe('ingest_integration tests ', () => {
 
     test('default manifest is taken when there is none and there are errors pushing artifacts', async () => {
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       const manifestManager = buildManifestManagerMock();
       manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
@@ -137,13 +147,13 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACTS[0]]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
       expect(manifestManager.commit).not.toHaveBeenCalled();
     });
 
     test('default manifest is taken when there is none and there are errors commiting manifest', async () => {
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       const manifestManager = buildManifestManagerMock();
       manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
@@ -160,14 +170,14 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACTS[0]]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_EXCEPTIONS_MACOS]);
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 
     test('manifest is created successfuly when there is none', async () => {
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
-      newManifest.addEntry(ARTIFACTS[2]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
       const manifestManager = buildManifestManagerMock();
       manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(null);
@@ -178,8 +188,8 @@ describe('ingest_integration tests ', () => {
       expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
         createNewEndpointPolicyInput({
           artifacts: toArtifactRecords({
-            'endpoint-exceptionlist-macos-v1': ARTIFACTS[0],
-            'endpoint-trustlist-macos-v1': ARTIFACTS[2],
+            [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+            [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
           }),
           manifest_version: '1.0.0',
           schema_version: 'v1',
@@ -187,16 +197,19 @@ describe('ingest_integration tests ', () => {
       );
 
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith();
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACTS[0], ARTIFACTS[2]]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_EXCEPTIONS_MACOS,
+        ARTIFACT_TRUSTED_APPS_MACOS,
+      ]);
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
     });
 
     test('policy is updated with only default entries from manifest', async () => {
       const manifest = new Manifest({ soVersion: '1.0.1', semanticVersion: '1.0.1' });
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACTS[3]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
 
       const manifestManager = buildManifestManagerMock();
       manifestManager.getLastComputedManifest = jest.fn().mockResolvedValue(manifest);
@@ -204,8 +217,8 @@ describe('ingest_integration tests ', () => {
       expect((await invokeCallback(manifestManager)).inputs[0]).toStrictEqual(
         createNewEndpointPolicyInput({
           artifacts: toArtifactRecords({
-            'endpoint-exceptionlist-macos-v1': ARTIFACTS[0],
-            'endpoint-trustlist-windows-v1': ARTIFACTS[3],
+            [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
+            [ARTIFACT_NAME_TRUSTED_APPS_WINDOWS]: ARTIFACT_TRUSTED_APPS_WINDOWS,
           }),
           manifest_version: '1.0.1',
           schema_version: 'v1',
