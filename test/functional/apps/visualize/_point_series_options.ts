@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
         const gridLines = await PageObjects.visChart.getGridLines();
-        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 5);
+        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 6);
         expect(gridLines.length).to.be(expectedCount);
         gridLines.forEach((gridLine) => {
           expect(gridLine.y).to.be(0);
