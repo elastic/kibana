@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { getApmsForClusters } from '../../../../lib/apm/get_apms_for_clusters';
 
 export const getApmClusterStatus = (req, apmIndexPattern, { clusterUuid }) => {
   const clusters = [{ cluster_uuid: clusterUuid }];
-  return getApmsForClusters(req, apmIndexPattern, clusters).then((apms) => get(apms, '[0].stats'));
+  return getApmsForClusters(req, apmIndexPattern, clusters).then((apms) => {
+    const [{ stats, config }] = apms;
+    return {
+      ...stats,
+      config,
+    };
+  });
 };

@@ -6,66 +6,28 @@
  */
 
 import React from 'react';
-import { MonitoringTimeseriesContainer } from '../../chart';
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiPage,
-  EuiPageBody,
-  EuiFlexGroup,
-  EuiPageContent,
-  EuiScreenReaderOnly,
-} from '@elastic/eui';
-import { Status } from './status';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { ApmMetrics } from '../apm_metrics';
 
-export function ApmServerInstance({ summary, metrics, ...props }) {
+const title = i18n.translate('xpack.monitoring.apm.instance.panels.title', {
+  defaultMessage: 'APM Server - Custom Metrics',
+});
+
+export function ApmServerInstance(props) {
+  const { metrics } = props;
   const seriesToShow = [
     metrics.apm_requests,
     metrics.apm_responses_valid,
-
     metrics.apm_responses_errors,
     metrics.apm_acm_request_count,
-
     metrics.apm_acm_response,
     metrics.apm_acm_response_errors,
-
     metrics.apm_output_events_rate_success,
     metrics.apm_output_events_rate_failure,
-
     metrics.apm_transformations,
-    metrics.apm_cpu,
-
-    metrics.apm_memory,
-    metrics.apm_os_load,
   ];
 
-  const charts = seriesToShow.map((data, index) => (
-    <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-      <MonitoringTimeseriesContainer series={data} {...props} />
-    </EuiFlexItem>
-  ));
-
-  return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiScreenReaderOnly>
-          <h1>
-            <FormattedMessage
-              id="xpack.monitoring.apm.instance.heading"
-              defaultMessage="APM server instance"
-            />
-          </h1>
-        </EuiScreenReaderOnly>
-        <EuiPanel>
-          <Status stats={summary} />
-        </EuiPanel>
-        <EuiSpacer size="m" />
-        <EuiPageContent>
-          <EuiFlexGroup wrap>{charts}</EuiFlexGroup>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
-  );
+  const stats = props.summary;
+  const metricProps = { ...props, title, seriesToShow, stats };
+  return <ApmMetrics {...metricProps} />;
 }
