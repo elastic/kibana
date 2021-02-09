@@ -32,7 +32,7 @@ test('`configSchema` creates correct schema.', () => {
   const wrongConfig1 = { type: 'not-console', layout: { type: 'mock' } };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { type: 'file', layout: { type: 'mock' }, path: 'path' };
+  const wrongConfig2 = { type: 'file', layout: { type: 'mock' }, fileName: 'path' };
   expect(() => appenderSchema.validate(wrongConfig2)).toThrow();
 });
 

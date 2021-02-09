@@ -103,7 +103,7 @@ test('appends records via multiple appenders.', async () => {
     config.schema.validate({
       appenders: {
         default: { type: 'console', layout: { type: 'pattern' } },
-        file: { type: 'file', layout: { type: 'pattern' }, path: 'path' },
+        file: { type: 'file', layout: { type: 'pattern' }, fileName: 'path' },
       },
       loggers: [
         { appenders: ['file'], context: 'tests', level: 'warn' },

@@ -153,7 +153,7 @@ logging:
   appenders:
     rolling-file:
       type: rolling-file
-      path: /var/logs/kibana.log
+      fileName: /var/logs/kibana.log
       policy:
         type: size-limit
         size: 50mb
@@ -180,7 +180,7 @@ logging:
   appenders:
     rolling-file:
       type: rolling-file
-      path: /var/logs/kibana.log
+      fileName: /var/logs/kibana.log
       policy:
         type: time-interval
         interval: 10s
@@ -225,7 +225,7 @@ logging:
   appenders:
     rolling-file:
       type: rolling-file
-      path: /var/logs/kibana.log
+      fileName: /var/logs/kibana.log
       policy:
         // ...
       strategy:
@@ -252,7 +252,7 @@ The options are:
 The suffix to append to the file path when rolling. Must include `%i`, as this is the value
 that will be converted to the file index.
 
-for example, with `path: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
+for example, with `fileName: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
 will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
 
 The default value is `-%i`
@@ -283,7 +283,7 @@ logging:
         highlight: true
     file:
       type: file
-      path: /var/log/kibana.log
+      fileName: /var/log/kibana.log
       layout:
         type: pattern
     custom:
@@ -293,7 +293,7 @@ logging:
         pattern: "[%date][%level] %message"
     json-file-appender:
       type: file
-      path: /var/log/kibana-json.log
+      fileName: /var/log/kibana-json.log
 
   root:
     appenders: [console, file]
@@ -451,7 +451,7 @@ logging:
   appenders:
     file:
       type: file
-      path: /var/log/kibana.log
+      fileName: /var/log/kibana.log
       layout:
         type: pattern
   loggers:

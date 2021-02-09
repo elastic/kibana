@@ -65,7 +65,7 @@ describe('RollingFileAppender', () => {
     it('rolls the log file in the correct order', async () => {
       root = createRoot({
         type: 'rolling-file',
-        path: logFile,
+        fileName: logFile,
         layout: {
           type: 'pattern',
           pattern: '%message',
@@ -110,7 +110,7 @@ describe('RollingFileAppender', () => {
     it('only keep the correct number of files', async () => {
       root = createRoot({
         type: 'rolling-file',
-        path: logFile,
+        fileName: logFile,
         layout: {
           type: 'pattern',
           pattern: '%message',
@@ -159,7 +159,7 @@ describe('RollingFileAppender', () => {
     it('rolls the log file at the given interval', async () => {
       root = createRoot({
         type: 'rolling-file',
-        path: logFile,
+        fileName: logFile,
         layout: {
           type: 'pattern',
           pattern: '%message',

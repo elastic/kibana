@@ -21,7 +21,7 @@ import { RollingFileAppender, RollingFileAppenderConfig } from './rolling_file_a
 
 const config: RollingFileAppenderConfig = {
   type: 'rolling-file',
-  path: '/var/log/kibana.log',
+  fileName: '/var/log/kibana.log',
   layout: {
     type: 'pattern',
     pattern: '%message',
@@ -99,7 +99,7 @@ describe('RollingFileAppender', () => {
 
   it('constructs its delegates with the correct parameters', () => {
     expect(RollingFileContextMock).toHaveBeenCalledTimes(1);
-    expect(RollingFileContextMock).toHaveBeenCalledWith(config.path);
+    expect(RollingFileContextMock).toHaveBeenCalledWith(config.fileName);
 
     expect(RollingFileManagerMock).toHaveBeenCalledTimes(1);
     expect(RollingFileManagerMock).toHaveBeenCalledWith(context);

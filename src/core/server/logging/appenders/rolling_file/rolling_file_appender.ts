@@ -34,7 +34,7 @@ export interface RollingFileAppenderConfig {
   /**
    * The absolute path of the file to write to.
    */
-  path: string;
+  fileName: string;
   /**
    * The {@link TriggeringPolicy | policy} to use to determine if a rollover should occur.
    */
@@ -53,7 +53,7 @@ export class RollingFileAppender implements DisposableAppender {
   public static configSchema = schema.object({
     type: schema.literal('rolling-file'),
     layout: Layouts.configSchema,
-    path: schema.string(),
+    fileName: schema.string(),
     policy: triggeringPolicyConfigSchema,
     strategy: rollingStrategyConfigSchema,
   });
@@ -70,7 +70,7 @@ export class RollingFileAppender implements DisposableAppender {
   private readonly buffer: BufferAppender;
 
   constructor(config: RollingFileAppenderConfig) {
-    this.context = new RollingFileContext(config.path);
+    this.context = new RollingFileContext(config.fileName);
     this.context.refreshFileInfo();
     this.fileManager = new RollingFileManager(this.context);
     this.layout = Layouts.create(config.layout);

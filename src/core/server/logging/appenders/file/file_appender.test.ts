@@ -20,17 +20,17 @@ beforeEach(() => {
 test('`createConfigSchema()` creates correct schema.', () => {
   const appenderSchema = FileAppender.configSchema;
 
-  const validConfig = { type: 'file', layout: { type: 'mock' }, path: 'path' };
+  const validConfig = { type: 'file', layout: { type: 'mock' }, fileName: 'path' };
   expect(appenderSchema.validate(validConfig)).toEqual({
     type: 'file',
     layout: { type: 'mock' },
-    path: 'path',
+    fileName: 'path',
   });
 
   const wrongConfig1 = {
     type: 'not-file',
     layout: { type: 'mock' },
-    path: 'path',
+    fileName: 'path',
   };
   expect(() => appenderSchema.validate(wrongConfig1)).toThrow();
 

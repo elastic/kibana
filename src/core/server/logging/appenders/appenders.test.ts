@@ -21,11 +21,11 @@ beforeEach(() => {
 
 test('`configSchema` creates correct schema.', () => {
   const appendersSchema = Appenders.configSchema;
-  const validConfig1 = { type: 'file', layout: { type: 'mock' }, path: 'path' };
+  const validConfig1 = { type: 'file', layout: { type: 'mock' }, fileName: 'path' };
   expect(appendersSchema.validate(validConfig1)).toEqual({
     type: 'file',
     layout: { type: 'mock' },
-    path: 'path',
+    fileName: 'path',
   });
 
   const validConfig2 = { type: 'console', layout: { type: 'mock' } };
@@ -37,7 +37,7 @@ test('`configSchema` creates correct schema.', () => {
   const wrongConfig1 = {
     type: 'console',
     layout: { type: 'mock' },
-    path: 'path',
+    fileName: 'path',
   };
   expect(() => appendersSchema.validate(wrongConfig1)).toThrow();
 
@@ -47,7 +47,7 @@ test('`configSchema` creates correct schema.', () => {
   const wrongConfig3 = {
     type: 'console',
     layout: { type: 'mock' },
-    path: 'path',
+    fileName: 'path',
   };
   expect(() => appendersSchema.validate(wrongConfig3)).toThrow();
 });
@@ -64,7 +64,7 @@ test('`create()` creates correct appender.', () => {
   const fileAppender = Appenders.create({
     type: 'file',
     layout: { highlight: true, type: 'pattern', pattern: '' },
-    path: 'path',
+    fileName: 'path',
   });
   expect(fileAppender).toBeInstanceOf(FileAppender);
 
@@ -77,7 +77,7 @@ test('`create()` creates correct appender.', () => {
 
   const rollingFileAppender = Appenders.create({
     type: 'rolling-file',
-    path: 'path',
+    fileName: 'path',
     layout: { highlight: true, type: 'pattern', pattern: '' },
     strategy: { type: 'numeric', max: 5, pattern: '%i' },
     policy: { type: 'size-limit', size: ByteSizeValue.parse('15b') },

@@ -1559,7 +1559,7 @@ describe('createConfig()', () => {
         audit: {
           appender: {
             type: 'file',
-            path: '/path/to/file.txt',
+            fileName: '/path/to/file.txt',
             layout: {
               type: 'json',
             },
@@ -1568,10 +1568,10 @@ describe('createConfig()', () => {
       }).audit.appender
     ).toMatchInlineSnapshot(`
       Object {
+        "fileName": "/path/to/file.txt",
         "layout": Object {
           "type": "json",
         },
-        "path": "/path/to/file.txt",
         "type": "file",
       }
     `);

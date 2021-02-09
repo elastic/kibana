@@ -22,7 +22,7 @@ export interface NumericRollingStrategyConfig {
   type: 'numeric';
   /**
    * The suffix pattern to apply when renaming a file. The suffix will be applied
-   * after the `appender.path` file name, but before the file extension.
+   * after the `appender.fileName` file name, but before the file extension.
    *
    * Must include `%i`, as it is the value that will be converted to the file index
    *
@@ -32,7 +32,7 @@ export interface NumericRollingStrategyConfig {
    *   appenders:
    *     rolling-file:
    *       type: rolling-file
-   *       path: /var/logs/kibana.log
+   *       fileName: /var/logs/kibana.log
    *       strategy:
    *         type: default
    *         pattern: "-%i"
@@ -74,7 +74,7 @@ export const numericRollingStrategyConfigSchema = schema.object({
  *   appenders:
  *     rolling-file:
  *       type: rolling-file
- *       path: /kibana.log
+ *       fileName: /kibana.log
  *       strategy:
  *         type: numeric
  *         pattern: "-%i"

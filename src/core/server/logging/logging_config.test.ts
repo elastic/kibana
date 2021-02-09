@@ -103,7 +103,7 @@ test('correctly fills in custom `loggers` config.', () => {
         file: {
           type: 'file',
           layout: { type: 'pattern' },
-          path: 'path',
+          fileName: 'path',
         },
       },
       loggers: [
@@ -169,7 +169,7 @@ describe('extend', () => {
           file1: {
             type: 'file',
             layout: { type: 'pattern' },
-            path: 'path',
+            fileName: 'path',
           },
         },
       })
@@ -181,7 +181,7 @@ describe('extend', () => {
           file2: {
             type: 'file',
             layout: { type: 'pattern' },
-            path: 'path',
+            fileName: 'path',
           },
         },
       })
@@ -202,7 +202,7 @@ describe('extend', () => {
           file1: {
             type: 'file',
             layout: { type: 'pattern' },
-            path: 'path',
+            fileName: 'path',
           },
         },
       })
@@ -214,7 +214,7 @@ describe('extend', () => {
           file1: {
             type: 'file',
             layout: { type: 'json' },
-            path: 'updatedPath',
+            fileName: 'updatedPath',
           },
         },
       })
@@ -223,7 +223,7 @@ describe('extend', () => {
     expect(mergedConfigValue.appenders.get('file1')).toEqual({
       type: 'file',
       layout: { type: 'json' },
-      path: 'updatedPath',
+      fileName: 'updatedPath',
     });
   });
 

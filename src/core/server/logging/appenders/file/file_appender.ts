@@ -15,7 +15,7 @@ import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 export interface FileAppenderConfig {
   type: 'file';
   layout: LayoutConfigType;
-  path: string;
+  fileName: string;
 }
 
 /**
@@ -26,7 +26,7 @@ export class FileAppender implements DisposableAppender {
   public static configSchema = schema.object({
     type: schema.literal('file'),
     layout: Layouts.configSchema,
-    path: schema.string(),
+    fileName: schema.string(),
   });
 
   /**
