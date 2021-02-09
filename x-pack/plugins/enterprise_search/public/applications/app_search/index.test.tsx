@@ -11,13 +11,16 @@ import { setMockValues, setMockActions } from '../__mocks__';
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { SetupGuide } from './components/setup_guide';
-import { ErrorConnecting } from './components/error_connecting';
-import { EnginesOverview } from './components/engines';
+
 import { EngineRouter } from './components/engine';
+import { EnginesOverview } from './components/engines';
+import { ErrorConnecting } from './components/error_connecting';
+import { SetupGuide } from './components/setup_guide';
+
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {

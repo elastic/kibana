@@ -772,6 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
             const expectedRspDatafeeds = sortBy(
               testData.expected.jobs.map((job) => {
                 return {
+                  awaitingMlNodeAllocation: false,
                   id: `datafeed-${job.jobId}`,
                   success: true,
                   started: testData.requestBody.startDatafeed,

@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { InitialAppData } from '../../../common/types';
+
 import { ConfiguredLimits, Account, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
