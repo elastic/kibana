@@ -9,6 +9,9 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { DataEnhancedPluginRouter } from '../type';
+import { API_SEARCH_SESSION_CREATE_ROLE } from '../search/session/feature';
+
+const API_SEARCH_SESSION_CREATE_ROLE_TAG = `access:${API_SEARCH_SESSION_CREATE_ROLE}`;
 
 export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: Logger): void {
   router.post(
@@ -24,6 +27,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
+      },
+      options: {
+        tags: [API_SEARCH_SESSION_CREATE_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -65,6 +71,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           id: schema.string(),
         }),
       },
+      options: {
+        tags: [API_SEARCH_SESSION_CREATE_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -95,6 +104,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
           search: schema.maybe(schema.string()),
         }),
+      },
+      options: {
+        tags: [API_SEARCH_SESSION_CREATE_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -128,6 +140,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           id: schema.string(),
         }),
       },
+      options: {
+        tags: [API_SEARCH_SESSION_CREATE_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -150,6 +165,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         params: schema.object({
           id: schema.string(),
         }),
+      },
+      options: {
+        tags: [API_SEARCH_SESSION_CREATE_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -178,6 +196,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           expires: schema.maybe(schema.string()),
         }),
       },
+      options: {
+        tags: [API_SEARCH_SESSION_CREATE_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -205,6 +226,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         body: schema.object({
           expires: schema.string(),
         }),
+      },
+      options: {
+        tags: [API_SEARCH_SESSION_CREATE_ROLE_TAG],
       },
     },
     async (context, request, res) => {

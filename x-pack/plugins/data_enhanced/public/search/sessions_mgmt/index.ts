@@ -15,7 +15,7 @@ import type { ConfigSchema } from '../../../config';
 import type { DataEnhancedStartDependencies } from '../../plugin';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../common';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/common';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;

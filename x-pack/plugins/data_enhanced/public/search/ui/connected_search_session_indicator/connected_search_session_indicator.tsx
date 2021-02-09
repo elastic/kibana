@@ -20,7 +20,10 @@ import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/
 import { ApplicationStart } from '../../../../../../../src/core/public';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { useSearchSessionTour } from './search_session_tour';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../common';
+import {
+  getSearchSessionsCapabilities,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
+} from '../../../../../../../src/plugins/data/common';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
@@ -41,8 +44,16 @@ export const createConnectedSearchSessionIndicator = ({
   storage,
   disableSaveAfterSessionCompletesTimeout,
 }: SearchSessionIndicatorDeps): React.FC => {
-  const isSearchSessionsManagementDisabled =
-    !application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID] ?? false;
+  // check if user doesn't have access to search_sessions and search_sessions
+  // mgtm because root level `search_sessions` feature is disabled
+  // NOTE: saveing search_session can also be disabled on per-app basis and controlled by apps' sub-features,
+  // see: `isSaveDisabledByApp`
+  const areSearchSessionsGloballyDisabled =
+    !(
+      application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID] &&
+      getSearchSessionsCapabilities(application.capabilities).create
+    ) ?? true;
+
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
     .getRefreshIntervalUpdate$()
@@ -110,7 +121,7 @@ export const createConnectedSearchSessionIndicator = ({
       saveDisabledReasonText = isSaveDisabledByApp.reasonText;
     }
 
-    if (isSearchSessionsManagementDisabled) {
+    if (areSearchSessionsGloballyDisabled) {
       managementDisabled = saveDisabled = true;
       managementDisabledReasonText = saveDisabledReasonText = i18n.translate(
         'xpack.data.searchSessionIndicator.disabledDueToDisabledGloballyMessage',

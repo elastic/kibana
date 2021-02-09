@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               feature: {
                 discover: ['all'],
+                search_sessions: ['all'],
               },
               spaces: ['another-space'],
             },
@@ -97,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.missingOrFail('discoverNoResultsError'); // expect error because of fake searchSessionId
       });
     });
-    describe('Disabled storing search sessions in space', () => {
+    describe("Disable storing search sessions in space in case discover's sub-feature is off", () => {
       before(async () => {
         await esArchiver.load('dashboard/session_in_space');
 
@@ -109,6 +110,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               feature: {
                 discover: ['read'],
+                search_sessions: ['all'],
+              },
+              spaces: ['another-space'],
+            },
+          ],
+        });
+
+        await security.user.create('analyst', {
+          password: 'analyst-password',
+          roles: ['data_analyst'],
+          full_name: 'test user',
+        });
+
+        await PageObjects.security.forceLogout();
+
+        await PageObjects.security.login('analyst', 'analyst-password', {
+          expectSpaceSelector: false,
+        });
+      });
+
+      after(async () => {
+        await security.role.delete('data_analyst');
+        await security.user.delete('analyst');
+
+        await esArchiver.unload('dashboard/session_in_space');
+        await PageObjects.security.forceLogout();
+      });
+
+      it("Doesn't allow to store a session", async () => {
+        await PageObjects.common.navigateToApp('discover', { basePath: 's/another-space' });
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
+
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 1, 2015 @ 00:00:00.000',
+          'Oct 1, 2015 @ 00:00:00.000'
+        );
+
+        await PageObjects.discover.waitForDocTableLoadingComplete();
+
+        await searchSessions.expectState('completed');
+        await searchSessions.disabledOrFail();
+      });
+    });
+    describe('Disable storing search sessions in space in search_sessions feature is off', () => {
+      before(async () => {
+        await esArchiver.load('dashboard/session_in_space');
+
+        await security.role.create('data_analyst', {
+          elasticsearch: {
+            indices: [{ names: ['logstash-*'], privileges: ['all'] }],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['all'],
+                search_sessions: [],
               },
               spaces: ['another-space'],
             },

@@ -11,6 +11,8 @@ import { SearchSessionStatus } from '../../../../plugins/data_enhanced/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
 
   describe('search session', () => {
     describe('session management', () => {
@@ -314,6 +316,54 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
         getSessionSecondTime.body.attributes.touched
       );
+    });
+
+    describe('search session permissions', () => {
+      before(async () => {
+        await security.role.create('data_analyst', {
+          elasticsearch: {},
+          kibana: [
+            {
+              feature: {
+                dashboard: ['all'],
+                search_sessions: [],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create('analyst', {
+          password: 'analyst-password',
+          roles: ['data_analyst'],
+          full_name: 'test user',
+        });
+      });
+      after(async () => {
+        await security.role.delete('data_analyst');
+        await security.user.delete('analyst');
+      });
+
+      it('should create and get a session only if has permissions', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertestWithoutAuth
+          .post(`/internal/session`)
+          .auth('analyst', 'analyst-password')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(403);
+
+        await supertestWithoutAuth
+          .get(`/internal/session/${sessionId}`)
+          .auth('analyst', 'analyst-password')
+          .set('kbn-xsrf', 'foo')
+          .expect(403);
+      });
     });
   });
 }

@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               feature: {
                 dashboard: ['minimal_read', 'store_search_session'],
+                search_sessions: ['all'],
               },
               spaces: ['another-space'],
             },
@@ -106,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             {
               feature: {
                 dashboard: ['minimal_read'],
+                search_sessions: ['all'],
               },
               spaces: ['another-space'],
             },

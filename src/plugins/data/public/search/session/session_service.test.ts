@@ -14,6 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_FEATURE_ID } from '../../../common';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
@@ -30,7 +31,14 @@ describe('Session service', () => {
         startService().then(([coreStart, ...rest]) => [
           {
             ...coreStart,
-            application: { ...coreStart.application, currentAppId$: new BehaviorSubject('app') },
+            application: {
+              ...coreStart.application,
+              currentAppId$: new BehaviorSubject('app'),
+              capabilities: {
+                ...coreStart.application.capabilities,
+                [SEARCH_SESSIONS_FEATURE_ID]: { create: true },
+              },
+            },
           },
           ...rest,
         ]),

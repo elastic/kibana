@@ -18,7 +18,11 @@ import {
   SessionStateContainer,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
-import { ISearchOptions } from '../../../common';
+import {
+  getSearchSessionsCapabilities,
+  ISearchOptions,
+  SearchSessionsCapabilities,
+} from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 
 export type ISessionService = PublicContract<SessionService>;
@@ -68,6 +72,7 @@ export class SessionService {
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
   private curApp?: string;
+  private searchSessionsCapabilities?: SearchSessionsCapabilities;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -94,6 +99,10 @@ export class SessionService {
     );
 
     getStartServices().then(([coreStart]) => {
+      this.searchSessionsCapabilities = getSearchSessionsCapabilities(
+        coreStart.application.capabilities
+      );
+
       // Apps required to clean up their sessions before unmounting
       // Make sure that apps don't leave sessions open.
       this.subscription.add(
@@ -251,7 +260,15 @@ export class SessionService {
    */
   public getSearchOptions(
     sessionId: string
-  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> {
+  ):
+    | Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>>
+    | { sessionId: undefined } {
+    // in case user doesn't have permissions to search session, do not forward sessionId to the server
+    // because user most likely also doesn't have access to `background-session` SO
+    if (!this.searchSessionsCapabilities?.create) {
+      return { sessionId: undefined };
+    }
+
     const isCurrentSession = this.isCurrentSession(sessionId);
     return {
       sessionId,

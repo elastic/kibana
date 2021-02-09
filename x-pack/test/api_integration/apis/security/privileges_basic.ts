@@ -41,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
             fleet: ['all', 'read'],
             stackAlerts: ['all', 'read'],
             actions: ['all', 'read'],
+            search_sessions: ['all', 'read'],
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
