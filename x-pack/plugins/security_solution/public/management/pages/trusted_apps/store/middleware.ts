@@ -370,6 +370,10 @@ const fetchEditTrustedAppIfNeeded = async (
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
             type: 'LoadingResourceState',
+            // No easy way to get around this that I can see. `previousState` does not
+            // seem to allow everything that `editItem` state can hold, so not even sure if using
+            // type guards would work here
+            // @ts-ignore
             previousState: editItemState(currentState)!,
           },
         });
