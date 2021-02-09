@@ -25,20 +25,21 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
   return (
     <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-      <WaterfallChartSidebarContainer height={items.length * FIXED_AXIS_HEIGHT}>
+      <WaterfallChartSidebarContainer
+        height={items.length * FIXED_AXIS_HEIGHT}
+        data-test-subj="wfSidebarContainer"
+      >
         <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
           <WaterfallChartSidebarContainerFlexGroup
             direction="column"
             gutterSize="none"
             responsive={false}
           >
-            {items.map((item, index) => {
-              return (
-                <WaterfallChartSidebarFlexItem key={index}>
-                  {render(item, index)}
-                </WaterfallChartSidebarFlexItem>
-              );
-            })}
+            {items.map((item) => (
+              <WaterfallChartSidebarFlexItem key={item.offsetIndex}>
+                {render(item)}
+              </WaterfallChartSidebarFlexItem>
+            ))}
           </WaterfallChartSidebarContainerFlexGroup>
         </WaterfallChartSidebarContainerInnerPanel>
       </WaterfallChartSidebarContainer>
