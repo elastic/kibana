@@ -119,14 +119,14 @@ describe('areLayersLoaded', () => {
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
   });
 
-  test('layer should be counted as loaded if its finished loading', () => {
+  test('layer should be counted as loaded if its loaded', () => {
     const layerList = [createLayerMock({ isDataLoaded: true })];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
   });
 
-  test('layer should not be counted as loaded if it has has not loading', () => {
+  test('layer should not be counted as loaded if it has not loaded', () => {
     const layerList = [createLayerMock({ isDataLoaded: false })];
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
