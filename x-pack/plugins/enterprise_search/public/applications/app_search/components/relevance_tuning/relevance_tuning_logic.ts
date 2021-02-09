@@ -8,9 +8,8 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
-import { NUMBER } from '../../../shared/constants/field_types';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
+import { Schema, SchemaConflicts } from '../../../shared/types';
 import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 
 import { Result } from '../result/types';
@@ -23,6 +22,7 @@ import {
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
 } from './constants';
+import { filterIfTerm, parseBoostCenter, removeBoostStateProps } from './utils';
 
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
@@ -104,29 +104,6 @@ interface RelevanceTuningValues {
   searchResults: Result[] | null;
   resultsLoading: boolean;
 }
-
-// If the user hasn't entered a filter, then we can skip filtering the array entirely
-const filterIfTerm = (array: string[], filterTerm: string): string[] => {
-  return filterTerm === '' ? array : array.filter((item) => item.includes(filterTerm));
-};
-
-const removeBoostStateProps = (searchSettings: SearchSettings) => {
-  const updatedSettings = cloneDeep(searchSettings);
-  const { boosts } = updatedSettings;
-  const keys = Object.keys(boosts);
-  keys.forEach((key) => boosts[key].forEach((boost) => delete boost.newBoost));
-
-  return updatedSettings;
-};
-
-const parseBoostCenter = (fieldType: SchemaTypes, value: string | number) => {
-  // Leave non-numeric fields alone
-  if (fieldType === NUMBER) {
-    const floatValue = parseFloat(value as string);
-    return isNaN(floatValue) ? value : floatValue;
-  }
-  return value;
-};
 
 export const RelevanceTuningLogic = kea<
   MakeLogicType<RelevanceTuningValues, RelevanceTuningActions>
