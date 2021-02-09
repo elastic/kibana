@@ -47,7 +47,7 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { indicesExist, indexPattern, indexNames } = useSourcererScope();
   console.log({ indexPattern });
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -105,7 +105,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
+                      indexNames={indexNames}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -118,7 +118,7 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
+                      indexNames={indexNames}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -129,7 +129,7 @@ const OverviewComponent = () => {
                     <EventCounts
                       filters={filters}
                       from={from}
-                      indexNames={selectedPatterns}
+                      indexNames={indexNames}
                       indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}

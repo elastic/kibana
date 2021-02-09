@@ -58,7 +58,9 @@ export const getIndexNamesSelectedSelector = () => {
     const configIndexPatterns = getConfigIndexPatternsSelector(state);
     return {
       indexNames:
-        scope.selectedPatterns.length === 0 ? configIndexPatterns : scope.selectedPatterns,
+        scope.selectedPatterns.length === 0
+          ? configIndexPatterns
+          : scope.selectedPatterns.map(({ title }) => title),
       previousIndexNames: scope.indexPattern.title,
     };
   };
@@ -85,12 +87,15 @@ const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();
-  const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
-    const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',') : [];
-    return selectedPatterns.some((index) => index === 'logs-*')
-      ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
-      : selectedPatterns;
-  });
+  // const getSelectedPatterns = memoizeOne((selectedPatternsStr: string): string[] => {
+  //   if (selectedPatternsStr.length > 0) {
+  //     debugger;
+  //   }
+  //   const selectedPatterns = selectedPatternsStr.length > 0 ? selectedPatternsStr.split(',') : [];
+  //   return selectedPatterns.some((index) => index === 'logs-*')
+  //     ? [...selectedPatterns, EXCLUDE_ELASTIC_CLOUD_INDEX]
+  //     : selectedPatterns;
+  // });
 
   const getIndexPattern = memoizeOne(
     (indexPattern, title) => ({
@@ -102,12 +107,17 @@ export const getSourcererScopeSelector = () => {
 
   const mapStateToProps = (state: State, scopeId: SourcererScopeName): ManageScope => {
     const scope = getScopeIdSelector(state, scopeId);
-    const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
-    const indexPattern = getIndexPattern(scope.indexPattern, selectedPatterns.join());
+    console.log('wha', scope);
+    // if (scope.selectedPatterns.length > 0) {
+    //   debugger;
+    // }
+    // const selectedPatterns = getSelectedPatterns(scope.selectedPatterns.sort().join());
+
+    const indexPattern = getIndexPattern(scope.indexPattern, scope.indexNames.join());
+    console.log('indexPattern', indexPattern);
 
     return {
       ...scope,
-      selectedPatterns,
       indexPattern,
     };
   };

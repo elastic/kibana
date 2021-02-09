@@ -9,7 +9,11 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import { SelectedPatterns, SourcererScopeName } from '../../store/sourcerer/model';
+import {
+  SelectedPatterns,
+  SourcererPatternType,
+  SourcererScopeName,
+} from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
@@ -29,7 +33,7 @@ export const useInitSourcerer = (
   );
   const ConfigIndexPatterns = useDeepEqualSelector(getConfigIndexPatternsSelector);
   const configIndexPatternsWithId: SelectedPatterns = useMemo(
-    () => ConfigIndexPatterns.map((title) => ({ id: 'config', title })),
+    () => ConfigIndexPatterns.map((title) => ({ id: SourcererPatternType.config, title })),
     [ConfigIndexPatterns]
   );
 
@@ -68,7 +72,7 @@ export const useInitSourcerer = (
           id: SourcererScopeName.timeline,
           selectedPatterns: [
             ...configIndexPatternsWithId,
-            { id: 'detections', title: signalIndexName },
+            { id: SourcererPatternType.detections, title: signalIndexName },
           ],
         })
       );
@@ -79,7 +83,7 @@ export const useInitSourcerer = (
           id: SourcererScopeName.timeline,
           selectedPatterns: [
             ...configIndexPatternsWithId,
-            { id: 'detections', title: signalIndexNameSelector },
+            { id: SourcererPatternType.detections, title: signalIndexNameSelector },
           ],
         })
       );
@@ -105,7 +109,7 @@ export const useInitSourcerer = (
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: scopeId,
-          selectedPatterns: [{ id: 'detections', title: signalIndexName }],
+          selectedPatterns: [{ id: SourcererPatternType.detections, title: signalIndexName }],
         })
       );
     } else if (signalIndexNameSelector != null && initialTimelineSourcerer.current) {
@@ -113,7 +117,9 @@ export const useInitSourcerer = (
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: scopeId,
-          selectedPatterns: [{ id: 'detections', title: signalIndexNameSelector }],
+          selectedPatterns: [
+            { id: SourcererPatternType.detections, title: signalIndexNameSelector },
+          ],
         })
       );
     }

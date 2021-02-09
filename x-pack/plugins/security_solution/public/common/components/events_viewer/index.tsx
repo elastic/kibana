@@ -76,7 +76,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     browserFields,
     docValueFields,
     indexPattern,
-    selectedPatterns,
+    indexNames,
     loading: isLoadingIndexPattern,
   } = useSourcererScope(scopeId);
   const { globalFullScreen } = useGlobalFullScreen();
@@ -87,7 +87,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         id,
         columns,
         excludedRowRendererIds,
-        indexNames: selectedPatterns.map(({ title }) => title),
+        indexNames,
         sort,
         itemsPerPage,
         showCheckboxes,
@@ -117,7 +117,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             isLoadingIndexPattern={isLoadingIndexPattern}
             filters={globalFilters}
             headerFilterGroup={headerFilterGroup}
-            indexNames={selectedPatterns}
+            indexNames={indexNames}
             indexPattern={indexPattern}
             isLive={isLive}
             itemsPerPage={itemsPerPage!}

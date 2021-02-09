@@ -22,11 +22,17 @@ export enum SourcererScopeName {
   timeline = 'timeline',
 }
 
+export enum SourcererPatternType {
+  config = 'config',
+  detections = 'detections',
+  kip = 'ip',
+}
+
 export type SelectedPatterns = Array<{
   /**
    * if pattern is a KIP, the string will be the saved object id of the KIP
    */
-  id: 'config' | 'detections' | string;
+  id: SourcererPatternType.config | SourcererPatternType.detections | string;
   /**
    * name of the pattern
    */
@@ -37,6 +43,7 @@ export interface ManageScope {
   docValueFields: DocValueFields[];
   errorMessage: string | null;
   id: SourcererScopeName;
+  indexNames: string[];
   indexPattern: IIndexPattern;
   indicesExist: boolean | undefined | null;
   loading: boolean;
@@ -65,6 +72,7 @@ export const initSourcererScope = {
   browserFields: EMPTY_BROWSER_FIELDS,
   docValueFields: EMPTY_DOCVALUE_FIELD,
   errorMessage: null,
+  indexNames: [],
   indexPattern: EMPTY_INDEX_PATTERN,
   indicesExist: true,
   loading: false,
@@ -92,6 +100,6 @@ export const initialSourcererState: SourcererModel = {
 };
 
 export type FSourcererScopePatterns = {
-  [id in SourcererScopeName]: string[];
+  [id in SourcererScopeName]: SelectedPatterns;
 };
 export type SourcererScopePatterns = Partial<FSourcererScopePatterns>;

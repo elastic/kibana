@@ -16,7 +16,7 @@ import {
   setSource,
   initTimelineIndexPatterns,
 } from './actions';
-import { initialSourcererState, SourcererModel } from './model';
+import { initialSourcererState, SourcererModel, SourcererPatternType } from './model';
 import { createDefaultIndexPatterns, defaultIndexPatternByEventType } from './helpers';
 
 export type SourcererState = SourcererModel;
@@ -48,7 +48,7 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
         ...state.sourcererScopes,
         [id]: {
           ...state.sourcererScopes[id],
-          selectedPatterns: createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
+          ...createDefaultIndexPatterns({ eventType, id, selectedPatterns, state }),
         },
       },
     };
@@ -78,7 +78,13 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
           ...state.sourcererScopes[id],
           ...sourcererScopes,
           ...(state.sourcererScopes[id].selectedPatterns.length === 0
-            ? { selectedPatterns: state.configIndexPatterns }
+            ? {
+                selectedPatterns: state.configIndexPatterns.map((title) => ({
+                  title,
+                  id: SourcererPatternType.config,
+                })),
+                indexNames: state.configIndexPatterns,
+              }
             : {}),
         },
       },
