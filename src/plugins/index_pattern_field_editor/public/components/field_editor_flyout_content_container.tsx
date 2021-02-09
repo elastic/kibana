@@ -84,9 +84,12 @@ export const FieldEditorFlyoutContentContainer = ({
 }: Props) => {
   const fieldToEdit = deserializeField(indexPattern, field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const saveField = useCallback(
     async (updatedField: Field) => {
+      setIsSaving(true);
+
       const { script } = updatedField;
 
       if (fieldTypeToProcess === 'runtime') {
@@ -124,6 +127,7 @@ export const FieldEditorFlyoutContentContainer = ({
             values: { fieldName: updatedField.name },
           });
           notifications.toasts.addSuccess(message);
+          setIsSaving(false);
           onSave(editedField);
         });
       } catch (e) {
@@ -131,6 +135,7 @@ export const FieldEditorFlyoutContentContainer = ({
           defaultMessage: 'Failed to save field changes',
         });
         notifications.toasts.addError(e, { title });
+        setIsSaving(false);
       }
     },
     [onSave, indexPattern, indexPatternService, notifications, fieldTypeToProcess, field?.name]
@@ -165,6 +170,7 @@ export const FieldEditorFlyoutContentContainer = ({
       indexPattern={indexPattern}
       fieldTypeToProcess={fieldTypeToProcess}
       runtimeFieldValidator={validateRuntimeField}
+      isSavingField={isSaving}
     />
   );
 };

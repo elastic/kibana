@@ -80,6 +80,7 @@ export interface Props {
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
+  isSavingField: boolean;
 }
 
 const FieldEditorFlyoutContentComponent = ({
@@ -94,6 +95,7 @@ const FieldEditorFlyoutContentComponent = ({
   uiSettings,
   fieldTypeToProcess,
   runtimeFieldValidator,
+  isSavingField,
 }: Props) => {
   const i18nTexts = geti18nTexts(field);
 
@@ -108,6 +110,8 @@ const FieldEditorFlyoutContentComponent = ({
   const [painlessSyntaxError, setPainlessSyntaxError] = useState<RuntimeFieldPainlessError | null>(
     null
   );
+
+  const [isValidating, setIsValidating] = useState(false);
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
   const { fields } = indexPattern;
@@ -128,11 +132,14 @@ const FieldEditorFlyoutContentComponent = ({
 
     if (isValid) {
       if (data.script) {
+        setIsValidating(true);
+
         const error = await runtimeFieldValidator({
           type: data.type,
           script: data.script,
         });
 
+        setIsValidating(false);
         setPainlessSyntaxError(error);
 
         if (error) {
@@ -217,6 +224,7 @@ const FieldEditorFlyoutContentComponent = ({
                   data-test-subj="fieldSaveButton"
                   fill
                   disabled={isSaveButtonDisabled}
+                  isLoading={isSavingField || isValidating}
                 >
                   {i18nTexts.saveButtonLabel}
                 </EuiButton>
