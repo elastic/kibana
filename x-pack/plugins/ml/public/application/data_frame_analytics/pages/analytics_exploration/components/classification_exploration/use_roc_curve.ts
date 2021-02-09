@@ -80,9 +80,10 @@ export const useRocCurve = (
           evalData.eval &&
           isClassificationEvaluateResponse(evalData.eval)
         ) {
+          const auc = evalData.eval?.classification?.auc_roc?.value || 0;
           const rocCurveDataForClass = (evalData.eval?.classification?.auc_roc?.curve || []).map(
             (d) => ({
-              class_name: rocCurveClassName,
+              class_name: `${rocCurveClassName} (AUC: ${Math.round(auc * 100000) / 100000})`,
               ...d,
             })
           );
