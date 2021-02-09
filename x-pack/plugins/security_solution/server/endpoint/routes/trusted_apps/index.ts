@@ -7,18 +7,21 @@
 
 import {
   DeleteTrustedAppsRequestSchema,
+  GetOneTrustedAppRequestSchema,
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
 } from '../../../../common/endpoint/schema/trusted_apps';
 import {
   TRUSTED_APPS_CREATE_API,
   TRUSTED_APPS_DELETE_API,
+  TRUSTED_APPS_GET_API,
   TRUSTED_APPS_LIST_API,
   TRUSTED_APPS_SUMMARY_API,
 } from '../../../../common/endpoint/constants';
 import {
   getTrustedAppsCreateRouteHandler,
   getTrustedAppsDeleteRouteHandler,
+  getTrustedAppsGetOneHandler,
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
 } from './handlers';
@@ -37,6 +40,16 @@ export const registerTrustedAppsRoutes = (
       options: { authRequired: true },
     },
     getTrustedAppsDeleteRouteHandler(endpointAppContext)
+  );
+
+  // GET one
+  router.get(
+    {
+      path: TRUSTED_APPS_GET_API,
+      validate: GetOneTrustedAppRequestSchema,
+      options: { authRequired: true },
+    },
+    getTrustedAppsGetOneHandler(endpointAppContext)
   );
 
   // GET list

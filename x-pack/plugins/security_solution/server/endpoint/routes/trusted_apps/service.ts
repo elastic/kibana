@@ -10,6 +10,7 @@ import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/const
 
 import {
   DeleteTrustedAppsRequestParams,
+  GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsSummaryResponse,
   GetTrustedListAppsResponse,
@@ -40,6 +41,26 @@ export const deleteTrustedApp = async (
   if (!exceptionListItem) {
     throw new MissingTrustedAppException(id);
   }
+};
+
+export const getTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  id: string
+): Promise<GetOneTrustedAppResponse> => {
+  const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
+    itemId: '',
+    id,
+    namespaceType: 'agnostic',
+  });
+
+  if (!trustedAppExceptionItem) {
+    // FIXME: use specific error from current pending PR once merged
+    throw new Error('does not exist');
+  }
+
+  return {
+    data: exceptionListItemToTrustedApp(trustedAppExceptionItem),
+  };
 };
 
 export const getTrustedAppsList = async (

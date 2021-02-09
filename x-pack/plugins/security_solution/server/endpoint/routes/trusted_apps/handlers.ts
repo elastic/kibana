@@ -12,6 +12,7 @@ import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
   DeleteTrustedAppsRequestParams,
+  GetOneTrustedAppRequestParams,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
 } from '../../../../common/endpoint/types';
@@ -20,6 +21,7 @@ import { EndpointAppContext } from '../../types';
 import {
   createTrustedApp,
   deleteTrustedApp,
+  getTrustedApp,
   getTrustedAppsList,
   getTrustedAppsSummary,
   MissingTrustedAppException,
@@ -59,6 +61,29 @@ export const getTrustedAppsDeleteRouteHandler = (
         logger.error(error);
         return res.internalError({ body: error });
       }
+    }
+  };
+};
+
+export const getTrustedAppsGetOneHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
+  GetOneTrustedAppRequestParams,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      return res.ok({
+        body: await getTrustedApp(exceptionListClientFromContext(context), req.params.id),
+      });
+    } catch (error) {
+      // FIXME:PT use generic error handlers from other PR once merged
+      logger.error(error);
+      return res.internalError({ body: error });
     }
   };
 };

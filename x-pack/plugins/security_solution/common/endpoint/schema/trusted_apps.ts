@@ -21,6 +21,12 @@ export const DeleteTrustedAppsRequestSchema = {
   }),
 };
 
+export const GetOneTrustedAppRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
 export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
