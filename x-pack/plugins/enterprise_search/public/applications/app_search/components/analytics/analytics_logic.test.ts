@@ -19,6 +19,7 @@ jest.mock('../engine', () => ({
 import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
+
 import { AnalyticsLogic } from './';
 
 describe('AnalyticsLogic', () => {
