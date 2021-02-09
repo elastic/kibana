@@ -128,7 +128,7 @@ While you're trying to track down changes which will improve the bundle size, tr
 node scripts/build_kibana_platform_plugins --dist --watch --focus {pluginId}
 -----------
 
-This will build the front-end bundles for your plugin and only the plugins your plugin depends on. Whenever you make cahnges the bundles are rebuilt and you can inspect the metrics of that build in the `target/public/metrics.json` file within your plugin. This file will be updated as you save changes to the source and should be helpful to determine if your changes are lowering the `page load asset size` enough.
+This will build the front-end bundles for your plugin and only the plugins your plugin depends on. Whenever you make changes the bundles are rebuilt and you can inspect the metrics of that build in the `target/public/metrics.json` file within your plugin. This file will be updated as you save changes to the source and should be helpful to determine if your changes are lowering the `page load asset size` enough.
 
 If you only want to run the build once you can run:
 
