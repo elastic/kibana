@@ -20,7 +20,6 @@ import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security = getService('security');
 
   describe('create_index', () => {
     afterEach(async () => {
@@ -67,11 +66,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.t1_analyst;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -117,11 +116,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.t2_analyst;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -167,11 +166,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.detections_admin;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -217,11 +216,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.soc_manager;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -267,11 +266,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.hunter;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -317,11 +316,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.platform_engineer;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -367,11 +366,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.reader;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -417,11 +416,11 @@ export default ({ getService }: FtrProviderContext) => {
       const role = ROLES.rule_author;
 
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await deleteUserAndRole(security, role);
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {

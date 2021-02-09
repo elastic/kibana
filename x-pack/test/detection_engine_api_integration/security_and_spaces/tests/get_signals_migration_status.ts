@@ -16,7 +16,6 @@ import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -99,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       await supertestWithoutAuth
         .get(DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL)
@@ -108,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .query({ from: '2020-10-10' })
         .expect(403);
 
-      await deleteUserAndRole(security, ROLES.t1_analyst);
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });
 };

@@ -16,7 +16,6 @@ import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security = getService('security');
 
   describe('read_privileges', () => {
     it('should return expected privileges for elastic admin', async () => {
@@ -79,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return expected privileges for a "reader" user', async () => {
-      await createUserAndRole(security, ROLES.reader);
+      await createUserAndRole(getService, ROLES.reader);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.reader, 'changeme')
@@ -140,11 +139,11 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.reader);
+      await deleteUserAndRole(getService, ROLES.reader);
     });
 
     it('should return expected privileges for a "t1_analyst" user', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.t1_analyst, 'changeme')
@@ -205,11 +204,11 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.t1_analyst);
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
 
     it('should return expected privileges for a "t2_analyst" user', async () => {
-      await createUserAndRole(security, ROLES.t2_analyst);
+      await createUserAndRole(getService, ROLES.t2_analyst);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.t2_analyst, 'changeme')
@@ -270,11 +269,11 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.t2_analyst);
+      await deleteUserAndRole(getService, ROLES.t2_analyst);
     });
 
     it('should return expected privileges for a "hunter" user', async () => {
-      await createUserAndRole(security, ROLES.hunter);
+      await createUserAndRole(getService, ROLES.hunter);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.hunter, 'changeme')
@@ -335,11 +334,11 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.hunter);
+      await deleteUserAndRole(getService, ROLES.hunter);
     });
 
     it('should return expected privileges for a "rule_author" user', async () => {
-      await createUserAndRole(security, ROLES.rule_author);
+      await createUserAndRole(getService, ROLES.rule_author);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.rule_author, 'changeme')
@@ -400,11 +399,11 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.rule_author);
+      await deleteUserAndRole(getService, ROLES.rule_author);
     });
 
     it('should return expected privileges for a "soc_manager" user', async () => {
-      await createUserAndRole(security, ROLES.soc_manager);
+      await createUserAndRole(getService, ROLES.soc_manager);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.soc_manager, 'changeme')
@@ -465,11 +464,11 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.soc_manager);
+      await deleteUserAndRole(getService, ROLES.soc_manager);
     });
 
     it('should return expected privileges for a "platform_engineer" user', async () => {
-      await createUserAndRole(security, ROLES.platform_engineer);
+      await createUserAndRole(getService, ROLES.platform_engineer);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.platform_engineer, 'changeme')
@@ -530,11 +529,11 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.platform_engineer);
+      await deleteUserAndRole(getService, ROLES.platform_engineer);
     });
 
     it('should return expected privileges for a "detections_admin" user', async () => {
-      await createUserAndRole(security, ROLES.detections_admin);
+      await createUserAndRole(getService, ROLES.detections_admin);
       const { body } = await supertestWithoutAuth
         .get(DETECTION_ENGINE_PRIVILEGES_URL)
         .auth(ROLES.detections_admin, 'changeme')
@@ -595,7 +594,7 @@ export default ({ getService }: FtrProviderContext) => {
         is_authenticated: true,
         has_encryption_key: true,
       });
-      await deleteUserAndRole(security, ROLES.detections_admin);
+      await deleteUserAndRole(getService, ROLES.detections_admin);
     });
   });
 };
