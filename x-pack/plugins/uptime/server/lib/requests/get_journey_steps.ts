@@ -8,7 +8,7 @@
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types';
 
-interface GetJourneyStepsParams {
+export interface GetJourneyStepsParams {
   checkGroup: string;
   syntheticEventTypes?: string | string[];
 }
