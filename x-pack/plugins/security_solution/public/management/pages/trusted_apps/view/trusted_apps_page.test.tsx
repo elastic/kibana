@@ -183,28 +183,32 @@ describe('When on the Trusted Apps Page', () => {
           act(() => {
             fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'));
           });
-          expect(coreStart.http.put).toHaveBeenCalledWith(
-            '/api/endpoint/trusted_apps/1111-2222-3333-4444',
-            {
-              body: JSON.stringify({
-                name: 'one app',
-                os: 'windows',
-                entries: [
-                  {
-                    field: 'process.executable.caseless',
-                    value: 'one/two',
-                    operator: 'included',
-                    type: 'match',
-                  },
-                ],
-                description: 'a good one',
-                effectScope: {
-                  type: 'global',
-                },
-                version: 'abc123',
-              }),
-            }
-          );
+
+          expect(coreStart.http.put).toHaveBeenCalledTimes(1);
+
+          const lastCallToPut = (coreStart.http.put.mock.calls[0] as unknown) as [
+            string,
+            HttpFetchOptions
+          ];
+
+          expect(lastCallToPut[0]).toEqual('/api/endpoint/trusted_apps/1111-2222-3333-4444');
+          expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
+            name: 'one app',
+            os: 'windows',
+            entries: [
+              {
+                field: 'process.executable.caseless',
+                value: 'one/two',
+                operator: 'included',
+                type: 'match',
+              },
+            ],
+            description: 'a good one',
+            effectScope: {
+              type: 'global',
+            },
+            version: 'abc123',
+          });
         });
       });
     });
