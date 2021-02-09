@@ -161,7 +161,8 @@ image:images/document-table-expanded.png[Table view with document expanded]
 . Scan through the fields and their values. If you find a field of interest,
 hover of its name for filters and other controls.
 
-. To view documents that occurred before or after the event you are looking at, click **View surrounding documents**.
+. To view documents that occurred before or after the event you are looking at, click
+<<discover-document-context, View surrounding documents>>.
 
 . For direct access to a particular document, click **View single document**.
 +
@@ -216,3 +217,7 @@ include::{kib-repo-dir}/management/index-patterns.asciidoc[]
 include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
 
 include::{kib-repo-dir}/discover/search.asciidoc[]
+
+include::{kib-repo-dir}/discover/context.asciidoc[]
+
+
