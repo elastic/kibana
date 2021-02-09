@@ -61,7 +61,7 @@ describe('<EditPolicy />', () => {
       // Set max docs to test whether we keep the unknown fields in that object after serializing
       await actions.hot.setMaxDocs('1000');
       // Remove the delete phase to ensure that we also correctly remove data
-      await actions.delete.enable(false);
+      await actions.delete.disablePhase();
       await actions.savePolicy();
 
       const latestRequest = server.requests[server.requests.length - 1];
@@ -89,7 +89,7 @@ describe('<EditPolicy />', () => {
                 unknown_setting: true,
               },
             },
-            min_age: '0ms',
+            min_age: '0d',
           },
         },
       });
@@ -255,7 +255,7 @@ describe('<EditPolicy />', () => {
                 "priority": 50,
               },
             },
-            "min_age": "0ms",
+            "min_age": "0d",
           }
         `);
       });
@@ -310,7 +310,7 @@ describe('<EditPolicy />', () => {
                     "number_of_shards": 123,
                   },
                 },
-                "min_age": "0ms",
+                "min_age": "0d",
               },
             },
           }
@@ -839,7 +839,7 @@ describe('<EditPolicy />', () => {
       expect(actions.timeline.hasColdPhase()).toBe(true);
       expect(actions.timeline.hasDeletePhase()).toBe(false);
 
-      await actions.delete.enable(true);
+      await actions.delete.enablePhase();
       expect(actions.timeline.hasHotPhase()).toBe(true);
       expect(actions.timeline.hasWarmPhase()).toBe(true);
       expect(actions.timeline.hasColdPhase()).toBe(true);

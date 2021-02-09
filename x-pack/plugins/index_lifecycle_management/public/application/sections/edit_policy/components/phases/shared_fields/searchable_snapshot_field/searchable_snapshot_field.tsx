@@ -186,7 +186,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             <UseField<string>
               config={{
                 defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
-                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
                 validations: [
                   {
                     validator: emptyField(

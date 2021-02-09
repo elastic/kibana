@@ -248,6 +248,27 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     };
   };
 
+  const createToggleDeletePhaseActions = () => {
+    const enablePhase = async () => {
+      await act(async () => {
+        find('enableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    const disablePhase = async () => {
+      await act(async () => {
+        find('disableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    return {
+      enablePhase,
+      disablePhase,
+    };
+  };
+
   return {
     ...testBed,
     actions: {
@@ -302,7 +323,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {
-        enable: enable('delete'),
+        ...createToggleDeletePhaseActions(),
         setMinAgeValue: setMinAgeValue('delete'),
         setMinAgeUnits: setMinAgeUnits('delete'),
       },
