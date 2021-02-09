@@ -48,14 +48,14 @@ export function ErrorCorrelations({ onClose }: Props) {
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
 
-  const { defaultFieldNames } = useFieldNames();
-  const [fieldNames, setFieldNames] = useLocalStorage(
-    'apm.correlations.errors.fields',
-    defaultFieldNames
-  );
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
+  const { defaultFieldNames } = useFieldNames();
+  const [fieldNames, setFieldNames] = useLocalStorage(
+    `apm.correlations.errors.fields:${serviceName}`,
+    defaultFieldNames
+  );
 
   const { data, status } = useFetcher(
     (callApmApi) => {

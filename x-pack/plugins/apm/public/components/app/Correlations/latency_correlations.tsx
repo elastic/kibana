@@ -45,18 +45,19 @@ export function LatencyCorrelations({ onClose }: Props) {
     selectedSignificantTerm,
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
+
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { urlParams, uiFilters } = useUrlParams();
+  const { transactionName, transactionType, start, end } = urlParams;
   const { defaultFieldNames } = useFieldNames();
   const [fieldNames, setFieldNames] = useLocalStorage(
-    'apm.correlations.latency.fields',
+    `apm.correlations.latency.fields:${serviceName}`,
     defaultFieldNames
   );
   const [durationPercentile, setDurationPercentile] = useLocalStorage(
     'apm.correlations.latency.threshold',
     50
   );
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
-  const { transactionName, transactionType, start, end } = urlParams;
 
   const { data, status } = useFetcher(
     (callApmApi) => {
