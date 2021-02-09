@@ -25,19 +25,27 @@ const sortToMlFieldMap = {
   startTime: 'timestamp',
 };
 
-export const createMetricsK8sAnomaliesQuery = (
-  jobIds: string[],
-  startTime: number,
-  endTime: number,
-  sort: Sort,
-  pagination: Pagination
-) => {
+export const createMetricsK8sAnomaliesQuery = ({
+  jobIds,
+  anomalyThreshold,
+  startTime,
+  endTime,
+  sort,
+  pagination,
+}: {
+  jobIds: string[];
+  anomalyThreshold: number;
+  startTime: number;
+  endTime: number;
+  sort: Sort;
+  pagination: Pagination;
+}) => {
   const { field } = sort;
   const { pageSize } = pagination;
 
   const filters = [
     ...createJobIdsFilters(jobIds),
-    ...createAnomalyScoreFilter(50),
+    ...createAnomalyScoreFilter(anomalyThreshold),
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
