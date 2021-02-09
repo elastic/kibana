@@ -6,7 +6,10 @@
  */
 
 import { find, uniqBy } from 'lodash';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../common/environment_filter_values';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -27,8 +30,10 @@ export function getConnections({
   if (!paths) {
     return [];
   }
+  const isEnvironmentSelected =
+    environment && environment !== ENVIRONMENT_ALL.value;
 
-  if (serviceName || environment) {
+  if (serviceName || isEnvironmentSelected) {
     paths = paths.filter((path) => {
       return (
         path

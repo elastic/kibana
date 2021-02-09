@@ -87,7 +87,10 @@ async function getServicesData(options: IEnvOptions) {
     searchAggregatedTransactions,
   });
 
-  let { filter } = projection.body.query.bool;
+  let filter = [
+    ...projection.body.query.bool.filter,
+    ...environmentQuery(environment),
+  ];
 
   if (options.serviceName) {
     filter = filter.concat({
@@ -95,10 +98,6 @@ async function getServicesData(options: IEnvOptions) {
         [SERVICE_NAME]: options.serviceName,
       },
     });
-  }
-
-  if (options.environment) {
-    filter = filter.concat(environmentQuery(environment));
   }
 
   const params = mergeProjection(projection, {
