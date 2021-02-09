@@ -292,11 +292,16 @@ export const update = async ({
       },
     });
 
-    // TODO: double check that this logic will get all sub case comments and include them in the updates
+    // TODO: if a collection's sync settings are change we need to get all the sub cases and sync their alerts according
+    // to the SUB CASE status not the collection's status
+    // I think what we can do is get all comments for a collection's sub cases in a single call, then group the alerts by
+    // sub case ID, then query for all those sub cases that we need, grab their status, build another map of status
+    // to {ids: string[], indices: Set<string>} then iterate over the map and perform a updateAlertsStatus
+    // for each group of alerts for the 3 statuses.
+
     const caseComments = (await caseService.getAllCaseComments({
       client: savedObjectsClient,
       id: theCase.id,
-      includeSubCaseComments: true,
       options: {
         fields: [],
         filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
