@@ -96,6 +96,10 @@ export interface SearchSourceFields {
    * {@link IndexPatternService}
    */
   index?: IndexPattern;
+  /**
+   * Search a specific shard, used for retrieving documents with known routing
+   */
+  routing?: string;
   searchAfter?: EsQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;

@@ -106,8 +106,8 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           indexPatternId: $scope.indexPattern.id,
           columns: $scope.columns,
           filterManager: getServices().filterManager,
-          // Use absolute time so that refreshing the page will work
-          timeRange: getServices().timefilter.getAbsoluteTime(),
+          // Each document is guaranteed to have a time field, this allows changing from one document to another
+          documentTime: $scope.flattenedRow[$scope.indexPattern.timeFieldName],
           routing: $scope.row._routing,
         });
       };

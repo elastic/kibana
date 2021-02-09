@@ -9,7 +9,7 @@
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { url } from '../../../../kibana_utils/common';
-import { esFilters, FilterManager, TimeRange } from '../../../../data/public';
+import { esFilters, FilterManager } from '../../../../data/public';
 
 /**
  * Helper function to generate an URL to a document in Discover's context view
@@ -19,12 +19,12 @@ export function getContextUrl(props: {
   indexPatternId: string;
   columns: string[];
   filterManager: FilterManager;
-  timeRange: TimeRange;
+  documentTime: string;
   /* Routing is optional, but allows the context query to be more optimized
    */
   routing: string | undefined;
 }) {
-  const { documentId, routing, indexPatternId, columns, filterManager, timeRange } = props;
+  const { documentId, routing, indexPatternId, columns, filterManager, documentTime } = props;
   const globalFilters = filterManager.getGlobalFilters();
   const appFilters = filterManager.getAppFilters();
 
@@ -32,12 +32,13 @@ export function getContextUrl(props: {
     url.encodeQuery({
       _g: rison.encode({
         filters: globalFilters || [],
-        time: timeRange,
       }),
       _a: rison.encode({
         routing,
         columns,
         filters: (appFilters || []).map(esFilters.disableFilter),
+        // App state for time won't affect the previously selected time filters
+        documentTime,
       }),
     }),
     { encode: false, sort: false }

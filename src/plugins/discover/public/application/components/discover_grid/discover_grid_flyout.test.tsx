@@ -21,16 +21,6 @@ import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_
 describe('Discover flyout', function () {
   setDocViewsRegistry(new DocViewsRegistry());
 
-  const timefilterMock = {
-    createFilter: jest.fn((indexPattern, timeRange) => ({
-      range: { from: timeRange.from, to: timeRange.to },
-    })),
-    getAbsoluteTime: jest.fn().mockReturnValue({
-      from: '1',
-      to: '2',
-    }),
-  };
-
   it('should be rendered correctly using an index pattern without timefield', async () => {
     const onClose = jest.fn();
     const component = mountWithIntl(
@@ -42,12 +32,7 @@ describe('Discover flyout', function () {
         onClose={onClose}
         onFilter={jest.fn()}
         onRemoveColumn={jest.fn()}
-        services={
-          ({
-            filterManager: createFilterManagerMock(),
-            timefilter: timefilterMock,
-          } as unknown) as DiscoverServices
-        }
+        services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
       />
     );
 
@@ -68,12 +53,7 @@ describe('Discover flyout', function () {
         onClose={onClose}
         onFilter={jest.fn()}
         onRemoveColumn={jest.fn()}
-        services={
-          ({
-            filterManager: createFilterManagerMock(),
-            timefilter: timefilterMock,
-          } as unknown) as DiscoverServices
-        }
+        services={({ filterManager: createFilterManagerMock() } as unknown) as DiscoverServices}
       />
     );
 
@@ -83,7 +63,7 @@ describe('Discover flyout', function () {
       `"#/doc/index-pattern-with-timefield-id/i?id=1"`
     );
     expect(actions.last().prop('href')).toMatchInlineSnapshot(
-      `"#/context/index-pattern-with-timefield-id/1?_g=(filters:!(),time:(from:'1',to:'2'))&_a=(columns:!(date),filters:!())"`
+      `"#/context/index-pattern-with-timefield-id/1?_g=(filters:!())&_a=(columns:!(date),filters:!())"`
     );
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(onClose).toHaveBeenCalled();

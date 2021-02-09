@@ -92,6 +92,7 @@ const testRecords = [
     value: {
       index: 'foo',
       id: '3',
+      routing: 'custom',
       source: {
         hello: 'world',
       },

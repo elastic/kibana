@@ -459,6 +459,7 @@ export class SearchSource {
       case 'index':
       case 'type':
       case 'highlightAll':
+      case 'routing':
         return key && data[key] == null && addToRoot(key, val);
       case 'searchAfter':
         return addToBody('search_after', val);

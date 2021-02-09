@@ -31,6 +31,7 @@ export function createIndexDocRecordsStream(
           [operation]: {
             _index: doc.index,
             _id: doc.id,
+            routing: doc.routing,
           },
         });
         return body;

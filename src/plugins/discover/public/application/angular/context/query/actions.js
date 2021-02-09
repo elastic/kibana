@@ -52,7 +52,7 @@ export function QueryActionsProvider(Promise) {
 
   const fetchAnchorRow = (state) => () => {
     const {
-      queryParameters: { indexPatternId, anchorId, sort, tieBreakerField, time, routing },
+      queryParameters: { indexPatternId, anchorId, sort, tieBreakerField, documentTime, routing },
     } = state;
 
     if (!tieBreakerField) {
@@ -70,7 +70,7 @@ export function QueryActionsProvider(Promise) {
         indexPatternId,
         anchorId,
         sort: [_.fromPairs([sort]), { [tieBreakerField]: sort[1] }],
-        timeRange: time,
+        documentTime,
         routing,
       })
     ).then(

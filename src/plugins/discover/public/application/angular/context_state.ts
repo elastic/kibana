@@ -16,7 +16,7 @@ import {
   BaseStateContainer,
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
-import { esFilters, FilterManager, Filter, Query, TimeRange } from '../../../../data/public';
+import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
 
 export interface AppState {
   /**
@@ -40,6 +40,10 @@ export interface AppState {
    */
   successorCount: number;
   query?: Query;
+  /**
+   * The timestamp of the anchor document
+   */
+  documentTime?: string;
 }
 
 interface GlobalState {
@@ -47,7 +51,6 @@ interface GlobalState {
    * Array of filters
    */
   filters: Filter[];
-  time: TimeRange;
 }
 
 interface GetStateParams {

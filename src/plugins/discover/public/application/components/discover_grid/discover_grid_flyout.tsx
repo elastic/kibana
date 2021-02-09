@@ -101,7 +101,7 @@ export function DiscoverGridFlyout({
                     indexPatternId: indexPattern.id,
                     columns,
                     filterManager: services.filterManager,
-                    timeRange: services.timefilter.getAbsoluteTime(),
+                    documentTime: indexPattern.flattenHit(hit)[indexPattern.timeFieldName!],
                     // @ts-expect-error for some reason this is not part of the public types
                     routing: hit._routing,
                   })}

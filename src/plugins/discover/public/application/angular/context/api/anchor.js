@@ -16,14 +16,19 @@ export function fetchAnchorProvider(
   useNewFieldsApi = false
 ) {
   return async function fetchAnchor(props) {
-    const { indexPatternId, anchorId, sort, timeRange, routing } = props;
+    const { indexPatternId, anchorId, sort, documentTime, routing } = props;
     const indexPattern = await indexPatterns.get(indexPatternId);
 
     const filters = [{ ids: { values: [anchorId] } }];
-    if (timeRange) {
+    if (documentTime) {
       // Use the time filter if available to improve performance. This is not always available
       // because in previous versions of Discover the URL was missing time
-      filters.push(timefilter.createFilter(indexPattern, timeRange));
+      filters.push(
+        timefilter.createFilter(indexPattern, {
+          from: documentTime,
+          to: documentTime,
+        })
+      );
     }
 
     searchSource

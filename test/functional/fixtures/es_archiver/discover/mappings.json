@@ -274,3 +274,32 @@
     }
   }
 }
+
+{
+  "type": "index",
+  "value": {
+    "index": "discover-routing-test",
+    "mappings": {
+      "_routing": {
+        "required": true
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "name": {
+          "type": "keyword"
+        },
+        "value": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "2"
+      }
+    }
+  }
+}

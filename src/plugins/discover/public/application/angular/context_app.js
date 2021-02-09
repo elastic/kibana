@@ -43,7 +43,7 @@ getAngularModule().directive('contextApp', function ContextApp() {
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
-      time: '=',
+      documentTime: '=',
       routing: '=',
     },
     template: contextAppTemplate,

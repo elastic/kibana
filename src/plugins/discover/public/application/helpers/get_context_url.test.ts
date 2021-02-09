@@ -20,11 +20,11 @@ describe('Get context url', () => {
       indexPatternId: 'ipId',
       columns: ['test1', 'test2'],
       filterManager,
-      timeRange: { from: 'now-7d', to: 'now', mode: 'relative' },
+      documentTime: '2021-02-10T20:01:01.000Z',
       routing: undefined,
     });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/docId?_g=(filters:!(),time:(from:now-7d,mode:relative,to:now))&_a=(columns:!(test1,test2),filters:!())"`
+      `"#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!())"`
     );
   });
 
@@ -34,11 +34,11 @@ describe('Get context url', () => {
       indexPatternId: 'ipId',
       columns: ['test1', 'test2'],
       filterManager,
-      timeRange: { from: 'now-7d', to: 'now', mode: 'relative' },
+      documentTime: '2021-02-10T20:01:01.000Z',
       routing: 'shard1',
     });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/docId?_g=(filters:!(),time:(from:now-7d,mode:relative,to:now))&_a=(columns:!(test1,test2),filters:!(),routing:shard1)"`
+      `"#/context/ipId/docId?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!(),routing:shard1)"`
     );
   });
 
@@ -48,11 +48,11 @@ describe('Get context url', () => {
       indexPatternId: 'ipId',
       columns: ['test1', 'test2'],
       filterManager,
-      timeRange: { from: 'now-7d', to: 'now', mode: 'relative' },
+      documentTime: '2021-02-10T20:01:01.000Z',
       routing: undefined,
     });
     expect(url).toMatchInlineSnapshot(
-      `"#/context/ipId/doc%20Id?_g=(filters:!(),time:(from:now-7d,mode:relative,to:now))&_a=(columns:!(test1,test2),filters:!())"`
+      `"#/context/ipId/doc%20Id?_g=(filters:!())&_a=(columns:!(test1,test2),documentTime:'2021-02-10T20:01:01.000Z',filters:!())"`
     );
   });
 });

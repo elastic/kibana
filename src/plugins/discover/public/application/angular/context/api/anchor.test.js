@@ -31,7 +31,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         expect(searchSourceStub.fetch.calledOnce).toBe(true);
@@ -43,7 +43,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         const setParentSpy = searchSourceStub.setParent;
@@ -57,7 +57,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         const setFieldSpy = searchSourceStub.setField;
@@ -70,7 +70,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         const setVersionSpy = searchSourceStub.setField.withArgs('version');
@@ -84,7 +84,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         const setSizeSpy = searchSourceStub.setField.withArgs('size');
@@ -98,7 +98,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         const setQuerySpy = searchSourceStub.setField.withArgs('filter');
@@ -128,12 +128,12 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'start', to: 'end' },
+        documentTime: 'start',
         routing: undefined,
       }).then(() => {
         expect(timefilterStub.createFilter.firstCall.args[1]).toEqual({
           from: 'start',
-          to: 'end',
+          to: 'start',
         });
       });
     });
@@ -143,7 +143,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         const setSortSpy = searchSourceStub.setField.withArgs('sort');
@@ -157,7 +157,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(() => {
         const setRoutingSpy = searchSourceStub.setField.withArgs('routing');
@@ -170,7 +170,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: 'shard',
       }).then(() => {
         const setRoutingSpy = searchSourceStub.setField.withArgs('routing');
@@ -186,7 +186,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then(
         () => {
@@ -205,7 +205,7 @@ describe('context app', function () {
         indexPatternId: 'INDEX_PATTERN_ID',
         anchorId: 'id',
         sort: [{ '@timestamp': 'desc' }, { _doc: 'desc' }],
-        timeRange: { from: 'now-7d', to: 'now' },
+        documentTime: '2021-02-10T20:01:01.000Z',
         routing: undefined,
       }).then((anchorDocument) => {
         expect(anchorDocument).toHaveProperty('property1', 'value1');

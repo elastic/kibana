@@ -300,6 +300,12 @@ describe('SearchSource', () => {
         expect(request).not.toHaveProperty('docvalue_fields');
       });
 
+      test('never includes routing in body', async () => {
+        searchSource.setField('routing', 'custom');
+        const request = await searchSource.getSearchRequestBody();
+        expect(request).not.toHaveProperty('routing');
+      });
+
       test('overrides computed docvalue fields with ones that are provided', async () => {
         searchSource.setField('index', ({
           ...indexPattern,

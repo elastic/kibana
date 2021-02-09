@@ -55,7 +55,6 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     startSync: startStateSync,
     stopSync: stopStateSync,
     appState,
-    globalState,
     getFilters,
     setFilters,
     setAppState,
@@ -67,8 +66,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     history: getServices().history(),
     toasts: getServices().core.notifications.toasts,
   });
-  this.state = { ...globalState.getState(), ...appState.getState() };
-  this.globalState = { ...globalState.getState() };
+  this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
   filterManager.setFilters(_.cloneDeep(getFilters()));

@@ -16,7 +16,7 @@ export function createInitialQueryParametersState(
     defaultStepSize,
     filters: [],
     indexPatternId: null,
-    time: null,
+    documentTime: null,
     routing: null,
     predecessorCount: 0,
     successorCount: 0,
