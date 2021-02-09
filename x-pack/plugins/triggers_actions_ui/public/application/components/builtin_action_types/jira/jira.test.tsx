@@ -84,7 +84,7 @@ describe('jira action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { summary: [] },
+      errors: { summary: [], labels: [] },
     });
   });
 
@@ -96,6 +96,23 @@ describe('jira action params validation', () => {
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         summary: ['Summary is required.'],
+        labels: [],
+      },
+    });
+  });
+
+  test('params validation fails when labels contain spaces', () => {
+    const actionParams = {
+      subActionParams: {
+        incident: { summary: 'some title', labels: ['label with spaces'] },
+        comments: [],
+      },
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        summary: [],
+        labels: ['Labels cannot contain spaces.'],
       },
     });
   });
