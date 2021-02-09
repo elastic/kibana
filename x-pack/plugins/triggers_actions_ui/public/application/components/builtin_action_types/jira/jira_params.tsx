@@ -184,6 +184,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
 
+  const areLabelsInvalid =
+    errors['subActionParams.incident.labels'] != null &&
+    errors['subActionParams.incident.labels'].length > 0 &&
+    incident.labels !== undefined;
+
   return (
     <Fragment>
       <>
@@ -304,6 +309,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                         defaultMessage: 'Labels',
                       }
                     )}
+                    error={errors['subActionParams.incident.labels'] as string[]}
+                    isInvalid={areLabelsInvalid}
                   >
                     <EuiComboBox
                       noSuggestions
@@ -331,6 +338,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                       }}
                       isClearable={true}
                       data-test-subj="labelsComboBox"
+                      isInvalid={areLabelsInvalid}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
