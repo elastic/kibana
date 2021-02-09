@@ -153,6 +153,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     risk_score: riskScore,
     tags,
     threat,
+    threat_indicator_path: threatIndicatorPath,
   } = rule;
 
   return {
@@ -179,6 +180,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     },
     falsePositives,
     threat: threat as Threats,
+    threatIndicatorPath: threatIndicatorPath ?? '',
   };
 };
 

@@ -1152,7 +1152,7 @@ describe('create rules schema', () => {
     });
   });
 
-  describe('threat_mapping', () => {
+  describe('threat_match', () => {
     test('You can set a threat query, index, mapping, filters when creating a rule', () => {
       const payload = getCreateThreatMatchRulesSchemaMock();
       const decoded = createRulesSchema.decode(payload);
