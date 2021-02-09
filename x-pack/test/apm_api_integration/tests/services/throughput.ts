@@ -10,7 +10,6 @@ import qs from 'querystring';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
-import { Coordinate } from '../../../../plugins/apm/typings/timeseries';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
