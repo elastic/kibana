@@ -25,7 +25,8 @@
   ],
   "optionalPlugins": [
     "home",
-    "savedObjectsTagging"
+    "savedObjectsTagging",
+    "charts"
   ],
   "ui": true,
   "server": true,

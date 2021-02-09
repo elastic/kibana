@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { useCallback, useMemo, useState } from 'react';
+import datemath from '@elastic/datemath';
+import moment from 'moment';
 import * as rt from 'io-ts';
-
+import { TimeRange as KibanaTimeRange } from '../../../../../../../src/plugins/data/public';
+import { TimeRange } from '../../../../common/time/time_range';
 import { useUrlState } from '../../../utils/use_url_state';
+import { useInterval } from '../../../hooks/use_interval';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../hooks/use_kibana_timefilter_time';
+import { decodeOrThrow } from '../../../../common/runtime_types';
 
-const autoRefreshRT = rt.union([
-  rt.type({
-    interval: rt.number,
-    isPaused: rt.boolean,
-  }),
-  rt.undefined,
-]);
+const autoRefreshRT = rt.type({
+  interval: rt.number,
+  isPaused: rt.boolean,
+});
+
+export type AutoRefresh = rt.TypeOf<typeof autoRefreshRT>;
+const urlAutoRefreshRT = rt.union([autoRefreshRT, rt.undefined]);
+const decodeAutoRefreshUrlState = decodeOrThrow(urlAutoRefreshRT);
+const defaultAutoRefreshState = {
+  isPaused: false,
+  interval: 30000,
+};
 
 export const stringTimeRangeRT = rt.type({
   startTime: rt.string,
@@ -31,6 +39,7 @@ export const stringTimeRangeRT = rt.type({
 export type StringTimeRange = rt.TypeOf<typeof stringTimeRangeRT>;
 
 const urlTimeRangeRT = rt.union([stringTimeRangeRT, rt.undefined]);
+const decodeTimeRangeUrlState = decodeOrThrow(urlTimeRangeRT);
 
 const TIME_RANGE_URL_STATE_KEY = 'timeRange';
 const AUTOREFRESH_URL_STATE_KEY = 'autoRefresh';
@@ -40,36 +49,102 @@ export const useLogAnalysisResultsUrlState = () => {
   const [getTime] = useKibanaTimefilterTime(TIME_DEFAULTS);
   const { from: start, to: end } = getTime();
 
-  const [timeRange, setTimeRange] = useUrlState({
-    defaultState: {
+  const defaultTimeRangeState = useMemo(() => {
+    return {
       startTime: start,
       endTime: end,
-    },
-    decodeUrlState: (value: unknown) =>
-      pipe(urlTimeRangeRT.decode(value), fold(constant(undefined), identity)),
+    };
+  }, [start, end]);
+
+  const [urlTimeRange, setUrlTimeRange] = useUrlState({
+    defaultState: defaultTimeRangeState,
+    decodeUrlState: decodeTimeRangeUrlState,
     encodeUrlState: urlTimeRangeRT.encode,
     urlStateKey: TIME_RANGE_URL_STATE_KEY,
     writeDefaultState: true,
   });
 
-  useSyncKibanaTimeFilterTime(TIME_DEFAULTS, { from: timeRange.startTime, to: timeRange.endTime });
+  // Numeric time range for querying APIs
+  const [queryTimeRange, setQueryTimeRange] = useState<{
+    value: TimeRange;
+    lastChangedTime: number;
+  }>(() => ({
+    value: stringToNumericTimeRange({ start: urlTimeRange.startTime, end: urlTimeRange.endTime }),
+    lastChangedTime: Date.now(),
+  }));
+
+  const handleQueryTimeRangeChange = useCallback(
+    ({ start: startTime, end: endTime }: { start: string; end: string }) => {
+      setQueryTimeRange({
+        value: stringToNumericTimeRange({ start: startTime, end: endTime }),
+        lastChangedTime: Date.now(),
+      });
+    },
+    [setQueryTimeRange]
+  );
+
+  const setTimeRange = useCallback(
+    (selectedTime: { start: string; end: string }) => {
+      setUrlTimeRange({
+        startTime: selectedTime.start,
+        endTime: selectedTime.end,
+      });
+      handleQueryTimeRangeChange(selectedTime);
+    },
+    [setUrlTimeRange, handleQueryTimeRangeChange]
+  );
+
+  const handleTimeFilterChange = useCallback(
+    (newTimeRange: KibanaTimeRange) => {
+      const { from, to } = newTimeRange;
+      setTimeRange({ start: from, end: to });
+    },
+    [setTimeRange]
+  );
+
+  useSyncKibanaTimeFilterTime(
+    TIME_DEFAULTS,
+    { from: urlTimeRange.startTime, to: urlTimeRange.endTime },
+    handleTimeFilterChange
+  );
 
   const [autoRefresh, setAutoRefresh] = useUrlState({
-    defaultState: {
-      isPaused: false,
-      interval: 30000,
-    },
-    decodeUrlState: (value: unknown) =>
-      pipe(autoRefreshRT.decode(value), fold(constant(undefined), identity)),
-    encodeUrlState: autoRefreshRT.encode,
+    defaultState: defaultAutoRefreshState,
+    decodeUrlState: decodeAutoRefreshUrlState,
+    encodeUrlState: urlAutoRefreshRT.encode,
     urlStateKey: AUTOREFRESH_URL_STATE_KEY,
     writeDefaultState: true,
   });
 
+  useInterval(
+    () => {
+      handleQueryTimeRangeChange({
+        start: urlTimeRange.startTime,
+        end: urlTimeRange.endTime,
+      });
+    },
+    autoRefresh.isPaused ? null : autoRefresh.interval
+  );
+
   return {
-    timeRange,
+    timeRange: queryTimeRange,
+    friendlyTimeRange: urlTimeRange,
     setTimeRange,
     autoRefresh,
     setAutoRefresh,
   };
 };
+
+const stringToNumericTimeRange = (timeRange: { start: string; end: string }): TimeRange => ({
+  startTime: moment(
+    datemath.parse(timeRange.start, {
+      momentInstance: moment,
+    })
+  ).valueOf(),
+  endTime: moment(
+    datemath.parse(timeRange.end, {
+      momentInstance: moment,
+      roundUp: true,
+    })
+  ).valueOf(),
+});
