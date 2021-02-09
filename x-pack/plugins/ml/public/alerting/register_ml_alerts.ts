@@ -21,8 +21,7 @@ export function registerMlAlerts(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      // TODO add the documentation link
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/ml-alerts.html`;
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/machine-learning/${docLinks.DOC_LINK_VERSION}/ml-configuring-alerts.html`;
     },
     alertParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
     validate: (alertParams: MlAnomalyDetectionAlertParams) => {
