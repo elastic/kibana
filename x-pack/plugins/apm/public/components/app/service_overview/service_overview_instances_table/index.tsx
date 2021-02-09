@@ -1,55 +1,55 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
-  asDuration,
+  asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../../services/rest/createCallApmApi';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { px, unit } from '../../../../style/variables';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
-import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
+import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
+import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
+import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
+import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
 type ServiceInstanceItem = ValuesType<
   APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances'>
 >;
 
 interface Props {
+  items?: ServiceInstanceItem[];
   serviceName: string;
+  status: FETCH_STATUS;
 }
 
-export function ServiceOverviewInstancesTable({ serviceName }: Props) {
-  const { agentName, transactionType } = useApmServiceContext();
-
-  const {
-    urlParams: { start, end },
-    uiFilters,
-  } = useUrlParams();
+export function ServiceOverviewInstancesTable({
+  items = [],
+  serviceName,
+  status,
+}: Props) {
+  const { agentName } = useApmServiceContext();
 
   const columns: Array<EuiBasicTableColumn<ServiceInstanceItem>> = [
     {
@@ -107,7 +107,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
           <SparkPlot
             color="euiColorVis1"
             series={latency?.timeseries}
-            valueLabel={asDuration(latency?.value)}
+            valueLabel={asMillisecondDuration(latency?.value)}
           />
         );
       },
@@ -197,31 +197,8 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
     },
   ];
 
-  const { data = [], status } = useFetcher(() => {
-    if (!start || !end || !transactionType) {
-      return;
-    }
-
-    return callApmApi({
-      endpoint:
-        'GET /api/apm/services/{serviceName}/service_overview_instances',
-      params: {
-        path: {
-          serviceName,
-        },
-        query: {
-          start,
-          end,
-          transactionType,
-          uiFilters: JSON.stringify(uiFilters),
-          numBuckets: 20,
-        },
-      },
-    });
-  }, [start, end, serviceName, transactionType, uiFilters]);
-
   // need top-level sortable fields for the managed table
-  const items = data.map((item) => ({
+  const tableItems = items.map((item) => ({
     ...item,
     latencyValue: item.latency?.value ?? 0,
     throughputValue: item.throughput?.value ?? 0,
@@ -250,7 +227,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
           >
             <EuiInMemoryTable
               columns={columns}
-              items={items}
+              items={tableItems}
               allowNeutralSort={false}
               loading={isLoading}
               pagination={{

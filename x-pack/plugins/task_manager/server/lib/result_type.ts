@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
@@ -37,6 +38,14 @@ export function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
 
 export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
   return !isOk(result);
+}
+
+export function tryAsResult<T, E>(fn: () => T): Result<T, E> {
+  try {
+    return asOk(fn());
+  } catch (e) {
+    return asErr(e);
+  }
 }
 
 export async function promiseResult<T, E>(future: Promise<T>): Promise<Result<T, E>> {

@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
+import uuid from 'uuid/v4';
 import semverParse from 'semver/functions/parse';
 import semverDiff from 'semver/functions/diff';
 import semverLte from 'semver/functions/lte';
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { AgentType, Agent, AgentSOAttributes } from '../../types';
+import { AgentType, Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import * as APIKeyService from '../api_keys';
 import { appContextService } from '../app_context';
 
@@ -20,26 +22,46 @@ export async function enroll(
   soClient: SavedObjectsClientContract,
   type: AgentType,
   agentPolicyId: string,
-  metadata?: { local: any; userProvided: any },
-  sharedId?: string
+  metadata?: { local: any; userProvided: any }
 ): Promise<Agent> {
   const agentVersion = metadata?.local?.elastic?.agent?.version;
   validateAgentVersion(agentVersion);
 
-  const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+    const esClient = appContextService.getInternalUserESClient();
 
-  if (existingAgent && existingAgent.active === true) {
-    throw Boom.badRequest('Impossible to enroll an already active agent');
+    const agentId = uuid();
+    const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agentId);
+    const fleetServerAgent: FleetServerAgent = {
+      active: true,
+      policy_id: agentPolicyId,
+      type,
+      enrolled_at: new Date().toISOString(),
+      user_provided_metadata: metadata?.userProvided ?? {},
+      local_metadata: metadata?.local ?? {},
+      access_api_key_id: accessAPIKey.id,
+    };
+    await esClient.create({
+      index: AGENTS_INDEX,
+      body: fleetServerAgent,
+      id: agentId,
+      refresh: 'wait_for',
+    });
+
+    return {
+      id: agentId,
+      current_error_events: [],
+      packages: [],
+      ...fleetServerAgent,
+      access_api_key: accessAPIKey.key,
+    } as Agent;
   }
 
-  const enrolledAt = new Date().toISOString();
-
   const agentData: AgentSOAttributes = {
-    shared_id: sharedId,
     active: true,
     policy_id: agentPolicyId,
     type,
-    enrolled_at: enrolledAt,
+    enrolled_at: new Date().toISOString(),
     user_provided_metadata: metadata?.userProvided ?? {},
     local_metadata: metadata?.local ?? {},
     current_error_events: undefined,
@@ -48,25 +70,11 @@ export async function enroll(
     default_api_key: undefined,
   };
 
-  let agent;
-  if (existingAgent) {
-    await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, existingAgent.id, agentData, {
+  const agent = savedObjectToAgent(
+    await soClient.create<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentData, {
       refresh: false,
-    });
-    agent = {
-      ...existingAgent,
-      ...agentData,
-      user_provided_metadata: metadata?.userProvided ?? {},
-      local_metadata: metadata?.local ?? {},
-      current_error_events: [],
-    } as Agent;
-  } else {
-    agent = savedObjectToAgent(
-      await soClient.create<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentData, {
-        refresh: false,
-      })
-    );
-  }
+    })
+  );
 
   const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id);
 
@@ -75,22 +83,6 @@ export async function enroll(
   });
 
   return { ...agent, access_api_key: accessAPIKey.key };
-}
-
-async function getAgentBySharedId(soClient: SavedObjectsClientContract, sharedId: string) {
-  const response = await soClient.find<AgentSOAttributes>({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    searchFields: ['shared_id'],
-    search: sharedId,
-  });
-
-  const agents = response.saved_objects.map(savedObjectToAgent);
-
-  if (agents.length > 0) {
-    return agents[0];
-  }
-
-  return null;
 }
 
 export function validateAgentVersion(

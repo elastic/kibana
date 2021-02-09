@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -85,6 +86,10 @@ export class TaskPool {
     // this should happen less often than the actual changes to the worker queue
     // so is lighter than emitting the load every time we add/remove a task from the queue
     this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
+    // cancel expired task whenever a call is made to check for capacity
+    // this ensures that we don't end up with a queue of hung tasks causing both
+    // the poller and the pool from hanging due to lack of capacity
+    this.cancelExpiredTasks();
     return this.maxWorkers - this.occupiedWorkers;
   }
 
@@ -96,19 +101,7 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public run = (tasks: TaskRunner[]) => {
-    this.cancelExpiredTasks();
-    return this.attemptToRun(tasks);
-  };
-
-  public cancelRunningTasks() {
-    this.logger.debug('Cancelling running tasks.');
-    for (const task of this.running) {
-      this.cancelTask(task);
-    }
-  }
-
-  private async attemptToRun(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
+  public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       performance.mark('attemptToRun_start');
@@ -135,13 +128,20 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {
-        return this.attemptToRun(leftOverTasks);
+        return this.run(leftOverTasks);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
     } else if (!this.availableWorkers) {
       return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
+  };
+
+  public cancelRunningTasks() {
+    this.logger.debug('Cancelling running tasks.');
+    for (const task of this.running) {
+      this.cancelTask(task);
+    }
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {

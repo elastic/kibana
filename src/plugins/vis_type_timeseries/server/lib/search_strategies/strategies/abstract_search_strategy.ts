@@ -1,35 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type {
-  RequestHandlerContext,
-  FakeRequest,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import type { FakeRequest, IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
+
+import { indexPatterns, IndexPatternsFetcher } from '../../../../../data/server';
 
 import type { Framework } from '../../../plugin';
-import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
-import type { VisPayload } from '../../../../common/types';
-import type { IndexPatternsService } from '../../../../../data/common';
-import { indexPatterns } from '../../../../../data/server';
-import { SanitizedFieldType } from '../../../../common/types';
+import type { FieldSpec, IndexPatternsService } from '../../../../../data/common';
+import type { VisPayload, SanitizedFieldType } from '../../../../common/types';
+import type { VisTypeTimeseriesRequestHandlerContext } from '../../../types';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -38,7 +22,7 @@ import { SanitizedFieldType } from '../../../../common/types';
  * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
  */
 export interface ReqFacade<T = unknown> extends FakeRequest {
-  requestContext: RequestHandlerContext;
+  requestContext: VisTypeTimeseriesRequestHandlerContext;
   framework: Framework;
   payload: T;
   pre: {
@@ -50,11 +34,15 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   getIndexPatternsService: () => Promise<IndexPatternsService>;
 }
 
-const toSanitizedFieldType = (fields: IFieldType[]) => {
+export const toSanitizedFieldType = (fields: FieldSpec[]) => {
   return fields
-    .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
+    .filter(
+      (field) =>
+        // Make sure to only include mapped fields, e.g. no index pattern runtime fields
+        !field.runtimeField && field.aggregatable && !indexPatterns.isNestedField(field)
+    )
     .map(
-      (field: IFieldType) =>
+      (field) =>
         ({
           name: field.name,
           label: field.customLabel ?? field.name,
@@ -69,8 +57,8 @@ export abstract class AbstractSearchStrategy {
 
     bodies.forEach((body) => {
       requests.push(
-        req.requestContext
-          .search!.search(
+        req.requestContext.search
+          .search(
             {
               indexType,
               params: {
@@ -109,7 +97,7 @@ export abstract class AbstractSearchStrategy {
 
     return toSanitizedFieldType(
       kibanaIndexPattern
-        ? kibanaIndexPattern.fields.getAll()
+        ? kibanaIndexPattern.getNonScriptedFields()
         : await indexPatternsFetcher!.getFieldsForWildcard({
             pattern: indexPattern,
             fieldCapsOptions: { allow_no_indices: true },

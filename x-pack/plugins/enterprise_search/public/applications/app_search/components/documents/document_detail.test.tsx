@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+
 import '../../../__mocks__/react_router_history.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
@@ -102,11 +104,5 @@ describe('DocumentDetail', () => {
     button.simulate('click');
 
     expect(actions.deleteDocument).toHaveBeenCalledWith('1');
-  });
-
-  it('correctly decodes document IDs', () => {
-    (useParams as jest.Mock).mockReturnValueOnce({ documentId: 'hello%20world%20%26%3F!' });
-    const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
-    expect(wrapper.find('h1').text()).toEqual('Document: hello world &?!');
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './datapanel.scss';
@@ -100,6 +101,8 @@ export function IndexPatternDataPanel({
   changeIndexPattern,
   charts,
   showNoDataPopover,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -193,6 +196,8 @@ export function IndexPatternDataPanel({
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
         />
       )}
     </>
@@ -241,6 +246,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   data,
   existingFields,
   charts,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
@@ -420,6 +427,23 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
 
+  const checkFieldExists = useCallback(
+    (field) =>
+      field.type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field.name),
+    [existingFields, currentIndexPattern.title]
+  );
+
+  const { nameFilter, typeFilter } = localState;
+
+  const filter = useMemo(
+    () => ({
+      nameFilter,
+      typeFilter,
+    }),
+    [nameFilter, typeFilter]
+  );
+
   const fieldProps = useMemo(
     () => ({
       core,
@@ -498,8 +522,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onChange={(e) => {
                 setLocalState({ ...localState, nameFilter: e.target.value });
               }}
-              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
-                defaultMessage: 'Search fields',
+              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
+                defaultMessage: 'Search field names',
+                description: 'Search the list of fields in the index pattern for the provided text',
               })}
               aria-describedby={fieldSearchDescriptionId}
             />
@@ -579,20 +604,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
-            exists={(field) =>
-              field.type === 'document' ||
-              fieldExists(existingFields, currentIndexPattern.title, field.name)
-            }
+            exists={checkFieldExists}
             fieldProps={fieldProps}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={!!hasSyncedExistingFields}
-            filter={{
-              nameFilter: localState.nameFilter,
-              typeFilter: localState.typeFilter,
-            }}
+            filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
             existFieldsInIndex={!!allFields.length}
+            dropOntoWorkspace={dropOntoWorkspace}
+            hasSuggestionForField={hasSuggestionForField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

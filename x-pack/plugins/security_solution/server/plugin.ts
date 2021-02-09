@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
 
@@ -34,7 +34,7 @@ import { ListPluginSetup } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { ILicense, LicensingPluginStart } from '../../licensing/server';
-import { FleetStartContract, ExternalCallback } from '../../fleet/server';
+import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -46,7 +46,7 @@ import { isNotificationAlertExecutor } from './lib/detection_engine/notification
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
-import { createConfig$, ConfigType } from './config';
+import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
@@ -64,7 +64,7 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
-import { AppRequestContext } from './types';
+import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
@@ -119,8 +119,7 @@ const securitySubPlugins = [
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
-  private readonly config$: Observable<ConfigType>;
-  private config?: ConfigType;
+  private readonly config: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private setupPlugins?: SetupPlugins;
@@ -137,7 +136,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get();
-    this.config$ = createConfig$(context);
+    this.config = createConfig(context);
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
     this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
@@ -146,13 +145,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('plugin initialized');
   }
 
-  public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
     this.setupPlugins = plugins;
 
-    const config = await this.config$.pipe(first()).toPromise();
-    this.config = config;
-    const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
+    const config = this.config;
+    const globalConfig = this.context.config.legacy.get();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
@@ -169,10 +167,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       config: (): Promise<ConfigType> => Promise.resolve(config),
     };
 
-    const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(
+    const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
-      (context, request, response): AppRequestContext => ({
+      (context, request, response) => ({
         getAppClient: () => this.appClientFactory.create(request),
       })
     );
@@ -331,27 +329,42 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins) {
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
-
+    const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     let manifestManager: ManifestManager | undefined;
-    let registerIngestCallback: ((...args: ExternalCallback) => void) | undefined;
 
-    const exceptionListsStartEnabled = () => {
-      return this.lists && plugins.taskManager && plugins.fleet;
-    };
+    this.licensing$ = plugins.licensing.license$;
 
-    if (exceptionListsStartEnabled()) {
-      const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
+    if (this.lists && plugins.taskManager && plugins.fleet) {
+      // Exceptions, Artifacts and Manifests start
+      const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = new ArtifactClient(savedObjectsClient);
 
-      registerIngestCallback = plugins.fleet!.registerExternalCallback;
       manifestManager = new ManifestManager({
         savedObjectsClient,
         artifactClient,
         exceptionListClient,
-        packagePolicyService: plugins.fleet!.packagePolicyService,
+        packagePolicyService: plugins.fleet.packagePolicyService,
         logger: this.logger,
         cache: this.exceptionsCache,
       });
+
+      if (this.manifestTask) {
+        this.manifestTask.start({
+          taskManager: plugins.taskManager,
+        });
+      } else {
+        this.logger.debug('User artifacts task not available.');
+      }
+
+      // License related start
+      licenseService.start(this.licensing$);
+      this.policyWatcher = new PolicyWatcher(
+        plugins.fleet!.packagePolicyService,
+        core.savedObjects,
+        core.elasticsearch,
+        this.logger
+      );
+      this.policyWatcher.start(licenseService);
     }
 
     this.endpointAppContextService.start({
@@ -368,25 +381,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
       licenseService,
+      exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
-    if (exceptionListsStartEnabled() && this.manifestTask) {
-      this.manifestTask.start({
-        taskManager: plugins.taskManager!,
-      });
-    } else {
-      this.logger.debug('User artifacts task not available.');
-    }
-
     this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
-    this.licensing$ = plugins.licensing.license$;
-    licenseService.start(this.licensing$);
-    this.policyWatcher = new PolicyWatcher(
-      plugins.fleet!.packagePolicyService,
-      core.savedObjects,
-      this.logger
-    );
-    this.policyWatcher.start(licenseService);
     return {};
   }
 

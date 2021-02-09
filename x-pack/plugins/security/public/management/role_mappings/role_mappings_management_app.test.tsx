@@ -1,15 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./role_mappings_grid', () => ({
-  RoleMappingsGridPage: (props: any) => `Role Mappings Page: ${JSON.stringify(props)}`,
+  RoleMappingsGridPage: (props: any) =>
+    // `docLinks` object is too big to include into test snapshot, so we just check its existence.
+    `Role Mappings Page: ${JSON.stringify({
+      ...props,
+      docLinks: props.docLinks ? {} : undefined,
+    })}`,
 }));
 
 jest.mock('./edit_role_mapping', () => ({
-  EditRoleMappingPage: (props: any) => `Role Mapping Edit Page: ${JSON.stringify(props)}`,
+  EditRoleMappingPage: (props: any) =>
+    // `docLinks` object is too big to include into test snapshot, so we just check its existence.
+    `Role Mapping Edit Page: ${JSON.stringify({
+      ...props,
+      docLinks: props.docLinks ? {} : undefined,
+    })}`,
 }));
 
 import { roleMappingsManagementApp } from './role_mappings_management_app';
@@ -54,7 +65,7 @@ describe('roleMappingsManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `/`, text: 'Role Mappings' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"docLinks":{"mappingRoles":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping-roles.html","createRoleMapping":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-put-role-mapping.html","createRoleMappingTemplates":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-put-role-mapping.html#_role_templates","roleMappingFieldRules":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/role-mapping-resources.html#mapping-roles-rule-field"},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
+        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}}}
       </div>
     `);
 
@@ -73,7 +84,7 @@ describe('roleMappingsManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{"mappingRoles":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping-roles.html","createRoleMapping":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-put-role-mapping.html","createRoleMappingTemplates":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-put-role-mapping.html#_role_templates","roleMappingFieldRules":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/role-mapping-resources.html#mapping-roles-rule-field"},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
+        Role Mapping Edit Page: {"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}}}
       </div>
     `);
 
@@ -94,7 +105,7 @@ describe('roleMappingsManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{"mappingRoles":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/mapping-roles.html","createRoleMapping":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-put-role-mapping.html","createRoleMappingTemplates":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-api-put-role-mapping.html#_role_templates","roleMappingFieldRules":"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/role-mapping-resources.html#mapping-roles-rule-field"},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}}}
+        Role Mapping Edit Page: {"name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}}}
       </div>
     `);
 

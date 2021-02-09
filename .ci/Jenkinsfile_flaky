@@ -5,11 +5,10 @@ kibanaLibrary.load()
 
 def CI_GROUP_PARAM = params.CI_GROUP
 
-// Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke', or 'all:serverMocha'
+// Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke'
 def JOB_PARTS = CI_GROUP_PARAM.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
 def JOB = JOB_PARTS[1]
-def NEED_BUILD = JOB != 'serverMocha'
 def CI_GROUP = JOB_PARTS.size() > 2 ? JOB_PARTS[2] : ''
 def EXECUTIONS = params.NUMBER_EXECUTIONS.toInteger()
 def AGENT_COUNT = getAgentCount(EXECUTIONS)
@@ -31,15 +30,13 @@ kibanaPipeline(timeoutMinutes: 180) {
         print "Agent ${agentNumberInside} - ${agentExecutions} executions"
 
         workers.functional('flaky-test-runner', {
-          if (NEED_BUILD) {
-            if (!IS_XPACK) {
-              kibanaPipeline.buildOss()
-              if (CI_GROUP == '1') {
-                runbld("./test/scripts/jenkins_build_kbn_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
-              }
-            } else {
-              kibanaPipeline.buildXpack()
+          if (!IS_XPACK) {
+            kibanaPipeline.buildOss()
+            if (CI_GROUP == '1') {
+              runbld("./test/scripts/jenkins_build_kbn_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
             }
+          } else {
+            kibanaPipeline.buildXpack()
           }
         }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
       }
@@ -60,17 +57,7 @@ kibanaPipeline(timeoutMinutes: 180) {
 
 def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
-    if (job == 'serverMocha') {
-      return kibanaPipeline.functionalTestProcess('serverMocha', {
-        kibanaPipeline.bash(
-          """
-            source src/dev/ci_setup/setup_env.sh
-            node scripts/mocha
-          """,
-          "run `node scripts/mocha`"
-        )
-      })
-    } else if (job == 'accessibility') {
+    if (job == 'accessibility') {
       return kibanaPipeline.functionalTestProcess('kibana-accessibility', './test/scripts/jenkins_accessibility.sh')
     } else if (job == 'firefoxSmoke') {
       return kibanaPipeline.functionalTestProcess('firefoxSmoke', './test/scripts/jenkins_firefox_smoke.sh')

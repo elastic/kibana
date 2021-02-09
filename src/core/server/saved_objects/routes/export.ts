@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
 import stringify from 'json-stable-stringify';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
-import { IRouter } from '../../http';
+import { IRouter, KibanaRequest } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
 import {
@@ -29,7 +18,7 @@ import {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportError,
 } from '../export';
-import { validateTypes, validateObjects } from './utils';
+import { validateTypes, validateObjects, catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -89,7 +78,11 @@ const validateOptions = (
     includeReferencesDeep,
     search,
   }: ExportOptions,
-  { exportSizeLimit, supportedTypes }: { exportSizeLimit: number; supportedTypes: string[] }
+  {
+    exportSizeLimit,
+    supportedTypes,
+    request,
+  }: { exportSizeLimit: number; supportedTypes: string[]; request: KibanaRequest }
 ): EitherExportOptions => {
   const hasTypes = (types?.length ?? 0) > 0;
   const hasObjects = (objects?.length ?? 0) > 0;
@@ -117,6 +110,7 @@ const validateOptions = (
       objects: objects!,
       excludeExportDetails,
       includeReferencesDeep,
+      request,
     };
   } else {
     const validationError = validateTypes(types!, supportedTypes);
@@ -129,6 +123,7 @@ const validateOptions = (
       search,
       excludeExportDetails,
       includeReferencesDeep,
+      request,
     };
   }
 };
@@ -168,7 +163,7 @@ export const registerExportRoute = (
         }),
       },
     },
-    router.handleLegacyErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, req, res) => {
       const cleaned = cleanOptions(req.body);
       const supportedTypes = context.core.savedObjects.typeRegistry
         .getImportableAndExportableTypes()
@@ -176,6 +171,7 @@ export const registerExportRoute = (
       let options: EitherExportOptions;
       try {
         options = validateOptions(cleaned, {
+          request: req,
           exportSizeLimit: maxImportExportSize,
           supportedTypes,
         });

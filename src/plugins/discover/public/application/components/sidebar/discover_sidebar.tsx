@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { UiCounterMetricType } from '@kbn/analytics';
 import {
   EuiAccordion,
   EuiFlexItem,
@@ -35,101 +24,49 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
-import { IndexPatternAttributes } from '../../../../../data/common';
-import { SavedObject } from '../../../../../../core/types';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
-import { IndexPatternField, IndexPattern } from '../../../../../data/public';
+import { IndexPatternField } from '../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
-import { DiscoverServices } from '../../../build_services';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 
-export interface DiscoverSidebarProps {
-  /**
-   * Determines whether add/remove buttons are displayed not only when focused
-   */
-  alwaysShowActionButtons?: boolean;
-  /**
-   * the selected columns displayed in the doc table in discover
-   */
-  columns: string[];
-  /**
-   * a statistics of the distribution of fields in the given hits
-   */
-  fieldCounts: Record<string, number>;
+export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
    */
   fieldFilter: FieldFilterState;
   /**
-   * hits fetched from ES, displayed in the doc table
-   */
-  hits: ElasticSearchHit[];
-  /**
-   * List of available index patterns
-   */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-  /**
-   * Callback function when selecting a field
-   */
-  onAddField: (fieldName: string) => void;
-  /**
-   * Callback function when adding a filter from sidebar
-   */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  /**
-   * Callback function when removing a field
-   * @param fieldName
-   */
-  onRemoveField: (fieldName: string) => void;
-  /**
-   * Currently selected index pattern
-   */
-  selectedIndexPattern?: IndexPattern;
-  /**
-   * Discover plugin services;
-   */
-  services: DiscoverServices;
-  /**
    * Change current state of fieldFilter
    */
   setFieldFilter: (next: FieldFilterState) => void;
-  /**
-   * Callback function to select another index pattern
-   */
-  setIndexPattern: (id: string) => void;
-  /**
-   * Metric tracking function
-   * @param metricType
-   * @param eventName
-   */
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  /**
-   * Shows index pattern and a button that displays the sidebar in a flyout
-   */
-  useFlyout?: boolean;
 }
 
 export function DiscoverSidebar({
   alwaysShowActionButtons = false,
   columns,
+  config,
   fieldCounts,
   fieldFilter,
   hits,
   indexPatternList,
+  indexPatterns,
   onAddField,
   onAddFilter,
   onRemoveField,
   selectedIndexPattern,
   services,
+  setAppState,
   setFieldFilter,
-  setIndexPattern,
+  state,
   trackUiMetric,
+  useNewFieldsApi = false,
   useFlyout = false,
+  unmappedFieldsConfig,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
+
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
@@ -149,18 +86,31 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-
   const {
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
-  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter), [
-    fields,
-    columns,
-    popularLimit,
-    fieldCounts,
-    fieldFilter,
-  ]);
+  } = useMemo(
+    () =>
+      groupFields(
+        fields,
+        columns,
+        popularLimit,
+        fieldCounts,
+        fieldFilter,
+        useNewFieldsApi,
+        !!unmappedFieldsConfig?.showUnmappedFields
+      ),
+    [
+      fields,
+      columns,
+      popularLimit,
+      fieldCounts,
+      fieldFilter,
+      useNewFieldsApi,
+      unmappedFieldsConfig?.showUnmappedFields,
+    ]
+  );
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];
@@ -173,6 +123,27 @@ export function DiscoverSidebar({
     }
     return result;
   }, [fields]);
+
+  const multiFields = useMemo(() => {
+    if (!useNewFieldsApi || !fields) {
+      return undefined;
+    }
+    const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
+    fields.forEach((field) => {
+      const parent = field.spec?.subType?.multi?.parent;
+      if (!parent) {
+        return;
+      }
+      const multiField = {
+        field,
+        isSelected: selectedFields.includes(field),
+      };
+      const value = map.get(parent) ?? [];
+      value.push(multiField);
+      map.set(parent, value);
+    });
+    return map;
+  }, [fields, useNewFieldsApi, selectedFields]);
 
   if (!selectedIndexPattern || !fields) {
     return null;
@@ -188,9 +159,13 @@ export function DiscoverSidebar({
         })}
       >
         <DiscoverIndexPattern
+          config={config}
           selectedIndexPattern={selectedIndexPattern}
-          setIndexPattern={setIndexPattern}
           indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+          indexPatterns={indexPatterns}
+          state={state}
+          setAppState={setAppState}
+          useNewFieldsApi={useNewFieldsApi}
         />
       </section>
     );
@@ -214,9 +189,13 @@ export function DiscoverSidebar({
       >
         <EuiFlexItem grow={false}>
           <DiscoverIndexPattern
+            config={config}
             selectedIndexPattern={selectedIndexPattern}
-            setIndexPattern={setIndexPattern}
             indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+            indexPatterns={indexPatterns}
+            state={state}
+            setAppState={setAppState}
+            useNewFieldsApi={useNewFieldsApi}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -225,6 +204,9 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              useNewFieldsApi={useNewFieldsApi}
+              onChangeUnmappedFields={unmappedFieldsConfig?.onChangeUnmappedFields}
+              showUnmappedFields={unmappedFieldsConfig?.showUnmappedFieldsDefaultValue}
             />
           </form>
         </EuiFlexItem>
@@ -278,6 +260,7 @@ export function DiscoverSidebar({
                                 getDetails={getDetailsByField}
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
+                                multiFields={multiFields?.get(field.name)}
                               />
                             </li>
                           );
@@ -338,6 +321,7 @@ export function DiscoverSidebar({
                                 onAddFilter={onAddFilter}
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
+                                multiFields={multiFields?.get(field.name)}
                               />
                             </li>
                           );
@@ -366,6 +350,7 @@ export function DiscoverSidebar({
                             onAddFilter={onAddFilter}
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
+                            multiFields={multiFields?.get(field.name)}
                           />
                         </li>
                       );

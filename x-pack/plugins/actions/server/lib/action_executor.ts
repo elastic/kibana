@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
@@ -12,7 +14,6 @@ import {
   GetServicesFunction,
   RawAction,
   PreConfiguredAction,
-  ProxySettings,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceStart } from '../../../spaces/server';
@@ -33,7 +34,6 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
-  proxySettings?: ProxySettings;
 }
 
 export interface ExecuteOptions<Source = unknown> {
@@ -87,7 +87,6 @@ export class ActionExecutor {
       eventLogger,
       preconfiguredActions,
       getActionsClientWithRequest,
-      proxySettings,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -145,7 +144,6 @@ export class ActionExecutor {
         params: validatedParams,
         config: validatedConfig,
         secrets: validatedSecrets,
-        proxySettings,
       });
     } catch (err) {
       rawResult = {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
@@ -20,7 +21,7 @@ import {
   getPrePackagedTimelineStatus,
 } from '../../../pages/detection_engine/rules/helpers';
 
-type Func = () => void;
+type Func = () => Promise<void>;
 export type CreatePreBuiltRules = () => Promise<boolean>;
 
 interface ReturnPrePackagedTimelines {
@@ -262,8 +263,14 @@ export const usePrePackagedRules = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canUserCRUD, hasIndexWrite, isAuthenticated, hasEncryptionKey, isSignalIndexExists]);
+  }, [
+    canUserCRUD,
+    hasIndexWrite,
+    isAuthenticated,
+    hasEncryptionKey,
+    isSignalIndexExists,
+    dispatchToaster,
+  ]);
 
   const prePackagedRuleStatus = useMemo(
     () =>

@@ -1,9 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { LegacyScopedClusterClient, IRouter } from 'src/core/server';
+
+import type {
+  LegacyScopedClusterClient,
+  ILegacyScopedClusterClient,
+  IRouter,
+  RequestHandlerContext,
+} from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { CloudSetup } from '../../cloud/server';
@@ -20,7 +27,7 @@ export interface Dependencies {
 }
 
 export interface RouteDependencies {
-  router: IRouter;
+  router: SnapshotRestoreRouter;
   license: License;
   config: {
     isSlmEnabled: boolean;
@@ -50,3 +57,22 @@ export interface ResolveIndexResponseFromES {
 }
 
 export type CallAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
+
+/**
+ * @internal
+ */
+export interface SnapshotRestoreContext {
+  client: ILegacyScopedClusterClient;
+}
+
+/**
+ * @internal
+ */
+export interface SnapshotRestoreRequestHandlerContext extends RequestHandlerContext {
+  snapshotRestore: SnapshotRestoreContext;
+}
+
+/**
+ * @internal
+ */
+export type SnapshotRestoreRouter = IRouter<SnapshotRestoreRequestHandlerContext>;

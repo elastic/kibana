@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  ILegacyScopedClusterClient,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
 import { Agent } from '../../../../../fleet/common/types/models';
@@ -73,6 +78,7 @@ const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: stri
 export async function getAgentPolicySummary(
   endpointAppContext: EndpointAppContext,
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   packageName: string,
   policyId?: string,
   pageSize: number = 1000
@@ -83,6 +89,7 @@ export async function getAgentPolicySummary(
       await agentVersionsMap(
         endpointAppContext,
         soClient,
+        esClient,
         `${agentQuery} AND ${AGENT_SAVED_OBJECT_TYPE}.policy_id:${policyId}`,
         pageSize
       )
@@ -90,13 +97,14 @@ export async function getAgentPolicySummary(
   }
 
   return transformAgentVersionMap(
-    await agentVersionsMap(endpointAppContext, soClient, agentQuery, pageSize)
+    await agentVersionsMap(endpointAppContext, soClient, esClient, agentQuery, pageSize)
   );
 }
 
 export async function agentVersionsMap(
   endpointAppContext: EndpointAppContext,
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   kqlQuery: string,
   pageSize: number = 1000
 ): Promise<Map<string, number>> {
@@ -115,7 +123,7 @@ export async function agentVersionsMap(
   while (hasMore) {
     const queryResult = await endpointAppContext.service
       .getAgentService()!
-      .listAgents(soClient, searchOptions(page++));
+      .listAgents(soClient, esClient, searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { once } from 'lodash';
 import { throwError, Subscription } from 'rxjs';
 import { tap, finalize, catchError, filter, take, skip } from 'rxjs/operators';
 import {
@@ -14,7 +16,6 @@ import {
   IKibanaSearchRequest,
   SearchSessionState,
 } from '../../../../../src/plugins/data/public';
-import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
@@ -88,10 +89,14 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    return pollSearch(search, { ...options, abortSignal: combinedSignal }).pipe(
+    const cancel = once(() => {
+      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+    });
+
+    return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
       tap((response) => (id = response.id)),
-      catchError((e: AbortError) => {
-        if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+      catchError((e: Error) => {
+        cancel();
         return throwError(this.handleSearchError(e, timeoutSignal, options));
       }),
       finalize(() => {

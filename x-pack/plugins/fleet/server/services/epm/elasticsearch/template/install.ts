@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -16,7 +17,13 @@ import {
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
-import { generateMappings, generateTemplateName, getTemplate } from './template';
+import {
+  generateMappings,
+  generateTemplateName,
+  generateTemplateIndexPattern,
+  getTemplate,
+  getTemplatePriority,
+} from './template';
 import { getAsset, getPathParts } from '../../archive';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
@@ -292,6 +299,9 @@ export async function installTemplate({
 }): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataStream);
+  const templateIndexPattern = generateTemplateIndexPattern(dataStream);
+  const templatePriority = getTemplatePriority(dataStream);
+
   let pipelineName;
   if (dataStream.ingest_pipeline) {
     pipelineName = getPipelineNameForInstallation({
@@ -309,11 +319,12 @@ export async function installTemplate({
 
   const template = getTemplate({
     type: dataStream.type,
-    templateName,
+    templateIndexPattern,
     mappings,
     pipelineName,
     packageName,
     composedOfTemplates,
+    templatePriority,
     ilmPolicy: dataStream.ilm_policy,
     hidden: dataStream.hidden,
   });

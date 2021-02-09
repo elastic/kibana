@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { take } from 'rxjs/operators';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -26,10 +27,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     this.initContext = initContext;
   }
 
-  public async setup(core: CoreSetup, plugins: {}): Promise<ObservabilityPluginSetup> {
-    const config$ = this.initContext.config.create<ObservabilityConfig>();
-
-    const config = await config$.pipe(take(1)).toPromise();
+  public setup(core: CoreSetup, plugins: {}): ObservabilityPluginSetup {
+    const config = this.initContext.config.get<ObservabilityConfig>();
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 

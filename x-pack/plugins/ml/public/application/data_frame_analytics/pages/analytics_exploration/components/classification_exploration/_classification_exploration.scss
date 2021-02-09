@@ -15,7 +15,7 @@
   and just uses a legacy approach for a two column layout so we don't break IE11.
 */
 .mlDataFrameAnalyticsClassification__confusionMatrix:after {
-  content: "";
+  content: '';
   display: table;
   clear: both;
 }

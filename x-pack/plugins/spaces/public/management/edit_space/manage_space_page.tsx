@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,7 +25,7 @@ import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { KibanaFeature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { SpacesManager } from '../../spaces_manager';
-import { SecureSpaceMessage, UnauthorizedPrompt } from '../components';
+import { UnauthorizedPrompt } from '../components';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
@@ -39,7 +41,6 @@ interface Props {
   spaceId?: string;
   onLoadSpace?: (space: Space) => void;
   capabilities: Capabilities;
-  securityEnabled: boolean;
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
@@ -107,7 +108,6 @@ export class ManageSpacePage extends Component<Props, State> {
     return (
       <Fragment>
         <EuiPageContentBody>{content}</EuiPageContentBody>
-        {this.maybeGetSecureSpacesMessage()}
       </Fragment>
     );
   }
@@ -157,7 +157,6 @@ export class ManageSpacePage extends Component<Props, State> {
           features={this.state.features}
           onChange={this.onSpaceChange}
           getUrlForApp={this.props.getUrlForApp}
-          securityEnabled={this.props.securityEnabled}
         />
 
         <EuiSpacer />
@@ -199,13 +198,6 @@ export class ManageSpacePage extends Component<Props, State> {
         defaultMessage="Create a space"
       />
     );
-  };
-
-  public maybeGetSecureSpacesMessage = () => {
-    if (this.editingExistingSpace() && this.props.securityEnabled) {
-      return <SecureSpaceMessage getUrlForApp={this.props.getUrlForApp} />;
-    }
-    return null;
   };
 
   public getFormButtons = () => {

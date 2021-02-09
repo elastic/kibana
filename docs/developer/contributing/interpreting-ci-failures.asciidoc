@@ -27,7 +27,7 @@ image::images/job_view.png[]
 [discrete]
 === Viewing ciGroup/test Logs
 
-To view the logs for a failed specific ciGroup, jest, mocha, type checkers, linters, etc., click on the *Pipeline Steps* link in from the Job page.
+To view the logs for a failed specific ciGroup, jest, type checkers, linters, etc., click on the *Pipeline Steps* link in from the Job page.
 
 image::images/pipeline_steps_view.png[]
 

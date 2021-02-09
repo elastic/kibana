@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 
 export interface InputOverrides {
   [key: string]: string;
@@ -29,15 +32,27 @@ export interface FindFileStructureResponse {
       count: number;
       cardinality: number;
       top_hits: Array<{ count: number; value: any }>;
+      mean_value?: number;
+      median_value?: number;
       max_value?: number;
       min_value?: number;
+      earliest?: string;
+      latest?: string;
     };
   };
   sample_start: string;
   num_messages_analyzed: number;
   mappings: {
-    [fieldName: string]: {
-      type: string;
+    properties: {
+      [fieldName: string]: {
+        // including all possible Elasticsearch types
+        // since find_file_structure API can be enhanced to include new fields in the future
+        type: Exclude<
+          ES_FIELD_TYPES,
+          ES_FIELD_TYPES._ID | ES_FIELD_TYPES._INDEX | ES_FIELD_TYPES._SOURCE | ES_FIELD_TYPES._TYPE
+        >;
+        format?: string;
+      };
     };
   };
   quote: string;
@@ -53,53 +68,4 @@ export interface FindFileStructureResponse {
   joda_timestamp_formats?: string[];
   timestamp_field?: string;
   should_trim_fields?: boolean;
-}
-
-export interface ImportResponse {
-  success: boolean;
-  id: string;
-  index?: string;
-  pipelineId?: string;
-  docCount: number;
-  failures: ImportFailure[];
-  error?: any;
-  ingestError?: boolean;
-}
-
-export interface ImportFailure {
-  item: number;
-  reason: string;
-  doc: ImportDoc;
-}
-
-export interface Doc {
-  message: string;
-}
-
-export type ImportDoc = Doc | string;
-
-export interface Settings {
-  pipeline?: string;
-  index: string;
-  body: any[];
-  [key: string]: any;
-}
-
-export interface Mappings {
-  _meta?: {
-    created_by: string;
-  };
-  properties: {
-    [key: string]: any;
-  };
-}
-
-export interface IngestPipelineWrapper {
-  id: string;
-  pipeline: IngestPipeline;
-}
-
-export interface IngestPipeline {
-  description: string;
-  processors: any[];
 }

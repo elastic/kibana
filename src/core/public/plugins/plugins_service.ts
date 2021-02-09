@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { withTimeout } from '@kbn/std';
+import { withTimeout, isPromise } from '@kbn/std';
 import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -109,16 +98,29 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      const contract = await withTimeout({
-        promise: plugin.setup(
-          createPluginSetupContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
-      contracts.set(pluginName, contract);
+      let contract: unknown;
+      const contractOrPromise = plugin.setup(
+        createPluginSetupContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
 
+        contract = await withTimeout({
+          promise: contractOrPromise,
+          timeout: 10 * Sec,
+          errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+        });
+      } else {
+        contract = contractOrPromise;
+      }
+
+      contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
 
@@ -143,14 +145,28 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      const contract = await withTimeout({
-        promise: plugin.start(
-          createPluginStartContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let contract: unknown;
+      const contractOrPromise = plugin.start(
+        createPluginStartContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+
+        contract = await withTimeout({
+          promise: contractOrPromise,
+          timeout: 10 * Sec,
+          errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+        });
+      } else {
+        contract = contractOrPromise;
+      }
+
       contracts.set(pluginName, contract);
     }
 

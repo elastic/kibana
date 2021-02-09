@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,6 +11,8 @@ import classNames from 'classnames';
 import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+
+import { URL_LABEL } from '../../../../constants';
 
 import { DisplaySettingsLogic } from './display_settings_logic';
 
@@ -28,7 +31,7 @@ export const ExampleResultDetailCard: React.FC = () => {
   const result = exampleDocuments[0];
 
   return (
-    <div className="example-result-detail-card">
+    <div className="example-result-detail-card" data-test-subj="ExampleResultDetailCard">
       <div className="example-result-detail-card__header">
         <div className="example-result-detail-card__border" style={{ backgroundColor: color }} />
         <div className="example-result-detail-card__source-name">
@@ -49,7 +52,9 @@ export const ExampleResultDetailCard: React.FC = () => {
             {urlField ? (
               <div className="eui-textTruncate">{result[urlField]}</div>
             ) : (
-              <span className="example-result-content-placeholder">URL</span>
+              <span className="example-result-content-placeholder" data-test-subj="DefaultUrlLabel">
+                {URL_LABEL}
+              </span>
             )}
           </div>
         </div>
@@ -57,7 +62,11 @@ export const ExampleResultDetailCard: React.FC = () => {
       <div className="example-result-detail-card__content">
         {detailFields.length > 0 ? (
           detailFields.map(({ fieldName, label }, index) => (
-            <div className="example-result-detail-card__field" key={index}>
+            <div
+              data-test-subj="DetailField"
+              className="example-result-detail-card__field"
+              key={index}
+            >
               <EuiTitle size="xs">
                 <h4>{label}</h4>
               </EuiTitle>

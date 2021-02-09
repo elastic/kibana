@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import semver from 'semver';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
@@ -293,7 +295,13 @@ export class ManifestManager {
             };
 
             try {
-              await this.packagePolicyService.update(this.savedObjectsClient, id, newPackagePolicy);
+              await this.packagePolicyService.update(
+                this.savedObjectsClient,
+                // @ts-ignore
+                undefined,
+                id,
+                newPackagePolicy
+              );
               this.logger.debug(
                 `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
               );

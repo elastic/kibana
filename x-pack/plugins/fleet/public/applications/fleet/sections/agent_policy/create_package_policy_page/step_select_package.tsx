@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -141,15 +143,7 @@ export const StepSelectPackage: React.FunctionComponent<{
             return {
               label: title || name,
               key: pkgkey,
-              prepend: (
-                <PackageIcon
-                  packageName={name}
-                  version={version}
-                  icons={icons}
-                  size="m"
-                  tryApi={true}
-                />
-              ),
+              prepend: <PackageIcon packageName={name} version={version} icons={icons} size="m" />,
               checked: selectedPkgKey === pkgkey ? 'on' : undefined,
             };
           })}

@@ -1,13 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable } from 'rxjs';
-import { IRouter, ILegacyClusterClient, Logger, ILegacyCustomClusterClient } from 'kibana/server';
+import type {
+  IRouter,
+  ILegacyClusterClient,
+  Logger,
+  ILegacyCustomClusterClient,
+  RequestHandlerContext,
+} from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
-import { PluginStartContract as ActionsPluginsStartContact } from '../../actions/server';
+import type {
+  PluginStartContract as ActionsPluginsStartContact,
+  ActionsApiRequestHandlerContext,
+} from '../../actions/server';
+import type { AlertingApiRequestHandlerContext } from '../../alerts/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
@@ -17,7 +29,6 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
-import { ElasticsearchSource } from '../common/types/es';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -43,6 +54,11 @@ export interface PluginsSetup {
   cloud?: CloudSetup;
 }
 
+export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
+  actions?: ActionsApiRequestHandlerContext;
+  alerting?: AlertingApiRequestHandlerContext;
+}
+
 export interface PluginsStart {
   alerts: AlertingPluginStartContract;
   actions: ActionsPluginsStartContact;
@@ -54,7 +70,7 @@ export interface MonitoringCoreConfig {
 
 export interface RouteDependencies {
   cluster: ILegacyCustomClusterClient;
-  router: IRouter;
+  router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   logger: Logger;
@@ -67,7 +83,7 @@ export interface MonitoringCore {
 }
 
 export interface LegacyShimDependencies {
-  router: IRouter;
+  router: IRouter<RequestHandlerContextMonitoringPlugin>;
   instanceUuid: string;
   esDataClient: ILegacyClusterClient;
   kibanaStatsCollector: any;
@@ -76,6 +92,10 @@ export interface LegacyShimDependencies {
 export interface IBulkUploader {
   getKibanaStats: () => any;
   stop: () => void;
+}
+
+export interface MonitoringPluginSetup {
+  getKibanaStats: IBulkUploader['getKibanaStats'];
 }
 
 export interface LegacyRequest {
@@ -114,29 +134,6 @@ export interface LegacyServer {
         name: string
       ) => {
         callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
-      };
-    };
-  };
-}
-
-export interface ElasticsearchResponse {
-  hits?: {
-    hits: ElasticsearchResponseHit[];
-    total: {
-      value: number;
-    };
-  };
-}
-
-export interface ElasticsearchResponseHit {
-  _source: ElasticsearchSource;
-  inner_hits?: {
-    [field: string]: {
-      hits?: {
-        hits: ElasticsearchResponseHit[];
-        total: {
-          value: number;
-        };
       };
     };
   };

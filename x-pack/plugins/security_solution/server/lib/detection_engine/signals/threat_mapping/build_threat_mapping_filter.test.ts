@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -132,10 +133,16 @@ describe('build_threat_mapping_filter', () => {
           },
         ],
         threatListItem: {
-          '@timestamp': '2020-09-09T21:59:13Z',
-          host: {
-            name: 'host-1',
-            // since ip is missing this entire AND clause should be dropped
+          _source: {
+            '@timestamp': '2020-09-09T21:59:13Z',
+            host: {
+              name: 'host-1',
+              // since ip is missing this entire AND clause should be dropped
+            },
+          },
+          fields: {
+            '@timestamp': ['2020-09-09T21:59:13Z'],
+            'host.name': ['host-1'],
           },
         },
       });
@@ -175,6 +182,10 @@ describe('build_threat_mapping_filter', () => {
             host: {
               name: 'host-1',
             },
+          },
+          fields: {
+            '@timestamp': ['2020-09-09T21:59:13Z'],
+            'host.name': ['host-1'],
           },
         },
       });

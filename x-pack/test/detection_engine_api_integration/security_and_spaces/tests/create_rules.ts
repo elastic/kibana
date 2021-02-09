@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -55,11 +56,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -101,6 +104,47 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         await waitForRuleSuccessOrStatus(supertest, body.id);
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body.id] })
+          .expect(200);
+
+        expect(statusBody[body.id].current_status.status).to.eql('succeeded');
+      });
+
+      it('should create a single rule with a rule_id and an index pattern that does not match anything available and fail the rule', async () => {
+        const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(supertest, body.id, 'failed');
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body.id] })
+          .expect(200);
+
+        expect(statusBody[body.id].current_status.status).to.eql('failed');
+        expect(statusBody[body.id].current_status.last_failure_message).to.eql(
+          'The following index patterns did not match any indices: ["does-not-exist-*"]'
+        );
+      });
+
+      it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
+        const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(supertest, body.id, 'succeeded');
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -205,8 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FAILING ES SNAPSHOT: https://github.com/elastic/kibana/issues/87180
-    describe.skip('missing timestamps', () => {
+    describe('missing timestamps', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
         // to edit these files run the following script
@@ -233,7 +276,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'failed');
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
         await waitForSignalsToBePresent(supertest, 2, [bodyId]);
 
         const { body: statusBody } = await supertest
@@ -244,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         // set to "failed" for now. Will update this with a partial failure
         // once I figure out the logic
-        expect(statusBody[bodyId].current_status.status).to.eql('failed');
+        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
       });
     });
   });

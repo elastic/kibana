@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -16,11 +17,16 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
   AuditMessage,
-  Job,
-  JobStats,
   DatafeedWithStats,
   CombinedJobWithStats,
+  Datafeed,
+  Job,
 } from '../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobsResponse,
+  MlJobsStatsResponse,
+  JobsExistResponse,
+} from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -34,16 +40,6 @@ import {
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
 
-export interface MlJobsResponse {
-  jobs: Job[];
-  count: number;
-}
-
-export interface MlJobsStatsResponse {
-  jobs: JobStats[];
-  count: number;
-}
-
 interface Results {
   [id: string]: {
     [status: string]: boolean;
@@ -54,7 +50,9 @@ interface Results {
 export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   const { asInternalUser } = client;
 
-  const { forceDeleteDatafeed, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
+  const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedByJobId } = datafeedsProvider(
+    mlClient
+  );
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
   const { getLatestBucketTimestampByJob } = resultsServiceProvider(mlClient);
   const calMngr = new CalendarManager(mlClient);
@@ -207,6 +205,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         isNotSingleMetricViewerJobMessage: errorMessage,
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
+        awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
       };
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
@@ -264,6 +263,25 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return { jobs, jobsMap };
   }
 
+  async function getJobForCloning(jobId: string) {
+    const [{ body: jobResults }, datafeedResult] = await Promise.all([
+      mlClient.getJobs<MlJobsResponse>({ job_id: jobId, exclude_generated: true }),
+      getDatafeedByJobId(jobId, true),
+    ]);
+    const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
+    if (datafeedResult && datafeedResult.job_id === jobId) {
+      result.datafeed = datafeedResult;
+    }
+
+    if (jobResults && jobResults.jobs) {
+      const job = jobResults.jobs.find((j) => j.job_id === jobId);
+      if (job) {
+        result.job = job;
+      }
+    }
+    return result;
+  }
+
   async function createFullJobsList(jobIds: string[] = []) {
     const jobs: CombinedJobWithStats[] = [];
     const groups: { [jobId: string]: string[] } = {};
@@ -272,6 +290,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const globalCalendars: string[] = [];
 
     const jobIdsString = jobIds.join();
+
     const [
       { body: jobResults },
       { body: jobStatsResults },
@@ -420,10 +439,18 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   // Checks if each of the jobs in the specified list of IDs exist.
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
-  async function jobsExist(jobIds: string[] = [], allSpaces: boolean = false) {
-    const results: { [id: string]: boolean } = {};
+  async function jobsExist(
+    jobIds: string[] = [],
+    allSpaces: boolean = false
+  ): Promise<JobsExistResponse> {
+    const results: JobsExistResponse = {};
     for (const jobId of jobIds) {
       try {
+        if (jobId === '') {
+          results[jobId] = { exists: false, isGroup: false };
+          continue;
+        }
+
         const { body } = allSpaces
           ? await client.asInternalUser.ml.getJobs<MlJobsResponse>({
               job_id: jobId,
@@ -431,13 +458,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           : await mlClient.getJobs<MlJobsResponse>({
               job_id: jobId,
             });
-        results[jobId] = body.count > 0;
+
+        const isGroup = body.jobs.some((j) => j.groups !== undefined && j.groups.includes(jobId));
+        results[jobId] = { exists: body.count > 0, isGroup };
       } catch (e) {
         // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
         if (e.statusCode !== 404) {
           throw e;
         }
-        results[jobId] = false;
+        results[jobId] = { exists: false, isGroup: false };
       }
     }
     return results;
@@ -492,6 +521,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     return false;
   }
 
+  function isJobAwaitingNodeAssignment(job: CombinedJobWithStats) {
+    return job.node === undefined && job.state === JOB_STATE.OPENING;
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
@@ -499,6 +532,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     forceStopAndCloseJob,
     jobsSummary,
     jobsWithTimerange,
+    getJobForCloning,
     createFullJobsList,
     deletingJobTasks,
     jobsExist,

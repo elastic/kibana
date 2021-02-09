@@ -1,3 +1,4 @@
+// stylelint-disable selector-no-qualifying-type
 .ml-explorer-chart-container {
   overflow: hidden;
 
@@ -12,10 +13,10 @@
       }
 
       rect.selected-interval {
-        fill: rgba(200, 200, 200, 0.1);
+        fill: rgba(200, 200, 200, .1);
         stroke: $euiColorDarkShade;
         stroke-width: $euiSizeXS / 2;
-        stroke-opacity: 0.8;
+        stroke-opacity: .8;
       }
 
       rect.scheduled-event-marker {
@@ -34,7 +35,7 @@
   }
 
   .axis .tick line.ml-tick-emphasis {
-    stroke: rgba(0, 0, 0, 0.2);
+    stroke: rgba(0, 0, 0, .2);
   }
 
   .axis text {
@@ -42,46 +43,41 @@
   }
 
   .axis .tick line {
-    stroke: rgba(0, 0, 0, 0.05);
+    stroke: rgba(0, 0, 0, .05);
     stroke-width: 1px;
   }
 
   .values-line {
     fill: none;
-    stroke: #32a7c2;
+    stroke: #32A7C2;
     stroke-width: 2;
   }
 
   .values-dots circle,
   .values-dots-circle {
-    fill: #32a7c2;
+    fill: #32A7C2;
     stroke-width: 0;
   }
 
   .values-dots circle.values-dots-circle-blur {
-    fill: #aaa;
-  }
-
-  .metric-value {
-    opacity: 1;
-    fill: #32a7c2;
+    fill: #AAA;
   }
 
   .metric-value {
     opacity: 1;
     fill: transparent;
-    stroke: #32a7c2;
-    stroke-width: 0px;
+    stroke: #32A7C2;
+    stroke-width: 0;
   }
 
   .anomaly-marker {
     stroke-width: 1px;
-    stroke: #aaaaaa;
+    stroke: #AAAAAA;
   }
 
   .anomaly-marker:hover {
     stroke-width: 6px;
-    stroke: #32a7c2;
+    stroke: #32A7C2;
   }
 
   .anomaly-marker.critical {
@@ -101,13 +97,13 @@
   }
 
   .anomaly-marker.low {
-    fill: #d2e9f7;
+    fill: #D2E9F7;
   }
 
   .metric-value:hover,
   .anomaly-marker:hover {
     stroke-width: 6px;
-    stroke-opacity: 0.65;
+    stroke-opacity: .65;
   }
 }
 

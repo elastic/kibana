@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { combineLatest, merge, Observable, of } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { isNumber, mapValues } from 'lodash';
@@ -160,19 +161,12 @@ export function createTaskRunAggregator(
       })
     ),
     // get DateTime of latest polling delay refresh
-    merge(
-      /**
-       * as `combineLatest` hangs until it has its first value and we're not likely to reconfigure the delay in normal deployments, we needed some initial value.
-        I've used _now_ (`new Date().toISOString()`) as it made the most sense (it would be the time Kibana started), but it _could_ be confusing in the future.
-       */
-      of(new Date().toISOString()),
-      taskPollingLifecycle.events.pipe(
-        filter(
-          (taskEvent: TaskLifecycleEvent) =>
-            isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
-        ),
-        map(() => new Date().toISOString())
-      )
+    taskPollingLifecycle.events.pipe(
+      filter(
+        (taskEvent: TaskLifecycleEvent) =>
+          isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
+      ),
+      map(() => new Date().toISOString())
     ),
   ]).pipe(
     map(([{ polling }, pollingDelay]) => ({

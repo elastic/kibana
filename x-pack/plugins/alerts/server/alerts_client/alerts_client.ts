@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -149,6 +150,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'executionStatus'
   > & { actions: NormalizedAlertAction[] };
   options?: {
+    id?: string;
     migrationVersion?: Record<string, string>;
   };
 }
@@ -226,7 +228,7 @@ export class AlertsClient {
     data,
     options,
   }: CreateOptions<Params>): Promise<Alert<Params>> {
-    const id = SavedObjectsUtils.generateId();
+    const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
       await this.authorization.ensureAuthorized(
@@ -817,10 +819,7 @@ export class AlertsClient {
         attributes.consumer,
         WriteOperations.UpdateApiKey
       );
-      if (
-        attributes.actions.length &&
-        !this.authorization.shouldUseLegacyAuthorization(attributes)
-      ) {
+      if (attributes.actions.length) {
         await this.actionsAuthorization.ensureAuthorized('execute');
       }
     } catch (error) {

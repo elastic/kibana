@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { chunk } from 'lodash';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformWizardProvider({ getService }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
+  const canvasElement = getService('canvasElement');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -85,18 +89,24 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async parseEuiDataGrid(tableSubj: string) {
       const table = await testSubjects.find(`~${tableSubj}`);
       const $ = await table.parseDomContent();
-      const rows = [];
 
-      // For each row, get the content of each cell and
-      // add its values as an array to each row.
-      for (const tr of $.findTestSubjects(`~dataGridRow`).toArray()) {
-        rows.push(
-          $(tr)
-            .find('.euiDataGridRowCell__truncate')
-            .toArray()
-            .map((cell) => $(cell).text().trim())
+      // find columns to help determine number of rows
+      const columns = $('.euiDataGridHeaderCell__content')
+        .toArray()
+        .map((cell) => $(cell).text());
+
+      // Get the content of each cell and divide them up into rows
+      const cells = $.findTestSubjects('dataGridRowCell')
+        .find('.euiDataGridRowCell__truncate')
+        .toArray()
+        .map((cell) =>
+          $(cell)
+            .text()
+            .trim()
+            .replace(/Row: \d+, Column: \d+:$/g, '')
         );
-      }
+
+      const rows = chunk(cells, columns.length);
 
       return rows;
     },
@@ -136,12 +146,14 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
           `EuiDataGrid rows should be '${expectedNumberOfRows}' (got '${rowsData.length}')`
         );
 
-        rowsData.map((r, i) =>
-          expect(r).to.length(
-            columns,
-            `EuiDataGrid row #${i + 1} column count should be '${columns}' (got '${r.length}')`
-          )
-        );
+        // cell virtualization means the last column is cutoff in the functional tests
+        // https://github.com/elastic/eui/issues/4470
+        // rowsData.map((r, i) =>
+        //   expect(r).to.length(
+        //     columns,
+        //     `EuiDataGrid row #${i + 1} column count should be '${columns}' (got '${r.length}')`
+        //   )
+        // );
       });
     },
 
@@ -175,7 +187,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       const actualCheckState =
         (await testSubjects.getAttribute(
           'transformIndexPreviewHistogramButton',
-          'aria-checked'
+          'aria-pressed'
         )) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
@@ -184,7 +196,12 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertIndexPreviewHistogramCharts(
-      expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
+      expectedHistogramCharts: Array<{
+        chartAvailable: boolean;
+        id: string;
+        legend: string;
+        colorStats?: any[];
+      }>
     ) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
@@ -194,6 +211,22 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
           if (expected.chartAvailable) {
             await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+
+            if (expected.colorStats !== undefined) {
+              const actualColorStats = await canvasElement.getColorStats(
+                `[data-test-subj="mlDataGridChart-${index}-histogram"] .echCanvasRenderer`,
+                expected.colorStats
+              );
+
+              expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
+                true,
+                `Color stats for column '${
+                  expected.id
+                }' should be within tolerance. Expected: '${JSON.stringify(
+                  expected.colorStats
+                )}' (got '${JSON.stringify(actualColorStats)}')`
+              );
+            }
           } else {
             await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
           }
@@ -201,7 +234,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
           const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
           expect(actualLegend).to.eql(
             expected.legend,
-            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
+            `Legend text for column '${expected.id}' should be '${expected.legend}' (got '${actualLegend}')`
           );
 
           const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);

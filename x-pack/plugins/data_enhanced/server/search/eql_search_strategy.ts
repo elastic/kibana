@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { tap } from 'rxjs/operators';
-import type { Logger } from 'kibana/server';
+import type { IScopedClusterClient, Logger } from 'kibana/server';
 import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
 import type {
   EqlSearchStrategyRequest,
@@ -21,10 +22,15 @@ import { EqlSearchResponse } from './types';
 export const eqlSearchStrategyProvider = (
   logger: Logger
 ): ISearchStrategy<EqlSearchStrategyRequest, EqlSearchStrategyResponse> => {
+  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+    const client = esClient.asCurrentUser.eql;
+    await client.delete({ id });
+  }
+
   return {
     cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
-      await esClient.asCurrentUser.eql.delete({ id });
+      await cancelAsyncSearch(id, esClient);
     },
 
     search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
@@ -37,11 +43,11 @@ export const eqlSearchStrategyProvider = (
           uiSettingsClient
         );
         const params = id
-          ? getDefaultAsyncGetParams()
+          ? getDefaultAsyncGetParams(options)
           : {
               ...(await getIgnoreThrottled(uiSettingsClient)),
               ...defaultParams,
-              ...getDefaultAsyncGetParams(),
+              ...getDefaultAsyncGetParams(options),
               ...request.params,
             };
         const promise = id
@@ -54,7 +60,13 @@ export const eqlSearchStrategyProvider = (
         return toEqlKibanaSearchResponse(response);
       };
 
-      return pollSearch(search, options).pipe(tap((response) => (id = response.id)));
+      const cancel = async () => {
+        if (id) {
+          await cancelAsyncSearch(id, esClient);
+        }
+      };
+
+      return pollSearch(search, cancel, options).pipe(tap((response) => (id = response.id)));
     },
 
     extend: async (id, keepAlive, options, { esClient }) => {

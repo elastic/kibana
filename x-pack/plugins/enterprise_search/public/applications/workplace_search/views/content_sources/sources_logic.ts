@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, findIndex } from 'lodash';
@@ -12,11 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpLogic } from '../../../shared/http';
 
-import {
-  flashAPIErrors,
-  setQueuedSuccessMessage,
-  FlashMessagesLogic,
-} from '../../../shared/flash_messages';
+import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 
 import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
 
@@ -40,7 +37,6 @@ export interface ISourcesActions {
     additionalConfiguration: boolean,
     serviceType: string
   ): { addedSourceName: string; additionalConfiguration: boolean; serviceType: string };
-  resetFlashMessages(): void;
   resetPermissionsModal(): void;
   resetSourcesState(): void;
   initializeSources(): void;
@@ -77,6 +73,9 @@ interface ISourcesServerResponse {
   serviceTypes: Connector[];
 }
 
+let pollingInterval: number;
+export const POLLING_INTERVAL = 10000;
+
 export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>({
   path: ['enterprise_search', 'workplace_search', 'sources_logic'],
   actions: {
@@ -88,7 +87,6 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       additionalConfiguration: boolean,
       serviceType: string
     ) => ({ addedSourceName, additionalConfiguration, serviceType }),
-    resetFlashMessages: () => true,
     resetPermissionsModal: () => true,
     resetSourcesState: () => true,
     initializeSources: () => true,
@@ -169,6 +167,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
 
       try {
         const response = await HttpLogic.values.http.get(route);
+        actions.pollForSourceStatusChanges();
         actions.onInitializeSources(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -181,18 +180,20 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
       }
     },
     // We poll the server and if the status update, we trigger a new fetch of the sources.
-    pollForSourceStatusChanges: async () => {
+    pollForSourceStatusChanges: () => {
       const { isOrganization } = AppLogic.values;
       if (!isOrganization) return;
       const serverStatuses = values.serverStatuses;
 
-      const sourceStatuses = await fetchSourceStatuses(isOrganization);
+      pollingInterval = window.setInterval(async () => {
+        const sourceStatuses = await fetchSourceStatuses(isOrganization);
 
-      sourceStatuses.some((source: ContentSourceStatus) => {
-        if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
-          return actions.initializeSources();
-        }
-      });
+        sourceStatuses.some((source: ContentSourceStatus) => {
+          if (serverStatuses && serverStatuses[source.id] !== source.status.status) {
+            return actions.initializeSources();
+          }
+        });
+      }, POLLING_INTERVAL);
     },
     setSourceSearchability: async ({ sourceId, searchable }) => {
       const { isOrganization } = AppLogic.values;
@@ -232,13 +233,18 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         ].join(' ')
       );
     },
-    resetFlashMessages: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+    resetSourcesState: () => {
+      clearInterval(pollingInterval);
+    },
+  }),
+  events: () => ({
+    beforeUnmount() {
+      clearInterval(pollingInterval);
     },
   }),
 });
 
-const fetchSourceStatuses = async (isOrganization: boolean) => {
+export const fetchSourceStatuses = async (isOrganization: boolean) => {
   const route = isOrganization
     ? '/api/workplace_search/org/sources/status'
     : '/api/workplace_search/account/sources/status';
@@ -259,7 +265,6 @@ const updateSourcesOnToggle = (
   sourceId: string,
   searchable: boolean
 ): ContentSourceDetails[] => {
-  if (!contentSources) return [];
   const sources = cloneDeep(contentSources) as ContentSourceDetails[];
   const index = findIndex(sources, ({ id }) => id === sourceId);
   const updatedSource = sources[index];

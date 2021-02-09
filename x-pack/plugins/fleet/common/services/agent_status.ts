@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AGENT_POLLING_THRESHOLD_MS, AGENT_SAVED_OBJECT_TYPE } from '../constants';
@@ -41,7 +42,7 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
 }
 
 export function buildKueryForEnrollingAgents() {
-  return `not ${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*`;
+  return `not (${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*)`;
 }
 
 export function buildKueryForUnenrollingAgents() {
@@ -53,7 +54,7 @@ export function buildKueryForOnlineAgents() {
 }
 
 export function buildKueryForErrorAgents() {
-  return `( ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded )`;
+  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded`;
 }
 
 export function buildKueryForOfflineAgents() {

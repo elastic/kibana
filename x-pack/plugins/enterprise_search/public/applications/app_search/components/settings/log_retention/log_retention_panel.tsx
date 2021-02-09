@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -12,12 +13,7 @@ import { useActions, useValues } from 'kea';
 
 import { DOCS_PREFIX } from '../../../routes';
 
-import {
-  LogRetentionLogic,
-  LogRetentionOptions,
-  AnalyticsLogRetentionMessage,
-  ApiLogRetentionMessage,
-} from '../../log_retention';
+import { LogRetentionLogic, LogRetentionOptions, LogRetentionMessage } from '../../log_retention';
 
 export const LogRetentionPanel: React.FC = () => {
   const { toggleLogRetention, fetchLogRetention } = useActions(LogRetentionLogic);
@@ -69,7 +65,7 @@ export const LogRetentionPanel: React.FC = () => {
               {': '}
               {hasILM && (
                 <EuiTextColor color="subdued">
-                  <AnalyticsLogRetentionMessage />
+                  <LogRetentionMessage type={LogRetentionOptions.Analytics} />
                 </EuiTextColor>
               )}
             </>
@@ -96,7 +92,7 @@ export const LogRetentionPanel: React.FC = () => {
               {': '}
               {hasILM && (
                 <EuiTextColor color="subdued">
-                  <ApiLogRetentionMessage />
+                  <LogRetentionMessage type={LogRetentionOptions.API} />
                 </EuiTextColor>
               )}
             </>

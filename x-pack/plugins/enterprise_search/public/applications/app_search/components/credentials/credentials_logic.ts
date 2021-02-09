@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -11,7 +12,7 @@ import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from '.
 
 import { HttpLogic } from '../../../shared/http';
 import {
-  FlashMessagesLogic,
+  clearFlashMessages,
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
@@ -227,7 +228,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
   }),
   listeners: ({ actions, values }) => ({
     showCredentialsForm: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     initializeCredentialsData: () => {
       actions.fetchCredentials();

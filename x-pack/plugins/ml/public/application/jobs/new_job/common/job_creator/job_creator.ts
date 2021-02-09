@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -28,7 +29,7 @@ import {
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
-import { isSparseDataJob, collectAggs } from './util/general';
+import { collectAggs } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
@@ -681,7 +682,6 @@ export class JobCreator {
     ) {
       this.useDedicatedIndex = true;
     }
-    this._sparseData = isSparseDataJob(job, datafeed);
 
     this._scriptFields = [];
     if (this._datafeed_config.script_fields !== undefined) {

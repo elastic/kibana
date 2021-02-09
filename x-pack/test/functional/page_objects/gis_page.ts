@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -9,7 +10,7 @@ import { APP_ID } from '../../../plugins/maps/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function GisPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'timePicker', 'visualize']);
 
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -148,18 +149,14 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       await renderable.waitForRender();
     }
 
-    async saveMap(name: string, uncheckReturnToOriginModeSwitch = false, tags?: string[]) {
+    async saveMap(name: string, redirectToOrigin = true, tags?: string[]) {
       await testSubjects.click('mapSaveButton');
       await testSubjects.setValue('savedObjectTitle', name);
-      if (uncheckReturnToOriginModeSwitch) {
-        const redirectToOriginCheckboxExists = await testSubjects.exists(
-          'returnToOriginModeSwitch'
-        );
-        if (!redirectToOriginCheckboxExists) {
-          throw new Error('Unable to uncheck "returnToOriginModeSwitch", it does not exist.');
-        }
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', 'uncheck');
-      }
+      await PageObjects.visualize.setSaveModalValues(name, {
+        addToDashboard: false,
+        redirectToOrigin,
+        saveAsNew: true,
+      });
       if (tags) {
         await testSubjects.click('savedObjectTagSelector');
         for (const tagName of tags) {
@@ -172,6 +169,10 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async clickSaveAndReturnButton() {
       await testSubjects.click('mapSaveAndReturnButton');
+    }
+
+    async expectMissingSaveAndReturnButton() {
+      await testSubjects.missingOrFail('mapSaveAndReturnButton');
     }
 
     async expectMissingSaveButton() {

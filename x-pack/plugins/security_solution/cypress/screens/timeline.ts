@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TimelineFilter } from '../objects/timeline';
@@ -69,6 +70,8 @@ export const NOTES_TEXT = '.euiMarkdownFormat';
 export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
+
+export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
 export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';

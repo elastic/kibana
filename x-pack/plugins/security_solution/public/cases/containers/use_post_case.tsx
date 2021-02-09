@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
@@ -11,7 +12,6 @@ import { errorToToaster, useStateToaster } from '../../common/components/toaster
 import { postCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
-
 interface NewCaseState {
   isLoading: boolean;
   isError: boolean;
@@ -42,7 +42,6 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
       return state;
   }
 };
-
 export interface UsePostCase extends NewCaseState {
   postCase: (data: CasePostRequest) => Promise<Case | undefined>;
 }
@@ -52,14 +51,14 @@ export const usePostCase = (): UsePostCase => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
-
   const cancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
-
   const postMyCase = useCallback(
     async (data: CasePostRequest) => {
       try {
         dispatch({ type: 'FETCH_INIT' });
+        abortCtrl.current.abort();
+        cancel.current = false;
         abortCtrl.current = new AbortController();
         const response = await postCase(data, abortCtrl.current.signal);
         if (!cancel.current) {
@@ -86,6 +85,5 @@ export const usePostCase = (): UsePostCase => {
       cancel.current = true;
     };
   }, []);
-
   return { ...state, postCase: postMyCase };
 };

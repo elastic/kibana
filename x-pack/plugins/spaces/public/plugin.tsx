@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from 'src/core/public';
@@ -11,7 +12,6 @@ import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_man
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { FeaturesPluginStart } from '../../features/public';
-import { SecurityPluginStart, SecurityPluginSetup } from '../../security/public';
 import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
@@ -26,14 +26,12 @@ export interface PluginsSetup {
   advancedSettings?: AdvancedSettingsSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
-  security?: SecurityPluginSetup;
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
 }
 
 export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
-  security?: SecurityPluginStart;
 }
 
 export type SpacesPluginSetup = ReturnType<SpacesPlugin['setup']>;
@@ -57,7 +55,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
         management: plugins.management,
         getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
         spacesManager: this.spacesManager,
-        securityLicense: plugins.security?.license,
       });
     }
 

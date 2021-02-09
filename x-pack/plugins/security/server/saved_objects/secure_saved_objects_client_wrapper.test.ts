@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
@@ -175,6 +176,7 @@ const expectObjectNamespaceFiltering = async (
   // we don't know which base client method will be called; mock them all
   clientOpts.baseClient.create.mockReturnValue(returnValue as any);
   clientOpts.baseClient.get.mockReturnValue(returnValue as any);
+  // 'resolve' is excluded because it has a specific test case written for it
   clientOpts.baseClient.update.mockReturnValue(returnValue as any);
   clientOpts.baseClient.addToNamespaces.mockReturnValue(returnValue as any);
   clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(returnValue as any);
@@ -982,6 +984,82 @@ describe('#get', () => {
     await expect(() => client.get(type, id, { namespace })).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_get', EventOutcome.FAILURE, { type, id });
+  });
+});
+
+describe('#resolve', () => {
+  const type = 'foo';
+  const id = `${type}-id`;
+  const namespace = 'some-ns';
+  const resolvedId = 'another-id'; // success audit records include the resolved ID, not the requested ID
+  const mockResult = { saved_object: { id: resolvedId } }; // mock result needs to have ID for audit logging
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    await expectGeneralError(client.resolve, { type, id });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const options = { namespace };
+    await expectForbiddenError(client.resolve, { type, id, options }, 'resolve');
+  });
+
+  test(`returns result of baseClient.resolve when authorized`, async () => {
+    const apiCallReturnValue = mockResult;
+    clientOpts.baseClient.resolve.mockReturnValue(apiCallReturnValue as any);
+
+    const options = { namespace };
+    const result = await expectSuccess(client.resolve, { type, id, options }, 'resolve');
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const options = { namespace };
+    await expectPrivilegeCheck(client.resolve, { type, id, options }, namespace);
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    const options = { namespace };
+
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
+      getMockCheckPrivilegesSuccess // privilege check for authorization
+    );
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure // privilege check for namespace filtering
+    );
+
+    const namespaces = ['some-other-namespace', '*', namespace];
+    const returnValue = { saved_object: { namespaces, id: resolvedId, foo: 'bar' } };
+    clientOpts.baseClient.resolve.mockReturnValue(returnValue as any);
+
+    const result = await client.resolve(type, id, options);
+    // we will never redact the "All Spaces" ID
+    expect(result).toEqual({
+      saved_object: expect.objectContaining({ namespaces: ['*', namespace, '?'] }),
+    });
+
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
+      'login:',
+      ['some-other-namespace']
+      // when we check what namespaces to redact, we don't check privileges for '*', only actual space IDs
+      // we don't check privileges for authorizedNamespace either, as that was already checked earlier in the operation
+    );
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = mockResult;
+    clientOpts.baseClient.resolve.mockReturnValue(apiCallReturnValue as any);
+    const options = { namespace };
+    await expectSuccess(client.resolve, { type, id, options }, 'resolve');
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_resolve', EventOutcome.SUCCESS, { type, id: resolvedId });
+  });
+
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.resolve(type, id, { namespace })).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_resolve', EventOutcome.FAILURE, { type, id });
   });
 });
 
