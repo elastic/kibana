@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
 import { useFieldNames } from './useFieldNames';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
+import { useUiTracker } from '../../../../../observability/public';
 
 interface Props {
   fieldNames: string[];
@@ -36,6 +37,7 @@ export function CustomFields({
   showThreshold = false,
   durationPercentile = 50,
 }: Props) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { defaultFieldNames, getSuggestions } = useFieldNames();
   const [suggestedFieldNames, setSuggestedFieldNames] = useState(
     getSuggestions('')
@@ -133,6 +135,7 @@ export function CustomFields({
               onChange={(options) => {
                 const nextFieldNames = options.map((option) => option.label);
                 setFieldNames(nextFieldNames);
+                trackApmEvent({ metric: 'customize_correlations_fields' });
               }}
               onCreateOption={(term) => {
                 const nextFieldNames = [...fieldNames, term];

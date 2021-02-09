@@ -27,6 +27,7 @@ import { LatencyCorrelations } from './latency_correlations';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
+import { useUiTracker } from '../../../../../observability/public';
 
 const latencyTab = {
   key: 'latency',
@@ -45,6 +46,7 @@ const errorRateTab = {
 const tabs = [latencyTab, errorRateTab];
 
 export function Correlations() {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { urlParams } = useUrlParams();
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -57,6 +59,7 @@ export function Correlations() {
       <EuiButton
         onClick={() => {
           setIsFlyoutVisible(true);
+          trackApmEvent({ metric: 'show_correlations_flyout' });
         }}
         iconType="visTagCloud"
       >

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiIcon,
   EuiLink,
@@ -20,6 +21,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { ImpactBar } from '../../shared/ImpactBar';
+import { useUiTracker } from '../../../../../observability/public';
 
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -44,6 +46,15 @@ export function CorrelationsTable<T extends SignificantTerm>({
   setSelectedSignificantTerm,
   onFilter,
 }: Props<T>) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+  const trackSelectSignificantTerm = useCallback(
+    () =>
+      debounce(
+        () => trackApmEvent({ metric: 'select_significant_term' }),
+        1000
+      ),
+    [trackApmEvent]
+  );
   const history = useHistory();
   const columns: Array<EuiBasicTableColumn<T>> = [
     {
@@ -185,7 +196,10 @@ export function CorrelationsTable<T extends SignificantTerm>({
       columns={columns}
       rowProps={(term) => {
         return {
-          onMouseEnter: () => setSelectedSignificantTerm(term),
+          onMouseEnter: () => {
+            setSelectedSignificantTerm(term);
+            trackSelectSignificantTerm();
+          },
           onMouseLeave: () => setSelectedSignificantTerm(null),
         };
       }}
