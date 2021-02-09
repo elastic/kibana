@@ -9,7 +9,14 @@ import React, { useEffect, useRef } from 'react';
 
 import styled from 'styled-components';
 
-import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiTitle,
+  EuiSpacer,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../../waterfall';
@@ -85,7 +92,9 @@ export const WaterfallFlyout = ({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
-              <MiddleTruncatedText text={url} url={url} ariaLabel={url} />
+              <EuiFlexItem>
+                <MiddleTruncatedText text={url} url={url} ariaLabel={url} />
+              </EuiFlexItem>
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
