@@ -41,8 +41,142 @@
         "type": "date"
       },
       "local_metadata": {
-        "enabled": false,
-        "type": "object"
+        "properties": {
+          "elastic": {
+            "properties": {
+              "agent": {
+                "properties": {
+                  "build": {
+                    "properties": {
+                      "original": {
+                        "type": "text",
+                        "fields": {
+                          "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "keyword"
+                  },
+                  "log_level": {
+                    "type": "keyword"
+                  },
+                  "snapshot": {
+                    "type": "boolean"
+                  },
+                  "upgradeable": {
+                    "type": "boolean"
+                  },
+                  "version": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 16
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "host": {
+            "properties": {
+              "architecture": {
+                "type": "keyword"
+              },
+              "hostname": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "ip": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 64
+                  }
+                }
+              },
+              "mac": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 17
+                  }
+                }
+              },
+              "name": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              }
+            }
+          },
+          "os": {
+            "properties": {
+              "family": {
+                "type": "keyword"
+              },
+              "full": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 128
+                  }
+                }
+              },
+              "kernel": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 128
+                  }
+                }
+              },
+              "name": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 256
+                  }
+                }
+              },
+              "platform": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword",
+                    "ignore_above": 32
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "packages": {
         "type": "keyword"
@@ -78,8 +212,8 @@
         "type": "date"
       },
       "user_provided_metadata": {
-        "enabled": false,
-        "type": "object"
+        "type": "object",
+        "enabled": false
       }
     }
   }
