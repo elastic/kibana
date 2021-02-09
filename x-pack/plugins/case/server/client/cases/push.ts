@@ -44,6 +44,11 @@ const createError = (e: Error | BoomType, message: string): Error | BoomType => 
   return Error(message);
 };
 
+interface AlertInfo {
+  ids: string[];
+  indices: Set<string>;
+}
+
 interface PushParams {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
@@ -93,11 +98,11 @@ export const push = async ({
     );
   }
 
-  const { ids, indices }: { ids: string[]; indices: Set<string> } = theCase?.comments
+  const { ids, indices }: AlertInfo = theCase?.comments
     ?.filter(isCommentAlertType)
-    .reduce(
+    .reduce<AlertInfo>(
       (acc, comment) => {
-        ids.push(...getAlertIds(comment));
+        acc.ids.push(...getAlertIds(comment));
         acc.indices.add(comment.index);
         return acc;
       },

@@ -26,6 +26,10 @@ export function initPushCaseApi({ router }: RouteDeps) {
       },
     },
     async (context, request, response) => {
+      if (!context.case) {
+        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+      }
+
       const caseClient = context.case.getCaseClient();
       const actionsClient = context.actions?.getActionsClient();
 

@@ -60,12 +60,7 @@ describe('DELETE case', () => {
     // so it makes a call to bulkGet first
     mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
 
-    const { context } = await createRouteContext(
-      createMockSavedObjectsRepository({
-        caseSavedObject: mockCases,
-        caseCommentSavedObject: mockCaseComments,
-      })
-    );
+    const { context } = await createRouteContext(mockSO);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
@@ -88,12 +83,7 @@ describe('DELETE case', () => {
     // so it makes a call to bulkGet first
     mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
 
-    const { context } = await createRouteContext(
-      createMockSavedObjectsRepository({
-        caseSavedObject: mockCasesErrorTriggerData,
-        caseCommentSavedObject: mockCaseComments,
-      })
-    );
+    const { context } = await createRouteContext(mockSO);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
@@ -116,12 +106,7 @@ describe('DELETE case', () => {
     // so it makes a call to bulkGet first
     mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
 
-    const { context } = await createRouteContext(
-      createMockSavedObjectsRepository({
-        caseSavedObject: mockCasesErrorTriggerData,
-        caseCommentSavedObject: mockCasesErrorTriggerData,
-      })
-    );
+    const { context } = await createRouteContext(mockSO);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);

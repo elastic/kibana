@@ -15,7 +15,6 @@ import { wrapError } from '../utils';
 import { CASES_URL } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
 
-// TODO: move this to the service layer
 async function unremovableCases({
   caseService,
   client,
@@ -46,7 +45,6 @@ async function unremovableCases({
   return parentCases.map((parentCase) => parentCase.id);
 }
 
-// TODO: move this to the service layer
 async function deleteSubCases({
   caseService,
   client,

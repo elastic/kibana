@@ -7,7 +7,7 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest, kibanaResponseFactory } from '../../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createExternalCaseClient } from '../../client';
@@ -76,7 +76,6 @@ async function executor(
     scopedClusterClient,
     // TODO: refactor this
     request: {} as KibanaRequest,
-    response: kibanaResponseFactory,
     caseService,
     caseConfigureService,
     connectorMappingsService,

@@ -21,6 +21,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
         }),
         query: schema.object({
           includeComments: schema.boolean({ defaultValue: true }),
+          includeSubCaseComments: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -30,7 +31,11 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
 
       try {
         return response.ok({
-          body: await caseClient.get({ id, includeComments: request.query.includeComments }),
+          body: await caseClient.get({
+            id,
+            includeComments: request.query.includeComments,
+            includeSubCaseComments: request.query.includeSubCaseComments,
+          }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

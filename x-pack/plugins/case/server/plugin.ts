@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  IContextProvider,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  PluginInitializerContext,
-} from 'kibana/server';
+import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -131,8 +125,7 @@ export class CasePlugin {
 
     const getCaseClientWithRequestAndContext = async (
       context: CasesRequestHandlerContext,
-      request: KibanaRequest,
-      response: KibanaResponseFactory
+      request: KibanaRequest
     ) => {
       return createExternalCaseClient({
         scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
@@ -146,7 +139,6 @@ export class CasePlugin {
       });
     };
 
-    // TODO I think we need to create a return type for the start function to include this
     return {
       getCaseClientWithRequestAndContext,
     };

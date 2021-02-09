@@ -16,6 +16,7 @@ interface GetParams {
   caseService: CaseServiceSetup;
   id: string;
   includeComments?: boolean;
+  includeSubCaseComments?: boolean;
 }
 
 export const get = async ({
@@ -23,6 +24,7 @@ export const get = async ({
   caseService,
   id,
   includeComments = false,
+  includeSubCaseComments = false,
 }: GetParams): Promise<CaseResponse> => {
   const theCase = await caseService.getCase({
     client: savedObjectsClient,
@@ -44,6 +46,7 @@ export const get = async ({
       sortField: 'created_at',
       sortOrder: 'asc',
     },
+    includeSubCaseComments,
   });
 
   return CaseResponseRt.encode(

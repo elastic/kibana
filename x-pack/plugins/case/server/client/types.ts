@@ -42,6 +42,7 @@ export interface CaseClientUpdate {
 export interface CaseClientGet {
   id: string;
   includeComments?: boolean;
+  includeSubCaseComments?: boolean;
 }
 
 export interface CaseClientPush {
