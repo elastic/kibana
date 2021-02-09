@@ -10,6 +10,7 @@
     "./plugins/apm/ftr_e2e"
   ],
   "compilerOptions": {
-    "noErrorTruncation": true
+    "noErrorTruncation": true,
+    "assumeChangesOnlyAffectDirectDependencies": true
   }
 }
