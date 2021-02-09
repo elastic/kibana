@@ -128,7 +128,7 @@ export const SourceConfigurationSettings = ({
             />
           </EuiPanel>
           <EuiSpacer />
-          {hasInfraMLCapabilites && (
+          {hasInfraMLCapabilities && (
             <>
               <EuiPanel paddingSize="l">
                 <MLConfigurationPanel
