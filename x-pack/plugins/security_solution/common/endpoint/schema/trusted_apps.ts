@@ -79,7 +79,7 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends Con
         );
       },
     }),
-    ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
+    version: forUpdateFlow ? schema.maybe(schema.string()) : schema.never(),
   });
 
 export const PostTrustedAppCreateRequestSchema = {
