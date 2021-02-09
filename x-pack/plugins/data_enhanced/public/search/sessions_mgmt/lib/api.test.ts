@@ -61,9 +61,8 @@ describe('Search Sessions Management API', () => {
         Array [
           Object {
             "actions": Array [
-              "reload",
               "extend",
-              "cancel",
+              "delete",
             ],
             "appId": "pizza",
             "created": undefined,
@@ -146,7 +145,7 @@ describe('Search Sessions Management API', () => {
       await api.sendCancel('abc-123-cool-session-ID');
 
       expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'The search session was canceled and expired.',
+        title: 'The search session was deleted.',
       });
     });
 
@@ -162,40 +161,14 @@ describe('Search Sessions Management API', () => {
 
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
-        { title: 'Failed to cancel the search session!' }
+        { title: 'Failed to delete the search session!' }
       );
-    });
-  });
-
-  describe('reload', () => {
-    beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
-        return {
-          saved_objects: [
-            {
-              id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: SearchSessionStatus.COMPLETE },
-            },
-          ],
-        } as SavedObjectsFindResponse;
-      });
-    });
-
-    test('send cancel calls the cancel endpoint with a session ID', async () => {
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-        urls: mockUrls,
-        notifications: mockCoreStart.notifications,
-        application: mockCoreStart.application,
-      });
-      await api.reloadSearchSession('www.myurl.com');
-
-      expect(mockCoreStart.application.navigateToUrl).toHaveBeenCalledWith('www.myurl.com');
     });
   });
 
   describe('extend', () => {
     beforeEach(() => {
-      sessionsClient.find = jest.fn().mockImplementation(async () => {
+      sessionsClient.extend = jest.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -215,6 +188,20 @@ describe('Search Sessions Management API', () => {
       });
       await api.sendExtend('my-id', '5d');
 
+      expect(sessionsClient.extend).toHaveBeenCalledTimes(1);
+      expect(mockCoreStart.notifications.toasts.addSuccess).toHaveBeenCalled();
+    });
+
+    test('displays error on reject', async () => {
+      sessionsClient.extend = jest.fn().mockRejectedValue({});
+      const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
+        urls: mockUrls,
+        notifications: mockCoreStart.notifications,
+        application: mockCoreStart.application,
+      });
+      await api.sendExtend('my-id', '5d');
+
+      expect(sessionsClient.extend).toHaveBeenCalledTimes(1);
       expect(mockCoreStart.notifications.toasts.addError).toHaveBeenCalled();
     });
   });

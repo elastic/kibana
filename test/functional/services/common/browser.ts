@@ -462,6 +462,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Removes a value in local storage for the focused window/frame.
+     *
+     * @param {string} key
+     * @return {Promise<void>}
+     */
+    public async removeLocalStorageItem(key: string): Promise<void> {
+      await driver.executeScript('return window.localStorage.removeItem(arguments[0]);', key);
+    }
+
+    /**
      * Clears session storage for the focused window/frame.
      *
      * @return {Promise<void>}

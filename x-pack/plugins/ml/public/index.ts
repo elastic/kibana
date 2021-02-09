@@ -39,8 +39,18 @@ export type {
   RenderCellValue,
 } from './shared';
 
+export type { AnomalySwimlaneEmbeddableInput } from './embeddables';
+
+export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
+export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
+
 // Static exports
-export { getSeverityColor, getSeverityType } from '../common/util/anomaly_utils';
+export {
+  getSeverityColor,
+  getSeverityType,
+  getFormattedSeverityScore,
+} from '../common/util/anomaly_utils';
+
 export { ANOMALY_SEVERITY } from '../common';
 export { useMlHref, ML_PAGES, MlUrlGenerator } from './ml_url_generator';
 

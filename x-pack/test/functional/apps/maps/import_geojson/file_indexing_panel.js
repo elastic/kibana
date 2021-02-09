@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const security = getService('security');
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
   const FILE_LOAD_DIR = 'test_upload_files';
@@ -37,7 +38,15 @@ export default function ({ getService, getPageObjects }) {
 
   describe('On GeoJSON index name & pattern operation complete', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoall_data_writer', 'global_index_pattern_management_all'],
+        false
+      );
       await PageObjects.maps.openNewMap();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     beforeEach(async () => {

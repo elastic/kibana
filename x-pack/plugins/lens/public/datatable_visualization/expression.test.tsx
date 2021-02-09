@@ -59,12 +59,22 @@ function sampleArgs() {
 
   const args: DatatableProps['args'] = {
     title: 'My fanci metric chart',
-    columns: {
-      columnIds: ['a', 'b', 'c'],
-      sortBy: '',
-      sortDirection: 'none',
-      type: 'lens_datatable_columns',
-    },
+    columns: [
+      {
+        columnId: 'a',
+        type: 'lens_datatable_column',
+      },
+      {
+        columnId: 'b',
+        type: 'lens_datatable_column',
+      },
+      {
+        columnId: 'c',
+        type: 'lens_datatable_column',
+      },
+    ],
+    sortingColumnId: '',
+    sortingDirection: 'none',
   };
 
   return { data, args };

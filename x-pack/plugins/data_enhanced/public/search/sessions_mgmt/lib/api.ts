@@ -21,10 +21,9 @@ type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
 function getActions(status: SearchSessionStatus) {
   const actions: ACTION[] = [];
-  actions.push(ACTION.RELOAD);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
     actions.push(ACTION.EXTEND);
-    actions.push(ACTION.CANCEL);
+    actions.push(ACTION.DELETE);
   }
   return actions;
 }
@@ -162,28 +161,35 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.delete(id);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.canceled', {
-          defaultMessage: 'The search session was canceled and expired.',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deleted', {
+          defaultMessage: 'The search session was deleted.',
         }),
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.cancelError', {
-          defaultMessage: 'Failed to cancel the search session!',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deletedError', {
+          defaultMessage: 'Failed to delete the search session!',
         }),
       });
     }
   }
 
   // Extend
-  public async sendExtend(id: string, ttl: string): Promise<void> {
-    this.deps.notifications.toasts.addError(new Error('Not implemented'), {
-      title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
-        defaultMessage: 'Failed to extend the session expiration!',
-      }),
-    });
+  public async sendExtend(id: string, expires: string): Promise<void> {
+    try {
+      await this.sessionsClient.extend(id, expires);
+
+      this.deps.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extended', {
+          defaultMessage: 'The search session was extended.',
+        }),
+      });
+    } catch (err) {
+      this.deps.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
+          defaultMessage: 'Failed to extend the search session!',
+        }),
+      });
+    }
   }
 }
