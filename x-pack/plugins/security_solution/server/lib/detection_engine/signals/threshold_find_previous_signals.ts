@@ -47,6 +47,7 @@ export const findPreviousThresholdSignals = async ({
     threshold: {
       terms: {
         field: 'signal.threshold_result.value',
+        size: 10000,
       },
       aggs: {
         lastSignalTimestamp: {
