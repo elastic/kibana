@@ -78,6 +78,21 @@ describe('getTimeRangeComparison', () => {
         expect(result.comparisonEnd).toEqual('2021-01-21T15:00:00.000Z');
       });
     });
+    describe('when previous period is selected', () => {
+      it('returns the correct time range - 15 min', () => {
+        const start = '2021-02-09T14:40:01.087Z';
+        const end = '2021-02-09T14:56:00.000Z';
+        const result = getTimeRangeComparison({
+          start,
+          end,
+          comparisonType: 'previousPeriod',
+        });
+        expect(result).toEqual({
+          comparisonStart: '2021-02-09T14:24:02.174Z',
+          comparisonEnd: '2021-02-09T14:40:01.087Z',
+        });
+      });
+    });
   });
 
   describe('Time range is between 24 hours - 1 week', () => {

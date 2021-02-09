@@ -104,7 +104,7 @@ describe('TimeComparison', () => {
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
       });
-      expectTextsInDocument(component, ['28/01 11:00 - 29/01 11:00']);
+      expectTextsInDocument(component, ['27/01 11:00 - 28/01 11:00']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex
@@ -173,7 +173,7 @@ describe('TimeComparison', () => {
       const component = render(<TimeComparison />, {
         wrapper: Wrapper,
       });
-      expectTextsInDocument(component, ['26/01 16:00 - 28/01 16:00']);
+      expectTextsInDocument(component, ['24/01 16:00 - 26/01 16:00']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex
@@ -194,7 +194,7 @@ describe('TimeComparison', () => {
         wrapper: Wrapper,
       });
       expect(spy).not.toHaveBeenCalled();
-      expectTextsInDocument(component, ['20/01 16:00 - 28/01 16:00']);
+      expectTextsInDocument(component, ['12/01 16:00 - 20/01 16:00']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex
@@ -213,7 +213,7 @@ describe('TimeComparison', () => {
         wrapper: Wrapper,
       });
       expect(spy).not.toHaveBeenCalled();
-      expectTextsInDocument(component, ['20/12/20 16:00 - 28/01/21 16:00']);
+      expectTextsInDocument(component, ['11/11/20 16:00 - 20/12/20 16:00']);
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement)
           .selectedIndex

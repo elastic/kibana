@@ -29,6 +29,9 @@ export function getComparisonChartTheme(theme: EuiTheme) {
   };
 }
 
+const oneDayInMilliseconds = moment.duration(1, 'day').asMilliseconds();
+const oneWeekInMilliseconds = moment.duration(1, 'week').asMilliseconds();
+
 export function getTimeRangeComparison({
   comparisonType,
   start,
@@ -45,22 +48,27 @@ export function getTimeRangeComparison({
   const startDate = moment(start);
   const endDate = moment(end);
 
-  const daysToSubtractPerType: Record<string, number> = {
-    yesterday: 1,
-    week: 7,
+  const amountToSubtractPerType: Record<string, number> = {
+    yesterday: oneDayInMilliseconds,
+    week: oneWeekInMilliseconds,
     previousPeriod: getDateDifference({
       start: startDate,
       end: endDate,
-      unitOfTime: 'days',
+      unitOfTime: 'milliseconds',
+      precise: true,
     }),
   };
 
-  const daysToSubtract = daysToSubtractPerType[comparisonType];
-  if (!daysToSubtract) {
+  const amountToSubtract = amountToSubtractPerType[comparisonType];
+  if (amountToSubtract === undefined) {
     return {};
   }
   return {
-    comparisonStart: startDate.subtract(daysToSubtract, 'days').toISOString(),
-    comparisonEnd: endDate.subtract(daysToSubtract, 'days').toISOString(),
+    comparisonStart: startDate
+      .subtract(amountToSubtract, 'milliseconds')
+      .toISOString(),
+    comparisonEnd: endDate
+      .subtract(amountToSubtract, 'milliseconds')
+      .toISOString(),
   };
 }

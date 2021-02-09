@@ -23,7 +23,7 @@ import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_ic
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { getThroughput } from '../lib/services/get_throughput';
-import { mergePeriodsTimeseries } from '../utils/merge_periods_timeseries';
+import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
 import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 
@@ -363,8 +363,9 @@ export const serviceThroughputRoute = createRoute({
       previousPeriodPromise,
     ]);
 
-    const previousPeriodTimeseries = mergePeriodsTimeseries({
-      currentPeriodTimeseries: currentPeriod,
+    const previousPeriodTimeseries = offsetPreviousPeriodCoordinates({
+      currentPeriodStart: start,
+      previousPeriodStart: comparisonStart,
       previousPeriodTimeseries: previousPeriod,
     });
 

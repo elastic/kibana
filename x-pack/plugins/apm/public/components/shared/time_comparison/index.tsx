@@ -16,6 +16,7 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { px, unit } from '../../../style/variables';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import { useBreakPoints } from '../../../hooks/use_break_points';
+import { getTimeRangeComparison } from './get_time_range_comparison';
 
 const PrependContainer = styled.div`
   display: flex;
@@ -25,15 +26,32 @@ const PrependContainer = styled.div`
   padding: 0 ${px(unit)};
 `;
 
-function formatPreviousPeriodDates({
-  momentStart,
-  momentEnd,
+function getDateFormat({
+  previousPeriodStart,
+  currentPeriodEnd,
 }: {
-  momentStart: moment.Moment;
-  momentEnd: moment.Moment;
+  previousPeriodStart?: string;
+  currentPeriodEnd?: string;
 }) {
-  const isDifferentYears = momentStart.get('year') !== momentEnd.get('year');
-  const dateFormat = isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
+  const momentPreviousPeriodStart = moment(previousPeriodStart);
+  const momentCurrentPeriodEnd = moment(currentPeriodEnd);
+  const isDifferentYears =
+    momentPreviousPeriodStart.get('year') !==
+    momentCurrentPeriodEnd.get('year');
+  return isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
+}
+
+function formatDate({
+  dateFormat,
+  previousPeriodStart,
+  previousPeriodEnd,
+}: {
+  dateFormat: string;
+  previousPeriodStart?: string;
+  previousPeriodEnd?: string;
+}) {
+  const momentStart = moment(previousPeriodStart);
+  const momentEnd = moment(previousPeriodEnd);
   return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
 }
 
@@ -83,9 +101,24 @@ function getSelectOptions({
     }
   }
 
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    comparisonType: 'previousPeriod',
+    start,
+    end,
+  });
+
+  const dateFormat = getDateFormat({
+    previousPeriodStart: comparisonStart,
+    currentPeriodEnd: end,
+  });
+
   const prevPeriodOption = {
     value: 'previousPeriod',
-    text: formatPreviousPeriodDates({ momentStart, momentEnd }),
+    text: formatDate({
+      dateFormat,
+      previousPeriodStart: comparisonStart,
+      previousPeriodEnd: comparisonEnd,
+    }),
   };
 
   // above one week or when rangeTo is not "now"
