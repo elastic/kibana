@@ -14,7 +14,7 @@ import { useActions, useValues } from 'kea';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { parseQueryParams } from '../../../../../../applications/shared/query_params';
+import { parseQueryParams } from '../../../../../shared/query_params';
 
 import { AddSourceLogic } from './add_source_logic';
 
