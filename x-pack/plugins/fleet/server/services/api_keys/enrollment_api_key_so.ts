@@ -13,7 +13,7 @@ import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-import { normalizeKuery } from '../saved_object';
+import { normalizeKuery, escapeSearchQueryPhrase } from '../saved_object';
 
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,
@@ -157,6 +157,25 @@ async function validateAgentPolicyId(soClient: SavedObjectsClientContract, agent
     }
     throw e;
   }
+}
+
+export async function getEnrollmentAPIKeyById(
+  soClient: SavedObjectsClientContract,
+  apiKeyId: string
+) {
+  const [enrollmentAPIKey] = (
+    await soClient.find<EnrollmentAPIKeySOAttributes>({
+      type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+      searchFields: ['api_key_id'],
+      search: escapeSearchQueryPhrase(apiKeyId),
+    })
+  ).saved_objects.map(savedObjectToEnrollmentApiKey);
+
+  if (enrollmentAPIKey?.api_key_id !== apiKeyId) {
+    throw new Error('find enrollmentKeyById returned an incorrect key');
+  }
+
+  return enrollmentAPIKey;
 }
 
 function savedObjectToEnrollmentApiKey({

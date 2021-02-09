@@ -87,7 +87,7 @@ export const addComment = ({
 
   // If the case is synced with alerts the newly attached alert must match the status of the case.
   if (newComment.attributes.type === CommentType.alert && myCase.attributes.settings.syncAlerts) {
-    caseClient.updateAlertsStatus({
+    await caseClient.updateAlertsStatus({
       ids: [newComment.attributes.alertId],
       status: myCase.attributes.status,
     });

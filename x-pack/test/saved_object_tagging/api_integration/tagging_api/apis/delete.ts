@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('DELETE /api/saved_objects_tagging/tags/{id}', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/90552
+  describe.skip('DELETE /api/saved_objects_tagging/tags/{id}', () => {
     beforeEach(async () => {
       await esArchiver.load('delete_with_references');
     });
