@@ -291,7 +291,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
         >
           <EuiFieldNumber
             aria-label={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.downsampleFactorInputAriaLabel',
+              'xpack.ml.dataframe.analytics.create.etaGrowthRatePerTreeInputAriaLabel',
               {
                 defaultMessage:
                   'Specifies the rate at which eta increases for each new tree that is added to the forest.',
