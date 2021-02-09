@@ -38,7 +38,7 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
-import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { APP_ID, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { PLUGIN_ID_OSS } from '../../../../src/plugins/lens_oss/common/constants';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
@@ -144,7 +144,7 @@ export class LensPlugin {
     };
 
     core.application.register({
-      id: 'lens',
+      id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
