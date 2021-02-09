@@ -1,44 +1,49 @@
 ---
 id: kibDevDocsSavedObjectsIntro
 slug: /kibana-dev-docs/saved-objects-intro
-title: Saved objects
-summary: Saved objects are a key concept to understand when building a Kibana plugin.
+title: Saved Objects
+summary: Saved Objects are a key concept to understand when building a Kibana plugin.
 date: 2021-02-02
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
-"Saved objects" are well defined, persisted entities, stored in the Kibana system index (which is also sometimes referred to as the `.kibana` index).
-The core Saved Objects service allows Kibana plugins to use Elasticsearch like a primary database. Think of it as an Object Document Mapper for Elasticsearch.
- Some examples of saved object types are dashboards, lens, canvas workpads, index patterns, cases, ml jobs, and advanced settings. Some saved object types are 
- exposed to the user in the [Saved object management UI](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html), but not all.
+"Saved Objects" are well defined, persisted entities, stored in the Kibana system index (which is also sometimes referred to as the `.kibana` index).
+The Saved Objects service allows Kibana plugins to use Elasticsearch like a primary database. Think of it as an Object Document Mapper for Elasticsearch.
+ Some examples of Saved Object types are dashboards, lens, canvas workpads, index patterns, cases, ml jobs, and advanced settings. Some Saved Object types are 
+ exposed to the user in the [Saved Object management UI](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html), but not all.
 
-<DocLink id="kibDevTutorialSavedObject" text="Tutorial: Register a new saved object type"/>
+Developers create and manage their Saved Objects using the SavedObjectClient, while other data in elasticsearch should be accessed via the data plugin's search
+services.
+
+![image](../assets/saved_object_vs_data_indices.png)
+
+
+<DocLink id="kibDevTutorialSavedObject" text="Tutorial: Register a new Saved Object type"/>
 
 ## References
 
-It’s very important that if your saved object references another saved object, this link is captured in saved object references. 
-This capability is used to export all of your visualization and index pattern saved objects when you export only a single dashboard.
+In order to support import and export capabilities, Saved Objects need to explicitly list any references they contain to other Saved Objects.
 
-Note that the reference links should be from parent to child, not the inverse. 
-
-<DocLink id="kibDevTutorialSavedObject" section="references" text="Learn how to define saved object references"/>
+<DocLink id="kibDevTutorialSavedObject" section="references" text="Learn how to define Saved Object references"/>
 
 ## Migrations and Backward compatibility
 
-As your plugin evolves, you may need to change your saved object type in a breaking way (for example, changing the type of an attribtue, or removing
-an attribute). If that happens, you should write a migration to upgrade the saved objects that existed prior to the change.
+As your plugin evolves, you may need to change your Saved Object type in a breaking way (for example, changing the type of an attribtue, or removing
+an attribute). If that happens, you should write a migration to upgrade the Saved Objects that existed prior to the change.
 
 <DocLink id="kibDevTutorialSavedObject" section="migrations" text="How to write a migration"/>.
 
-## Privacy and sharing
+## Security
+
+Saved Objects can be secured using Kibana's Privileges model, unlike data that comes from data indices, which is secured using Elasticsearch's Privileges model.
 
 ### Space awareness
 
-Saved objects are "space aware". They exist in the space they were created in, and any spaces they were shared with.
+Saved Objects are "space aware". They exist in the space they were created in, and any spaces they have been shared with.
 
 ### Feature controls and RBAC
 
-Feature controls provide another level of isolation and shareability for saved objects. Admins can give users and roles read, write or none permissions for each saved object type.
+Feature controls provide another level of isolation and shareability for Saved Objects. Admins can give users and roles read, write or none permissions for each Saved Object type.
 
 ### Object level security (OLS) 
 
@@ -47,25 +52,16 @@ objects can be private to the user, shared with a selection of others, or made p
  
 ## Scalability
 
-Because all saved objects are stored in a single index, they don’t scale well, and at this time we recommend no more than 10,000 saved
+Because all Saved Objects are stored in a single index, they don’t scale well, and at this time we recommend no more than 10,000 saved
 objects of any given type should exist. This is becoming a growing issue, especially for use cases like alerts. If you see the phrase “[X] as data” it is 
-referring to this scalability limitation. Should the information in question be stored as saved objects in the Kibana index, or directly in a data index?
+referring to this scalability limitation. Should the information in question be stored as Saved Objects in the Kibana index, or in a data index?
 
-## Saved objects by value
+## Saved Objects by value
 
-Sometimes saved objects end up persisted inside another saved object. We call these saved objects “by value”, instead of by
- reference (passing the data, not the id). This can be useful for organizational reasons. For example, if you expect a visualization to only ever be used inside a single dashboard,
-if it's added "by value", then it doesn't require a entire separate saved object to exist.  From the end user stand point, we don’t use these terms “by reference” and “by value”.
-This capability is currently only exposed to end users via the “Visualization library” feature, however we may start to see more usage as other plugins follow this pattern.
-
-### Migrating saved objects by value
-
-Saved objects by value need to have their migrations handled in a special manner. This is important not only for plugins that 
-persist saved objects by value but plugins that persist any data that is owned by another plugin. The plugin providing persistable 
-state should provide a migration function to the plugin that is actually doing the persisting. 
-
-This is exactly what the Embeddable and Expression plugins do. Dashboard, which uses Embeddables, must make sure to call any migration functions during
- its migration function. Embeddables are not saved objects, but some Embeddable types do contain saved objects, which may have migrations registered. 
- You may hear this type of data called persistable state or persistable data.
+Sometimes Saved Objects end up persisted inside another Saved Object. We call these Saved Objects “by value”, as opposed to "by
+ reference". If an end user creates a visualization and adds it to a dashboard without saving it to the visualization 
+ library, the data ends up nested inside the dashboard Saved Object. This helps keep the visualization library smaller. It also avoids
+ issues with edits propagating - since an entity can only exist in a single place.
+  Note that from the end user stand point, we don’t use these terms “by reference” and “by value”.
 
 
