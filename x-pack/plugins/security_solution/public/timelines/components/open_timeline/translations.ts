@@ -33,10 +33,18 @@ export const DELETE_SELECTED = i18n.translate(
   }
 );
 
-export const DELETE_WARNING = i18n.translate(
+export const DELETE_TIMELINE_WARNING = i18n.translate(
   'xpack.securitySolution.open.timeline.deleteWarningLabel',
   {
     defaultMessage: 'You will not be able to recover this timeline or its notes once deleted.',
+  }
+);
+
+export const DELETE_TIMELINE_TEMPLATE_WARNING = i18n.translate(
+  'xpack.securitySolution.open.timeline.deleteTemplateWarningLabel',
+  {
+    defaultMessage:
+      'You will not be able to recover this timeline template or its notes once deleted.',
   }
 );
 
@@ -204,10 +212,21 @@ export const WITH = i18n.translate('xpack.securitySolution.open.timeline.withLab
   defaultMessage: 'with',
 });
 
+export const LOADING = i18n.translate('xpack.securitySolution.open.timeline.loadingLabel', {
+  defaultMessage: 'Loading...',
+});
+
 export const ZERO_TIMELINES_MATCH = i18n.translate(
   'xpack.securitySolution.open.timeline.zeroTimelinesMatchLabel',
   {
     defaultMessage: '0 timelines match the search criteria',
+  }
+);
+
+export const ZERO_TIMELINE_TEMPLATES_MATCH = i18n.translate(
+  'xpack.securitySolution.open.timeline.zeroTimelineTemplatesMatchLabel',
+  {
+    defaultMessage: '0 timeline templates match the search criteria',
   }
 );
 
@@ -305,14 +324,14 @@ export const FILTER_CUSTOM_TIMELINES = i18n.translate(
 export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.importTimelineTitle',
   {
-    defaultMessage: 'Import timeline',
+    defaultMessage: 'Import',
   }
 );
 
 export const SELECT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.selectTimelineDescription',
   {
-    defaultMessage: 'Select a Security timeline (as exported from the Timeline view) to import',
+    defaultMessage: 'Select a security timeline or timeline template to import',
   }
 );
 
@@ -343,14 +362,14 @@ export const SUCCESSFULLY_IMPORTED_TIMELINES = (totalCount: number) =>
 export const IMPORT_FAILED = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.importFailedTitle',
   {
-    defaultMessage: 'Failed to import timelines',
+    defaultMessage: 'Failed to import',
   }
 );
 
 export const IMPORT_TIMELINE = i18n.translate(
   'xpack.securitySolution.timelines.components.importTimelineModal.importTitle',
   {
-    defaultMessage: 'Import timeline…',
+    defaultMessage: 'Import…',
   }
 );
 

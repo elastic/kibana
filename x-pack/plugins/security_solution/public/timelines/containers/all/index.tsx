@@ -38,7 +38,7 @@ export interface AllTimelinesArgs {
     status,
     timelineType,
   }: AllTimelinesVariables) => void;
-  timelines: OpenTimelineResult[];
+  timelines: OpenTimelineResult[] | null;
   loading: boolean;
   totalCount: number;
   customTemplateTimelineCount: number;
@@ -105,7 +105,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   const [allTimelines, setAllTimelines] = useState<Omit<AllTimelinesArgs, 'fetchAllTimeline'>>({
     loading: false,
     totalCount: 0,
-    timelines: [],
+    timelines: null,
     customTemplateTimelineCount: 0,
     defaultTimelineCount: 0,
     elasticTemplateTimelineCount: 0,

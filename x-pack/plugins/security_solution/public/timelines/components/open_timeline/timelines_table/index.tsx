@@ -25,7 +25,11 @@ import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
 import { getIconHeaderColumns } from './icon_header_columns';
-import { TimelineTypeLiteralWithNull, TimelineStatus } from '../../../../../common/types/timeline';
+import {
+  TimelineTypeLiteralWithNull,
+  TimelineStatus,
+  TimelineType,
+} from '../../../../../common/types/timeline';
 
 // there are a number of type mismatches across this file
 const EuiBasicTable: any = _EuiBasicTable; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -196,6 +200,13 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       ]
     );
 
+    const noItemsMessage =
+      isLoading || searchResults == null
+        ? i18n.LOADING
+        : timelineType === TimelineType.template
+        ? i18n.ZERO_TIMELINE_TEMPLATES_MATCH
+        : i18n.ZERO_TIMELINES_MATCH;
+
     return (
       <BasicTable
         columns={columns}
@@ -204,9 +215,9 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         isSelectable={actionTimelineToShow.includes('selectable')}
         itemId="savedObjectId"
         itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
-        items={searchResults}
+        items={searchResults ?? []}
         loading={isLoading}
-        noItemsMessage={i18n.ZERO_TIMELINES_MATCH}
+        noItemsMessage={noItemsMessage}
         onChange={onTableChange}
         pagination={pagination}
         selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
