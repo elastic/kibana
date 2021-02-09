@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
 import {
@@ -22,9 +23,9 @@ import {
 
 import { KibanaLogic } from '../kibana';
 
-import { SetupInstructions } from './instructions';
 import { CloudSetupInstructions } from './cloud/instructions';
 import { SETUP_GUIDE_TITLE } from './constants';
+import { SetupInstructions } from './instructions';
 import './setup_guide.scss';
 
 /**
