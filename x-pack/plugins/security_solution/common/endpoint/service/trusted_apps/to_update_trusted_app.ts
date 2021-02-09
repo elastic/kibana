@@ -19,8 +19,7 @@ const NEW_TRUSTED_APP_KEYS: Array<keyof UpdateTrustedApp> = [
 export const toUpdateTrustedApp = <T extends NewTrustedApp>(
   trustedApp: MaybeImmutable<T>
 ): UpdateTrustedApp => {
-  // @ts-ignore
-  const trustedAppForUpdate: UpdateTrustedApp = {};
+  const trustedAppForUpdate: UpdateTrustedApp = {} as UpdateTrustedApp;
 
   for (const key of NEW_TRUSTED_APP_KEYS) {
     // This should be safe. Its needed due to the inter-dependency on property values (`os` <=> `entries`)
