@@ -17,7 +17,7 @@ import {
 import { WaterfallMetadata, WaterfallMetadataEntry } from '../types';
 
 interface OnSidebarClickParams {
-  buttonRef: ButtonRef;
+  buttonRef?: ButtonRef;
   networkItemIndex: number;
 }
 
