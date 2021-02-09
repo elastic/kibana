@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export {
-  calculateRelativeFromAbsoluteMilliseconds,
-  formDataToAbsoluteTimings,
-  AbsoluteTimings,
-  PhaseAgeInMilliseconds,
-  RelativePhaseTimingInMs,
-} from './absolute_timing_to_relative_timing';
+export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
