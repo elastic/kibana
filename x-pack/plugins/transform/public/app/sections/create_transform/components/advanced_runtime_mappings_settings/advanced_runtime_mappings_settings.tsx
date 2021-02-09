@@ -24,7 +24,7 @@ import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mapping
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
-  'xpack.transform.indexPreview.copyClipboardTooltip',
+  'xpack.transform.indexPreview.copyRuntimeMappingsClipboardTooltip',
   {
     defaultMessage: 'Copy Dev Console statement of the runtime mappings to the clipboard.',
   }
