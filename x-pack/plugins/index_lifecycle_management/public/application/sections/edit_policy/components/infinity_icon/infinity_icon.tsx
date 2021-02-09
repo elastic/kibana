@@ -6,13 +6,9 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { EuiIcon, EuiIconProps } from '@elastic/eui';
+import { InfinityIconSvg } from './infinity_icon.svg';
 
-import './active_highlight.scss';
-
-interface Props {
-  phase: 'hot' | 'warm' | 'cold';
-  enabled: boolean;
-}
-export const ActiveHighlight: FunctionComponent<Props> = ({ phase, enabled }) => {
-  return <div className={`ilmActivePhaseHighlight ${phase}Phase ${enabled ? 'active' : ''} `} />;
-};
+export const InfinityIcon: FunctionComponent<Omit<EuiIconProps, 'type'>> = (props) => (
+  <EuiIcon type={InfinityIconSvg} {...props} />
+);
