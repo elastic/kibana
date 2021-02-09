@@ -87,7 +87,7 @@ export const CommentPatchRequestRt = rt.intersection([
    * Partial updates are not allowed.
    * We want to prevent the user for changing the type without removing invalid fields.
    */
-  ContextBasicRt,
+  rt.union([ContextTypeUserRt, ContextTypeAlertRt]),
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
