@@ -30,9 +30,9 @@ export const CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME =
 
 export const CASE_DETAILS_USERNAMES = '[data-test-subj="case-view-username"]';
 
-export const CONNECTOR_CARD_DETAILS = '[data-test-subj="settings-connector-card"]';
+export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card"]';
 
-export const CONNECTOR_TITLE = '[data-test-subj="settings-connector-card"] span.euiTitle';
+export const CONNECTOR_TITLE = '[data-test-subj="connector-card"] span.euiTitle';
 
 export const DELETE_CASE_BTN = '[data-test-subj="property-actions-trash"]';
 
