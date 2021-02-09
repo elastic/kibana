@@ -24,6 +24,7 @@ import { defineUsersRoutes } from './users';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSessionManagementRoutes } from './session_management';
 import { defineViewRoutes } from './views';
+import { defineDeprecationRoutes } from './deprecations';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -51,4 +52,5 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineUsersRoutes(params);
   defineRoleMappingRoutes(params);
   defineViewRoutes(params);
+  defineDeprecationRoutes(params);
 }

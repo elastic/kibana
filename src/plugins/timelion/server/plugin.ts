@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { TimelionConfigType } from './config';
 import { timelionSheetSavedObjectType } from './saved_objects';
+import { getDeprecations } from './deprecations';
 
 /**
  * Deprecated since 7.0, the Timelion app will be removed in 8.0.
@@ -18,22 +19,14 @@ import { timelionSheetSavedObjectType } from './saved_objects';
  *
  *  @link https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation
  **/
-const showWarningMessageIfTimelionSheetWasFound = (core: CoreStart, logger: Logger) => {
-  const { savedObjects } = core;
-  const savedObjectsClient = savedObjects.createInternalRepository();
+const showWarningMessageIfTimelionSheetWasFound = async (core: CoreStart, logger: Logger) => {
+  const deprecations = await getDeprecations(core.savedObjects);
 
-  savedObjectsClient
-    .find({
-      type: 'timelion-sheet',
-      perPage: 1,
-    })
-    .then(
-      ({ total }) =>
-        total &&
-        logger.warn(
-          'Deprecated since 7.0, the Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/master/dashboard.html#timelion-deprecation.'
-        )
+  if (deprecations.length) {
+    logger.warn(
+      'Deprecated since 7.0, the Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard. See https://www.elastic.co/guide/en/kibana/master/dashboard.html#timelion-deprecation.'
     );
+  }
 };
 
 export class TimelionPlugin implements Plugin {
@@ -43,7 +36,7 @@ export class TimelionPlugin implements Plugin {
     this.logger = context.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, { deprecations }) {
     core.capabilities.registerProvider(() => ({
       timelion: {
         save: true,
@@ -85,6 +78,11 @@ export class TimelionPlugin implements Plugin {
         category: ['timelion'],
         schema: schema.number(),
       },
+    });
+
+    deprecations.registerDeprecations({
+      pluginId: 'timelion',
+      getDeprecations: getDeprecations.bind(core.savedObjects),
     });
   }
   start(core: CoreStart) {

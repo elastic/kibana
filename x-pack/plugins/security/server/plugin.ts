@@ -43,6 +43,7 @@ import { ElasticsearchService } from './elasticsearch';
 import { Session, SessionManagementService } from './session_management';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { setupSpacesClient } from './spaces';
+import { DeprecationsService } from './deprecations';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -88,6 +89,7 @@ export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
+  deprecations: any;
   usageCollection?: UsageCollectionSetup;
   securityOss?: SecurityOssPluginSetup;
   spaces?: SpacesPluginSetup;
@@ -173,6 +175,7 @@ export class SecurityPlugin
     this.initializerContext.logger.get('anonymous-access'),
     this.getConfig
   );
+  private readonly deprecationsService = new DeprecationsService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -187,6 +190,7 @@ export class SecurityPlugin
       usageCollection,
       securityOss,
       spaces,
+      deprecations,
     }: PluginSetupDependencies
   ) {
     this.configSubscription = combineLatest([
@@ -296,6 +300,11 @@ export class SecurityPlugin
         startServicesPromise.then((services) => services.features.getKibanaFeatures()),
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
+    });
+
+    deprecations.registerDeprecations({
+      pluginId: 'security',
+      getDeprecations: this.deprecationsService.getDeprecations.bind(this.deprecationsService),
     });
 
     return Object.freeze<SecurityPluginSetup>({

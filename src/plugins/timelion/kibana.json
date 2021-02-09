@@ -14,6 +14,7 @@
     "navigation",
     "visTypeTimelion",
     "savedObjects",
-    "kibanaLegacy"
+    "kibanaLegacy",
+    "deprecations"
   ]
 }
