@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
 import {
   CoreSetup,
   CoreStart,
@@ -16,7 +15,11 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
 } from '../../../../../../src/core/server';
-import { IKibanaSearchRequest, ISearchOptions } from '../../../../../../src/plugins/data/common';
+import {
+  IKibanaSearchRequest,
+  ISearchOptions,
+  nodeBuilder,
+} from '../../../../../../src/plugins/data/common';
 import { ISearchSessionService } from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
 import {
@@ -193,18 +196,16 @@ export class SearchSessionService
     );
   };
 
-  public get = async (
+  public get = (
     { savedObjectsClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
     this.logger.debug(`get | ${sessionId}`);
-    const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
+    return savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId
     );
-    this.throwOnUserConflict(user, session);
-    return session;
   };
 
   public find = (
@@ -216,11 +217,17 @@ export class SearchSessionService
       user === null
         ? []
         : [
-            `${SEARCH_SESSION_TYPE}.attributes.realmType: ${user.authentication_realm.type}`,
-            `${SEARCH_SESSION_TYPE}.attributes.realmName: ${user.authentication_realm.name}`,
-            `${SEARCH_SESSION_TYPE}.attributes.username: ${user.username}`,
+            nodeBuilder.is(
+              `${SEARCH_SESSION_TYPE}.attributes.realmType`,
+              `${user.authentication_realm.type}`
+            ),
+            nodeBuilder.is(
+              `${SEARCH_SESSION_TYPE}.attributes.realmName`,
+              `${user.authentication_realm.name}`
+            ),
+            nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.username`, `${user.username}`),
           ];
-    const filter = userFilters.concat(options.filter ?? []).join(' and ');
+    const filter = nodeBuilder.and(userFilters.concat(options.filter ?? []));
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
       filter,
@@ -228,16 +235,13 @@ export class SearchSessionService
     });
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
-  public update = async (
+  public update = (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`update | ${sessionId}`);
-    const session = await this.get(deps, user, sessionId);
-    this.throwOnUserConflict(user, session);
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId,
@@ -259,7 +263,6 @@ export class SearchSessionService
     return this.update(deps, user, sessionId, { expires: expires.toISOString() });
   }
 
-  // TODO: Throw an error if this session doesn't belong to this user
   public cancel = (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
@@ -271,14 +274,11 @@ export class SearchSessionService
     });
   };
 
-  // TODO: Throw an error if this session doesn't belong to this user
-  public delete = async (
+  public delete = (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
-    const session = await this.get(deps, user, sessionId);
-    this.throwOnUserConflict(user, session);
     return deps.savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
   };
 
@@ -374,19 +374,5 @@ export class SearchSessionService
         delete: this.delete.bind(this, deps, user),
       };
     };
-  };
-
-  private throwOnUserConflict = (
-    user: AuthenticatedUser | null,
-    session?: SavedObject<SearchSessionSavedObjectAttributes>
-  ) => {
-    if (user === null || !session) return;
-    if (
-      user.authentication_realm.type !== session.attributes.realmType ||
-      user.authentication_realm.name !== session.attributes.realmName ||
-      user.username !== session.attributes.username
-    ) {
-      throw notFound();
-    }
   };
 }
