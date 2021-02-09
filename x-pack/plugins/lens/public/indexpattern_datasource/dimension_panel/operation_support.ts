@@ -67,21 +67,14 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
 export const getOperationsForField = (
   field: IndexPatternField,
   filterOperations: (operation: OperationMetadata) => boolean
-): Set<string> | undefined => {
-  const supportedOperations: Set<OperationType> = new Set();
+): OperationType[] =>
   operationDefinitions
-    .sort(getSortScoreByPriority)
     .filter((operation) => {
       if (operation.input !== 'field') {
         return false;
       }
       const possibleOperation = operation.getPossibleOperationForField(field);
-      return (
-        operation.input === 'field' && possibleOperation && filterOperations(possibleOperation)
-      );
+      return possibleOperation && filterOperations(possibleOperation);
     })
-    .forEach((operation) => {
-      supportedOperations?.add(operation.type);
-    });
-  return supportedOperations.size ? supportedOperations : undefined;
-};
+    .sort(getSortScoreByPriority)
+    .map((o) => o.type);

@@ -34,7 +34,8 @@ export function getDropTypes(
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
   function hasOperationForField(field: IndexPatternField) {
-    return !!getOperationsForField(field, props.filterOperations);
+    const operationsForNewField = getOperationsForField(field, props.filterOperations);
+    return !!operationsForNewField.length;
   }
 
   const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
@@ -173,7 +174,7 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
 
   const operationsForNewField = getOperationsForField(field, props.filterOperations);
 
-  if (!operationsForNewField) {
+  if (!operationsForNewField.length) {
     return false;
   }
 
@@ -187,7 +188,7 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
     }),
     columnId,
     indexPattern: currentIndexPattern,
-    op: operationsForNewField.values().next().value,
+    op: operationsForNewField[0],
     field,
   });
 
@@ -284,7 +285,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>) {
 
   const operationsForNewField = getOperationsForField(droppedItem.field, props.filterOperations);
 
-  if (!isDraggedField(droppedItem) || !operationsForNewField) {
+  if (!isDraggedField(droppedItem) || !operationsForNewField.length) {
     // TODO: What do we do if we couldn't find a column?
     return false;
   }
@@ -296,15 +297,13 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>) {
 
   // Detects if we can change the field only, otherwise change field + operation
   const fieldIsCompatibleWithCurrent =
-    selectedColumn && operationsForNewField?.has(selectedColumn.operationType);
+    selectedColumn && operationsForNewField.includes(selectedColumn.operationType);
 
   const newLayer = insertOrReplaceColumn({
     layer,
     columnId,
     indexPattern: currentIndexPattern,
-    op: fieldIsCompatibleWithCurrent
-      ? selectedColumn.operationType
-      : operationsForNewField.values().next().value,
+    op: fieldIsCompatibleWithCurrent ? selectedColumn.operationType : operationsForNewField[0],
     field: droppedItem.field,
   });
 
