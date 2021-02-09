@@ -49,6 +49,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppCategory](./kibana-plugin-core-server.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AssistanceAPIResponse](./kibana-plugin-core-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-core-server.assistantapiclientparams.md) |  |
+|  [AsyncPlugin](./kibana-plugin-core-server.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Authenticated](./kibana-plugin-core-server.authenticated.md) |  |
 |  [AuthNotHandled](./kibana-plugin-core-server.authnothandled.md) |  |
 |  [AuthRedirected](./kibana-plugin-core-server.authredirected.md) |  |
