@@ -210,7 +210,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('setSearchSettingsResponse', () => {
-      it('should set state', () => {
+      it('should set searchSettings state and unsavedChanges to false', () => {
         mount({
           unsavedChanges: true,
         });
