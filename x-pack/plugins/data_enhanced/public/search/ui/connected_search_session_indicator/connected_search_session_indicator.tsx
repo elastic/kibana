@@ -20,6 +20,7 @@ import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/
 import { ApplicationStart } from '../../../../../../../src/core/public';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { useSearchSessionTour } from './search_session_tour';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../common';
 
 export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
@@ -40,6 +41,8 @@ export const createConnectedSearchSessionIndicator = ({
   storage,
   disableSaveAfterSessionCompletesTimeout,
 }: SearchSessionIndicatorDeps): React.FC => {
+  const isSearchSessionsManagementDisabled =
+    !application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID] ?? false;
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
     .getRefreshIntervalUpdate$()
@@ -79,6 +82,9 @@ export const createConnectedSearchSessionIndicator = ({
     let saveDisabled = false;
     let saveDisabledReasonText: string = '';
 
+    let managementDisabled = false;
+    let managementDisabledReasonText: string = '';
+
     if (autoRefreshEnabled) {
       saveDisabled = true;
       saveDisabledReasonText = i18n.translate(
@@ -102,6 +108,16 @@ export const createConnectedSearchSessionIndicator = ({
     if (isSaveDisabledByApp.disabled) {
       saveDisabled = true;
       saveDisabledReasonText = isSaveDisabledByApp.reasonText;
+    }
+
+    if (isSearchSessionsManagementDisabled) {
+      managementDisabled = saveDisabled = true;
+      managementDisabledReasonText = saveDisabledReasonText = i18n.translate(
+        'xpack.data.searchSessionIndicator.disabledDueToDisabledGloballyMessage',
+        {
+          defaultMessage: "You don't have permissions to manage search sessions",
+        }
+      );
     }
 
     const { markOpenedDone, markRestoredDone } = useSearchSessionTour(
@@ -143,6 +159,8 @@ export const createConnectedSearchSessionIndicator = ({
           state={state}
           saveDisabled={saveDisabled}
           saveDisabledReasonText={saveDisabledReasonText}
+          managementDisabled={managementDisabled}
+          managementDisabledReasonText={managementDisabledReasonText}
           onContinueInBackground={onContinueInBackground}
           onSaveResults={onSaveResults}
           onCancel={onCancel}

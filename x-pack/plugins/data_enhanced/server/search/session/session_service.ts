@@ -31,12 +31,15 @@ import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 import { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';
 import { SearchSessionsConfig, SearchStatus } from './types';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../features/server';
+import { searchSessionsFeature } from './feature';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
 }
 interface SetupDependencies {
   taskManager: TaskManagerSetupContract;
+  features: FeaturesPluginSetup;
 }
 
 interface StartDependencies {
@@ -55,6 +58,7 @@ export class SearchSessionService
   }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
+    deps.features.registerKibanaFeature(searchSessionsFeature);
     registerSearchSessionsTask(core, {
       config: this.config,
       taskManager: deps.taskManager,

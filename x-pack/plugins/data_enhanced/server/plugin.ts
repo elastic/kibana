@@ -24,11 +24,13 @@ import {
 import { getUiSettings } from './ui_settings';
 import type { DataEnhancedRequestHandlerContext } from './type';
 import { ConfigSchema } from '../config';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 
 interface SetupDependencies {
   data: DataPluginSetup;
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
+  features: FeaturesPluginSetup;
 }
 export interface StartDependencies {
   data: DataPluginStart;
@@ -81,6 +83,7 @@ export class EnhancedDataServerPlugin
 
     this.sessionService.setup(core, {
       taskManager: deps.taskManager,
+      features: deps.features,
     });
   }
 

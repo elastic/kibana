@@ -17,4 +17,5 @@ export {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
   SearchSessionRequestInfo,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
 } from './search';

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './status';
-export * from './types';
-export * from './feature';
+export const SEARCH_SESSIONS_MANAGEMENT_ID = 'search_sessions';
