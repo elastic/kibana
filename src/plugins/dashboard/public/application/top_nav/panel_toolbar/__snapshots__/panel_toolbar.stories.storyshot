@@ -41,6 +41,7 @@ exports[`Storyshots components/PanelToolbar default 1`] = `
   >
     <button
       className="euiButton euiButton--text euiButton--small panelToolbarButton"
+      data-test-subj="dashboardAddPanelButton"
       disabled={false}
       onClick={[Function]}
       style={
