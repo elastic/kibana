@@ -72,7 +72,7 @@ export class SavedObjectsExporter {
    * @throws SavedObjectsExportError
    */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
-    this.#log.debug(`Initiating export for types: [${options.types.join(',')}]`);
+    this.#log.debug(`Initiating export for types: [${options.types}]`);
     const objects = await this.fetchByTypes(options);
     return this.processObjects(objects, byIdAscComparator, {
       request: options.request,
@@ -185,33 +185,51 @@ export class SavedObjectsExporter {
     const getLastHitSortValue = (res: SavedObjectsFindResponse) =>
       res.saved_objects.length && res.saved_objects[res.saved_objects.length - 1].sort;
 
-    const findWithPit = async ({ id, searchAfter }: { id: string; searchAfter?: unknown[] }) => {
-      return await this.#savedObjectsClient.find({
-        // Sort fields are required to use searchAfter, so we set some defaults here
-        sortField: 'updated_at',
-        sortOrder: 'desc',
-        pit: {
-          keepAlive: '1m', // bump keep_alive by 1m on every new request
-          ...findOptions.pit,
-          id,
-        },
-        ...(searchAfter ? { searchAfter } : {}),
-        ...findOptions,
-      });
+    const findWithPit = async ({ id, searchAfter }: { id?: string; searchAfter?: unknown[] }) => {
+      try {
+        return await this.#savedObjectsClient.find({
+          // Sort fields are required to use searchAfter, so we set some defaults here
+          sortField: 'updated_at',
+          sortOrder: 'desc',
+          // Bump keep_alive by 1m on every new request
+          ...(id ? { pit: { keepAlive: '1m', ...findOptions.pit, id } } : {}),
+          ...(searchAfter ? { searchAfter } : {}),
+          ...findOptions,
+        });
+      } catch (e) {
+        if (id) {
+          // Clean up PIT on any errors.
+          this.#log.debug(`Closing PIT for types [${findOptions.type}]`);
+          await this.#savedObjectsClient.closePointInTime(id);
+        }
+        throw e;
+      }
     };
 
     // Open PIT and request our first page of hits
-    let { id: pitId } = await this.#savedObjectsClient.openPointInTimeForType(findOptions.type);
-    let results = await findWithPit({ id: pitId });
+    let pitId: string | undefined;
+    try {
+      const { id } = await this.#savedObjectsClient.openPointInTimeForType(findOptions.type);
+      pitId = id;
+    } catch (e) {
+      // Since `find` swallows 404s, it is expected that exporter will do the same,
+      // so we only rethrow non-404 errors here.
+      if (e.output.statusCode !== 404) {
+        throw e;
+      }
+      this.#log.debug(`Unable to open PIT for types [${findOptions.type}]: 404 ${e}`);
+    }
 
+    let results = await findWithPit({ id: pitId });
     let lastResultsCount = results.saved_objects.length;
     let lastHitSortValue = getLastHitSortValue(results);
-    pitId = results.pit_id!;
+    pitId = results.pit_id;
 
     this.#log.debug(`Collected [${lastResultsCount}] saved objects for export.`);
 
     // Close PIT if this was our last page
-    if (lastResultsCount < findOptions.perPage!) {
+    if (pitId && lastResultsCount < findOptions.perPage!) {
+      this.#log.debug(`Closing PIT for types [${findOptions.type}]`);
       await this.#savedObjectsClient.closePointInTime(pitId);
     }
 
@@ -226,11 +244,12 @@ export class SavedObjectsExporter {
 
       lastResultsCount = results.saved_objects.length;
       lastHitSortValue = getLastHitSortValue(results);
-      pitId = results.pit_id!;
+      pitId = results.pit_id;
 
       this.#log.debug(`Collected [${lastResultsCount}] more saved objects for export.`);
 
-      if (lastResultsCount < findOptions.perPage) {
+      if (pitId && lastResultsCount < findOptions.perPage) {
+        this.#log.debug(`Closing PIT for types [${findOptions.type}]`);
         await this.#savedObjectsClient.closePointInTime(pitId);
       }
 
