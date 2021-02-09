@@ -53,7 +53,7 @@ export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, a
   'DELETE ANOMALY ALERT'
 );
 
-interface AlertState {
+export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
   newAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
   alerts: AsyncInitState<AlertsResult>;
