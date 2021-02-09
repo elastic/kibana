@@ -51,7 +51,8 @@ export function* fetchMLJobEffect() {
       // let's delete alert as well if it's there
       const { data: anomalyAlert } = yield select(anomalyAlertSelector);
       if (anomalyAlert) {
-        yield put(deleteAlertAction.get({ alertId: anomalyAlert.id as string }));
+        const { monitorId } = action.payload;
+        yield put(deleteAlertAction.get({ alertId: anomalyAlert.id as string, monitorId }));
       }
     } catch (err) {
       yield put(deleteMLJobAction.fail(err));

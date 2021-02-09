@@ -115,6 +115,7 @@ describe('state selectors', () => {
       connectors: { data: null, loading: false },
       newAlert: { data: null, loading: false },
       anomalyAlertDeletion: { data: null, loading: false },
+      pendingAlertRequests: [],
     },
     journeys: {},
     networkEvents: {},

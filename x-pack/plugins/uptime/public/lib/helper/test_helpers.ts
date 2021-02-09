@@ -11,8 +11,8 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import * as redux from 'react-redux';
 import * as reactRouterDom from 'react-router-dom';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { AppState } from '../../state';
+import { mockState } from '../__mocks__/uptime_store.mock';
 
 export function mockMoment() {
   // avoid timezone issues
@@ -73,7 +73,7 @@ export function mockStateForSelector(state?: Partial<AppState>) {
   mockDispatch();
   jest.spyOn(redux, 'useSelector').mockImplementation((fn) => {
     return fn({
-      ...mockAppState,
+      ...mockState,
       ...state,
     });
   });
@@ -82,114 +82,3 @@ export function mockStateForSelector(state?: Partial<AppState>) {
 export function mockReactRouterDomHooks({ useParamsResponse }: { useParamsResponse: any }) {
   jest.spyOn(reactRouterDom, 'useParams').mockReturnValue(useParamsResponse);
 }
-
-export const mockAppState: AppState = {
-  overviewFilters: {
-    filters: {
-      locations: [],
-      ports: [],
-      schemes: [],
-      tags: [],
-    },
-    errors: [],
-    loading: false,
-  },
-  dynamicSettings: {
-    settings: DYNAMIC_SETTINGS_DEFAULTS,
-    loading: false,
-  },
-  monitor: {
-    monitorDetailsList: [],
-    monitorLocationsList: new Map(),
-    loading: false,
-    errors: [],
-  },
-  snapshot: {
-    count: {
-      up: 2,
-      down: 0,
-      total: 2,
-    },
-    errors: [],
-    loading: false,
-  },
-  ui: {
-    alertFlyoutVisible: false,
-    basePath: 'yyz',
-    esKuery: '',
-    integrationsPopoverOpen: null,
-    searchText: '',
-    monitorId: '',
-  },
-  monitorStatus: {
-    status: null,
-    loading: false,
-  },
-  indexPattern: {
-    index_pattern: null,
-    loading: false,
-    errors: [],
-  },
-  ping: {
-    pingHistogram: null,
-    loading: false,
-    errors: [],
-  },
-  pingList: {
-    loading: false,
-    pingList: {
-      total: 0,
-      pings: [],
-    },
-  },
-  monitorDuration: {
-    durationLines: null,
-    loading: false,
-    errors: [],
-  },
-  monitorList: {
-    list: {
-      prevPagePagination: null,
-      nextPagePagination: null,
-      summaries: [],
-    },
-    loading: false,
-  },
-  ml: {
-    mlJob: {
-      data: null,
-      loading: false,
-    },
-    createJob: { data: null, loading: false },
-    deleteJob: { data: null, loading: false },
-    mlCapabilities: { data: null, loading: false },
-    anomalies: {
-      data: null,
-      loading: false,
-    },
-  },
-  indexStatus: {
-    indexStatus: {
-      data: null,
-      loading: false,
-    },
-  },
-  certificates: {
-    certs: {
-      data: null,
-      loading: false,
-    },
-  },
-  selectedFilters: null,
-  alerts: {
-    alertDeletion: { data: null, loading: false },
-    anomalyAlert: { data: null, loading: false },
-    alerts: { data: null, loading: false },
-    connectors: { data: null, loading: false },
-    newAlert: { data: null, loading: false },
-    anomalyAlertDeletion: { data: null, loading: false },
-    pendingAlertRequests: [],
-  },
-  journeys: {},
-  networkEvents: {},
-};

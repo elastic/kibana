@@ -11,7 +11,8 @@ import { ManageMLJobComponent } from './manage_ml_job';
 import * as redux from 'react-redux';
 import { renderWithRouter, shallowWithRouter } from '../../../lib';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { mockAppState, mockStateForSelector } from '../../../lib/helper/test_helpers';
+import { mockStateForSelector } from '../../../lib/helper/test_helpers';
+import { mockState } from '../../../lib/__mocks__/uptime_store.mock';
 
 const core = coreMock.createStart();
 describe('Manage ML Job', () => {
@@ -28,7 +29,7 @@ describe('Manage ML Job', () => {
   it('renders without errors', () => {
     mockStateForSelector({
       ml: {
-        ...mockAppState.ml,
+        ...mockState.ml,
         mlJob: { loading: true, data: null },
       },
     });

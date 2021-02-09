@@ -117,6 +117,7 @@ export const mockState: AppState = {
     alerts: { data: null, loading: false },
     connectors: { data: null, loading: false },
     newAlert: { data: null, loading: false },
+    pendingAlertRequests: [],
   },
   journeys: {},
   networkEvents: {},

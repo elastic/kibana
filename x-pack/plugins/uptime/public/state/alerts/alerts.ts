@@ -54,7 +54,7 @@ export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, a
   'DELETE ANOMALY ALERT'
 );
 
-interface AsyncLoadingPayload {
+export interface AsyncLoadingPayload {
   monitorId: string;
   monitorName?: string;
 }

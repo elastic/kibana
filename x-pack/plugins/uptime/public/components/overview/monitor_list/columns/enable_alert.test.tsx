@@ -15,14 +15,15 @@ import {
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
-import { mockAppState, mockStateForSelector } from '../../../../lib/helper/test_helpers';
+import { mockStateForSelector } from '../../../../lib/helper/test_helpers';
+import { mockState } from '../../../../lib/__mocks__/uptime_store.mock';
 
 describe('EnableAlertComponent', () => {
   let defaultConnectors: string[] = [];
   const alerts: any = [];
   const defaultState = {
     alerts: {
-      ...mockAppState.alerts,
+      ...mockState.alerts,
       alerts: {
         data: alerts,
         loading: false,
