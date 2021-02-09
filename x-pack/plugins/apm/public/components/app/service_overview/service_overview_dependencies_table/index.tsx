@@ -14,10 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ENVIRONMENT_ALL,
-  getNextEnvironmentUrlParam,
-} from '../../../../../common/environment_filter_values';
+import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import {
   asMillisecondDuration,
   asPercent,
