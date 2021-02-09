@@ -32,7 +32,7 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -54,7 +54,7 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
@@ -106,6 +106,16 @@ describe('GET connectors', () => {
         isPreconfigured: false,
         referencedByCount: 0,
       },
+      {
+        id: 'for-mock-case-id-3',
+        actionTypeId: '.jira',
+        name: 'For mock case id 3',
+        config: {
+          apiUrl: 'https://elastic.jira.com',
+        },
+        isPreconfigured: false,
+        referencedByCount: 0,
+      },
     ]);
   });
 
@@ -115,7 +125,7 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
         caseMappingsSavedObject: mockCaseMappings,
