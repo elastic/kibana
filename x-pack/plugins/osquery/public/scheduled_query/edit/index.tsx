@@ -26,11 +26,21 @@ const EditScheduledQueryPageComponent = () => {
     http.get(`/api/fleet/agent_policies`)
   );
 
+  const updateScheduledQueryMutation = useMutation((payload) =>
+    http.put(`/api/fleet/package_policies/${scheduledQueryId}`, { body: JSON.stringify(payload) })
+  );
+
   if (data) {
-    return <EditScheduledQueryForm data={data} agentPolicies={agentPolicies?.items ?? []} />;
+    return (
+      <EditScheduledQueryForm
+        data={data}
+        agentPolicies={agentPolicies?.items ?? []}
+        handleSubmit={updateScheduledQueryMutation.mutate}
+      />
+    );
   }
 
-  return <div>dupa</div>;
+  return <div>Loading</div>;
 };
 
 export const EditScheduledQueryPage = React.memo(EditScheduledQueryPageComponent);

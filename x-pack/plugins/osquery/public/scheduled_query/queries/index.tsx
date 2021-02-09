@@ -22,7 +22,7 @@ const ScheduledQueriesPageComponent = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
   const { http } = useKibana().services;
-  const newQueryLinkProps = useRouterNavigate('queries/new');
+  const newQueryLinkProps = useRouterNavigate('scheduled_queries/new');
 
   const { data = {} } = useQuery(
     ['scheduledQueryList', { pageIndex, pageSize, sortField, sortDirection }],

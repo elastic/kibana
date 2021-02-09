@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiButtonEmpty, EuiForm, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import produce from 'immer';
+import { get, omit } from 'lodash/fp';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiForm,
+  EuiSpacer,
+  EuiHorizontalRule,
+} from '@elastic/eui';
+import uuid from 'uuid';
+import React, { useCallback, useMemo } from 'react';
+import { useQuery } from 'react-query';
 
 import {
+  UseField,
   useForm,
   UseArray,
   getUseField,
@@ -17,6 +29,8 @@ import {
   Form,
   FIELD_TYPES,
 } from '../../shared_imports';
+
+import { OsqueryStreamField } from '../common/osquery_stream_field';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -40,10 +54,10 @@ const schema = {
   },
 };
 
-const EditScheduledQueryFormComponent = ({ data, agentPolicies }) => {
+const EditScheduledQueryFormComponent = ({ data, agentPolicies, handleSubmit }) => {
   const agentPoliciesOptions = useMemo(
     () =>
-      agentPolicies.reverse().map((policy) => ({
+      agentPolicies.map((policy) => ({
         value: policy.id,
         text: policy.name,
       })),
@@ -53,19 +67,33 @@ const EditScheduledQueryFormComponent = ({ data, agentPolicies }) => {
   const { form } = useForm({
     schema,
     id: EDIT_SCHEDULED_QUERY_FORM_ID,
+    onSubmit: handleSubmit,
     defaultValue: data,
     deserializer: (payload) => {
-      console.error('poayload', payload);
-      return {
-        ...payload,
-        streams: payload.inputs[0].streams,
-      };
+      const deserialized = produce(payload, (draft) => {
+        draft.inputs[0].streams.forEach((stream) => {
+          delete stream.compiled_stream;
+        });
+      });
+
+      return deserialized;
     },
     serializer: (payload) => {
-      console.error('serializer,', payload);
-      return payload;
+      console.error('serri', { ...data, ...payload });
+
+      return omit(
+        ['id', 'revision', 'created_at', 'created_by', 'updated_at', 'updated_by', 'version'],
+        {
+          ...data,
+          ...payload,
+          inputs: [{ type: 'osquery', ...((payload.inputs && payload.inputs[0]) ?? {}) }],
+        }
+      );
     },
   });
+
+  const { submit } = form;
+
   return (
     <Form form={form}>
       <CommonUseField
@@ -82,24 +110,42 @@ const EditScheduledQueryFormComponent = ({ data, agentPolicies }) => {
       <EuiSpacer />
       <CommonUseField path="description" />
       <EuiSpacer />
-      <UseArray path="streams">
+      <CommonUseField path="inputs[0].enabled" component={ToggleField} />
+      <EuiHorizontalRule />
+      <EuiSpacer />
+      <UseArray path="inputs[0].streams">
         {({ items, error, form, addItem, removeItem }) => (
           <>
             {items.map((item) => (
-              <EuiForm key={item.path}>
-                <CommonUseField path={`${item.path}.enabled`} component={ToggleField} />
-                <EuiButtonIcon
-                  onClick={() => removeItem(item.id)}
-                  color="danger"
-                  iconType="trash"
-                />
-                <CommonUseField path={`${item.path}.vars.query.value`} />
-                <EuiSpacer />
-                <CommonUseField path={`${item.path}.vars.interval.value`} />
-                <EuiSpacer />
-                <CommonUseField path={`${item.path}.vars.id.value`} />
-                <EuiHorizontalRule />
-              </EuiForm>
+              <UseField
+                key={item.path}
+                path={item.path}
+                component={OsqueryStreamField}
+                removeItem={() => removeItem(item.id)}
+                defaultValue={
+                  get(item.path, form.getFormData()) ?? {
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'osquery_elastic_managed.osquery',
+                    },
+                    vars: {
+                      query: {
+                        type: 'text',
+                        value: 'select * from uptime',
+                      },
+                      interval: {
+                        type: 'text',
+                        value: '120',
+                      },
+                      id: {
+                        type: 'text',
+                        value: uuid.v4(),
+                      },
+                    },
+                    enabled: true,
+                  }
+                }
+              />
             ))}
             <EuiButtonEmpty onClick={addItem} iconType="plusInCircleFilled">
               {'Add query'}
@@ -107,6 +153,11 @@ const EditScheduledQueryFormComponent = ({ data, agentPolicies }) => {
           </>
         )}
       </UseArray>
+      <EuiHorizontalRule />
+      <EuiSpacer />
+      <EuiButton fill onClick={submit}>
+        Save
+      </EuiButton>
     </Form>
   );
 };

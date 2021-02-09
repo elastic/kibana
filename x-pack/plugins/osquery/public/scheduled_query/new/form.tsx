@@ -9,28 +9,59 @@ import {
   EuiButton,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiForm,
+  EuiFormRow,
   EuiSpacer,
+  EuiSwitch,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React from 'react';
+import deepmerge from 'deepmerge';
+import React, { useCallback, useEffect } from 'react';
+import uuid from 'uuid';
 
 import {
   useForm,
   UseArray,
+  UseField,
   getUseField,
   Field,
+  FieldHook,
   ToggleField,
   Form,
   FIELD_TYPES,
 } from '../../shared_imports';
 
+import { OsqueryStreamField } from '../common/osquery_stream_field';
+
 const CommonUseField = getUseField({ component: Field });
 
 const NEW_SCHEDULED_QUERY_FORM_ID = 'newScheduledQueryForm';
 
+const defaultStreamValue = {
+  data_stream: {
+    type: 'logs',
+    dataset: 'osquery_elastic_managed.osquery',
+  },
+  vars: {
+    query: {
+      type: 'text',
+      value: 'select * from uptime',
+    },
+    interval: {
+      type: 'text',
+      value: '120',
+    },
+    id: {
+      type: 'text',
+      value: '777-777',
+    },
+  },
+  enabled: true,
+};
+
 const defaultValue = {
-  name: 'osquery_elastic_managed-8',
+  name: '',
   description: '',
   namespace: 'default',
   enabled: true,
@@ -45,29 +76,7 @@ const defaultValue = {
     {
       type: 'osquery',
       enabled: true,
-      streams: [
-        {
-          data_stream: {
-            type: 'logs',
-            dataset: 'osquery_elastic_managed.osquery',
-          },
-          vars: {
-            query: {
-              type: 'text',
-              value: 'select * from uptime',
-            },
-            interval: {
-              type: 'text',
-              value: '120',
-            },
-            id: {
-              type: 'text',
-              value: '777-777',
-            },
-          },
-          enabled: true,
-        },
-      ],
+      streams: [],
     },
   ],
 };
@@ -110,6 +119,21 @@ const schema = {
   },
 };
 
+const combineMerge = (target, source, options) => {
+  const destination = target.slice();
+
+  source.forEach((item, index) => {
+    if (typeof destination[index] === 'undefined') {
+      destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
+    } else if (options.isMergeableObject(item)) {
+      destination[index] = deepmerge(target[index], item, options);
+    } else if (target.indexOf(item) === -1) {
+      destination.push(item);
+    }
+  });
+  return destination;
+};
+
 const NewScheduledQueryFormComponent = ({ handleSubmit }) => {
   const { form } = useForm({
     schema,
@@ -117,66 +141,57 @@ const NewScheduledQueryFormComponent = ({ handleSubmit }) => {
     options: {
       stripEmptyFields: false,
     },
-    // onSubmit: handleSubmit,
+    onSubmit: handleSubmit,
     defaultValue,
-    deserializer: (payload) => {
-      console.error('poayload', payload);
-      return {
-        ...payload,
-        streams: payload.inputs[0].streams,
-      };
-    },
     serializer: (payload) => {
-      const { streams, ...rest } = payload;
       console.error('serializer,', payload);
 
-      return {
-        ...defaultValue,
-        ...rest,
-        inputs: [
-          {
-            type: 'osquery',
-            enabled: true,
-            streams: streams.map((stream) => ({
-              ...stream,
-              data_stream: {
-                type: 'logs',
-                dataset: 'osquery_elastic_managed.osquery',
-              },
-            })),
-          },
-        ],
-      };
+      return deepmerge(defaultValue, payload, {
+        arrayMerge: combineMerge,
+      });
     },
   });
   const { submit } = form;
+
   return (
     <Form form={form}>
       <CommonUseField path="name" />
       <EuiSpacer />
       <CommonUseField path="description" />
       <EuiSpacer />
-      <UseArray path="inputs[0].streams">
+      <UseArray path="inputs[0].streams" initialNumberOfItems={1} readDefaultValueOnForm={false}>
         {({ items, error, form, addItem, removeItem }) => {
+          console.error('items', items);
           return (
             <>
               {items.map((item) => (
-                <EuiForm key={item.path}>
-                  <CommonUseField path={`${item.path}.enabled`} component={ToggleField} />
-                  <EuiButtonIcon
-                    onClick={() => removeItem(item.id)}
-                    color="danger"
-                    iconType="trash"
-                  />
-                  <CommonUseField path={`${item.path}.vars.query.value`} />
-                  <EuiSpacer />
-                  <CommonUseField path={`${item.path}.vars.interval.type`} />
-                  <CommonUseField path={`${item.path}.vars.interval.value`} />
-                  <EuiSpacer />
-                  <CommonUseField path={`${item.path}.vars.id.type`} />
-                  <CommonUseField path={`${item.path}.vars.id.value`} />
-                  <EuiHorizontalRule />
-                </EuiForm>
+                <UseField
+                  key={item.path}
+                  path={item.path}
+                  component={OsqueryStreamField}
+                  removeItem={() => removeItem(item.id)}
+                  defaultValue={{
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'osquery_elastic_managed.osquery',
+                    },
+                    vars: {
+                      query: {
+                        type: 'text',
+                        value: '',
+                      },
+                      interval: {
+                        type: 'text',
+                        value: '',
+                      },
+                      id: {
+                        type: 'text',
+                        value: '',
+                      },
+                    },
+                    enabled: true,
+                  }}
+                />
               ))}
               <EuiButtonEmpty onClick={addItem} iconType="plusInCircleFilled">
                 {'Add query'}

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation } from 'react-query';
 
 import { useKibana } from '../../common/lib/kibana';
 import { NewScheduledQueryForm } from './form';
@@ -18,7 +16,7 @@ const NewScheduledQueryPageComponent = () => {
   const { http } = useKibana().services;
   const history = useHistory();
 
-  const createSavedQueryMutation = useMutation(
+  const createScheduledQueryMutation = useMutation(
     (payload) => http.post(`/api/fleet/package_policies`, { body: JSON.stringify(payload) }),
     {
       onSuccess: (data) => {
@@ -27,7 +25,7 @@ const NewScheduledQueryPageComponent = () => {
     }
   );
 
-  return <NewScheduledQueryForm handleSubmit={createSavedQueryMutation.mutate} />;
+  return <NewScheduledQueryForm handleSubmit={createScheduledQueryMutation.mutate} />;
 };
 
 export const NewScheduledQueryPage = React.memo(NewScheduledQueryPageComponent);
