@@ -55,7 +55,7 @@ export function LatencyCorrelations({ onClose }: Props) {
     defaultFieldNames
   );
   const [durationPercentile, setDurationPercentile] = useLocalStorage(
-    'apm.correlations.latency.threshold',
+    `apm.correlations.latency.threshold:${serviceName}`,
     50
   );
 
