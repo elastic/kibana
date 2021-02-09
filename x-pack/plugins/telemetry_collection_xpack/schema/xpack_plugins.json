@@ -3364,52 +3364,6 @@
               }
             }
           }
-        },
-        "endpoints": {
-          "properties": {
-            "total_installed": {
-              "type": "long"
-            },
-            "active_within_last_24_hours": {
-              "type": "long"
-            },
-            "os": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "full_name": {
-                    "type": "keyword"
-                  },
-                  "platform": {
-                    "type": "keyword"
-                  },
-                  "version": {
-                    "type": "keyword"
-                  },
-                  "count": {
-                    "type": "long"
-                  }
-                }
-              }
-            },
-            "policies": {
-              "properties": {
-                "malware": {
-                  "properties": {
-                    "active": {
-                      "type": "long"
-                    },
-                    "inactive": {
-                      "type": "long"
-                    },
-                    "failure": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            }
-          }
         }
       }
     },
