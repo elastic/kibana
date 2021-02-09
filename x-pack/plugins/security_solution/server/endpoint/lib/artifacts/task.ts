@@ -120,33 +120,33 @@ export class ManifestTask {
 
       const diff = newManifest.diff(oldManifest);
 
-      if (!isEmptyManifestDiff(diff)) {
-        const persistErrors = await manifestManager.pushArtifacts(
-          diff.additions as InternalArtifactCompleteSchema[]
-        );
-        if (persistErrors.length) {
-          reportErrors(this.logger, persistErrors);
-          throw new Error('Unable to persist new artifacts.');
-        }
+      const persistErrors = await manifestManager.pushArtifacts(
+        diff.additions as InternalArtifactCompleteSchema[]
+      );
+      if (persistErrors.length) {
+        reportErrors(this.logger, persistErrors);
+        throw new Error('Unable to persist new artifacts.');
+      }
 
+      if (!isEmptyManifestDiff(diff)) {
         // Commit latest manifest state
         newManifest.bumpSemanticVersion();
         await manifestManager.commit(newManifest);
+      }
 
-        // Try dispatching to ingest-manager package policies
-        const dispatchErrors = await manifestManager.tryDispatch(newManifest);
-        if (dispatchErrors.length) {
-          reportErrors(this.logger, dispatchErrors);
-          throw new Error('Error dispatching manifest.');
-        }
+      // Try dispatching to ingest-manager package policies
+      const dispatchErrors = await manifestManager.tryDispatch(newManifest);
+      if (dispatchErrors.length) {
+        reportErrors(this.logger, dispatchErrors);
+        throw new Error('Error dispatching manifest.');
+      }
 
-        // Try to clean up superceded artifacts
-        const deleteErrors = await manifestManager.deleteArtifacts(
-          diff.removals.map((artifact) => getArtifactId(artifact))
-        );
-        if (deleteErrors.length) {
-          reportErrors(this.logger, deleteErrors);
-        }
+      // Try to clean up superceded artifacts
+      const deleteErrors = await manifestManager.deleteArtifacts(
+        diff.removals.map((artifact) => getArtifactId(artifact))
+      );
+      if (deleteErrors.length) {
+        reportErrors(this.logger, deleteErrors);
       }
     } catch (err) {
       this.logger.error(err);

@@ -101,10 +101,15 @@ describe('task', () => {
     const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
     const ARTIFACT_ID_1 =
       'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
-    let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
+    let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+    let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+    let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
 
     beforeAll(async () => {
-      ARTIFACTS = await getMockArtifacts({ compress: true });
+      const artifacts = await getMockArtifacts({ compress: true });
+      ARTIFACT_EXCEPTIONS_MACOS = artifacts[0];
+      ARTIFACT_EXCEPTIONS_WINDOWS = artifacts[1];
+      ARTIFACT_TRUSTED_APPS_MACOS = artifacts[2];
     });
 
     test('Should not run the process when no current manifest manager', async () => {
@@ -139,28 +144,33 @@ describe('task', () => {
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
     });
 
-    test('Should stop the process when no diff in the manifest', async () => {
+    test('Should not bump version and commit manifest when no diff in the manifest', async () => {
       const manifestManager = buildManifestManagerMock();
 
       const lastManifest = Manifest.getDefault();
-      lastManifest.addEntry(ARTIFACTS[0]);
-      lastManifest.addEntry(ARTIFACTS[1]);
+      lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
-      newManifest.addEntry(ARTIFACTS[1]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
+      manifestManager.pushArtifacts = jest.fn().mockResolvedValue([]);
+      manifestManager.tryDispatch = jest.fn().mockResolvedValue([]);
+      manifestManager.deleteArtifacts = jest.fn().mockResolvedValue([]);
 
       await runTask(manifestManager);
 
+      expect(newManifest.getSemanticVersion()).toBe('1.0.0');
+
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([]);
       expect(manifestManager.commit).not.toHaveBeenCalled();
-      expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
-      expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
+      expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
+      expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([]);
     });
 
     test('Should stop the process when there are errors pushing new artifacts', async () => {
@@ -169,8 +179,8 @@ describe('task', () => {
       const lastManifest = Manifest.getDefault();
 
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
-      newManifest.addEntry(ARTIFACTS[2]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
@@ -178,9 +188,14 @@ describe('task', () => {
 
       await runTask(manifestManager);
 
+      expect(newManifest.getSemanticVersion()).toBe('1.0.0');
+
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACTS[0], ARTIFACTS[2]]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_EXCEPTIONS_MACOS,
+        ARTIFACT_TRUSTED_APPS_MACOS,
+      ]);
       expect(manifestManager.commit).not.toHaveBeenCalled();
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -192,8 +207,8 @@ describe('task', () => {
       const lastManifest = Manifest.getDefault();
 
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
-      newManifest.addEntry(ARTIFACTS[2]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
@@ -206,7 +221,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACTS[0], ARTIFACTS[2]]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_EXCEPTIONS_MACOS,
+        ARTIFACT_TRUSTED_APPS_MACOS,
+      ]);
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).not.toHaveBeenCalled();
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -218,8 +236,8 @@ describe('task', () => {
       const lastManifest = Manifest.getDefault();
 
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
-      newManifest.addEntry(ARTIFACTS[2]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
@@ -233,7 +251,10 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACTS[0], ARTIFACTS[2]]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_EXCEPTIONS_MACOS,
+        ARTIFACT_TRUSTED_APPS_MACOS,
+      ]);
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).not.toHaveBeenCalled();
@@ -243,12 +264,12 @@ describe('task', () => {
       const manifestManager = buildManifestManagerMock();
 
       const lastManifest = Manifest.getDefault();
-      lastManifest.addEntry(ARTIFACTS[0]);
-      lastManifest.addEntry(ARTIFACTS[1]);
+      lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0]);
-      newManifest.addEntry(ARTIFACTS[2]);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
@@ -263,7 +284,7 @@ describe('task', () => {
 
       expect(manifestManager.getLastComputedManifest).toHaveBeenCalled();
       expect(manifestManager.buildNewManifest).toHaveBeenCalledWith(lastManifest);
-      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACTS[2]]);
+      expect(manifestManager.pushArtifacts).toHaveBeenCalledWith([ARTIFACT_TRUSTED_APPS_MACOS]);
       expect(manifestManager.commit).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.tryDispatch).toHaveBeenCalledWith(newManifest);
       expect(manifestManager.deleteArtifacts).toHaveBeenCalledWith([ARTIFACT_ID_1]);
@@ -273,12 +294,12 @@ describe('task', () => {
       const manifestManager = buildManifestManagerMock();
 
       const lastManifest = Manifest.getDefault();
-      lastManifest.addEntry(ARTIFACTS[0]);
-      lastManifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
+      lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
 
       const newManifest = Manifest.getDefault();
-      newManifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      newManifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_2);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockResolvedValue(newManifest);
