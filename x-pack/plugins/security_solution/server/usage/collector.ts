@@ -14,12 +14,10 @@ import {
   defaultDetectionsUsage,
   fetchDetectionsMetrics,
 } from './detections';
-import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
   detections: DetectionsUsage;
-  endpoints: EndpointUsage | {};
   detectionMetrics: {};
 }
 
@@ -110,41 +108,19 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
-      endpoints: {
-        total_installed: { type: 'long' },
-        active_within_last_24_hours: { type: 'long' },
-        os: {
-          type: 'array',
-          items: {
-            full_name: { type: 'keyword' },
-            platform: { type: 'keyword' },
-            version: { type: 'keyword' },
-            count: { type: 'long' },
-          },
-        },
-        policies: {
-          malware: {
-            active: { type: 'long' },
-            inactive: { type: 'long' },
-            failure: { type: 'long' },
-          },
-        },
-      },
     },
     isReady: () => kibanaIndex.length > 0,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
-      const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
+      const [detections, detectionMetrics] = await Promise.allSettled([
         fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
         fetchDetectionsMetrics(ml, savedObjectsClient),
-        getEndpointTelemetryFromFleet(internalSavedObjectsClient),
       ]);
 
       return {
         detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
-        endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
       };
     },
   });
