@@ -35,7 +35,7 @@ export interface TimelionExpressionFunction extends ExpressionItem {
   arguments: TimelionExpressionArgument[];
 }
 
-export interface TimelionExpressionChain extends ExpressionItem {
+export interface TimelionExpressionChain {
   chain: TimelionExpressionFunction[];
   type: 'chain';
 }
