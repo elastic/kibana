@@ -81,6 +81,7 @@ export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
+  chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
 
 export interface IVectorLayer extends ILayer {
@@ -119,13 +120,23 @@ export class VectorLayer extends AbstractLayer {
     return layerDescriptor as VectorLayerDescriptor;
   }
 
-  constructor({ layerDescriptor, source, joins = [] }: VectorLayerArguments) {
+  constructor({
+    layerDescriptor,
+    source,
+    joins = [],
+    chartsPaletteServiceGetColor,
+  }: VectorLayerArguments) {
     super({
       layerDescriptor,
       source,
     });
     this._joins = joins;
-    this._style = new VectorStyle(layerDescriptor.style, source, this);
+    this._style = new VectorStyle(
+      layerDescriptor.style,
+      source,
+      this,
+      chartsPaletteServiceGetColor
+    );
   }
 
   getSource(): IVectorSource {
