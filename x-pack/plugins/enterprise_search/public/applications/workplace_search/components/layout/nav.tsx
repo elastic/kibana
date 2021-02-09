@@ -12,9 +12,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNav, SideNavLink } from '../../../shared/layout';
-
 import { NAV } from '../../constants';
-
 import {
   SOURCES_PATH,
   SECURITY_PATH,
