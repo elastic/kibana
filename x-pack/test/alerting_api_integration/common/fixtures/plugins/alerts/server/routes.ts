@@ -66,7 +66,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
 
       const user = await security.authc.getCurrentUser(req);
       if (!user) {
-        return res.internalError({});
+        throw new Error('Failed to get the current user');
       }
 
       // Create an API key using the new grant API - in this case the Kibana system user is creating the
@@ -78,7 +78,7 @@ export function defineRoutes(core: CoreSetup<FixtureStartDeps>) {
       });
 
       if (!createAPIKeyResult) {
-        return res.internalError({});
+        throw new Error('Failed to grant an API Key');
       }
 
       const result = await savedObjectsWithAlerts.update<RawAlert>(

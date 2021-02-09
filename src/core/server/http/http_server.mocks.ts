@@ -151,7 +151,6 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
-  internalError: jest.fn(),
   customError: jest.fn(),
 });
 
@@ -162,7 +161,6 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
-  internalError: jest.fn(),
   customError: jest.fn(),
 });
 

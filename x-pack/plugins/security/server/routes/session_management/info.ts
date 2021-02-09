@@ -32,8 +32,8 @@ export function defineSessionInfoRoutes({ router, logger, getSession }: RouteDef
 
         return response.noContent();
       } catch (err) {
-        logger.error(`Error retrieving user session: ${err.message}`);
-        return response.internalError();
+        err.message = `Error retrieving user session: ${err.message}`;
+        throw err;
       }
     }
   );

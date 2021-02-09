@@ -93,13 +93,7 @@ export class AuthenticationService {
         });
       }
 
-      let authenticationResult;
-      try {
-        authenticationResult = await this.authenticator.authenticate(request);
-      } catch (err) {
-        this.logger.error(err);
-        return response.internalError();
-      }
+      const authenticationResult = await this.authenticator.authenticate(request);
 
       if (authenticationResult.succeeded()) {
         return t.authenticated({

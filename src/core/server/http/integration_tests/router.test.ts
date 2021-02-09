@@ -588,48 +588,6 @@ describe('Handler', () => {
     `);
   });
 
-  it('returns 500 Server error if handler returns an internalError with no body', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-
-    router.get({ path: '/', validate: false }, (context, req, res) => {
-      return res.internalError();
-    });
-    await server.start();
-
-    const result = await supertest(innerServer.listener).get('/').expect(500);
-
-    expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          [Error: Internal Error],
-        ],
-      ]
-    `);
-  });
-
-  it('returns 500 Server error if handler returns an internalError with a body', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
-
-    router.get({ path: '/', validate: false }, (context, req, res) => {
-      return res.internalError({ body: 'Some message' });
-    });
-    await server.start();
-
-    const result = await supertest(innerServer.listener).get('/').expect(500);
-
-    expect(result.body.message).toBe('An internal server error occurred.');
-    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          [Error: Some message],
-        ],
-      ]
-    `);
-  });
-
   it('returns 400 Bad request if request validation failed', async () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');

@@ -37,65 +37,57 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const { nodeId, nodeType, sourceId, timeRange } = pipe(
-          InfraMetadataRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const { nodeId, nodeType, sourceId, timeRange } = pipe(
+        InfraMetadataRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const { configuration } = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
-        const metricsMetadata = await getMetricMetadata(
-          framework,
-          requestContext,
-          configuration,
-          nodeId,
-          nodeType,
-          timeRange
-        );
-        const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(
-          nameToFeature('metrics')
-        );
+      const { configuration } = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
+      const metricsMetadata = await getMetricMetadata(
+        framework,
+        requestContext,
+        configuration,
+        nodeId,
+        nodeType,
+        timeRange
+      );
+      const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(nameToFeature('metrics'));
 
-        const info = await getNodeInfo(
-          framework,
-          requestContext,
-          configuration,
-          nodeId,
-          nodeType,
-          timeRange
-        );
-        const cloudInstanceId = get(info, 'cloud.instance.id');
+      const info = await getNodeInfo(
+        framework,
+        requestContext,
+        configuration,
+        nodeId,
+        nodeType,
+        timeRange
+      );
+      const cloudInstanceId = get(info, 'cloud.instance.id');
 
-        const cloudMetricsMetadata = cloudInstanceId
-          ? await getCloudMetricsMetadata(
-              framework,
-              requestContext,
-              configuration,
-              cloudInstanceId,
-              timeRange
-            )
-          : { buckets: [] };
-        const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
-          nameToFeature('metrics')
-        );
-        const id = metricsMetadata.id;
-        const name = metricsMetadata.name || id;
-        return response.ok({
-          body: InfraMetadataRT.encode({
-            id,
-            name,
-            features: [...metricFeatures, ...cloudMetricsFeatures],
-            info,
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      const cloudMetricsMetadata = cloudInstanceId
+        ? await getCloudMetricsMetadata(
+            framework,
+            requestContext,
+            configuration,
+            cloudInstanceId,
+            timeRange
+          )
+        : { buckets: [] };
+      const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
+        nameToFeature('metrics')
+      );
+      const id = metricsMetadata.id;
+      const name = metricsMetadata.name || id;
+      return response.ok({
+        body: InfraMetadataRT.encode({
+          id,
+          name,
+          features: [...metricFeatures, ...cloudMetricsFeatures],
+          info,
+        }),
+      });
     }
   );
 };

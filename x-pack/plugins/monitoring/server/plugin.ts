@@ -368,7 +368,7 @@ export class MonitoringPlugin
             if (Boom.isBoom(err) || statusCode !== 500) {
               return res.customError({ statusCode, body: err });
             }
-            return res.internalError(wrapError(err));
+            throw wrapError(err).body;
           }
         };
 

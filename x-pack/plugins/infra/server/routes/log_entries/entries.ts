@@ -24,74 +24,68 @@ export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs)
       validate: { body: createValidationFunction(logEntriesRequestRT) },
     },
     async (requestContext, request, response) => {
-      try {
-        const payload = request.body;
-        const {
-          startTimestamp: startTimestamp,
-          endTimestamp: endTimestamp,
+      const payload = request.body;
+      const {
+        startTimestamp: startTimestamp,
+        endTimestamp: endTimestamp,
+        sourceId,
+        query,
+        size,
+        columns,
+      } = payload;
+
+      let entries;
+      let hasMoreBefore;
+      let hasMoreAfter;
+
+      if ('center' in payload) {
+        ({ entries, hasMoreBefore, hasMoreAfter } = await logEntries.getLogEntriesAround(
+          requestContext,
           sourceId,
-          query,
-          size,
-          columns,
-        } = payload;
-
-        let entries;
-        let hasMoreBefore;
-        let hasMoreAfter;
-
-        if ('center' in payload) {
-          ({ entries, hasMoreBefore, hasMoreAfter } = await logEntries.getLogEntriesAround(
-            requestContext,
-            sourceId,
-            {
-              startTimestamp,
-              endTimestamp,
-              query: parseFilterQuery(query),
-              center: payload.center,
-              size,
-            },
-            columns
-          ));
-        } else {
-          let cursor: LogEntriesParams['cursor'];
-          if ('before' in payload) {
-            cursor = { before: payload.before };
-          } else if ('after' in payload) {
-            cursor = { after: payload.after };
-          }
-
-          ({ entries, hasMoreBefore, hasMoreAfter } = await logEntries.getLogEntries(
-            requestContext,
-            sourceId,
-            {
-              startTimestamp,
-              endTimestamp,
-              query: parseFilterQuery(query),
-              cursor,
-              size,
-            },
-            columns
-          ));
+          {
+            startTimestamp,
+            endTimestamp,
+            query: parseFilterQuery(query),
+            center: payload.center,
+            size,
+          },
+          columns
+        ));
+      } else {
+        let cursor: LogEntriesParams['cursor'];
+        if ('before' in payload) {
+          cursor = { before: payload.before };
+        } else if ('after' in payload) {
+          cursor = { after: payload.after };
         }
 
-        const hasEntries = entries.length > 0;
-
-        return response.ok({
-          body: logEntriesResponseRT.encode({
-            data: {
-              entries,
-              topCursor: hasEntries ? entries[0].cursor : null,
-              bottomCursor: hasEntries ? entries[entries.length - 1].cursor : null,
-              hasMoreBefore,
-              hasMoreAfter,
-            },
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
+        ({ entries, hasMoreBefore, hasMoreAfter } = await logEntries.getLogEntries(
+          requestContext,
+          sourceId,
+          {
+            startTimestamp,
+            endTimestamp,
+            query: parseFilterQuery(query),
+            cursor,
+            size,
+          },
+          columns
+        ));
       }
+
+      const hasEntries = entries.length > 0;
+
+      return response.ok({
+        body: logEntriesResponseRT.encode({
+          data: {
+            entries,
+            topCursor: hasEntries ? entries[0].cursor : null,
+            bottomCursor: hasEntries ? entries[entries.length - 1].cursor : null,
+            hasMoreBefore,
+            hasMoreAfter,
+          },
+        }),
+      });
     }
   );
 };

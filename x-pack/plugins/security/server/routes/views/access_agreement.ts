@@ -57,8 +57,7 @@ export function defineAccessAgreementRoutes({
 
         return response.ok({ body: { accessAgreement } });
       } catch (err) {
-        logger.error(err);
-        return response.internalError();
+        throw err;
       }
     })
   );
