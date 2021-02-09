@@ -156,14 +156,14 @@ const FieldEditorFlyoutContentComponent = ({
   const existingConcreteFields = useMemo(
     () =>
       fields
+        .filter((fld) => {
+          const isFieldBeingEdited = field?.name === fld.name;
+          return !isFieldBeingEdited && fld.isMapped;
+        })
         .map((fld) => ({
           name: fld.name,
           type: (fld.esTypes && fld.esTypes[0]) || '',
-        }))
-        .filter((fld) => {
-          // Filter out the current field being edited
-          return field?.name === fld.name ? false : true;
-        }),
+        })),
     [fields, field]
   );
 
