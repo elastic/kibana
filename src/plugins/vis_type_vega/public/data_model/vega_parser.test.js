@@ -13,11 +13,6 @@ import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
 jest.mock('../services');
 
-jest.mock('../lib/vega', () => ({
-  vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
-}));
-
 describe(`VegaParser.parseAsync`, () => {
   test(`should throw an error in case of $spec is not defined`, async () => {
     const vp = new VegaParser('{}');

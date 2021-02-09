@@ -35,11 +35,11 @@ type MinAgePhase = 'warm' | 'cold' | 'delete';
 type Phase = 'hot' | MinAgePhase;
 
 const i18nTexts = {
-  forever: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.Forever', {
-    defaultMessage: 'Forever',
+  forever: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.forever', {
+    defaultMessage: 'forever',
   }),
   lessThanADay: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.lessThanADay', {
-    defaultMessage: 'Less than a day',
+    defaultMessage: 'less than a day',
   }),
   day: i18n.translate('xpack.indexLifecycleMgmt.relativeTiming.day', {
     defaultMessage: 'day',
