@@ -5,8 +5,22 @@ Packaging tests use Vagrant virtual machines as hosts and Ansible for provisioni
 ## Setup
 
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+
+  ```
+  # Ubuntu
+  sudo apt-get install python3-pip
+  pip3 install --user ansible
+
+  # Darwin
+  brew install python3
+  pip3 install --user ansible
+  ```
+
 - [ansible.posix.firewalld](https://docs.ansible.com/ansible/latest/collections/ansible/posix/firewalld_module.html)
-- [Vagrant](https://www.vagrantup.com/docs/installation)
+  ```
+  ansible-galaxy collection install ansible.posix
+  ```
+- [Vagrant](https://www.vagrantup.com/downloads)
 - [Virtualbox](https://www.virtualbox.org/wiki/Downloads)
 
 ## Machines
