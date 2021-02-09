@@ -2415,6 +2415,7 @@ export interface SearchSourceFields {
     index?: IndexPattern;
     // (undocumented)
     query?: Query;
+    routing?: string;
     // Warning: (ae-forgotten-export) The symbol "EsQuerySearchAfter" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

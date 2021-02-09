@@ -25,6 +25,7 @@ export interface SearchSourceFields
 |  [highlightAll](./kibana-plugin-plugins-data-public.searchsourcefields.highlightall.md) | <code>boolean</code> |  |
 |  [index](./kibana-plugin-plugins-data-public.searchsourcefields.index.md) | <code>IndexPattern</code> |  |
 |  [query](./kibana-plugin-plugins-data-public.searchsourcefields.query.md) | <code>Query</code> | [Query](./kibana-plugin-plugins-data-public.query.md) |
+|  [routing](./kibana-plugin-plugins-data-public.searchsourcefields.routing.md) | <code>string</code> | Search a specific shard, used for retrieving documents with known routing |
 |  [searchAfter](./kibana-plugin-plugins-data-public.searchsourcefields.searchafter.md) | <code>EsQuerySearchAfter</code> |  |
 |  [size](./kibana-plugin-plugins-data-public.searchsourcefields.size.md) | <code>number</code> |  |
 |  [sort](./kibana-plugin-plugins-data-public.searchsourcefields.sort.md) | <code>EsQuerySortValue &#124; EsQuerySortValue[]</code> | [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |
