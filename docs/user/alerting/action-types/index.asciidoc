@@ -30,6 +30,7 @@ Execution time field::  This field will be automatically set to the time the ale
      executionTimeField: somedate
 --
 
+[[index-connector-config-properties]]
 `config` defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]

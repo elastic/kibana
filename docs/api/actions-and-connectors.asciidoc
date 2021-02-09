@@ -1,0 +1,83 @@
+[[actions-and-connectors-api]]
+== Actions and Connectors APIs
+
+Manage your {kib} actions and connectors.
+
+The following {kib} actions APIs are available: 
+
+* <<actions-and-connectors-api-get, Get action API>> to retrieve a single {kib} action by ID
+
+* <<actions-and-connectors-api-get-all, Get all actions API>> to retrieve all {kib} actions
+
+* <<actions-and-connectors-api-list, List all action types API>> to retrieve a list of all {kib} action types
+
+* <<actions-and-connectors-api-create, Create action API>> to create {kib} action
+
+* <<actions-and-connectors-api-update, Update action API>> to update the attributes for an existing {kib} action
+
+* <<actions-and-connectors-api-execute, Execute action API>> to execute a {kib} action by ID
+
+* <<actions-and-connectors-api-delete, Delete action API>> to remove {kib} action by ID
+
+=== Action types
+
+{kib} ships with a set of built-in action types:
+
+[options="header"]
+|===
+
+| Type | Id | Description
+
+| Server log
+| `.server-log`
+| Logs messages to the {kib} log using {kib}'s logger
+
+| Email
+| `.email`
+| Sends an email using SMTP
+
+| Slack
+| `.slack`
+| Posts a message to a Slack channel
+
+| Microsoft Teams
+| `.teams`
+| Posts a message to a Microsoft Teams channel
+
+| Index
+| `.index`
+| Indexes document(s) into Elasticsearch
+
+| Webhook
+| `.webhook`
+| Sends a payload to a web service using `HTTP POST` or `PUT`
+
+| PagerDuty
+| `.pagerduty`
+| Triggers, resolves or acknowledges an incident to a PagerDuty service
+
+| ServiceNow ITSM
+| `.servicenow`
+| Creates or updates an incident to a ServiceNow ITSM instance
+
+| ServiceNow SIR
+| `.servicenow-sir`
+| Creates or updates an incident to a ServiceNow SIR instance
+
+| Jira
+| `.jira`
+| Creates or updates an issue to a Jira instance
+
+| IBM Resilient
+| `.resilient`
+| Creates or updates an incident to an IBM Resilient instance
+
+|===
+
+include::actions-and-connectors/get.asciidoc[]
+include::actions-and-connectors/get_all.asciidoc[]
+include::actions-and-connectors/list.asciidoc[]
+include::actions-and-connectors/create.asciidoc[]
+include::actions-and-connectors/update.asciidoc[]
+include::actions-and-connectors/execute.asciidoc[]
+include::actions-and-connectors/delete.asciidoc[]

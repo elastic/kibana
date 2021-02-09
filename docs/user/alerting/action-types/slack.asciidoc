@@ -26,6 +26,7 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
      webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
 --
 
+[[slack-connector-config-properties]]
 `config` defines the action type specific to the configuration.
 `config` contains
 `webhookUrl`, a string that corresponds to *Webhook URL*.

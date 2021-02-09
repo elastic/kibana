@@ -1,0 +1,82 @@
+[[actions-and-connectors-api-list]]
+=== List action types API
+++++
+<titleabbrev>List action types</titleabbrev>
+++++
+
+experimental[] Retrieve a list of all {kib} action types.
+
+[[actions-and-connectors-api-list-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/actions/list_action_types`
+
+[[actions-and-connectors-api-list-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-list-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/list_action_types
+--------------------------------------------------
+// KIBANA
+
+==== Action types
+
+{kib} ships with a set of built-in action types:
+
+[options="header"]
+|===
+
+| Type | Id | Config
+
+| Email
+| `.email`
+| <<email-connector-config-properties, Email config and secrets properties>>
+
+| IBM Resilient
+| `.resilient`
+| <<resilient-connector-config-properties, IBM Resilient config and secrets properties>>
+
+| Index
+| `.index`
+| <<index-connector-config-properties, Index config and secrets properties>>
+
+| Jira
+| `.jira`
+| <<jira-connector-config-properties, Jira config and secrets properties>>
+
+| Microsoft Teams
+| `.teams`
+| <<teams-connector-config-properties, Microsoft Teams config and secrets properties>>
+
+| PagerDuty
+| `.pagerduty`
+| <<pagerduty-connector-config-properties, PagerDuty config and secrets properties>>
+
+| Server log
+| `.server-log`
+| <<index-connector-config-properties, Server log config and secrets properties>>
+
+| ServiceNow ITSM
+| `.servicenow`
+| <<servicenow-connector-config-properties, ServiceNow ITSM config and secrets properties>>
+
+| ServiceNow SIR
+| `.servicenow-sir`
+| <<servicenow-connector-config-properties, ServiceNow SIR config and secrets properties>>
+
+| Slack
+| `.slack`
+| <<slack-connector-config-properties, Slack config and secrets properties>>
+
+| Webhook
+| `.webhook`
+| <<webhook-connector-config-properties, Webhook config and secrets properties>>
+
+|===

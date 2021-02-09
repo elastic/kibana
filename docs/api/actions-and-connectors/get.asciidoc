@@ -1,15 +1,15 @@
-[[actions-api-execute]]
-// === Get object API
-// ++++
-// <titleabbrev>Get object</titleabbrev>
-// ++++
+[[actions-and-connectors-api-get]]
+=== Get action API
+++++
+<titleabbrev>Get action</titleabbrev>
+++++
 
-// experimental[] Retrieve a single {kib} saved object by ID.
+Retrieve a single {kib} action by ID.
 
-// [[saved-objects-api-get-request]]
-// ==== Request
+[[actions-and-connectors-api-get-request]]
+==== Request
 
-// `GET <kibana host>:<port>/api/saved_objects/<type>/<id>`
+`GET <kibana host>:<port>/api/actions/action/<id>`
 
 // `GET <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 

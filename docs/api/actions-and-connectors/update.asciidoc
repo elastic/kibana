@@ -1,8 +1,8 @@
-[[actions-api-get_all]]
-// === Get object API
-// ++++
-// <titleabbrev>Get object</titleabbrev>
-// ++++
+[[actions-and-connectors-api-update]]
+=== Update action API
+++++
+<titleabbrev>Update action</titleabbrev>
+++++
 
 // experimental[] Retrieve a single {kib} saved object by ID.
 

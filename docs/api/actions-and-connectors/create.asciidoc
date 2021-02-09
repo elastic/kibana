@@ -1,0 +1,52 @@
+[[actions-and-connectors-api-create]]
+=== Create action API
+++++
+<titleabbrev>Create actions and connectors</titleabbrev>
+++++
+
+Create {kib} actions and connectors.
+
+[[actions-and-connectors-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/actions/action`
+
+[[actions-and-connectors-api-create-request-body]]
+==== Request body
+
+`name`::
+  (Required, string) The display name for the action.
+
+`actionTypeId`::
+  (Required, string) The action type for the action.
+
+`config`::
+  (Required, object) The action configuration. Expected configuration varies depending on
+  the action type. See the specific action type to determine configuration definition.
+
+`secrets`::
+  (Required, object) The secrets configuration for the action. Expected configuration varies
+  depending on the action type. See the specific ation type to determine secrets definition.
+
+[[actions-and-connectors-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[actions-and-connectors-api-create-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/actions/action  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "name": "my-action",
+  "actionTypeId": ".index",
+  "config": {
+    "index": "test-index"
+  }
+}'
+--------------------------------------------------
+// KIBANA
+

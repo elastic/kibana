@@ -33,6 +33,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
      apiKeySecret: tokenkeystorevalue
 --
 
+[[resilient-connector-config-properties]]
 `config` defines the action type specific to the configuration and contains the following properties:
 
 [cols="2*<"]
