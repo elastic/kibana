@@ -924,7 +924,7 @@ describe('<EditPolicy />', () => {
       await actions.warm.enable(true);
       await actions.warm.toggleForceMerge(true);
       await actions.warm.setForcemergeSegmentsCount('-22');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(true);
       expect(actions.warm.hasErrorIndicator()).toBe(true);
@@ -933,7 +933,7 @@ describe('<EditPolicy />', () => {
       // 3. Cold phase validation issue
       await actions.cold.enable(true);
       await actions.cold.setReplicas('-33');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(true);
       expect(actions.warm.hasErrorIndicator()).toBe(true);
@@ -941,7 +941,7 @@ describe('<EditPolicy />', () => {
 
       // 4. Fix validation issue in hot
       await actions.hot.setForcemergeSegmentsCount('1');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(true);
@@ -949,7 +949,7 @@ describe('<EditPolicy />', () => {
 
       // 5. Fix validation issue in warm
       await actions.warm.setForcemergeSegmentsCount('1');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(true);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(false);
@@ -957,7 +957,7 @@ describe('<EditPolicy />', () => {
 
       // 6. Fix validation issue in cold
       await actions.cold.setReplicas('1');
-      await runTimers();
+      runTimers();
       expect(actions.hasGlobalErrorCallout()).toBe(false);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(false);
@@ -974,9 +974,33 @@ describe('<EditPolicy />', () => {
 
       await actions.saveAsNewPolicy(true);
       await actions.setPolicyName('');
-      await runTimers();
+      runTimers();
 
       expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(false);
+    });
+
+    test('clears all error indicators if last erroring field is unmounted', async () => {
+      const { actions } = testBed;
+
+      await actions.cold.enable(true);
+      // form should exit pristine state
+      await actions.cold.setSearchableSnapshot('123');
+      // introduce validation error
+      await actions.cold.setSearchableSnapshot('');
+      runTimers();
+
+      expect(actions.hasGlobalErrorCallout()).toBe(true);
+      expect(actions.hot.hasErrorIndicator()).toBe(false);
+      expect(actions.warm.hasErrorIndicator()).toBe(false);
+      expect(actions.cold.hasErrorIndicator()).toBe(true);
+
+      // unmount the field
+      await actions.cold.toggleSearchableSnapshot(false);
+
+      expect(actions.hasGlobalErrorCallout()).toBe(false);
       expect(actions.hot.hasErrorIndicator()).toBe(false);
       expect(actions.warm.hasErrorIndicator()).toBe(false);
       expect(actions.cold.hasErrorIndicator()).toBe(false);
