@@ -9,15 +9,12 @@ import expect from '@kbn/expect';
 import qs from 'querystring';
 import { first, last } from 'lodash';
 import moment from 'moment';
+import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { Coordinate } from '../../../../plugins/apm/typings/timeseries';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-
-function removeInvalidYAxis({ y }: Coordinate) {
-  return y !== null;
-}
 
 type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
 
@@ -64,7 +61,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
         expect(throughputResponse.previousPeriod.length).not.to.be.greaterThan(0);
 
-        const nonNullDataPoints = throughputResponse.currentPeriod.filter(removeInvalidYAxis);
+        const nonNullDataPoints = throughputResponse.currentPeriod.filter(({ y }) =>
+          isFiniteNumber(y)
+        );
 
         expect(nonNullDataPoints.length).to.be.greaterThan(0);
       });
@@ -113,11 +112,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(throughputResponse.currentPeriod.length).to.be.greaterThan(0);
         expect(throughputResponse.previousPeriod.length).to.be.greaterThan(0);
 
-        const currentPeriodNonNullDataPoints = throughputResponse.currentPeriod.filter(
-          removeInvalidYAxis
+        const currentPeriodNonNullDataPoints = throughputResponse.currentPeriod.filter(({ y }) =>
+          isFiniteNumber(y)
         );
-        const previousPeriodNonNullDataPoints = throughputResponse.previousPeriod.filter(
-          removeInvalidYAxis
+        const previousPeriodNonNullDataPoints = throughputResponse.previousPeriod.filter(({ y }) =>
+          isFiniteNumber(y)
         );
 
         expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
