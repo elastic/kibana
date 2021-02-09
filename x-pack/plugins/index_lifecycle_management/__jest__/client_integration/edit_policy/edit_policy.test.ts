@@ -674,146 +674,82 @@ describe('<EditPolicy />', () => {
     });
     describe('on cloud', () => {
       describe('using legacy data role config', () => {
-        describe('pre v8', () => {
-          beforeEach(async () => {
-            httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-            httpRequestsMockHelpers.setListNodes({
-              nodesByAttributes: { test: ['123'] },
-              // On cloud, even if there are data_* roles set, the default, recommended allocation option should not
-              // be available.
-              nodesByRoles: { data_hot: ['123'] },
-              isUsingDeprecatedDataRoleConfig: true,
-            });
-            httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            nodesByAttributes: { test: ['123'] },
+            // On cloud, even if there are data_* roles set, the default, recommended allocation option should not
+            // be available.
+            nodesByRoles: { data_hot: ['123'] },
+            isUsingDeprecatedDataRoleConfig: true,
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-            await act(async () => {
-              testBed = await setup({
-                appServicesContext: {
-                  cloud: {
-                    isCloudEnabled: true,
-                  },
-                  license: licensingMock.createLicense({ license: { type: 'basic' } }),
+          await act(async () => {
+            testBed = await setup({
+              appServicesContext: {
+                cloud: {
+                  isCloudEnabled: true,
                 },
-              });
+                license: licensingMock.createLicense({ license: { type: 'basic' } }),
+              },
             });
-
-            const { component } = testBed;
-            component.update();
           });
-          test('removes default, recommended option', async () => {
-            const { actions, find } = testBed;
-            await actions.warm.enable(true);
-            actions.warm.showDataAllocationOptions();
 
-            expect(find('defaultDataAllocationOption').exists()).toBeFalsy();
-            expect(find('customDataAllocationOption').exists()).toBeTruthy();
-            expect(find('noneDataAllocationOption').exists()).toBeTruthy();
-          });
+          const { component } = testBed;
+          component.update();
         });
+        test('removes default, recommended option', async () => {
+          const { actions, find } = testBed;
+          await actions.warm.enable(true);
+          actions.warm.showDataAllocationOptions();
 
-        describe('v8 and above', () => {
-          beforeEach(async () => {
-            httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-            httpRequestsMockHelpers.setListNodes({
-              nodesByAttributes: { test: ['123'] },
-              // On cloud, even if there are data_* roles set, the default, recommended allocation option should *not* be available when legacy node role config is present
-              nodesByRoles: { data_hot: ['123'] },
-              isUsingDeprecatedDataRoleConfig: true,
-            });
-            httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
-
-            await act(async () => {
-              testBed = await setup({
-                appServicesContext: {
-                  cloud: {
-                    isCloudEnabled: true,
-                  },
-                  license: licensingMock.createLicense({ license: { type: 'basic' } }),
-                  stackVersion: '8.0.0',
-                },
-              });
-            });
-
-            const { component } = testBed;
-            component.update();
-          });
-          test('offers default, recommended option', async () => {
-            const { actions, find } = testBed;
-            await actions.warm.enable(true);
-            actions.warm.showDataAllocationOptions();
-
-            // Should show all options!!
-            expect(find('defaultDataAllocationOption').exists()).toBeTruthy();
-            expect(find('customDataAllocationOption').exists()).toBeTruthy();
-            expect(find('noneDataAllocationOption').exists()).toBeTruthy();
-          });
+          expect(find('defaultDataAllocationOption').exists()).toBeFalsy();
+          expect(find('customDataAllocationOption').exists()).toBeTruthy();
+          expect(find('noneDataAllocationOption').exists()).toBeTruthy();
+          // Show the call-to-action for users to migrate their cluster to use node roles
+          expect(find('cloudDataTierCallout').exists()).toBeTruthy();
         });
       });
-      describe('using data role config', () => {
-        describe('new policy', () => {
-          beforeEach(async () => {
-            // simulate creating a new policy
-            httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('')]);
-            httpRequestsMockHelpers.setListNodes({
-              nodesByAttributes: { test: ['123'] },
-              nodesByRoles: { data: ['123'] },
-              isUsingDeprecatedDataRoleConfig: false,
-            });
-            httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
-
-            await act(async () => {
-              testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-            });
-
-            const { component } = testBed;
-            component.update();
+      describe('using node roles', () => {
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data_hot: ['123'] },
+            isUsingDeprecatedDataRoleConfig: false,
           });
-          test('defaults searchable snapshot to true on cloud', async () => {
-            const { find, actions } = testBed;
-            await actions.cold.enable(true);
-            expect(
-              find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
-            ).toBe(true);
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
           });
+
+          const { component } = testBed;
+          component.update();
         });
-        describe('existing policy', () => {
-          beforeEach(async () => {
-            httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-            httpRequestsMockHelpers.setListNodes({
-              nodesByAttributes: { test: ['123'] },
-              nodesByRoles: { data_hot: ['123'] },
-              isUsingDeprecatedDataRoleConfig: false,
-            });
-            httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-            await act(async () => {
-              testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-            });
+        test('should show off, custom and data role options on cloud with data roles', async () => {
+          const { actions, find } = testBed;
 
-            const { component } = testBed;
-            component.update();
-          });
+          await actions.warm.enable(true);
+          actions.warm.showDataAllocationOptions();
+          expect(find('defaultDataAllocationOption').exists()).toBeTruthy();
+          expect(find('customDataAllocationOption').exists()).toBeTruthy();
+          expect(find('noneDataAllocationOption').exists()).toBeTruthy();
+          // We should not be showing the call-to-action for users to activate the cold tier on cloud
+          expect(find('cloudMissingColdTierCallout').exists()).toBeFalsy();
+          // Do not show the call-to-action for users to migrate their cluster to use node roles
+          expect(find('cloudDataTierCallout').exists()).toBeFalsy();
+        });
 
-          test('should show off, custom and data role options on cloud with data roles', async () => {
-            const { actions, find } = testBed;
-
-            await actions.warm.enable(true);
-            actions.warm.showDataAllocationOptions();
-            expect(find('defaultDataAllocationOption').exists()).toBeTruthy();
-            expect(find('customDataAllocationOption').exists()).toBeTruthy();
-            expect(find('noneDataAllocationOption').exists()).toBeTruthy();
-            // We should not be showing the call-to-action for users to activate data tiers in cloud
-            expect(find('cloudDataTierCallout').exists()).toBeFalsy();
-          });
-
-          test('should show cloud notice when cold tier nodes do not exist', async () => {
-            const { actions, find } = testBed;
-            await actions.cold.enable(true);
-            expect(find('cloudDataTierCallout').exists()).toBeTruthy();
-            // Assert that other notices are not showing
-            expect(find('defaultAllocationNotice').exists()).toBeFalsy();
-            expect(find('noNodeAttributesWarning').exists()).toBeFalsy();
-          });
+        test('should show cloud notice when cold tier nodes do not exist', async () => {
+          const { actions, find } = testBed;
+          await actions.cold.enable(true);
+          expect(find('cloudMissingColdTierCallout').exists()).toBeTruthy();
+          // Assert that other notices are not showing
+          expect(find('defaultAllocationNotice').exists()).toBeFalsy();
+          expect(find('noNodeAttributesWarning').exists()).toBeFalsy();
         });
       });
     });
@@ -858,32 +794,60 @@ describe('<EditPolicy />', () => {
     });
 
     describe('on cloud', () => {
-      beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-        httpRequestsMockHelpers.setListNodes({
-          isUsingDeprecatedDataRoleConfig: false,
-          nodesByAttributes: { test: ['123'] },
-          nodesByRoles: { data_hot: ['123'] },
-        });
-        httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+      describe('new policy', () => {
+        beforeEach(async () => {
+          // simulate creating a new policy
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('')]);
+          httpRequestsMockHelpers.setListNodes({
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data: ['123'] },
+            isUsingDeprecatedDataRoleConfig: false,
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
-        await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-        });
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
 
-        const { component } = testBed;
-        component.update();
+          const { component } = testBed;
+          component.update();
+        });
+        test('defaults searchable snapshot to true on cloud', async () => {
+          const { find, actions } = testBed;
+          await actions.cold.enable(true);
+          expect(
+            find('searchableSnapshotField-cold.searchableSnapshotToggle').props()['aria-checked']
+          ).toBe(true);
+        });
       });
-      test('correctly sets snapshot repository default to "found-snapshots"', async () => {
-        const { actions } = testBed;
-        await actions.cold.enable(true);
-        await actions.cold.toggleSearchableSnapshot(true);
-        await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-        expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
-          'found-snapshots'
-        );
+      describe('existing policy', () => {
+        beforeEach(async () => {
+          httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
+          httpRequestsMockHelpers.setListNodes({
+            isUsingDeprecatedDataRoleConfig: false,
+            nodesByAttributes: { test: ['123'] },
+            nodesByRoles: { data_hot: ['123'] },
+          });
+          httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
+
+          await act(async () => {
+            testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          });
+
+          const { component } = testBed;
+          component.update();
+        });
+        test('correctly sets snapshot repository default to "found-snapshots"', async () => {
+          const { actions } = testBed;
+          await actions.cold.enable(true);
+          await actions.cold.toggleSearchableSnapshot(true);
+          await actions.savePolicy();
+          const latestRequest = server.requests[server.requests.length - 1];
+          const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+          expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+            'found-snapshots'
+          );
+        });
       });
     });
   });

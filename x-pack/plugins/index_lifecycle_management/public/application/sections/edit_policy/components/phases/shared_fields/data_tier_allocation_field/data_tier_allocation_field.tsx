@@ -6,8 +6,7 @@
  */
 
 import { get } from 'lodash';
-import semver from 'semver';
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
@@ -27,6 +26,7 @@ import {
   DataTierAllocation,
   DefaultAllocationNotice,
   NoNodeAttributesWarning,
+  CloudMissingColdTierCallout,
   CloudDataTierCallout,
   LoadingError,
 } from './components';
@@ -49,12 +49,9 @@ interface Props {
  */
 export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, description }) => {
   const {
-    services: { cloud, stackVersion },
+    services: { cloud },
   } = useKibana();
 
-  const isPreV8 = useMemo(() => {
-    return semver.lt(stackVersion, '8.0.0');
-  }, [stackVersion]);
   const dataTierAllocationTypePath = `_meta.${phase}.dataTierAllocationType`;
   const [formData] = useFormData({ watch: dataTierAllocationTypePath });
   const allocationType: DataTierAllocationType = get(formData, dataTierAllocationTypePath);
@@ -69,20 +66,20 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
   );
   const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
   const isCloudEnabled = cloud?.isCloudEnabled ?? false;
+  const cloudDeploymentUrl = cloud?.cloudDeploymentUrl;
 
   const renderNotice = () => {
     switch (allocationType) {
       case 'node_roles':
         if (isCloudEnabled && phase === 'cold') {
-          const isUsingNodeRolesAllocation = !isUsingDeprecatedDataRoleConfig && hasDataNodeRoles;
           const hasNoNodesWithNodeRole = !nodesByRoles.data_cold?.length;
 
-          if (isUsingNodeRolesAllocation && hasNoNodesWithNodeRole) {
+          if (hasDataNodeRoles && hasNoNodesWithNodeRole) {
             // Tell cloud users they can deploy nodes on cloud.
             return (
               <>
                 <EuiSpacer size="s" />
-                <CloudDataTierCallout />
+                <CloudMissingColdTierCallout linkToCloudDeployment={cloudDeploymentUrl} />
               </>
             );
           }
@@ -107,6 +104,14 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
             <>
               <EuiSpacer size="s" />
               <NoNodeAttributesWarning phase={phase} />
+            </>
+          );
+        }
+        if (isUsingDeprecatedDataRoleConfig) {
+          return (
+            <>
+              <EuiSpacer size="s" />
+              <CloudDataTierCallout linkToCloudDeployment={cloudDeploymentUrl} />
             </>
           );
         }
@@ -145,9 +150,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           hasNodeAttributes={hasNodeAttrs}
           phase={phase}
           nodes={nodesByAttributes}
-          disableDataTierOption={Boolean(
-            isPreV8 && isCloudEnabled && isUsingDeprecatedDataRoleConfig
-          )}
+          disableDataTierOption={Boolean(isCloudEnabled && isUsingDeprecatedDataRoleConfig)}
           isLoading={isLoading}
         />
 

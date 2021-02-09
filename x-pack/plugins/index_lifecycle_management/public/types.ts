@@ -36,9 +36,5 @@ export interface ClientConfigType {
 export interface AppServicesContext {
   breadcrumbService: BreadcrumbService;
   license: ILicense;
-  /**
-   * Semver compatible string of the current stack version.
-   */
-  stackVersion: string;
   cloud?: CloudSetup;
 }

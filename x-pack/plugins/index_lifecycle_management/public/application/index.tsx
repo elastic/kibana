@@ -26,12 +26,11 @@ export const renderApp = (
   getUrlForApp: ApplicationStart['getUrlForApp'],
   breadcrumbService: BreadcrumbService,
   license: ILicense,
-  stackVersion: string,
   cloud?: CloudSetup
 ): UnmountCallback => {
   render(
     <I18nContext>
-      <KibanaContextProvider services={{ cloud, breadcrumbService, license, stackVersion }}>
+      <KibanaContextProvider services={{ cloud, breadcrumbService, license }}>
         <AppWithRouter
           history={history}
           navigateToApp={navigateToApp}

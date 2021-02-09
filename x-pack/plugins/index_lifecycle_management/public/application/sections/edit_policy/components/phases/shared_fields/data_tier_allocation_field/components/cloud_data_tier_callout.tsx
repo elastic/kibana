@@ -7,21 +7,39 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.title', {
-    defaultMessage: 'Create a cold tier',
+    defaultMessage: 'Migrate to data tiers',
   }),
   body: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.body', {
-    defaultMessage: 'Edit your Elastic Cloud deployment to set up a cold tier.',
+    defaultMessage: 'Migrate your Elastic Cloud deployment to use data tiers.',
   }),
+  linkText: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.cloudDataTierCallout.linkToCloudDeploymentDescription',
+    { defaultMessage: 'View cloud deployment' }
+  ),
 };
 
-export const CloudDataTierCallout: FunctionComponent = () => {
+interface Props {
+  linkToCloudDeployment?: string;
+}
+
+/**
+ * A call-to-action for users to migrate to data tiers if their cluster is still running
+ * the deprecated node.data:true config.
+ */
+export const CloudDataTierCallout: FunctionComponent<Props> = ({ linkToCloudDeployment }) => {
   return (
     <EuiCallOut title={i18nTexts.title} data-test-subj="cloudDataTierCallout">
       {i18nTexts.body}
+      &nbsp;
+      {Boolean(linkToCloudDeployment) && (
+        <EuiLink href={linkToCloudDeployment} external>
+          {i18nTexts.linkText}
+        </EuiLink>
+      )}
     </EuiCallOut>
   );
 };
