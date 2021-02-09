@@ -40,6 +40,7 @@ export const PanelToolbar: FC<Props> = ({ onAddPanelClick, onLibraryClick }) => 
         className="panelToolbarButton"
         iconType="folderOpen"
         onClick={onLibraryClick}
+        data-test-subj="dashboardAddPanelButton"
       >
         {i18n.translate('dashboard.panelToolbar.libraryButtonLabel', {
           defaultMessage: 'Add from library',
