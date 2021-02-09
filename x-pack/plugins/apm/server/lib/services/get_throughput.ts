@@ -18,12 +18,12 @@ import {
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { calculateThroughput } from '../helpers/calculate_throughput';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 
 interface Options {
   searchAggregatedTransactions: boolean;
   serviceName: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   transactionType: string;
   start: number;
   end: number;
