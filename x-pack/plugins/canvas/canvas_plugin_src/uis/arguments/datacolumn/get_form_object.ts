@@ -9,7 +9,7 @@ import { parse } from '@kbn/tinymath';
 import { unquoteString } from '../../../../common/lib/unquote_string';
 
 // break out into separate function, write unit tests first
-export function getFormObject(argValue) {
+export function getFormObject(argValue: string) {
   if (argValue === '') {
     return {
       fn: '',
@@ -20,23 +20,28 @@ export function getFormObject(argValue) {
   // check if the value is a math expression, and set its type if it is
   const mathObj = parse(argValue);
   // A symbol node is a plain string, so we guess that they're looking for a column.
-  if (typeof mathObj === 'string') {
+  if (typeof mathObj === 'number') {
+    throw new Error(`Cannot render scalar values or complex math expressions`);
+  }
+
+  if (mathObj.type === 'variable') {
     return {
       fn: '',
-      column: unquoteString(argValue),
+      column: unquoteString(mathObj.value),
     };
   }
 
   // Check if its a simple function, eg a function wrapping a symbol node
   // check for only one arg of type string
   if (
-    typeof mathObj === 'object' &&
+    mathObj.type === 'function' &&
     mathObj.args.length === 1 &&
-    typeof mathObj.args[0] === 'string'
+    typeof mathObj.args[0] !== 'number' &&
+    mathObj.args[0].type === 'variable'
   ) {
     return {
       fn: mathObj.name,
-      column: unquoteString(mathObj.args[0]),
+      column: unquoteString(mathObj.args[0].value),
     };
   }
 

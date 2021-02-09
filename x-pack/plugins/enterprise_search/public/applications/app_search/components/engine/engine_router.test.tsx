@@ -6,17 +6,18 @@
  */
 
 import '../../../__mocks__/react_router_history.mock';
-import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { Switch, Redirect, useParams } from 'react-router-dom';
 
+import { shallow } from 'enzyme';
+
 import { Loading } from '../../../shared/loading';
-import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
+import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
 
 import { EngineRouter } from './engine_router';

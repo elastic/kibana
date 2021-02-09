@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '..',
-  projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
-};
+export { addGeoJsonMbSource, syncVectorSource } from './utils';
+export { IVectorLayer, VectorLayer, VectorLayerArguments } from './vector_layer';
