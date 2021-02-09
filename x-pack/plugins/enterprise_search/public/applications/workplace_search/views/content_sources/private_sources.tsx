@@ -41,17 +41,6 @@ import {
 import { SourcesLogic } from './sources_logic';
 import { SourcesView } from './sources_view';
 
-// TODO: Remove this after links in Kibana sidenav
-interface SidebarLink {
-  title: string;
-  path?: string;
-  disabled?: boolean;
-  iconType?: string;
-  otherActivePath?: string;
-  dataTestSubj?: string;
-  onClick?(): void;
-}
-
 export const PrivateSources: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { initializeSources, setSourceSearchability, resetSourcesState } = useActions(SourcesLogic);
@@ -71,16 +60,8 @@ export const PrivateSources: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const sidebarLinks = [] as SidebarLink[];
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
   const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
-  if (canAddSources) {
-    sidebarLinks.push({
-      title: PRIVATE_LINK_TITLE,
-      iconType: 'plusInCircle',
-      path: getSourcesPath(ADD_SOURCE_PATH, false),
-    });
-  }
 
   const headerAction = (
     <EuiButtonTo
