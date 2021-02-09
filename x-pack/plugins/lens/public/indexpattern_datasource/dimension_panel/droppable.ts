@@ -12,12 +12,11 @@ import {
   DraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn, deleteColumn } from '../operations';
+import { insertOrReplaceColumn, deleteColumn, getOperationTypesForField } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField, DraggedField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { getOperationsForField } from './operation_support';
 
 type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
   droppedItem: T;
@@ -34,7 +33,7 @@ export function getDropTypes(
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
   function hasOperationForField(field: IndexPatternField) {
-    const operationsForNewField = getOperationsForField(field, props.filterOperations);
+    const operationsForNewField = getOperationTypesForField(field, props.filterOperations);
     return !!operationsForNewField.length;
   }
 
@@ -172,7 +171,7 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
     return false;
   }
 
-  const operationsForNewField = getOperationsForField(field, props.filterOperations);
+  const operationsForNewField = getOperationTypesForField(field, props.filterOperations);
 
   if (!operationsForNewField.length) {
     return false;
@@ -283,7 +282,10 @@ function onMoveDropToCompatibleGroup({
 function onFieldDrop(props: DropHandlerProps<DraggedField>) {
   const { columnId, setState, state, layerId, droppedItem } = props;
 
-  const operationsForNewField = getOperationsForField(droppedItem.field, props.filterOperations);
+  const operationsForNewField = getOperationTypesForField(
+    droppedItem.field,
+    props.filterOperations
+  );
 
   if (!isDraggedField(droppedItem) || !operationsForNewField.length) {
     // TODO: What do we do if we couldn't find a column?

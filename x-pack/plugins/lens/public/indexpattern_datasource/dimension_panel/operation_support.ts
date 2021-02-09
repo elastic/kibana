@@ -8,7 +8,11 @@
 import _ from 'lodash';
 import { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
 import { OperationType } from '../indexpattern';
-import { getAvailableOperationsByMetadata, getSortScoreByPriority } from '../operations';
+import {
+  getAvailableOperationsByMetadata,
+  getSortScoreByPriority,
+  getOperationTypesForField,
+} from '../operations';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 
 import { operationDefinitions } from '../operations/definitions';
@@ -63,18 +67,3 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
     fieldByOperation: supportedFieldsByOperation,
   };
 };
-
-export const getOperationsForField = (
-  field: IndexPatternField,
-  filterOperations: (operation: OperationMetadata) => boolean
-): OperationType[] =>
-  operationDefinitions
-    .filter((operation) => {
-      if (operation.input !== 'field') {
-        return false;
-      }
-      const possibleOperation = operation.getPossibleOperationForField(field);
-      return possibleOperation && filterOperations(possibleOperation);
-    })
-    .sort(getSortScoreByPriority)
-    .map((o) => o.type);
