@@ -96,7 +96,7 @@ export const GroupSourcePrioritization: React.FC = () => {
     <EuiButton
       disabled={groupPrioritiesUnchanged}
       color="primary"
-      fill={true}
+      fill
       onClick={saveGroupSourcePrioritization}
     >
       {HEADER_ACTION_TEXT}

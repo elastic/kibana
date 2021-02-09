@@ -41,7 +41,7 @@ export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
   return (
     <>
       {percentageComplete < 100 && (
-        <EuiPanel paddingSize="l" hasShadow={true}>
+        <EuiPanel paddingSize="l" hasShadow>
           <IndexingStatusContent percentageComplete={percentageComplete} />
         </EuiPanel>
       )}

@@ -19,7 +19,6 @@ import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/experimental_map_vis_info';
 import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
 
-import type { VegaSpec } from './data_model/types';
 import type { VisParams } from './vega_fn';
 
 export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
@@ -58,7 +57,7 @@ export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
       try {
         const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
 
-        return extractIndexPatternsFromSpec(spec as VegaSpec);
+        return extractIndexPatternsFromSpec(spec);
       } catch (e) {
         // spec is invalid
       }

@@ -97,3 +97,4 @@ export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
 export { APMPlugin, APMPluginSetup } from './plugin';
+export type { ProcessorEvent } from '../common/processor_event';
