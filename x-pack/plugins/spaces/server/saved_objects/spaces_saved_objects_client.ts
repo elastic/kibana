@@ -386,7 +386,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
    *
    * @param {string|Array<string>} type
-   * @param {object} [options] - {@link SavedObjectsPointInTimeOptions}
+   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
    * @property {string} [options.keepAlive]
    * @property {string} [options.preference]
    * @returns {promise} - { id: string }
@@ -406,8 +406,16 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
    * via the Elasticsearch client, and is included in the Saved Objects Client
    * as a convenience for consumers who are using `openPointInTimeForType`.
+   *
+   * @param {string} id - ID returned from `openPointInTimeForType`
+   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
+   * @returns {promise} - { succeeded: boolean; num_freed: number }
    */
   async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
-    return await this.client.closePointInTime(id, options);
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.closePointInTime(id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
   }
 }

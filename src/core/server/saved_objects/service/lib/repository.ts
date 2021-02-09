@@ -1809,7 +1809,7 @@ export class SavedObjectsRepository {
    * ```
    *
    * @param {string|Array<string>} type
-   * @param {object} [options] - {@link SavedObjectsPointInTimeOptions}
+   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
    * @property {string} [options.keepAlive]
    * @property {string} [options.preference]
    * @returns {promise} - { id: string }

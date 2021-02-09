@@ -995,11 +995,6 @@ describe('#openPointInTimeForType', () => {
     await expectGeneralError(client.openPointInTimeForType, { type });
   });
 
-  test(`throws decorated ForbiddenError when unauthorized`, async () => {
-    const options = { namespace };
-    await expectForbiddenError(client.openPointInTimeForType, { type, options });
-  });
-
   test(`returns result of baseClient.openPointInTimeForType when authorized`, async () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
@@ -1015,7 +1010,7 @@ describe('#openPointInTimeForType', () => {
     const options = { namespace };
     await expectSuccess(client.openPointInTimeForType, { type, options });
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
-    expectAuditEvent('saved_object_open_point_in_time', EventOutcome.SUCCESS);
+    expectAuditEvent('saved_object_open_point_in_time', EventOutcome.UNKNOWN);
   });
 
   test(`adds audit event when not successful`, async () => {
@@ -1023,6 +1018,30 @@ describe('#openPointInTimeForType', () => {
     await expect(() => client.openPointInTimeForType(type, { namespace })).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_open_point_in_time', EventOutcome.FAILURE);
+  });
+});
+
+describe('#closePointInTime', () => {
+  const id = 'abc123';
+  const namespace = 'some-ns';
+
+  test(`returns result of baseClient.closePointInTime`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.closePointInTime.mockReturnValue(apiCallReturnValue as any);
+
+    const options = { namespace };
+    const result = await client.closePointInTime(id, options);
+    expect(result).toBe(apiCallReturnValue);
+  });
+
+  test(`adds audit event`, async () => {
+    const apiCallReturnValue = Symbol();
+    clientOpts.baseClient.closePointInTime.mockReturnValue(apiCallReturnValue as any);
+
+    const options = { namespace };
+    await client.closePointInTime(id, options);
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
+    expectAuditEvent('saved_object_close_point_in_time', EventOutcome.UNKNOWN);
   });
 });
 

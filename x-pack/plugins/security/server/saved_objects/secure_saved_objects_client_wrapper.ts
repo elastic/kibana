@@ -570,7 +570,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     try {
       const args = { type, options };
-      await this.ensureAuthorized(type, 'open_point_in_time', options?.namespace, { args });
+      await this.ensureAuthorized(type, 'open_point_in_time', options?.namespace, {
+        args,
+        requireFullAuthorization: false,
+      });
     } catch (error) {
       this.auditLogger.log(
         savedObjectEvent({
@@ -581,27 +584,25 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       throw error;
     }
 
-    const pit = await this.baseClient.openPointInTimeForType(type, options);
-
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.OPEN_POINT_IN_TIME,
+        outcome: EventOutcome.UNKNOWN,
       })
     );
 
-    return pit;
+    return await this.baseClient.openPointInTimeForType(type, options);
   }
 
   public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
-    const response = await this.baseClient.closePointInTime(id, options);
-
     this.auditLogger.log(
       savedObjectEvent({
         action: SavedObjectAction.CLOSE_POINT_IN_TIME,
+        outcome: EventOutcome.UNKNOWN,
       })
     );
 
-    return response;
+    return await this.baseClient.closePointInTime(id, options);
   }
 
   private async checkPrivileges(

@@ -615,5 +615,31 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         });
       });
     });
+
+    describe('#closePointInTime', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.closePointInTime('foo', { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { succeeded: true, num_freed: 1 };
+        baseClient.closePointInTime.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.closePointInTime('foo', options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.closePointInTime).toHaveBeenCalledWith('foo', {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
   });
 });
