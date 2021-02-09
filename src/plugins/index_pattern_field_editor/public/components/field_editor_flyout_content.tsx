@@ -112,12 +112,10 @@ const FieldEditorFlyoutContentComponent = ({
   }, [onSave, submit]);
 
   const namesNotAllowed = indexPattern.fields.map((fld) => fld.name);
-  const existingConcreteFields = indexPattern.fields
-    .filter((fld) => fld.isMapped)
-    .map((fld) => ({
-      name: fld.name,
-      type: fld.esTypes![0]!,
-    }));
+  const existingConcreteFields = indexPattern.fields.map((fld) => ({
+    name: fld.name,
+    type: (fld.esTypes && fld.esTypes[0]) || '',
+  }));
 
   return (
     <>
