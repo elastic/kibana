@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { parse } from '../../../common/_generated_/chain';
+import { parseTimelionExpression } from '../../../common/parser';
 
 export default function parseSheet(sheet) {
   return sheet.map(function (plot) {
     try {
-      return parse(plot).tree;
+      return parseTimelionExpression(plot).tree;
     } catch (e) {
       if (e.expected) {
         throw new Error(

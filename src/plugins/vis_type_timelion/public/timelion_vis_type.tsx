@@ -15,11 +15,9 @@ import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { getIndexPatterns } from './helpers/plugin_services';
 
-// @ts-ignore
-import { parse } from '../common/_generated_/chain';
+import { parseTimelionExpression } from '../common/parser';
 
 import { VIS_EVENT_TO_TRIGGER, VisParams } from '../../visualizations/public';
-import { TimelionExpressionArgument } from '../common/types';
 
 const TimelionOptions = lazy(() => import('./timelion_options'));
 
@@ -54,7 +52,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     },
     getUsedIndexPattern: (params: VisParams) => {
       try {
-        const args: TimelionExpressionArgument[] = parse(params.expression)?.args ?? [];
+        const args = parseTimelionExpression(params.expression)?.args ?? [];
         const indexArg = args.find(
           ({ type, name, function: fn }) => type === 'namedArg' && fn === 'es' && name === 'index'
         );
