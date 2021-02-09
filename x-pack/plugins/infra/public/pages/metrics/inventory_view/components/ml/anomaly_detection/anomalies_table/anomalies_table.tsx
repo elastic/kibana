@@ -28,6 +28,7 @@ import {
 import { PaginationControls } from './pagination';
 import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
+import { useSourceContext } from '../../../../../../../containers/source';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
@@ -45,6 +46,8 @@ export const AnomaliesTable = () => {
   const [sortField, setSortField] = useState<SortField>('startTime');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [jobType, setJobType] = useState<JobType>('hosts');
+  const { source } = useSourceContext();
+  const anomalyThreshold = source?.configuration.anomalyThreshold;
 
   const onTimeChange = useCallback(({ start: s, end: e }) => {
     setStart(s);
@@ -55,6 +58,7 @@ export const AnomaliesTable = () => {
   const anomalyParams = useMemo(
     () => ({
       sourceId: 'default',
+      anomalyThreshold: anomalyThreshold || 0,
       startTime: timeRange.start,
       endTime: timeRange.end,
       defaultSortOptions: {
@@ -63,7 +67,7 @@ export const AnomaliesTable = () => {
       },
       defaultPaginationOptions: { pageSize: 10 },
     }),
-    [timeRange, sortField, sortDir]
+    [timeRange, sortField, sortDir, anomalyThreshold]
   );
 
   const {
