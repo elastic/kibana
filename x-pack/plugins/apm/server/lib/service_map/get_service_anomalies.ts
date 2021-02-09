@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
@@ -88,9 +88,10 @@ export async function getServiceAnomalies({
                   { field: 'result_type' },
                   { field: 'record_score' },
                 ] as const),
-                sort: {
+                sort: ({
                   record_score: 'desc' as const,
-                },
+                  // FIXME: TopMetricsAggregation.sort is incorrect
+                } as unknown) as Sort,
               },
             },
           },

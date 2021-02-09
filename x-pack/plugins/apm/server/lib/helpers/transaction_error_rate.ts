@@ -11,7 +11,6 @@ import {
   AggregationOptionsByType,
   AggregationResultOf,
 } from '../../../../../typings/elasticsearch';
-import { getTransactionDurationFieldForAggregatedTransactions } from './aggregated_transactions';
 
 export const getOutcomeAggregation = () => ({
   terms: {

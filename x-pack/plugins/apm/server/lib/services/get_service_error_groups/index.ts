@@ -78,7 +78,12 @@ export async function getServiceErrorGroups({
             sample: {
               top_hits: {
                 size: 1,
-                _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, '@timestamp'],
+                // FIXME: TopHitsAggregation._source is incorrect
+                _source: ([
+                  ERROR_LOG_MESSAGE,
+                  ERROR_EXC_MESSAGE,
+                  '@timestamp',
+                ] as any) as string,
                 sort: {
                   '@timestamp': 'desc',
                 },

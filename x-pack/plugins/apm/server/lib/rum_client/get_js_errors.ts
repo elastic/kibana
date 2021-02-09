@@ -76,12 +76,13 @@ export async function getJSErrors({
             },
             sample: {
               top_hits: {
-                _source: [
+                _source: ([
                   ERROR_EXC_MESSAGE,
                   ERROR_EXC_TYPE,
                   ERROR_GROUP_ID,
                   '@timestamp',
-                ],
+                  // FIXME: TopHitsAggregation._source is incorrect
+                ] as unknown) as string,
                 sort: [{ '@timestamp': 'desc' as const }],
                 size: 1,
               },

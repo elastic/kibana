@@ -13,7 +13,6 @@
 // - Validate whether we can run the queries we want to on the telemetry data
 
 import { merge, chunk, flatten, omit } from 'lodash';
-import { Client } from '@elastic/elasticsearch';
 import { argv } from 'yargs';
 import { Logger } from 'kibana/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -26,6 +25,7 @@ import { generateSampleDocuments } from './generate-sample-documents';
 import { readKibanaConfig } from '../shared/read-kibana-config';
 import { getHttpAuth } from '../shared/get-http-auth';
 import { createOrUpdateIndex } from '../shared/create-or-update-index';
+import { getEsClient } from '../shared/get_es_client';
 
 async function uploadData() {
   const githubToken = process.env.GITHUB_TOKEN;
@@ -43,8 +43,8 @@ async function uploadData() {
 
   const httpAuth = getHttpAuth(config);
 
-  const client = new Client({
-    nodes: [config['elasticsearch.hosts']],
+  const client = getEsClient({
+    node: config['elasticsearch.hosts'],
     ...(httpAuth
       ? {
           auth: { ...httpAuth, username: 'elastic' },
@@ -83,10 +83,10 @@ async function uploadData() {
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return unwrapEsResponse(client.search<any>(body));
+        return unwrapEsResponse(client.search(body)) as Promise<any>;
       },
       indicesStats: (body) => {
-        return unwrapEsResponse(client.indices.stats<any>(body));
+        return unwrapEsResponse(client.indices.stats(body));
       },
       transportRequest: ((params) => {
         return unwrapEsResponse(

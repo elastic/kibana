@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
-  MappingsDefinition,
+  Mappings,
 } from '../../../../../observability/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
@@ -31,11 +31,12 @@ export async function createApmAgentConfigurationIndex({
   });
 }
 
-const mappings: MappingsDefinition = {
+const mappings: Mappings = {
   dynamic: 'strict',
   dynamic_templates: [
     {
       // force string to keyword (instead of default of text + keyword)
+      // @ts-expect-error all properties DynamicTemplate are required
       strings: {
         match_mapping_type: 'string',
         mapping: {
@@ -53,16 +54,19 @@ const mappings: MappingsDefinition = {
       properties: {
         name: {
           type: 'keyword',
+          // @ts-expect-error PropertyBase.ignore_above is missing
           ignore_above: 1024,
         },
         environment: {
           type: 'keyword',
+          // @ts-expect-error PropertyBase.ignore_above is missing
           ignore_above: 1024,
         },
       },
     },
     settings: {
       // allowing dynamic fields without specifying anything specific
+      // @ts-expect-error PropertyBase.dynamic is missing
       dynamic: true,
       properties: {},
     },
@@ -71,10 +75,12 @@ const mappings: MappingsDefinition = {
     },
     agent_name: {
       type: 'keyword',
+      // @ts-expect-error PropertyBase.ignore_above is missing
       ignore_above: 1024,
     },
     etag: {
       type: 'keyword',
+      // @ts-expect-error PropertyBase.ignore_above is missing
       ignore_above: 1024,
     },
   },

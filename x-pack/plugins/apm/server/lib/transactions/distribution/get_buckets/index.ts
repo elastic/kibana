@@ -104,7 +104,8 @@ export async function getBuckets({
             aggs: {
               samples: {
                 top_hits: {
-                  _source: [TRANSACTION_ID, TRACE_ID],
+                  // FIXME: TopHitsAggregation._source is incorrect
+                  _source: ([TRANSACTION_ID, TRACE_ID] as unknown) as string,
                   size: 10,
                   sort: {
                     _score: 'desc',

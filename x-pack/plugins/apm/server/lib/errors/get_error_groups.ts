@@ -55,7 +55,7 @@ export async function getErrorGroups({
           aggs: {
             sample: {
               top_hits: {
-                _source: [
+                _source: ([
                   ERROR_LOG_MESSAGE,
                   ERROR_EXC_MESSAGE,
                   ERROR_EXC_HANDLED,
@@ -63,7 +63,8 @@ export async function getErrorGroups({
                   ERROR_CULPRIT,
                   ERROR_GROUP_ID,
                   '@timestamp',
-                ],
+                  // FIXME: TopHitsAggregation._source is incorrect
+                ] as unknown) as string,
                 sort: [{ '@timestamp': 'desc' as const }],
                 size: 1,
               },

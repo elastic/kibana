@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryContainer, Sort } from '@elastic/elasticsearch/api/types';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
@@ -72,9 +72,10 @@ export async function anomalySeriesFetcher({
                       { field: 'timestamp' },
                       { field: 'bucket_span' },
                     ] as const),
-                    sort: {
+                    sort: ({
                       record_score: 'desc' as const,
-                    },
+                      // FIXME: TopMetricsAggregation.sort is incorrect
+                    } as unknown) as Sort,
                   },
                 },
                 lower: { min: { field: 'model_lower' } },

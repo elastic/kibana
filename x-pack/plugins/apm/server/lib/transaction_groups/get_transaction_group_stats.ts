@@ -71,7 +71,8 @@ export async function getCounts({
     transaction_type: {
       top_hits: {
         size: 1,
-        _source: [TRANSACTION_TYPE],
+        // FIXME: TopHitsAggregation._source is incorrect
+        _source: ([TRANSACTION_TYPE] as unknown) as string,
       },
     },
   });
