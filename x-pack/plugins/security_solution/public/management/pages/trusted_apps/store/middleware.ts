@@ -60,6 +60,7 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
+  editItemState,
 } from './selectors';
 import { toNewTrustedApp } from '../service/to_new_trusted_app';
 
@@ -359,7 +360,23 @@ const fetchEditTrustedAppIfNeeded = async (
 
     // See if we can get the Trusted App record from the current list of Trusted Apps being displayed
     trustedAppForEdit = getListItems(currentState).find((ta) => ta.id === editTrustedAppId);
-    if (trustedAppForEdit) {
+
+    try {
+      // Retrieve Trusted App record via API if it was not in the list data.
+      // This would be the case when linking from another place or using an UUID for a Trusted App
+      // that is not currently displayed on the list view.
+      if (!trustedAppForEdit) {
+        dispatch({
+          type: 'trustedAppCreationEditItemStateChanged',
+          payload: {
+            type: 'LoadingResourceState',
+            previousState: editItemState(currentState)!,
+          },
+        });
+
+        trustedAppForEdit = (await trustedAppsService.getTrustedApp({ id: editTrustedAppId })).data;
+      }
+
       dispatch({
         type: 'trustedAppCreationEditItemStateChanged',
         payload: {
@@ -375,17 +392,15 @@ const fetchEditTrustedAppIfNeeded = async (
           isValid: true,
         },
       });
-      return;
+    } catch (e) {
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: e,
+        },
+      });
     }
-
-    // Retrieve Trusted App record via API. This would be the case when linking from another place or
-    // using an UUID for a Trusted App that is not currently displayed on the list view.
-
-    // eslint-disable-next-line no-console
-    console.log('todo: api call');
-
-    // FIXME: Implement GET API
-    throw new Error('GET trusted app API missing!');
   }
 };
 
