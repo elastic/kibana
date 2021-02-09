@@ -16,6 +16,7 @@ import {
   IndexPatternField,
   DataPublicPluginStart,
   IndexPattern,
+  UsageCollectionStart,
 } from './shared_imports';
 
 import { InternalFieldType } from './types';
@@ -37,7 +38,8 @@ export const getFieldEditorOpener = (
   coreStart: CoreStart,
   indexPatternService: DataPublicPluginStart['indexPatterns'],
   fieldFormats: DataPublicPluginStart['fieldFormats'],
-  fieldFormatEditors: PluginStart['fieldFormatEditors']
+  fieldFormatEditors: PluginStart['fieldFormatEditors'],
+  usageCollection: UsageCollectionStart
 ) => (options: OpenFieldEditorOptions): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications } = coreStart;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
@@ -89,6 +91,7 @@ export const getFieldEditorOpener = (
             fieldFormatEditors={fieldFormatEditors}
             fieldFormats={fieldFormats}
             uiSettings={uiSettings}
+            usageCollection={usageCollection}
           />
         </KibanaReactContextProvider>
       )
