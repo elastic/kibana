@@ -286,7 +286,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
   };
 
-  private cancel = (deps: SearchStrategyDependencies, id: string, options: ISearchOptions = {}) => {
+  private cancel = async (
+    deps: SearchStrategyDependencies,
+    id: string,
+    options: ISearchOptions = {}
+  ) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
@@ -297,7 +301,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.cancel(id, options, deps);
   };
 
-  private extend = (
+  private extend = async (
     deps: SearchStrategyDependencies,
     id: string,
     keepAlive: string,
@@ -312,9 +316,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private cancelSessionSearches = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
-    await Promise.all(
-      Object.keys(searchIdMapping).map((searchId) => {
-        const strategyName = searchIdMapping.get(searchId);
+    await Promise.allSettled(
+      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
         const searchOptions = {
           sessionId,
           strategy: strategyName,
@@ -344,9 +347,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
     const keepAlive = `${moment(expires).diff(moment())}ms`;
 
-    await Promise.all(
-      Object.keys(searchIdMapping).map((searchId) => {
-        const strategyName = searchIdMapping.get(searchId);
+    const result = await Promise.allSettled(
+      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
         const searchOptions = {
           sessionId,
           strategy: strategyName,
@@ -355,6 +357,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         return this.extend(deps, searchId, keepAlive, searchOptions);
       })
     );
+
+    if (result.some((extRes) => extRes.status === 'rejected')) {
+      throw new Error('Failed to extend the expiration of some searches');
+    }
 
     return deps.searchSessionsClient.extend(sessionId, expires);
   };
