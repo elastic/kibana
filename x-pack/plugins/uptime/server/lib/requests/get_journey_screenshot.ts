@@ -9,7 +9,7 @@ import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types/ping';
 
-interface GetJourneyScreenshotParams {
+export interface GetJourneyScreenshotParams {
   checkGroup: string;
   stepIndex: number;
 }

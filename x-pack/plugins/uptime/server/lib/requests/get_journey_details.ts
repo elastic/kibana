@@ -9,7 +9,7 @@ import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
-interface GetJourneyDetails {
+export interface GetJourneyDetails {
   checkGroup: string;
 }
 

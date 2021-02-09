@@ -27,7 +27,7 @@ export interface UMServerLibs extends UMDomainLibs {
   framework: UMBackendFrameworkAdapter;
 }
 
-interface CountResponse {
+export interface CountResponse {
   body: {
     count: number;
     _shards: {

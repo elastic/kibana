@@ -9,7 +9,7 @@ import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { NetworkEvent } from '../../../common/runtime_types';
 
-interface GetNetworkEventsParams {
+export interface GetNetworkEventsParams {
   checkGroup: string;
   stepIndex: string;
 }
