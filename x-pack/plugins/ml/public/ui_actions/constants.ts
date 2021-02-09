@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export {
-  checkMlNodesAvailable,
-  getMlNodeCount,
-  mlNodesAvailable,
-  lazyMlNodesAvailable,
-  permissionToViewMlNodeCount,
-} from './check_ml_nodes';
+export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
