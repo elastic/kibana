@@ -7,7 +7,6 @@
  */
 
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
-import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
@@ -20,15 +19,12 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
 
 export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const elasticSearchServerUrl = formatUrl(config.get('servers.elasticsearch'));
+  const esServerConfig = config.get('servers.elasticsearch');
+  const elasticSearchServerUrl = formatUrl(esServerConfig);
 
   let agentOptions = {};
-  const kbnServerArgs: string[] = config.get('kbnTestServer.serverArgs');
-  const esCa = kbnServerArgs
-    .find((arg) => arg.startsWith('--elasticsearch.ssl.certificateAuthorities'))
-    ?.split('=')[1];
-  if (esCa) {
-    agentOptions = { ca: readFileSync(esCa) };
+  if ('certificateAuthorities' in esServerConfig) {
+    agentOptions = { ca: esServerConfig!.certificateAuthorities };
   }
 
   // @ts-ignore - supertestAsPromised doesn't like the agentOptions, but still passes it correctly to supertest
