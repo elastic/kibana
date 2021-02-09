@@ -7,8 +7,12 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('search', () => {
+    before(async () => {
+      const esArchiver = getService('esArchiver');
+      esArchiver.emptyKibanaIndex();
+    });
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./session'));
   });
