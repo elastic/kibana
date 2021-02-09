@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { STATUS } from '../case_view/translations';
 import { Status } from '../status';
 import { getSubCasesStatusCountsBadges } from './helpers';
+import { ALERTS } from '../../../app/home/translations';
 
 export type CasesColumns =
   | EuiTableFieldDataColumnType<Case>
@@ -44,6 +45,8 @@ const Spacer = styled.span`
 const TagWrapper = styled(EuiBadgeGroup)`
   width: 100%;
 `;
+
+export const NUMERIC_COLUMN_WIDTH = '120px';
 
 const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
@@ -129,7 +132,19 @@ export const getCasesColumns = (
     },
     {
       align: 'right' as HorizontalAlignment,
+      field: 'totalAlerts',
+      // width: NUMERIC_COLUMN_WIDTH,
+      name: ALERTS,
+      sortable: true,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    },
+    {
+      align: 'right' as HorizontalAlignment,
       field: 'totalComment',
+      // width: NUMERIC_COLUMN_WIDTH,
       name: i18n.COMMENTS,
       sortable: true,
       render: (totalComment: Case['totalComment']) =>
