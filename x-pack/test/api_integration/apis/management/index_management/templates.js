@@ -12,9 +12,8 @@ import { registerHelpers } from './templates.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
-  const { cleanUp: cleanUpEsResources, catTemplate } = initElasticsearchHelpers(es);
+  const { cleanUp: cleanUpEsResources, catTemplate } = initElasticsearchHelpers(getService);
 
   const {
     getAllTemplates,

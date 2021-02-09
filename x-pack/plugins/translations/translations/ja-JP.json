@@ -19258,7 +19258,6 @@
     "xpack.securitySolution.open.timeline.exportSelectedButton": "選択した項目のエクスポート",
     "xpack.securitySolution.open.timeline.favoriteSelectedButton": "選択中のお気に入り",
     "xpack.securitySolution.open.timeline.favoritesTooltip": "お気に入り",
-    "xpack.securitySolution.open.timeline.filterByTimelineTypesTitle": "{timelineType}のみ",
     "xpack.securitySolution.open.timeline.lastModifiedTableHeader": "最終更新:",
     "xpack.securitySolution.open.timeline.missingSavedObjectIdTooltip": "savedObjectId がありません",
     "xpack.securitySolution.open.timeline.modifiedByTableHeader": "変更者:",

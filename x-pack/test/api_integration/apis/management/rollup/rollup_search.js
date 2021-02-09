@@ -13,12 +13,10 @@ import { getRandomString } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers({
-    supertest,
-    es,
-  });
+  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers(
+    getService
+  );
 
   describe('search', () => {
     const URI = `${API_BASE_PATH}/search`;

@@ -13,8 +13,8 @@ import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('find', () => {
     let KIBANA_VERSION: string;
@@ -430,7 +430,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
+          await esDeleteAllIndices('.kibana')
       );
 
       it('should return 200 with empty response', async () =>

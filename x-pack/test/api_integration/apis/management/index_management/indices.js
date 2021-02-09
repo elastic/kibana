@@ -12,14 +12,13 @@ import { registerHelpers } from './indices.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
   const {
     createIndex,
     catIndex,
     indexStats,
     cleanUp: cleanUpEsResources,
-  } = initElasticsearchHelpers(es);
+  } = initElasticsearchHelpers(getService);
 
   const {
     closeIndex,

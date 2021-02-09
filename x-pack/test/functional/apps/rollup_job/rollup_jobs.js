@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common', 'security']);
   const security = getService('security');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('rollup job', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
@@ -69,8 +70,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       //Delete all data indices that were created.
-      await es.indices.delete({ index: targetIndexName });
-      await es.indices.delete({ index: rollupSourceIndexPattern });
+      await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern]);
       await esArchiver.load('empty_kibana');
       await security.testUser.restoreDefaults();
     });
