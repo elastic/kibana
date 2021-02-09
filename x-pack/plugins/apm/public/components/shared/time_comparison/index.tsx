@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { px, unit } from '../../../style/variables';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import { useBreakPoints } from '../../../hooks/use_break_points';
 
-const PrependContainer = styled.div`
+const PrependContainer = euiStyled.div`
   display: flex;
   justify-content: center;
   align-items: center;
