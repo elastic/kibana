@@ -120,9 +120,12 @@ export const PrivateSources: React.FC = () => {
   const hasPrivateSources = privateContentSources?.length > 0;
   const privateSources = hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState;
 
-  const groupsSentence = `${groups.slice(0, groups.length - 1).join(', ')}, ${AND} ${groups.slice(
-    -1
-  )}`;
+  const groupsSentence =
+    groups.length === 1
+      ? `${groups}`
+      : `${groups.slice(0, groups.length - 1).join(', ')}${
+          groups.length === 2 ? '' : ','
+        } ${AND} ${groups.slice(-1)}`;
 
   const sharedSources = (
     <ContentSection
