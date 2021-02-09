@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { withTimeout } from '@kbn/std';
+import { withTimeout, isPromise } from '@kbn/std';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
@@ -94,14 +94,25 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      const contract = await withTimeout({
-        promise: plugin.setup(
-          createPluginSetupContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let contract: unknown;
+      const contractOrPromise = plugin.setup(
+        createPluginSetupContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        contract = await withTimeout({
+          promise: contractOrPromise,
+          timeout: 10 * Sec,
+          errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+        });
+      } else {
+        contract = contractOrPromise;
+      }
 
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
@@ -132,14 +143,25 @@ export class PluginsSystem {
         return depContracts;
       }, {} as Record<PluginName, unknown>);
 
-      const contract = await withTimeout({
-        promise: plugin.start(
-          createPluginStartContext(this.coreContext, deps, plugin),
-          pluginDepContracts
-        ),
-        timeout: 30 * Sec,
-        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
-      });
+      let contract: unknown;
+      const contractOrPromise = plugin.start(
+        createPluginStartContext(this.coreContext, deps, plugin),
+        pluginDepContracts
+      );
+      if (isPromise(contractOrPromise)) {
+        if (this.coreContext.env.mode.dev) {
+          this.log.warn(
+            `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
+          );
+        }
+        contract = await withTimeout({
+          promise: contractOrPromise,
+          timeout: 10 * Sec,
+          errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+        });
+      } else {
+        contract = contractOrPromise;
+      }
 
       contracts.set(pluginName, contract);
     }
