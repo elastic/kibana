@@ -11,7 +11,8 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
-import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -30,7 +31,7 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 
-const CsmMainContainer = styled.div`
+const CsmMainContainer = euiStyled.div`
   padding: ${px(units.plus)};
   height: 100%;
 `;
