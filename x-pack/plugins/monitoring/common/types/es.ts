@@ -136,6 +136,7 @@ export interface ElasticsearchLegacySource {
           heap_max_in_bytes?: number;
         };
       };
+      fs: {};
       versions?: string[];
     };
     indices?: {
@@ -170,6 +171,7 @@ export interface ElasticsearchLegacySource {
   license?: {
     status?: string;
     type?: string;
+    expiry_date_in_millis?: number;
   };
   logstash_state?: {
     pipeline?: {
@@ -307,6 +309,15 @@ export interface ElasticsearchMetricbeatNode {
 export interface ElasticsearchMetricbeatSource {
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
+    cluster?: {
+      name?: string;
+      id?: string;
+      stats?: {
+        license?: ElasticsearchLegacySource['license'];
+        state?: {};
+        status?: string;
+      };
+    };
   };
 }
 

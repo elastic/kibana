@@ -12,8 +12,8 @@ import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
 import { getKibanasForClusters } from '../kibana';
-import { getLogstashForClusters } from '../logstash';
-import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
+// import { getLogstashForClusters } from '../logstash';
+// import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
 import { verifyMonitoringLicense } from '../../cluster_alerts/verify_monitoring_license';
 import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
@@ -215,17 +215,16 @@ export async function getClustersFromRequest(
 
   // add logstash data
   if (isInCodePath(codePaths, [CODE_PATH_LOGSTASH])) {
-    const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
-    const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
-    logstashes.forEach((logstash) => {
-      const clusterIndex = findIndex(clusters, { cluster_uuid: logstash.clusterUuid });
-
-      // withhold LS overview stats until there is at least 1 pipeline
-      if (logstash.clusterUuid === clusterUuid && !pipelines.length) {
-        logstash.stats = {};
-      }
-      set(clusters[clusterIndex], 'logstash', logstash.stats);
-    });
+    // const logstashes = await getLogstashForClusters(req, lsIndexPattern, clusters);
+    // const pipelines = await getLogstashPipelineIds(req, lsIndexPattern, { clusterUuid }, 1);
+    // logstashes.forEach((logstash) => {
+    //   const clusterIndex = findIndex(clusters, { cluster_uuid: logstash.clusterUuid });
+    //   // withhold LS overview stats until there is at least 1 pipeline
+    //   if (logstash.clusterUuid === clusterUuid && !pipelines.length) {
+    //     logstash.stats = {};
+    //   }
+    //   set(clusters[clusterIndex], 'logstash', logstash.stats);
+    // });
   }
 
   // add beats data

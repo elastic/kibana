@@ -6,18 +6,27 @@
  */
 
 import { pick, omit, get } from 'lodash';
+import { ElasticsearchModifiedSource, ElasticsearchLegacySource } from '../../../common/types/es';
+// @ts-ignore
 import { calculateOverallStatus } from '../calculate_overall_status';
-import { LOGGING_TAG } from '../../../common/constants';
+// @ts-ignore
 import { MonitoringLicenseError } from '../errors/custom_errors';
 
-export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
+type EnhancedClusters = ElasticsearchModifiedSource & {
+  license: ElasticsearchLegacySource['license'];
+  [key: string]: any;
+};
+
+export function getClustersSummary(
+  server: any,
+  clusters: EnhancedClusters[],
+  kibanaUuid: string,
+  isCcrEnabled: boolean
+) {
   return clusters.map((cluster) => {
     const {
       isSupported,
-      cluster_uuid: clusterUuid,
       version,
-      license,
-      cluster_stats: clusterStats,
       logstash,
       kibana,
       ml,
@@ -29,13 +38,16 @@ export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
       logs,
     } = cluster;
 
+    const license = cluster.license || cluster.elasticsearch?.cluster?.stats?.license;
+    const clusterUuid = cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id;
+    const clusterStats = cluster.cluster_stats || cluster.elasticsearch?.cluster?.stats;
+
     const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
 
     // check for any missing licenses
     if (!license) {
       const clusterId = cluster.name || clusterName || clusterUuid;
-      server.log(
-        ['error', LOGGING_TAG],
+      server.log.error(
         "Could not find license information for cluster = '" +
           clusterId +
           "'. " +
@@ -50,21 +62,21 @@ export function getClustersSummary(server, clusters, kibanaUuid, isCcrEnabled) {
       expiry_date_in_millis: licenseExpiry,
     } = license;
 
-    const indices = pick(clusterStats.indices, ['count', 'docs', 'shards', 'store']);
+    const indices = pick(clusterStats?.indices, ['count', 'docs', 'shards', 'store']);
 
     const jvm = {
-      max_uptime_in_millis: clusterStats.nodes.jvm.max_uptime_in_millis,
-      mem: clusterStats.nodes.jvm.mem,
+      max_uptime_in_millis: clusterStats?.nodes?.jvm?.max_uptime_in_millis,
+      mem: clusterStats?.nodes?.jvm?.mem,
     };
 
     const nodes = {
-      fs: clusterStats.nodes.fs,
+      fs: clusterStats?.nodes?.fs,
       count: {
-        total: clusterStats.nodes.count.total,
+        total: clusterStats?.nodes?.count?.total,
       },
       jvm,
     };
-    const { status } = cluster.cluster_state;
+    const { status } = cluster.cluster_state ?? { status: null };
 
     return {
       isSupported,
