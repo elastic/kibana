@@ -173,7 +173,7 @@ function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation
 
   const operationsForNewField = getOperationsForField(field, props.filterOperations);
 
-  if (!operationsForNewField || operationsForNewField.size === 0) {
+  if (!operationsForNewField) {
     return false;
   }
 
@@ -284,7 +284,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>) {
 
   const operationsForNewField = getOperationsForField(droppedItem.field, props.filterOperations);
 
-  if (!isDraggedField(droppedItem) || !operationsForNewField || operationsForNewField.size === 0) {
+  if (!isDraggedField(droppedItem) || !operationsForNewField) {
     // TODO: What do we do if we couldn't find a column?
     return false;
   }

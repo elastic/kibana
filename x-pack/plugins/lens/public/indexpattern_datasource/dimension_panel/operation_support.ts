@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import { memoize } from 'lodash';
 import { DatasourceDimensionDropProps, OperationMetadata } from '../../types';
 import { OperationType } from '../indexpattern';
 import { getAvailableOperationsByMetadata, getSortScoreByPriority } from '../operations';

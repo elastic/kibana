@@ -125,6 +125,7 @@ interface DropInnerProps extends BaseProps {
   setDragging: DragContextState['setDragging'];
   setActiveDropTarget: DragContextState['setActiveDropTarget'];
   setA11yMessage: DragContextState['setA11yMessage'];
+  registerDropTarget: DragContextState['registerDropTarget'];
   isActiveDropTarget: boolean;
   isNotDroppable: boolean;
 }
