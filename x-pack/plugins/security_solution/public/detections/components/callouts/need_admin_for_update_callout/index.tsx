@@ -24,6 +24,11 @@ const needAdminForUpdateRulesMessage: CallOutMessage = {
  * - Have the permissions to be able to read "signalIndexMappingOutdated" and that condition is "true"
  * - Have the permissions to be able to read "hasIndexManage" and that condition is "false"
  *
+ * Some users do not have sufficient privileges to be able to determine if "signalIndexMappingOutdated"
+ * is outdated or not. Same could apply to "hasIndexManage". When users do not have enough permissions
+ * to determine if "signalIndexMappingOutdated" is true or false, the permissions system returns a "null"
+ * instead.
+ *
  * If the user has the permissions to see that signalIndexMappingOutdated is true and that
  * hasIndexManage is also true, then the user should be performing the update on the page which is
  * why we do not show it for that condition.
@@ -34,11 +39,11 @@ const NeedAdminForUpdateCallOutComponent = (): JSX.Element => {
   const signalIndexMappingIsOutdated =
     signalIndexMappingOutdated != null && signalIndexMappingOutdated;
 
-  const userHasIndexManage = hasIndexManage != null && hasIndexManage;
+  const userDoesntHaveIndexManage = hasIndexManage != null && !hasIndexManage;
 
   return (
     <CallOutPersistentSwitcher
-      condition={signalIndexMappingIsOutdated && !userHasIndexManage}
+      condition={signalIndexMappingIsOutdated && userDoesntHaveIndexManage}
       message={needAdminForUpdateRulesMessage}
     />
   );

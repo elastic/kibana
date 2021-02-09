@@ -7,8 +7,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { CallOut, CallOutMessage } from '.';
 import { TestProviders } from '../../mock';
+import { CallOut } from './callout';
+import { CallOutMessage } from './callout_types';
 
 describe('callout', () => {
   let message: CallOutMessage = {

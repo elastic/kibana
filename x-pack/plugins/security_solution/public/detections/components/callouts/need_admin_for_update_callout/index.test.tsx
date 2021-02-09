@@ -7,8 +7,8 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { NeedAdminForUpdateRulesCallOut } from './index';
 import { TestProviders } from '../../../../common/mock';
-import { NeedAdminForUpdateRulesCallOut } from '.';
 import * as userInfo from '../../user_info';
 
 describe('need_admin_for_update_callout', () => {
@@ -18,7 +18,7 @@ describe('need_admin_for_update_callout', () => {
 
   describe('hasIndexManage is "null"', () => {
     const hasIndexManage = null;
-    test('renders when "signalIndexMappingOutdated" is true', () => {
+    test('Does NOT render when "signalIndexMappingOutdated" is true', () => {
       jest
         .spyOn(userInfo, 'useUserData')
         .mockImplementation(
@@ -30,7 +30,7 @@ describe('need_admin_for_update_callout', () => {
         </TestProviders>
       );
       expect(wrapper.exists('[data-test-subj="callout-need-admin-for-update-rules"]')).toEqual(
-        true
+        false
       );
     });
 
