@@ -145,7 +145,7 @@ describe('Runtime field validation', () => {
       expected: {
         message: 'Error compiling the painless script',
         position: null,
-        reason: '',
+        reason: null,
         scriptStack: [],
       },
     },

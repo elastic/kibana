@@ -125,11 +125,18 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
   return (
     <UseField<string> path="script.source" config={sourceFieldConfig}>
       {({ value, setValue, label, isValid, getErrorsMessages }) => {
+        let errorMessage: string | null = '';
+        if (syntaxError.error !== null) {
+          errorMessage = syntaxError.error.reason ?? syntaxError.error.message;
+        } else {
+          errorMessage = getErrorsMessages();
+        }
+
         return (
           <>
             <EuiFormRow
               label={label}
-              error={syntaxError.error !== null ? syntaxError.error.message : getErrorsMessages()}
+              error={errorMessage}
               isInvalid={syntaxError.error !== null || !isValid}
               helpText={
                 <FormattedMessage

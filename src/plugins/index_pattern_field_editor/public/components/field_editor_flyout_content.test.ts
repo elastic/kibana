@@ -21,6 +21,7 @@ const defaultProps: Props = {
   fieldFormatEditors: {} as any,
   fieldTypeToProcess: 'runtime',
   runtimeFieldValidator: () => Promise.resolve(null),
+  isSavingField: false,
 };
 
 const setup = (props: Props = defaultProps) =>

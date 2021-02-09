@@ -80,7 +80,7 @@ const parseEsError = (error?: Error): RuntimeFieldPainlessError | null => {
     ),
     position: scriptError.position ?? null,
     scriptStack: scriptError.script_stack ?? [],
-    reason: scriptError.caused_by?.reason ?? '',
+    reason: scriptError.caused_by?.reason ?? null,
   };
 };
 
