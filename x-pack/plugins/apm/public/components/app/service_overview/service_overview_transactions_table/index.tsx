@@ -14,7 +14,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -75,7 +74,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
             end,
             uiFilters: JSON.stringify(uiFilters),
             transactionType,
-            latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+            latencyAggregationType,
           },
         },
       });
@@ -110,7 +109,8 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         currentPageTransactionGroups.length &&
         start &&
         end &&
-        transactionType
+        transactionType &&
+        latencyAggregationType
       ) {
         return callApmApi({
           endpoint:
@@ -123,7 +123,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               uiFilters: JSON.stringify(uiFilters),
               numBuckets: 20,
               transactionType,
-              latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+              latencyAggregationType,
               transactionNames,
             },
           },
