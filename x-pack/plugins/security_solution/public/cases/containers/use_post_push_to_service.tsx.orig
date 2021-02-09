@@ -1,0 +1,226 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { CaseConnector } from '../../../../case/common/api';
+import {
+  errorToToaster,
+  useStateToaster,
+  displaySuccessToast,
+} from '../../common/components/toasters';
+
+import { pushCase } from './api';
+import * as i18n from './translations';
+import { Case } from './types';
+
+interface PushToServiceState {
+  isLoading: boolean;
+  isError: boolean;
+}
+type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
+
+const dataFetchReducer = (state: PushToServiceState, action: Action): PushToServiceState => {
+  switch (action.type) {
+    case 'FETCH_INIT':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case 'FETCH_SUCCESS':
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+      };
+    case 'FETCH_FAILURE':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
+    default:
+      return state;
+  }
+};
+
+interface PushToServiceRequest {
+  caseId: string;
+  connector: CaseConnector;
+}
+
+export interface UsePostPushToService extends PushToServiceState {
+  pushCaseToExternalService: ({
+    caseId,
+    connector,
+  }: PushToServiceRequest) => Promise<Case | undefined>;
+}
+
+export const usePostPushToService = (): UsePostPushToService => {
+  const [state, dispatch] = useReducer(dataFetchReducer, {
+    isLoading: false,
+    isError: false,
+  });
+  const [, dispatchToaster] = useStateToaster();
+  const cancel = useRef(false);
+  const abortCtrl = useRef(new AbortController());
+
+  const pushCaseToExternalService = useCallback(
+    async ({ caseId, connector }: PushToServiceRequest) => {
+      try {
+        dispatch({ type: 'FETCH_INIT' });
+        abortCtrl.current.abort();
+        cancel.current = false;
+        abortCtrl.current = new AbortController();
+
+        const response = await pushCase(caseId, connector.id, abortCtrl.current.signal);
+
+        if (!cancel.current) {
+          dispatch({ type: 'FETCH_SUCCESS' });
+          displaySuccessToast(
+            i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name),
+            dispatchToaster
+          );
+        }
+
+        return response;
+      } catch (error) {
+        if (!cancel.current) {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+          dispatch({ type: 'FETCH_FAILURE' });
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      abortCtrl.current.abort();
+      cancel.current = true;
+    };
+  }, []);
+
+<<<<<<< HEAD
+  const from = moment(alert['@timestamp'] ?? new Date())
+    .subtract(ellapsedTimeRule)
+    .toISOString();
+  const to = moment(alert['@timestamp'] ?? new Date()).toISOString();
+
+  return { to, from };
+};
+
+const getAlertFilterUrl = (alert: Alert): string => {
+  const { to, from } = determineToAndFrom(alert);
+  return `?filters=!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,key:_id,negate:!f,params:(query:${alert._id}),type:phrase),query:(match:(_id:(query:${alert._id},type:phrase)))))&sourcerer=(default:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:%27${from}%27,kind:absolute,to:%27${to}%27)),timeline:(linkTo:!(global),timerange:(from:%27${from}%27,kind:absolute,to:%27${to}%27)))`;
+};
+
+const getCommentContent = (
+  comment: Comment,
+  alerts: Record<string, Alert>,
+  formatUrl: FormatUrl
+): string => {
+  if (comment.type === CommentType.user) {
+    return comment.comment;
+  } else if (comment.type === CommentType.alert) {
+    // TODO: handle generated alerts here to
+    // TODO: clean this up
+    const alertId = Array.isArray(comment.alertId)
+      ? comment.alertId.length > 0
+        ? comment.alertId[0]
+        : ''
+      : comment.alertId;
+    const alert = alerts[alertId];
+    const ruleDetailsLink = formatUrl(getRuleDetailsUrl(alert.rule.id), {
+      absolute: true,
+      skipSearch: true,
+    });
+
+    return `[${i18n.ALERT}](${ruleDetailsLink}${getAlertFilterUrl(alert)}) ${
+      i18n.ALERT_ADDED_TO_CASE
+    }.`;
+  }
+
+  return '';
+};
+
+export const formatServiceRequestData = ({
+  myCase,
+  connector,
+  caseServices,
+  alerts,
+  formatUrl,
+}: {
+  myCase: Case;
+  connector: CaseConnector;
+  caseServices: CaseServices;
+  alerts: Record<string, Alert>;
+  formatUrl: FormatUrl;
+}): ServiceConnectorCaseParams => {
+  const {
+    id: caseId,
+    createdAt,
+    createdBy,
+    comments,
+    description,
+    title,
+    updatedAt,
+    updatedBy,
+  } = myCase;
+  const actualExternalService = caseServices[connector.id] ?? null;
+
+  return {
+    savedObjectId: caseId,
+    createdAt,
+    createdBy: {
+      fullName: createdBy.fullName ?? null,
+      username: createdBy?.username ?? '',
+    },
+    comments: comments
+      .filter(
+        (c) =>
+          actualExternalService == null || actualExternalService.commentsToUpdate.includes(c.id)
+      )
+      .map((c) => ({
+        commentId: c.id,
+        comment: getCommentContent(c, alerts, formatUrl),
+        createdAt: c.createdAt,
+        createdBy: {
+          fullName: c.createdBy.fullName ?? null,
+          username: c.createdBy.username ?? '',
+        },
+        updatedAt: c.updatedAt,
+        updatedBy:
+          c.updatedBy != null
+            ? {
+                fullName: c.updatedBy.fullName ?? null,
+                username: c.updatedBy.username ?? '',
+              }
+            : null,
+      })),
+    description,
+    externalId: actualExternalService?.externalId ?? null,
+    title,
+    ...(connector.fields ?? {}),
+    updatedAt,
+    updatedBy:
+      updatedBy != null
+        ? {
+            fullName: updatedBy.fullName ?? null,
+            username: updatedBy.username ?? '',
+          }
+        : null,
+  };
+=======
+  return { ...state, pushCaseToExternalService };
+>>>>>>> 810e4ab8e8206949965c89c889aac2fc396c4111
+};

@@ -936,6 +936,7 @@ export class CaseService implements CaseServiceSetup {
       throw error;
     }
   }
+  // TODO: remove response
   public async getUser({ request, response }: GetUserArgs) {
     try {
       this.log.debug(`Attempting to authenticate a user`);

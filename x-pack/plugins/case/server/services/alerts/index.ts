@@ -19,6 +19,24 @@ interface UpdateAlertsStatusArgs {
   scopedClusterClient: ElasticsearchClient;
 }
 
+interface GetAlertsArgs {
+  ids: string[];
+  indices: Set<string>;
+  scopedClusterClient: ElasticsearchClient;
+}
+
+interface Alert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+interface AlertsResponse {
+  hits: {
+    hits: Alert[];
+  };
+}
+
 export class AlertService {
   constructor() {}
 
@@ -53,5 +71,31 @@ export class AlertService {
     });
 
     return result;
+  }
+
+  public async getAlerts({
+    scopedClusterClient,
+    ids,
+    indices,
+  }: GetAlertsArgs): Promise<AlertsResponse> {
+    // The above check makes sure that esClient is defined.
+    const result = await scopedClusterClient.search<AlertsResponse>({
+      index: [...indices].filter((index) => index !== ''),
+      body: {
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                should: ids.map((_id) => ({ match: { _id } })),
+                minimum_should_match: 1,
+              },
+            },
+          },
+        },
+      },
+      ignore_unavailable: true,
+    });
+
+    return result.body;
   }
 }

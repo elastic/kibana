@@ -74,4 +74,5 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => ({
 
 export const createAlertServiceMock = (): AlertServiceMock => ({
   updateAlertsStatus: jest.fn(),
+  getAlerts: jest.fn(),
 });

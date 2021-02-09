@@ -10,11 +10,9 @@ import {
   CasePostRequest,
   CasesConfigureRequest,
   ConnectorTypes,
-  PostPushRequest,
 } from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../actions/server/types';
-import { params } from '../cases/configure/mock';
 
 export const newCase: CasePostRequest = {
   title: 'My new case',
@@ -74,6 +72,16 @@ export const getActions = (): FindActionResult[] => [
     isPreconfigured: false,
     referencedByCount: 0,
   },
+  {
+    id: 'for-mock-case-id-3',
+    actionTypeId: '.jira',
+    name: 'For mock case id 3',
+    config: {
+      apiUrl: 'https://elastic.jira.com',
+    },
+    isPreconfigured: false,
+    referencedByCount: 0,
+  },
 ];
 
 export const getActionTypes = (): ActionTypeConnector[] => [
@@ -119,6 +127,18 @@ export const getActionTypes = (): ActionTypeConnector[] => [
   },
 ];
 
+export const getActionExecuteResults = (actionId = '123') => ({
+  status: 'ok' as const,
+  data: {
+    title: 'RJ2-200',
+    id: '10663',
+    pushedDate: '2020-12-17T00:32:40.738Z',
+    url: 'https://siem-kibana.atlassian.net/browse/RJ2-200',
+    comments: [],
+  },
+  actionId,
+});
+
 export const newConfiguration: CasesConfigureRequest = {
   connector: {
     id: '456',
@@ -127,11 +147,6 @@ export const newConfiguration: CasesConfigureRequest = {
     fields: null,
   },
   closure_type: 'close-by-pushing',
-};
-
-export const newPostPushRequest: PostPushRequest = {
-  params: params[ConnectorTypes.jira],
-  connector_type: ConnectorTypes.jira,
 };
 
 export const executePushResponse = {
