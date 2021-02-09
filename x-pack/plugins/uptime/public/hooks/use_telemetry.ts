@@ -16,6 +16,7 @@ export enum UptimePage {
   Settings = 'Settings',
   Certificates = 'Certificates',
   StepDetail = 'StepDetail',
+  SyntheticCheckStepsPage = 'SyntheticCheckStepsPage',
   NotFound = '__not-found__',
 }
 

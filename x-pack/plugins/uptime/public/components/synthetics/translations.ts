@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { MonitorPage } from './monitor';
-export { StepDetailPage } from './synthetics/step_detail_page';
-export { SettingsPage } from './settings';
-export { NotFoundPage } from './not_found';
+import { i18n } from '@kbn/i18n';
+
+export const STEP_NAME_LABEL = i18n.translate('xpack.uptime.stepList.stepName', {
+  defaultMessage: 'Step name',
+});
