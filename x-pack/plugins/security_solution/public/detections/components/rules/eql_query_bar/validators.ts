@@ -58,7 +58,8 @@ export const eqlValidator = async (
   const query = queryValue.query as string;
   const { index, ruleType } = formData as DefineStepRule;
 
-  const needsValidation = isEqlRule(ruleType) && !isEmpty(query);
+  const needsValidation =
+    (ruleType === undefined && !isEmpty(query)) || (isEqlRule(ruleType) && !isEmpty(query));
   if (!needsValidation) {
     return;
   }

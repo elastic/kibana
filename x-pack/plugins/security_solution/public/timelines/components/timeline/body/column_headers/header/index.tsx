@@ -8,6 +8,7 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useShallowEqualSelector } from '../../../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../../../store/timeline';
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { OnFilterChange } from '../../../events';
@@ -17,6 +18,7 @@ import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
 import { useManageTimeline } from '../../../../manage_timeline';
+import { isEqlOnSelector } from './selectors';
 
 interface Props {
   header: ColumnHeaderOptions;
@@ -32,6 +34,8 @@ export const HeaderComponent: React.FC<Props> = ({
   timelineId,
 }) => {
   const dispatch = useDispatch();
+  const getIsEqlOn = useMemo(() => isEqlOnSelector(), []);
+  const isEqlOn = useShallowEqualSelector((state) => getIsEqlOn(state, timelineId));
 
   const onColumnSort = useCallback(() => {
     const columnId = header.id;
@@ -89,6 +93,7 @@ export const HeaderComponent: React.FC<Props> = ({
         isLoading={isLoading}
         isResizing={false}
         onClick={onColumnSort}
+        showSortingCapability={!isEqlOn}
         sort={sort}
       >
         <Actions

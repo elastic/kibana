@@ -278,6 +278,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         hideSavedQuery={kqlMode === 'search'}
+        includeEqlLanguage={true}
         indexPattern={indexPattern}
         isRefreshPaused={isRefreshPaused}
         filterQuery={filterQueryConverted}

@@ -20,7 +20,7 @@ import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
-import { isEventBuildingBlockType, getEventType } from '../helpers';
+import { isEventBuildingBlockType, getEventType, isEvenEqlSequence } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
@@ -212,6 +212,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       data-test-subj="event"
       eventType={getEventType(event.ecs)}
       isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
+      isEvenEqlSequence={isEvenEqlSequence(event.ecs)}
       isExpanded={isExpanded}
       ref={trGroupRef}
       showLeftBorder={!isEventViewer}

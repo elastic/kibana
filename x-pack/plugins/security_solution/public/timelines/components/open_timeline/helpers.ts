@@ -433,7 +433,7 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
         id,
         filterQuery: {
           kuery: {
-            kind: 'kuery',
+            kind: timeline.kqlQuery.filterQuery.kuery.kind ?? 'kuery',
             expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
           },
           serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',

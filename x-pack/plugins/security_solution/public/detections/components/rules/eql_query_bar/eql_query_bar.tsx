@@ -14,6 +14,11 @@ import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { EqlQueryBarFooter } from './footer';
 import { getValidationResults } from './validators';
+import {
+  EqlOptionsData,
+  EqlOptionsSelected,
+  FieldsEqlOptions,
+} from '../../../../../common/search_strategy';
 
 const TextArea = styled(EuiTextArea)`
   display: block;
@@ -27,14 +32,24 @@ export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
   idAria?: string;
+  optionsData?: EqlOptionsData;
+  optionsSelected?: EqlOptionsSelected;
+  onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
+  onSelectLanguage?: (newLanguage: string) => void;
   onValidityChange?: (arg: boolean) => void;
+  onValiditingChange?: (arg: boolean) => void;
 }
 
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   dataTestSubj,
   field,
   idAria,
+  optionsData,
+  optionsSelected,
+  onOptionsChange,
+  onSelectLanguage,
   onValidityChange,
+  onValiditingChange,
 }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
@@ -60,6 +75,12 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       addError(error, { title: i18n.EQL_VALIDATION_REQUEST_ERROR });
     }
   }, [error, addError]);
+
+  useEffect(() => {
+    if (onValiditingChange) {
+      onValiditingChange(isValidating);
+    }
+  }, [isValidating, onValiditingChange]);
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -96,7 +117,14 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           value={fieldValue}
           onChange={handleChange}
         />
-        <EqlQueryBarFooter errors={errorMessages} isLoading={isValidating} />
+        <EqlQueryBarFooter
+          errors={errorMessages}
+          isLoading={isValidating}
+          optionsData={optionsData}
+          optionsSelected={optionsSelected}
+          onOptionsChange={onOptionsChange}
+          onSelectLanguage={onSelectLanguage}
+        />
       </>
     </EuiFormRow>
   );

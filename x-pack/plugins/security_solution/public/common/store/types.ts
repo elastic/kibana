@@ -36,7 +36,7 @@ export type StoreState = HostsPluginState &
  */
 export type State = CombinedState<StoreState>;
 
-export type KueryFilterQueryKind = 'kuery' | 'lucene';
+export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
 
 export interface KueryFilterQuery {
   kind: KueryFilterQueryKind;

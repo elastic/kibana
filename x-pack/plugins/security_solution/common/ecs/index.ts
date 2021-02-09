@@ -54,4 +54,6 @@ export interface Ecs {
   process?: ProcessEcs;
   file?: FileEcs;
   system?: SystemEcs;
+  // This should be temporary
+  eql?: { parentId: string; sequenceNumber: string };
 }

@@ -34,7 +34,7 @@ interface Props {
 export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
   const { connectors } = useConnectors();
   const { connector: configurationConnector } = useCaseConfigure();
-  const { caseData, postCase } = usePostCase();
+  const { postCase } = usePostCase();
   const connectorId = useMemo(
     () =>
       connectors.some((connector) => connector.id === configurationConnector.id)
@@ -54,14 +54,18 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
-        await postCase({
+        const updatedCase = await postCase({
           ...dataWithoutConnectorId,
           connector: connectorToUpdate,
           settings: { syncAlerts },
         });
+
+        if (onSuccess && updatedCase) {
+          onSuccess(updatedCase);
+        }
       }
     },
-    [postCase, connectors]
+    [postCase, connectors, onSuccess]
   );
 
   const { form } = useForm<FormProps>({
@@ -75,12 +79,6 @@ export const FormContext: React.FC<Props> = ({ children, onSuccess }) => {
 
   // Set the selected connector to the configuration connector
   useEffect(() => setFieldValue('connectorId', connectorId), [connectorId, setFieldValue]);
-
-  useEffect(() => {
-    if (caseData && onSuccess) {
-      onSuccess(caseData);
-    }
-  }, [caseData, onSuccess]);
 
   return <Form form={form}>{children}</Form>;
 };

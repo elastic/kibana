@@ -76,6 +76,7 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
+import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 
 export interface SetupPlugins {
   alerts: AlertingSetup;
@@ -300,6 +301,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
+      const securitySolutionTimelineEqlSearchStrategy = securitySolutionTimelineEqlSearchStrategyProvider(
+        depsStart.data
+      );
       const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
 
       plugins.data.search.registerSearchStrategy(
@@ -313,6 +317,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',
         securitySolutionTimelineSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionTimelineEqlSearchStrategy',
+        securitySolutionTimelineEqlSearchStrategy
       );
     });
 

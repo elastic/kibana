@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './all';
-export * from './details';
-export * from './last_event_time';
-export * from './eql';
+import { i18n } from '@kbn/i18n';
 
-export enum TimelineEventsQueries {
-  all = 'eventsAll',
-  details = 'eventsDetails',
-  lastEventTime = 'eventsLastEventTime',
-}
+export const EQL_QUERY_BAR_LABEL = i18n.translate(
+  'xpack.securitySolution.timeline.EqlQueryBarLabel',
+  {
+    defaultMessage: 'EQL query',
+  }
+);

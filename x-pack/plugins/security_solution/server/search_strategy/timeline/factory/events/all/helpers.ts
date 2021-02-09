@@ -9,6 +9,15 @@ import { EventHit, TimelineEdges } from '../../../../../../common/search_strateg
 import { toStringArray } from '../../../../helpers/to_array';
 import { formatGeoLocation, isGeoField } from '../details/helpers';
 
+const getTimestamp = (hit: EventHit): string => {
+  if (hit.fields && hit.fields['@timestamp']) {
+    return (hit.fields['@timestamp'][0] ?? '') as string;
+  } else if (hit._source && hit._source['@timestamp']) {
+    return hit._source['@timestamp'];
+  }
+  return '';
+};
+
 export const formatTimelineData = (
   dataFields: readonly string[],
   ecsFields: readonly string[],
@@ -19,7 +28,7 @@ export const formatTimelineData = (
       flattenedFields.node._id = hit._id;
       flattenedFields.node._index = hit._index;
       flattenedFields.node.ecs._id = hit._id;
-      flattenedFields.node.ecs.timestamp = (hit.fields['@timestamp'][0] ?? '') as string;
+      flattenedFields.node.ecs.timestamp = getTimestamp(hit);
       flattenedFields.node.ecs._index = hit._index;
       if (hit.sort && hit.sort.length > 1) {
         flattenedFields.cursor.value = hit.sort[0];
