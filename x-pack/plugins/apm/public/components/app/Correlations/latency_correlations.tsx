@@ -96,10 +96,10 @@ export function LatencyCorrelations({ onClose }: Props) {
         <EuiFlexItem>
           <EuiText size="s">
             <p>
-              Orbiting this at a distance of roughly ninety-two million miles is
-              an utterly insignificant little blue green planet whose
-              ape-descended life forms are so amazingly primitive that they
-              still think digital watches are a pretty neat idea.
+              {i18n.translate('xpack.apm.correlations.latency.description', {
+                defaultMessage:
+                  'What is slowing down my service? Correlations will help discover a slower performance in a particular cohort of your data. Either by host, version, or other custom fields.',
+              })}
             </p>
           </EuiText>
         </EuiFlexItem>

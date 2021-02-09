@@ -93,10 +93,10 @@ export function ErrorCorrelations({ onClose }: Props) {
         <EuiFlexItem>
           <EuiText size="s">
             <p>
-              Orbiting this at a distance of roughly ninety-two million miles is
-              an utterly insignificant little blue green planet whose
-              ape-descended life forms are so amazingly primitive that they
-              still think digital watches are a pretty neat idea.
+              {i18n.translate('xpack.apm.correlations.error.description', {
+                defaultMessage:
+                  'Why are some transactions failing and returning errors? Correlations will help discover a possible culprit in a particular cohort of your data. Either by host, version, or other custom fields.',
+              })}
             </p>
           </EuiText>
         </EuiFlexItem>
