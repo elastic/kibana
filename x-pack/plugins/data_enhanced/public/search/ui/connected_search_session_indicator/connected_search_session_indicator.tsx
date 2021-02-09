@@ -147,7 +147,6 @@ export const createConnectedSearchSessionIndicator = ({
 
     const onViewSearchSessions = useCallback(() => {
       usageCollector?.trackViewSessionsList();
-      application.navigateToUrl('management/kibana/search_sessions');
     }, []);
 
     if (!sessionService.isSessionStorageReady()) return null;
