@@ -64,7 +64,7 @@ export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
-export type TaskManagerStats = 'load' | 'pollingDelay';
+export type TaskManagerStats = 'load' | 'pollingDelay' | 'claimDuration';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>

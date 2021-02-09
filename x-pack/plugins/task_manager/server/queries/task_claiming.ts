@@ -18,7 +18,13 @@ import { Logger } from '../../../../../src/core/server';
 
 import { asOk, asErr, Result } from '../lib/result_type';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { TaskClaim, asTaskClaimEvent, TaskClaimErrorType } from '../task_events';
+import {
+  TaskClaim,
+  asTaskClaimEvent,
+  TaskClaimErrorType,
+  startTaskTimer,
+  TaskTiming,
+} from '../task_events';
 
 import {
   asUpdateByQuery,
@@ -80,6 +86,7 @@ export interface ClaimOwnershipResult {
     tasksRejected: number;
   };
   docs: ConcreteTaskInstance[];
+  timing?: TaskTiming;
 }
 
 enum BatchConcurrency {
@@ -178,6 +185,7 @@ export class TaskClaiming {
     return from(this.getClaimingBatches()).pipe(
       mergeScan(
         (accumulatedResult, batch) => {
+          const stopTaskTimer = startTaskTimer();
           const capacity = Math.min(
             initialCapacity - accumulatedResult.stats.tasksClaimed,
             isLimited(batch) ? this.getCapacity(batch.tasksTypes) : this.getCapacity()
@@ -199,7 +207,7 @@ export class TaskClaiming {
                 stats.tasksConflicted,
                 capacity
               );
-              return { stats, docs };
+              return { stats, docs, timing: stopTaskTimer() };
             })
           );
         },
@@ -426,14 +434,16 @@ function accumulateClaimOwnershipResults(
   next?: ClaimOwnershipResult
 ) {
   if (next) {
+    const { stats, docs, timing } = next;
     const res = {
       stats: {
-        tasksUpdated: next.stats.tasksUpdated + prev.stats.tasksUpdated,
-        tasksConflicted: next.stats.tasksConflicted + prev.stats.tasksConflicted,
-        tasksClaimed: next.stats.tasksClaimed + prev.stats.tasksClaimed,
-        tasksRejected: next.stats.tasksRejected + prev.stats.tasksRejected,
+        tasksUpdated: stats.tasksUpdated + prev.stats.tasksUpdated,
+        tasksConflicted: stats.tasksConflicted + prev.stats.tasksConflicted,
+        tasksClaimed: stats.tasksClaimed + prev.stats.tasksClaimed,
+        tasksRejected: stats.tasksRejected + prev.stats.tasksRejected,
       },
-      docs: next.docs,
+      docs,
+      timing,
     };
     return res;
   }

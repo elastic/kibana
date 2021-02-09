@@ -11,7 +11,7 @@ import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
-import { Result, asErr, mapErr, asOk, map } from './lib/result_type';
+import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
@@ -232,6 +232,16 @@ export class TaskPollingLifecycle {
           tasksToClaim.splice(0, this.pool.availableWorkers),
           this.taskClaiming,
           this.logger
+        ).pipe(
+          tap(
+            mapOk(({ timing }: ClaimOwnershipResult) => {
+              if (timing) {
+                this.emitEvent(
+                  asTaskManagerStatEvent('claimDuration', asOk(timing.stop - timing.start))
+                );
+              }
+            })
+          )
         ),
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
