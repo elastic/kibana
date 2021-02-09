@@ -6,9 +6,10 @@
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+
 import { SecurityPluginSetup } from '../../../security/server';
-import { ConfigType } from '../';
+import { SpacesPluginStart } from '../../../spaces/server';
+import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 

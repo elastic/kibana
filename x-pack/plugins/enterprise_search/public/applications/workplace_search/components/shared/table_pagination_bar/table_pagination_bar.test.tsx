@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiFlexGroup, EuiTablePagination } from '@elastic/eui';
