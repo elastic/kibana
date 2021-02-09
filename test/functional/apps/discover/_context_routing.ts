@@ -9,25 +9,19 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const TEST_COLUMN_NAMES = ['name', 'value'];
-const TEST_FILTER_COLUMN_NAMES = [['name', 'a']];
-
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
-  const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
   const defaultSettings = { defaultIndex: 'discover-routing-*', 'doc_table:legacy': false };
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const log = getService('log');
 
   describe('discover routing tests', () => {
     before(async () => {
       await esArchiver.load('discover');
-      // await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');

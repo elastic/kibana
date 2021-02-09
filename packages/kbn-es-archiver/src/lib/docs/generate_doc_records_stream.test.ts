@@ -30,7 +30,7 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
             hits: [
               { _index: 'foo', _type: '_doc', _id: '0', _source: {} },
               { _index: 'foo', _type: '_doc', _id: '1', _source: {} },
-              { _index: 'foo', _type: '_doc', _id: '2', _source: {} },
+              { _index: 'foo', _type: '_doc', _id: '2', _source: {}, _routing: '0' },
             ],
           },
         },
@@ -88,6 +88,7 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
       expect(record.value.type).toBe('_doc');
       expect(record.value.index).toMatch(/^(foo|bar)$/);
       expect(record.value.id).toMatch(/^\d+$/);
+      expect(record.value.routing === undefined || record.value.routing === '0').toBe(true);
       return `${record.value.index}:${record.value.id}`;
     }),
     createConcatStream([]),

@@ -61,6 +61,8 @@ export function createGenerateDocRecordsStream({
                 type: hit._type,
                 id: hit._id,
                 source: hit._source,
+                // not present on all documents, it only exists if set at indexing time.
+                routing: hit._routing,
               },
             });
           }

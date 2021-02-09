@@ -189,18 +189,19 @@ it('indexes documents using the bulk client helper', async () => {
 
 describe('bulk helper onDocument param', () => {
   it('returns index ops for each doc', async () => {
-    expect.assertions(testRecords.length);
+    expect.assertions(testRecords.length * 2);
 
     const client = new MockClient();
     client.helpers.bulk.mockImplementation(async ({ datasource, onDocument }) => {
       for (const d of datasource) {
         const op = onDocument(d);
         expect(op).toEqual({
-          index: {
+          index: expect.objectContaining({
             _index: 'foo',
             _id: expect.stringMatching(/^\d$/),
-          },
+          }),
         });
+        expect(op.index.routing === undefined || op.index.routing === 'custom').toBe(true);
       }
     });
 
@@ -214,18 +215,19 @@ describe('bulk helper onDocument param', () => {
   });
 
   it('returns create ops for each doc when instructed', async () => {
-    expect.assertions(testRecords.length);
+    expect.assertions(testRecords.length * 2);
 
     const client = new MockClient();
     client.helpers.bulk.mockImplementation(async ({ datasource, onDocument }) => {
       for (const d of datasource) {
         const op = onDocument(d);
         expect(op).toEqual({
-          create: {
+          create: expect.objectContaining({
             _index: 'foo',
             _id: expect.stringMatching(/^\d$/),
-          },
+          }),
         });
+        expect(op.create.routing === undefined || op.create.routing === 'custom').toBe(true);
       }
     });
 
