@@ -10,9 +10,9 @@ import { EuiHealth } from '@elastic/eui';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
 import { WaterfallProvider, WaterfallChart, RenderItem, useFlyout } from '../../waterfall';
-import { WaterfallFlyout } from '../../waterfall/components/waterfall_flyout';
 import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/public';
 import { WaterfallFilter } from './waterfall_filter';
+import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
@@ -66,6 +66,16 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
       />
     );
   }, [activeFilters, setActiveFilters, onlyHighlighted, setOnlyHighlighted, query, setQuery]);
+
+  const renderFlyout = useCallback(() => {
+    return (
+      <WaterfallFlyout
+        flyoutData={flyoutData}
+        onFlyoutClose={onFlyoutClose}
+        isFlyoutVisible={isFlyoutVisible}
+      />
+    );
+  }, [flyoutData, isFlyoutVisible, onFlyoutClose]);
 
   const renderSidebarItem: RenderItem<SidebarItem> = useCallback(
     (item) => {
@@ -121,13 +131,9 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         }, [])}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
+        renderFlyout={renderFlyout}
         renderFilter={renderFilter}
         fullHeight={true}
-      />
-      <WaterfallFlyout
-        flyoutData={flyoutData}
-        isFlyoutVisible={isFlyoutVisible}
-        onFlyoutClose={onFlyoutClose}
       />
     </WaterfallProvider>
   );

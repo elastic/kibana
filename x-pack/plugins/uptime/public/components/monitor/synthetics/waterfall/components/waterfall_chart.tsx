@@ -32,7 +32,7 @@ export type RenderItem<I = any> = (
   index: number,
   onClick?: (event: any) => void
 ) => JSX.Element;
-export type RenderFilter = () => JSX.Element;
+export type RenderElement = () => JSX.Element;
 
 export interface WaterfallChartProps {
   tickFormat: TickFormatter;
@@ -40,7 +40,8 @@ export interface WaterfallChartProps {
   barStyleAccessor: BarStyleAccessor;
   renderSidebarItem?: RenderItem;
   renderLegendItem?: RenderItem;
-  renderFilter?: RenderFilter;
+  renderFilter?: RenderElement;
+  renderFlyout?: RenderElement;
   maxHeight?: string;
   fullHeight?: boolean;
 }
@@ -52,6 +53,7 @@ export const WaterfallChart = ({
   renderSidebarItem,
   renderLegendItem,
   renderFilter,
+  renderFlyout,
   maxHeight = '800px',
   fullHeight = false,
 }: WaterfallChartProps) => {
@@ -134,6 +136,7 @@ export const WaterfallChart = ({
         </EuiFlexGroup>
       </WaterfallChartOuterContainer>
       {shouldRenderLegend && <Legend items={legendItems!} render={renderLegendItem!} />}
+      {renderFlyout && renderFlyout()}
     </RelativeContainer>
   );
 };
