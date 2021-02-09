@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
-import { escapeSearchQueryPhrase } from '../saved_object';
-import { savedObjectToAgent } from './saved_objects';
 import { appContextService, agentPolicyService } from '../../services';
 import * as crudServiceSO from './crud_so';
 import * as crudServiceFleetServer from './crud_fleet_server';
@@ -75,15 +70,15 @@ export async function getAgent(
     : crudServiceSO.getAgent(soClient, agentId);
 }
 
-export async function getAgents(soClient: SavedObjectsClientContract, agentIds: string[]) {
-  const agentSOs = await soClient.bulkGet<AgentSOAttributes>(
-    agentIds.map((agentId) => ({
-      id: agentId,
-      type: AGENT_SAVED_OBJECT_TYPE,
-    }))
-  );
-  const agents = agentSOs.saved_objects.map(savedObjectToAgent);
-  return agents;
+export async function getAgents(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentIds: string[]
+) {
+  const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+  return fleetServerEnabled
+    ? crudServiceFleetServer.getAgents(esClient, agentIds)
+    : crudServiceSO.getAgents(soClient, agentIds);
 }
 
 export async function getAgentPolicyForAgent(
@@ -104,38 +99,39 @@ export async function getAgentPolicyForAgent(
 
 export async function getAgentByAccessAPIKeyId(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   accessAPIKeyId: string
 ): Promise<Agent> {
-  const response = await soClient.find<AgentSOAttributes>({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    searchFields: ['access_api_key_id'],
-    search: escapeSearchQueryPhrase(accessAPIKeyId),
-  });
-  const [agent] = response.saved_objects.map(savedObjectToAgent);
-
-  if (!agent) {
-    throw Boom.notFound('Agent not found');
-  }
-  if (agent.access_api_key_id !== accessAPIKeyId) {
-    throw new Error('Agent api key id is not matching');
-  }
-  if (!agent.active) {
-    throw Boom.forbidden('Agent inactive');
-  }
-
-  return agent;
+  const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+  return fleetServerEnabled
+    ? crudServiceFleetServer.getAgentByAccessAPIKeyId(esClient, accessAPIKeyId)
+    : crudServiceSO.getAgentByAccessAPIKeyId(soClient, accessAPIKeyId);
 }
 
 export async function updateAgent(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string,
-  data: {
-    userProvidedMetatada: any;
-  }
+  data: Partial<AgentSOAttributes>
 ) {
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    user_provided_metadata: data.userProvidedMetatada,
-  });
+  const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+  return fleetServerEnabled
+    ? crudServiceFleetServer.updateAgent(esClient, agentId, data)
+    : crudServiceSO.updateAgent(soClient, agentId, data);
+}
+
+export async function bulkUpdateAgents(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  data: Array<{
+    agentId: string;
+    data: Partial<AgentSOAttributes>;
+  }>
+) {
+  const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+  return fleetServerEnabled
+    ? crudServiceFleetServer.bulkUpdateAgents(esClient, data)
+    : crudServiceSO.bulkUpdateAgents(soClient, data);
 }
 
 export async function deleteAgent(
