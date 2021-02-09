@@ -37,9 +37,10 @@ import './phase.scss';
 
 interface Props {
   phase: PhasesExceptDelete;
+  childrenOutsideAccordion?: React.ReactNode;
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
+export const Phase: FunctionComponent<Props> = ({ children, childrenOutsideAccordion, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
@@ -102,7 +103,15 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
 
       {enabled && (
         <>
-          <EuiSpacer size="m" />
+          {!!childrenOutsideAccordion ? (
+            <>
+              <EuiSpacer />
+              {childrenOutsideAccordion}
+            </>
+          ) : (
+            <EuiSpacer size="m" />
+          )}
+
           <EuiAccordion
             id={`${phase}-settingsSwitch`}
             buttonContent={
