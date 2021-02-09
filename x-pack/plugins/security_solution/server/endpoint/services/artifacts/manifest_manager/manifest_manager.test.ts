@@ -12,6 +12,7 @@ import { ENDPOINT_LIST_ID } from '../../../../../../lists/common';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common/constants';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { PackagePolicy } from '../../../../../../fleet/common/types/models';
+import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
 import {
   InternalArtifactCompleteSchema,
   InternalArtifactSchema,
@@ -46,26 +47,40 @@ const uncompressArtifact = async (artifact: InternalArtifactSchema) =>
 describe('ManifestManager', () => {
   const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
   const TEST_POLICY_ID_2 = '93c46720-c217-11ea-9906-b5b8a21b268e';
-  const ARTIFACT_ID_0 =
+  const ARTIFACT_ID_EXCEPTIONS_MACOS =
     'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
-  const ARTIFACT_ID_1 =
+  const ARTIFACT_ID_EXCEPTIONS_WINDOWS =
     'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
-  const ARTIFACT_ID_2 =
+  const ARTIFACT_ID_TRUSTED_APPS_MACOS =
     'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
-  const ARTIFACT_ID_3 =
+  const ARTIFACT_ID_TRUSTED_APPS_WINDOWS =
     'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3';
 
+  const ARTIFACT_NAME_EXCEPTIONS_MACOS = 'endpoint-exceptionlist-macos-v1';
+  const ARTIFACT_NAME_EXCEPTIONS_WINDOWS = 'endpoint-exceptionlist-windows-v1';
+  const ARTIFACT_NAME_TRUSTED_APPS_MACOS = 'endpoint-trustlist-macos-v1';
+  const ARTIFACT_NAME_TRUSTED_APPS_WINDOWS = 'endpoint-trustlist-windows-v1';
+  const ARTIFACT_NAME_TRUSTED_APPS_LINUX = 'endpoint-trustlist-linux-v1';
+
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
-  let ARTIFACTS_MAP: { [K: string]: InternalArtifactCompleteSchema } = {};
+  let ARTIFACTS_BY_ID: { [K: string]: InternalArtifactCompleteSchema } = {};
+  let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
+  let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
   beforeAll(async () => {
     ARTIFACTS = await getMockArtifacts({ compress: true });
-    ARTIFACTS_MAP = {
-      [ARTIFACT_ID_0]: ARTIFACTS[0],
-      [ARTIFACT_ID_1]: ARTIFACTS[1],
-      [ARTIFACT_ID_2]: ARTIFACTS[2],
-      [ARTIFACT_ID_3]: ARTIFACTS[3],
+    ARTIFACTS_BY_ID = {
+      [ARTIFACT_ID_EXCEPTIONS_MACOS]: ARTIFACTS[0],
+      [ARTIFACT_ID_EXCEPTIONS_WINDOWS]: ARTIFACTS[1],
+      [ARTIFACT_ID_TRUSTED_APPS_MACOS]: ARTIFACTS[2],
+      [ARTIFACT_ID_TRUSTED_APPS_WINDOWS]: ARTIFACTS[3],
     };
+    ARTIFACT_EXCEPTIONS_MACOS = ARTIFACTS[0];
+    ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
+    ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[2];
+    ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[3];
   });
 
   describe('getLastComputedManifest', () => {
@@ -145,18 +160,18 @@ describe('ManifestManager', () => {
                 schemaVersion: 'v2',
                 semanticVersion: '1.0.0',
                 artifacts: [
-                  { artifactId: ARTIFACT_ID_0, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_1, policyId: undefined },
-                  { artifactId: ARTIFACT_ID_1, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_2, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_3, policyId: TEST_POLICY_ID_1 },
-                  { artifactId: ARTIFACT_ID_3, policyId: TEST_POLICY_ID_2 },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: undefined },
+                  { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_1 },
+                  { artifactId: ARTIFACT_ID_TRUSTED_APPS_WINDOWS, policyId: TEST_POLICY_ID_2 },
                 ],
               },
               version: '2.0.0',
             };
           } else if (objectType === ArtifactConstants.SAVED_OBJECT_TYPE) {
-            return { attributes: ARTIFACTS_MAP[id], version: '2.1.1' };
+            return { attributes: ARTIFACTS_BY_ID[id], version: '2.1.1' };
           } else {
             return null;
           }
@@ -168,30 +183,32 @@ describe('ManifestManager', () => {
       expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
       expect(manifest?.getSavedObjectVersion()).toStrictEqual('2.0.0');
       expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 4));
-      expect(manifest?.isDefaultArtifact(ARTIFACTS[0])).toBe(true);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACTS[0])).toStrictEqual(new Set());
-      expect(manifest?.isDefaultArtifact(ARTIFACTS[1])).toBe(true);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACTS[1])).toStrictEqual(
+      expect(manifest?.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_MACOS)).toStrictEqual(
+        new Set()
+      );
+      expect(manifest?.isDefaultArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(true);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_EXCEPTIONS_WINDOWS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1])
       );
-      expect(manifest?.isDefaultArtifact(ARTIFACTS[2])).toBe(false);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACTS[2])).toStrictEqual(
+      expect(manifest?.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_MACOS)).toBe(false);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_MACOS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1])
       );
-      expect(manifest?.isDefaultArtifact(ARTIFACTS[3])).toBe(false);
-      expect(manifest?.getArtifactTargetPolicies(ARTIFACTS[3])).toStrictEqual(
+      expect(manifest?.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_WINDOWS)).toBe(false);
+      expect(manifest?.getArtifactTargetPolicies(ARTIFACT_TRUSTED_APPS_WINDOWS)).toStrictEqual(
         new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
       );
     });
   });
 
   describe('buildNewManifest', () => {
-    const SUPPORTED_ARTIFACT_IDS = [
-      'endpoint-exceptionlist-macos-v1',
-      'endpoint-exceptionlist-windows-v1',
-      'endpoint-trustlist-macos-v1',
-      'endpoint-trustlist-windows-v1',
-      'endpoint-trustlist-linux-v1',
+    const SUPPORTED_ARTIFACT_NAMES = [
+      ARTIFACT_NAME_EXCEPTIONS_MACOS,
+      ARTIFACT_NAME_EXCEPTIONS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_MACOS,
+      ARTIFACT_NAME_TRUSTED_APPS_WINDOWS,
+      ARTIFACT_NAME_TRUSTED_APPS_LINUX,
     ];
 
     const getArtifactIds = (artifacts: InternalArtifactSchema[]) =>
@@ -220,7 +237,7 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_IDS);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
       for (const artifact of artifacts) {
@@ -247,11 +264,11 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_IDS);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
       for (const artifact of artifacts) {
-        if (artifact.identifier === 'endpoint-exceptionlist-macos-v1') {
+        if (artifact.identifier === ARTIFACT_NAME_EXCEPTIONS_MACOS) {
           expect(await uncompressArtifact(artifact)).toStrictEqual({
             entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
           });
@@ -290,11 +307,11 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
-      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_IDS);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
       for (const artifact of artifacts) {
-        if (artifact.identifier === 'endpoint-exceptionlist-macos-v1') {
+        if (artifact.identifier === ARTIFACT_NAME_EXCEPTIONS_MACOS) {
           expect(artifact).toStrictEqual(oldManifest.getAllArtifacts()[0]);
         } else if (artifact.identifier === 'endpoint-trustlist-linux-v1') {
           expect(await uncompressArtifact(artifact)).toStrictEqual({
@@ -315,18 +332,21 @@ describe('ManifestManager', () => {
       context.savedObjectsClient.delete = jest.fn().mockResolvedValue({});
 
       await expect(
-        manifestManager.deleteArtifacts([ARTIFACT_ID_0, ARTIFACT_ID_1])
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_EXCEPTIONS_MACOS,
+          ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+        ])
       ).resolves.toStrictEqual([]);
 
       expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
         1,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        ARTIFACT_ID_0
+        ARTIFACT_ID_EXCEPTIONS_MACOS
       );
       expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
         2,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        ARTIFACT_ID_1
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS
       );
     });
 
@@ -338,7 +358,7 @@ describe('ManifestManager', () => {
       context.savedObjectsClient.delete = jest
         .fn()
         .mockImplementation(async (type: string, id: string) => {
-          if (id === ARTIFACT_ID_1) {
+          if (id === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
             throw error;
           } else {
             return {};
@@ -346,19 +366,22 @@ describe('ManifestManager', () => {
         });
 
       await expect(
-        manifestManager.deleteArtifacts([ARTIFACT_ID_0, ARTIFACT_ID_1])
+        manifestManager.deleteArtifacts([
+          ARTIFACT_ID_EXCEPTIONS_MACOS,
+          ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+        ])
       ).resolves.toStrictEqual([error]);
 
       expect(context.savedObjectsClient.delete).toHaveBeenCalledTimes(2);
       expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
         1,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        ARTIFACT_ID_0
+        ARTIFACT_ID_EXCEPTIONS_MACOS
       );
       expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
         2,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        ARTIFACT_ID_1
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS
       );
     });
   });
@@ -373,40 +396,40 @@ describe('ManifestManager', () => {
         .mockImplementation((type: string, artifact: InternalArtifactCompleteSchema) => artifact);
 
       await expect(
-        manifestManager.pushArtifacts([ARTIFACTS[0], ARTIFACTS[1]])
+        manifestManager.pushArtifacts([ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_EXCEPTIONS_WINDOWS])
       ).resolves.toStrictEqual([]);
 
       expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(2);
       expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
         1,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACTS[0], created: expect.anything() },
-        { id: ARTIFACT_ID_0 }
+        { ...ARTIFACT_EXCEPTIONS_MACOS, created: expect.anything() },
+        { id: ARTIFACT_ID_EXCEPTIONS_MACOS }
       );
       expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
         2,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACTS[1], created: expect.anything() },
-        { id: ARTIFACT_ID_1 }
+        { ...ARTIFACT_EXCEPTIONS_WINDOWS, created: expect.anything() },
+        { id: ARTIFACT_ID_EXCEPTIONS_WINDOWS }
       );
-      expect(await uncompressData(context.cache.get(getArtifactId(ARTIFACTS[0]))!)).toStrictEqual(
-        await uncompressArtifact(ARTIFACTS[0])
-      );
-      expect(await uncompressData(context.cache.get(getArtifactId(ARTIFACTS[1]))!)).toStrictEqual(
-        await uncompressArtifact(ARTIFACTS[1])
-      );
+      expect(
+        await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!)
+      ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_MACOS));
+      expect(
+        await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))!)
+      ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_WINDOWS));
     });
 
     test('Returns errors for partial failures', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
       const error = new Error();
-      const { body, ...incompleteArtifact } = ARTIFACTS[2];
+      const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_APPS_MACOS;
 
       context.savedObjectsClient.create = jest
         .fn()
         .mockImplementation(async (type: string, artifact: InternalArtifactCompleteSchema) => {
-          if (getArtifactId(artifact) === ARTIFACT_ID_1) {
+          if (getArtifactId(artifact) === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
             throw error;
           } else {
             return artifact;
@@ -415,23 +438,26 @@ describe('ManifestManager', () => {
 
       await expect(
         manifestManager.pushArtifacts([
-          ARTIFACTS[0],
-          ARTIFACTS[1],
+          ARTIFACT_EXCEPTIONS_MACOS,
+          ARTIFACT_EXCEPTIONS_WINDOWS,
           incompleteArtifact as InternalArtifactCompleteSchema,
         ])
-      ).resolves.toStrictEqual([error, new Error(`Incomplete artifact: ${ARTIFACT_ID_2}`)]);
+      ).resolves.toStrictEqual([
+        error,
+        new Error(`Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`),
+      ]);
 
       expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(2);
       expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
         1,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACTS[0], created: expect.anything() },
-        { id: ARTIFACT_ID_0 }
+        { ...ARTIFACT_EXCEPTIONS_MACOS, created: expect.anything() },
+        { id: ARTIFACT_ID_EXCEPTIONS_MACOS }
       );
-      expect(await uncompressData(context.cache.get(getArtifactId(ARTIFACTS[0]))!)).toStrictEqual(
-        await uncompressArtifact(ARTIFACTS[0])
-      );
-      expect(context.cache.get(getArtifactId(ARTIFACTS[1]))).toBeUndefined();
+      expect(
+        await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!)
+      ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_MACOS));
+      expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))).toBeUndefined();
     });
 
     test('Tolerates saved objects client conflict', async () => {
@@ -443,20 +469,22 @@ describe('ManifestManager', () => {
         .mockRejectedValue(
           SavedObjectsErrorHelpers.createConflictError(
             ArtifactConstants.SAVED_OBJECT_TYPE,
-            ARTIFACT_ID_0
+            ARTIFACT_ID_EXCEPTIONS_MACOS
           )
         );
 
-      await expect(manifestManager.pushArtifacts([ARTIFACTS[0]])).resolves.toStrictEqual([]);
+      await expect(
+        manifestManager.pushArtifacts([ARTIFACT_EXCEPTIONS_MACOS])
+      ).resolves.toStrictEqual([]);
 
       expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(1);
       expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
         1,
         ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACTS[0], created: expect.anything() },
-        { id: ARTIFACT_ID_0 }
+        { ...ARTIFACT_EXCEPTIONS_MACOS, created: expect.anything() },
+        { id: ARTIFACT_ID_EXCEPTIONS_MACOS }
       );
-      expect(context.cache.get(getArtifactId(ARTIFACTS[0]))).toBeUndefined();
+      expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))).toBeUndefined();
     });
   });
 
@@ -466,11 +494,11 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
       const manifest = Manifest.getDefault();
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       context.savedObjectsClient.create = jest
         .fn()
@@ -484,11 +512,11 @@ describe('ManifestManager', () => {
         ManifestConstants.SAVED_OBJECT_TYPE,
         {
           artifacts: [
-            { artifactId: ARTIFACT_ID_0, policyId: undefined },
-            { artifactId: ARTIFACT_ID_0, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_2, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_1, policyId: TEST_POLICY_ID_2 },
-            { artifactId: ARTIFACT_ID_2, policyId: TEST_POLICY_ID_2 },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: TEST_POLICY_ID_1 },
+            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_2 },
+            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_2 },
           ],
           schemaVersion: 'v1',
           semanticVersion: '1.0.0',
@@ -503,11 +531,11 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
       const manifest = new Manifest({ soVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[0], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       context.savedObjectsClient.update = jest
         .fn()
@@ -522,11 +550,11 @@ describe('ManifestManager', () => {
         'endpoint-manifest-v1',
         {
           artifacts: [
-            { artifactId: ARTIFACT_ID_0, policyId: undefined },
-            { artifactId: ARTIFACT_ID_0, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_2, policyId: TEST_POLICY_ID_1 },
-            { artifactId: ARTIFACT_ID_1, policyId: TEST_POLICY_ID_2 },
-            { artifactId: ARTIFACT_ID_2, policyId: TEST_POLICY_ID_2 },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: undefined },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_MACOS, policyId: TEST_POLICY_ID_1 },
+            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_1 },
+            { artifactId: ARTIFACT_ID_EXCEPTIONS_WINDOWS, policyId: TEST_POLICY_ID_2 },
+            { artifactId: ARTIFACT_ID_TRUSTED_APPS_MACOS, policyId: TEST_POLICY_ID_2 },
           ],
           schemaVersion: 'v1',
           semanticVersion: '1.0.0',
@@ -580,7 +608,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
       const manifest = new Manifest({ soVersion: '1.0.0' });
 
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       context.packagePolicyService.list = mockPolicyListResponse([]);
 
@@ -594,7 +622,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       const manifest = new Manifest({ soVersion: '1.0.0' });
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       context.packagePolicyService.list = mockPolicyListResponse([
         createPackagePolicyWithConfigMock({ id: TEST_POLICY_ID_1 }),
@@ -612,7 +640,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       const manifest = new Manifest({ soVersion: '1.0.0' });
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       context.packagePolicyService.list = mockPolicyListResponse([
         createPackagePolicyWithConfigMock({
@@ -621,7 +649,7 @@ describe('ManifestManager', () => {
             artifact_manifest: {
               value: {
                 artifacts: toArtifactRecords({
-                  'endpoint-exceptionlist-windows-v1': ARTIFACTS[0],
+                  [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_MACOS,
                 }),
                 manifest_version: '1.0.0',
                 schema_version: 'v1',
@@ -636,15 +664,15 @@ describe('ManifestManager', () => {
       expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
     });
 
-    test('Should dispatch to only policies that were changed', async () => {
+    test('Should dispatch to only policies where list of artifacts changed', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
-      manifest.addEntry(ARTIFACTS[0]);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_1);
-      manifest.addEntry(ARTIFACTS[1], TEST_POLICY_ID_2);
-      manifest.addEntry(ARTIFACTS[2], TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       context.packagePolicyService.list = mockPolicyListResponse([
         createPackagePolicyWithConfigMock({
@@ -653,7 +681,7 @@ describe('ManifestManager', () => {
             artifact_manifest: {
               value: {
                 artifacts: toArtifactRecords({
-                  'endpoint-exceptionlist-macos-v1': ARTIFACTS[0],
+                  [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
                 }),
                 manifest_version: '1.0.0',
                 schema_version: 'v1',
@@ -667,8 +695,8 @@ describe('ManifestManager', () => {
             artifact_manifest: {
               value: {
                 artifacts: toArtifactRecords({
-                  'endpoint-exceptionlist-windows-v1': ARTIFACTS[1],
-                  'endpoint-trustlist-macos-v1': ARTIFACTS[2],
+                  [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_WINDOWS,
+                  [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
                 }),
                 manifest_version: '1.0.0',
                 schema_version: 'v1',
@@ -694,7 +722,82 @@ describe('ManifestManager', () => {
               artifact_manifest: {
                 value: {
                   artifacts: toArtifactRecords({
-                    'endpoint-exceptionlist-windows-v1': ARTIFACTS[1],
+                    [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_WINDOWS,
+                  }),
+                  manifest_version: '1.0.1',
+                  schema_version: 'v1',
+                },
+              },
+            },
+          })
+        )
+      );
+    });
+
+    test('Should dispatch to only policies where artifact content changed', async () => {
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
+
+      context.packagePolicyService.list = mockPolicyListResponse([
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_1,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: toArtifactRecords({
+                  [ARTIFACT_NAME_EXCEPTIONS_MACOS]: await getEmptyInternalArtifactMock(
+                    'macos',
+                    'v1',
+                    {
+                      compress: true,
+                    }
+                  ),
+                }),
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+        createPackagePolicyWithConfigMock({
+          id: TEST_POLICY_ID_2,
+          config: {
+            artifact_manifest: {
+              value: {
+                artifacts: toArtifactRecords({
+                  [ARTIFACT_NAME_EXCEPTIONS_WINDOWS]: ARTIFACT_EXCEPTIONS_WINDOWS,
+                  [ARTIFACT_NAME_TRUSTED_APPS_MACOS]: ARTIFACT_TRUSTED_APPS_MACOS,
+                }),
+                manifest_version: '1.0.0',
+                schema_version: 'v1',
+              },
+            },
+          },
+        }),
+      ]);
+      context.packagePolicyService.update = jest.fn().mockResolvedValue({});
+
+      await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
+
+      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.update).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        undefined,
+        TEST_POLICY_ID_1,
+        toNewPackagePolicy(
+          createPackagePolicyWithConfigMock({
+            id: TEST_POLICY_ID_1,
+            config: {
+              artifact_manifest: {
+                value: {
+                  artifacts: toArtifactRecords({
+                    [ARTIFACT_NAME_EXCEPTIONS_MACOS]: ARTIFACT_EXCEPTIONS_MACOS,
                   }),
                   manifest_version: '1.0.1',
                   schema_version: 'v1',
@@ -712,7 +815,7 @@ describe('ManifestManager', () => {
       const error = new Error();
 
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
-      manifest.addEntry(ARTIFACTS[0]);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       context.packagePolicyService.list = mockPolicyListResponse([
         createPackagePolicyWithConfigMock({

@@ -45,8 +45,13 @@ export interface ManifestManagerContext {
   cache: LRU<string, Buffer>;
 }
 
+const getArtifactIds = (manifest: ManifestSchema) =>
+  [...Object.keys(manifest.artifacts)].map(
+    (key) => `${key}-${manifest.artifacts[key].decoded_sha256}`
+  );
+
 const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
-  isEqual(new Set(Object.keys(manifest1.artifacts)), new Set(Object.keys(manifest2.artifacts)));
+  isEqual(new Set(getArtifactIds(manifest1)), new Set(getArtifactIds(manifest2)));
 
 export class ManifestManager {
   protected artifactClient: ArtifactClient;
