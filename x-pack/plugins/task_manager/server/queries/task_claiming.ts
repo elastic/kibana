@@ -357,6 +357,7 @@ export class TaskClaiming {
     const taskMaxAttempts = taskTypesToClaim.reduce((accumulator, [type, { maxAttempts }]) => {
       return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
     }, {});
+
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
@@ -391,7 +392,7 @@ export class TaskClaiming {
             retryAt: claimOwnershipUntil,
           },
           claimTasksById || [],
-          [...taskTypes],
+          taskTypesToClaim.map(([type]) => type),
           taskTypesToSkip.map(([type]) => type),
           taskMaxAttempts
         ),
