@@ -289,7 +289,7 @@ describe('Conversion of absolute policy timing to relative timing', () => {
               },
             })
           )
-        ).toEqual({ total: 'Forever', hot: 'Forever', warm: undefined, cold: undefined });
+        ).toEqual({ total: 'forever', hot: 'forever', warm: undefined, cold: undefined });
       });
 
       test('hot, then always warm', () => {
@@ -308,7 +308,7 @@ describe('Conversion of absolute policy timing to relative timing', () => {
               },
             })
           )
-        ).toEqual({ total: 'Forever', hot: 'Less than a day', warm: 'Forever', cold: undefined });
+        ).toEqual({ total: 'forever', hot: 'less than a day', warm: 'forever', cold: undefined });
       });
 
       test('hot, then warm, then always cold', () => {
@@ -333,10 +333,10 @@ describe('Conversion of absolute policy timing to relative timing', () => {
             })
           )
         ).toEqual({
-          total: 'Forever',
+          total: 'forever',
           hot: '30 days',
           warm: '4 days',
-          cold: 'Forever',
+          cold: 'forever',
         });
       });
 
@@ -357,7 +357,7 @@ describe('Conversion of absolute policy timing to relative timing', () => {
               },
             })
           )
-        ).toEqual({ total: 'Forever', hot: '34 days', warm: undefined, cold: 'Forever' });
+        ).toEqual({ total: 'forever', hot: '34 days', warm: undefined, cold: 'forever' });
       });
     });
 
@@ -445,7 +445,7 @@ describe('Conversion of absolute policy timing to relative timing', () => {
           total: '61 days',
           hot: '24 days',
           warm: '37 days',
-          cold: 'Less than a day',
+          cold: 'less than a day',
         });
       });
 
@@ -474,7 +474,7 @@ describe('Conversion of absolute policy timing to relative timing', () => {
           total: '61 days',
           hot: '61 days',
           warm: undefined,
-          cold: 'Less than a day',
+          cold: 'less than a day',
         });
       });
 
@@ -506,8 +506,8 @@ describe('Conversion of absolute policy timing to relative timing', () => {
         ).toEqual({
           total: '61 days',
           hot: '61 days',
-          warm: 'Less than a day',
-          cold: 'Less than a day',
+          warm: 'less than a day',
+          cold: 'less than a day',
         });
       });
     });
