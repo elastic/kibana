@@ -48,20 +48,18 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
 
   const legendItems = getLegendItems();
 
+  const onHoverToggle = useCallback((val: string | null) => setHoveredLegend(val), []);
+
+  const onVisibleToggle = useCallback((val, label) => {
+    if (val) {
+      setHiddenLegends((prevState) => prevState.filter((legend) => legend !== label));
+    } else {
+      setHiddenLegends((prevState) => [...prevState, label]);
+    }
+  }, []);
+
   const renderLegendItem: RenderItem<LegendItemType> = (item) => {
-    return (
-      <LegendItem
-        item={item}
-        onHoverToggle={(val: string | null) => setHoveredLegend(val)}
-        onToggle={(val) => {
-          if (val) {
-            setHiddenLegends((prevState) => prevState.filter((legend) => legend !== item.id));
-          } else {
-            setHiddenLegends((prevState) => [...prevState, item.id]);
-          }
-        }}
-      />
-    );
+    return <LegendItem item={item} onHoverToggle={onHoverToggle} onToggle={onVisibleToggle} />;
   };
 
   const renderFilter = useCallback(() => {
@@ -114,30 +112,39 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
         domain={domain}
         barStyleAccessor={(datum) => {
-          if (hiddenLegends.length > 0 && hiddenLegends.includes(datum.datum.config.timing)) {
+          const barConfig = datum.datum.config;
+
+          const lowOpacityStyle = {
+            rect: {
+              fill: barConfig.colour,
+              opacity: '0.1',
+            },
+          };
+
+          if (!barConfig.isHighlighted) {
+            return lowOpacityStyle;
+          }
+
+          if (hiddenLegends.length > 0 && hiddenLegends.includes(barConfig.timing)) {
             return {
               rect: {
                 opacity: 0,
               },
             };
           }
-          if (hoveredLegend && hoveredLegend !== datum.datum.config.timing) {
-            if (
-              hoveredLegend === MimeTypesMap[datum.datum.config.mimeType] &&
-              datum.datum.config.timing === Timings.Receive
-            ) {
-              return datum.datum.config.colour;
+          if (hoveredLegend) {
+            if (hoveredLegend !== barConfig.timing) {
+              if (
+                hoveredLegend === MimeTypesMap[barConfig.mimeType] &&
+                barConfig.timing === Timings.Receive
+              ) {
+                return barConfig.colour;
+              }
+              return lowOpacityStyle;
             }
           }
-          if (!datum.datum.config.isHighlighted) {
-            return {
-              rect: {
-                fill: datum.datum.config.colour,
-                opacity: '0.1',
-              },
-            };
-          }
-          return datum.datum.config.colour;
+
+          return barConfig.colour;
         }}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}

@@ -23,12 +23,11 @@ const StyledLegend = euiStyled.div`
 
 interface Props {
   item: LegendItemType;
-  onToggle: (val: boolean) => void;
+  onToggle: (val: boolean, label: string) => void;
   onHoverToggle: (val: string | null) => void;
 }
 export const LegendItem = ({ item, onToggle, onHoverToggle }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(true);
-  const [isHovered, setIsHovered] = useState<string | null>(null);
 
   const onClick = () => {
     setIsVisible(!isVisible);
@@ -36,25 +35,21 @@ export const LegendItem = ({ item, onToggle, onHoverToggle }: Props) => {
 
   const onMouseEnter = () => {
     if (isVisible) {
-      setIsHovered(item.id);
+      onHoverToggle(item.id);
     }
   };
 
   const onMouseLeave = () => {
-    setIsHovered(null);
+    onHoverToggle(null);
   };
 
   useEffect(() => {
     if (!isVisible) {
-      setIsHovered(null);
+      onHoverToggle(null);
     }
 
-    onToggle(isVisible);
-  }, [isVisible, onToggle]);
-
-  useEffect(() => {
-    onHoverToggle(isHovered);
-  }, [isHovered, onHoverToggle]);
+    onToggle(isVisible, item.id);
+  }, [isVisible, onToggle, onHoverToggle, item.id]);
 
   return (
     <StyledLegend
