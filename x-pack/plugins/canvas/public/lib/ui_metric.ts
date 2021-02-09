@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { UiStatsMetricType, METRIC_TYPE } from '@kbn/analytics';
+import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
 export { METRIC_TYPE };
 
-export let reportUiStats: UsageCollectionSetup['reportUiStats'] | undefined;
+export let reportUiCounter: UsageCollectionSetup['reportUiCounter'] | undefined;
 
-export function init(_reportUiStats: UsageCollectionSetup['reportUiStats']): void {
-  reportUiStats = _reportUiStats;
+export function init(_reportUiCounter: UsageCollectionSetup['reportUiCounter']): void {
+  reportUiCounter = _reportUiCounter;
 }
 
-export function trackCanvasUiMetric(metricType: UiStatsMetricType, name: string | string[]) {
-  if (!reportUiStats) {
+export function trackCanvasUiMetric(metricType: UiCounterMetricType, name: string | string[]) {
+  if (!reportUiCounter) {
     return;
   }
 
-  reportUiStats('canvas', metricType, name);
+  reportUiCounter('canvas', metricType, name);
 }

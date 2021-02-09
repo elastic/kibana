@@ -1,48 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import React, { useCallback } from 'react';
+import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import { ActionConnector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];
   dataTestSubj: string;
-  defaultValue?: ActionConnector;
   disabled: boolean;
-  field: FieldHook;
+  field: FieldHook<string>;
   idAria: string;
   isEdit: boolean;
   isLoading: boolean;
+  handleChange?: (newValue: string) => void;
 }
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
-  defaultValue,
   disabled = false,
   field,
   idAria,
   isEdit = true,
   isLoading = false,
+  handleChange,
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-  useEffect(() => {
-    field.setValue(defaultValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue]);
-
-  const handleContentChange = useCallback(
-    (newConnector: string) => {
-      field.setValue(newConnector);
+  const onChange = useCallback(
+    (val: string) => {
+      if (handleChange) {
+        handleChange(val);
+      }
+      field.setValue(val);
     },
-    [field]
+    [handleChange, field]
   );
 
   return isEdit ? (
@@ -60,8 +59,8 @@ export const ConnectorSelector = ({
         connectors={connectors}
         disabled={disabled}
         isLoading={isLoading}
-        onChange={handleContentChange}
-        selectedConnector={(field.value as string) ?? 'none'}
+        onChange={onChange}
+        selectedConnector={isEmpty(field.value) ? 'none' : field.value}
       />
     </EuiFormRow>
   ) : null;

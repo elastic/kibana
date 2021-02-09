@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { NodeDataRoleWithCatchAll } from '.';
+import { AnyDataRole } from '.';
 
 export interface ListNodesRouteResponse {
   nodesByAttributes: { [attributePair: string]: string[] };
-  nodesByRoles: { [role in NodeDataRoleWithCatchAll]?: string[] };
+  nodesByRoles: { [role in AnyDataRole]?: string[] };
 
   /**
    * A flag to indicate whether a node is using `settings.node.data` which is the now deprecated way cloud configured
@@ -17,4 +18,11 @@ export interface ListNodesRouteResponse {
    * If this is true, it means the cluster is using legacy cloud configuration for data allocation, not node roles.
    */
   isUsingDeprecatedDataRoleConfig: boolean;
+}
+
+export interface ListSnapshotReposResponse {
+  /**
+   * An array of repository names
+   */
+  repositories: string[];
 }

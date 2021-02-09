@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ObservabilityApp } from '../../../typings/common';
@@ -37,24 +38,24 @@ export interface UXHasDataResponse {
   serviceName: string | number | undefined;
 }
 
-export type HasDataResponse = UXHasDataResponse | boolean;
-
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData = (params?: HasDataParams) => Promise<HasDataResponse>;
+export type HasData<T extends ObservabilityFetchDataPlugins> = (
+  params?: HasDataParams
+) => Promise<ObservabilityHasDataResponse[T]>;
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability' | 'stack_monitoring'
+  'observability-overview' | 'stack_monitoring'
 >;
 
 export interface DataHandler<
   T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
 > {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
-  hasData: HasData;
+  hasData: HasData<T>;
 }
 
 export interface FetchDataResponse {
@@ -71,12 +72,6 @@ export interface MetricsFetchDataResponse extends FetchDataResponse {
     hosts: Stat;
     cpu: Stat;
     memory: Stat;
-    inboundTraffic: Stat;
-    outboundTraffic: Stat;
-  };
-  series: {
-    inboundTraffic: Series;
-    outboundTraffic: Series;
   };
 }
 
@@ -112,4 +107,12 @@ export interface ObservabilityFetchDataResponse {
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
   ux: UxFetchDataResponse;
+}
+
+export interface ObservabilityHasDataResponse {
+  apm: boolean;
+  infra_metrics: boolean;
+  infra_logs: boolean;
+  uptime: boolean;
+  ux: UXHasDataResponse;
 }

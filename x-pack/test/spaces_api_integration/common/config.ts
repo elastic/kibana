@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -9,8 +10,6 @@ import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { TestInvoker } from './lib/types';
-// @ts-ignore
-import { LegacyEsProvider } from './services/legacy_es';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -35,7 +34,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
-        legacyEs: LegacyEsProvider,
+        es: config.kibana.api.get('services.es'),
+        legacyEs: config.kibana.api.get('services.legacyEs'),
         esSupertestWithoutAuth: config.xpack.api.get('services.esSupertestWithoutAuth'),
         supertest: config.kibana.api.get('services.supertest'),
         supertestWithoutAuth: config.xpack.api.get('services.supertestWithoutAuth'),

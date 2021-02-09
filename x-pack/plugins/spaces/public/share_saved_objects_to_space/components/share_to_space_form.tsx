@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './share_to_space_form.scss';
@@ -38,7 +39,7 @@ export const ShareToSpaceForm = (props: Props) => {
           title={
             <FormattedMessage
               id="xpack.spaces.management.shareToSpace.shareWarningTitle"
-              defaultMessage="Editing a shared object applies the changes in all spaces"
+              defaultMessage="Editing a shared object applies the changes in every space"
             />
           }
           color="warning"

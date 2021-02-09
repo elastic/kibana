@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AnyAction } from 'redux';
@@ -14,8 +15,8 @@ import {
   areLayersLoaded,
   getRefreshConfig,
   getMapInitError,
+  getMapSettings,
   getQueryableUniqueIndexPatternIds,
-  isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
 import { MapStoreState } from '../../reducers/store';
 import { getCoreChrome } from '../../kibana_services';
@@ -28,7 +29,7 @@ function mapStateToProps(state: MapStoreState) {
     refreshConfig: getRefreshConfig(state),
     mapInitError: getMapInitError(state),
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
-    hideToolbarOverlay: isToolbarOverlayHidden(state),
+    settings: getMapSettings(state),
   };
 }
 

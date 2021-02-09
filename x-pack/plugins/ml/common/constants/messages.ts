@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { once } from 'lodash';
@@ -87,6 +88,38 @@ export const getMessages = once(() => {
       text: i18n.translate('xpack.ml.models.jobValidation.messages.fieldsNotAggregatableMessage', {
         defaultMessage: 'One of the detector fields is not an aggregatable field.',
       }),
+      url:
+        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
+    },
+    cardinality_no_results: {
+      status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityNoResultsHeading',
+        {
+          defaultMessage: 'Field cardinality',
+        }
+      ),
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.cardinalityNoResultsMessage', {
+        defaultMessage: `Cardinality checks could not be run. The query to validate fields didn't return any documents.`,
+      }),
+    },
+    cardinality_field_not_exists: {
+      status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityFieldNotExistsHeading',
+        {
+          defaultMessage: 'Field cardinality',
+        }
+      ),
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.cardinalityFieldNotExistsMessage',
+        {
+          defaultMessage: `Cardinality checks could not be run for field {fieldName}. The query to validate the field didn't return any documents.`,
+          values: {
+            fieldName: '"{{fieldName}}"',
+          },
+        }
+      ),
       url:
         'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
     },
@@ -441,6 +474,16 @@ export const getMessages = once(() => {
       }),
       url:
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+    },
+    missing_summary_count_field_name: {
+      status: VALIDATION_STATUS.ERROR,
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.missingSummaryCountFieldNameMessage',
+        {
+          defaultMessage:
+            'A job configured with a datafeed with aggregations must set summary_count_field_name; use doc_count or suitable alternative.',
+        }
+      ),
     },
     skipped_extended_tests: {
       status: VALIDATION_STATUS.WARNING,

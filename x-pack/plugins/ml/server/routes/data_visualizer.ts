@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -80,7 +81,7 @@ function getHistogramsForFields(
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
+export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup DataVisualizer
    *
@@ -104,7 +105,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -151,7 +152,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -216,7 +217,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },

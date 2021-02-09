@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,65 +16,39 @@ import {
   EuiFieldPassword,
   EuiSpacer,
   EuiLink,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '../case_mappings';
 
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
-import { connectorConfiguration } from './config';
+import { useKibana } from '../../../../common/lib/kibana';
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
-  ServiceNowActionConnector
->> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly, docLinks }) => {
-  // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
-  const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
-  const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
+const ServiceNowConnectorFields: React.FC<
+  ActionConnectorFieldsProps<ServiceNowActionConnector>
+> = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
+  const { docLinks } = useKibana().services;
+  const { apiUrl } = action.config;
 
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
+  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
 
   const { username, password } = action.secrets;
 
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
-
-  // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-  if (consumer === 'case') {
-    if (isEmpty(mapping)) {
-      editActionConfig('incidentConfiguration', {
-        mapping: createDefaultMapping(connectorConfiguration.fields as any),
-      });
-    }
-    if (!isCaseOwned) {
-      editActionConfig('isCaseOwned', true);
-    }
-  }
+  const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
+  const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [editActionConfig]
   );
 
   const handleOnChangeSecretConfig = useCallback(
     (key: string, value: string) => editActionSecrets(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [editActionSecrets]
   );
-
-  const handleOnChangeMappingConfig = useCallback(
-    (newMapping: CasesConfigurationMapping[]) =>
-      editActionConfig('incidentConfiguration', {
-        ...action.config.incidentConfiguration,
-        mapping: newMapping,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [action.config]
-  );
-
   return (
     <>
       <EuiFlexGroup>
@@ -89,7 +66,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
               >
                 <FormattedMessage
                   id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.apiUrlHelpLabel"
-                  defaultMessage="Configure Personal Developer Instance for ServiceNow"
+                  defaultMessage="Configure a Personal Developer Instance"
                 />
               </EuiLink>
             }
@@ -101,7 +78,6 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
               readOnly={readOnly}
               value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
               data-test-subj="apiUrlFromInput"
-              placeholder="https://<site-url>"
               onChange={(evt) => handleOnChangeActionConfig('apiUrl', evt.target.value)}
               onBlur={() => {
                 if (!apiUrl) {
@@ -110,6 +86,20 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
               }}
             />
           </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4>{i18n.AUTHENTICATION_LABEL}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth>{getEncryptedFieldNotifyLabel(!action.id)}</EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -166,24 +156,27 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {consumer === 'case' && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-        <>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="case-servicenow-mappings">
-              <FieldMapping
-                disabled={true}
-                connectorConfiguration={connectorConfiguration}
-                mapping={mapping as CasesConfigurationMapping[]}
-                onChangeMapping={handleOnChangeMappingConfig}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </>
   );
 };
+
+function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <EuiText size="s" data-test-subj="rememberValuesMessage">
+        {i18n.REMEMBER_VALUES_LABEL}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiCallOut
+      size="s"
+      iconType="iInCircle"
+      title={i18n.REENTER_VALUES_LABEL}
+      data-test-subj="reenterValuesMessage"
+    />
+  );
+}
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

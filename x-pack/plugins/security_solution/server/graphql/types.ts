@@ -2,8 +2,9 @@
 /* eslint-disable */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SiemContext } from '../lib/types';
@@ -105,7 +106,7 @@ export interface TimelineInput {
 
   savedQueryId?: Maybe<string>;
 
-  sort?: Maybe<SortTimelineInput>;
+  sort?: Maybe<SortTimelineInput[]>;
 
   status?: Maybe<TimelineStatus>;
 }
@@ -634,7 +635,7 @@ export interface TimelineResult {
 
   savedObjectId: string;
 
-  sort?: Maybe<SortTimelineResult>;
+  sort?: Maybe<ToAny>;
 
   status?: Maybe<TimelineStatus>;
 
@@ -777,12 +778,6 @@ export interface KueryFilterQueryResult {
   expression?: Maybe<string>;
 }
 
-export interface SortTimelineResult {
-  columnId?: Maybe<string>;
-
-  sortDirection?: Maybe<string>;
-}
-
 export interface ResponseTimelines {
   timeline: (Maybe<TimelineResult>)[];
 
@@ -842,6 +837,12 @@ export interface ResponseFavoriteTimeline {
   message?: Maybe<string>;
 
   savedObjectId: string;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 
   version: string;
 
@@ -1699,6 +1700,12 @@ export interface PersistTimelineMutationArgs {
 }
 export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface DeleteTimelineMutationArgs {
   id: string[];
@@ -2336,7 +2343,6 @@ export namespace AgentFieldsResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-
 export namespace CloudFieldsResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = CloudFields> {
     instance?: InstanceResolver<Maybe<CloudInstance>, TypeParent, TContext>;
@@ -2665,7 +2671,7 @@ export namespace TimelineResultResolvers {
 
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
-    sort?: SortResolver<Maybe<SortTimelineResult>, TypeParent, TContext>;
+    sort?: SortResolver<Maybe<ToAny>, TypeParent, TContext>;
 
     status?: StatusResolver<Maybe<TimelineStatus>, TypeParent, TContext>;
 
@@ -2785,7 +2791,7 @@ export namespace TimelineResultResolvers {
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
   export type SortResolver<
-    R = Maybe<SortTimelineResult>,
+    R = Maybe<ToAny>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3245,25 +3251,6 @@ export namespace KueryFilterQueryResultResolvers {
   > = Resolver<R, Parent, TContext>;
 }
 
-export namespace SortTimelineResultResolvers {
-  export interface Resolvers<TContext = SiemContext, TypeParent = SortTimelineResult> {
-    columnId?: ColumnIdResolver<Maybe<string>, TypeParent, TContext>;
-
-    sortDirection?: SortDirectionResolver<Maybe<string>, TypeParent, TContext>;
-  }
-
-  export type ColumnIdResolver<
-    R = Maybe<string>,
-    Parent = SortTimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-  export type SortDirectionResolver<
-    R = Maybe<string>,
-    Parent = SortTimelineResult,
-    TContext = SiemContext
-  > = Resolver<R, Parent, TContext>;
-}
-
 export namespace ResponseTimelinesResolvers {
   export interface Resolvers<TContext = SiemContext, TypeParent = ResponseTimelines> {
     timeline?: TimelineResolver<(Maybe<TimelineResult>)[], TypeParent, TContext>;
@@ -3445,6 +3432,12 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, TContext, PersistFavoriteArgs>;
   export interface PersistFavoriteArgs {
     timelineId?: Maybe<string>;
+
+    templateTimelineId?: Maybe<string>;
+
+    templateTimelineVersion?: Maybe<number>;
+
+    timelineType?: Maybe<TimelineType>;
   }
 
   export type DeleteTimelineResolver<R = boolean, Parent = {}, TContext = SiemContext> = Resolver<
@@ -3518,6 +3511,12 @@ export namespace ResponseFavoriteTimelineResolvers {
 
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
+    templateTimelineId?: TemplateTimelineIdResolver<Maybe<string>, TypeParent, TContext>;
+
+    templateTimelineVersion?: TemplateTimelineVersionResolver<Maybe<number>, TypeParent, TContext>;
+
+    timelineType?: TimelineTypeResolver<Maybe<TimelineType>, TypeParent, TContext>;
+
     version?: VersionResolver<string, TypeParent, TContext>;
 
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
@@ -3535,6 +3534,21 @@ export namespace ResponseFavoriteTimelineResolvers {
   > = Resolver<R, Parent, TContext>;
   export type SavedObjectIdResolver<
     R = string,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineIdResolver<
+    R = Maybe<string>,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineVersionResolver<
+    R = Maybe<number>,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TimelineTypeResolver<
+    R = Maybe<TimelineType>,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6091,7 +6105,6 @@ export type IResolvers<TContext = SiemContext> = {
   SerializedFilterQueryResult?: SerializedFilterQueryResultResolvers.Resolvers<TContext>;
   SerializedKueryQueryResult?: SerializedKueryQueryResultResolvers.Resolvers<TContext>;
   KueryFilterQueryResult?: KueryFilterQueryResultResolvers.Resolvers<TContext>;
-  SortTimelineResult?: SortTimelineResultResolvers.Resolvers<TContext>;
   ResponseTimelines?: ResponseTimelinesResolvers.Resolvers<TContext>;
   Mutation?: MutationResolvers.Resolvers<TContext>;
   ResponseNote?: ResponseNoteResolvers.Resolvers<TContext>;

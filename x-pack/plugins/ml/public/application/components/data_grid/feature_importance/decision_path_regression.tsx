@@ -1,21 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import d3 from 'd3';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import {
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../../common/types/feature_importance';
 import { useDecisionPathData, isDecisionPathData } from './use_classification_path_data';
 import { DecisionPathChart } from './decision_path_chart';
 import { MissingDecisionPathCallout } from './missing_decision_path_callout';
 
 interface RegressionDecisionPathProps {
   predictionFieldName?: string;
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   predictedValue?: number | undefined;
   featureImportance: FeatureImportance[];
   topClasses?: TopClasses;

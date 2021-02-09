@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -26,10 +27,13 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineEdges,
   TimelineItem,
-  SortField,
+  TimelineRequestSortField,
 } from '../../../common/search_strategy';
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
+import { TimelineId } from '../../../common/types/timeline';
+import { useRouteSpy } from '../../common/utils/route/use_route_spy';
+import { activeTimeline } from './active_timeline_context';
 
 export interface TimelineArgs {
   events: TimelineItem[];
@@ -44,7 +48,7 @@ export interface TimelineArgs {
 
 type LoadPage = (newActivePage: number) => void;
 
-interface UseTimelineEventsProps {
+export interface UseTimelineEventsProps {
   docValueFields?: DocValueFields[];
   filterQuery?: ESQuery | string;
   skip?: boolean;
@@ -53,18 +57,22 @@ interface UseTimelineEventsProps {
   fields: string[];
   indexNames: string[];
   limit: number;
-  sort: SortField;
+  sort: TimelineRequestSortField[];
   startDate: string;
+  timerangeKind?: 'absolute' | 'relative';
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
   timelineEdges.map((e: TimelineEdges) => e.node);
 
 const ID = 'timelineEventsQuery';
-const initSortDefault = {
-  field: '@timestamp',
-  direction: Direction.asc,
-};
+export const initSortDefault = [
+  {
+    field: '@timestamp',
+    direction: Direction.asc,
+    type: 'number',
+  },
+];
 
 export const useTimelineEvents = ({
   docValueFields,
@@ -77,36 +85,21 @@ export const useTimelineEvents = ({
   limit,
   sort = initSortDefault,
   skip = false,
+  timerangeKind,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+  const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [activePage, setActivePage] = useState(0);
-  const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
-    !skip
-      ? {
-          fields: [],
-          fieldRequested: fields,
-          filterQuery: createFilter(filterQuery),
-          id: ID,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          pagination: {
-            activePage,
-            querySize: limit,
-          },
-          sort,
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: TimelineEventsQueries.all,
-        }
-      : null
+  const [activePage, setActivePage] = useState(
+    id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
+  const [timelineRequest, setTimelineRequest] = useState<TimelineEventsAllRequestOptions | null>(
+    null
+  );
+  const prevTimelineRequest = useRef<TimelineEventsAllRequestOptions | null>(null);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -118,18 +111,31 @@ export const useTimelineEvents = ({
   const wrappedLoadPage = useCallback(
     (newActivePage: number) => {
       clearSignalsState();
+
+      if (id === TimelineId.active) {
+        activeTimeline.setExpandedEvent({});
+        activeTimeline.setActivePage(newActivePage);
+      }
+
       setActivePage(newActivePage);
     },
-    [clearSignalsState]
+    [clearSignalsState, id]
   );
 
+  const refetchGrid = useCallback(() => {
+    if (refetch.current != null) {
+      refetch.current();
+    }
+    wrappedLoadPage(0);
+  }, [wrappedLoadPage]);
+
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],
     },
-    refetch: refetch.current,
+    refetch: refetchGrid,
     totalCount: -1,
     pageInfo: {
       activePage: 0,
@@ -142,15 +148,14 @@ export const useTimelineEvents = ({
 
   const timelineSearch = useCallback(
     (request: TimelineEventsAllRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || pageName === '' || skip) {
         return;
       }
-
       let didCancel = false;
       const asyncSearch = async () => {
+        prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
-
         const searchSubscription$ = data.search
           .search<TimelineEventsAllRequestOptions, TimelineEventsAllStrategyResponse>(request, {
             strategy: 'securitySolutionTimelineSearchStrategy',
@@ -158,26 +163,39 @@ export const useTimelineEvents = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setTimelineResponse((prevResponse) => ({
-                    ...prevResponse,
-                    events: getTimelineEvents(response.edges),
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    pageInfo: response.pageInfo,
-                    refetch: refetch.current,
-                    totalCount: response.totalCount,
-                    updatedAt: Date.now(),
-                  }));
+              try {
+                if (isCompleteResponse(response)) {
+                  if (!didCancel) {
+                    setLoading(false);
+
+                    setTimelineResponse((prevResponse) => {
+                      const newTimelineResponse = {
+                        ...prevResponse,
+                        events: getTimelineEvents(response.edges),
+                        inspect: getInspectResponse(response, prevResponse.inspect),
+                        pageInfo: response.pageInfo,
+                        totalCount: response.totalCount,
+                        updatedAt: Date.now(),
+                      };
+                      if (id === TimelineId.active) {
+                        activeTimeline.setExpandedEvent({});
+                        activeTimeline.setPageName(pageName);
+                        activeTimeline.setRequest(request);
+                        activeTimeline.setResponse(newTimelineResponse);
+                      }
+                      return newTimelineResponse;
+                    });
+                  }
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
+                  if (!didCancel) {
+                    setLoading(false);
+                  }
+                  notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
+                  searchSubscription$.unsubscribe();
                 }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
+              } catch {
                 notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
-                searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
@@ -190,19 +208,47 @@ export const useTimelineEvents = ({
             },
           });
       };
+
+      if (
+        id === TimelineId.active &&
+        activeTimeline.getPageName() !== '' &&
+        pageName !== activeTimeline.getPageName()
+      ) {
+        activeTimeline.setPageName(pageName);
+        abortCtrl.current.abort();
+        setLoading(false);
+        prevTimelineRequest.current = activeTimeline.getRequest();
+        refetch.current = asyncSearch.bind(null, activeTimeline.getRequest());
+        setTimelineResponse((prevResp) => {
+          const resp = activeTimeline.getResponse();
+          if (resp != null) {
+            return {
+              ...resp,
+              refetch: refetchGrid,
+              loadPage: wrappedLoadPage,
+            };
+          }
+          return prevResp;
+        });
+        if (activeTimeline.getResponse() != null) {
+          return;
+        }
+      }
+
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
+
       return () => {
         didCancel = true;
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, id, notifications.toasts, pageName, refetchGrid, skip, wrappedLoadPage]
   );
 
   useEffect(() => {
-    if (skip || skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
+    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
       return;
     }
 
@@ -238,7 +284,6 @@ export const useTimelineEvents = ({
         fieldRequested: fields,
         fields: [],
         filterQuery: createFilter(filterQuery),
-        id,
         pagination: {
           activePage: newActivePage,
           querySize: limit,
@@ -253,34 +298,63 @@ export const useTimelineEvents = ({
 
       if (activePage !== newActivePage) {
         setActivePage(newActivePage);
+        if (id === TimelineId.active) {
+          activeTimeline.setActivePage(newActivePage);
+        }
       }
-
-      if (
-        !skip &&
-        !skipQueryForDetectionsPage(id, indexNames) &&
-        !deepEqual(prevRequest, currentRequest)
-      ) {
+      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
         return currentRequest;
       }
       return prevRequest;
     });
   }, [
+    dispatch,
     indexNames,
+    activePage,
     docValueFields,
     endDate,
     filterQuery,
-    startDate,
     id,
-    activePage,
     limit,
+    startDate,
     sort,
-    skip,
     fields,
   ]);
 
   useEffect(() => {
-    timelineSearch(timelineRequest);
-  }, [timelineRequest, timelineSearch]);
+    if (
+      id !== TimelineId.active ||
+      timerangeKind === 'absolute' ||
+      !deepEqual(prevTimelineRequest, timelineRequest)
+    ) {
+      timelineSearch(timelineRequest);
+    }
+  }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
+
+  /*
+    cleanup timeline events response when the filters were removed completely
+    to avoid displaying previous query results
+  */
+  useEffect(() => {
+    if (isEmpty(filterQuery)) {
+      setTimelineResponse({
+        id,
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: refetchGrid,
+        totalCount: -1,
+        pageInfo: {
+          activePage: 0,
+          querySize: 0,
+        },
+        events: [],
+        loadPage: wrappedLoadPage,
+        updatedAt: 0,
+      });
+    }
+  }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
 
   return [loading, timelineResponse];
 };

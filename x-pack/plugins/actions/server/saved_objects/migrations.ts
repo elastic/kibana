@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
@@ -19,14 +21,23 @@ type ActionMigration = (
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationActions = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
       !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
+  const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      !!doc.attributes.config?.isCaseOwned ||
+      !!doc.attributes.config?.incidentConfiguration ||
+      doc.attributes.actionTypeId === '.webhook',
+    pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
+  );
+
   return {
-    '7.10.0': executeMigrationWithErrorHandling(migrationActions, '7.10.0'),
+    '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
+    '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
   };
 }
 
@@ -67,9 +78,32 @@ function renameCasesConfigurationObject(
   };
 }
 
+function removeCasesFieldMappings(
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> {
+  if (
+    !doc.attributes.config?.hasOwnProperty('isCaseOwned') &&
+    !doc.attributes.config?.hasOwnProperty('incidentConfiguration')
+  ) {
+    return doc;
+  }
+  const { incidentConfiguration, isCaseOwned, ...restConfiguration } = doc.attributes.config;
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      config: restConfiguration,
+    },
+  };
+}
+
 const addHasAuthConfigurationObject = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
+  if (doc.attributes.actionTypeId !== '.email' && doc.attributes.actionTypeId !== '.webhook') {
+    return doc;
+  }
   const hasAuth = !!doc.attributes.secrets.user || !!doc.attributes.secrets.password;
   return {
     ...doc,

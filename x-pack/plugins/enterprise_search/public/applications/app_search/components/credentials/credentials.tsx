@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
+
 import { useActions, useValues } from 'kea';
 
 import {
@@ -23,17 +25,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { CredentialsLogic } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
+import { CREDENTIALS_TITLE } from './constants';
+import { CredentialsFlyout } from './credentials_flyout';
 import { CredentialsList } from './credentials_list';
+import { CredentialsLogic } from './credentials_logic';
 
 export const Credentials: React.FC = () => {
   const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
   );
 
-  const { dataLoading } = useValues(CredentialsLogic);
+  const { dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
 
   useEffect(() => {
     initializeCredentialsData();
@@ -44,25 +50,16 @@ export const Credentials: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome
-        trail={[
-          i18n.translate('xpack.enterpriseSearch.appSearch.credentials.title', {
-            defaultMessage: 'Credentials',
-          }),
-        ]}
-      />
+      <SetPageChrome trail={[CREDENTIALS_TITLE]} />
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.title', {
-                defaultMessage: 'Credentials',
-              })}
-            </h1>
+            <h1>{CREDENTIALS_TITLE}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
       <EuiPageContentBody>
+        {shouldShowCredentialsForm && <CredentialsFlyout />}
         <EuiPanel className="eui-textCenter">
           <EuiTitle size="s">
             <h2>
@@ -110,7 +107,7 @@ export const Credentials: React.FC = () => {
               <EuiButton
                 color="primary"
                 data-test-subj="CreateAPIKeyButton"
-                fill={true}
+                fill
                 onClick={() => showCredentialsForm()}
               >
                 {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
@@ -120,7 +117,8 @@ export const Credentials: React.FC = () => {
             )}
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
+        <FlashMessages />
         <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
       </EuiPageContentBody>
     </>

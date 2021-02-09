@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -13,6 +14,8 @@ import { parseInterval } from '../../../../common/util/parse_interval';
 import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import { mlJobService } from '../../services/job_service';
+import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 // Builds the chart configuration for the provided anomaly record, returning
 // an object with properties used for the display (series function and field, aggregation interval etc),
@@ -47,6 +50,10 @@ export function buildConfig(record) {
   // Add the 'entity_fields' i.e. the partition, by, over fields which
   // define the metric series to be plotted.
   config.entityFields = getEntityFieldList(record);
+
+  if (record.function === ML_JOB_AGGREGATION.METRIC) {
+    config.metricFunction = mlFunctionToESAggregation(record.function_description);
+  }
 
   // Build the tooltip data for the chart info icon, showing further details on what is being plotted.
   let functionLabel = config.metricFunction;

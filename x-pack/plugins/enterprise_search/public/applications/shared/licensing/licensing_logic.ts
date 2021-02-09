@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
@@ -9,18 +10,18 @@ import { Observable, Subscription } from 'rxjs';
 
 import { ILicense } from '../../../../../licensing/public';
 
-export interface ILicensingValues {
+interface LicensingValues {
   license: ILicense | null;
   licenseSubscription: Subscription | null;
   hasPlatinumLicense: boolean;
   hasGoldLicense: boolean;
 }
-export interface ILicensingActions {
+interface LicensingActions {
   setLicense(license: ILicense): ILicense;
   setLicenseSubscription(licenseSubscription: Subscription): Subscription;
 }
 
-export const LicensingLogic = kea<MakeLogicType<ILicensingValues, ILicensingActions>>({
+export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingActions>>({
   path: ['enterprise_search', 'licensing_logic'],
   actions: {
     setLicense: (license) => license,
@@ -72,10 +73,10 @@ export const LicensingLogic = kea<MakeLogicType<ILicensingValues, ILicensingActi
 /**
  * Mount/props helper
  */
-interface ILicensingLogicProps {
+interface LicensingLogicProps {
   license$: Observable<ILicense>;
 }
-export const mountLicensingLogic = (props: ILicensingLogicProps) => {
+export const mountLicensingLogic = (props: LicensingLogicProps) => {
   LicensingLogic(props);
   const unmount = LicensingLogic.mount();
   return unmount;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
@@ -15,9 +16,7 @@ export type QueryAllNoteResolver = AppResolverWithFields<
   'totalCount' | 'Note'
 >;
 
-export type QueryNotesByTimelineIdResolver = AppResolverOf<
-  QueryResolvers.GetNotesByTimelineIdResolver
->;
+export type QueryNotesByTimelineIdResolver = AppResolverOf<QueryResolvers.GetNotesByTimelineIdResolver>;
 
 export type QueryNotesByEventIdResolver = AppResolverOf<QueryResolvers.GetNotesByEventIdResolver>;
 
@@ -27,9 +26,7 @@ export type MutationNoteResolver = AppResolverOf<
 
 export type MutationDeleteNoteResolver = AppResolverOf<MutationResolvers.DeleteNoteResolver>;
 
-export type MutationDeleteNoteByTimelineIdResolver = AppResolverOf<
-  MutationResolvers.DeleteNoteByTimelineIdResolver
->;
+export type MutationDeleteNoteByTimelineIdResolver = AppResolverOf<MutationResolvers.DeleteNoteByTimelineIdResolver>;
 
 interface NoteResolversDeps {
   note: Note;

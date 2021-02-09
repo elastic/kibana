@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getSuggestions } from './suggestion_helpers';
+import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../mocks';
-import { TableSuggestion, DatasourceSuggestion } from '../../types';
+import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -412,5 +414,195 @@ describe('suggestion helpers', () => {
         state: currentState,
       })
     );
+  });
+
+  it('should pass passed in main palette if specified', () => {
+    const mockVisualization1 = createMockVisualization();
+    const mockVisualization2 = createMockVisualization();
+    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(0),
+      generateSuggestion(1),
+    ]);
+    getSuggestions({
+      visualizationMap: {
+        vis1: mockVisualization1,
+        vis2: mockVisualization2,
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+      mainPalette,
+    });
+    expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mainPalette,
+      })
+    );
+    expect(mockVisualization2.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mainPalette,
+      })
+    );
+  });
+
+  it('should query active visualization for main palette if not specified', () => {
+    const mockVisualization1 = createMockVisualization();
+    const mockVisualization2 = createMockVisualization();
+    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    mockVisualization1.getMainPalette = jest.fn(() => mainPalette);
+    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      generateSuggestion(0),
+      generateSuggestion(1),
+    ]);
+    getSuggestions({
+      visualizationMap: {
+        vis1: mockVisualization1,
+        vis2: mockVisualization2,
+      },
+      activeVisualizationId: 'vis1',
+      visualizationState: {},
+      datasourceMap,
+      datasourceStates,
+    });
+    expect(mockVisualization1.getMainPalette).toHaveBeenCalledWith({});
+    expect(mockVisualization2.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mainPalette,
+      })
+    );
+  });
+
+  describe('getTopSuggestionForField', () => {
+    let mockVisualization1: jest.Mocked<Visualization>;
+    let mockVisualization2: jest.Mocked<Visualization>;
+    let mockDatasourceState: unknown;
+    let defaultParams: Parameters<typeof getTopSuggestionForField>;
+    beforeEach(() => {
+      datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([
+        {
+          state: {},
+          table: {
+            isMultiRow: true,
+            layerId: '1',
+            columns: [],
+            changeType: 'unchanged',
+          },
+          keptLayerIds: [],
+        },
+      ]);
+      mockVisualization1 = createMockVisualization();
+      mockVisualization1.getSuggestions.mockReturnValue([
+        {
+          score: 0.3,
+          title: 'second suggestion',
+          state: { second: true },
+          previewIcon: 'empty',
+        },
+        {
+          score: 0.5,
+          title: 'top suggestion',
+          state: { first: true },
+          previewIcon: 'empty',
+        },
+      ]);
+      mockVisualization2 = createMockVisualization();
+      mockVisualization2.getSuggestions.mockReturnValue([
+        {
+          score: 0.8,
+          title: 'other vis suggestion',
+          state: {},
+          previewIcon: 'empty',
+        },
+      ]);
+      mockDatasourceState = { myDatasourceState: true };
+      defaultParams = [
+        {
+          '1': {
+            getTableSpec: () => [{ columnId: 'col1' }],
+            datasourceId: '',
+            getOperationForColumnId: jest.fn(),
+          },
+        },
+        'vis1',
+        { vis1: mockVisualization1 },
+        {},
+        datasourceMap.mock,
+        {
+          mockindexpattern: { state: mockDatasourceState, isLoading: false },
+        },
+        { id: 'myfield', humanData: { label: 'myfieldLabel' } },
+      ];
+    });
+
+    it('should return top suggestion for field', () => {
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result!.title).toEqual('top suggestion');
+      expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+        mockDatasourceState,
+        {
+          id: 'myfield',
+          humanData: {
+            label: 'myfieldLabel',
+          },
+        }
+      );
+    });
+
+    it('should return nothing if visualization does not produce suggestions', () => {
+      mockVisualization1.getSuggestions.mockReturnValue([]);
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result).toEqual(undefined);
+    });
+
+    it('should return nothing if datasource does not produce suggestions', () => {
+      datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([]);
+      defaultParams[2] = {
+        vis1: { ...mockVisualization1, getSuggestions: () => [] },
+        vis2: mockVisualization2,
+      };
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result).toEqual(undefined);
+    });
+
+    it('should not consider suggestion from other visualization if there is data', () => {
+      defaultParams[2] = {
+        vis1: { ...mockVisualization1, getSuggestions: () => [] },
+        vis2: mockVisualization2,
+      };
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result).toBeUndefined();
+    });
+
+    it('should consider top suggestion from other visualization if there is no data', () => {
+      const mockVisualization3 = createMockVisualization();
+      defaultParams[0] = {
+        '1': {
+          getTableSpec: () => [],
+          datasourceId: '',
+          getOperationForColumnId: jest.fn(),
+        },
+      };
+      mockVisualization1.getSuggestions.mockReturnValue([]);
+      mockVisualization3.getSuggestions.mockReturnValue([
+        {
+          score: 0.1,
+          title: 'low ranking suggestion',
+          state: {},
+          previewIcon: 'empty',
+        },
+      ]);
+      defaultParams[2] = {
+        vis1: mockVisualization1,
+        vis2: mockVisualization2,
+        vis3: mockVisualization3,
+      };
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result!.title).toEqual('other vis suggestion');
+      expect(mockVisualization1.getSuggestions).toHaveBeenCalled();
+      expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
+      expect(mockVisualization3.getSuggestions).toHaveBeenCalled();
+    });
   });
 });

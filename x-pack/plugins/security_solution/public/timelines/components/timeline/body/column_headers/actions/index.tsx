@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
@@ -18,7 +19,7 @@ interface Props {
   header: ColumnHeaderOptions;
   isLoading: boolean;
   onColumnRemoved: OnColumnRemoved;
-  sort: Sort;
+  sort: Sort[];
 }
 
 /** Given a `header`, returns the `SortDirection` applicable to it */
@@ -53,7 +54,7 @@ CloseButton.displayName = 'CloseButton';
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort, isLoading }) => {
   return (
     <>
-      {sort.columnId === header.id && isLoading ? (
+      {sort.some((i) => i.columnId === header.id) && isLoading ? (
         <EventsHeadingExtra className="siemEventsHeading__extra--loading">
           <EventsLoading data-test-subj="timeline-loading-spinner" />
         </EventsHeadingExtra>

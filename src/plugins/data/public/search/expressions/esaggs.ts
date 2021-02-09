@@ -1,306 +1,98 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { get, hasIn } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
-import { PersistedState } from '../../../../../plugins/visualizations/public';
-import { Adapters } from '../../../../../plugins/inspector/public';
-
+import { get } from 'lodash';
+import { StartServicesAccessor } from 'src/core/public';
+import { Adapters } from 'src/plugins/inspector/common';
 import {
-  calculateBounds,
   EsaggsExpressionFunctionDefinition,
-  Filter,
-  getTime,
-  IIndexPattern,
-  isRangeFilter,
-  Query,
-  TimeRange,
-} from '../../../common';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-  IAggConfigs,
-  ISearchSource,
-  tabifyAggResponse,
-} from '../../../common/search';
+  EsaggsStartDependencies,
+  getEsaggsMeta,
+  handleEsaggsRequest,
+} from '../../../common/search/expressions';
+import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
-import { FilterManager } from '../../query';
-import {
-  getFieldFormats,
-  getIndexPatterns,
-  getQueryService,
-  getSearchService,
-} from '../../services';
-import { buildTabularInspectorData } from './build_tabular_inspector_data';
+/**
+ * Returns the expression function definition. Any stateful dependencies are accessed
+ * at runtime via the `getStartDependencies` param, which provides the specific services
+ * needed for this function to run.
+ *
+ * This function is an implementation detail of this module, and is exported separately
+ * only for testing purposes.
+ *
+ * @param getStartDependencies - async function that resolves with EsaggsStartDependencies
+ *
+ * @internal
+ */
+export function getFunctionDefinition({
+  getStartDependencies,
+}: {
+  getStartDependencies: () => Promise<EsaggsStartDependencies>;
+}) {
+  return (): EsaggsExpressionFunctionDefinition => ({
+    ...getEsaggsMeta(),
+    async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
+      const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
-export interface RequestHandlerParams {
-  searchSource: ISearchSource;
-  aggs: IAggConfigs;
-  timeRange?: TimeRange;
-  timeFields?: string[];
-  indexPattern?: IIndexPattern;
-  query?: Query;
-  filters?: Filter[];
-  filterManager: FilterManager;
-  uiState?: PersistedState;
-  partialRows?: boolean;
-  inspectorAdapters: Adapters;
-  metricsAtAllLevels?: boolean;
-  visParams?: any;
-  abortSignal?: AbortSignal;
+      const indexPattern = await indexPatterns.create(args.index.value, true);
+      const aggConfigs = aggs.createAggConfigs(
+        indexPattern,
+        args.aggs!.map((agg) => agg.value)
+      );
+
+      return await handleEsaggsRequest({
+        abortSignal: (abortSignal as unknown) as AbortSignal,
+        aggs: aggConfigs,
+        filters: get(input, 'filters', undefined),
+        indexPattern,
+        inspectorAdapters: inspectorAdapters as Adapters,
+        metricsAtAllLevels: args.metricsAtAllLevels,
+        partialRows: args.partialRows,
+        query: get(input, 'query', undefined) as any,
+        searchSessionId: getSearchSessionId(),
+        searchSourceService: searchSource,
+        timeFields: args.timeFields,
+        timeRange: get(input, 'timeRange', undefined),
+        getNow,
+      });
+    },
+  });
 }
 
-const name = 'esaggs';
-
-const handleCourierRequest = async ({
-  searchSource,
-  aggs,
-  timeRange,
-  timeFields,
-  indexPattern,
-  query,
-  filters,
-  partialRows,
-  metricsAtAllLevels,
-  inspectorAdapters,
-  filterManager,
-  abortSignal,
-}: RequestHandlerParams) => {
-  // Create a new search source that inherits the original search source
-  // but has the appropriate timeRange applied via a filter.
-  // This is a temporary solution until we properly pass down all required
-  // information for the request to the request handler (https://github.com/elastic/kibana/issues/16641).
-  // Using callParentStartHandlers: true we make sure, that the parent searchSource
-  // onSearchRequestStart will be called properly even though we use an inherited
-  // search source.
-  const timeFilterSearchSource = searchSource.createChild({ callParentStartHandlers: true });
-  const requestSearchSource = timeFilterSearchSource.createChild({ callParentStartHandlers: true });
-
-  aggs.setTimeRange(timeRange as TimeRange);
-
-  // For now we need to mirror the history of the passed search source, since
-  // the request inspector wouldn't work otherwise.
-  Object.defineProperty(requestSearchSource, 'history', {
-    get() {
-      return searchSource.history;
-    },
-    set(history) {
-      return (searchSource.history = history);
+/**
+ * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
+ * needed for this function, and wraps them behind a `getStartDependencies` function that
+ * is then called at runtime.
+ *
+ * We do this so that we can be explicit about exactly which dependencies the function
+ * requires, without cluttering up the top-level `plugin.ts` with this logic. It also
+ * makes testing the expression function a bit easier since `getStartDependencies` is
+ * the only thing you should need to mock.
+ *
+ * @param getStartServices - core's StartServicesAccessor for this plugin
+ *
+ * @internal
+ */
+export function getEsaggs({
+  getStartServices,
+}: {
+  getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+}) {
+  return getFunctionDefinition({
+    getStartDependencies: async () => {
+      const [, , self] = await getStartServices();
+      const { indexPatterns, search, nowProvider } = self;
+      return {
+        aggs: search.aggs,
+        indexPatterns,
+        searchSource: search.searchSource,
+        getNow: () => nowProvider.get(),
+      };
     },
   });
-
-  requestSearchSource.setField('aggs', function () {
-    return aggs.toDsl(metricsAtAllLevels);
-  });
-
-  requestSearchSource.onRequestStart((paramSearchSource, options) => {
-    return aggs.onSearchRequestStart(paramSearchSource, options);
-  });
-
-  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
-  // pattern if it's available.
-  const defaultTimeField = indexPattern?.getTimeField?.();
-  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
-  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
-
-  // If a timeRange has been specified and we had at least one timeField available, create range
-  // filters for that those time fields
-  if (timeRange && allTimeFields.length > 0) {
-    timeFilterSearchSource.setField('filter', () => {
-      return allTimeFields
-        .map((fieldName) => getTime(indexPattern, timeRange, { fieldName }))
-        .filter(isRangeFilter);
-    });
-  }
-
-  requestSearchSource.setField('filter', filters);
-  requestSearchSource.setField('query', query);
-
-  inspectorAdapters.requests.reset();
-  const request = inspectorAdapters.requests.start(
-    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-      defaultMessage: 'Data',
-    }),
-    {
-      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-        defaultMessage:
-          'This request queries Elasticsearch to fetch the data for the visualization.',
-      }),
-    }
-  );
-  request.stats(getRequestInspectorStats(requestSearchSource));
-
-  try {
-    const response = await requestSearchSource.fetch({
-      abortSignal,
-    });
-
-    request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
-
-    (searchSource as any).rawResponse = response;
-  } catch (e) {
-    // Log any error during request to the inspector
-    request.error({ json: e });
-    throw e;
-  } finally {
-    // Add the request body no matter if things went fine or not
-    requestSearchSource.getSearchRequestBody().then((req: unknown) => {
-      request.json(req);
-    });
-  }
-
-  // Note that rawResponse is not deeply cloned here, so downstream applications using courier
-  // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
-  // response data incorrectly in the inspector.
-  let resp = (searchSource as any).rawResponse;
-  for (const agg of aggs.aggs) {
-    if (hasIn(agg, 'type.postFlightRequest')) {
-      resp = await agg.type.postFlightRequest(
-        resp,
-        aggs,
-        agg,
-        requestSearchSource,
-        inspectorAdapters.requests,
-        abortSignal
-      );
-    }
-  }
-
-  (searchSource as any).finalResponse = resp;
-
-  const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
-  const tabifyParams = {
-    metricsAtAllLevels,
-    partialRows,
-    timeRange: parsedTimeRange
-      ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
-      : undefined,
-  };
-
-  const response = tabifyAggResponse(aggs, (searchSource as any).finalResponse, tabifyParams);
-
-  (searchSource as any).tabifiedResponse = response;
-
-  inspectorAdapters.data.setTabularLoader(
-    () =>
-      buildTabularInspectorData((searchSource as any).tabifiedResponse, {
-        queryFilter: filterManager,
-        deserializeFieldFormat: getFieldFormats().deserialize,
-      }),
-    { returnsFormattedValues: true }
-  );
-
-  return response;
-};
-
-export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
-  name,
-  type: 'datatable',
-  inputTypes: ['kibana_context', 'null'],
-  help: i18n.translate('data.functions.esaggs.help', {
-    defaultMessage: 'Run AggConfig aggregation',
-  }),
-  args: {
-    index: {
-      types: ['string'],
-      help: '',
-    },
-    metricsAtAllLevels: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    partialRows: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    includeFormatHints: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    aggConfigs: {
-      types: ['string'],
-      default: '""',
-      help: '',
-    },
-    timeFields: {
-      types: ['string'],
-      help: '',
-      multi: true,
-    },
-  },
-  async fn(input, args, { inspectorAdapters, abortSignal }) {
-    const indexPatterns = getIndexPatterns();
-    const { filterManager } = getQueryService();
-    const searchService = getSearchService();
-
-    const aggConfigsState = JSON.parse(args.aggConfigs);
-    const indexPattern = await indexPatterns.get(args.index);
-    const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
-
-    // we should move searchSource creation inside courier request handler
-    const searchSource = await searchService.searchSource.create();
-
-    searchSource.setField('index', indexPattern);
-    searchSource.setField('size', 0);
-
-    const response = await handleCourierRequest({
-      searchSource,
-      aggs,
-      indexPattern,
-      timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined) as any,
-      filters: get(input, 'filters', undefined),
-      timeFields: args.timeFields,
-      metricsAtAllLevels: args.metricsAtAllLevels,
-      partialRows: args.partialRows,
-      inspectorAdapters: inspectorAdapters as Adapters,
-      filterManager,
-      abortSignal: (abortSignal as unknown) as AbortSignal,
-    });
-
-    const table: Datatable = {
-      type: 'datatable',
-      rows: response.rows,
-      columns: response.columns.map((column) => {
-        const cleanedColumn: DatatableColumn = {
-          id: column.id,
-          name: column.name,
-          meta: {
-            type: column.aggConfig.params.field?.type || 'number',
-            field: column.aggConfig.params.field?.name,
-            index: indexPattern.title,
-            params: column.aggConfig.toSerializedFieldFormat(),
-            source: 'esaggs',
-            sourceParams: {
-              indexPatternId: indexPattern.id,
-              ...column.aggConfig.serialize(),
-            },
-          },
-        };
-        return cleanedColumn;
-      }),
-    };
-
-    return table;
-  },
-});
+}

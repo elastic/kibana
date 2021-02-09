@@ -1,28 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'src/core/public';
 import { SetupDependencies, StartDependencies } from '../../plugin';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
-import { EnhancedEmbeddableContext } from '../../../../embeddable_enhanced/public';
-import {
-  FlyoutCreateDrilldownAction,
-  FlyoutEditDrilldownAction,
-  OPEN_FLYOUT_ADD_DRILLDOWN,
-  OPEN_FLYOUT_EDIT_DRILLDOWN,
-} from './actions';
+import { FlyoutCreateDrilldownAction, FlyoutEditDrilldownAction } from './actions';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
-
-declare module '../../../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [OPEN_FLYOUT_ADD_DRILLDOWN]: EnhancedEmbeddableContext;
-    [OPEN_FLYOUT_EDIT_DRILLDOWN]: EnhancedEmbeddableContext;
-  }
-}
 
 interface BootstrapParams {
   enableDrilldowns: boolean;

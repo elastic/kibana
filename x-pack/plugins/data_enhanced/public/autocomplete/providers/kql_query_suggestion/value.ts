@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { flatten } from 'lodash';
@@ -27,7 +28,7 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
 
 export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
   return async (
-    { indexPatterns, boolFilter, signal },
+    { indexPatterns, boolFilter, useTimeRange, signal },
     { start, end, prefix, suffix, fieldName, nestedPath }
   ): Promise<QuerySuggestion[]> => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
@@ -49,6 +50,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
           field,
           query,
           boolFilter,
+          useTimeRange,
           signal,
         }).then((valueSuggestions) => {
           const quotedValues = valueSuggestions.map((value) =>

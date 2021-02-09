@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement } from 'react';
@@ -11,7 +12,12 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
 import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
-import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import {
+  SOURCE_TYPES,
+  FIELD_ORIGIN,
+  VECTOR_SHAPE_TYPE,
+  FORMAT_TYPE,
+} from '../../../../common/constants';
 import { getEmsFileLayers } from '../../../meta';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -20,21 +26,41 @@ import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { getEMSSettings } from '../../../kibana_services';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+import { LICENSED_FEATURES } from '../../../licensed_features';
+
+function getErrorInfo(fileId: string) {
+  return i18n.translate('xpack.maps.source.emsFile.unableToFindFileIdErrorMessage', {
+    defaultMessage: `Unable to find EMS vector shapes for id: {id}. {info}`,
+    values: {
+      id: fileId,
+      info: getEmsUnavailableMessage(),
+    },
+  });
+}
 
 export interface IEmsFileSource extends IVectorSource {
   getEmsFieldLabel(emsFieldName: string): Promise<string>;
 }
 
-export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
-  defaultMessage: 'EMS Boundaries',
-});
+export function getSourceTitle() {
+  const emsSettings = getEMSSettings();
+  if (emsSettings.isEMSUrlSet()) {
+    return i18n.translate('xpack.maps.source.emsOnPremFileTitle', {
+      defaultMessage: 'Elastic Maps Server Boundaries',
+    });
+  } else {
+    return i18n.translate('xpack.maps.source.emsFileTitle', {
+      defaultMessage: 'EMS Boundaries',
+    });
+  }
+}
 
 export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {
-  static type = SOURCE_TYPES.EMS_FILE;
-
   static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
     return {
-      type: EMSFileSource.type,
+      type: SOURCE_TYPES.EMS_FILE,
       id: id!,
       tooltipProperties,
     };
@@ -71,19 +97,19 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   }
 
   async getEMSFileLayer(): Promise<FileLayer> {
-    const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
-    if (!emsFileLayer) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
-          defaultMessage: `Unable to find EMS vector shapes for id: {id}`,
-          values: {
-            id: this._descriptor.id,
-          },
-        })
-      );
+    let emsFileLayers: FileLayer[];
+    try {
+      emsFileLayers = await getEmsFileLayers();
+    } catch (e) {
+      throw new Error(`${getErrorInfo(this._descriptor.id)} - ${e.message}`);
     }
-    return emsFileLayer;
+
+    const emsFileLayer = emsFileLayers.find((fileLayer) => fileLayer.hasId(this._descriptor.id));
+    if (emsFileLayer) {
+      return emsFileLayer;
+    }
+
+    throw new Error(getErrorInfo(this._descriptor.id));
   }
 
   // Map EMS field name to language specific label
@@ -99,7 +125,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     const emsFileLayer = await this.getEMSFileLayer();
     // @ts-ignore
     const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: emsFileLayer.getDefaultFormatType(),
+      format: emsFileLayer.getDefaultFormatType() as FORMAT_TYPE,
       featureCollectionPath: 'data',
       fetchUrl: emsFileLayer.getDefaultFormatUrl(),
     });
@@ -126,10 +152,10 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       // ignore error if EMS layer id could not be found
     }
 
-    return [
+    const props = [
       {
         label: getDataSourceLabel(),
-        value: sourceTitle,
+        value: getSourceTitle(),
       },
       {
         label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
@@ -139,6 +165,17 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
         link: emsLink,
       },
     ];
+
+    const emsSettings = getEMSSettings();
+    if (emsSettings.isEMSUrlSet()) {
+      props.push({
+        label: i18n.translate('xpack.maps.source.emsFile.emsOnPremLabel', {
+          defaultMessage: `Elastic Maps Server`,
+        }),
+        value: emsSettings.getEMSRoot(),
+      });
+    }
+    return props;
   }
 
   async getDisplayName(): Promise<string> {
@@ -177,6 +214,11 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
     return [VECTOR_SHAPE_TYPE.POLYGON];
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    const emsSettings = getEMSSettings();
+    return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
 

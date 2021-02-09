@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -11,7 +12,7 @@ import { mount } from 'enzyme';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { ReactElement } from 'react';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 
 test('Removing custom time range from badge resets embeddable back to container time', async () => {
   const container = new TimeRangeContainer(

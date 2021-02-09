@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { set } from '@elastic/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
 import { Readable } from 'stream';
+import { createListStream } from '@kbn/utils';
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
-
-import { createListStream } from '../../../../../../../../src/core/server/utils';
-
+import { KibanaRequest } from 'src/core/server';
 import { SetupPlugins } from '../../../../plugin';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 
 import { FrameworkRequest } from '../../../framework';
 
 export const buildFrameworkRequest = async (
-  context: RequestHandlerContext,
+  context: SecuritySolutionRequestHandlerContext,
   security: SetupPlugins['security'],
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
@@ -27,7 +28,7 @@ export const buildFrameworkRequest = async (
   return set<FrameworkRequest>(
     'user',
     user,
-    set<KibanaRequest & { context: RequestHandlerContext }>(
+    set<KibanaRequest & { context: SecuritySolutionRequestHandlerContext }>(
       'context.core.savedObjects.client',
       savedObjectsClient,
       request
@@ -41,7 +42,7 @@ export const getReadables = (dataPath: string): Promise<Readable> =>
     const readable = fs.createReadStream(dataPath, { encoding: 'utf-8' });
 
     readable.on('data', (stream) => {
-      contents.push(stream);
+      contents.push(stream as string);
     });
 
     readable.on('end', () => {

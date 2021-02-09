@@ -1,17 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Plugin } from './plugin';
-import { combineLatest } from 'rxjs';
-import { AlertsFactory } from './alerts';
 
-jest.mock('rxjs', () => ({
-  // @ts-ignore
-  ...jest.requireActual('rxjs'),
-  combineLatest: jest.fn(),
-}));
+import { coreMock } from 'src/core/server/mocks';
+import { MonitoringPlugin } from './plugin';
+import { AlertsFactory } from './alerts';
 
 jest.mock('./es_client/instantiate_client', () => ({
   instantiateClient: jest.fn().mockImplementation(() => ({
@@ -29,55 +25,14 @@ jest.mock('./kibana_monitoring/collectors', () => ({
   registerCollectors: jest.fn(),
 }));
 
-describe('Monitoring plugin', () => {
-  const initializerContext = {
-    logger: {
-      get: jest.fn().mockImplementation(() => ({
-        info: jest.fn(),
-      })),
-    },
-    config: {
-      create: jest.fn().mockImplementation(() => ({
-        pipe: jest.fn().mockImplementation(() => ({
-          toPromise: jest.fn(),
-        })),
-      })),
-      legacy: {
-        globalConfig$: {},
-      },
-    },
-    env: {
-      packageInfo: {
-        version: '1.0.0',
-      },
-    },
-  };
+jest.mock('./config', () => ({
+  createConfig: (config: any) => config,
+}));
 
-  const coreSetup = {
-    http: {
-      createRouter: jest.fn(),
-      getServerInfo: jest.fn().mockImplementation(() => ({
-        port: 5601,
-      })),
-      basePath: {
-        serverBasePath: '',
-      },
-    },
-    elasticsearch: {
-      legacy: {
-        client: {},
-        createClient: jest.fn(),
-      },
-    },
-    status: {
-      overall$: {
-        subscribe: jest.fn(),
-      },
-    },
-    savedObjects: {
-      registerType: jest.fn(),
-    },
-  };
+describe('Monitoring plugin', () => {
+  const coreSetup = coreMock.createSetup();
+  coreSetup.http.getServerInfo.mockReturnValue({ port: 5601 } as any);
+  coreSetup.status.overall$.subscribe = jest.fn();
 
   const setupPlugins = {
     usageCollection: {
@@ -90,7 +45,6 @@ describe('Monitoring plugin', () => {
     },
   };
 
-  let config = {};
   const defaultConfig = {
     ui: {
       elasticsearch: {},
@@ -102,20 +56,7 @@ describe('Monitoring plugin', () => {
     },
   };
 
-  beforeEach(() => {
-    config = defaultConfig;
-    (combineLatest as jest.Mock).mockImplementation(() => {
-      return {
-        pipe: jest.fn().mockImplementation(() => {
-          return {
-            toPromise: jest.fn().mockImplementation(() => {
-              return [config, 2];
-            }),
-          };
-        }),
-      };
-    });
-  });
+  const initializerContext = coreMock.createPluginInitializerContext(defaultConfig);
 
   afterEach(() => {
     (setupPlugins.alerts.registerType as jest.Mock).mockReset();
@@ -123,14 +64,14 @@ describe('Monitoring plugin', () => {
   });
 
   it('always create the bulk uploader', async () => {
-    const plugin = new Plugin(initializerContext as any);
-    await plugin.setup(coreSetup as any, setupPlugins as any);
+    const plugin = new MonitoringPlugin(initializerContext as any);
+    await plugin.setup(coreSetup, setupPlugins as any);
     expect(coreSetup.status.overall$.subscribe).toHaveBeenCalled();
   });
 
   it('should register all alerts', async () => {
     const alerts = AlertsFactory.getAll();
-    const plugin = new Plugin(initializerContext as any);
+    const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup as any, setupPlugins as any);
     expect(setupPlugins.alerts.registerType).toHaveBeenCalledTimes(alerts.length);
   });

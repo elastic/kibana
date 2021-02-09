@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,8 +14,7 @@ import {
   ValidationFunc,
   ERROR_CODE,
 } from '../../../../shared_imports';
-import { IMitreEnterpriseAttack, AboutStepRule } from '../../../pages/detection_engine/rules/types';
-import { isMitreAttackInvalid } from '../mitre/helpers';
+import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
@@ -192,28 +192,6 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path }] = args;
-          let hasError = false;
-          (value as IMitreEnterpriseAttack[]).forEach((v) => {
-            if (isMitreAttackInvalid(v.tactic.name, v.technique)) {
-              hasError = true;
-            }
-          });
-          return hasError
-            ? {
-                code: 'ERR_FIELD_MISSING',
-                path,
-                message: I18n.CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED,
-              }
-            : undefined;
-        },
-      },
-    ],
   },
   timestampOverride: {
     type: FIELD_TYPES.TEXT,

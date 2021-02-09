@@ -1,36 +1,34 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { isErrorEmbeddable, IContainer, ReferenceOrValueEmbeddable } from '../../embeddable_plugin';
+
+import { CoreStart } from 'kibana/public';
+
+import {
+  ViewMode,
+  IContainer,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+  ReferenceOrValueEmbeddable,
+  SavedObjectEmbeddableInput,
+} from '../../services/embeddable';
+import { UnlinkFromLibraryAction } from '.';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
   ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { UnlinkFromLibraryAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ViewMode, SavedObjectEmbeddableInput } from '../../../../embeddable/public';
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -55,6 +53,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
@@ -78,6 +78,16 @@ beforeEach(async () => {
     mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
   });
   embeddable.updateInput({ viewMode: ViewMode.EDIT });
+});
+
+test('Unlink is incompatible with Error Embeddables', async () => {
+  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const errorEmbeddable = new ErrorEmbeddable(
+    'Wow what an awful error',
+    { id: ' 404' },
+    embeddable.getRoot() as IContainer
+  );
+  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
 test('Unlink is compatible when embeddable on dashboard has reference type input', async () => {
@@ -118,7 +128,7 @@ test('Unlink is not compatible when embeddable is not in a dashboard container',
   expect(await action.isCompatible({ embeddable: orphanContactCard })).toBe(false);
 });
 
-test('Unlink replaces embeddableId but retains panel count', async () => {
+test('Unlink replaces embeddableId and retains panel count', async () => {
   const dashboard = embeddable.getRoot() as IContainer;
   const originalPanelCount = Object.keys(dashboard.getInput().panels).length;
   const originalPanelKeySet = new Set(Object.keys(dashboard.getInput().panels));

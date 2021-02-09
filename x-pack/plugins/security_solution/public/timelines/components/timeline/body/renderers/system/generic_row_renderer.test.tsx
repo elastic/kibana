@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../../../../common/test_utils';
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
@@ -34,6 +36,17 @@ import {
   mockEndgameTerminationEvent,
   mockEndgameUserLogoff,
   mockEndgameUserLogon,
+  mockEndpointDisconnectReceivedEvent,
+  mockEndpointFileCreationEvent,
+  mockEndpointFileDeletionEvent,
+  mockEndpointNetworkConnectionAcceptedEvent,
+  mockEndpointNetworkLookupRequestedEvent,
+  mockEndpointNetworkLookupResultEvent,
+  mockEndpointProcessStartEvent,
+  mockEndpointProcessEndEvent,
+  mockEndpointSecurityLogOnSuccessEvent,
+  mockEndpointSecurityLogOnFailureEvent,
+  mockEndpointSecurityLogOffEvent,
 } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { RowRenderer } from '../row_renderer';
@@ -47,6 +60,15 @@ import {
   createSocketRowRenderer,
 } from './generic_row_renderer';
 import * as i18n from './translations';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 jest.mock('../../../../../../common/components/link_to');
 jest.mock('../../../../../../overview/components/events_by_dataset');
@@ -176,6 +198,31 @@ describe('GenericRowRenderer', () => {
   });
 
   describe('#createEndgameProcessRowRenderer', () => {
+    test('it renders an endpoint process start event', () => {
+      const actionName = 'start';
+      const text = i18n.PROCESS_STARTED;
+
+      const endpointProcessStartRowRenderer = createEndgameProcessRowRenderer({
+        actionName,
+        text,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          {endpointProcessStartRowRenderer.isInstance(mockEndpointProcessStartEvent) &&
+            endpointProcessStartRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointProcessStartEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@win2019-endpoint-1started processconhost.exe(3636)C:\\Windows\\system32\\conhost.exe,0xffffffff,-ForceV1697334c236cce7d4c9e223146ee683a1219adced9729d4ae771fd6a1502a6b63e19da2c35ba1c38adf12d1a472c1fcf1f1a811a71b0e9b5fcb62de0787235ecca560b610'
+      );
+    });
+
     test('it renders an endgame process creation_event', () => {
       const actionName = 'creation_event';
       const text = i18n.PROCESS_STARTED;
@@ -201,6 +248,31 @@ describe('GenericRowRenderer', () => {
 
       expect(wrapper.text()).toEqual(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54started processMicrosoft.Photos.exe(441684)C:\\Program Files\\WindowsApps\\Microsoft.Windows.Photos_2018.18091.17210.0_x64__8wekyb3d8bbwe\\Microsoft.Photos.exe-ServerName:App.AppXzst44mncqdg84v7sv6p7yznqwssy6f7f.mcavia parent processsvchost.exe(8)d4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee12563599116157778a22600d2a163d8112aed84562d06d7235b37895b68de56687895743'
+      );
+    });
+
+    test('it renders an endpoint process end event', () => {
+      const actionName = 'end';
+      const text = i18n.TERMINATED_PROCESS;
+
+      const endpointProcessEndRowRenderer = createEndgameProcessRowRenderer({
+        actionName,
+        text,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          {endpointProcessEndRowRenderer.isInstance(mockEndpointProcessEndEvent) &&
+            endpointProcessEndRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointProcessEndEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@win2019-endpointterminated processsvchost.exe(10392)C:\\Windows\\System32\\svchost.exe,-k,netsvcs,-p,-s,NetSetupSvcwith exit code-1via parent processservices.exe7fd065bac18c5278777ae44908101cdfed72d26fa741367f0ad4d02020787ab6a1385ce20ad79f55df235effd9780c31442aa2348a0a29438052faed8a2532da50455756'
       );
     });
 
@@ -320,6 +392,31 @@ describe('GenericRowRenderer', () => {
   });
 
   describe('#createFimRowRenderer', () => {
+    test('it renders an endpoint file creation event', () => {
+      const actionName = 'creation';
+      const text = i18n.CREATED_FILE;
+
+      const endpointFileCreationRowRenderer = createFimRowRenderer({
+        actionName,
+        text,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          {endpointFileCreationRowRenderer.isInstance(mockEndpointFileCreationEvent) &&
+            endpointFileCreationRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointFileCreationEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@win2019-endpointcreated a fileWimProvider.dllinC:\\Windows\\TEMP\\E38FD162-B6E6-4799-B52D-F590BACBAE94\\WimProvider.dllviaMsMpEng.exe(2424)'
+      );
+    });
+
     test('it renders an endgame file_create_event', () => {
       const actionName = 'file_create_event';
       const text = i18n.CREATED_FILE;
@@ -345,6 +442,31 @@ describe('GenericRowRenderer', () => {
 
       expect(wrapper.text()).toEqual(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54created a fileinC:\\Users\\Arun\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\63d78c21-e593-4484-b7a9-db33cd522ddc.tmpviachrome.exe(11620)'
+      );
+    });
+
+    test('it renders an endpoint file deletion event', () => {
+      const actionName = 'deletion';
+      const text = i18n.DELETED_FILE;
+
+      const endpointFileDeletionRowRenderer = createFimRowRenderer({
+        actionName,
+        text,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          {endpointFileDeletionRowRenderer.isInstance(mockEndpointFileDeletionEvent) &&
+            endpointFileDeletionRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointFileDeletionEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@windows-endpoint-1deleted a fileAM_Delta_Patch_1.329.2793.0.exeinC:\\Windows\\SoftwareDistribution\\Download\\Install\\AM_Delta_Patch_1.329.2793.0.exeviasvchost.exe(1728)'
       );
     });
 
@@ -518,6 +640,33 @@ describe('GenericRowRenderer', () => {
   });
 
   describe('#createSocketRowRenderer', () => {
+    test('it renders an Endpoint network connection_accepted event', () => {
+      const actionName = 'connection_accepted';
+      const text = i18n.ACCEPTED_A_CONNECTION_VIA;
+
+      const endpointConnectionAcceptedRowRenderer = createSocketRowRenderer({
+        actionName,
+        text,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          {endpointConnectionAcceptedRowRenderer.isInstance(
+            mockEndpointNetworkConnectionAcceptedEvent
+          ) &&
+            endpointConnectionAcceptedRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointNetworkConnectionAcceptedEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
+        'NETWORK SERVICE\\NT AUTHORITY@windows-endpoint-1accepted a connection viasvchost.exe(328)with resultsuccessEndpoint network eventincomingtcpSource10.1.2.3:64557North AmericaUnited States🇺🇸USNorth CarolinaConcordDestination10.50.60.70:3389'
+      );
+    });
+
     test('it renders an Endgame ipv4_connection_accept_event', () => {
       const actionName = 'ipv4_connection_accept_event';
       const text = i18n.ACCEPTED_A_CONNECTION_VIA;
@@ -541,7 +690,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-gqf-0af7b4feaccepted a connection viaAmSvc.exe(1084)tcp1:network-community_idSource127.0.0.1:49306Destination127.0.0.1:49305'
       );
     });
@@ -569,8 +718,33 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66accepted a connection via(4)tcp1:network-community_idSource::1:51324Destination::1:5357'
+      );
+    });
+
+    test('it renders an endpoint network disconnect_received event', () => {
+      const actionName = 'disconnect_received';
+      const text = i18n.DISCONNECTED_VIA;
+
+      const endpointDisconnectReceivedRowRenderer = createSocketRowRenderer({
+        actionName,
+        text,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          {endpointDisconnectReceivedRowRenderer.isInstance(mockEndpointDisconnectReceivedEvent) &&
+            endpointDisconnectReceivedRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointDisconnectReceivedEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
+        'NETWORK SERVICE\\NT AUTHORITY@windows-endpoint-1disconnected viasvchost.exe(328)Endpoint network eventincomingtcpSource10.20.30.40:64557North AmericaUnited States🇺🇸USNorth CarolinaConcord(42.47%)1.2KB(57.53%)1.6KBDestination10.11.12.13:3389'
       );
     });
 
@@ -597,7 +771,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'Arun\\Anvi-Acer@HD-obe-8bf77f54disconnected viachrome.exe(11620)8.1KBtcp1:LxYHJJv98b2O0fNccXu6HheXmwk=Source192.168.0.6:59356(25.78%)2.1KB(74.22%)6KBDestination10.156.162.53:443'
       );
     });
@@ -625,7 +799,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'SYSTEM\\NT AUTHORITY@HD-55b-3ec87f66disconnected via(4)7.9KBtcp1:ZylzQhsB1dcptA2t4DY8S6l9o8E=Source::1:51338(96.92%)7.7KB(3.08%)249BDestination::1:2869'
       );
     });
@@ -653,7 +827,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'root@foohostopened a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59554 -> 10.1.2.3:80) Ooutboundtcp1:network-community_idSource10.4.20.1:59554Destination10.1.2.3:80'
       );
     });
@@ -681,7 +855,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'root@foohostclosed a socket withgoogle_accounts(2166)Outbound socket (10.4.20.1:59508 -> 10.1.2.3:80) Coutboundtcp1:network-community_idSource10.4.20.1:59508Destination10.1.2.3:80'
       );
     });
@@ -714,6 +888,48 @@ describe('GenericRowRenderer', () => {
   });
 
   describe('#createSecurityEventRowRenderer', () => {
+    test('it renders an endpoint security log_on event with event.outcome: success', () => {
+      const actionName = 'log_on';
+
+      const securityLogOnRowRenderer = createSecurityEventRowRenderer({ actionName });
+
+      const wrapper = mount(
+        <TestProviders>
+          {securityLogOnRowRenderer.isInstance(mockEndpointSecurityLogOnSuccessEvent) &&
+            securityLogOnRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointSecurityLogOnSuccessEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@win2019-endpointsuccessfully logged inviaC:\\Program Files\\OpenSSH-Win64\\sshd.exe(90210)'
+      );
+    });
+
+    test('it renders an endpoint security log_on event with event.outcome: failure', () => {
+      const actionName = 'log_on';
+
+      const securityLogOnRowRenderer = createSecurityEventRowRenderer({ actionName });
+
+      const wrapper = mount(
+        <TestProviders>
+          {securityLogOnRowRenderer.isInstance(mockEndpointSecurityLogOnFailureEvent) &&
+            securityLogOnRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointSecurityLogOnFailureEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'win2019-endpointfailed to log inviaC:\\Program Files\\OpenSSH-Win64\\sshd.exe(90210)'
+      );
+    });
+
     test('it renders an Endgame user_logon event', () => {
       const actionName = 'user_logon';
       const userLogonEvent = {
@@ -786,6 +1002,27 @@ describe('GenericRowRenderer', () => {
       );
     });
 
+    test('it renders an endpoint security log_off event', () => {
+      const actionName = 'log_off';
+
+      const securityLogOffRowRenderer = createSecurityEventRowRenderer({ actionName });
+
+      const wrapper = mount(
+        <TestProviders>
+          {securityLogOffRowRenderer.isInstance(mockEndpointSecurityLogOffEvent) &&
+            securityLogOffRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointSecurityLogOffEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@win2019-endpointlogged offviaC:\\Windows\\System32\\lsass.exe(90210)'
+      );
+    });
+
     test('it renders an Endgame user_logoff event', () => {
       const actionName = 'user_logoff';
       const userLogoffEvent = {
@@ -834,6 +1071,44 @@ describe('GenericRowRenderer', () => {
   });
 
   describe('#createDnsRowRenderer', () => {
+    test('it renders an endpoint network lookup_requested event', () => {
+      const dnsRowRenderer = createDnsRowRenderer();
+
+      const wrapper = mount(
+        <TestProviders>
+          {dnsRowRenderer.isInstance(mockEndpointNetworkLookupRequestedEvent) &&
+            dnsRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointNetworkLookupRequestedEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@win2019-endpointasked forlogging.googleapis.comwith question typeAviagoogle_osconfig_agent.exe(3272)dns'
+      );
+    });
+
+    test('it renders an endpoint network lookup_result event', () => {
+      const dnsRowRenderer = createDnsRowRenderer();
+
+      const wrapper = mount(
+        <TestProviders>
+          {dnsRowRenderer.isInstance(mockEndpointNetworkLookupResultEvent) &&
+            dnsRowRenderer.renderRow({
+              browserFields: mockBrowserFields,
+              data: mockEndpointNetworkLookupResultEvent,
+              timelineId: 'test',
+            })}
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(
+        'SYSTEM\\NT AUTHORITY@win2019-endpointasked forlogging.googleapis.comwith question typeAAAAviagoogle_osconfig_agent.exe(3272)dns'
+      );
+    });
+
     test('it renders an Endgame DNS request_event', () => {
       const requestEvent = {
         ...mockEndgameDnsRequest,
@@ -875,7 +1150,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
 
-      expect(wrapper.text()).toEqual(
+      expect(removeExternalLinkText(wrapper.text())).toEqual(
         'iot.example.comasked forlookup.example.comwith question typeA, which resolved to10.1.2.3(response code:NOERROR)viaan unknown process6.937500msOct 8, 2019 @ 10:05:23.241Oct 8, 2019 @ 10:05:23.248outbounddns177Budp1:network-community_idSource10.9.9.9:58732(22.60%)40B(77.40%)137BDestination10.1.1.1:53OceaniaAustralia🇦🇺AU'
       );
     });

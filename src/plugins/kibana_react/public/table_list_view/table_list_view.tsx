@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -36,15 +25,12 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+  SearchFilterConfig,
 } from '@elastic/eui';
+
 import { HttpFetchError, ToastsStart } from 'kibana/public';
 import { toMountPoint } from '../util';
-
-interface Column {
-  name: string;
-  width?: string;
-  actions?: object[];
-}
 
 interface Item {
   id?: string;
@@ -60,9 +46,8 @@ export interface TableListViewProps {
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
-  noItemsFragment: JSX.Element;
-  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
-  tableColumns: Column[];
+  noItemsFragment?: JSX.Element;
+  tableColumns: Array<EuiBasicTableColumn<any>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
   /**
@@ -70,6 +55,15 @@ export interface TableListViewProps {
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  /**
+   * Indicates which column should be used as the identifying cell in each row.
+   */
+  rowHeader: string;
+  /**
+   * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
+   */
+  tableCaption?: string;
+  searchFilters?: SearchFilterConfig[];
 }
 
 export interface TableListViewState {
@@ -402,6 +396,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderTable() {
+    const { searchFilters } = this.props;
+
     const selection = this.props.deleteItems
       ? {
           onSelectionChange: (obj: Item[]) => {
@@ -414,7 +410,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         }
       : undefined;
 
-    const actions = [
+    const actions: EuiTableActionsColumnType<any>['actions'] = [
       {
         name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
           defaultMessage: 'Edit',
@@ -427,6 +423,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         ),
         icon: 'pencil',
         type: 'icon',
+        enabled: ({ error }: { error: string }) => !error,
         onClick: this.props.editItem,
       },
     ];
@@ -437,7 +434,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       defaultQuery: this.state.filter,
       box: {
         incremental: true,
+        'data-test-subj': 'tableListSearchBox',
       },
+      filters: searchFilters ?? [],
     };
 
     const columns = this.props.tableColumns.slice();
@@ -462,7 +461,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
-        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
+        columns={columns}
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
@@ -470,6 +469,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         search={search}
         sorting={true}
         data-test-subj="itemsInMemTable"
+        rowHeader={this.props.rowHeader}
+        tableCaption={this.props.tableCaption}
       />
     );
   }
@@ -517,6 +518,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
+        {this.props.children}
 
         {this.renderListingLimitWarning()}
         {this.renderFetchError()}

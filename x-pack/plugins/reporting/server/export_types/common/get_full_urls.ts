@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -50,9 +51,9 @@ export function getFullUrls(config: ReportingConfig, job: TaskPayloadPDF | TaskP
   const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
-      path: parsedRelative.pathname,
-      hash: parsedRelative.hash,
-      search: parsedRelative.search,
+      path: parsedRelative.pathname === null ? undefined : parsedRelative.pathname,
+      hash: parsedRelative.hash === null ? undefined : parsedRelative.hash,
+      search: parsedRelative.search === null ? undefined : parsedRelative.search,
     });
 
     // capture the route to the visualization

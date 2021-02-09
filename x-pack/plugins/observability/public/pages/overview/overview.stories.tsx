@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
 import { ObservabilityPluginSetupDeps } from '../../plugin';
-import { EuiThemeProvider } from '../../typings';
 import { OverviewPage } from './';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
@@ -39,6 +41,9 @@ const withCore = makeDecorator({
       <MemoryRouter>
         <PluginContext.Provider
           value={{
+            appMountParameters: ({
+              setHeaderActionMenu: () => {},
+            } as unknown) as AppMountParameters,
             core: options as CoreStart,
             plugins: ({
               data: {
@@ -49,7 +54,9 @@ const withCore = makeDecorator({
             } as unknown) as ObservabilityPluginSetupDeps,
           }}
         >
-          <EuiThemeProvider>{storyFn(context)}</EuiThemeProvider>
+          <EuiThemeProvider>
+            <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
+          </EuiThemeProvider>
         </PluginContext.Provider>
       </MemoryRouter>
     );

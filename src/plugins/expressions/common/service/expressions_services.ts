@@ -1,30 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Executor, ExpressionExecOptions } from '../executor';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
+import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
 import { AnyExpressionTypeDefinition } from '../expression_types';
 import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
+import { Adapters } from '../../../inspector/common/adapters';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -44,6 +37,32 @@ export type ExpressionsServiceSetup = Pick<
   | 'run'
   | 'fork'
 >;
+
+export interface ExpressionExecutionParams {
+  searchContext?: SerializableState;
+
+  variables?: Record<string, any>;
+
+  /**
+   * Whether to execute expression in *debug mode*. In *debug mode* inputs and
+   * outputs as well as all resolved arguments and time it took to execute each
+   * function are saved and are available for introspection.
+   */
+  debug?: boolean;
+
+  /**
+   * Makes a `KibanaRequest` object available to expression functions. Useful for
+   * functions which are running on the server and need to perform operations that
+   * are scoped to a specific user.
+   */
+  kibanaRequest?: KibanaRequest;
+
+  searchSessionId?: string;
+
+  syncColors?: boolean;
+
+  inspectorAdapters?: Adapters;
+}
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -98,11 +117,10 @@ export interface ExpressionsServiceStart {
    * expressions.run('...', null, { elasticsearchClient });
    * ```
    */
-  run: <Input, Output, ExtraContext extends Record<string, unknown> = Record<string, unknown>>(
+  run: <Input, Output>(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext,
-    options?: ExpressionExecOptions
+    params?: ExpressionExecutionParams
   ) => Promise<Output>;
 
   /**
@@ -110,17 +128,12 @@ export interface ExpressionsServiceStart {
    * instance that tracks the progress of the execution and can be used to
    * interact with the execution.
    */
-  execute: <
-    Input = unknown,
-    Output = unknown,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
-  >(
+  execute: <Input = unknown, Output = unknown>(
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.
     input: Input,
-    context?: ExtraContext,
-    options?: ExpressionExecOptions
-  ) => ExecutionContract<ExtraContext, Input, Output>;
+    params?: ExpressionExecutionParams
+  ) => ExecutionContract<Input, Output>;
 
   /**
    * Create a new instance of `ExpressionsService`. The new instance inherits
@@ -158,7 +171,7 @@ export interface ExpressionServiceParams {
  *
  *    so that JSDoc appears in developers IDE when they use those `plugins.expressions.registerFunction(`.
  */
-export class ExpressionsService implements PersistableState<ExpressionAstExpression> {
+export class ExpressionsService implements PersistableStateService<ExpressionAstExpression> {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
@@ -214,8 +227,8 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
     definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
   ): void => this.renderers.register(definition);
 
-  public readonly run: ExpressionsServiceStart['run'] = (ast, input, context, options) =>
-    this.executor.run(ast, input, context, options);
+  public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
+    this.executor.run(ast, input, params);
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -246,8 +259,8 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
    */
   public readonly getTypes = (): ReturnType<Executor['getTypes']> => this.executor.getTypes();
 
-  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, context, options) => {
-    const execution = this.executor.createExecution(ast, context, options);
+  public readonly execute: ExpressionsServiceStart['execute'] = ((ast, input, params) => {
+    const execution = this.executor.createExecution(ast, params);
     execution.start(input);
     return execution.contract;
   }) as ExpressionsServiceStart['execute'];
@@ -288,6 +301,16 @@ export class ExpressionsService implements PersistableState<ExpressionAstExpress
    */
   public readonly inject = (state: ExpressionAstExpression, references: SavedObjectReference[]) => {
     return this.executor.inject(state, references);
+  };
+
+  /**
+   * Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1)
+   * @param state expression AST to update
+   * @param version defines which migration version to run
+   * @returns new migrated expression AST
+   */
+  public readonly migrate = (state: SerializableState, version: string) => {
+    return this.executor.migrate(state, version);
   };
 
   /**

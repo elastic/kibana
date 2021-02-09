@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useState } from 'react';
@@ -21,14 +22,14 @@ import {
   BaseActionConfig,
   BaseActionFactoryContext,
 } from '../../../dynamic_actions';
-import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryPlaceContext } from '../types';
 
 export interface DrilldownWizardConfig<ActionConfig extends BaseActionConfig = BaseActionConfig> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
-  selectedTriggers?: TriggerId[];
+  selectedTriggers?: string[];
 }
 
 export interface FlyoutDrilldownWizardProps<
@@ -60,12 +61,12 @@ export interface FlyoutDrilldownWizardProps<
    */
   triggerPickerDocsLink?: string;
 
-  getTrigger: (triggerId: TriggerId) => Trigger;
+  getTrigger: (triggerId: string) => Trigger;
 
   /**
    * List of possible triggers in current context
    */
-  supportedTriggers: TriggerId[];
+  supportedTriggers: string[];
 }
 
 function useWizardConfigState(
@@ -77,7 +78,7 @@ function useWizardConfigState(
     setName: (name: string) => void;
     setActionConfig: (actionConfig: BaseActionConfig) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
-    setSelectedTriggers: (triggers?: TriggerId[]) => void;
+    setSelectedTriggers: (triggers?: string[]) => void;
   }
 ] {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
@@ -135,7 +136,7 @@ function useWizardConfigState(
           });
         }
       },
-      setSelectedTriggers: (selectedTriggers: TriggerId[] = []) => {
+      setSelectedTriggers: (selectedTriggers: string[] = []) => {
         setWizardConfig({
           ...wizardConfig,
           selectedTriggers,

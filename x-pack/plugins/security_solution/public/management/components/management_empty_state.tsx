@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, MouseEvent, CSSProperties } from 'react';
@@ -66,7 +67,7 @@ const PolicyEmptyState = React.memo<{
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
-                defaultMessage="Endpoint Security protects your hosts with threat prevention, detection, and deep security data visibility."
+                defaultMessage="Protect your hosts with threat prevention, detection, and deep security data visibility."
               />
             </EuiText>
             <EuiSpacer size="m" />
@@ -170,8 +171,7 @@ const EndpointsEmptyState = React.memo<{
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.list.stepTwoTitle', {
-          defaultMessage:
-            'Enroll your agents enabled with Endpoint Security through Ingest Manager',
+          defaultMessage: 'Enroll your agents enabled with Endpoint Security through Fleet',
         }),
         status: actionDisabled ? 'disabled' : '',
         children: (

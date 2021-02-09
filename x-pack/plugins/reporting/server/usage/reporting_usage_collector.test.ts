@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as Rx from 'rxjs';
@@ -59,7 +60,7 @@ const getResponseMock = (base = {}) => base;
 
 const getMockFetchClients = (resp: any) => {
   const fetchParamsMock = createCollectorFetchContextMock();
-  fetchParamsMock.callCluster.mockResolvedValue(resp);
+  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: resp });
   return fetchParamsMock;
 };
 describe('license checks', () => {
@@ -74,7 +75,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
@@ -83,7 +84,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(getMockFetchClients(getResponseMock()));
+      usageStats = await collector.fetch(getMockFetchClients(getResponseMock()));
     });
 
     test('sets enables to true', async () => {
@@ -103,7 +104,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'none' });
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('none'),
@@ -112,7 +113,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(getMockFetchClients(getResponseMock()));
+      usageStats = await collector.fetch(getMockFetchClients(getResponseMock()));
     });
 
     test('sets enables to true', async () => {
@@ -132,7 +133,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'platinum' });
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('platinum'),
@@ -141,7 +142,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(getMockFetchClients(getResponseMock()));
+      usageStats = await collector.fetch(getMockFetchClients(getResponseMock()));
     });
 
     test('sets enables to true', async () => {
@@ -161,7 +162,7 @@ describe('license checks', () => {
     let usageStats: any;
     beforeAll(async () => {
       const plugins = getPluginsMock({ license: 'basic' });
-      const { fetch } = getReportingUsageCollector(
+      const collector = getReportingUsageCollector(
         mockCore,
         plugins.usageCollection,
         getLicenseMock('basic'),
@@ -170,7 +171,7 @@ describe('license checks', () => {
           return Promise.resolve(true);
         }
       );
-      usageStats = await fetch(getMockFetchClients({}));
+      usageStats = await collector.fetch(getMockFetchClients({}));
     });
 
     test('sets enables to true', async () => {
@@ -193,7 +194,7 @@ describe('data modeling', () => {
   });
   test('with normal looking usage data', async () => {
     const plugins = getPluginsMock();
-    const { fetch } = getReportingUsageCollector(
+    const collector = getReportingUsageCollector(
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
@@ -237,13 +238,13 @@ describe('data modeling', () => {
         },
       } as SearchResponse) // prettier-ignore
     );
-    const usageStats = await fetch(collectorFetchContext);
+    const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 
   test('with sparse data', async () => {
     const plugins = getPluginsMock();
-    const { fetch } = getReportingUsageCollector(
+    const collector = getReportingUsageCollector(
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
@@ -287,13 +288,13 @@ describe('data modeling', () => {
         },
       } as SearchResponse) // prettier-ignore
     );
-    const usageStats = await fetch(collectorFetchContext);
+    const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 
   test('with empty data', async () => {
     const plugins = getPluginsMock();
-    const { fetch } = getReportingUsageCollector(
+    const collector = getReportingUsageCollector(
       mockCore,
       plugins.usageCollection,
       getLicenseMock(),
@@ -337,7 +338,7 @@ describe('data modeling', () => {
       },
     } as SearchResponse) // prettier-ignore
     );
-    const usageStats = await fetch(collectorFetchContext);
+    const usageStats = await collector.fetch(collectorFetchContext);
     expect(usageStats).toMatchSnapshot();
   });
 
@@ -463,7 +464,6 @@ describe('Ready for collection observable', () => {
     expect(args).toMatchInlineSnapshot(`
       Object {
         "fetch": [Function],
-        "formatForBulkUpload": [Function],
         "isReady": [Function],
         "schema": Object {
           "PNG": Object {

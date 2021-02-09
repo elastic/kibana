@@ -1,40 +1,34 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { EsaggsExpressionFunctionDefinition } from '../../data/common/search/expressions';
+import {
+  EsaggsExpressionFunctionDefinition,
+  IndexPatternLoadExpressionFunctionDefinition,
+} from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
+import { getVisSchemas, VisToExpressionAst } from '../../visualizations/public';
+import { TableVisParams } from '../common';
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
-import { TableVisConfig, TableVisParams } from './types';
+import { TableVisConfig } from './types';
 
 const buildTableVisConfig = (
   schemas: ReturnType<typeof getVisSchemas>,
   visParams: TableVisParams
 ) => {
-  const visConfig = {} as any;
   const metrics = schemas.metric;
   const buckets = schemas.bucket || [];
-  visConfig.dimensions = {
-    metrics,
-    buckets,
-    splitRow: schemas.split_row,
-    splitColumn: schemas.split_column,
+  const visConfig = {
+    dimensions: {
+      metrics,
+      buckets,
+      splitRow: schemas.split_row,
+      splitColumn: schemas.split_column,
+    },
   };
 
   if (visParams.showPartialRows && !visParams.showMetricsAtAllLevels) {
@@ -47,13 +41,16 @@ const buildTableVisConfig = (
   return visConfig;
 };
 
-export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineParams) => {
+export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: vis.data.indexPattern!.id!,
+    index: buildExpression([
+      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
+        id: vis.data.indexPattern!.id!,
+      }),
+    ]),
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: vis.params.showPartialRows,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
-    includeFormatHints: false,
+    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
   });
 
   const schemas = getVisSchemas(vis, params);

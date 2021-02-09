@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -81,6 +82,24 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
         },
       ]);
+    });
+
+    it('7.11.0 migrates alerts to contain `updatedAt` field', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.updatedAt).to.eql('2020-06-17T15:35:39.839Z');
+    });
+
+    it('7.11.0 migrates alerts to contain `notifyWhen` field', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerts/alert/74f3e6d7-b7bb-477d-ac28-92ee22728e6e`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.notifyWhen).to.eql('onActiveAlert');
     });
   });
 }

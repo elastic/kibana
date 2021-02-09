@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 
 export type LegendProps = {
@@ -24,8 +25,8 @@ export interface IStyleProperty<T> {
   getStyleName(): VECTOR_STYLES;
   getOptions(): T;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null;
   getDisplayStyleName(): string;
 }
@@ -75,8 +76,8 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return null;
   }
 
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null {
     return null;
   }

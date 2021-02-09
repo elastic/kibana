@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
@@ -61,6 +63,7 @@ describe('field_items', () => {
               })}
               width={FIELDS_PANE_WIDTH}
               onCategorySelected={jest.fn()}
+              onUpdateColumns={jest.fn()}
               timelineId={timelineId}
             />
           </TestProviders>
@@ -92,6 +95,7 @@ describe('field_items', () => {
               })}
               width={FIELDS_PANE_WIDTH}
               onCategorySelected={jest.fn()}
+              onUpdateColumns={jest.fn()}
               timelineId={timelineId}
             />
           </TestProviders>
@@ -122,6 +126,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -152,6 +157,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -184,6 +190,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -201,6 +208,66 @@ describe('field_items', () => {
         columnHeaderType: 'not-filtered',
         id: '@timestamp',
         width: 180,
+      });
+    });
+
+    test('it returns the expected signal column settings', async () => {
+      const mockSelectedCategoryId = 'signal';
+      const mockBrowserFieldsWithSignal = {
+        ...mockBrowserFields,
+        signal: {
+          fields: {
+            'signal.rule.name': {
+              aggregatable: true,
+              category: 'signal',
+              description: 'rule name',
+              example: '',
+              format: '',
+              indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+              name: 'signal.rule.name',
+              searchable: true,
+              type: 'string',
+            },
+          },
+        },
+      };
+      const toggleColumn = jest.fn();
+      const wrapper = mount(
+        <TestProviders>
+          <Category
+            categoryId={mockSelectedCategoryId}
+            data-test-subj="category"
+            filteredBrowserFields={mockBrowserFieldsWithSignal}
+            fieldItems={getFieldItems({
+              browserFields: mockBrowserFieldsWithSignal,
+              category: mockBrowserFieldsWithSignal[mockSelectedCategoryId],
+              categoryId: mockSelectedCategoryId,
+              columnHeaders,
+              highlight: '',
+              onUpdateColumns: jest.fn(),
+              timelineId,
+              toggleColumn,
+            })}
+            width={FIELDS_PANE_WIDTH}
+            onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
+            timelineId={timelineId}
+          />
+        </TestProviders>
+      );
+      wrapper
+        .find(`[data-test-subj="field-signal.rule.name-checkbox"]`)
+        .last()
+        .simulate('change', {
+          target: { checked: true },
+        });
+
+      await waitFor(() => {
+        expect(toggleColumn).toBeCalledWith({
+          columnHeaderType: 'not-filtered',
+          id: 'signal.rule.name',
+          width: 180,
+        });
       });
     });
 
@@ -223,6 +290,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -252,6 +320,7 @@ describe('field_items', () => {
             })}
             width={FIELDS_PANE_WIDTH}
             onCategorySelected={jest.fn()}
+            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -268,11 +337,17 @@ describe('field_items', () => {
   describe('getFieldColumns', () => {
     test('it returns the expected column definitions', () => {
       expect(getFieldColumns().map((column) => omit('render', column))).toEqual([
-        { field: 'field', name: 'Field', sortable: true, width: '250px' },
+        {
+          field: 'checkbox',
+          name: '',
+          sortable: false,
+          width: '25px',
+        },
+        { field: 'field', name: 'Field', sortable: false, width: '225px' },
         {
           field: 'description',
           name: 'Description',
-          sortable: true,
+          sortable: false,
           truncateText: true,
           width: '400px',
         },

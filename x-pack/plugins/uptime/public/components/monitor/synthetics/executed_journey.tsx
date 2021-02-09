@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
@@ -57,28 +58,31 @@ interface ExecutedJourneyProps {
   journey: JourneyState;
 }
 
-export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => (
-  <div>
-    <EuiText>
-      <h3>
-        <FormattedMessage
-          id="xpack.uptime.synthetics.executedJourney.heading"
-          defaultMessage="Summary information"
-        />
-      </h3>
-      <p>
-        {statusMessage(
-          journey.steps
-            .filter(isStepEnd)
-            .reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
-        )}
-      </p>
-    </EuiText>
-    <EuiSpacer />
-    <EuiFlexGroup direction="column">
-      {journey.steps.filter(isStepEnd).map((step, index) => (
-        <ExecutedStep key={index} index={index} step={step} />
-      ))}
-    </EuiFlexGroup>
-  </div>
-);
+export const ExecutedJourney: FC<ExecutedJourneyProps> = ({ journey }) => {
+  return (
+    <div>
+      <EuiText>
+        <h3>
+          <FormattedMessage
+            id="xpack.uptime.synthetics.executedJourney.heading"
+            defaultMessage="Summary information"
+          />
+        </h3>
+        <p>
+          {statusMessage(
+            journey.steps
+              .filter(isStepEnd)
+              .reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 })
+          )}
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup direction="column">
+        {journey.steps.filter(isStepEnd).map((step, index) => (
+          <ExecutedStep key={index} index={index} step={step} checkGroup={journey.checkGroup} />
+        ))}
+        <EuiSpacer size="s" />
+      </EuiFlexGroup>
+    </div>
+  );
+};

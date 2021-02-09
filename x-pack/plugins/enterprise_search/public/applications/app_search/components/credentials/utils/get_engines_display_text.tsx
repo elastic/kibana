@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { ApiTokenTypes, ALL } from '../constants';
-import { IApiToken } from '../types';
 
-export const getEnginesDisplayText = (apiToken: IApiToken): JSX.Element | string => {
+import { ApiTokenTypes, ALL } from '../constants';
+import { ApiToken } from '../types';
+
+export const getEnginesDisplayText = (apiToken: ApiToken): JSX.Element | string => {
   const { type, access_all_engines: accessAll, engines = [] } = apiToken;
   if (type === ApiTokenTypes.Admin) {
     return '--';

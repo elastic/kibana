@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject } from 'src/core/types';
@@ -12,6 +13,7 @@ import {
   RuleAlertAttributes,
   BaseSignalHit,
   SignalSource,
+  WrappedSignalHit,
 } from './types';
 import { buildRule, buildRuleWithoutOverrides, buildRuleWithOverrides } from './build_rule';
 import { additionalSignalFields, buildSignal } from './build_signal';
@@ -71,6 +73,7 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
+  delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
     ...doc._source,
@@ -93,7 +96,7 @@ export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<RuleAlertAttributes>,
   outputIndex: string
-): BaseSignalHit[] => {
+): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
       const signal = buildSignalFromEvent(event, ruleSO, false);
@@ -102,6 +105,14 @@ export const buildSignalGroupFromSequence = (
     }),
     outputIndex
   );
+
+  if (
+    wrappedBuildingBlocks.some((block) =>
+      block._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleSO.id)
+    )
+  ) {
+    return [];
+  }
 
   // Now that we have an array of building blocks for the events in the sequence,
   // we can build the signal that links the building blocks together
@@ -123,7 +134,7 @@ export const buildSignalGroupFromSequence = (
 };
 
 export const buildSignalFromSequence = (
-  events: BaseSignalHit[],
+  events: WrappedSignalHit[],
   ruleSO: SavedObject<RuleAlertAttributes>
 ): SignalHit => {
   const rule = buildRuleWithoutOverrides(ruleSO);
@@ -154,7 +165,7 @@ export const buildSignalFromEvent = (
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, event._source)
     : buildRuleWithoutOverrides(ruleSO);
-  const signal = {
+  const signal: Signal = {
     ...buildSignal([event], rule),
     ...additionalSignalFields(event),
   };

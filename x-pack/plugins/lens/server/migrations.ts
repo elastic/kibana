@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -31,7 +32,7 @@ interface LensDocShapePre710<VisualizationState = unknown> {
           string,
           {
             columnOrder: string[];
-            columns: Record<string, unknown>;
+            columns: Record<string, Record<string, unknown>>;
             indexPatternId: string;
           }
         >;
@@ -43,7 +44,7 @@ interface LensDocShapePre710<VisualizationState = unknown> {
   };
 }
 
-interface LensDocShape<VisualizationState = unknown> {
+export interface LensDocShape<VisualizationState = unknown> {
   id?: string;
   type?: string;
   visualizationType: string | null;
@@ -56,7 +57,7 @@ interface LensDocShape<VisualizationState = unknown> {
           string,
           {
             columnOrder: string[];
-            columns: Record<string, unknown>;
+            columns: Record<string, Record<string, unknown>>;
           }
         >;
       };
@@ -80,6 +81,29 @@ interface XYStatePre77 {
 
 interface XYStatePost77 {
   layers: Array<Partial<XYLayerPre77>>;
+}
+
+interface DatatableStatePre711 {
+  layers: Array<{
+    layerId: string;
+    columns: string[];
+  }>;
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
+}
+interface DatatableStatePost711 {
+  layerId: string;
+  columns: Array<{
+    columnId: string;
+    width?: number;
+    hidden?: boolean;
+  }>;
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
 }
 
 /**
@@ -218,18 +242,18 @@ const removeInvalidAccessors: SavedObjectMigrationFn<
   if (newDoc.attributes.visualizationType === 'lnsXY') {
     const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
     const xyState = newDoc.attributes.state.visualization;
-    (newDoc.attributes as LensDocShapePre710<
-      XYStatePost77
-    >).state.visualization.layers = xyState.layers.map((layer: XYLayerPre77) => {
-      const layerId = layer.layerId;
-      const datasource = datasourceLayers[layerId];
-      return {
-        ...layer,
-        xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
-        splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
-        accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
-      };
-    });
+    (newDoc.attributes as LensDocShapePre710<XYStatePost77>).state.visualization.layers = xyState.layers.map(
+      (layer: XYLayerPre77) => {
+        const layerId = layer.layerId;
+        const datasource = datasourceLayers[layerId];
+        return {
+          ...layer,
+          xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
+          splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
+          accessors: layer.accessors.filter((accessor) => !!datasource?.columns[accessor]),
+        };
+      }
+    );
   }
   return newDoc;
 };
@@ -310,10 +334,65 @@ const extractReferences: SavedObjectMigrationFn<LensDocShapePre710, LensDocShape
   return newDoc;
 };
 
+const removeSuggestedPriority: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
+  newDoc.attributes.state.datasourceStates.indexpattern.layers = Object.fromEntries(
+    Object.entries(datasourceLayers).map(([layerId, layer]) => {
+      return [
+        layerId,
+        {
+          ...layer,
+          columns: Object.fromEntries(
+            Object.entries(layer.columns).map(([columnId, column]) => {
+              const copy = { ...column };
+              delete copy.suggestedPriority;
+              return [columnId, copy];
+            })
+          ),
+        },
+      ];
+    })
+  );
+  return newDoc;
+};
+
+const transformTableState: SavedObjectMigrationFn<
+  LensDocShape<DatatableStatePre711>,
+  LensDocShape<DatatableStatePost711>
+> = (doc) => {
+  // nothing to do for non-datatable visualizations
+  if (doc.attributes.visualizationType !== 'lnsDatatable')
+    return (doc as unknown) as SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>>;
+  const oldState = doc.attributes.state.visualization;
+  const layer = oldState.layers[0] || {
+    layerId: '',
+    columns: [],
+  };
+  // put together new saved object format
+  const newDoc: SavedObjectUnsanitizedDoc<LensDocShape<DatatableStatePost711>> = {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      state: {
+        ...doc.attributes.state,
+        visualization: {
+          sorting: oldState.sorting,
+          layerId: layer.layerId,
+          columns: layer.columns.map((columnId) => ({ columnId })),
+        },
+      },
+    },
+  };
+  return newDoc;
+};
+
 export const migrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
   // sitting directly on the esaggs as an argument and not a nested function (which lens_auto_date was).
   '7.8.0': (doc, context) => addTimeFieldToEsaggs(removeLensAutoDate(doc, context), context),
   '7.10.0': extractReferences,
+  '7.11.0': removeSuggestedPriority,
+  '7.12.0': transformTableState,
 };

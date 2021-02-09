@@ -1,31 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createBrowserHistory } from 'history';
-import { DashboardStateManager } from './dashboard_state_manager';
 import { getSavedDashboardMock } from './test_helpers';
-import { InputTimeRange, TimefilterContract, TimeRange } from 'src/plugins/data/public';
-import { ViewMode } from 'src/plugins/embeddable/public';
-import { createKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import { DashboardContainer, DashboardContainerInput } from '.';
-import { DashboardContainerOptions } from './embeddable/dashboard_container';
-import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+import { DashboardContainer, DashboardContainerInput, DashboardPanelState } from '.';
+import { DashboardStateManager } from './dashboard_state_manager';
+import { DashboardContainerServices } from './embeddable/dashboard_container';
+
+import { EmbeddableInput, ViewMode } from '../services/embeddable';
+import { createKbnUrlStateStorage } from '../services/kibana_utils';
+import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
+
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
@@ -41,13 +32,20 @@ describe('DashboardState', function () {
     },
   } as TimefilterContract;
 
+  // TS is *very* picky with type guards / predicates. can't just use jest.fn()
+  function mockHasTaggingCapabilities(obj: any): obj is any {
+    return false;
+  }
+
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
       hideWriteControls: false,
+      allowByValueEmbeddables: false,
       kibanaVersion: '7.0.0',
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
+      hasTaggingCapabilities: mockHasTaggingCapabilities,
     });
   }
 
@@ -60,12 +58,13 @@ describe('DashboardState', function () {
       query: {} as DashboardContainerInput['query'],
       timeRange: {} as DashboardContainerInput['timeRange'],
       useMargins: true,
+      syncColors: false,
       title: 'ultra awesome test dashboard',
       isFullScreenMode: false,
       panels: {} as DashboardContainerInput['panels'],
     };
     const input = { ...defaultInput, ...(initialInput ?? {}) };
-    return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerOptions);
+    return new DashboardContainer(input, { embeddable: doStart() } as DashboardContainerServices);
   }
 
   describe('syncTimefilterWithDashboard', function () {
@@ -125,6 +124,11 @@ describe('DashboardState', function () {
 
       const dashboardContainer = initDashboardContainer({
         expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
       });
 
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
@@ -140,15 +144,39 @@ describe('DashboardState', function () {
 
       const dashboardContainer = initDashboardContainer({
         expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
       });
 
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
       expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(1);
+    });
 
-      dashboardContainer.updateInput({ expandedPanelId: 'woah it changed' });
+    test('expandedPanelId is set to undefined if panel does not exist in input', () => {
+      dashboardState.setExpandedPanelId = jest
+        .fn()
+        .mockImplementation(dashboardState.setExpandedPanelId);
+      const dashboardContainer = initDashboardContainer({
+        expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
+      });
+
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
-      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(2);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledWith(
+        'theCoolestPanelOnThisDashboard'
+      );
+
+      dashboardContainer.updateInput({ expandedPanelId: 'theLeastCoolPanelOnThisDashboard' });
+      dashboardState.handleDashboardContainerChanges(dashboardContainer);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledWith(undefined);
     });
   });
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -28,11 +29,15 @@ import {
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
-import { isSparseDataJob, collectAggs } from './util/general';
+import { collectAggs } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import {
+  getAggregationBucketsName,
+  getDatafeedAggregations,
+} from '../../../../../../common/util/datafeed_utils';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -52,6 +57,7 @@ export class JobCreator {
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
   protected _scriptFields: Field[] = [];
+  protected _runtimeMappings: Field[] = [];
   protected _aggregationFields: Field[] = [];
   protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
@@ -483,12 +489,16 @@ export class JobCreator {
     return this._scriptFields;
   }
 
+  public get runtimeMappings(): Field[] {
+    return this._runtimeMappings;
+  }
+
   public get aggregationFields(): Field[] {
     return this._aggregationFields;
   }
 
   public get additionalFields(): Field[] {
-    return [...this._scriptFields, ...this._aggregationFields];
+    return [...this._scriptFields, ...this._runtimeMappings, ...this._aggregationFields];
   }
 
   public get subscribers(): ProgressSubscriber[] {
@@ -622,7 +632,7 @@ export class JobCreator {
     return JSON.stringify(this._datafeed_config, null, 2);
   }
 
-  private _initPerPartitionCategorization() {
+  protected _initPerPartitionCategorization() {
     if (this._job_config.analysis_config.per_partition_categorization === undefined) {
       this._job_config.analysis_config.per_partition_categorization = {};
     }
@@ -672,7 +682,6 @@ export class JobCreator {
     ) {
       this.useDedicatedIndex = true;
     }
-    this._sparseData = isSparseDataJob(job, datafeed);
 
     this._scriptFields = [];
     if (this._datafeed_config.script_fields !== undefined) {
@@ -684,11 +693,24 @@ export class JobCreator {
       }));
     }
 
+    this._runtimeMappings = [];
+    if (this._datafeed_config.runtime_mappings !== undefined) {
+      this._runtimeMappings = Object.keys(this._datafeed_config.runtime_mappings).map((f) => ({
+        id: f,
+        name: f,
+        type: ES_FIELD_TYPES.KEYWORD,
+        aggregatable: true,
+      }));
+    }
+
     this._aggregationFields = [];
-    const buckets =
-      this._datafeed_config.aggregations?.buckets || this._datafeed_config.aggs?.buckets;
-    if (buckets !== undefined) {
-      collectAggs(buckets, this._aggregationFields);
+    const aggs = getDatafeedAggregations(this._datafeed_config);
+    if (aggs !== undefined) {
+      const aggBucketsName = getAggregationBucketsName(aggs);
+      if (aggBucketsName !== undefined && aggs[aggBucketsName] !== undefined) {
+        const buckets = aggs[aggBucketsName];
+        collectAggs(buckets, this._aggregationFields);
+      }
     }
   }
 }

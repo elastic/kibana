@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Cookie, cookie } from 'request';
@@ -47,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           providerType: 'basic',
-          providerName: 'basic',
+          providerName: 'basic1',
           currentURL: '/',
           params: { username: validUsername, password: validPassword },
         })
@@ -61,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.now).to.be.a('number');
         expect(body.idleTimeoutExpiration).to.be.a('number');
         expect(body.lifespanExpiration).to.be(null);
-        expect(body.provider).to.eql({ type: 'basic', name: 'basic' });
+        expect(body.provider).to.eql({ type: 'basic', name: 'basic1' });
       });
 
       it('should not extend the session', async () => {

@@ -1,51 +1,62 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable, BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
-import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
-import { Space } from '../../common/model/space';
-import { GetSpacePurpose } from '../../common/model/types';
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
+import { GetAllSpacesOptions, GetSpaceResult } from '../../common';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
-type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
+interface SavedObjectTarget {
+  type: string;
+  id: string;
+}
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
 
   private readonly serverBasePath: string;
 
-  public readonly onActiveSpaceChange$: Observable<Space>;
+  private readonly _onActiveSpaceChange$: Observable<Space>;
 
   constructor(private readonly http: HttpSetup) {
     this.serverBasePath = http.basePath.serverBasePath;
 
-    this.onActiveSpaceChange$ = this.activeSpace$
+    this._onActiveSpaceChange$ = this.activeSpace$
       .asObservable()
       .pipe(skipWhile((v: Space | null) => v == null)) as Observable<Space>;
-
-    this.refreshActiveSpace();
   }
 
-  public async getSpaces(purpose?: GetSpacePurpose): Promise<Space[]> {
-    return await this.http.get('/api/spaces/space', { query: { purpose } });
+  public get onActiveSpaceChange$() {
+    if (!this.activeSpace$.value) {
+      this.refreshActiveSpace();
+    }
+    return this._onActiveSpaceChange$;
+  }
+
+  public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
+    const { purpose, includeAuthorizedPurposes } = options;
+    const query = { purpose, include_authorized_purposes: includeAuthorizedPurposes };
+    return await this.http.get('/api/spaces/space', { query });
   }
 
   public async getSpace(id: string): Promise<Space> {
     return await this.http.get(`/api/spaces/space/${encodeURIComponent(id)}`);
   }
 
-  public getActiveSpace({ forceRefresh = false } = {}) {
+  public async getActiveSpace({ forceRefresh = false } = {}) {
     if (this.isAnonymousPath()) {
       throw new Error(`Cannot retrieve the active space for anonymous paths`);
     }
-    if (!forceRefresh && this.activeSpace$.value) {
-      return Promise.resolve(this.activeSpace$.value);
+    if (forceRefresh || !this.activeSpace$.value) {
+      await this.refreshActiveSpace();
     }
-    return this.http.get('/internal/spaces/_active_space') as Promise<Space>;
+    return this.activeSpace$.value!;
   }
 
   public async createSpace(space: Space) {
@@ -74,7 +85,7 @@ export class SpacesManager {
   }
 
   public async copySavedObjects(
-    objects: SavedObject[],
+    objects: SavedObjectTarget[],
     spaces: string[],
     includeReferences: boolean,
     createNewCopies: boolean,
@@ -85,13 +96,14 @@ export class SpacesManager {
         objects,
         spaces,
         includeReferences,
-        ...(createNewCopies ? { createNewCopies } : { overwrite }),
+        createNewCopies,
+        ...(createNewCopies ? { overwrite: false } : { overwrite }), // ignore the overwrite option if createNewCopies is enabled
       }),
     });
   }
 
   public async resolveCopySavedObjectsErrors(
-    objects: SavedObject[],
+    objects: SavedObjectTarget[],
     retries: unknown,
     includeReferences: boolean,
     createNewCopies: boolean
@@ -109,16 +121,25 @@ export class SpacesManager {
   public async getShareSavedObjectPermissions(
     type: string
   ): Promise<{ shareToAllSpaces: boolean }> {
-    return this.http.get('/internal/spaces/_share_saved_object_permissions', { query: { type } });
+    return this.http
+      .get('/internal/security/_share_saved_object_permissions', { query: { type } })
+      .catch((err) => {
+        const isNotFound = err?.body?.statusCode === 404;
+        if (isNotFound) {
+          // security is not enabled
+          return { shareToAllSpaces: true };
+        }
+        throw err;
+      });
   }
 
-  public async shareSavedObjectAdd(object: SavedObject, spaces: string[]): Promise<void> {
+  public async shareSavedObjectAdd(object: SavedObjectTarget, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_add`, {
       body: JSON.stringify({ object, spaces }),
     });
   }
 
-  public async shareSavedObjectRemove(object: SavedObject, spaces: string[]): Promise<void> {
+  public async shareSavedObjectRemove(object: SavedObjectTarget, spaces: string[]): Promise<void> {
     return this.http.post(`/api/spaces/_share_saved_object_remove`, {
       body: JSON.stringify({ object, spaces }),
     });
@@ -133,7 +154,7 @@ export class SpacesManager {
     if (this.isAnonymousPath()) {
       return;
     }
-    const activeSpace = await this.getActiveSpace({ forceRefresh: true });
+    const activeSpace = await this.http.get('/internal/spaces/_active_space');
     this.activeSpace$.next(activeSpace);
   }
 

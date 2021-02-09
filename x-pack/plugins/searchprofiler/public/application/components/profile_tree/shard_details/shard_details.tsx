@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
 
 import { Index, Operation, Shard } from '../../../types';
-import { msToPretty } from '../../../utils';
+import { msToPretty } from '../../../lib';
 import { ShardDetailTree } from './shard_details_tree';
 import { PercentageBadge } from '../../percentage_badge';
 

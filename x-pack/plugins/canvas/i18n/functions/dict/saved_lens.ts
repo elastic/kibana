@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,6 +23,9 @@ export const help: FunctionHelp<FunctionFactory<typeof savedLens>> = {
     }),
     title: i18n.translate('xpack.canvas.functions.savedLens.args.titleHelpText', {
       defaultMessage: `The title for the Lens visualization object`,
+    }),
+    palette: i18n.translate('xpack.canvas.functions.savedLens.args.paletteHelpText', {
+      defaultMessage: `The palette used for the Lens visualization`,
     }),
   },
 };

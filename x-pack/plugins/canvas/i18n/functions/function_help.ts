@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 import { UnionToIntersection } from '@kbn/utility-types';
-import { CanvasFunction } from '../../types';
+import { CanvasFunction, FunctionFactory } from '../../types';
 
 import { help as all } from './dict/all';
 import { help as alterColumn } from './dict/alter_column';
@@ -50,7 +51,6 @@ import { help as markdown } from './dict/markdown';
 import { help as math } from './dict/math';
 import { help as metric } from './dict/metric';
 import { help as neq } from './dict/neq';
-import { help as palette } from './dict/palette';
 import { help as pie } from './dict/pie';
 import { help as plot } from './dict/plot';
 import { help as ply } from './dict/ply';
@@ -121,6 +121,15 @@ export type FunctionHelp<T> = T extends ExpressionFunctionDefinition<
       args: { [key in keyof Arguments]: string };
     }
   : never;
+
+/**
+ * Helper type to use `FunctionHelp` for function definitions wrapped into factory functions.
+ * It creates a strongly typed entry for the `FunctionHelpMap` for the function definition generated
+ * by the passed in factory: `type MyFnHelp = FunctionFactoryHelp<typeof myFnFactory>`
+ */
+export type FunctionFactoryHelp<T extends (...args: any) => any> = FunctionHelp<
+  FunctionFactory<ReturnType<T>>
+>;
 
 // This internal type infers a Function name and uses `FunctionHelp` above to build
 // a dictionary entry.  This can be used to ensure every Function is defined and all
@@ -205,7 +214,6 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   math,
   metric,
   neq,
-  palette,
   pie,
   plot,
   ply,

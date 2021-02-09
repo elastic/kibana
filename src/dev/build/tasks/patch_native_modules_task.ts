@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import path from 'path';
@@ -46,17 +35,32 @@ const packages: Package[] = [
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
-      darwin: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-64.gz',
-        sha256: '595c6653d796493ddb288fc0732a0d1df8560099796f55a1dd242357d96bb8d6',
+      'darwin-x64': {
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-83.gz',
+        sha256: 'b45cd8296fd6eb2a091399c20111af43093ba30c99ed9e5d969278f5ff69ba8f',
       },
-      linux: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-64.gz',
-        sha256: 'e743587bc96314edf10c3e659c03168bc374a5cd9a6623ee99d989251e331f28',
+      'linux-x64': {
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-83.gz',
+        sha256: '1bbc3f90f0ba105772b37c04e3a718f69544b4df01dda00435c2b8e50b2ad0d9',
       },
-      win32: {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-64.gz',
-        sha256: 'b33de62cda24fb02dc80a19fb79977d686468ac746e97cd211059d2d4c75d529',
+
+      // ARM build is currently done manually as Github Actions used in upstream project
+      // do not natively support an ARM target.
+
+      // From a AWS Graviton instance:
+      // * checkout the node-re2 project,
+      // * install Node using the same minor used by Kibana
+      // * npm install, which will also create a build
+      // * gzip -c build/Release/re2.node > linux-arm64-83.gz
+      // * upload to kibana-ci-proxy-cache bucket
+      'linux-arm64': {
+        url:
+          'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.15.4/linux-arm64-83.gz',
+        sha256: '4eb524ca9a79dea9c07342e487fbe91591166fdbc022ae987104840df948a4e9',
+      },
+      'win32-x64': {
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-83.gz',
+        sha256: 'efe939d3cda1d64ee3ee3e60a20613b95166d55632e702c670763ea7e69fca06',
       },
     },
   },
@@ -84,7 +88,7 @@ async function patchModule(
       `Can't patch ${pkg.name}'s native module, we were expecting version ${pkg.version} and found ${installedVersion}`
     );
   }
-  const platformName = platform.getName();
+  const platformName = platform.getNodeArch();
   const archive = pkg.archives[platformName];
   const archiveName = path.basename(archive.url);
   const downloadPath = config.resolveFromRepo(DOWNLOAD_DIRECTORY, pkg.name, archiveName);

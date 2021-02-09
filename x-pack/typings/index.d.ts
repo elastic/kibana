@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 declare module '*.html' {
@@ -22,17 +23,7 @@ declare module '*.svg' {
   export default content;
 }
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 declare module 'axios/lib/adapters/xhr';
-
-type Writable<T> = {
-  -readonly [K in keyof T]: T[K];
-};
 
 // Storybook references this module. It's @ts-ignored in the codebase but when
 // built into its dist it strips that out. Add it here to avoid a type checking

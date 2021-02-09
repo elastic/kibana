@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable, of } from 'rxjs';
@@ -36,10 +37,17 @@ describe('SearchService', () => {
 
   const createProvider = (
     id: string,
-    source: Observable<GlobalSearchProviderResult[]> = of([])
+    {
+      source = of([]),
+      types = [],
+    }: {
+      source?: Observable<GlobalSearchProviderResult[]>;
+      types?: string[] | Promise<string[]>;
+    } = {}
   ): jest.Mocked<GlobalSearchResultProvider> => ({
     id,
     find: jest.fn().mockImplementation((term, options, context) => source),
+    getSearchableTypes: jest.fn().mockReturnValue(types),
   });
 
   const expectedResult = (id: string) => expect.objectContaining({ id });
@@ -97,11 +105,15 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start({ core: coreStart, licenseChecker });
-        find('foobar', { preference: 'pref' }, request);
+        find(
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
+          { preference: 'pref' },
+          request
+        );
 
         expect(provider.find).toHaveBeenCalledTimes(1);
         expect(provider.find).toHaveBeenCalledWith(
-          'foobar',
+          { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
           expect.objectContaining({ preference: 'pref' }),
           expect.objectContaining({ core: expect.any(Object) })
         );
@@ -118,10 +130,10 @@ describe('SearchService', () => {
             a: [result('1')],
             b: [result('2')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('a-b-|', {
             a: expectedBatch('1'),
@@ -138,26 +150,24 @@ describe('SearchService', () => {
 
         getTestScheduler().run(({ expectObservable, hot }) => {
           registerResultProvider(
-            createProvider(
-              'A',
-              hot('a---d-|', {
+            createProvider('A', {
+              source: hot('a---d-|', {
                 a: [result('A1'), result('A2')],
                 d: [result('A3')],
-              })
-            )
+              }),
+            })
           );
           registerResultProvider(
-            createProvider(
-              'B',
-              hot('-b-c|  ', {
+            createProvider('B', {
+              source: hot('-b-c|  ', {
                 b: [result('B1')],
                 c: [result('B2'), result('B3')],
-              })
-            )
+              }),
+            })
           );
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('ab-cd-|', {
             a: expectedBatch('A1', 'A2'),
@@ -179,12 +189,12 @@ describe('SearchService', () => {
             a: [result('1')],
             b: [result('2')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const aborted$ = hot('----a--|', { a: undefined });
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', { aborted$ }, request);
+          const results = find({ term: 'foobar' }, { aborted$ }, request);
 
           expectObservable(results).toBe('--a-|', {
             a: expectedBatch('1'),
@@ -204,10 +214,10 @@ describe('SearchService', () => {
             b: [result('2')],
             c: [result('3')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('a 24ms b 74ms |', {
             a: expectedBatch('1'),
@@ -225,26 +235,24 @@ describe('SearchService', () => {
 
         getTestScheduler().run(({ expectObservable, hot }) => {
           registerResultProvider(
-            createProvider(
-              'A',
-              hot('a---d-|', {
+            createProvider('A', {
+              source: hot('a---d-|', {
                 a: [result('A1'), result('A2')],
                 d: [result('A3')],
-              })
-            )
+              }),
+            })
           );
           registerResultProvider(
-            createProvider(
-              'B',
-              hot('-b-c|  ', {
+            createProvider('B', {
+              source: hot('-b-c|  ', {
                 b: [result('B1')],
                 c: [result('B2'), result('B3')],
-              })
-            )
+              }),
+            })
           );
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('ab-(c|)', {
             a: expectedBatch('A1', 'A2'),
@@ -274,11 +282,11 @@ describe('SearchService', () => {
           url: { path: '/foo', prependBasePath: false },
         });
 
-        const provider = createProvider('A', of([resultA, resultB]));
+        const provider = createProvider('A', { source: of([resultA, resultB]) });
         registerResultProvider(provider);
 
         const { find } = service.start({ core: coreStart, licenseChecker });
-        const batch = await find('foo', {}, request).pipe(take(1)).toPromise();
+        const batch = await find({ term: 'foobar' }, {}, request).pipe(take(1)).toPromise();
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({
@@ -304,10 +312,10 @@ describe('SearchService', () => {
             a: [result('1')],
             b: [result('2')],
           });
-          registerResultProvider(createProvider('A', providerResults));
+          registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
-          const results = find('foo', {}, request);
+          const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe(
             '#',
@@ -317,6 +325,78 @@ describe('SearchService', () => {
             )
           );
         });
+      });
+    });
+
+    describe('#getSearchableTypes()', () => {
+      it('returns the types registered by the provider', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          basePath,
+        });
+
+        const provider = createProvider('A', { types: ['type-a', 'type-b'] });
+        registerResultProvider(provider);
+
+        const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
+
+        const types = await getSearchableTypes(request);
+
+        expect(types).toEqual(['type-a', 'type-b']);
+      });
+
+      it('supports promises', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          basePath,
+        });
+
+        const provider = createProvider('A', { types: Promise.resolve(['type-a', 'type-b']) });
+        registerResultProvider(provider);
+
+        const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
+
+        const types = await getSearchableTypes(request);
+
+        expect(types).toEqual(['type-a', 'type-b']);
+      });
+
+      it('merges the types registered by the providers', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          basePath,
+        });
+
+        const provider1 = createProvider('A', { types: ['type-a', 'type-b'] });
+        registerResultProvider(provider1);
+
+        const provider2 = createProvider('B', { types: ['type-c', 'type-d'] });
+        registerResultProvider(provider2);
+
+        const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
+
+        const types = await getSearchableTypes(request);
+
+        expect(types.sort()).toEqual(['type-a', 'type-b', 'type-c', 'type-d']);
+      });
+
+      it('removes duplicates', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          basePath,
+        });
+
+        const provider1 = createProvider('A', { types: ['type-a', 'dupe'] });
+        registerResultProvider(provider1);
+
+        const provider2 = createProvider('B', { types: ['type-b', 'dupe'] });
+        registerResultProvider(provider2);
+
+        const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
+
+        const types = await getSearchableTypes(request);
+
+        expect(types.sort()).toEqual(['dupe', 'type-a', 'type-b']);
       });
     });
   });

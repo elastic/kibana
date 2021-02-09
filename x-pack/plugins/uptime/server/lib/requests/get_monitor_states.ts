@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CONTEXT_DEFAULTS, QUERY } from '../../../common/constants';
@@ -40,8 +41,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   GetMonitorStatesParams,
   MonitorSummariesResult
 > = async ({
-  callES,
-  dynamicSettings,
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   pagination,
@@ -53,8 +53,7 @@ export const getMonitorStates: UMElasticsearchQueryFn<
   statusFilter = statusFilter === null ? undefined : statusFilter;
 
   const queryContext = new QueryContext(
-    callES,
-    dynamicSettings.heartbeatIndices,
+    uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
     pagination,
@@ -98,52 +97,49 @@ export const getHistogramForMonitors = async (
   minInterval: number
 ): Promise<{ [key: string]: Histogram }> => {
   const params = {
-    index: queryContext.heartbeatIndices,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                'summary.down': { gt: 0 },
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              'summary.down': { gt: 0 },
             },
-            {
-              terms: {
-                'monitor.id': monitorIds,
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: queryContext.dateRangeStart,
-                  lte: queryContext.dateRangeEnd,
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        histogram: {
-          date_histogram: {
-            field: '@timestamp',
-            // 12 seems to be a good size for performance given
-            // long monitor lists of up to 100 on the overview page
-            fixed_interval: minInterval + 'ms',
-            missing: 0,
           },
-          aggs: {
-            by_id: {
-              terms: {
-                field: 'monitor.id',
-                size: Math.max(monitorIds.length, 1),
+          {
+            terms: {
+              'monitor.id': monitorIds,
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: queryContext.dateRangeStart,
+                lte: queryContext.dateRangeEnd,
               },
-              aggs: {
-                totalDown: {
-                  sum: { field: 'summary.down' },
-                },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      histogram: {
+        date_histogram: {
+          field: '@timestamp',
+          // 12 seems to be a good size for performance given
+          // long monitor lists of up to 100 on the overview page
+          fixed_interval: minInterval + 'ms',
+          missing: 0,
+        },
+        aggs: {
+          by_id: {
+            terms: {
+              field: 'monitor.id',
+              size: Math.max(monitorIds.length, 1),
+            },
+            aggs: {
+              totalDown: {
+                sum: { field: 'summary.down' },
               },
             },
           },
@@ -151,9 +147,9 @@ export const getHistogramForMonitors = async (
       },
     },
   };
-  const result = await queryContext.search(params);
+  const { body: result } = await queryContext.search({ body: params });
 
-  const histoBuckets: any[] = result.aggregations.histogram.buckets;
+  const histoBuckets: any[] = result.aggregations?.histogram.buckets ?? [];
   const simplified = histoBuckets.map((histoBucket: any): { timestamp: number; byId: any } => {
     const byId: { [key: string]: number } = {};
     histoBucket.by_id.buckets.forEach((idBucket: any) => {

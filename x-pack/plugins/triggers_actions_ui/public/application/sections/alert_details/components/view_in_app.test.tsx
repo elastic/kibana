@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
@@ -10,28 +12,8 @@ import { act } from 'react-dom/test-utils';
 
 import { Alert } from '../../../../types';
 import { ViewInApp } from './view_in_app';
-import { useAppDependencies } from '../../../app_context';
-
-jest.mock('../../../app_context', () => {
-  const alerts = {
-    getNavigation: jest.fn(async (id) =>
-      id === 'alert-with-nav' ? { path: '/alert' } : undefined
-    ),
-  };
-  const navigateToApp = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({
-      http: jest.fn(),
-      navigateToApp,
-      alerts,
-      legacy: {
-        capabilities: {
-          get: jest.fn(() => ({})),
-        },
-      },
-    })),
-  };
-});
+import { useKibana } from '../../../../common/lib/kibana';
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
@@ -41,8 +23,7 @@ describe('view in app', () => {
   describe('link to the app that created the alert', () => {
     it('is disabled when there is no navigation', async () => {
       const alert = mockAlert();
-      const { alerts } = useAppDependencies();
-
+      const { alerts } = useKibana().services;
       let component: ReactWrapper;
       await act(async () => {
         // use mount as we need useEffect to run
@@ -59,7 +40,9 @@ describe('view in app', () => {
 
     it('enabled when there is navigation', async () => {
       const alert = mockAlert({ id: 'alert-with-nav', consumer: 'siem' });
-      const { navigateToApp } = useAppDependencies();
+      const {
+        application: { navigateToApp },
+      } = useKibana().services;
 
       let component: ReactWrapper;
       act(async () => {
@@ -103,6 +86,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     updatedAt: new Date(),
     apiKeyOwner: null,
     throttle: null,
+    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {

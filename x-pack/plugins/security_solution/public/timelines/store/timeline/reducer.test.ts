@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 import {
   IS_OPERATOR,
@@ -14,10 +15,7 @@ import {
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import {
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_TIMELINE_WIDTH,
-} from '../../../timelines/components/timeline/body/constants';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Direction } from '../../../graphql/types';
 import { defaultHeaders } from '../../../common/mock';
@@ -30,7 +28,6 @@ import {
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
-  updateTimelineDescription,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -40,7 +37,7 @@ import {
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
-  updateTimelineTitle,
+  updateTimelineTitleAndDescription,
   upsertTimelineColumn,
 } from './helpers';
 import { ColumnHeaderOptions, TimelineModel } from './model';
@@ -48,6 +45,14 @@ import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/utils/default_date_settings', () => {
+  const actual = jest.requireActual('../../../common/utils/default_date_settings');
+  return {
+    ...actual,
+    DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),
+    DEFAULT_TO_MOMENT: new Date('2020-10-28T11:37:31.655Z'),
+  };
+});
 
 const basicDataProvider: DataProvider = {
   and: [],
@@ -63,6 +68,7 @@ const basicDataProvider: DataProvider = {
   kqlQuery: '',
 };
 const basicTimeline: TimelineModel = {
+  activeTab: TimelineTabs.query,
   columns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
@@ -73,6 +79,7 @@ const basicTimeline: TimelineModel = {
   description: '',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
+  expandedEvent: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'foo',
@@ -85,7 +92,7 @@ const basicTimeline: TimelineModel = {
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
   kqlMode: 'filter',
-  kqlQuery: { filterQuery: null, filterQueryDraft: null },
+  kqlQuery: { filterQuery: null },
   loadingEventIds: [],
   noteIds: [],
   pinnedEventIds: {},
@@ -94,17 +101,19 @@ const basicTimeline: TimelineModel = {
   selectedEventIds: {},
   show: true,
   showCheckboxes: false,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'number',
+      sortDirection: Direction.desc,
+    },
+  ],
   status: TimelineStatus.active,
   templateTimelineId: null,
   templateTimelineVersion: null,
   timelineType: TimelineType.default,
   title: '',
   version: null,
-  width: DEFAULT_TIMELINE_WIDTH,
 };
 const timelineByIdMock: TimelineById = {
   foo: { ...basicTimeline },
@@ -137,6 +146,31 @@ describe('Timeline', () => {
       expect(update).toEqual({
         foo: {
           ...basicTimeline,
+          show: true,
+        },
+      });
+    });
+
+    test('should override timerange if adding an immutable template', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update).toEqual({
+        foo: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+          dateRange: {
+            start: '2020-10-27T11:37:31.655Z',
+            end: '2020-10-28T11:37:31.655Z',
+          },
           show: true,
         },
       });
@@ -802,65 +836,40 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#updateTimelineDescription', () => {
-    const newDescription = 'a new description';
-
-    test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    test('should update the timeline description', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual(newDescription);
-    });
-
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: '      breathing room      ',
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual('breathing room ');
-    });
-  });
-
-  describe('#updateTimelineTitle', () => {
+  describe('#updateTimelineTitleAndDescription', () => {
     const newTitle = 'a new title';
+    const newDescription = 'breathing room';
 
     test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineTitle({
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '',
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update the timeline title', () => {
-      const update = updateTimelineTitle({
+    test('should update the timeline title and description', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: newDescription,
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update.foo.title).toEqual(newTitle);
+      expect(update.foo.description).toEqual(newDescription);
     });
 
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineTitle({
+    test('should always trim all leading whitespace', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '      breathing room      ',
         title: '      room at the back      ',
         timelineById: timelineByIdMock,
       });
-      expect(update.foo.title).toEqual('room at the back ');
+      expect(update.foo.title).toEqual('room at the back');
+      expect(update.foo.description).toEqual('breathing room');
     });
   });
 
@@ -922,10 +931,13 @@ describe('Timeline', () => {
     beforeAll(() => {
       update = updateTimelineSort({
         id: 'foo',
-        sort: {
-          columnId: 'some column',
-          sortDirection: Direction.desc,
-        },
+        sort: [
+          {
+            columnId: 'some column',
+            columnType: 'text',
+            sortDirection: Direction.desc,
+          },
+        ],
         timelineById: timelineByIdMock,
       });
     });
@@ -933,8 +945,10 @@ describe('Timeline', () => {
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update the timeline range', () => {
-      expect(update.foo.sort).toEqual({ columnId: 'some column', sortDirection: Direction.desc });
+    test('should update the sort attribute', () => {
+      expect(update.foo.sort).toEqual([
+        { columnId: 'some column', columnType: 'text', sortDirection: Direction.desc },
+      ]);
     });
   });
 

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -30,6 +19,7 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/+([A-Z_]).mdx',
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
@@ -49,6 +39,7 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
+  'packages/kbn-test/jest-preset.js',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -70,7 +61,11 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/plugins/maps/server/fonts/**/*',
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
+  'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
+
+  // Bazel default files
+  '**/WORKSPACE.bazel',
+  '**/BUILD.bazel',
 ];
 
 /**
@@ -99,7 +94,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'packages/kbn-ui-framework/generator-kui',
   'src/legacy/ui/public/flot-charts',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
@@ -144,9 +138,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/mstile-310x310.png',
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
-  'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
-  'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',
-  'packages/kbn-ui-framework/doc_site/src/images/react-logo.svg',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',

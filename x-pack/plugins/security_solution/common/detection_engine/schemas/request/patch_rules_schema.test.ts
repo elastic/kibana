@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { patchRulesSchema, PatchRulesSchema, PatchRulesSchemaDecoded } from './patch_rules_schema';
@@ -829,6 +830,32 @@ describe('patch_rules_schema', () => {
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "should not work" supplied to "filters"',
     ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('name cannot be an empty string', () => {
+    const payload: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
+      name: '',
+    };
+
+    const decoded = patchRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('description cannot be an empty string', () => {
+    const payload: PatchRulesSchema = {
+      ...getPatchRulesSchemaMock(),
+      description: '',
+    };
+
+    const decoded = patchRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "description"']);
     expect(message.schema).toEqual({});
   });
 

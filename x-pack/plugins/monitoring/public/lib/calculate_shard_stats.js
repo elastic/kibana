@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import _ from 'lodash';
+import { get, each } from 'lodash';
 
 function addOne(obj, key) {
-  let value = _.get(obj, key);
+  let value = get(obj, key);
   set(obj, key, ++value);
 }
 
@@ -34,8 +35,8 @@ export function calculateShardStats(state) {
     data[shard.index] = metrics;
   };
   if (state) {
-    const shards = _.get(state, 'cluster_state.shards');
-    _.each(shards, processShards);
+    const shards = get(state, 'cluster_state.shards');
+    each(shards, processShards);
   }
   return data;
 }

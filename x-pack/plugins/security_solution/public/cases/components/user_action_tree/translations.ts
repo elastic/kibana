@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -31,5 +32,33 @@ export const MOVE_TO_ORIGINAL_COMMENT = i18n.translate(
   'xpack.securitySolution.case.caseView.moveToCommentAria',
   {
     defaultMessage: 'Highlight the referenced comment',
+  }
+);
+
+export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
+  'xpack.securitySolution.case.caseView.alertCommentLabelTitle',
+  {
+    defaultMessage: 'added an alert from',
+  }
+);
+
+export const ALERT_RULE_DELETED_COMMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.case.caseView.alertRuleDeletedLabelTitle',
+  {
+    defaultMessage: 'added an alert',
+  }
+);
+
+export const SHOW_ALERT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.case.caseView.showAlertTooltip',
+  {
+    defaultMessage: 'Show alert details',
+  }
+);
+
+export const ALERT_NOT_FOUND_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.case.caseView.showAlertDeletedTooltip',
+  {
+    defaultMessage: 'Alert not found',
   }
 );

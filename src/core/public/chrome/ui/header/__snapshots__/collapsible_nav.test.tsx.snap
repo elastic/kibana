@@ -56,6 +56,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -131,7 +132,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -187,7 +188,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "visualize",
@@ -201,7 +202,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "dashboard",
@@ -542,6 +543,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       listItems={
                         Array [
                           Object {
+                            "data-test-subj": "homeLink",
                             "href": "/",
                             "iconType": "home",
                             "label": "Home",
@@ -563,6 +565,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       >
                         <EuiListGroupItem
                           color="text"
+                          data-test-subj="homeLink"
                           href="/"
                           iconType="home"
                           key="title-0"
@@ -577,6 +580,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           >
                             <a
                               className="euiListGroupItem__button"
+                              data-test-subj="homeLink"
                               href="/"
                               onClick={[Function]}
                               rel="noreferrer"
@@ -859,7 +863,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 isCollapsible={true}
                 key="kibana"
                 onToggle={[Function]}
-                title="Kibana"
+                title="Analytics"
               >
                 <EuiAccordion
                   arrowDisplay="right"
@@ -886,7 +890,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__title"
                             id="mockId__title"
                           >
-                            Kibana
+                            Analytics
                           </h3>
                         </EuiTitle>
                       </EuiFlexItem>
@@ -971,7 +975,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                       id="mockId__title"
                                     >
-                                      Kibana
+                                      Analytics
                                     </h3>
                                   </EuiTitle>
                                 </div>
@@ -996,7 +1000,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               className="euiCollapsibleNavGroup__children"
                             >
                               <EuiListGroup
-                                aria-label="Primary navigation links, Kibana"
+                                aria-label="Primary navigation links, Analytics"
                                 color="subdued"
                                 gutterSize="none"
                                 listItems={
@@ -1031,7 +1035,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 size="s"
                               >
                                 <ul
-                                  aria-label="Primary navigation links, Kibana"
+                                  aria-label="Primary navigation links, Analytics"
                                   className="euiListGroup"
                                   style={
                                     Object {
@@ -1973,6 +1977,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -2078,6 +2083,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2313,6 +2319,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2549,6 +2556,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2787,6 +2795,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       listItems={
                         Array [
                           Object {
+                            "data-test-subj": "homeLink",
                             "href": "/",
                             "iconType": "home",
                             "label": "Home",
@@ -2808,6 +2817,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       >
                         <EuiListGroupItem
                           color="text"
+                          data-test-subj="homeLink"
                           href="/"
                           iconType="home"
                           key="title-0"
@@ -2822,6 +2832,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           >
                             <a
                               className="euiListGroupItem__button"
+                              data-test-subj="homeLink"
                               href="/"
                               onClick={[Function]}
                               rel="noreferrer"
@@ -3126,6 +3137,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -23,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
 import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
@@ -112,7 +114,7 @@ export class UsersGridPage extends Component<Props, State> {
         render: (username: string) => (
           <EuiLink
             data-test-subj="userRowUserName"
-            {...reactRouterNavigate(this.props.history, `/edit/${username}`)}
+            {...reactRouterNavigate(this.props.history, `/edit/${encodeURIComponent(username)}`)}
           >
             {username}
           </EuiLink>
@@ -151,14 +153,16 @@ export class UsersGridPage extends Component<Props, State> {
           const roleLinks = rolenames.map((rolename, index) => {
             const roleDefinition = roles?.find((role) => role.name === rolename) ?? rolename;
             return (
-              <RoleTableDisplay
-                role={roleDefinition}
-                key={rolename}
-                navigateToApp={this.props.navigateToApp}
-              />
+              <EuiFlexItem grow={false} key={rolename}>
+                <RoleTableDisplay role={roleDefinition} navigateToApp={this.props.navigateToApp} />
+              </EuiFlexItem>
             );
           });
-          return <div data-test-subj="userRowRoles">{roleLinks}</div>;
+          return (
+            <EuiFlexGroup data-test-subj="userRowRoles" gutterSize="s" wrap>
+              {roleLinks}
+            </EuiFlexGroup>
+          );
         },
       },
       {
@@ -234,7 +238,7 @@ export class UsersGridPage extends Component<Props, State> {
             <EuiPageContentHeaderSection>
               <EuiButton
                 data-test-subj="createUserButton"
-                {...reactRouterNavigate(this.props.history, `/edit/`)}
+                {...reactRouterNavigate(this.props.history, `/create`)}
               >
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"
@@ -257,6 +261,10 @@ export class UsersGridPage extends Component<Props, State> {
             {
               <EuiInMemoryTable
                 itemId="username"
+                tableCaption={i18n.translate('xpack.security.management.users.tableCaption', {
+                  defaultMessage: 'Users',
+                })}
+                rowHeader="username"
                 columns={columns}
                 selection={selectionConfig}
                 pagination={pagination}

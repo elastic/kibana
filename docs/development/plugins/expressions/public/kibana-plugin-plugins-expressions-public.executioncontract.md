@@ -9,7 +9,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class ExecutionContract<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown, InspectorAdapters = unknown> 
+export declare class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> 
 ```
 
 ## Constructors
@@ -23,7 +23,7 @@ export declare class ExecutionContract<ExtraContext extends Record<string, unkno
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [cancel](./kibana-plugin-plugins-expressions-public.executioncontract.cancel.md) |  | <code>() =&gt; void</code> | Cancel the execution of the expression. This will set abort signal (available in execution context) to aborted state, letting expression functions to stop their execution. |
-|  [execution](./kibana-plugin-plugins-expressions-public.executioncontract.execution.md) |  | <code>Execution&lt;ExtraContext, Input, Output, InspectorAdapters&gt;</code> |  |
+|  [execution](./kibana-plugin-plugins-expressions-public.executioncontract.execution.md) |  | <code>Execution&lt;Input, Output, InspectorAdapters&gt;</code> |  |
 |  [getAst](./kibana-plugin-plugins-expressions-public.executioncontract.getast.md) |  | <code>() =&gt; ExpressionAstExpression</code> | Get AST used to execute the expression. |
 |  [getData](./kibana-plugin-plugins-expressions-public.executioncontract.getdata.md) |  | <code>() =&gt; Promise&lt;Output &#124; ExpressionValueError&gt;</code> | Returns the final output of expression, if any error happens still wraps that error into <code>ExpressionValueError</code> type and returns that. This function never throws. |
 |  [getExpression](./kibana-plugin-plugins-expressions-public.executioncontract.getexpression.md) |  | <code>() =&gt; string</code> | Get string representation of the expression. Returns the original string if execution was started from a string. If execution was started from an AST this method returns a string generated from AST. |

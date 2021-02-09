@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 
 import { showAllOthersBucket } from '../../../../common/constants';
 import { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
 import { AlertSearchResponse } from '../../containers/detection_engine/alerts/types';
 import * as i18n from './translations';
+
+const EMPTY_ALERTS_DATA: HistogramData[] = [];
 
 export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggregation> | null) => {
   const groupBuckets: AlertsGroupBucket[] =
@@ -25,7 +29,7 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
         g: group,
       })),
     ];
-  }, []);
+  }, EMPTY_ALERTS_DATA);
 };
 
 export const getAlertsHistogramQuery = (

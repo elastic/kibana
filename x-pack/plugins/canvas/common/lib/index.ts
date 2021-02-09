@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // @ts-expect-error missing local definition
@@ -15,8 +16,6 @@ export * from './errors';
 export * from './expression_form_handlers';
 export * from './fetch';
 export * from './fonts';
-// @ts-expect-error missing local definition
-export * from './get_colors_from_palette';
 export * from './get_field_type';
 // @ts-expect-error missing local definition
 export * from './get_legend_config';

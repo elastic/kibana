@@ -1,0 +1,55 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "signal_overrides",
+    "source": {
+      "@timestamp": "2020-11-24T13:00:01.000Z",
+      "my_severity" : "sev_900",
+      "my_risk": 31.14
+     },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "signal_overrides",
+    "source": {
+      "@timestamp": "2020-11-24T13:00:02.000Z",
+      "my_severity": ["sev_900", "sev_max"],
+      "my_risk": [32.14]
+     },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "signal_overrides",
+    "source": {
+      "@timestamp": "2020-11-24T13:00:03.000Z",
+      "my_severity": ["sev_max", "sev_900"],
+      "my_risk": "33.14"
+     },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "signal_overrides",
+    "source": {
+      "@timestamp": "2020-11-24T13:00:04.000Z",
+      "my_severity": "sev_max",
+      "my_risk": [3.14, "34.14"]
+     },
+    "type": "_doc"
+  }
+}

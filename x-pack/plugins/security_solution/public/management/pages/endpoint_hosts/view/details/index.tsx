@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, memo, useMemo } from 'react';
@@ -14,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiEmptyPrompt,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -33,6 +35,7 @@ import {
   policyResponseError,
   policyResponseLoading,
   policyResponseTimestamp,
+  policyVersionInfo,
 } from '../../store/selectors';
 import { EndpointDetails } from './endpoint_details';
 import { PolicyResponse } from './policy_response';
@@ -53,6 +56,7 @@ export const EndpointDetailsFlyout = memo(() => {
     ...queryParamsWithoutSelectedEndpoint
   } = queryParams;
   const details = useEndpointSelector(detailsData);
+  const policyInfo = useEndpointSelector(policyVersionInfo);
   const loading = useEndpointSelector(detailsLoading);
   const error = useEndpointSelector(detailsError);
   const show = useEndpointSelector(showView);
@@ -82,13 +86,20 @@ export const EndpointDetailsFlyout = memo(() => {
       size="s"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          {loading ? (
-            <EuiLoadingContent lines={1} />
-          ) : (
-            <h2 data-test-subj="endpointDetailsFlyoutTitle"> {details?.host?.hostname} </h2>
-          )}
-        </EuiTitle>
+        {loading ? (
+          <EuiLoadingContent lines={1} />
+        ) : (
+          <EuiToolTip content={details?.host?.hostname} anchorClassName="eui-textTruncate">
+            <EuiTitle size="s">
+              <h2
+                style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                data-test-subj="endpointDetailsFlyoutTitle"
+              >
+                {details?.host?.hostname}
+              </h2>
+            </EuiTitle>
+          </EuiToolTip>
+        )}
       </EuiFlyoutHeader>
       {details === undefined ? (
         <>
@@ -101,7 +112,7 @@ export const EndpointDetailsFlyout = memo(() => {
           {show === 'details' && (
             <>
               <EuiFlyoutBody data-test-subj="endpointDetailsFlyoutBody">
-                <EndpointDetails details={details} />
+                <EndpointDetails details={details} policyInfo={policyInfo} />
               </EuiFlyoutBody>
             </>
           )}

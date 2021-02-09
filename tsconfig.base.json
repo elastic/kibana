@@ -6,10 +6,6 @@
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
-      "plugins/*": ["src/legacy/core_plugins/*/public/"],
-      "test_utils/*": [
-        "src/test_utils/public/*"
-      ],
       "fixtures/*": ["src/fixtures/*"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
@@ -18,6 +14,8 @@
     "strict": true,
     // save information about the project graph on disk
     "incremental": true,
+    // Do not check d.ts files by default
+    "skipLibCheck": true,
     // enables "core language features"
     "lib": [
       "esnext",
@@ -53,7 +51,6 @@
     "types": [
       "node",
       "jest",
-      "react",
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom"

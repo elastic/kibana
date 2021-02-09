@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -43,7 +44,8 @@ export const getActions = (
   dispatch: React.Dispatch<Action>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
-  reFetchRules: (refreshPrePackagedRule?: boolean) => void,
+  reFetchRules: () => Promise<void>,
+  refetchPrePackagedRulesStatus: () => Promise<void>,
   actionsPrivileges:
     | boolean
     | Readonly<{
@@ -77,7 +79,8 @@ export const getActions = (
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
       await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules(true);
+      await reFetchRules();
+      await refetchPrePackagedRulesStatus();
     },
   },
   {
@@ -95,7 +98,8 @@ export const getActions = (
     name: i18n.DELETE_RULE,
     onClick: async (rowItem: Rule) => {
       await deleteRulesAction([rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules(true);
+      await reFetchRules();
+      await refetchPrePackagedRulesStatus();
     },
   },
 ];
@@ -115,7 +119,8 @@ interface GetColumns {
   hasMlPermissions: boolean;
   hasNoPermissions: boolean;
   loadingRuleIds: string[];
-  reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+  reFetchRules: () => Promise<void>;
+  refetchPrePackagedRulesStatus: () => Promise<void>;
   hasReadActionsPrivileges:
     | boolean
     | Readonly<{
@@ -132,6 +137,7 @@ export const getColumns = ({
   hasNoPermissions,
   loadingRuleIds,
   reFetchRules,
+  refetchPrePackagedRulesStatus,
   hasReadActionsPrivileges,
 }: GetColumns): RulesColumns[] => {
   const cols: RulesColumns[] = [
@@ -210,7 +216,7 @@ export const getColumns = ({
           getEmptyTagValue()
         ) : (
           <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
-            <FormattedRelative value={value} />
+            <FormattedDate value={value} fieldName={'last rule update date'} />
           </LocalizedDateTooltip>
         );
       },
@@ -279,6 +285,7 @@ export const getColumns = ({
         dispatchToaster,
         history,
         reFetchRules,
+        refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges
       ),
       width: '40px',
@@ -350,19 +357,20 @@ export const getMonitoringColumns = (
       truncateText: true,
       width: '14%',
     },
-    {
-      field: 'current_status.last_look_back_date',
-      name: i18n.COLUMN_LAST_LOOKBACK_DATE,
-      render: (value: RuleStatus['current_status']['last_look_back_date']) => {
-        return value == null ? (
-          getEmptyTagValue()
-        ) : (
-          <FormattedDate value={value} fieldName={'last look back date'} />
-        );
-      },
-      truncateText: true,
-      width: '16%',
-    },
+    // hiding this field until after 7.11 release
+    // {
+    //   field: 'current_status.last_look_back_date',
+    //   name: i18n.COLUMN_LAST_LOOKBACK_DATE,
+    //   render: (value: RuleStatus['current_status']['last_look_back_date']) => {
+    //     return value == null ? (
+    //       getEmptyTagValue()
+    //     ) : (
+    //       <FormattedDate value={value} fieldName={'last look back date'} />
+    //     );
+    //   },
+    //   truncateText: true,
+    //   width: '16%',
+    // },
     {
       field: 'current_status.status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,

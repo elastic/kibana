@@ -1,10 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { DAY } from '../../shared_imports';
 
 export const BASE_PATH = '';
 export const DEFAULT_SECTION: Section = 'snapshots';
@@ -89,10 +88,10 @@ export const REMOVE_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGEST
 );
 
 export const DEFAULT_POLICY_SCHEDULE = '0 30 1 * * ?';
-export const DEFAULT_POLICY_FREQUENCY = DAY;
+export const DEFAULT_POLICY_FREQUENCY = 'DAY';
 
 export const DEFAULT_RETENTION_SCHEDULE = '0 30 1 * * ?';
-export const DEFAULT_RETENTION_FREQUENCY = DAY;
+export const DEFAULT_RETENTION_FREQUENCY = 'DAY';
 
 // UI Metric constants
 export const UIM_APP_NAME = 'snapshot_restore';

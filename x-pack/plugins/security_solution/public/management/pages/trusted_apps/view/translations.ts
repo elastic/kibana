@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,43 +10,34 @@ import {
   TrustedApp,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
+  ConditionEntry,
+  ConditionEntryField,
 } from '../../../../../common/endpoint/types';
+
+export { OS_TITLES } from '../../../common/translations';
 
 export const ABOUT_TRUSTED_APPS = i18n.translate('xpack.securitySolution.trustedapps.aboutInfo', {
   defaultMessage:
-    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
+    'Add a trusted application to improve performance or alleviate conflicts with other applications ' +
+    'running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.',
 });
 
-export const OS_TITLES: Readonly<{ [K in TrustedApp['os']]: string }> = {
-  windows: i18n.translate('xpack.securitySolution.trustedapps.os.windows', {
-    defaultMessage: 'Windows',
-  }),
-  macos: i18n.translate('xpack.securitySolution.trustedapps.os.macos', {
-    defaultMessage: 'Mac OS',
-  }),
-  linux: i18n.translate('xpack.securitySolution.trustedapps.os.linux', {
-    defaultMessage: 'Linux',
-  }),
-};
-
-type Entry = MacosLinuxConditionEntry | WindowsConditionEntry;
-
-export const CONDITION_FIELD_TITLE: { [K in Entry['field']]: string } = {
-  'process.hash.*': i18n.translate(
+export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
+  [ConditionEntryField.HASH]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',
     { defaultMessage: 'Hash' }
   ),
-  'process.executable.caseless': i18n.translate(
+  [ConditionEntryField.PATH]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.path',
     { defaultMessage: 'Path' }
   ),
-  'process.code_signature': i18n.translate(
+  [ConditionEntryField.SIGNER]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.signature',
     { defaultMessage: 'Signature' }
   ),
 };
 
-export const OPERATOR_TITLE: { [K in Entry['operator']]: string } = {
+export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
   included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
     defaultMessage: 'is',
   }),

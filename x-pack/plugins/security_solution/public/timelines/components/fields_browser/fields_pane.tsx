@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
-
+import { timelineActions } from '../../../timelines/store/timeline';
+import { OnUpdateColumns } from '../timeline/events';
 import { Category } from './category';
 import { FieldBrowserProps } from './types';
 import { getFieldItems } from './field_items';
@@ -32,7 +35,7 @@ const NoFieldsFlexGroup = styled(EuiFlexGroup)`
 
 NoFieldsFlexGroup.displayName = 'NoFieldsFlexGroup';
 
-type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'timelineId'> & {
+type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'timelineId'> & {
   columnHeaders: ColumnHeaderOptions[];
   /**
    * A map of categoryId -> metadata about the fields in that category,
@@ -46,6 +49,8 @@ type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'ti
    */
   onCategorySelected: (categoryId: string) => void;
   /** The text displayed in the search input */
+  /** Invoked when a user chooses to view a new set of columns in the timeline */
+  onUpdateColumns: OnUpdateColumns;
   searchInput: string;
   /**
    * The category selected on the left-hand side of the field browser
@@ -53,10 +58,6 @@ type Props = Pick<FieldBrowserProps, 'onFieldSelected' | 'onUpdateColumns' | 'ti
   selectedCategoryId: string;
   /** The width field browser */
   width: number;
-  /**
-   * Invoked to add or remove a column from the timeline
-   */
-  toggleColumn: (column: ColumnHeaderOptions) => void;
 };
 export const FieldsPane = React.memo<Props>(
   ({
@@ -67,11 +68,39 @@ export const FieldsPane = React.memo<Props>(
     searchInput,
     selectedCategoryId,
     timelineId,
-    toggleColumn,
     width,
-  }) => (
-    <>
-      {Object.keys(filteredBrowserFields).length > 0 ? (
+  }) => {
+    const dispatch = useDispatch();
+
+    const toggleColumn = useCallback(
+      (column: ColumnHeaderOptions) => {
+        if (columnHeaders.some((c) => c.id === column.id)) {
+          dispatch(
+            timelineActions.removeColumn({
+              columnId: column.id,
+              id: timelineId,
+            })
+          );
+        } else {
+          dispatch(
+            timelineActions.upsertColumn({
+              column,
+              id: timelineId,
+              index: 1,
+            })
+          );
+        }
+      },
+      [columnHeaders, dispatch, timelineId]
+    );
+
+    const filteredBrowserFieldsExists = useMemo(
+      () => Object.keys(filteredBrowserFields).length > 0,
+      [filteredBrowserFields]
+    );
+
+    if (filteredBrowserFieldsExists) {
+      return (
         <Category
           categoryId={selectedCategoryId}
           data-test-subj="category"
@@ -88,19 +117,22 @@ export const FieldsPane = React.memo<Props>(
           })}
           width={width}
           onCategorySelected={onCategorySelected}
+          onUpdateColumns={onUpdateColumns}
           timelineId={timelineId}
         />
-      ) : (
-        <NoFieldsPanel>
-          <NoFieldsFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <h3 data-test-subj="no-fields-match">{i18n.NO_FIELDS_MATCH_INPUT(searchInput)}</h3>
-            </EuiFlexItem>
-          </NoFieldsFlexGroup>
-        </NoFieldsPanel>
-      )}
-    </>
-  )
+      );
+    }
+
+    return (
+      <NoFieldsPanel>
+        <NoFieldsFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <h3 data-test-subj="no-fields-match">{i18n.NO_FIELDS_MATCH_INPUT(searchInput)}</h3>
+          </EuiFlexItem>
+        </NoFieldsFlexGroup>
+      </NoFieldsPanel>
+    );
+  }
 );
 
 FieldsPane.displayName = 'FieldsPane';

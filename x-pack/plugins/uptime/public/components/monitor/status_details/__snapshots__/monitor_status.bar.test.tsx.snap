@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorStatusBar component renders 1`] = `
+Array [
+  <div>
+    <h2
+      class="euiTitle euiTitle--small"
+    >
+      Up in 2 locations
+    </h2>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--l"
+  />,
+  .c0.c0.c0 {
+  width: 30%;
+  max-width: 250px;
+}
+
+.c1.c1.c1 {
+  width: 70%;
+  overflow-wrap: anywhere;
+}
+
+<dl
+    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+  >
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Overall availability
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+      data-test-subj="uptimeOverallAvailability"
+    >
+      0.00 %
+    </dd>
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Url
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    >
+      <a
+        aria-label="Monitor URL link"
+        class="euiLink euiLink--primary"
+        href=""
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <span
+          aria-label="External link"
+          class="euiLink__externalIcon"
+          data-euiicon-type="popout"
+        />
+        <span
+          class="euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+    </dd>
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Monitor ID
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+      data-test-subj="monitor-page-title"
+    />
+    <dt
+      class="euiDescriptionList__title c0"
+    >
+      Tags
+    </dt>
+    <dd
+      class="euiDescriptionList__description c1"
+    >
+      <a
+        class="euiLink euiLink--primary"
+        href="undefined/monitor-options.html#monitor-tags"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        Set tags
+        <span
+          aria-label="External link"
+          class="euiLink__externalIcon"
+          data-euiicon-type="popout"
+        />
+        <span
+          class="euiScreenReaderOnly"
+        >
+          (opens in a new tab or window)
+        </span>
+      </a>
+    </dd>
+  </dl>,
+]
+`;

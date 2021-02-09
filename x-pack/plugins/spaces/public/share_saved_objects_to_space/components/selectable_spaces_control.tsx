@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './selectable_spaces_control.scss';
@@ -11,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiLink,
   EuiSelectable,
   EuiSelectableOption,
@@ -35,6 +37,26 @@ interface Props {
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
 const ROW_HEIGHT = 40;
+const partiallyAuthorizedTooltip = {
+  checked: i18n.translate(
+    'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.checked',
+    { defaultMessage: 'You need additional privileges to deselect this space.' }
+  ),
+  unchecked: i18n.translate(
+    'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked',
+    { defaultMessage: 'You need additional privileges to select this space.' }
+  ),
+};
+const partiallyAuthorizedSpaceProps = (checked: boolean) => ({
+  append: (
+    <EuiIconTip
+      content={checked ? partiallyAuthorizedTooltip.checked : partiallyAuthorizedTooltip.unchecked}
+      position="left"
+      type="iInCircle"
+    />
+  ),
+  disabled: true,
+});
 const activeSpaceProps = {
   append: <EuiBadge color="hollow">Current</EuiBadge>,
   disabled: true,
@@ -46,22 +68,27 @@ export const SelectableSpacesControl = (props: Props) => {
   const { services } = useKibana();
   const { application, docLinks } = services;
 
+  const activeSpaceId = spaces.find((space) => space.isActiveSpace)!.id;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const options = spaces
     .sort((a, b) => (a.isActiveSpace ? -1 : b.isActiveSpace ? 1 : 0))
-    .map<SpaceOption>((space) => ({
-      label: space.name,
-      prepend: <SpaceAvatar space={space} size={'s'} />,
-      checked: selectedSpaceIds.includes(space.id) ? 'on' : undefined,
-      ['data-space-id']: space.id,
-      ['data-test-subj']: `sts-space-selector-row-${space.id}`,
-      ...(space.isActiveSpace ? activeSpaceProps : {}),
-      ...(isGlobalControlChecked && { disabled: true }),
-    }));
+    .map<SpaceOption>((space) => {
+      const checked = selectedSpaceIds.includes(space.id);
+      return {
+        label: space.name,
+        prepend: <SpaceAvatar space={space} size={'s'} />,
+        checked: checked ? 'on' : undefined,
+        ['data-space-id']: space.id,
+        ['data-test-subj']: `sts-space-selector-row-${space.id}`,
+        ...(isGlobalControlChecked && { disabled: true }),
+        ...(space.isPartiallyAuthorized && partiallyAuthorizedSpaceProps(checked)),
+        ...(space.isActiveSpace && activeSpaceProps),
+      };
+    });
 
   function updateSelectedSpaces(spaceOptions: SpaceOption[]) {
     const selectedOptions = spaceOptions
-      .filter(({ checked, disabled }) => checked && !disabled)
+      .filter((x) => x.checked && x['data-space-id'] !== activeSpaceId)
       .map((x) => x['data-space-id']);
     const updatedSpaceIds = [
       ...selectedOptions,
@@ -149,7 +176,7 @@ export const SelectableSpacesControl = (props: Props) => {
             'data-test-subj': 'sts-form-space-selector',
           }}
           height={ROW_HEIGHT * 3.5}
-          searchable
+          searchable={options.length > 6}
         >
           {(list, search) => {
             return (

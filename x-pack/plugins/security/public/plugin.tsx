@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -146,11 +147,13 @@ export class SecurityPlugin
 
   public start(core: CoreStart, { management, securityOss }: PluginStartDependencies) {
     this.sessionTimeout.start();
-    this.navControlService.start({ core });
     this.securityCheckupService.start({ securityOssStart: securityOss, docLinks: core.docLinks });
+
     if (management) {
       this.managementService.start({ capabilities: core.application.capabilities });
     }
+
+    return { navControlService: this.navControlService.start({ core }) };
   }
 
   public stop() {

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiProgress, EuiButtonGroup } from '@elastic/eui';
@@ -104,8 +106,8 @@ describe('StepAboutRuleToggleDetails', () => {
       );
 
       expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
-      expect(wrapper.find('EuiButtonToggle[id="details"]').at(0).prop('isSelected')).toBeTruthy();
-      expect(wrapper.find('EuiButtonToggle[id="notes"]').at(0).prop('isSelected')).toBeFalsy();
+      expect(wrapper.find('#details').at(0).prop('isSelected')).toBeTruthy();
+      expect(wrapper.find('#notes').at(0).prop('isSelected')).toBeFalsy();
     });
 
     test('it allows users to toggle between "details" and "note"', () => {
@@ -122,16 +124,17 @@ describe('StepAboutRuleToggleDetails', () => {
         </ThemeProvider>
       );
 
-      expect(wrapper.find('EuiButtonGroup[idSelected="details"]').exists()).toBeTruthy();
-      expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeFalsy();
+      expect(wrapper.find('[idSelected="details"]').exists()).toBeTruthy();
+      expect(wrapper.find('[idSelected="notes"]').exists()).toBeFalsy();
 
       wrapper
-        .find('input[title="Investigation guide"]')
+        .find('[title="Investigation guide"]')
         .at(0)
+        .find('input')
         .simulate('change', { target: { value: 'notes' } });
 
-      expect(wrapper.find('EuiButtonGroup[idSelected="details"]').exists()).toBeFalsy();
-      expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeTruthy();
+      expect(wrapper.find('[idSelected="details"]').exists()).toBeFalsy();
+      expect(wrapper.find('[idSelected="notes"]').exists()).toBeTruthy();
     });
 
     test('it displays notes markdown when user toggles to "notes"', () => {
@@ -149,8 +152,9 @@ describe('StepAboutRuleToggleDetails', () => {
       );
 
       wrapper
-        .find('input[title="Investigation guide"]')
+        .find('[title="Investigation guide"]')
         .at(0)
+        .find('input')
         .simulate('change', { target: { value: 'notes' } });
 
       expect(wrapper.find('EuiButtonGroup[idSelected="notes"]').exists()).toBeTruthy();

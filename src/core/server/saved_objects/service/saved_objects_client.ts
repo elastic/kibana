@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ISavedObjectsRepository } from './lib';
@@ -45,6 +34,16 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   version?: string;
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
+   * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the
+   * current Kibana version, it will result in an error.
+   *
+   * @remarks
+   * Do not attempt to set this manually. It should only be used if you retrieved an existing object that had the `coreMigrationVersion`
+   * field set and you want to create it again.
+   */
+  coreMigrationVersion?: string;
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -71,6 +70,16 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   references?: SavedObjectReference[];
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
+  /**
+   * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
+   * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the
+   * current Kibana version, it will result in an error.
+   *
+   * @remarks
+   * Do not attempt to set this manually. It should only be used if you retrieved an existing object that had the `coreMigrationVersion`
+   * field set and you want to create it again.
+   */
+  coreMigrationVersion?: string;
   /** Optional ID of the original saved object, if this object's `id` was regenerated */
   originId?: string;
   /**
@@ -213,6 +222,24 @@ export interface SavedObjectsDeleteFromNamespacesResponse {
  *
  * @public
  */
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation. Defaults to `true` */
+  refresh?: boolean;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+  /** The number of objects that have been updated by this operation */
+  updated: number;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -264,6 +291,24 @@ export interface SavedObjectsUpdateResponse<T = unknown>
   extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
   references: SavedObjectReference[] | undefined;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsResolveResponse<T = unknown> {
+  saved_object: SavedObject<T>;
+  /**
+   * The outcome for a successful `resolve` call is one of the following values:
+   *
+   *  * `'exactMatch'` -- One document exactly matched the given ID.
+   *  * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different
+   *    than the given ID.
+   *  * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the
+   *    `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
+   */
+  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
 }
 
 /**
@@ -373,6 +418,21 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param type - The type of SavedObject to retrieve
+   * @param id - The ID of the SavedObject to retrieve
+   * @param options
+   */
+  async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ): Promise<SavedObjectsResolveResponse<T>> {
+    return await this._repository.resolve(type, id, options);
+  }
+
+  /**
    * Updates an SavedObject
    *
    * @param type
@@ -432,5 +492,16 @@ export class SavedObjectsClient {
     options?: SavedObjectsBulkUpdateOptions
   ): Promise<SavedObjectsBulkUpdateResponse<T>> {
     return await this._repository.bulkUpdate(objects, options);
+  }
+
+  /**
+   * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   */
+  async removeReferencesTo(
+    type: string,
+    id: string,
+    options?: SavedObjectsRemoveReferencesToOptions
+  ) {
+    return await this._repository.removeReferencesTo(type, id, options);
   }
 }

@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { IBasePath } from 'src/core/public';
+import { ApplicationStart, IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import {
   EuiSearchBar,
@@ -34,9 +23,11 @@ import {
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
+  QueryType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -46,6 +37,7 @@ import {
 } from '../../../services';
 
 export interface TableProps {
+  taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -54,7 +46,7 @@ export interface TableProps {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
   filterOptions: any[];
-  canDelete: boolean;
+  capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
@@ -69,6 +61,7 @@ export interface TableProps {
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  initialQuery?: QueryType;
 }
 
 interface TableState {
@@ -152,6 +145,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       isSearching,
       filterOptions,
       selectionConfig: selection,
+      capabilities,
       onDelete,
       onActionRefresh,
       selectedSavedObjects,
@@ -161,6 +155,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      taggingApi,
     } = this.props;
 
     const pagination = {
@@ -180,14 +175,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         multiSelect: 'or',
         options: filterOptions,
       },
-      // Add this back in once we have tag support
-      // {
-      //   type: 'field_value_selection',
-      //   field: 'tag',
-      //   name: 'Tags',
-      //   multiSelect: 'or',
-      //   options: [],
-      // },
+      ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
     ];
 
     const columns = [
@@ -240,6 +228,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
       ...columnRegistry.getAll().map((column) => {
         return {
           ...column.euiColumn,
@@ -286,6 +275,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...actionRegistry.getAll().map((action) => {
+            action.setActionContext({ capabilities });
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
@@ -348,15 +338,18 @@ export class Table extends PureComponent<TableProps, TableState> {
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters as any}
           onChange={this.onChange}
+          defaultQuery={this.props.initialQuery}
           toolsRight={[
             <EuiButton
               key="deleteSO"
               iconType="trash"
               color="danger"
               onClick={onDelete}
-              isDisabled={selectedSavedObjects.length === 0 || !this.props.canDelete}
+              isDisabled={
+                selectedSavedObjects.length === 0 || !capabilities.savedObjectsManagement.delete
+              }
               title={
-                this.props.canDelete
+                capabilities.savedObjectsManagement.delete
                   ? undefined
                   : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
                       defaultMessage: 'Unable to delete saved objects',

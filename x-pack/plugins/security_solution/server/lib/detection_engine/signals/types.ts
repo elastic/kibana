@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
   AlertType,
   AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
-import { SearchResponse } from '../../types';
+import { BaseSearchResponse, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -46,6 +49,11 @@ export interface SignalsStatusParams {
   status: Status;
 }
 
+export interface ThresholdResult {
+  count: number;
+  value: string;
+}
+
 export interface SignalSource {
   [key: string]: SearchTypes;
   // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not
@@ -67,6 +75,7 @@ export interface SignalSource {
     // signal.depth doesn't exist on pre-7.10 signals
     depth?: number;
   };
+  threshold_result?: ThresholdResult;
 }
 
 export interface BulkItem {
@@ -117,23 +126,39 @@ export interface GetResponse {
 export type EventSearchResponse = SearchResponse<EventSource>;
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
+export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = BaseHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
-export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: RuleTypeParams;
-};
+export type RuleExecutorOptions = AlertExecutorOptions<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 // This returns true because by default a RuleAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
-export const isAlertExecutor = (obj: SignalRuleAlertTypeDefinition): obj is AlertType => {
+export const isAlertExecutor = (
+  obj: SignalRuleAlertTypeDefinition
+): obj is AlertType<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+> => {
   return true;
 };
 
-export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
-};
+export type SignalRuleAlertTypeDefinition = AlertType<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+>;
 
 export interface Ancestor {
   rule?: string;
@@ -144,6 +169,9 @@ export interface Ancestor {
 }
 
 export interface Signal {
+  _meta?: {
+    version: number;
+  };
   rule: RulesSchema;
   // DEPRECATED: use parents instead of parent
   parent?: Ancestor;
@@ -156,7 +184,8 @@ export interface Signal {
   original_time?: string;
   original_event?: SearchTypes;
   status: Status;
-  threshold_count?: SearchTypes;
+  threshold_result?: ThresholdResult;
+  original_signal?: SearchTypes;
   depth: number;
 }
 
@@ -164,6 +193,7 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Signal;
+  [key: string]: SearchTypes;
 }
 
 export interface AlertAttributes {
@@ -202,7 +232,7 @@ export interface SearchAfterAndBulkCreateParams {
   gap: moment.Duration | null;
   previousStartedAt: Date | null | undefined;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
   logger: Logger;
@@ -232,5 +262,21 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
+  createdSignals: SignalHit[];
   errors: string[];
+  totalToFromTuples?: Array<{
+    to: Moment | undefined;
+    from: Moment | undefined;
+    maxSignals: number;
+  }>;
+}
+
+export interface ThresholdAggregationBucket extends TermAggregationBucket {
+  top_threshold_hits: BaseSearchResponse<SignalSource>;
+}
+
+export interface ThresholdQueryBucket extends TermAggregationBucket {
+  lastSignalTimestamp: {
+    value_as_string: string;
+  };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,8 +18,7 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { DetectionEnginePageComponent } from './detection_engine';
+import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
@@ -84,12 +84,7 @@ describe('DetectionEnginePageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <DetectionEnginePageComponent
-            graphEventId={undefined}
-            query={{ query: 'query', language: 'language' }}
-            filters={[]}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-          />
+          <DetectionEnginePage />
         </Router>
       </TestProviders>
     );

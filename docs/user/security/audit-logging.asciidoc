@@ -47,8 +47,10 @@ For information on how to configure `xpack.security.audit.appender`, refer to
 
 Refer to the table of events that can be logged for auditing purposes. 
 
-Each event is broken down into `category`, `type`, `action` and `outcome` fields
+Each event is broken down into <<field-event-category, category>>, <<field-event-type, type>>, <<field-event-action, action>> and <<field-event-outcome, outcome>> fields
 to make it easy to filter, query and aggregate the resulting logs. 
+
+Refer to <<xpack-security-ecs-audit-schema>> for a table of fields that get logged with audit event. 
 
 [NOTE]
 ============================================================================
@@ -57,7 +59,6 @@ unexpected error, asynchronous write operations are logged immediately after all
 authorization checks have passed, but before the response from {es} is received.
 Refer to the corresponding {es} logs for potential write errors.
 ============================================================================
-
 
 [cols="3*<"]
 |======
@@ -84,6 +85,17 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a saved object.
 | `failure` | User is not authorized to create a saved object.
 
+.2+| `connector_create`
+| `unknown` | User is creating a connector.
+| `failure` | User is not authorized to create a connector.
+
+.2+| `alert_create`
+| `unknown` | User is creating an alert.
+| `failure` | User is not authorized to create an alert.
+
+.2+| `space_create`
+| `unknown` | User is creating a space.
+| `failure` | User is not authorized to create a space.
 
 3+a|
 ====== Type: change
@@ -104,6 +116,50 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is removing a saved object from other spaces.
 | `failure` | User is not authorized to remove a saved object from other spaces.
 
+.2+| `saved_object_remove_references`
+| `unknown` | User is removing references to a saved object.
+| `failure` | User is not authorized to remove references to a saved object.
+
+.2+| `connector_update`
+| `unknown` | User is updating a connector.
+| `failure` | User is not authorized to update a connector.
+
+.2+| `alert_update`
+| `unknown` | User is updating an alert.
+| `failure` | User is not authorized to update an alert.
+
+.2+| `alert_update_api_key`
+| `unknown` | User is updating the API key of an alert.
+| `failure` | User is not authorized to update the API key of an alert.
+
+.2+| `alert_enable`
+| `unknown` | User is enabling an alert.
+| `failure` | User is not authorized to enable an alert.
+
+.2+| `alert_disable`
+| `unknown` | User is disabling an alert.
+| `failure` | User is not authorized to disable an alert.
+
+.2+| `alert_mute`
+| `unknown` | User is muting an alert.
+| `failure` | User is not authorized to mute an alert.
+
+.2+| `alert_unmute`
+| `unknown` | User is unmuting an alert.
+| `failure` | User is not authorized to unmute an alert.
+
+.2+| `alert_instance_mute`
+| `unknown` | User is muting an alert instance.
+| `failure` | User is not authorized to mute an alert instance.
+
+.2+| `alert_instance_unmute`
+| `unknown` | User is unmuting an alert instance.
+| `failure` | User is not authorized to unmute an alert instance.
+
+.2+| `space_update`
+| `unknown` | User is updating a space.
+| `failure` | User is not authorized to update a space.
+
 3+a|
 ====== Type: deletion
 
@@ -114,6 +170,18 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `saved_object_delete`
 | `unknown` | User is deleting a saved object.
 | `failure` | User is not authorized to delete a saved object.
+
+.2+| `connector_delete`
+| `unknown` | User is deleting a connector.
+| `failure` | User is not authorized to delete a connector.
+
+.2+| `alert_delete`
+| `unknown` | User is deleting an alert.
+| `failure` | User is not authorized to delete an alert.
+
+.2+| `space_delete`
+| `unknown` | User is deleting a space.
+| `failure` | User is not authorized to delete a space.
 
 3+a|
 ====== Type: access
@@ -126,10 +194,37 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | User has accessed a saved object.
 | `failure` | User is not authorized to access a saved object.
 
+.2+| `saved_object_resolve`
+| `success` | User has accessed a saved object.
+| `failure` | User is not authorized to access a saved object.
+
 .2+| `saved_object_find`
 | `success` | User has accessed a saved object as part of a search operation.
 | `failure` | User is not authorized to search for saved objects.
 
+.2+| `connector_get`
+| `success` | User has accessed a connector.
+| `failure` | User is not authorized to access a connector.
+
+.2+| `connector_find`
+| `success` | User has accessed a connector as part of a search operation.
+| `failure` | User is not authorized to search for connectors.
+
+.2+| `alert_get`
+| `success` | User has accessed an alert.
+| `failure` | User is not authorized to access an alert.
+
+.2+| `alert_find`
+| `success` | User has accessed an alert as part of a search operation.
+| `failure` | User is not authorized to search for alerts.
+
+.2+| `space_get`
+| `success` | User has accessed a space.
+| `failure` | User is not authorized to access a space.
+
+.2+| `space_find`
+| `success` | User has accessed a space as part of a search operation.
+| `failure` | User is not authorized to search for spaces.
 
 3+a|
 ===== Category: web
@@ -140,4 +235,189 @@ Refer to the corresponding {es} logs for potential write errors.
 
 | `http_request`
 | `unknown` | User is making an HTTP request.
+|======
+
+
+[[xpack-security-ecs-audit-schema]]
+==== ECS audit schema
+
+Audit logs are written in JSON using https://www.elastic.co/guide/en/ecs/1.6/index.html[Elastic Common Schema (ECS)] specification.
+
+[cols="2*<"]
+|======
+
+2+a| ===== Base Fields
+
+| *Field*
+| *Description*
+
+| `@timestamp`
+| Time when the event was generated. 
+
+Example: `2016-05-23T08:05:34.853Z`
+
+| `message`
+| Human readable description of the event. 
+
+2+a| ===== Event Fields
+
+| *Field*
+| *Description*
+
+| [[field-event-action]] `event.action`
+| The action captured by the event.
+
+Refer to <<xpack-security-ecs-audit-logging>> for a table of possible actions. 
+
+| [[field-event-category]] `event.category`
+| High level category associated with the event.
+
+This field is closely related to `event.type`, which is used as a subcategory.
+
+Possible values:
+`database`,
+`web`,
+`authentication`
+
+| [[field-event-type]] `event.type`
+| Subcategory associated with the event.
+
+This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.
+
+Possible values:
+`creation`,
+`access`,
+`change`,
+`deletion`
+
+| [[field-event-outcome]] `event.outcome`
+| Denotes whether the event represents a success or failure. 
+
+Possible values:
+`success`,
+`failure`,
+`unknown`
+
+2+a| ===== User Fields
+
+| *Field*
+| *Description*
+
+| `user.name`
+| Login name of the user.
+
+Example: `jdoe`
+
+| `user.roles[]`
+| Set of user roles at the time of the event.
+
+Example: `[kibana_admin, reporting_user]`
+
+2+a| ===== Kibana Fields
+
+| *Field*
+| *Description*
+
+| `kibana.space_id`
+| ID of the space associated with the event.
+
+Example: `default`
+
+| `kibana.session_id`
+| ID of the user session associated with the event. 
+
+Each login attempt results in a unique session id.
+
+| `kibana.saved_object.type`
+| Type of saved object associated with the event.
+
+Example: `dashboard`
+
+| `kibana.saved_object.id`
+| ID of the saved object associated with the event.
+
+| `kibana.authentication_provider`
+| Name of the authentication provider associated with the event.
+
+Example: `my-saml-provider`
+
+| `kibana.authentication_type`
+| Type of the authentication provider associated with the event.
+
+Example: `saml`
+
+| `kibana.authentication_realm`
+| Name of the Elasticsearch realm that has authenticated the user.
+
+Example: `native`
+
+| `kibana.lookup_realm`
+| Name of the Elasticsearch realm where the user details were retrieved from.
+
+Example: `native`
+
+| `kibana.add_to_spaces[]`
+| Set of space IDs that a saved object is being shared to as part of the event.
+
+Example: `[default, marketing]`
+
+| `kibana.delete_from_spaces[]`
+| Set of space IDs that a saved object is being removed from as part of the event.
+
+Example: `[marketing]`
+
+2+a| ===== Error Fields
+
+| *Field*
+| *Description*
+
+| `error.code`
+| Error code describing the error.
+
+| `error.message`
+| Error message. 
+
+2+a| ===== HTTP and URL Fields
+
+| *Field*
+| *Description*
+
+| `http.request.method`
+| HTTP request method.
+
+Example: `get`, `post`, `put`, `delete`
+
+| `url.domain`
+| Domain of the url.
+
+Example: `www.elastic.co`
+
+| `url.path`
+| Path of the request.
+
+Example: `/search`
+
+| `url.port`
+| Port of the request.
+
+Example: `443`
+
+| `url.query`
+| The query field describes the query string of the request.
+
+Example: `q=elasticsearch`
+
+| `url.scheme`
+| Scheme of the request.
+
+Example: `https`
+
+2+a| ===== Tracing Fields
+
+| *Field*
+| *Description*
+
+| `trace.id`
+| Unique identifier allowing events of the same transaction from {kib} and {es} to be be correlated.
+
 |======

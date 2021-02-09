@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { ISection } from '../../typings/section';
 
@@ -24,7 +26,7 @@ export const appsSection: ISection[] = [
     title: i18n.translate('xpack.observability.section.apps.apm.title', {
       defaultMessage: 'APM',
     }),
-    icon: 'logoAPM',
+    icon: 'logoObservability',
     description: i18n.translate('xpack.observability.section.apps.apm.description', {
       defaultMessage:
         'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',

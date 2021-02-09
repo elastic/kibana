@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ProcessorEvent } from '../../../../common/processor_event';
@@ -21,7 +22,8 @@ export async function getServiceNames({
   setup: Setup;
   searchAggregatedTransactions: boolean;
 }) {
-  const { apmEventClient } = setup;
+  const { apmEventClient, config } = setup;
+  const maxServiceSelection = config['xpack.apm.maxServiceSelection'];
 
   const params = {
     apm: {
@@ -40,7 +42,7 @@ export async function getServiceNames({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 50,
+            size: maxServiceSelection,
             min_doc_count: 0,
           },
         },

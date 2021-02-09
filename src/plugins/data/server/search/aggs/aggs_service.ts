@@ -1,25 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { pick } from 'lodash';
 
-import { UiSettingsServiceStart, SavedObjectsClientContract } from 'src/core/server';
+import {
+  UiSettingsServiceStart,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from 'src/core/server';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {
   AggsCommonService,
@@ -30,6 +23,7 @@ import {
   TimeRange,
 } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
+import { IndexPatternsServiceStart } from '../../index_patterns';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
@@ -41,6 +35,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: UiSettingsServiceStart;
+  indexPatterns: IndexPatternsServiceStart;
 }
 
 /**
@@ -61,9 +56,12 @@ export class AggsService {
     return this.aggsCommonService.setup({ registerFunction });
   }
 
-  public start({ fieldFormats, uiSettings }: AggsStartDependencies): AggsStart {
+  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
     return {
-      asScopedToClient: async (savedObjectsClient: SavedObjectsClientContract) => {
+      asScopedToClient: async (
+        savedObjectsClient: SavedObjectsClientContract,
+        elasticsearchClient: ElasticsearchClient
+      ) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
@@ -72,8 +70,20 @@ export class AggsService {
         const getConfig = <T = any>(key: string): T => {
           return uiSettingsCache[key];
         };
+        const isDefaultTimezone = () => getConfig('dateFormat:tz') === 'Browser';
 
-        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({ getConfig });
+        const {
+          calculateAutoTimeExpression,
+          getDateMetaByDatatableColumn,
+          datatableUtilities,
+          types,
+        } = this.aggsCommonService.start({
+          getConfig,
+          getIndexPattern: (
+            await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
+          ).get,
+          isDefaultTimezone,
+        });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,
@@ -87,7 +97,7 @@ export class AggsService {
            * default timezone, but `isDefault` is not currently offered on the
            * server, so we need to manually check for the default value.
            */
-          isDefaultTimezone: () => getConfig('dateFormat:tz') === 'Browser',
+          isDefaultTimezone,
         };
 
         const typesRegistry = {
@@ -109,7 +119,9 @@ export class AggsService {
 
         return {
           calculateAutoTimeExpression,
-          createAggConfigs: (indexPattern, configStates = [], schemas) => {
+          getDateMetaByDatatableColumn,
+          datatableUtilities,
+          createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, { typesRegistry });
           },
           types: typesRegistry,

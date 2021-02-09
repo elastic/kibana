@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -115,20 +116,12 @@ export const CREATE_CASE = i18n.translate('xpack.securitySolution.case.caseView.
   defaultMessage: 'Create case',
 });
 
-export const CLOSED_CASE = i18n.translate('xpack.securitySolution.case.caseView.closedCase', {
-  defaultMessage: 'Closed case',
-});
-
 export const CLOSE_CASE = i18n.translate('xpack.securitySolution.case.caseView.closeCase', {
   defaultMessage: 'Close case',
 });
 
 export const REOPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenCase', {
   defaultMessage: 'Reopen case',
-});
-
-export const REOPENED_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenedCase', {
-  defaultMessage: 'Reopened case',
 });
 
 export const CASE_NAME = i18n.translate('xpack.securitySolution.case.caseView.caseName', {
@@ -224,7 +217,7 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
 );
 
 export const CONNECTORS = i18n.translate('xpack.securitySolution.case.caseView.connectors', {
-  defaultMessage: 'External incident management system',
+  defaultMessage: 'External Incident Management System',
 });
 
 export const EDIT_CONNECTOR = i18n.translate('xpack.securitySolution.case.caseView.editConnector', {

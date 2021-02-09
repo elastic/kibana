@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { first } from 'rxjs/operators';
@@ -48,12 +49,12 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       mount: async (params) => {
         const [coreStart] = await getStartServices();
         const { notifications, i18n: i18nDep } = coreStart;
-        const { boot } = await import('./application/boot');
+        const { renderApp } = await import('./application');
 
         const license = await licensing.license$.pipe(first()).toPromise();
         const initialLicenseStatus = checkLicenseStatus(license);
 
-        return boot({
+        return renderApp({
           http,
           initialLicenseStatus,
           el: params.element,

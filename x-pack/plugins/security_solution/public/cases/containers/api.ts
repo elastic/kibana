@@ -1,38 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  CaseResponse,
-  CasesResponse,
-  CasesFindResponse,
   CasePatchRequest,
   CasePostRequest,
+  CaseResponse,
+  CasesFindResponse,
+  CasesResponse,
   CasesStatusResponse,
-  CommentRequest,
-  User,
+  CaseStatuses,
   CaseUserActionsResponse,
-  CaseExternalServiceRequest,
-  ServiceConnectorCaseParams,
-  ServiceConnectorCaseResponse,
-  ActionTypeExecutorResult,
+  CommentRequest,
+  CommentType,
+  User,
 } from '../../../../case/common/api';
 
 import {
-  CASE_STATUS_URL,
-  CASES_URL,
-  CASE_TAGS_URL,
-  CASE_REPORTERS_URL,
   ACTION_TYPES_URL,
-  ACTION_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
+  CASES_URL,
 } from '../../../../case/common/constants';
 
 import {
+  getCaseCommentsUrl,
+  getCasePushUrl,
   getCaseDetailsUrl,
   getCaseUserActionUrl,
-  getCaseCommentsUrl,
 } from '../../../../case/common/api/helpers';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -57,10 +56,7 @@ import {
   decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
-  decodeServiceConnectorCaseResponse,
 } from './utils';
-
-import * as i18n from './translations';
 
 export const getCase = async (
   caseId: string,
@@ -119,7 +115,7 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     reporters: [],
-    status: 'open',
+    status: CaseStatuses.open,
     tags: [],
   },
   queryParams = {
@@ -133,7 +129,7 @@ export const getCases = async ({
   const query = {
     reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags.map((t) => `"${t.replace(/"/g, '\\"')}"`),
-    ...(filterOptions.status !== '' ? { status: filterOptions.status } : {}),
+    status: filterOptions.status,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...queryParams,
   };
@@ -156,7 +152,10 @@ export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): P
 
 export const patchCase = async (
   caseId: string,
-  updatedCase: Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>,
+  updatedCase: Pick<
+    CasePatchRequest,
+    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+  >,
   version: string,
   signal: AbortSignal
 ): Promise<Case[]> => {
@@ -205,7 +204,12 @@ export const patchComment = async (
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
-    body: JSON.stringify({ comment: commentUpdate, id: commentId, version }),
+    body: JSON.stringify({
+      comment: commentUpdate,
+      type: CommentType.user,
+      id: commentId,
+      version,
+    }),
     signal,
   });
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
@@ -222,40 +226,19 @@ export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promi
 
 export const pushCase = async (
   caseId: string,
-  push: CaseExternalServiceRequest,
+  connectorId: string,
   signal: AbortSignal
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(
-    `${getCaseDetailsUrl(caseId)}/_push`,
+    getCasePushUrl(caseId, connectorId),
     {
       method: 'POST',
-      body: JSON.stringify(push),
+      body: JSON.stringify({}),
       signal,
     }
   );
+
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
-};
-
-export const pushToService = async (
-  connectorId: string,
-  casePushParams: ServiceConnectorCaseParams,
-  signal: AbortSignal
-): Promise<ServiceConnectorCaseResponse> => {
-  const response = await KibanaServices.get().http.fetch<
-    ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
-  >(`${ACTION_URL}/action/${connectorId}/_execute`, {
-    method: 'POST',
-    body: JSON.stringify({
-      params: { subAction: 'pushToService', subActionParams: casePushParams },
-    }),
-    signal,
-  });
-
-  if (response.status === 'error') {
-    throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
-  }
-
-  return decodeServiceConnectorCaseResponse(response.data);
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {

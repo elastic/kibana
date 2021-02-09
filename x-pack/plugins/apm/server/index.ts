@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -43,6 +44,8 @@ export const config = {
     ),
     telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
     metricsInterval: schema.number({ defaultValue: 30 }),
+    maxServiceEnvironments: schema.number({ defaultValue: 100 }),
+    maxServiceSelection: schema.number({ defaultValue: 50 }),
   }),
 };
 
@@ -74,6 +77,8 @@ export function mergeConfigs(
     'xpack.apm.serviceMapMaxTracesPerRequest':
       apmConfig.serviceMapMaxTracesPerRequest,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
+    'xpack.apm.maxServiceEnvironments': apmConfig.maxServiceEnvironments,
+    'xpack.apm.maxServiceSelection': apmConfig.maxServiceSelection,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,
@@ -92,3 +97,4 @@ export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
 export { APMPlugin, APMPluginSetup } from './plugin';
+export type { ProcessorEvent } from '../common/processor_event';

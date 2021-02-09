@@ -1,138 +1,153 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useCallback, useReducer, useState, useEffect } from 'react';
-import { isObject } from 'lodash';
+
+import React, { useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiTitle,
-  EuiFlyoutHeader,
-  EuiFlyout,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlyoutBody,
-  EuiPortal,
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAlertsContext } from '../../context/alerts_context';
-import { Alert, AlertAction, IErrorObject } from '../../../types';
-import { AlertForm, validateBaseProperties } from './alert_form';
-import { alertReducer } from './alert_reducer';
+import { isEmpty } from 'lodash';
+import {
+  ActionTypeRegistryContract,
+  Alert,
+  AlertTypeRegistryContract,
+  AlertTypeParams,
+  AlertUpdates,
+} from '../../../types';
+import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
+import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
-import { PLUGIN } from '../../constants/plugin';
 import { ConfirmAlertSave } from './confirm_alert_save';
+import { ConfirmAlertClose } from './confirm_alert_close';
 import { hasShowActionsCapability } from '../../lib/capabilities';
+import AlertAddFooter from './alert_add_footer';
+import { HealthContextProvider } from '../../context/health_context';
+import { useKibana } from '../../../common/lib/kibana';
+import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
+import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
-interface AlertAddProps {
+export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: () => void;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
+  reloadAlerts?: () => Promise<void>;
+  metadata?: MetaData;
 }
 
-export const AlertAdd = ({
+const AlertAdd = ({
   consumer,
-  addFlyoutVisible,
-  setAddFlyoutVisibility,
+  alertTypeRegistry,
+  actionTypeRegistry,
+  onClose,
   canChangeTrigger,
   alertTypeId,
   initialValues,
+  reloadAlerts,
+  metadata,
 }: AlertAddProps) => {
-  const initialAlert = ({
-    params: {},
-    consumer,
-    alertTypeId,
-    schedule: {
-      interval: '1m',
-    },
-    actions: [],
-    tags: [],
-    ...(initialValues ? initialValues : {}),
-  } as unknown) as Alert;
+  const initialAlert: InitialAlert = useMemo(
+    () => ({
+      params: {},
+      consumer,
+      alertTypeId,
+      schedule: {
+        interval: '1m',
+      },
+      actions: [],
+      tags: [],
+      notifyWhen: 'onActionGroupChange',
+      ...(initialValues ? initialValues : {}),
+    }),
+    [alertTypeId, consumer, initialValues]
+  );
 
-  const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
+  const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
+    alert: initialAlert,
+  });
+  const [initialAlertParams, setInitialAlertParams] = useState<AlertTypeParams>({});
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
+  const [isConfirmAlertCloseModalOpen, setIsConfirmAlertCloseModalOpen] = useState<boolean>(false);
 
-  const setAlert = (value: any) => {
+  const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
-  const setAlertProperty = (key: string, value: any) => {
+
+  const setAlertProperty = <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
   const {
-    reloadAlerts,
     http,
-    toastNotifications,
-    alertTypeRegistry,
-    actionTypeRegistry,
-    docLinks,
-    capabilities,
-  } = useAlertsContext();
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
 
   useEffect(() => {
-    setAlertProperty('alertTypeId', alertTypeId);
+    if (alertTypeId) {
+      setAlertProperty('alertTypeId', alertTypeId);
+    }
   }, [alertTypeId]);
 
-  const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
-    setAlert(initialAlert);
-  }, [initialAlert, setAddFlyoutVisibility]);
+  useEffect(() => {
+    if (isEmpty(alert.params) && !isEmpty(initialAlertParams)) {
+      // alert params are explicitly cleared when the alert type is cleared.
+      // clear the "initial" params in order to capture the
+      // default when a new alert type is selected
+      setInitialAlertParams({});
+    } else if (isEmpty(initialAlertParams)) {
+      // captures the first change to the alert params,
+      // when consumers set a default value for the alert params
+      setInitialAlertParams(alert.params);
+    }
+  }, [alert.params, initialAlertParams, setInitialAlertParams]);
+
+  const checkForChangesAndCloseFlyout = () => {
+    if (
+      hasAlertChanged(alert, initialAlert, false) ||
+      haveAlertParamsChanged(alert.params, initialAlertParams)
+    ) {
+      setIsConfirmAlertCloseModalOpen(true);
+    } else {
+      onClose();
+    }
+  };
 
   const saveAlertAndCloseFlyout = async () => {
     const savedAlert = await onSaveAlert();
     setIsSaving(false);
     if (savedAlert) {
-      closeFlyout();
+      onClose();
       if (reloadAlerts) {
         reloadAlerts();
       }
     }
   };
 
-  if (!addFlyoutVisible) {
-    return null;
-  }
-
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
-  const errors = {
-    ...(alertType ? alertType.validate(alert.params).errors : []),
-    ...validateBaseProperties(alert).errors,
-  } as IErrorObject;
-  const hasErrors = parseErrors(errors);
-
-  const actionsErrors: Array<{
-    errors: IErrorObject;
-  }> = alert.actions.map((alertAction: AlertAction) =>
-    actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+    alert as Alert,
+    actionTypeRegistry,
+    alertType
   );
-
-  const hasActionErrors =
-    actionsErrors.find(
-      (errorObj: { errors: IErrorObject }) =>
-        errorObj &&
-        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
-    ) !== undefined;
 
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
   const shouldConfirmSave = canShowActions && alert.actions?.length === 0;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      const newAlert = await createAlert({ http, alert });
-      toastNotifications.addSuccess(
+      const newAlert = await createAlert({ http, alert: alert as AlertUpdates });
+      toasts.addSuccess(
         i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
           defaultMessage: 'Created alert "{alertName}"',
           values: {
@@ -142,7 +157,7 @@ export const AlertAdd = ({
       );
       return newAlert;
     } catch (errorRes) {
-      toastNotifications.addDanger(
+      toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
             defaultMessage: 'Cannot create alert.',
@@ -154,7 +169,7 @@ export const AlertAdd = ({
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={closeFlyout}
+        onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutAlertAddTitle"
         size="m"
         maxWidth={620}
@@ -166,71 +181,54 @@ export const AlertAdd = ({
                 defaultMessage="Create alert"
                 id="xpack.triggersActionsUI.sections.alertAdd.flyoutTitle"
               />
-              &emsp;
-              <EuiBetaBadge
-                label="Beta"
-                tooltipContent={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.betaBadgeTooltipContent',
-                  {
-                    defaultMessage:
-                      '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                    values: {
-                      pluginName: PLUGIN.getI18nName(i18n),
-                    },
-                  }
-                )}
-              />
             </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <HealthCheck docLinks={docLinks} http={http} inFlyout={true}>
-          <EuiFlyoutBody>
-            <AlertForm
-              alert={alert}
-              dispatch={dispatch}
-              errors={errors}
-              canChangeTrigger={canChangeTrigger}
-              operation={i18n.translate('xpack.triggersActionsUI.sections.alertAdd.operationName', {
-                defaultMessage: 'create',
-              })}
+        <HealthContextProvider>
+          <HealthCheck inFlyout={true} waitForCheck={false}>
+            <EuiFlyoutBody>
+              <AlertForm
+                alert={alert}
+                dispatch={dispatch}
+                errors={alertErrors}
+                canChangeTrigger={canChangeTrigger}
+                operation={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertAdd.operationName',
+                  {
+                    defaultMessage: 'create',
+                  }
+                )}
+                actionTypeRegistry={actionTypeRegistry}
+                alertTypeRegistry={alertTypeRegistry}
+                metadata={metadata}
+              />
+            </EuiFlyoutBody>
+            <AlertAddFooter
+              isSaving={isSaving}
+              onSave={async () => {
+                setIsSaving(true);
+                if (!isValidAlert(alert, alertErrors, alertActionsErrors)) {
+                  setAlert(
+                    getAlertWithInvalidatedFields(
+                      alert as Alert,
+                      alertParamsErrors,
+                      alertBaseErrors,
+                      alertActionsErrors
+                    )
+                  );
+                  setIsSaving(false);
+                  return;
+                }
+                if (shouldConfirmSave) {
+                  setIsConfirmAlertSaveModalOpen(true);
+                } else {
+                  await saveAlertAndCloseFlyout();
+                }
+              }}
+              onCancel={checkForChangesAndCloseFlyout}
             />
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty data-test-subj="cancelSaveAlertButton" onClick={closeFlyout}>
-                  {i18n.translate('xpack.triggersActionsUI.sections.alertAdd.cancelButtonLabel', {
-                    defaultMessage: 'Cancel',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="secondary"
-                  data-test-subj="saveAlertButton"
-                  type="submit"
-                  iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
-                  isLoading={isSaving}
-                  onClick={async () => {
-                    setIsSaving(true);
-                    if (shouldConfirmSave) {
-                      setIsConfirmAlertSaveModalOpen(true);
-                    } else {
-                      await saveAlertAndCloseFlyout();
-                    }
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertAdd.saveButtonLabel"
-                    defaultMessage="Save"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </HealthCheck>
+          </HealthCheck>
+        </HealthContextProvider>
         {isConfirmAlertSaveModalOpen && (
           <ConfirmAlertSave
             onConfirm={async () => {
@@ -243,16 +241,21 @@ export const AlertAdd = ({
             }}
           />
         )}
+        {isConfirmAlertCloseModalOpen && (
+          <ConfirmAlertClose
+            onConfirm={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+              onClose();
+            }}
+            onCancel={() => {
+              setIsConfirmAlertCloseModalOpen(false);
+            }}
+          />
+        )}
       </EuiFlyout>
     </EuiPortal>
   );
 };
-
-const parseErrors: (errors: IErrorObject) => boolean = (errors) =>
-  !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
-    return errorList.length >= 1;
-  });
 
 // eslint-disable-next-line import/no-default-export
 export { AlertAdd as default };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
@@ -9,9 +10,8 @@ import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SectionLoading } from '../../shared_imports';
+import { SectionLoading, attemptToURIDecode } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
-import { attemptToDecodeURI } from '../../lib';
 import { ComponentTemplateCreate } from '../component_template_create';
 
 export interface Params {
@@ -20,7 +20,7 @@ export interface Params {
 
 export const ComponentTemplateClone: FunctionComponent<RouteComponentProps<Params>> = (props) => {
   const { sourceComponentTemplateName } = props.match.params;
-  const decodedSourceName = attemptToDecodeURI(sourceComponentTemplateName);
+  const decodedSourceName = attemptToURIDecode(sourceComponentTemplateName)!;
 
   const { toasts, api } = useComponentTemplatesContext();
 

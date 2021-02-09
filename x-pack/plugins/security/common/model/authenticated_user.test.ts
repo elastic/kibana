@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AuthenticatedUser, canUserChangePassword } from './authenticated_user';
@@ -12,6 +13,7 @@ describe('#canUserChangePassword', () => {
       expect(
         canUserChangePassword({
           username: 'foo',
+          authentication_provider: { type: 'basic', name: 'basic1' },
           authentication_realm: {
             name: 'the realm name',
             type: realm,
@@ -19,12 +21,26 @@ describe('#canUserChangePassword', () => {
         } as AuthenticatedUser)
       ).toEqual(true);
     });
+
+    it(`returns false for users in the ${realm} realm if used for anonymous access`, () => {
+      expect(
+        canUserChangePassword({
+          username: 'foo',
+          authentication_provider: { type: 'anonymous', name: 'does not matter' },
+          authentication_realm: {
+            name: 'the realm name',
+            type: realm,
+          },
+        } as AuthenticatedUser)
+      ).toEqual(false);
+    });
   });
 
   it(`returns false for all other realms`, () => {
     expect(
       canUserChangePassword({
         username: 'foo',
+        authentication_provider: { type: 'the provider type', name: 'does not matter' },
         authentication_realm: {
           name: 'the realm name',
           type: 'does not matter',

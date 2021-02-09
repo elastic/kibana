@@ -1,24 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
-
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
+import { LogicMounter } from '../__mocks__';
+
 import { AppLogic } from './app_logic';
 
 describe('AppLogic', () => {
+  const { mount } = new LogicMounter(AppLogic);
+
   beforeEach(() => {
-    resetContext({});
-    AppLogic.mount();
+    mount();
   });
 
   const DEFAULT_VALUES = {
     account: {},
     hasInitialized: false,
     isFederatedAuth: true,
+    isOrganization: false,
     organization: {},
   };
 
@@ -34,6 +37,7 @@ describe('AppLogic', () => {
     },
     hasInitialized: true,
     isFederatedAuth: false,
+    isOrganization: false,
     organization: {
       defaultOrgName: 'My Organization',
       name: 'ACME Donuts',
@@ -59,6 +63,14 @@ describe('AppLogic', () => {
         hasInitialized: true,
         isFederatedAuth: false,
       });
+    });
+  });
+
+  describe('setContext()', () => {
+    it('sets context', () => {
+      AppLogic.actions.setContext(true);
+
+      expect(AppLogic.values.isOrganization).toEqual(true);
     });
   });
 });

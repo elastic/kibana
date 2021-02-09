@@ -6,17 +6,34 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "charts",
     "expressions",
     "navigation",
     "urlForwarding",
     "visualizations",
     "dashboard",
-    "charts",
     "uiActions",
-    "embeddable"
+    "embeddable",
+    "share",
+    "presentationUtil"
   ],
-  "optionalPlugins": ["usageCollection", "taskManager", "globalSearch"],
-  "configPath": ["xpack", "lens"],
-  "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["savedObjects", "kibanaUtils", "kibanaReact", "embeddable"]
+  "optionalPlugins": [
+    "usageCollection",
+    "taskManager",
+    "globalSearch",
+    "savedObjectsTagging"
+  ],
+  "configPath": [
+    "xpack",
+    "lens"
+  ],
+  "extraPublicDirs": [
+    "common/constants"
+  ],
+  "requiredBundles": [
+    "savedObjects",
+    "kibanaUtils",
+    "kibanaReact",
+    "embeddable"
+  ]
 }

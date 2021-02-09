@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -51,7 +52,7 @@ describe('PreviewEqlQueryHistogram', () => {
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeTruthy();
     expect(
-      wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
+      wrapper.find('[dataTestSubj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
     ).toEqual(i18n.QUERY_PREVIEW_SUBTITLE_LOADING);
   });
 
@@ -78,9 +79,9 @@ describe('PreviewEqlQueryHistogram', () => {
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeFalsy();
     expect(
-      wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
+      wrapper.find('[dataTestSubj="queryPreviewEqlHistogram"]').at(0).prop('subtitle')
     ).toEqual(i18n.QUERY_PREVIEW_TITLE(9154));
-    expect(wrapper.find('[data-test-subj="queryPreviewEqlHistogram"]').at(0).props().data).toEqual([
+    expect(wrapper.find('[dataTestSubj="queryPreviewEqlHistogram"]').at(0).props().data).toEqual([
       {
         key: 'hits',
         value: [

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -55,7 +56,8 @@ export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps)
 
   if (isGroupIdLink(props)) {
     return (
-      <EuiLink key={props.groupId} href={href}>
+      // Set margin-left to match EuiBadge (in JobGroup) built-in left margin for consistent badge spacing in management and plugin jobs list
+      <EuiLink style={{ marginLeft: '4px' }} key={props.groupId} href={href}>
         <JobGroup name={props.groupId} />
       </EuiLink>
     );

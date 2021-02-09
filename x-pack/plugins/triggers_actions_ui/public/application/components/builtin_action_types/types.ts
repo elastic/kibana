@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
@@ -60,6 +62,10 @@ export interface SlackActionParams {
   message: string;
 }
 
+export interface TeamsActionParams {
+  message: string;
+}
+
 export interface WebhookActionParams {
   body?: string;
 }
@@ -110,6 +116,7 @@ export interface WebhookConfig {
   method: string;
   url: string;
   headers: Record<string, string>;
+  hasAuth: boolean;
 }
 
 export interface WebhookSecrets {
@@ -118,3 +125,9 @@ export interface WebhookSecrets {
 }
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
+
+export interface TeamsSecrets {
+  webhookUrl: string;
+}
+
+export type TeamsActionConnector = UserConfiguredActionConnector<unknown, TeamsSecrets>;

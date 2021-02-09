@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // A simple template renderer, it replaces mustache/angular style {{...}} tags with
@@ -38,4 +39,12 @@ export function stringHash(str: string): number {
     hash |= 0; // eslint-disable-line no-bitwise
   }
   return hash < 0 ? hash * -2 : hash;
+}
+
+export function getGroupQueryText(groupIds: string[]): string {
+  return `groups:(${groupIds.join(' or ')})`;
+}
+
+export function getJobQueryText(jobIds: string | string[]): string {
+  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : `id:${jobIds}`;
 }

@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
 
-export const mockData: Readonly<Record<
-  string,
-  NetworkDetailsStrategyResponse['networkDetails']
->> = {
+export const mockData: Readonly<
+  Record<string, NetworkDetailsStrategyResponse['networkDetails']>
+> = {
   complete: {
     source: {
       firstSeen: '2019-02-07T17:19:41.636Z',

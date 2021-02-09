@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _, { each, reject } from 'lodash';
-import { SavedObjectsClientCommon } from '../..';
+import { FieldAttrs, FieldAttrSet } from '../..';
+import type { RuntimeField } from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -28,16 +18,17 @@ import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { castEsToKbnFieldTypeName } from '../../kbn_field_types';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
-  savedObjectsClient: SavedObjectsClientCommon;
   fieldFormats: FieldFormatsStartCommon;
-  shortDotsEnable: boolean;
-  metaFields: string[];
+  shortDotsEnable?: boolean;
+  metaFields?: string[];
 }
 
 interface SavedObjectBody {
+  fieldAttrs?: string;
   title?: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -54,10 +45,20 @@ export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
+  /**
+   * Only used by rollup indices, used by rollup specific endpoint to load field list
+   */
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
+  /**
+   * @deprecated
+   * Deprecated. used by time range index patterns
+   */
   public intervalName: string | undefined;
+  /**
+   * Type is used to identify rollup index patterns
+   */
   public type: string | undefined;
   public formatHit: {
     (hit: Record<string, any>, type?: string): any;
@@ -66,12 +67,21 @@ export class IndexPattern implements IIndexPattern {
   public formatField: FormatFieldFn;
   public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
   public metaFields: string[];
-  // savedObject version
+  /**
+   * SavedObject version
+   */
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  private fieldAttrs: FieldAttrs;
+  private runtimeFieldMap: Record<string, RuntimeField>;
+
+  /**
+   * prevents errors when index pattern exists before indices
+   */
+  public readonly allowNoIndex: boolean = false;
 
   constructor({
     spec = {},
@@ -103,19 +113,14 @@ export class IndexPattern implements IIndexPattern {
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
-
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
+    this.fieldAttrs = spec.fieldAttrs || {};
+    this.intervalName = spec.intervalName;
+    this.allowNoIndex = spec.allowNoIndex || false;
+    this.runtimeFieldMap = spec.runtimeFieldMap || {};
   }
-
-  setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
-    this.fieldFormatMap[fieldName] = format;
-  };
-
-  deleteFieldFormat = (fieldName: string) => {
-    delete this.fieldFormatMap[fieldName];
-  };
 
   /**
    * Get last saved saved object fields
@@ -129,13 +134,39 @@ export class IndexPattern implements IIndexPattern {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
+  getFieldAttrs = () => {
+    const newFieldAttrs = { ...this.fieldAttrs };
+
+    this.fields.forEach((field) => {
+      const attrs: FieldAttrSet = {};
+      let hasAttr = false;
+      if (field.customLabel) {
+        attrs.customLabel = field.customLabel;
+        hasAttr = true;
+      }
+      if (field.count) {
+        attrs.count = field.count;
+        hasAttr = true;
+      }
+
+      if (hasAttr) {
+        newFieldAttrs[field.name] = attrs;
+      } else {
+        delete newFieldAttrs[field.name];
+      }
+    });
+
+    return newFieldAttrs;
+  };
+
   getComputedFields() {
     const scriptFields: any = {};
     if (!this.fields) {
       return {
         storedFields: ['*'],
         scriptFields,
-        docvalueFields: [],
+        docvalueFields: [] as Array<{ field: string; format: string }>,
+        runtimeFields: {},
       };
     }
 
@@ -167,9 +198,13 @@ export class IndexPattern implements IIndexPattern {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
+      runtimeFields: this.runtimeFieldMap,
     };
   }
 
+  /**
+   * Create static representation of index pattern
+   */
   public toSpec(): IndexPatternSpec {
     return {
       id: this.id,
@@ -182,6 +217,10 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
+      runtimeFieldMap: this.runtimeFieldMap,
+      fieldAttrs: this.fieldAttrs,
+      intervalName: this.intervalName,
+      allowNoIndex: this.allowNoIndex,
     };
   }
 
@@ -273,16 +312,23 @@ export class IndexPattern implements IIndexPattern {
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
+    const fieldAttrs = this.getFieldAttrs();
+    const runtimeFieldMap = this.runtimeFieldMap;
 
     return {
+      fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
-      fields: this.fields ? JSON.stringify(this.fields) : undefined,
+      fields: this.fields
+        ? JSON.stringify(this.fields.filter((field) => field.scripted))
+        : undefined,
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
+      runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
     };
   }
 
@@ -293,15 +339,60 @@ export class IndexPattern implements IIndexPattern {
   getFormatterForField(
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ): FieldFormat {
-    const formatSpec = this.fieldFormatMap[field.name];
-    if (formatSpec) {
-      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
-    } else {
-      return this.fieldFormats.getDefaultInstance(
-        field.type as KBN_FIELD_TYPES,
-        field.esTypes as ES_FIELD_TYPES[]
-      );
+    const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
+    if (fieldFormat) {
+      return fieldFormat;
     }
+
+    return this.fieldFormats.getDefaultInstance(
+      field.type as KBN_FIELD_TYPES,
+      field.esTypes as ES_FIELD_TYPES[]
+    );
+  }
+
+  /**
+   * Add a runtime field - Appended to existing mapped field or a new field is
+   * created as appropriate
+   * @param name Field name
+   * @param runtimeField Runtime field definition
+   */
+
+  addRuntimeField(name: string, runtimeField: RuntimeField) {
+    const existingField = this.getFieldByName(name);
+    if (existingField) {
+      existingField.runtimeField = runtimeField;
+    } else {
+      this.fields.add({
+        name,
+        runtimeField,
+        type: castEsToKbnFieldTypeName(runtimeField.type),
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
+    }
+    this.runtimeFieldMap[name] = runtimeField;
+  }
+
+  /**
+   * Remove a runtime field - removed from mapped field or removed unmapped
+   * field as appropriate
+   * @param name Field name
+   */
+
+  removeRuntimeField(name: string) {
+    const existingField = this.getFieldByName(name);
+    if (existingField) {
+      if (existingField.isMapped) {
+        // mapped field, remove runtimeField def
+        existingField.runtimeField = undefined;
+      } else {
+        // runtimeField only
+        this.fields.remove(existingField);
+      }
+    }
+    delete this.runtimeFieldMap[name];
   }
 
   /**
@@ -310,8 +401,52 @@ export class IndexPattern implements IIndexPattern {
    */
   getFormatterForFieldNoDefault(fieldname: string) {
     const formatSpec = this.fieldFormatMap[fieldname];
-    if (formatSpec) {
+    if (formatSpec?.id) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
   }
+
+  protected setFieldAttrs<K extends keyof FieldAttrSet>(
+    fieldName: string,
+    attrName: K,
+    value: FieldAttrSet[K]
+  ) {
+    if (!this.fieldAttrs[fieldName]) {
+      this.fieldAttrs[fieldName] = {} as FieldAttrSet;
+    }
+    this.fieldAttrs[fieldName][attrName] = value;
+  }
+
+  public setFieldCustomLabel(fieldName: string, customLabel: string | undefined | null) {
+    const fieldObject = this.fields.getByName(fieldName);
+    const newCustomLabel: string | undefined = customLabel === null ? undefined : customLabel;
+
+    if (fieldObject) {
+      fieldObject.customLabel = newCustomLabel;
+      return;
+    }
+
+    this.setFieldAttrs(fieldName, 'customLabel', newCustomLabel);
+  }
+
+  public setFieldCount(fieldName: string, count: number | undefined | null) {
+    const fieldObject = this.fields.getByName(fieldName);
+    const newCount: number | undefined = count === null ? undefined : count;
+
+    if (fieldObject) {
+      if (!newCount) fieldObject.deleteCount();
+      else fieldObject.count = newCount;
+      return;
+    }
+
+    this.setFieldAttrs(fieldName, 'count', newCount);
+  }
+
+  public readonly setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
+    this.fieldFormatMap[fieldName] = format;
+  };
+
+  public readonly deleteFieldFormat = (fieldName: string) => {
+    delete this.fieldFormatMap[fieldName];
+  };
 }

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, uniq } from 'lodash';
+import { ILicense } from '../../licensing/server';
 import {
   KibanaFeatureConfig,
   KibanaFeature,
@@ -55,11 +57,30 @@ export class FeatureRegistry {
     this.esFeatures[feature.id] = featureCopy;
   }
 
-  public getAllKibanaFeatures(): KibanaFeature[] {
+  public getAllKibanaFeatures(license?: ILicense, ignoreLicense = false): KibanaFeature[] {
     this.locked = true;
-    return Object.values(this.kibanaFeatures).map(
-      (featureConfig) => new KibanaFeature(featureConfig)
-    );
+    let features = Object.values(this.kibanaFeatures);
+
+    const performLicenseCheck = license && !ignoreLicense;
+
+    if (performLicenseCheck) {
+      features = features.filter((feature) => {
+        const filter = !feature.minimumLicense || license!.hasAtLeast(feature.minimumLicense);
+        if (!filter) return false;
+
+        feature.subFeatures?.forEach((subFeature) => {
+          subFeature.privilegeGroups.forEach((group) => {
+            group.privileges = group.privileges.filter(
+              (privilege) =>
+                !privilege.minimumLicense || license!.hasAtLeast(privilege.minimumLicense)
+            );
+          });
+        });
+
+        return true;
+      });
+    }
+    return features.map((featureConfig) => new KibanaFeature(featureConfig));
   }
 
   public getAllElasticsearchFeatures(): ElasticsearchFeature[] {

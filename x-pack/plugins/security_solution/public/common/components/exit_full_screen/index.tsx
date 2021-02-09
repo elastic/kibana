@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiWindowEvent } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 
 import * as i18n from './translations';
 
@@ -17,7 +18,7 @@ const StyledEuiButton = styled(EuiButton)`
 `;
 
 export const ExitFullScreen: React.FC = () => {
-  const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
 
   const exitFullScreen = useCallback(() => {
     setGlobalFullScreen(false);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -10,7 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('case api basic', function () {
     // Fastest ciGroup for the moment.
-    this.tags('ciGroup2');
+    this.tags('ciGroup5');
 
     loadTestFile(require.resolve('./cases/comments/delete_comment'));
     loadTestFile(require.resolve('./cases/comments/find_comments'));
@@ -31,6 +32,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./configure/get_connectors'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
+    loadTestFile(require.resolve('./connectors/case'));
 
     // Migrations
     loadTestFile(require.resolve('./cases/migrations'));

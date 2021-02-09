@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -17,18 +18,19 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUtils,
   ISavedObjectTypeRegistry,
 } from '../../../../../src/core/server';
 import { ALL_SPACES_ID } from '../../common/constants';
-import { SpacesServiceSetup } from '../spaces_service/spaces_service';
+import { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import { SpacesClient } from '../lib/spaces_client';
+import { ISpacesClient } from '../spaces_client';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   request: any;
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
   typeRegistry: ISavedObjectTypeRegistry;
 }
 
@@ -50,14 +52,16 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
   private readonly types: string[];
-  private readonly getSpacesClient: Promise<SpacesClient>;
+  private readonly spacesClient: ISpacesClient;
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
-    const { baseClient, request, spacesService, typeRegistry } = options;
+    const { baseClient, request, getSpacesService, typeRegistry } = options;
+
+    const spacesService = getSpacesService();
 
     this.client = baseClient;
-    this.getSpacesClient = spacesService.scopedClient(request);
+    this.spacesClient = spacesService.createSpacesClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
     this.errors = baseClient.errors;
@@ -166,10 +170,8 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     let namespaces = options.namespaces;
     if (namespaces) {
-      const spacesClient = await this.getSpacesClient;
-
       try {
-        const availableSpaces = await spacesClient.getAll('findSavedObjects');
+        const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
         if (namespaces.includes(ALL_SPACES_ID)) {
           namespaces = availableSpaces.map((space) => space.id);
         } else {
@@ -240,6 +242,28 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.get<T>(type, id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Resolves a single object, using any legacy URL alias if it exists
+   *
+   * @param type - The type of SavedObject to retrieve
+   * @param id - The ID of the SavedObject to retrieve
+   * @param {object} [options={}]
+   * @property {string} [options.namespace]
+   * @returns {promise} - { saved_object, outcome }
+   */
+  public async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+
+    return await this.client.resolve<T>(type, id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
@@ -331,6 +355,25 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.bulkUpdate(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Remove outward references to given object.
+   *
+   * @param type
+   * @param id
+   * @param options
+   */
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.removeReferencesTo(type, id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });

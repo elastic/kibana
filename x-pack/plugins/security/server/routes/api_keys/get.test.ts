@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../licensing/server';
 import { defineGetApiKeysRoutes } from './get';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock, coreMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 interface TestOptions {
   isAdmin?: boolean;
@@ -26,11 +27,15 @@ describe('Get API keys', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+      const mockContext = {
+        core: coreMock.createRequestHandlerContext(),
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      };
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
       if (apiResponse) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementation(apiResponse);
+        mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey.mockImplementation(
+          (async () => ({ body: await apiResponse() })) as any
+        );
       }
 
       defineGetApiKeysRoutes(mockRouteDefinitionParams);
@@ -43,22 +48,15 @@ describe('Get API keys', () => {
         query: { isAdmin: isAdmin.toString() },
         headers,
       });
-      const mockContext = ({
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);
       expect(response.payload).toEqual(asserts.result);
 
       if (apiResponse) {
-        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-          'shield.getAPIKeys',
-          { owner: !isAdmin }
-        );
-      } else {
-        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+        expect(
+          mockContext.core.elasticsearch.client.asCurrentUser.security.getApiKey
+        ).toHaveBeenCalledWith({ owner: !isAdmin });
       }
       expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });

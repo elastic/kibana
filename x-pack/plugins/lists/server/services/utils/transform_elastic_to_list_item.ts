@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchResponse } from 'elasticsearch';
@@ -17,11 +18,23 @@ export interface TransformElasticToListItemOptions {
   type: Type;
 }
 
+export interface TransformElasticHitToListItemOptions {
+  hits: SearchResponse<SearchEsListItemSchema>['hits']['hits'];
+  type: Type;
+}
+
 export const transformElasticToListItem = ({
   response,
   type,
 }: TransformElasticToListItemOptions): ListItemArraySchema => {
-  return response.hits.hits.map((hit) => {
+  return transformElasticHitsToListItem({ hits: response.hits.hits, type });
+};
+
+export const transformElasticHitsToListItem = ({
+  hits,
+  type,
+}: TransformElasticHitToListItemOptions): ListItemArraySchema => {
+  return hits.map((hit) => {
     const {
       _id,
       _source: {

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve, join } from 'path';
@@ -26,7 +15,7 @@ import { PackageInfo, EnvironmentMode } from './types';
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
-  isDevClusterMaster: boolean;
+  isDevCliParent: boolean;
 }
 
 /** @internal */
@@ -36,9 +25,7 @@ export interface CliArgs {
   quiet: boolean;
   silent: boolean;
   watch: boolean;
-  repl: boolean;
   basePath: boolean;
-  open: boolean;
   oss: boolean;
   /** @deprecated use disableOptimizer to know if the @kbn/optimizer is disabled in development */
   optimize?: boolean;
@@ -102,10 +89,10 @@ export class Env {
   public readonly configs: readonly string[];
 
   /**
-   * Indicates that this Kibana instance is run as development Node Cluster master.
+   * Indicates that this Kibana instance is running in the parent process of the dev cli.
    * @internal
    */
-  public readonly isDevClusterMaster: boolean;
+  public readonly isDevCliParent: boolean;
 
   /**
    * @internal
@@ -123,7 +110,7 @@ export class Env {
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);
-    this.isDevClusterMaster = options.isDevClusterMaster;
+    this.isDevCliParent = options.isDevCliParent;
 
     const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
     this.mode = Object.freeze<EnvironmentMode>({

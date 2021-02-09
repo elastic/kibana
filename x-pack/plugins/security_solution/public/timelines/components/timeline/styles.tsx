@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -10,6 +11,22 @@ import styled, { createGlobalStyle } from 'styled-components';
 
 import { TimelineEventsType } from '../../../../common/types/timeline';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
+
+import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
+import { EVENTS_TABLE_ARIA_LABEL } from './translations';
+
+/**
+ * TIMELINE BODY
+ */
+export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
+export const TimelineContainer = styled.div.attrs(({ className = '' }) => ({
+  className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
+}))`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
 
 /**
  * TIMELINE BODY
@@ -25,12 +42,12 @@ export const TimelineBodyGlobalStyle = createGlobalStyle`
 
 export const TimelineBody = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_BODY_CLASS_NAME} ${className}`,
-}))<{ bodyHeight?: number; visible: boolean }>`
-  height: ${({ bodyHeight }) => (bodyHeight ? `${bodyHeight}px` : 'auto')};
+}))`
+  height: auto;
   overflow: auto;
   scrollbar-width: thin;
   flex: 1;
-  display: ${({ visible }) => (visible ? 'block' : 'none')};
+  display: block;
 
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
@@ -54,19 +71,32 @@ TimelineBody.displayName = 'TimelineBody';
  * EVENTS TABLE
  */
 
+export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
+export const EVENTS_TABLE_HEAD_CLASS_NAME = 'siemEventsTable__thead';
+
 interface EventsTableProps {
+  $activePage: number;
+  $columnCount: number;
   columnWidths: number;
+  $rowCount: number;
+  $totalPages: number;
 }
 
 export const EventsTable = styled.div.attrs<EventsTableProps>(
-  ({ className = '', columnWidths }) => ({
+  ({ className = '', $columnCount, columnWidths, $activePage, $rowCount, $totalPages }) => ({
+    'aria-label': EVENTS_TABLE_ARIA_LABEL({ activePage: $activePage + 1, totalPages: $totalPages }),
+    'aria-colcount': `${$columnCount}`,
+    'aria-rowcount': `${$rowCount + 1}`,
     className: `siemEventsTable ${className}`,
-    role: 'table',
+    role: 'grid',
     style: {
       minWidth: `${columnWidths}px`,
     },
+    tabindex: '-1',
   })
-)<EventsTableProps>``;
+)<EventsTableProps>`
+  padding: 3px;
+`;
 
 /* EVENTS HEAD */
 
@@ -83,6 +113,7 @@ export const EventsThead = styled.div.attrs(({ className = '' }) => ({
 `;
 
 export const EventsTrHeader = styled.div.attrs(({ className }) => ({
+  'aria-rowindex': '1',
   className: `siemEventsTable__trHeader ${className}`,
   role: 'row',
 }))`
@@ -90,7 +121,10 @@ export const EventsTrHeader = styled.div.attrs(({ className }) => ({
 `;
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
+  'aria-colindex': `${ACTIONS_COLUMN_ARIA_COL_INDEX}`,
   className: `siemEventsTable__thGroupActions ${className}`,
+  role: 'columnheader',
+  tabIndex: '0',
 }))<{ actionsColumnWidth: number; isEventViewer: boolean }>`
   display: flex;
   flex: 0 0
@@ -113,10 +147,12 @@ export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
   }
 `;
 
-export const EventsTh = styled.div.attrs<{ role: string }>(({ className = '' }) => ({
-  className: `siemEventsTable__th ${className}`,
-  role: 'columnheader',
-}))<{ role?: string }>`
+export const EventsTh = styled.div.attrs<{ role: string }>(
+  ({ className = '', role = 'columnheader' }) => ({
+    className: `siemEventsTable__th ${className}`,
+    role,
+  })
+)`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -171,22 +207,27 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
   overflow-x: hidden;
 `;
 
-export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable__trGroup ${className}`,
-}))<{
+export const EventsTrGroup = styled.div.attrs(
+  ({ className = '', $ariaRowindex }: { className?: string; $ariaRowindex: number }) => ({
+    'aria-rowindex': `${$ariaRowindex}`,
+    className: `siemEventsTable__trGroup ${className}`,
+    role: 'row',
+  })
+)<{
   className?: string;
   eventType: Omit<TimelineEventsType, 'all'>;
+  isExpanded: boolean;
   isBuildingBlockType: boolean;
   showLeftBorder: boolean;
 }>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
-  ${({ theme, eventType, isBuildingBlockType, showLeftBorder }) =>
+  ${({ theme, eventType, showLeftBorder }) =>
     showLeftBorder
       ? `border-left: 4px solid
     ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
       : ''};
-  ${({ isBuildingBlockType, showLeftBorder }) =>
+  ${({ isBuildingBlockType }) =>
     isBuildingBlockType
       ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
       : ''};
@@ -194,18 +235,32 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
   }
+
+  ${({ isExpanded, theme }) =>
+    isExpanded &&
+    `
+    background: ${theme.eui.euiTableSelectedColor};
+
+    &:hover {
+      ${theme.eui.euiTableHoverSelectedColor}
+    }
+  `}
 `;
 
 export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trData ${className}`,
-  role: 'row',
 }))`
   display: flex;
 `;
 
 const TIMELINE_EVENT_DETAILS_OFFSET = 40;
 
+interface WidthProp {
+  width?: number;
+}
+
 export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
+  role: 'dialog',
   style: {
     width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
   },
@@ -216,7 +271,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
   .euiAccordion + div {
     background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
     padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
@@ -226,7 +281,9 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 `;
 
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
+  'aria-colindex': `${ACTIONS_COLUMN_ARIA_COL_INDEX}`,
   className: `siemEventsTable__tdGroupActions ${className}`,
+  role: 'gridcell',
 }))<{ actionsColumnWidth: number }>`
   align-items: center;
   display: flex;
@@ -239,17 +296,31 @@ export const EventsTdGroupData = styled.div.attrs(({ className = '' }) => ({
 }))`
   display: flex;
 `;
-interface WidthProp {
+interface EventsTdProps {
+  $ariaColumnIndex?: number;
   width?: number;
 }
 
-export const EventsTd = styled.div.attrs<WidthProp>(({ className = '', width }) => ({
-  className: `siemEventsTable__td ${className}`,
-  role: 'cell',
-  style: {
-    flexBasis: width ? `${width}px` : 'auto',
-  },
-}))<WidthProp>`
+export const EVENTS_TD_CLASS_NAME = 'siemEventsTable__td';
+
+export const EventsTd = styled.div.attrs<EventsTdProps>(
+  ({ className = '', $ariaColumnIndex, width }) => {
+    const common = {
+      className: `siemEventsTable__td ${className}`,
+      role: 'gridcell',
+      style: {
+        flexBasis: width ? `${width}px` : 'auto',
+      },
+    };
+
+    return $ariaColumnIndex != null
+      ? {
+          ...common,
+          'aria-colindex': `${$ariaColumnIndex}`,
+        }
+      : common;
+  }
+)<EventsTdProps>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -327,6 +398,7 @@ export const EventsHeadingExtra = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsHeading__extra ${className}`,
 }))`
   margin-left: auto;
+  margin-right: 2px;
 
   &.siemEventsHeading__extra--close {
     opacity: 0;
@@ -361,5 +433,14 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
  */
 
 export const EventsLoading = styled(EuiLoadingSpinner)`
+  margin: 0 2px;
   vertical-align: middle;
 `;
+
+export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
+  ({ $isVisible = false }) => ({
+    style: {
+      display: $isVisible ? 'block' : 'none',
+    },
+  })
+)<{ $isVisible: boolean }>``;

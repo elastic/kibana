@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactText, useContext, useState } from 'react';
@@ -15,10 +16,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../CsmSharedContext';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -40,7 +40,7 @@ export function JSErrors() {
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/js-errors',
+          endpoint: 'GET /api/apm/rum-client/js-errors',
           params: {
             query: {
               start,
@@ -102,11 +102,6 @@ export function JSErrors() {
     });
   };
 
-  const errorRate =
-    totalPageViews > 0
-      ? ((data?.totalErrorPages ?? 0) / totalPageViews) * 100
-      : 0;
-
   const totalErrors = data?.totalErrors ?? 0;
 
   return (
@@ -133,20 +128,6 @@ export function JSErrors() {
             isLoading={status !== 'success'}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiStat
-            data-test-subj={'uxJsErrorRate'}
-            titleSize="s"
-            title={i18n.translate('xpack.apm.rum.jsErrors.errorRateValue', {
-              defaultMessage: '{errorRate} %',
-              values: {
-                errorRate: errorRate.toFixed(0),
-              },
-            })}
-            description={I18LABELS.errorRate}
-            isLoading={status !== 'success'}
-          />
-        </EuiFlexItem>{' '}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable

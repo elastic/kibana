@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -25,7 +26,7 @@ import {
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
-import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
+import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -39,8 +40,8 @@ jest.mock('@kbn/i18n/react', () => {
   };
 });
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../policy/store/policy_list/services/ingest', () => {
-  const originalModule = jest.requireActual('../../policy/store/policy_list/services/ingest');
+jest.mock('../../policy/store/services/ingest', () => {
+  const originalModule = jest.requireActual('../../policy/store/services/ingest');
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
@@ -220,6 +221,7 @@ describe('when on the list page', () => {
         HostInfo['metadata']['Endpoint']['policy']['applied']['status']
       > = [];
       let firstPolicyID: string;
+      let firstPolicyRev: number;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 4 });
@@ -227,16 +229,60 @@ describe('when on the list page', () => {
           const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
+          firstPolicyRev = hostListData[0].metadata.Endpoint.policy.applied.endpoint_policy_version;
 
-          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE, HostStatus.UNENROLLING].forEach(
-            (status, index) => {
-              hostListData[index] = {
-                metadata: hostListData[index].metadata,
-                host_status: status,
-                query_strategy_version: queryStrategyVersion,
-              };
-            }
-          );
+          // add ability to change (immutable) policy
+          type DeepMutable<T> = { -readonly [P in keyof T]: DeepMutable<T[P]> };
+          type Policy = DeepMutable<NonNullable<HostInfo['policy_info']>>;
+
+          const makePolicy = (
+            applied: HostInfo['metadata']['Endpoint']['policy']['applied'],
+            cb: (policy: Policy) => Policy
+          ): Policy => {
+            return cb({
+              agent: {
+                applied: { id: 'xyz', revision: applied.version },
+                configured: { id: 'xyz', revision: applied.version },
+              },
+              endpoint: { id: applied.id, revision: applied.endpoint_policy_version },
+            });
+          };
+
+          [
+            { status: HostStatus.ERROR, policy: (p: Policy) => p },
+            {
+              status: HostStatus.ONLINE,
+              policy: (p: Policy) => {
+                p.endpoint.id = 'xyz'; // represents change in endpoint policy assignment
+                p.endpoint.revision = 1;
+                return p;
+              },
+            },
+            {
+              status: HostStatus.OFFLINE,
+              policy: (p: Policy) => {
+                p.endpoint.revision += 1; // changes made to endpoint policy
+                return p;
+              },
+            },
+            {
+              status: HostStatus.UNENROLLING,
+              policy: (p: Policy) => {
+                p.agent.configured.revision += 1; // agent policy change, not propagated to agent yet
+                return p;
+              },
+            },
+          ].forEach((setup, index) => {
+            hostListData[index] = {
+              metadata: hostListData[index].metadata,
+              host_status: setup.status,
+              policy_info: makePolicy(
+                hostListData[index].metadata.Endpoint.policy.applied,
+                setup.policy
+              ),
+              query_strategy_version: queryStrategyVersion,
+            };
+          });
           hostListData.forEach((item, index) => {
             generatedPolicyStatuses[index] = item.metadata.Endpoint.policy.applied.status;
           });
@@ -316,6 +362,20 @@ describe('when on the list page', () => {
         });
       });
 
+      it('should display policy out-of-date warning when changes pending', async () => {
+        const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
+        expect(outOfDates).toHaveLength(3);
+
+        outOfDates.forEach((item, index) => {
+          expect(item.textContent).toEqual('Out-of-date');
+          expect(item.querySelector(`[data-euiicon-type][color=warning]`)).not.toBeNull();
+        });
+      });
+
       it('should display policy name as a link', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
@@ -344,6 +404,16 @@ describe('when on the list page', () => {
             expect(flyout).not.toBeNull();
           });
         });
+      });
+
+      it('should show revision number', async () => {
+        const renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const firstPolicyRevElement = (await renderResult.findAllByTestId('policyListRevNo'))[0];
+        expect(firstPolicyRevElement).not.toBeNull();
+        expect(firstPolicyRevElement.textContent).toEqual(`rev. ${firstPolicyRev}`);
       });
     });
   });
@@ -529,6 +599,15 @@ describe('when on the list page', () => {
       );
     });
 
+    it('should display policy revision number', async () => {
+      const renderResult = await renderAndWaitForData();
+      const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
+      expect(policyDetailsRevElement).not.toBeNull();
+      expect(policyDetailsRevElement.textContent).toEqual(
+        `rev. ${hostDetails.metadata.Endpoint.policy.applied.endpoint_policy_version}`
+      );
+    });
+
     it('should update the URL when policy name link is clicked', async () => {
       const renderResult = await renderAndWaitForData();
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
@@ -612,19 +691,19 @@ describe('when on the list page', () => {
     });
 
     it('should include the link to reassignment in Ingest', async () => {
-      coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+      coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
       const renderResult = await renderAndWaitForData();
       const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
       expect(linkToReassign).not.toBeNull();
       expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
+        `/app/fleet#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
       );
     });
 
     describe('when link to reassignment in Ingest is clicked', () => {
       beforeEach(async () => {
-        coreStart.application.getUrlForApp.mockReturnValue('/app/ingestManager');
+        coreStart.application.getUrlForApp.mockReturnValue('/app/fleet');
         const renderResult = await renderAndWaitForData();
         const linkToReassign = await renderResult.findByTestId('endpointDetailsLinkToIngest');
         reactTestingLibrary.act(() => {
@@ -820,8 +899,8 @@ describe('when on the list page', () => {
         switch (appName) {
           case 'securitySolution':
             return '/app/security';
-          case 'ingestManager':
-            return '/app/ingestManager';
+          case 'fleet':
+            return '/app/fleet';
         }
         return appName;
       });
@@ -852,9 +931,7 @@ describe('when on the list page', () => {
       });
 
       const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
-      expect(agentPolicyLink.getAttribute('href')).toEqual(
-        `/app/ingestManager#/policies/${agentPolicyId}`
-      );
+      expect(agentPolicyLink.getAttribute('href')).toEqual(`/app/fleet#/policies/${agentPolicyId}`);
     });
     it('navigates to the Ingest Agent Details page', async () => {
       const renderResult = await renderAndWaitForData();
@@ -864,9 +941,7 @@ describe('when on the list page', () => {
       });
 
       const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
-      expect(agentDetailsLink.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${agentId}`
-      );
+      expect(agentDetailsLink.getAttribute('href')).toEqual(`/app/fleet#/fleet/agents/${agentId}`);
     });
   });
 });

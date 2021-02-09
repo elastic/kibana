@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IRouter } from 'kibana/server';
@@ -31,11 +32,7 @@ export function registerSearchRoute({
         {
           core: {
             uiSettings: { client: uiSettings },
-            elasticsearch: {
-              legacy: {
-                client: { callAsCurrentUser: callCluster },
-              },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -47,12 +44,14 @@ export function registerSearchRoute({
         try {
           return response.ok({
             body: {
-              resp: await callCluster('search', {
-                index: request.body.index,
-                body: request.body.body,
-                rest_total_hits_as_int: true,
-                ignore_throttled: !includeFrozen,
-              }),
+              resp: (
+                await esClient.asCurrentUser.search({
+                  index: request.body.index,
+                  body: request.body.body,
+                  track_total_hits: true,
+                  ignore_throttled: !includeFrozen,
+                })
+              ).body,
             },
           });
         } catch (error) {

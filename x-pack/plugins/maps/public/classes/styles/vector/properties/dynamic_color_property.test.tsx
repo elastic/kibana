@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('../components/vector_style_editor', () => ({
@@ -15,8 +16,13 @@ import { shallow } from 'enzyme';
 import { Feature, Point } from 'geojson';
 
 import { DynamicColorProperty } from './dynamic_color_property';
-import { COLOR_MAP_TYPE, RawValue, VECTOR_STYLES } from '../../../../../common/constants';
-import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
+import {
+  COLOR_MAP_TYPE,
+  RawValue,
+  DATA_MAPPING_FUNCTION,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
+import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IField } from '../../../fields/field';
@@ -40,125 +46,164 @@ const defaultLegendParams = {
 
 const fieldMetaOptions = { isEnabled: true };
 
-describe('ordinal', () => {
-  test('Should render ordinal legend as bands', async () => {
-    const colorStyle = makeProperty({
-      color: 'Blues',
-      type: undefined,
-      fieldMetaOptions,
-    });
-
-    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
-
-    const component = shallow(legendRow);
-
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('Should render only single band of last color when delta is 0', async () => {
-    const colorStyle = makeProperty(
-      {
+describe('renderLegendDetailRow', () => {
+  describe('ordinal', () => {
+    test('Should render interpolate bands', async () => {
+      const colorStyle = makeProperty({
         color: 'Blues',
         type: undefined,
         fieldMetaOptions,
-      },
-      new MockStyle({ min: 100, max: 100 })
-    );
+      });
 
-    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+      const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
-    const component = shallow(legendRow);
+      const component = shallow(legendRow);
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
 
-    expect(component).toMatchSnapshot();
-  });
-
-  test('Should render custom ordinal legend with breaks', async () => {
-    const colorStyle = makeProperty({
-      type: COLOR_MAP_TYPE.ORDINAL,
-      useCustomColorRamp: true,
-      customColorRamp: [
-        {
-          stop: 0,
-          color: '#FF0000',
-        },
-        {
-          stop: 10,
-          color: '#00FF00',
-        },
-      ],
-      fieldMetaOptions,
+      expect(component).toMatchSnapshot();
     });
 
-    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+    test('Should render single band when interpolate range is 0', async () => {
+      const colorStyle = makeProperty({
+        color: 'Blues',
+        type: undefined,
+        fieldMetaOptions,
+      });
+      colorStyle.getRangeFieldMeta = () => {
+        return {
+          min: 100,
+          max: 100,
+          delta: 0,
+        };
+      };
 
-    const component = shallow(legendRow);
+      const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
+      const component = shallow(legendRow);
 
-    expect(component).toMatchSnapshot();
-  });
-});
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
 
-describe('categorical', () => {
-  test('Should render categorical legend with breaks from default', async () => {
-    const colorStyle = makeProperty({
-      type: COLOR_MAP_TYPE.CATEGORICAL,
-      useCustomColorPalette: false,
-      colorCategory: 'palette_0',
-      fieldMetaOptions,
+      expect(component).toMatchSnapshot();
     });
 
-    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
-
-    const component = shallow(legendRow);
-
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('Should render categorical legend with breaks from custom', async () => {
-    const colorStyle = makeProperty({
-      type: COLOR_MAP_TYPE.CATEGORICAL,
-      useCustomColorPalette: true,
-      customColorPalette: [
-        {
-          stop: null, // should include the default stop
-          color: '#FFFF00',
+    test('Should render percentile bands', async () => {
+      const colorStyle = makeProperty({
+        color: 'Blues',
+        type: undefined,
+        dataMappingFunction: DATA_MAPPING_FUNCTION.PERCENTILES,
+        fieldMetaOptions: {
+          isEnabled: true,
+          percentiles: [50, 75, 90, 95, 99],
         },
-        {
-          stop: 'US_STOP',
-          color: '#FF0000',
-        },
-        {
-          stop: 'CN_STOP',
-          color: '#00FF00',
-        },
-      ],
-      fieldMetaOptions,
+      });
+      colorStyle.getPercentilesFieldMeta = () => {
+        return [
+          { percentile: '0.0', value: 0 },
+          { percentile: '50.0', value: 5571.815277777777 },
+          { percentile: '75.0', value: 8078.703125 },
+          { percentile: '90.0', value: 9607.2 },
+          { percentile: '95.0', value: 10439.083333333334 },
+          { percentile: '99.0', value: 16856.5 },
+        ];
+      };
+
+      const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+      const component = shallow(legendRow);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
     });
 
-    const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+    test('Should render custom ordinal legend with breaks', async () => {
+      const colorStyle = makeProperty({
+        type: COLOR_MAP_TYPE.ORDINAL,
+        useCustomColorRamp: true,
+        customColorRamp: [
+          {
+            stop: 0,
+            color: '#FF0000',
+          },
+          {
+            stop: 10,
+            color: '#00FF00',
+          },
+        ],
+        fieldMetaOptions,
+      });
 
-    const component = shallow(legendRow);
+      const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
 
-    expect(component).toMatchSnapshot();
+      const component = shallow(legendRow);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+  });
+
+  describe('categorical', () => {
+    test('Should render categorical legend with breaks from default', async () => {
+      const colorStyle = makeProperty({
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        useCustomColorPalette: false,
+        colorCategory: 'palette_0',
+        fieldMetaOptions,
+      });
+
+      const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+      const component = shallow(legendRow);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('Should render categorical legend with breaks from custom', async () => {
+      const colorStyle = makeProperty({
+        type: COLOR_MAP_TYPE.CATEGORICAL,
+        useCustomColorPalette: true,
+        customColorPalette: [
+          {
+            stop: null, // should include the default stop
+            color: '#FFFF00',
+          },
+          {
+            stop: 'US_STOP',
+            color: '#FF0000',
+          },
+          {
+            stop: 'CN_STOP',
+            color: '#00FF00',
+          },
+        ],
+        fieldMetaOptions,
+      });
+
+      const legendRow = colorStyle.renderLegendDetailRow(defaultLegendParams);
+
+      const component = shallow(legendRow);
+
+      expect(component).toMatchSnapshot();
+    });
   });
 });
 
@@ -204,7 +249,7 @@ test('Should pluck the categorical style-meta from fieldmeta', async () => {
   });
 
   const meta = colorStyle._pluckCategoricalStyleMetaFromFieldMetaData({
-    foobar: {
+    foobar_terms: {
       buckets: [
         {
           key: 'CN',
@@ -327,7 +372,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       expect(colorProperty._getMbColor()).toBeNull();
     });
 
-    describe('pre-defined color ramp', () => {
+    describe('interpolate color ramp', () => {
       test('should return null when color ramp is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
@@ -413,7 +458,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'step',
-          ['coalesce', ['feature-state', 'foobar'], 9],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              9,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 10],
+            ],
+            9,
+          ],
           'rgba(0,0,0,0)',
           10,
           '#f7faff',
@@ -439,7 +493,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const colorProperty = makeProperty(dynamicStyleOptions, undefined, field);
         expect(colorProperty._getMbColor()).toEqual([
           'step',
-          ['coalesce', ['get', 'foobar'], 9],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['get', 'foobar'], null],
+              9,
+              ['max', ['min', ['to-number', ['get', 'foobar']], 100], 10],
+            ],
+            9,
+          ],
           'rgba(0,0,0,0)',
           10,
           '#f7faff',
@@ -578,7 +641,7 @@ test('Should read out ordinal type correctly', async () => {
   expect(ordinalColorStyle2.isCategorical()).toEqual(false);
 });
 
-describe('renderFieldMetaPopover', () => {
+describe('renderDataMappingPopover', () => {
   test('Should enable toggle when field is backed by geojson-source', () => {
     const colorStyle = makeProperty(
       {
@@ -590,7 +653,7 @@ describe('renderFieldMetaPopover', () => {
       mockField
     );
 
-    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
+    const legendRow = colorStyle.renderDataMappingPopover(() => {});
     expect(legendRow).toMatchSnapshot();
   });
 
@@ -609,7 +672,7 @@ describe('renderFieldMetaPopover', () => {
       nonGeoJsonField
     );
 
-    const legendRow = colorStyle.renderFieldMetaPopover(() => {});
+    const legendRow = colorStyle.renderDataMappingPopover(() => {});
     expect(legendRow).toMatchSnapshot();
   });
 });

@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiCard,
@@ -16,8 +15,9 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { IUser } from '../../../types';
+import { User } from '../../../types';
 
 import { UserOptionItem } from './user_option_item';
 
@@ -36,8 +36,8 @@ const NO_USERS_FOUND = i18n.translate(
   }
 );
 
-interface IFilterableUsersListProps {
-  users: IUser[];
+interface FilterableUsersListProps {
+  users: User[];
   selectedOptions?: string[];
   itemsClickable?: boolean;
   isPopover?: boolean;
@@ -46,7 +46,7 @@ interface IFilterableUsersListProps {
   removeFilteredUser(userId: string): void;
 }
 
-export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({
+export const FilterableUsersList: React.FC<FilterableUsersListProps> = ({
   users,
   selectedOptions = [],
   itemsClickable,
@@ -59,7 +59,7 @@ export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({
 
   const filterUsers = (userId: string): boolean => {
     if (!filterValue) return true;
-    const filterUser = users.find(({ id }) => id === userId) as IUser;
+    const filterUser = users.find(({ id }) => id === userId) as User;
     const filteredName = filterUser.name || filterUser.email;
     return filteredName.toLowerCase().indexOf(filterValue.toLowerCase()) > -1;
   };

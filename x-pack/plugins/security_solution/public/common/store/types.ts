@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, Action, Middleware, CombinedState } from 'redux';
@@ -76,7 +77,7 @@ export type ImmutableMiddleware<S, A extends Action> = (
  */
 export type ImmutableMiddlewareFactory<S = State> = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
 ) => ImmutableMiddleware<S, AppAction>;
 
 /**
@@ -87,7 +88,7 @@ export type ImmutableMiddlewareFactory<S = State> = (
  */
 export type SecuritySubPluginMiddlewareFactory = (
   coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
 ) => Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 
 /**
@@ -158,7 +159,7 @@ export type CreateStructuredSelector = <
 >(
   selectorMap: SelectorMap
 ) => (
-  state: SelectorMap[keyof SelectorMap] extends (state: infer State) => unknown ? State : never
+  state: SelectorMap[keyof SelectorMap] extends (state: infer S) => unknown ? S : never
 ) => {
   [Key in keyof SelectorMap]: ReturnType<SelectorMap[Key]>;
 };

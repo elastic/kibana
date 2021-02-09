@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent } from 'react';
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -29,7 +19,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { ControlEditor } from './control_editor';
 import {
@@ -44,22 +34,17 @@ import {
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { InputControlVisDependencies } from '../../plugin';
+import { InputControlVisParams } from '../../types';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;
 }
 
-interface ControlsTabUiParams {
-  controls: ControlParams[];
-}
-type ControlsTabUiInjectedProps = InjectedIntlProps &
-  Pick<VisOptionsProps<ControlsTabUiParams>, 'vis' | 'stateParams' | 'setValue'> & {
-    deps: InputControlVisDependencies;
-  };
+export type ControlsTabProps = VisEditorOptionsProps<InputControlVisParams> & {
+  deps: InputControlVisDependencies;
+};
 
-export type ControlsTabUiProps = ControlsTabUiInjectedProps;
-
-class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState> {
+class ControlsTab extends PureComponent<ControlsTabProps, ControlsTabUiState> {
   state = {
     type: CONTROL_TYPES.LIST,
   };
@@ -161,8 +146,6 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
   }
 
   render() {
-    const { intl } = this.props;
-
     return (
       <div>
         {this.renderControls()}
@@ -176,25 +159,31 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                   options={[
                     {
                       value: CONTROL_TYPES.RANGE,
-                      text: intl.formatMessage({
-                        id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
-                        defaultMessage: 'Range slider',
-                      }),
+                      text: i18n.translate(
+                        'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
+                        {
+                          defaultMessage: 'Range slider',
+                        }
+                      ),
                     },
                     {
                       value: CONTROL_TYPES.LIST,
-                      text: intl.formatMessage({
-                        id: 'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
-                        defaultMessage: 'Options list',
-                      }),
+                      text: i18n.translate(
+                        'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
+                        {
+                          defaultMessage: 'Options list',
+                        }
+                      ),
                     },
                   ]}
                   value={this.state.type}
                   onChange={(event) => this.setState({ type: event.target.value as CONTROL_TYPES })}
-                  aria-label={intl.formatMessage({
-                    id: 'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
-                    defaultMessage: 'Select control type',
-                  })}
+                  aria-label={i18n.translate(
+                    'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
+                    {
+                      defaultMessage: 'Select control type',
+                    }
+                  )}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -205,10 +194,12 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
-                  aria-label={intl.formatMessage({
-                    id: 'inputControl.editor.controlsTab.select.addControlAriaLabel',
-                    defaultMessage: 'Add control',
-                  })}
+                  aria-label={i18n.translate(
+                    'inputControl.editor.controlsTab.select.addControlAriaLabel',
+                    {
+                      defaultMessage: 'Add control',
+                    }
+                  )}
                 >
                   <FormattedMessage
                     id="inputControl.editor.controlsTab.addButtonLabel"
@@ -224,8 +215,6 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
   }
 }
 
-export const ControlsTab = injectI18n(ControlsTabUi);
-
-export const getControlsTab = (deps: InputControlVisDependencies) => (
-  props: Omit<ControlsTabUiProps, 'core'>
-) => <ControlsTab {...props} deps={deps} />;
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { ControlsTab as default };

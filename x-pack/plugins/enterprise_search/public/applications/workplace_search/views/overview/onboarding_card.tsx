@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+
+import { useActions } from 'kea';
 
 import {
   EuiButton,
@@ -19,11 +21,10 @@ import {
   EuiLinkProps,
 } from '@elastic/eui';
 
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { TelemetryLogic } from '../../../shared/telemetry';
 
-interface IOnboardingCardProps {
+interface OnboardingCardProps {
   title: React.ReactNode;
   icon: React.ReactNode;
   description: React.ReactNode;
@@ -33,7 +34,7 @@ interface IOnboardingCardProps {
   complete?: boolean;
 }
 
-export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
+export const OnboardingCard: React.FC<OnboardingCardProps> = ({
   title,
   icon,
   description,
@@ -42,12 +43,10 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   actionPath,
   complete,
 }) => {
-  const { http } = useValues(HttpLogic);
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'onboarding_card_button',
     });

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../observability/public';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 interface AppNavigationProps {
   'aria-label': string;
@@ -24,8 +25,7 @@ export const AppNavigation = ({ 'aria-label': label, children }: AppNavigationPr
 const Nav = euiStyled.nav`
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
   border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-  padding: ${(props) =>
-    `${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL} ${props.theme.eui.euiSize} ${props.theme.eui.euiSizeL}`};
+  padding: ${(props) => `${props.theme.eui.euiSizeS} ${props.theme.eui.euiSizeL}`};
   .euiTabs {
     padding-left: 3px;
     margin-left: -3px;

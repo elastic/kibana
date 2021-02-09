@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,7 +11,7 @@ import { LayerControl } from './layer_control';
 import { ViewControl } from './view_control';
 import { AttributionControl } from './attribution_control';
 
-export function WidgetOverlay({ hideLayerControl, hideViewControl }) {
+export function WidgetOverlay({ settings }) {
   return (
     <EuiFlexGroup
       className="mapWidgetOverlay"
@@ -20,9 +21,9 @@ export function WidgetOverlay({ hideLayerControl, hideViewControl }) {
       gutterSize="s"
     >
       <EuiFlexItem className="mapWidgetOverlay__layerWrapper">
-        {!hideLayerControl && <LayerControl />}
+        {!settings.hideLayerControl && <LayerControl />}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{!hideViewControl && <ViewControl />}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{!settings.hideViewControl && <ViewControl />}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <AttributionControl />
       </EuiFlexItem>

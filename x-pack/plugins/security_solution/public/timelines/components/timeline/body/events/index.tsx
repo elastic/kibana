@@ -1,121 +1,97 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { inputsModel } from '../../../../../common/store';
-import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
+import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { Note } from '../../../../../common/lib/note';
-import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import {
-  OnColumnResized,
-  OnPinEvent,
-  OnRowSelected,
-  OnUnPinEvent,
-  OnUpdateColumns,
-} from '../../events';
+import { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { StatefulEvent } from './stateful_event';
 import { eventIsPinned } from '../helpers';
 
+/** This offset begins at two, because the header row counts as "row 1", and aria-rowindex starts at "1" */
+const ARIA_ROW_INDEX_OFFSET = 2;
+
 interface Props {
   actionsColumnWidth: number;
-  addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
-  containerElementRef: HTMLDivElement;
+  containerRef: React.MutableRefObject<HTMLDivElement | null>;
   data: TimelineItem[];
-  docValueFields: DocValueFields[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  getNotesByIds: (noteIds: string[]) => Note[];
   id: string;
   isEventViewer?: boolean;
+  lastFocusedAriaColindex: number;
   loadingEventIds: Readonly<string[]>;
-  onColumnResized: OnColumnResized;
-  onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
-  onUpdateColumns: OnUpdateColumns;
-  onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
-  updateNote: UpdateNote;
+  tabType?: TimelineTabs;
 }
 
 const EventsComponent: React.FC<Props> = ({
   actionsColumnWidth,
-  addNoteToEvent,
   browserFields,
   columnHeaders,
   columnRenderers,
-  containerElementRef,
+  containerRef,
   data,
-  docValueFields,
   eventIdToNoteIds,
-  getNotesByIds,
   id,
   isEventViewer = false,
+  lastFocusedAriaColindex,
   loadingEventIds,
-  onColumnResized,
-  onPinEvent,
   onRowSelected,
-  onUpdateColumns,
-  onUnPinEvent,
   pinnedEventIds,
   refetch,
   onRuleChange,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
-  toggleColumn,
-  updateNote,
+  tabType,
 }) => (
   <EventsTbody data-test-subj="events">
-    {data.map((event) => (
+    {data.map((event, i) => (
       <StatefulEvent
         actionsColumnWidth={actionsColumnWidth}
-        addNoteToEvent={addNoteToEvent}
+        ariaRowindex={i + ARIA_ROW_INDEX_OFFSET}
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
-        containerElementRef={containerElementRef}
-        disableSensorVisibility={data != null && data.length < 101}
-        docValueFields={docValueFields}
+        containerRef={containerRef}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
-        getNotesByIds={getNotesByIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        key={`${event._id}_${event._index}`}
+        key={`${id}_${tabType}_${event._id}_${event._index}`}
+        lastFocusedAriaColindex={lastFocusedAriaColindex}
         loadingEventIds={loadingEventIds}
-        onColumnResized={onColumnResized}
-        onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
-        onUnPinEvent={onUnPinEvent}
-        onUpdateColumns={onUpdateColumns}
         refetch={refetch}
         rowRenderers={rowRenderers}
         onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
+        tabType={tabType}
         timelineId={id}
-        toggleColumn={toggleColumn}
-        updateNote={updateNote}
       />
     ))}
   </EventsTbody>

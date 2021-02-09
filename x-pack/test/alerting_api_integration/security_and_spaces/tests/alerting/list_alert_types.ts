@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,7 +16,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const expectedNoOpType = {
-    actionGroups: [{ id: 'default', name: 'Default' }],
+    actionGroups: [
+      { id: 'default', name: 'Default' },
+      { id: 'recovered', name: 'Recovered' },
+    ],
     defaultActionGroupId: 'default',
     id: 'test.noop',
     name: 'Test: Noop',
@@ -25,10 +29,23 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       params: [],
     },
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
+    recoveryActionGroup: {
+      id: 'recovered',
+      name: 'Recovered',
+    },
+    enabledInLicense: true,
   };
 
   const expectedRestrictedNoOpType = {
-    actionGroups: [{ id: 'default', name: 'Default' }],
+    actionGroups: [
+      { id: 'default', name: 'Default' },
+      { id: 'restrictedRecovered', name: 'Restricted Recovery' },
+    ],
+    recoveryActionGroup: {
+      id: 'restrictedRecovered',
+      name: 'Restricted Recovery',
+    },
     defaultActionGroupId: 'default',
     id: 'test.restricted-noop',
     name: 'Test: Restricted Noop',
@@ -38,6 +55,8 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
       params: [],
     },
     producer: 'alertsRestrictedFixture',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
   };
 
   describe('list_alert_types', () => {

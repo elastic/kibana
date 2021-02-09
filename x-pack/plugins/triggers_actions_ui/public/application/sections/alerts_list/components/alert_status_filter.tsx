@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -54,6 +55,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
             numActiveFilters={selectedValues.length}
             numFilters={selectedValues.length}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+            data-test-subj="alertStatusFilterButton"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.alertStatusFilterLabel"
@@ -78,6 +80,7 @@ export const AlertStatusFilter: React.FunctionComponent<AlertStatusFilterProps> 
                   }
                 }}
                 checked={selectedValues.includes(item) ? 'on' : undefined}
+                data-test-subj={`alertStatus${item}FilerOption`}
               >
                 <EuiHealth color={healthColor}>{alertsStatusesTranslationsMapping[item]}</EuiHealth>
               </EuiFilterSelectItem>

@@ -1,18 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from '../case/schema';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
   orgId: schema.string(),
-  // TODO: to remove - set it optional for the current stage to support Case implementation
-  incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
-  isCaseOwned: schema.nullable(schema.boolean()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
@@ -37,15 +34,21 @@ export const ExecutorSubActionSchema = schema.oneOf([
 ]);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
-  savedObjectId: schema.nullable(schema.string()),
-  title: schema.string(),
-  description: schema.nullable(schema.string()),
-  externalId: schema.nullable(schema.string()),
-  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
-  severityCode: schema.nullable(schema.number()),
-  // TODO: remove later  - need for support Case push multiple comments
-  comments: schema.nullable(schema.arrayOf(CommentSchema)),
-  ...EntityInformation,
+  incident: schema.object({
+    name: schema.string(),
+    description: schema.nullable(schema.string()),
+    externalId: schema.nullable(schema.string()),
+    incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
+    severityCode: schema.nullable(schema.number()),
+  }),
+  comments: schema.nullable(
+    schema.arrayOf(
+      schema.object({
+        comment: schema.string(),
+        commentId: schema.string(),
+      })
+    )
+  ),
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
@@ -53,11 +56,16 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 });
 
 // Reserved for future implementation
+export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionGetIncidentTypesParamsSchema = schema.object({});
 export const ExecutorSubActionGetSeverityParamsSchema = schema.object({});
 
 export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getFields'),
+    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+  }),
   schema.object({
     subAction: schema.literal('getIncident'),
     subActionParams: ExecutorSubActionGetIncidentParamsSchema,

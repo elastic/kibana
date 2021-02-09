@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ResolverAction } from '../store/actions';
@@ -47,7 +48,12 @@ export const spyMiddlewareFactory: () => SpyMiddleware = () => {
             break;
           }
           // eslint-disable-next-line no-console
-          console.log('action', actionStatePair.action, 'state', actionStatePair.state);
+          console.log(
+            'action',
+            JSON.stringify(actionStatePair.action, null, 2),
+            'state',
+            JSON.stringify(actionStatePair.state, null, 2)
+          );
         }
       })();
       return () => {

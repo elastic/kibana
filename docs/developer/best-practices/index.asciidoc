@@ -12,6 +12,8 @@ Are you planning with scalability in mind?
 * Consider data with many fields
 * Consider data with high cardinality fields
 * Consider large data sets, that span a long time range
+* Are you loading a minimal amount of JS code in the browser?
+** See <<plugin-performance>> for more guidance.
 * Do you make lots of requests to the server?
 ** If so, have you considered using the streaming {kib-repo}tree/{branch}/src/plugins/bfetch[bfetch service]?
 
@@ -139,6 +141,8 @@ Review:
 * <<stability>>
 * <<security-best-practices>>
 * <<typescript>>
+
+include::performance.asciidoc[leveloffset=+1]
 
 include::navigation.asciidoc[leveloffset=+1]
 

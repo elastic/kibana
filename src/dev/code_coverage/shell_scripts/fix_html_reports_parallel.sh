@@ -8,8 +8,8 @@ PWD=$(pwd)
 du -sh $COMBINED_EXRACT_DIR
 
 echo "### Jest: replacing path in json files"
-for i in coverage-final xpack-coverage-final;  do
-  sed -i "s|/dev/shm/workspace/kibana|${PWD}|g" $COMBINED_EXRACT_DIR/jest/${i}.json &
+for i in oss oss-integration xpack;  do
+  sed -i "s|/dev/shm/workspace/kibana|${PWD}|g" $COMBINED_EXRACT_DIR/jest/${i}-coverage-final.json &
 done
 wait
 

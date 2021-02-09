@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  TriggerContextMapping,
-  APPLY_FILTER_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
 import { DashboardUrlGeneratorState } from '../../../../../../../src/plugins/dashboard/public';
 import {
+  ApplyGlobalFilterActionContext,
+  APPLY_FILTER_TRIGGER,
   esFilters,
+  Filter,
   isFilters,
   isQuery,
   isTimeRange,
+  Query,
+  TimeRange,
 } from '../../../../../../../src/plugins/data/public';
+import { IEmbeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
 import {
   AbstractDashboardDrilldown,
   AbstractDashboardDrilldownParams,
@@ -22,9 +25,16 @@ import {
 } from '../abstract_dashboard_drilldown';
 import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
+import { createExtract, createInject } from '../../../../common';
+import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
 
-type Trigger = typeof APPLY_FILTER_TRIGGER;
-type Context = TriggerContextMapping[Trigger];
+interface EmbeddableQueryInput extends EmbeddableInput {
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+}
+
+type Context = EnhancedEmbeddableContext & ApplyGlobalFilterActionContext;
 export type Params = AbstractDashboardDrilldownParams;
 
 /**
@@ -34,10 +44,10 @@ export type Params = AbstractDashboardDrilldownParams;
  * by embeddables (but not necessarily); (2) its `getURL` method depends on
  * `embeddable` field being present in `context`.
  */
-export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Trigger> {
+export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Context> {
   public readonly id = EMBEDDABLE_TO_DASHBOARD_DRILLDOWN;
 
-  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER] as Trigger[];
+  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
 
   protected async getURL(config: Config, context: Context): Promise<KibanaURL> {
     const state: DashboardUrlGeneratorState = {
@@ -45,7 +55,8 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<T
     };
 
     if (context.embeddable) {
-      const input = context.embeddable.getInput();
+      const embeddable = context.embeddable as IEmbeddable<EmbeddableQueryInput>;
+      const input = embeddable.getInput();
       if (isQuery(input.query) && config.useCurrentFilters) state.query = input.query;
 
       // if useCurrentDashboardDataRange is enabled, then preserve current time range
@@ -80,4 +91,8 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<T
 
     return url;
   }
+
+  public readonly inject = createInject({ drilldownId: this.id });
+
+  public readonly extract = createExtract({ drilldownId: this.id });
 }

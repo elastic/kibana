@@ -1,22 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectsClientContract } from 'kibana/server';
 
+import {
+  SavedObjectType,
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../../common/types';
 import { EmptyStringArrayDecoded } from '../../../common/schemas/types/empty_string_array';
 import { NamespaceTypeArray } from '../../../common/schemas/types/default_namespace_array';
 import { NonEmptyStringArrayDecoded } from '../../../common/schemas/types/non_empty_string_array';
 import {
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,
+  Id,
   PageOrUndefined,
   PerPageOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../common/schemas';
-import { SavedObjectType } from '../../saved_objects';
 
 import { getSavedObjectTypes, transformSavedObjectsToFoundExceptionListItem } from './utils';
 import { getExceptionList } from './get_exception_list';
@@ -91,4 +98,34 @@ export const getExceptionListsItemFilter = ({
       return `${accum} OR ${listItemAppendWithFilter}`;
     }
   }, '');
+};
+
+interface FindValueListExceptionListsItems {
+  valueListId: Id;
+  savedObjectsClient: SavedObjectsClientContract;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export const findValueListExceptionListItems = async ({
+  valueListId,
+  savedObjectsClient,
+  page,
+  perPage,
+  sortField,
+  sortOrder,
+}: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
+  const savedObjectsFindResponse = await savedObjectsClient.find<ExceptionListSoSchema>({
+    filter: `(exception-list.attributes.list_type: item AND exception-list.attributes.entries.list.id:${valueListId}) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.entries.list.id:${valueListId}) `,
+    page,
+    perPage,
+    sortField,
+    sortOrder,
+    type: [exceptionListSavedObjectType, exceptionListAgnosticSavedObjectType],
+  });
+  return transformSavedObjectsToFoundExceptionListItem({
+    savedObjectsFindResponse,
+  });
 };

@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { mockTelemetryActions } from '../../../__mocks__';
+
 import './__mocks__/overview_logic.mock';
-import { setMockValues } from './__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { setMockValues } from './__mocks__';
 import { RecentActivity, RecentActivityItem } from './recent_activity';
-
-jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
-import { sendTelemetry } from '../../../shared/telemetry';
 
 const organization = { name: 'foo', defaultOrgName: 'bar' };
 
@@ -50,7 +51,7 @@ describe('RecentActivity', () => {
 
     const link = activity.find('[data-test-subj="viewSourceDetailsLink"]');
     link.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalled();
+    expect(mockTelemetryActions.sendWorkplaceSearchTelemetry).toHaveBeenCalled();
   });
 
   it('renders activity item error state', () => {

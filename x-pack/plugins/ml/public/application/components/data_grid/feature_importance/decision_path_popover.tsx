@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState } from 'react';
@@ -9,18 +10,26 @@ import { EuiLink, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RegressionDecisionPath } from './decision_path_regression';
 import { DecisionPathJSONViewer } from './decision_path_json_viewer';
-import { FeatureImportance, TopClasses } from '../../../../../common/types/feature_importance';
+import {
+  FeatureImportance,
+  FeatureImportanceBaseline,
+  isClassificationFeatureImportanceBaseline,
+  isRegressionFeatureImportanceBaseline,
+  TopClasses,
+} from '../../../../../common/types/feature_importance';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common';
 import { ClassificationDecisionPath } from './decision_path_classification';
 import { useMlKibana } from '../../../contexts/kibana';
 import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_frame_analytics';
+import { getStringBasedClassName } from './use_classification_path_data';
 
 interface DecisionPathPopoverProps {
   featureImportance: FeatureImportance[];
   analysisType: DataFrameAnalysisConfigType;
   predictionFieldName?: string;
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   predictedValue?: number | string | undefined;
+  predictedProbability?: number; // for classification
   topClasses?: TopClasses;
 }
 
@@ -30,7 +39,7 @@ enum DECISION_PATH_TABS {
 }
 
 export interface ExtendedFeatureImportance extends FeatureImportance {
-  absImportance?: number;
+  absImportance: number;
 }
 
 export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
@@ -40,12 +49,13 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   topClasses,
   analysisType,
   predictionFieldName,
+  predictedProbability,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState(DECISION_PATH_TABS.CHART);
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.featureImportance;
 
   if (featureImportance.length < 2) {
     return <DecisionPathJSONViewer featureImportance={featureImportance} />;
@@ -73,11 +83,12 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
   ];
 
   return (
-    <>
+    <div data-test-subj="mlDFADecisionPathPopover">
       <div style={{ display: 'flex', width: 300 }}>
         <EuiTabs size={'s'}>
           {tabs.map((tab) => (
             <EuiTab
+              data-test-subj={`mlDFADecisionPathPopoverTab-${tab.id}`}
               isSelected={tab.id === selectedTabId}
               onClick={() => setSelectedTabId(tab.id)}
               key={tab.id}
@@ -96,10 +107,7 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               values={{
                 predictionFieldName,
                 linkedFeatureImportanceValues: (
-                  <EuiLink
-                    href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
-                    target="_blank"
-                  >
+                  <EuiLink href={docLink} target="_blank">
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.explorationResults.linkedFeatureImportanceValues"
                       defaultMessage="feature importance values"
@@ -109,27 +117,34 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               }}
             />
           </EuiText>
-          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-            <ClassificationDecisionPath
-              featureImportance={featureImportance}
-              topClasses={topClasses as TopClasses}
-              predictedValue={predictedValue as string}
-              predictionFieldName={predictionFieldName}
-            />
-          )}
-          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionDecisionPath
-              featureImportance={featureImportance}
-              baseline={baseline}
-              predictedValue={predictedValue as number}
-              predictionFieldName={predictionFieldName}
-            />
-          )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
+            isClassificationFeatureImportanceBaseline(baseline) && (
+              <ClassificationDecisionPath
+                featureImportance={featureImportance}
+                topClasses={topClasses as TopClasses}
+                predictedValue={getStringBasedClassName(predictedValue)}
+                predictedProbability={predictedProbability}
+                predictionFieldName={predictionFieldName}
+                baseline={baseline}
+              />
+            )}
+          {analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION &&
+            isRegressionFeatureImportanceBaseline(baseline) &&
+            predictedValue !== undefined && (
+              <RegressionDecisionPath
+                featureImportance={featureImportance}
+                baseline={baseline}
+                predictedValue={
+                  typeof predictedValue === 'string' ? parseFloat(predictedValue) : predictedValue
+                }
+                predictionFieldName={predictionFieldName}
+              />
+            )}
         </>
       )}
       {selectedTabId === DECISION_PATH_TABS.JSON && (
         <DecisionPathJSONViewer featureImportance={featureImportance} />
       )}
-    </>
+    </div>
   );
 };

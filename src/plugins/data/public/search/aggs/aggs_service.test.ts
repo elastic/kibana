@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, Subscription } from 'rxjs';
@@ -23,6 +12,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+import { dataPluginMock } from '../../mocks';
 
 import {
   AggsService,
@@ -30,6 +20,7 @@ import {
   AggsStartDependencies,
   createGetConfig,
 } from './aggs_service';
+import { createNowProviderMock } from '../../now_provider/mocks';
 
 const { uiSettings } = coreMock.createSetup();
 
@@ -43,9 +34,11 @@ describe('AggsService - public', () => {
     setupDeps = {
       registerFunction: expressionsPluginMock.createSetupContract().registerFunction,
       uiSettings,
+      nowProvider: createNowProviderMock(),
     };
     startDeps = {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       uiSettings,
     };
   });
@@ -86,10 +79,12 @@ describe('AggsService - public', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(3);
+      expect(Object.keys(start).length).toBe(5);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
+      expect(start).toHaveProperty('getDateMetaByDatatableColumn');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
+      expect(start).toHaveProperty('datatableUtilities');
     });
 
     test('types registry returns initialized agg types', () => {

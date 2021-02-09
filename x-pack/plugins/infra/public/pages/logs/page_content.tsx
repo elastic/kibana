@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 import { AlertDropdown } from '../../alerting/log_threshold';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -24,9 +25,12 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { HeaderMenuPortal } from '../../../../observability/public';
+import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
 
   const { initialize } = useLogSourceContext();
 
@@ -66,6 +70,28 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
+      {setHeaderActionMenu && (
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+          <EuiFlexGroup gutterSize={'none'} alignItems={'center'} responsive={false}>
+            <EuiFlexItem grow={false}>
+              <AlertDropdown />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={kibana.services?.application?.getUrlForApp(
+                  '/home#/tutorial_directory/logging'
+                )}
+                size="s"
+                color="primary"
+                iconType="indexOpen"
+              >
+                {ADD_DATA_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </HeaderMenuPortal>
+      )}
+
       <Header
         breadcrumbs={[
           {
@@ -78,19 +104,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
           <EuiFlexItem>
             <RoutedTabs tabs={[streamTab, anomaliesTab, logCategoriesTab, settingsTab]} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertDropdown />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
-              size="s"
-              color="primary"
-              iconType="plusInCircle"
-            >
-              {ADD_DATA_LABEL}
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </AppNavigation>

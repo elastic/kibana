@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import { ILicense } from '../../licensing/common/types';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -61,10 +61,6 @@ export interface ServiceNodeStats {
   avgErrorRate: number | null;
 }
 
-export function isActivePlatinumLicense(license: ILicense) {
-  return license.isActive && license.hasAtLeast('platinum');
-}
-
 export const invalidLicenseMessage = i18n.translate(
   'xpack.apm.serviceMap.invalidLicenseMessage',
   {
@@ -91,3 +87,5 @@ export function isSpanGroupingSupported(type?: string, subtype?: string) {
       nongroupedSubType === 'all' || nongroupedSubType === subtype
   );
 }
+
+export const SERVICE_MAP_TIMEOUT_ERROR = 'ServiceMapTimeoutError';

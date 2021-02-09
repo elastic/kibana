@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../__mocks__/shallow_useeffect.mock';
-import '../__mocks__/kea.mock';
 import '../__mocks__/enterprise_search_url.mock';
 import { setMockValues, setMockActions } from '../__mocks__';
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { SetupGuide } from './components/setup_guide';
+
+import { EngineRouter } from './components/engine';
+import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
-import { EngineOverview } from './components/engine_overview';
+import { SetupGuide } from './components/setup_guide';
+
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
@@ -54,16 +58,17 @@ describe('AppSearchConfigured', () => {
   it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(Layout)).toHaveLength(1);
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
-    expect(wrapper.find(EngineOverview)).toHaveLength(1);
+    expect(wrapper.find(Layout)).toHaveLength(2);
+    expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(EnginesOverview)).toHaveLength(1);
+    expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
     const initializeAppData = jest.fn();
     setMockActions({ initializeAppData });
 
-    shallow(<AppSearchConfigured ilmEnabled={true} />);
+    shallow(<AppSearchConfigured ilmEnabled />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ ilmEnabled: true });
   });
@@ -91,7 +96,7 @@ describe('AppSearchConfigured', () => {
 
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
   describe('ability checks', () => {
@@ -108,13 +113,18 @@ describe('AppSearchNav', () => {
     expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
   });
 
+  it('renders an Engine subnav if passed', () => {
+    const wrapper = shallow(<AppSearchNav subNav={<div data-test-subj="subnav">Testing</div>} />);
+    const link = wrapper.find(SideNavLink).dive();
+
+    expect(link.find('[data-test-subj="subnav"]')).toHaveLength(1);
+  });
+
   it('renders the Settings link', () => {
     setMockValues({ myRole: { canViewSettings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/settings/account'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/settings/account');
   });
 
   it('renders the Credentials link', () => {

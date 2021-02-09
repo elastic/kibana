@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { has, isEmpty } from 'lodash/fp';
@@ -14,7 +15,12 @@ import { transformAlertToRuleAction } from '../../../../../../common/detection_e
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { Type } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  Threats,
+  ThreatSubtechnique,
+  ThreatTechnique,
+  Type,
+} from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
   AboutStepRule,
@@ -161,6 +167,32 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   assertUnreachable(type);
 };
 
+function trimThreatsWithNoName<T extends ThreatSubtechnique | ThreatTechnique>(
+  filterable: T[]
+): T[] {
+  return filterable.filter((item) => item.name !== 'none');
+}
+
+/**
+ * Filter out unfilled/empty threat, technique, and subtechnique fields based on if their name is `none`
+ */
+export const filterEmptyThreats = (threats: Threats): Threats => {
+  return threats
+    .filter((singleThreat) => singleThreat.tactic.name !== 'none')
+    .map((threat) => {
+      return {
+        ...threat,
+        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
+          return {
+            ...technique,
+            subtechnique:
+              technique.subtechnique != null ? trimThreatsWithNoName(technique.subtechnique) : [],
+          };
+        }),
+      };
+    });
+};
+
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
   const ruleFields = filterRuleFieldsForType(defineStepData, defineStepData.ruleType);
   const { ruleType, timeline } = ruleFields;
@@ -201,6 +233,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         threat_index: ruleFields.threatIndex,
         threat_query: ruleFields.threatQueryBar?.query?.query as string,
+        threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
       }
@@ -293,16 +326,10 @@ export const formatAboutStepData = (
     severity_mapping: severity.isMappingChecked
       ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
       : [],
-    threat: threat
-      .filter((singleThreat) => singleThreat.tactic.name !== 'none')
-      .map((singleThreat) => ({
-        ...singleThreat,
-        framework: 'MITRE ATT&CK',
-        technique: singleThreat.technique.map((technique) => {
-          const { id, name, reference } = technique;
-          return { id, name, reference };
-        }),
-      })),
+    threat: filterEmptyThreats(threat).map((singleThreat) => ({
+      ...singleThreat,
+      framework: 'MITRE ATT&CK',
+    })),
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,

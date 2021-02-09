@@ -30,7 +30,7 @@ to the last 15 minutes.
 * *Refresh every* to specify an automatic refresh rate.
 +
 [role="screenshot"]
-image::images/Timepicker-View.png[Time filter menu]
+image::images/time-filter.png[Time filter menu]
 
 . To set the start and end times, click the bar next to the time filter.
 In the popup, select *Absolute*, *Relative* or *Now*, then specify the required

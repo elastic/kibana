@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { extractErrorMessage, MLHttpFetchError, MLResponseError, EsErrorBody } from './index';
 
@@ -76,8 +77,9 @@ describe('ML - error message utils', () => {
       expect(extractErrorMessage(bodyWithAttributes)).toBe(testMsg);
 
       // boom error
-      const boomError: Boom<any> = {
+      const boomError: Boom.Boom<any> = {
         message: '',
+        typeof: Boom.Boom.constructor,
         reformat: () => '',
         name: '',
         data: [],

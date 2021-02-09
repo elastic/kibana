@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
@@ -34,14 +35,14 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function jobAuditMessagesProvider({ asInternalUser }) {
+export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
-  async function getJobAuditMessages(jobId, from) {
+  async function getJobAuditMessages(jobSavedObjectService, jobId, from) {
     let gte = null;
     if (jobId !== undefined && from === undefined) {
-      const jobs = await asInternalUser.ml.getJobs({ job_id: jobId });
+      const jobs = await mlClient.getJobs({ job_id: jobId });
       if (jobs.count > 0 && jobs.jobs !== undefined) {
         gte = moment(jobs.jobs[0].create_time).valueOf();
       }
@@ -113,6 +114,11 @@ export function jobAuditMessagesProvider({ asInternalUser }) {
     if (body.hits.total.value > 0) {
       messages = body.hits.hits.map((hit) => hit._source);
     }
+    messages = await jobSavedObjectService.filterJobsForSpace(
+      'anomaly-detector',
+      messages,
+      'job_id'
+    );
     return messages;
   }
 

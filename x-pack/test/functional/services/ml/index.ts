@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -17,6 +18,8 @@ import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 import { MachineLearningDataFrameAnalyticsEditProvider } from './data_frame_analytics_edit';
 import { MachineLearningDataFrameAnalyticsResultsProvider } from './data_frame_analytics_results';
+import { MachineLearningDataFrameAnalyticsScatterplotProvider } from './data_frame_analytics_scatterplot';
+import { MachineLearningDataFrameAnalyticsMapProvider } from './data_frame_analytics_map';
 import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
@@ -41,6 +44,7 @@ import { MachineLearningSettingsFilterListProvider } from './settings_filter_lis
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
+import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -59,10 +63,18 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   );
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
+  const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
+  const dataFrameAnalyticsScatterplot = MachineLearningDataFrameAnalyticsScatterplotProvider(
+    context
+  );
+
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
+  const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context, commonUI);
+
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
+
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -80,7 +92,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settings = MachineLearningSettingsProvider(context);
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
-  const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
+  const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
 
@@ -96,10 +108,13 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsEdit,
     dataFrameAnalyticsResults,
+    dataFrameAnalyticsMap,
     dataFrameAnalyticsTable,
+    dataFrameAnalyticsScatterplot,
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,
+    dataVisualizerTable,
     jobManagement,
     jobSelection,
     jobSourceSelection,

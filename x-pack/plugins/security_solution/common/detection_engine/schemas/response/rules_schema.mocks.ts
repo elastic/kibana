@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getListArrayMock } from '../types/lists.mock';
 
 import { RulesSchema } from './rules_schema';
@@ -115,16 +117,17 @@ export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): R
  * Useful for e2e backend tests where it doesn't have date time and other
  * server side properties attached to it.
  */
-export const getThreatMatchingSchemaPartialMock = (): Partial<RulesSchema> => {
+export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<RulesSchema> => {
   return {
     author: [],
     created_by: 'elastic',
     description: 'Detecting root and admin users',
-    enabled: true,
+    enabled,
     false_positives: [],
     from: 'now-6m',
     immutable: false,
     interval: '5m',
+    index: ['auditbeat-*'],
     rule_id: 'rule-1',
     output_index: '.siem-signals-default',
     max_signals: 100,

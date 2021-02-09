@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -12,19 +13,16 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
   aliasPath: getBasePath(),
   aliasApp: 'lens',
   name: 'lens',
-  promotion: {
-    description: i18n.translate('xpack.lens.visTypeAlias.promotion.description', {
-      defaultMessage: 'Try Lens, our new, intuitive way to create visualizations.',
-    }),
-    buttonText: i18n.translate('xpack.lens.visTypeAlias.promotion.buttonText', {
-      defaultMessage: 'Go to Lens',
-    }),
-  },
+  promotion: true,
   title: i18n.translate('xpack.lens.visTypeAlias.title', {
     defaultMessage: 'Lens',
   }),
   description: i18n.translate('xpack.lens.visTypeAlias.description', {
-    defaultMessage: `Lens is a simpler way to create basic visualizations`,
+    defaultMessage:
+      'Create visualizations with our drag and drop editor. Switch between visualization types at any time.',
+  }),
+  note: i18n.translate('xpack.lens.visTypeAlias.note', {
+    defaultMessage: 'Recommended for most users.',
   }),
   icon: 'lensApp',
   stage: 'production',

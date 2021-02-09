@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ValidateJob } from './validate_job_view';
 
 jest.mock('../../util/dependency_cache', () => ({
   getDocLinks: () => ({
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-    DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+    links: {
+      ml: {
+        anomalyDetectionJobTips: 'jest-metadata-mock-url',
+      },
+    },
   }),
 }));
 
@@ -27,6 +31,7 @@ const job = {
 };
 
 const getJobConfig = () => job;
+const getDuration = () => ({ start: 0, end: 1 });
 
 function prepareTest(messages) {
   const p = Promise.resolve(messages);
@@ -40,7 +45,9 @@ function prepareTest(messages) {
     },
   };
 
-  const component = <ValidateJob getJobConfig={getJobConfig} ml={ml} kibana={kibana} />;
+  const component = (
+    <ValidateJob getDuration={getDuration} getJobConfig={getJobConfig} ml={ml} kibana={kibana} />
+  );
 
   const wrapper = shallowWithIntl(component);
 

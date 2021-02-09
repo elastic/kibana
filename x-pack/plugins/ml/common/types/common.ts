@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { MlPages } from '../constants/ml_url_generator';
 
 export interface Dictionary<TValue> {
   [id: string]: TValue;
@@ -30,4 +33,16 @@ export type DeepReadonly<T> = T extends Array<infer R>
 
 type DeepReadonlyObject<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>;
+};
+
+export interface ListingPageUrlState {
+  pageSize: number;
+  pageIndex: number;
+  sortField: string;
+  sortDirection: string;
+  queryText?: string;
+}
+
+export type AppPageState<T> = {
+  [key in MlPages]?: Partial<T>;
 };

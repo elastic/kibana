@@ -7,6 +7,13 @@ exports[`start servers CLI options accepts boolean value for updateBaselines 1`]
 "
 `;
 
+exports[`start servers CLI options accepts boolean value for updateSnapshots 1`] = `
+"
+[31mfunctional_tests_server: invalid option [updateSnapshots][39m
+    ...stack trace...
+"
+`;
+
 exports[`start servers CLI options rejects bail 1`] = `
 "
 [31mfunctional_tests_server: invalid option [bail][39m

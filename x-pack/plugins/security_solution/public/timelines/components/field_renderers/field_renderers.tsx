@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
@@ -260,12 +261,12 @@ MoreContainer.displayName = 'MoreContainer';
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const handleClose = useCallback(() => setIsOpen(false), []);
+    const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
       () => (
         <>
           {' ,'}
-          <EuiButtonEmpty size="xs" onClick={handleClose}>
+          <EuiButtonEmpty size="xs" onClick={togglePopover}>
             {`+${rowItems.length - overflowIndexStart} `}
             <FormattedMessage
               id="xpack.securitySolution.fieldRenderers.moreLabel"
@@ -274,7 +275,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
           </EuiButtonEmpty>
         </>
       ),
-      [handleClose, overflowIndexStart, rowItems.length]
+      [togglePopover, overflowIndexStart, rowItems.length]
     );
 
     return (
@@ -284,7 +285,7 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             id="popover"
             button={button}
             isOpen={isOpen}
-            closePopover={handleClose}
+            closePopover={togglePopover}
             repositionOnScroll
           >
             <MoreContainer

@@ -1,33 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import './discover_field.scss';
+
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UiCounterMetricType } from '@kbn/analytics';
+import classNames from 'classnames';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
-import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
-import './discover_field.scss';
+import { DiscoverFieldDetailsFooter } from './discover_field_details_footer';
 
 export interface DiscoverFieldProps {
+  /**
+   * Determines whether add/remove button is displayed not only when focused
+   */
+  alwaysShowActionButton?: boolean;
   /**
    * The displayed field
    */
@@ -58,12 +55,17 @@ export interface DiscoverFieldProps {
    */
   selected?: boolean;
   /**
-   * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
    */
-  useShortDots?: boolean;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+
+  multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
 }
 
 export function DiscoverField({
+  alwaysShowActionButton = false,
   field,
   indexPattern,
   onAddField,
@@ -71,7 +73,8 @@ export function DiscoverField({
   onAddFilter,
   getDetails,
   selected,
-  useShortDots,
+  trackUiMetric,
+  multiFields,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -87,8 +90,8 @@ export function DiscoverField({
 
   const [infoIsOpen, setOpen] = useState(false);
 
-  const toggleDisplay = (f: IndexPatternField) => {
-    if (selected) {
+  const toggleDisplay = (f: IndexPatternField, isSelected: boolean) => {
+    if (isSelected) {
       onRemoveField(f.name);
     } else {
       onAddField(f.name);
@@ -106,71 +109,100 @@ export function DiscoverField({
     return str ? str.replace(/\./g, '.\u200B') : '';
   }
 
-  const dscFieldIcon = (
-    <FieldIcon type={field.type} label={getFieldTypeName(field.type)} scripted={field.scripted} />
-  );
-
-  const fieldName = (
-    <span
-      data-test-subj={`field-${field.name}`}
-      title={field.name}
-      className="dscSidebarField__name"
-    >
-      {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
-    </span>
-  );
-
-  let actionButton;
-  if (field.name !== '_source' && !selected) {
-    actionButton = (
-      <EuiToolTip
-        delay="long"
-        content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-          defaultMessage: 'Add field as column',
-        })}
-      >
-        <EuiButtonIcon
-          iconType="plusInCircleFilled"
-          className="dscSidebarItem__action"
-          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-            if (ev.type === 'click') {
-              ev.currentTarget.focus();
-            }
-            ev.preventDefault();
-            ev.stopPropagation();
-            toggleDisplay(field);
-          }}
-          data-test-subj={`fieldToggle-${field.name}`}
-          aria-label={addLabelAria}
-        />
-      </EuiToolTip>
+  const getDscFieldIcon = (indexPatternField: IndexPatternField) => {
+    return (
+      <FieldIcon
+        type={indexPatternField.type}
+        label={getFieldTypeName(indexPatternField.type)}
+        scripted={indexPatternField.scripted}
+      />
     );
-  } else if (field.name !== '_source' && selected) {
-    actionButton = (
-      <EuiToolTip
-        delay="long"
-        content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-          defaultMessage: 'Remove field from table',
-        })}
+  };
+
+  const dscFieldIcon = getDscFieldIcon(field);
+
+  const getTitle = (indexPatternField: IndexPatternField) => {
+    return indexPatternField.displayName !== indexPatternField.name
+      ? i18n.translate('discover.field.title', {
+          defaultMessage: '{fieldName} ({fieldDisplayName})',
+          values: {
+            fieldName: indexPatternField.name,
+            fieldDisplayName: indexPatternField.displayName,
+          },
+        })
+      : indexPatternField.displayName;
+  };
+
+  const getFieldName = (indexPatternField: IndexPatternField) => {
+    return (
+      <span
+        data-test-subj={`field-${indexPatternField.name}`}
+        title={getTitle(indexPatternField)}
+        className="dscSidebarField__name"
       >
-        <EuiButtonIcon
-          color="danger"
-          iconType="cross"
-          className="dscSidebarItem__action"
-          onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-            if (ev.type === 'click') {
-              ev.currentTarget.focus();
-            }
-            ev.preventDefault();
-            ev.stopPropagation();
-            toggleDisplay(field);
-          }}
-          data-test-subj={`fieldToggle-${field.name}`}
-          aria-label={removeLabelAria}
-        />
-      </EuiToolTip>
+        {wrapOnDot(indexPatternField.displayName)}
+      </span>
     );
-  }
+  };
+  const fieldName = getFieldName(field);
+
+  const actionBtnClassName = classNames('dscSidebarItem__action', {
+    ['dscSidebarItem__mobile']: alwaysShowActionButton,
+  });
+  const getActionButton = (f: IndexPatternField, isSelected?: boolean) => {
+    if (f.name !== '_source' && !isSelected) {
+      return (
+        <EuiToolTip
+          delay="long"
+          content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+            defaultMessage: 'Add field as column',
+          })}
+        >
+          <EuiButtonIcon
+            iconType="plusInCircleFilled"
+            className={actionBtnClassName}
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              if (ev.type === 'click') {
+                ev.currentTarget.focus();
+              }
+              ev.preventDefault();
+              ev.stopPropagation();
+              toggleDisplay(f, false);
+            }}
+            data-test-subj={`fieldToggle-${f.name}`}
+            aria-label={addLabelAria}
+          />
+        </EuiToolTip>
+      );
+    } else if (f.name !== '_source' && isSelected) {
+      return (
+        <EuiToolTip
+          delay="long"
+          content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+            defaultMessage: 'Remove field from table',
+          })}
+        >
+          <EuiButtonIcon
+            color="danger"
+            iconType="cross"
+            className={actionBtnClassName}
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              if (ev.type === 'click') {
+                ev.currentTarget.focus();
+              }
+              ev.preventDefault();
+              ev.stopPropagation();
+              toggleDisplay(f, isSelected);
+            }}
+            data-test-subj={`fieldToggle-${f.name}`}
+            aria-label={removeLabelAria}
+          />
+        </EuiToolTip>
+      );
+    }
+  };
+
+  const actionButton = getActionButton(field, selected);
 
   if (field.type === '_source') {
     return (
@@ -185,9 +217,39 @@ export function DiscoverField({
     );
   }
 
+  const shouldRenderMultiFields = !!multiFields;
+  const renderMultiFields = () => {
+    if (!multiFields) {
+      return null;
+    }
+    return (
+      <React.Fragment>
+        <EuiTitle size="xxxs">
+          <h5>
+            {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
+              defaultMessage: 'Multi fields',
+            })}
+          </h5>
+        </EuiTitle>
+        {multiFields.map((entry) => (
+          <FieldButton
+            size="s"
+            className="dscSidebarItem dscSidebarItem--multi"
+            isActive={false}
+            onClick={() => {}}
+            dataTestSubj={`field-${entry.field.name}-showDetails`}
+            fieldIcon={getDscFieldIcon(entry.field)}
+            fieldAction={getActionButton(entry.field, entry.isSelected)}
+            fieldName={getFieldName(entry.field)}
+            key={entry.field.name}
+          />
+        ))}
+      </React.Fragment>
+    );
+  };
+
   return (
     <EuiPopover
-      ownFocus
       display="block"
       button={
         <FieldButton
@@ -208,20 +270,35 @@ export function DiscoverField({
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle>
-        {' '}
-        {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-          defaultMessage: 'Top 5 values',
-        })}
-      </EuiPopoverTitle>
+      <EuiPopoverTitle style={{ textTransform: 'none' }}>{field.displayName}</EuiPopoverTitle>
+      <EuiTitle size="xxxs">
+        <h5>
+          {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+            defaultMessage: 'Top 5 values',
+          })}
+        </h5>
+      </EuiTitle>
       {infoIsOpen && (
         <DiscoverFieldDetails
           indexPattern={indexPattern}
           field={field}
           details={getDetails(field)}
           onAddFilter={onAddFilter}
+          trackUiMetric={trackUiMetric}
+          showFooter={!shouldRenderMultiFields}
         />
       )}
+      {shouldRenderMultiFields ? (
+        <>
+          {renderMultiFields()}
+          <DiscoverFieldDetailsFooter
+            indexPattern={indexPattern}
+            field={field}
+            details={getDetails(field)}
+            onAddFilter={onAddFilter}
+          />
+        </>
+      ) : null}
     </EuiPopover>
   );
 }

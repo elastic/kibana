@@ -1,9 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Readable } from 'stream';
+import { createPromiseFromStreams } from '@kbn/utils';
+
 import {
   transformAlertToRule,
   getIdError,
@@ -22,15 +26,14 @@ import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { createPromiseFromStreams } from '../../../../../../../../src/core/server/utils';
 import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
-import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -548,7 +551,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected = ['value2', 'value3'];
@@ -562,7 +565,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected: string[] = [];

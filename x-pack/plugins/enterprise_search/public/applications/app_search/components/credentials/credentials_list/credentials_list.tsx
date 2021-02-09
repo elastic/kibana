@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
-import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+
 import { useActions, useValues } from 'kea';
 
+import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 
-import { CredentialsLogic } from '../credentials_logic';
-import { Key } from './key';
 import { HiddenText } from '../../../../shared/hidden_text';
-import { IApiToken } from '../types';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
-import { apiTokenSort } from '../utils/api_token_sort';
+import { CredentialsLogic } from '../credentials_logic';
+import { ApiToken } from '../types';
 import { getModeDisplayText, getEnginesDisplayText } from '../utils';
+import { apiTokenSort } from '../utils/api_token_sort';
+
+import { Key } from './key';
 
 export const CredentialsList: React.FC = () => {
   const { deleteApiKey, fetchCredentials, showCredentialsForm } = useActions(CredentialsLogic);
@@ -26,21 +29,22 @@ export const CredentialsList: React.FC = () => {
 
   const items = useMemo(() => apiTokens.slice().sort(apiTokenSort), [apiTokens]);
 
-  const columns: Array<EuiBasicTableColumn<IApiToken>> = [
+  const columns: Array<EuiBasicTableColumn<ApiToken>> = [
     {
       name: 'Name',
       width: '12%',
-      render: (token: IApiToken) => token.name,
+      render: (token: ApiToken) => token.name,
     },
     {
       name: 'Type',
       width: '15%',
-      render: (token: IApiToken) => TOKEN_TYPE_DISPLAY_NAMES[token.type],
+      render: (token: ApiToken) => TOKEN_TYPE_DISPLAY_NAMES[token.type],
     },
     {
       name: 'Key',
       width: '36%',
-      render: (token: IApiToken) => {
+      className: 'eui-textBreakAll',
+      render: (token: ApiToken) => {
         const { key } = token;
         if (!key) return null;
         return (
@@ -60,16 +64,20 @@ export const CredentialsList: React.FC = () => {
           </EuiCopy>
         );
       },
+      mobileOptions: {
+        // @ts-ignore - EUI's type definitions need to be updated
+        width: '100%',
+      },
     },
     {
       name: 'Modes',
       width: '10%',
-      render: (token: IApiToken) => getModeDisplayText(token),
+      render: (token: ApiToken) => getModeDisplayText(token),
     },
     {
       name: 'Engines',
       width: '18%',
-      render: (token: IApiToken) => getEnginesDisplayText(token),
+      render: (token: ApiToken) => getEnginesDisplayText(token),
     },
     {
       actions: [
@@ -83,7 +91,7 @@ export const CredentialsList: React.FC = () => {
           type: 'icon',
           icon: 'pencil',
           color: 'primary',
-          onClick: (token: IApiToken) => showCredentialsForm(token),
+          onClick: (token: ApiToken) => showCredentialsForm(token),
         },
         {
           name: i18n.translate('xpack.enterpriseSearch.actions.delete', {
@@ -95,7 +103,7 @@ export const CredentialsList: React.FC = () => {
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (token: IApiToken) => deleteApiKey(token.name),
+          onClick: (token: ApiToken) => deleteApiKey(token.name),
         },
       ],
     },
@@ -108,7 +116,7 @@ export const CredentialsList: React.FC = () => {
     hidePerPageOptions: true,
   };
 
-  const onTableChange = ({ page }: CriteriaWithPagination<IApiToken>) => {
+  const onTableChange = ({ page }: CriteriaWithPagination<ApiToken>) => {
     const { index: current } = page;
     fetchCredentials(current + 1);
   };

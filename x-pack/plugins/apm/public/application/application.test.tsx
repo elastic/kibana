@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart, HttpSetup } from 'src/core/public';
-import { mockApmPluginContextValue } from '../context/ApmPluginContext/MockApmPluginContext';
-import { ApmPluginSetupDeps } from '../plugin';
+import { mockApmPluginContextValue } from '../context/apm_plugin/mock_apm_plugin_context';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { renderApp } from './';
 import { disableConsoleWarning } from '../utils/testHelpers';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 jest.mock('../services/rest/index_pattern', () => ({
   createStaticIndexPattern: () => Promise.resolve(undefined),
@@ -41,7 +44,7 @@ describe('renderApp', () => {
     const plugins = {
       licensing: { license$: new Observable() },
       triggersActionsUi: { actionTypeRegistry: {}, alertTypeRegistry: {} },
-      usageCollection: { reportUiStats: () => {} },
+      usageCollection: { reportUiCounter: () => {} },
       data: {
         query: {
           timefilter: {
@@ -53,6 +56,20 @@ describe('renderApp', () => {
     const params = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
+      setHeaderActionMenu: () => {},
+    };
+
+    const data = dataPluginMock.createStartContract();
+    const embeddable = embeddablePluginMock.createStartContract();
+    const startDeps = {
+      triggersActionsUi: {
+        actionTypeRegistry: {},
+        alertTypeRegistry: {},
+        getAddAlertFlyout: jest.fn(),
+        getEditAlertFlyout: jest.fn(),
+      },
+      data,
+      embeddable,
     };
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi((core.http as unknown) as HttpSetup);
@@ -74,7 +91,8 @@ describe('renderApp', () => {
         (core as unknown) as CoreStart,
         (plugins as unknown) as ApmPluginSetupDeps,
         (params as unknown) as AppMountParameters,
-        config
+        config,
+        (startDeps as unknown) as ApmPluginStartDeps
       );
     });
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
   mockFleetObjectsResponse,
@@ -12,17 +14,17 @@ import {
   MockOSVersion,
 } from './endpoint.mocks';
 import { ISavedObjectsRepository, SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from '../../../../ingest_manager/common/types/models/agent';
-import { Agent } from '../../../../ingest_manager/common';
+import { AgentEventSOAttributes } from '../../../../fleet/common/types/models/agent';
+import { Agent } from '../../../../fleet/common';
 import * as endpointTelemetry from './index';
 import * as fleetSavedObjects from './fleet_saved_objects';
 
 describe('test security solution endpoint telemetry', () => {
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
   let getFleetSavedObjectsMetadataSpy: jest.SpyInstance<Promise<SavedObjectsFindResponse<Agent>>>;
-  let getLatestFleetEndpointEventSpy: jest.SpyInstance<Promise<
-    SavedObjectsFindResponse<AgentEventSOAttributes>
-  >>;
+  let getLatestFleetEndpointEventSpy: jest.SpyInstance<
+    Promise<SavedObjectsFindResponse<AgentEventSOAttributes>>
+  >;
 
   beforeAll(() => {
     getLatestFleetEndpointEventSpy = jest.spyOn(fleetSavedObjects, 'getLatestFleetEndpointEvent');

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { dashboardServiceProvider } from './dashboard_service';
 import { savedObjectsServiceMock } from '../../../../../../src/core/public/mocks';
-import { SavedObjectDashboard } from '../../../../../../src/plugins/dashboard/public/saved_dashboards';
+import { DashboardSavedObject } from '../../../../../../src/plugins/dashboard/public/saved_dashboards';
 import {
   DashboardUrlGenerator,
   SavedDashboardPanel,
@@ -91,7 +92,7 @@ describe('DashboardService', () => {
         kibanaSavedObjectMeta: {
           searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}',
         },
-      } as unknown) as SavedObjectDashboard,
+      } as unknown) as DashboardSavedObject,
       [{ title: 'Test title', type: 'test-panel', embeddableConfig: { testConfig: '' } }]
     );
     // assert

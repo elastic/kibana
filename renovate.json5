@@ -17,7 +17,7 @@
     'Team:Operations',
     'renovate',
     'v8.0.0',
-    'v7.10.0',
+    'v7.11.0',
   ],
   major: {
     labels: [
@@ -25,7 +25,7 @@
       'Team:Operations',
       'renovate',
       'v8.0.0',
-      'v7.10.0',
+      'v7.11.0',
       'renovate:major',
     ],
   },
@@ -57,7 +57,7 @@
         groupName: 'vega related modules',
         packageNames: ['vega', 'vega-lite', 'vega-schema-url-parser', 'vega-tooltip'],
         reviewers: ['team:kibana-app'],
-        labels: ['Feature:Lens', 'Team:KibanaApp'],
+        labels: ['Feature:Vega', 'Team:KibanaApp'],
         enabled: true,
       },
     ],

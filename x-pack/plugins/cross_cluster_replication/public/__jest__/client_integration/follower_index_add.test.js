@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RemoteClustersFormField } from '../../app/components';
 
 const { setup } = pageHelpers.followerIndexAdd;
@@ -169,7 +170,7 @@ describe('Create Follower index', () => {
           const totalRequests = server.requests.length;
 
           form.setInputValue('followerIndexInput', 'index-name');
-          await nextTick(550); // we need to wait as there is a debounce of 500ms on the http validation
+          await delay(550); // we need to wait as there is a debounce of 500ms on the http validation
 
           expect(server.requests.length).toBe(totalRequests + 1);
           expect(server.requests[server.requests.length - 1].url).toBe(
@@ -182,7 +183,7 @@ describe('Create Follower index', () => {
           httpRequestsMockHelpers.setGetClusterIndicesResponse([{ name: indexName }]);
 
           form.setInputValue('followerIndexInput', indexName);
-          await nextTick(550);
+          await delay(550);
           component.update();
 
           expect(form.getErrorsMessages()).toContain('An index with the same name already exists.');

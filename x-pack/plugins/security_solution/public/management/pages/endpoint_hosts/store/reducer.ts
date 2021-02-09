@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isOnEndpointPage, hasSelectedEndpoint } from './selectors';
@@ -41,6 +42,7 @@ export const initialEndpointListState: Immutable<EndpointState> = {
   endpointsTotal: 0,
   endpointsTotalError: undefined,
   queryStrategyVersion: undefined,
+  policyVersionInfo: undefined,
 };
 
 /* eslint-disable-next-line complexity */
@@ -55,6 +57,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       request_page_size: pageSize,
       request_page_index: pageIndex,
       query_strategy_version: queryStrategyVersion,
+      policy_info: policyVersionInfo,
     } = action.payload;
     return {
       ...state,
@@ -63,6 +66,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
       pageSize,
       pageIndex,
       queryStrategyVersion,
+      policyVersionInfo,
       loading: false,
       error: undefined,
     };
@@ -104,6 +108,7 @@ export const endpointListReducer: ImmutableReducer<EndpointState, AppAction> = (
     return {
       ...state,
       details: action.payload.metadata,
+      policyVersionInfo: action.payload.policy_info,
       detailsLoading: false,
       detailsError: undefined,
     };

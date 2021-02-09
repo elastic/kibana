@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PromiseReturnType } from '../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { SecurityServiceProvider } from '../../../../test/common/services/security';
 
 type SecurityService = PromiseReturnType<typeof SecurityServiceProvider>;
@@ -23,7 +24,7 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['read'], ml: ['read'] },
+        feature: { apm: ['read'], ml: ['read'], savedObjectsManagement: ['read'] },
         spaces: ['*'],
       },
     ],
@@ -50,7 +51,7 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['all'], ml: ['all'] },
+        feature: { apm: ['all'], ml: ['all'], savedObjectsManagement: ['all'] },
         spaces: ['*'],
       },
     ],

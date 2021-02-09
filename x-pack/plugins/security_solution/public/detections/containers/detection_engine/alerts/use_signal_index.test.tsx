@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -26,7 +27,7 @@ describe('useSignalIndex', () => {
         loading: true,
         signalIndexExists: null,
         signalIndexName: null,
-        signalIndexTemplateOutdated: null,
+        signalIndexMappingOutdated: null,
       });
     });
   });
@@ -43,7 +44,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: true,
         signalIndexName: 'mock-signal-index',
-        signalIndexTemplateOutdated: false,
+        signalIndexMappingOutdated: false,
       });
     });
   });
@@ -64,7 +65,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: true,
         signalIndexName: 'mock-signal-index',
-        signalIndexTemplateOutdated: false,
+        signalIndexMappingOutdated: false,
       });
     });
   });
@@ -104,7 +105,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: false,
         signalIndexName: null,
-        signalIndexTemplateOutdated: null,
+        signalIndexMappingOutdated: null,
       });
     });
   });
@@ -125,7 +126,7 @@ describe('useSignalIndex', () => {
         loading: false,
         signalIndexExists: false,
         signalIndexName: null,
-        signalIndexTemplateOutdated: null,
+        signalIndexMappingOutdated: null,
       });
     });
   });

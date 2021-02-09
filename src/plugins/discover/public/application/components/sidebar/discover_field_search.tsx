@@ -1,29 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+import './discover_field_search.scss';
+
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFacetButton,
   EuiFieldSearch,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -34,6 +25,10 @@ import {
   EuiFormRow,
   EuiButtonGroup,
   EuiOutsideClickDetector,
+  EuiFilterButton,
+  EuiSpacer,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -42,6 +37,7 @@ export interface State {
   aggregatable: string;
   type: string;
   missing: boolean;
+  unmappedFields: boolean;
   [index: string]: string | boolean;
 }
 
@@ -60,13 +56,36 @@ export interface Props {
    * types for the type filter
    */
   types: string[];
+
+  /**
+   * use new fields api
+   */
+  useNewFieldsApi?: boolean;
+
+  /**
+   * callback funtion to change the value of unmapped fields switch
+   * @param value new value to set
+   */
+  onChangeUnmappedFields?: (value: boolean) => void;
+
+  /**
+   * should unmapped fields switch be rendered
+   */
+  showUnmappedFields?: boolean;
 }
 
 /**
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types }: Props) {
+export function DiscoverFieldSearch({
+  onChange,
+  value,
+  types,
+  useNewFieldsApi,
+  showUnmappedFields,
+  onChangeUnmappedFields,
+}: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -92,6 +111,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     aggregatable: 'any',
     type: 'any',
     missing: true,
+    unmappedFields: !!showUnmappedFields,
   });
 
   if (typeof value !== 'string') {
@@ -108,7 +128,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         defaultMessage: 'Show field filter settings',
       });
 
-  const handleFacetButtonClicked = () => {
+  const handleFilterButtonClicked = () => {
     setPopoverOpen(!isPopoverOpen);
   };
 
@@ -161,21 +181,30 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     handleValueChange('missing', missingValue);
   };
 
+  const handleUnmappedFieldsChange = (e: EuiSwitchEvent) => {
+    const unmappedFieldsValue = e.target.checked;
+    handleValueChange('unmappedFields', unmappedFieldsValue);
+    if (onChangeUnmappedFields) {
+      onChangeUnmappedFields(unmappedFieldsValue);
+    }
+  };
+
   const buttonContent = (
-    <EuiFacetButton
+    <EuiFilterButton
       aria-label={filterBtnAriaLabel}
       data-test-subj="toggleFieldFilterButton"
-      className="dscFieldSearch__toggleButton"
-      icon={<EuiIcon type="filter" />}
+      iconType="arrowDown"
       isSelected={activeFiltersCount > 0}
-      quantity={activeFiltersCount}
-      onClick={handleFacetButtonClicked}
+      numFilters={0}
+      hasActiveFilters={activeFiltersCount > 0}
+      numActiveFilters={activeFiltersCount}
+      onClick={handleFilterButtonClicked}
     >
       <FormattedMessage
-        id="discover.fieldChooser.fieldFilterFacetButtonLabel"
+        id="discover.fieldChooser.fieldFilterButtonLabel"
         defaultMessage="Filter by type"
       />
-    </EuiFacetButton>
+    </EuiFilterButton>
   );
 
   const select = (
@@ -224,11 +253,56 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         legend={legend}
         options={toggleButtons(id)}
         idSelected={`${id}-${values[id]}`}
-        onChange={(optionId) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
+        onChange={(optionId: string) => handleValueChange(id, optionId.replace(`${id}-`, ''))}
         buttonSize="compressed"
         isFullWidth
         data-test-subj={`${id}ButtonGroup`}
       />
+    );
+  };
+
+  const footer = () => {
+    if (!showUnmappedFields && useNewFieldsApi) {
+      return null;
+    }
+    return (
+      <EuiPopoverFooter>
+        {showUnmappedFields ? (
+          <EuiFlexGroup>
+            <EuiFlexItem component="span">
+              <EuiSwitch
+                label={i18n.translate('discover.fieldChooser.filter.showUnmappedFields', {
+                  defaultMessage: 'Show unmapped fields',
+                })}
+                checked={values.unmappedFields}
+                onChange={handleUnmappedFieldsChange}
+                data-test-subj="unmappedFieldsSwitch"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem component="span" grow={false}>
+              <EuiToolTip
+                position="right"
+                content={i18n.translate('discover.fieldChooser.filter.unmappedFieldsWarning', {
+                  defaultMessage:
+                    'Unmapped fields will be deprecated and removed in a future release.',
+                })}
+              >
+                <EuiIcon type="alert" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+        {useNewFieldsApi ? null : (
+          <EuiSwitch
+            label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+              defaultMessage: 'Hide missing fields',
+            })}
+            checked={values.missing}
+            onChange={handleMissingChange}
+            data-test-subj="missingSwitch"
+          />
+        )}
+      </EuiPopoverFooter>
     );
   };
 
@@ -255,7 +329,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           <EuiFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
-            compressed
             fullWidth
             onChange={(event) => onChange('name', event.currentTarget.value)}
             placeholder={searchPlaceholder}
@@ -263,13 +336,14 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div className="dscFieldSearch__filterWrapper">
-        <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+      <EuiSpacer size="xs" />
+      <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+        <EuiFilterGroup className="dscFieldSearch__filterWrapper">
           <EuiPopover
             id="dataPanelTypeFilter"
             panelClassName="euiFilterGroup__popoverPanel"
             panelPaddingSize="none"
-            anchorPosition="downLeft"
+            anchorPosition="rightUp"
             display="block"
             isOpen={isPopoverOpen}
             closePopover={() => {
@@ -283,19 +357,10 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               })}
             </EuiPopoverTitle>
             {selectionPanel}
-            <EuiPopoverFooter>
-              <EuiSwitch
-                label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-                  defaultMessage: 'Hide missing fields',
-                })}
-                checked={values.missing}
-                onChange={handleMissingChange}
-                data-test-subj="missingSwitch"
-              />
-            </EuiPopoverFooter>
+            {footer()}
           </EuiPopover>
-        </EuiOutsideClickDetector>
-      </div>
+        </EuiFilterGroup>
+      </EuiOutsideClickDetector>
     </React.Fragment>
   );
 }

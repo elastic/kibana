@@ -3,7 +3,7 @@ The response from this request will be JSON, and will contain a `path` property 
 URL to use to download the generated report. Use the `GET` method in the HTTP request to
 download the report.
 
-The request method must be `POST` and it must include a `kbn-version` header for Kibana
+The request method must be `POST` and it must include a `kbn-xsrf` header for Kibana
 to allow the request.
 
 The following example queues CSV report generation using the `POST` URL with cURL:
@@ -13,7 +13,7 @@ The following example queues CSV report generation using the `POST` URL with cUR
 curl \
 -XPOST \ <1>
 -u elastic \ <2>
--H 'kbn-version: {version}' \ <3>
+-H 'kbn-xsrf: true' \ <3>
 'http://0.0.0.0:5601/api/reporting/generate/csv?jobParams=...' <4>
 ---------------------------------------------------------
 // CONSOLE
@@ -21,8 +21,8 @@ curl \
 <1> `POST` method is required.
 <2> Provide user credentials for a user with permission to access Kibana and
 {report-features}.
-<3> The `kbn-version` header is required for all `POST` requests to Kibana.
-**The value must match the dotted-numeral version of the Kibana instance.**
+<3> The `kbn-xsrf` header is required for all `POST` requests to Kibana. For more information, see <<api-request-headers, API Request
+Headers>>.
 <4> The POST URL. You can copy and paste the URL for any report from the Kibana UI.
 
 Here is an example response for a successfully queued report:

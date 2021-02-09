@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-ReactExpressionRenderer: ({ className, dataAttrs, padding, renderError, expression, onEvent, reload$, ...expressionLoaderOptions }: ReactExpressionRendererProps) => JSX.Element
+ReactExpressionRenderer: ({ className, dataAttrs, padding, renderError, expression, onEvent, onData$, reload$, debounce, ...expressionLoaderOptions }: ReactExpressionRendererProps) => JSX.Element
 ```

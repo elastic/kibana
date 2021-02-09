@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters/framework';
+import { Ping } from '../../../common/runtime_types/ping';
 
-interface GetJourneyScreenshotParams {
+export interface GetJourneyScreenshotParams {
   checkGroup: string;
   stepIndex: number;
 }
@@ -14,37 +16,55 @@ interface GetJourneyScreenshotParams {
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   GetJourneyScreenshotParams,
   any
-> = async ({ callES, dynamicSettings, checkGroup, stepIndex }) => {
-  const params: any = {
-    index: dynamicSettings.heartbeatIndices,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.check_group': checkGroup,
-              },
+> = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
+  const params = {
+    track_total_hits: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.check_group': checkGroup,
             },
-            {
-              term: {
-                'synthetics.type': 'step/screenshot',
-              },
+          },
+          {
+            term: {
+              'synthetics.type': 'step/screenshot',
             },
-            {
-              term: {
-                'synthetics.step.index': stepIndex,
-              },
+          },
+        ],
+      },
+    },
+    aggs: {
+      step: {
+        filter: {
+          term: {
+            'synthetics.step.index': stepIndex,
+          },
+        },
+        aggs: {
+          image: {
+            top_hits: {
+              size: 1,
+              _source: ['synthetics.blob', 'synthetics.step.name'],
             },
-          ],
+          },
         },
       },
-      _source: ['synthetics.blob'],
     },
   };
-  const result = await callES('search', params);
-  if (!Array.isArray(result?.hits?.hits) || result.hits.hits.length < 1) {
+  const { body: result } = await uptimeEsClient.search({ body: params });
+
+  if (result?.hits?.total.value < 1) {
     return null;
   }
-  return result.hits.hits.map(({ _source }: any) => _source?.synthetics?.blob ?? null)[0];
+
+  const stepHit = result?.aggregations?.step.image.hits.hits[0]._source as Ping;
+
+  return {
+    blob: stepHit.synthetics?.blob ?? null,
+    stepName: stepHit?.synthetics?.step?.name ?? '',
+    totalSteps: result?.hits?.total.value,
+  };
 };

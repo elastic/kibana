@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { deepFreeze } from '@kbn/std';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   KibanaRequest,
   Logger,
   HttpServiceSetup,
-  ILegacyClusterClient,
   Headers,
+  IClusterClient,
 } from '../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens } from '../tokens';
@@ -23,11 +26,11 @@ import { Tokens } from '../tokens';
 export interface AuthenticationProviderOptions {
   name: string;
   basePath: HttpServiceSetup['basePath'];
-  client: ILegacyClusterClient;
+  client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;
   urls: {
-    loggedOut: string;
+    loggedOut: (request: KibanaRequest) => string;
   };
 }
 
@@ -108,11 +111,23 @@ export abstract class BaseAuthenticationProvider {
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
+    return this.authenticationInfoToAuthenticatedUser(
+      (
+        await this.options.client
+          .asScoped({ headers: { ...request.headers, ...authHeaders } })
+          .asCurrentUser.security.authenticate<AuthenticationInfo>()
+      ).body
+    );
+  }
+
+  /**
+   * Converts Elasticsearch Authentication result to a Kibana authenticated user.
+   * @param authenticationInfo Result returned from the `_authenticate` operation.
+   */
+  protected authenticationInfoToAuthenticatedUser(authenticationInfo: AuthenticationInfo) {
     return deepFreeze({
-      ...(await this.options.client
-        .asScoped({ headers: { ...request.headers, ...authHeaders } })
-        .callAsCurrentUser('shield.authenticate')),
-      authentication_provider: this.options.name,
+      ...authenticationInfo,
+      authentication_provider: { type: this.type, name: this.options.name },
     } as AuthenticatedUser);
   }
 }

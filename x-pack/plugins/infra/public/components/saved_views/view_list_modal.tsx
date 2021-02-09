@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
@@ -60,7 +61,7 @@ export function SavedViewListModal<ViewState extends { id: string; name: string 
       key: v.id,
       checked: currentView?.id === v.id ? 'on' : undefined,
     }));
-  }, [views, currentView]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [views, currentView]);
 
   return (
     <EuiOverlayMask>

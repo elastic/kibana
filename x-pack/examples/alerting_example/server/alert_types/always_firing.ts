@@ -1,29 +1,72 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
 import { range } from 'lodash';
 import { AlertType } from '../../../../plugins/alerts/server';
-import { DEFAULT_INSTANCES_TO_GENERATE, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import {
+  DEFAULT_INSTANCES_TO_GENERATE,
+  ALERTING_EXAMPLE_APP_ID,
+  AlwaysFiringParams,
+  AlwaysFiringActionGroupIds,
+} from '../../common/constants';
 
-export const alertType: AlertType = {
+type ActionGroups = 'small' | 'medium' | 'large';
+const DEFAULT_ACTION_GROUP: ActionGroups = 'small';
+
+function getTShirtSizeByIdAndThreshold(
+  id: string,
+  thresholds: AlwaysFiringParams['thresholds']
+): ActionGroups {
+  const idAsNumber = parseInt(id, 10);
+  if (!isNaN(idAsNumber)) {
+    if (thresholds?.large && thresholds.large < idAsNumber) {
+      return 'large';
+    }
+    if (thresholds?.medium && thresholds.medium < idAsNumber) {
+      return 'medium';
+    }
+    if (thresholds?.small && thresholds.small < idAsNumber) {
+      return 'small';
+    }
+  }
+  return DEFAULT_ACTION_GROUP;
+}
+
+export const alertType: AlertType<
+  AlwaysFiringParams,
+  { count?: number },
+  { triggerdOnCycle: number },
+  never,
+  AlwaysFiringActionGroupIds
+> = {
   id: 'example.always-firing',
   name: 'Always firing',
-  actionGroups: [{ id: 'default', name: 'default' }],
-  defaultActionGroupId: 'default',
-  async executor({ services, params: { instances = DEFAULT_INSTANCES_TO_GENERATE }, state }) {
+  actionGroups: [
+    { id: 'small', name: 'Small t-shirt' },
+    { id: 'medium', name: 'Medium t-shirt' },
+    { id: 'large', name: 'Large t-shirt' },
+  ],
+  defaultActionGroupId: DEFAULT_ACTION_GROUP,
+  minimumLicenseRequired: 'basic',
+  async executor({
+    services,
+    params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
+    state,
+  }) {
     const count = (state.count ?? 0) + 1;
 
     range(instances)
-      .map(() => ({ id: uuid.v4() }))
-      .forEach((instance: { id: string }) => {
+      .map(() => uuid.v4())
+      .forEach((id: string) => {
         services
-          .alertInstanceFactory(instance.id)
+          .alertInstanceFactory(id)
           .replaceState({ triggerdOnCycle: count })
-          .scheduleActions('default');
+          .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
       });
 
     return {

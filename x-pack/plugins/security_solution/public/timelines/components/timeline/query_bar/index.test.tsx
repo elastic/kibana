@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -23,22 +24,19 @@ import {
   getDataProviderFilter,
   TIMELINE_FILTER_DROP_AREA,
 } from './index';
+import { waitFor } from '@testing-library/dom';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline QueryBar ', () => {
-  const mockApplyKqlFilterQuery = jest.fn();
   const mockSetFilters = jest.fn();
-  const mockSetKqlFilterQueryDraft = jest.fn();
   const mockSetSavedQueryId = jest.fn();
   const mockUpdateReduxTime = jest.fn();
 
   beforeEach(() => {
-    mockApplyKqlFilterQuery.mockClear();
     mockSetFilters.mockClear();
-    mockSetKqlFilterQueryDraft.mockClear();
     mockSetSavedQueryId.mockClear();
     mockUpdateReduxTime.mockClear();
   });
@@ -77,24 +75,19 @@ describe('Timeline QueryBar ', () => {
     const wrapper = mount(
       <TestProviders>
         <QueryBarTimeline
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={filters}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
-          filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
           setFilters={mockSetFilters}
-          setKqlFilterQueryDraft={mockSetKqlFilterQueryDraft}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timline-real-id"
           updateReduxTime={mockUpdateReduxTime}
@@ -106,56 +99,9 @@ describe('Timeline QueryBar ', () => {
     expect(queryBarProps.dateRangeFrom).toEqual('now-24h');
     expect(queryBarProps.dateRangeTo).toEqual('now');
     expect(queryBarProps.filterQuery).toEqual({ query: 'here: query', language: 'kuery' });
-    expect(queryBarProps.savedQuery).toEqual(null);
+    expect(queryBarProps.savedQuery).toEqual(undefined);
     expect(queryBarProps.filters).toHaveLength(1);
     expect(queryBarProps.filters[0].query).toEqual(filters[1].query);
-  });
-
-  describe('#onChangeQuery', () => {
-    test(' is the only reference that changed when filterQueryDraft props get updated', () => {
-      const Proxy = (props: QueryBarTimelineComponentProps) => (
-        <TestProviders>
-          <QueryBarTimeline {...props} />
-        </TestProviders>
-      );
-
-      const wrapper = mount(
-        <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
-          dataProviders={mockDataProviders}
-          filters={[]}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-          filterQuery={{ expression: 'here: query', kind: 'kuery' }}
-          filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={'2020-07-07T08:20:18.966Z'}
-          fromStr={DEFAULT_FROM}
-          to={'2020-07-08T08:20:18.966Z'}
-          toStr={DEFAULT_TO}
-          kqlMode="search"
-          indexPattern={mockIndexPattern}
-          isRefreshPaused={true}
-          refreshInterval={3000}
-          savedQueryId={null}
-          setFilters={mockSetFilters}
-          setKqlFilterQueryDraft={mockSetKqlFilterQueryDraft}
-          setSavedQueryId={mockSetSavedQueryId}
-          timelineId="timeline-real-id"
-          updateReduxTime={mockUpdateReduxTime}
-        />
-      );
-      const queryBarProps = wrapper.find(QueryBar).props();
-      const onChangedQueryRef = queryBarProps.onChangedQuery;
-      const onSubmitQueryRef = queryBarProps.onSubmitQuery;
-      const onSavedQueryRef = queryBarProps.onSavedQuery;
-
-      wrapper.setProps({ filterQueryDraft: { expression: 'new: one', kind: 'kuery' } });
-      wrapper.update();
-
-      expect(onChangedQueryRef).not.toEqual(wrapper.find(QueryBar).props().onChangedQuery);
-      expect(onSubmitQueryRef).toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
-      expect(onSavedQueryRef).toEqual(wrapper.find(QueryBar).props().onSavedQuery);
-    });
   });
 
   describe('#onSubmitQuery', () => {
@@ -168,31 +114,25 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
-          filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
           setFilters={mockSetFilters}
-          setKqlFilterQueryDraft={mockSetKqlFilterQueryDraft}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}
         />
       );
       const queryBarProps = wrapper.find(QueryBar).props();
-      const onChangedQueryRef = queryBarProps.onChangedQuery;
       const onSubmitQueryRef = queryBarProps.onSubmitQuery;
       const onSavedQueryRef = queryBarProps.onSavedQuery;
 
@@ -200,7 +140,6 @@ describe('Timeline QueryBar ', () => {
       wrapper.update();
 
       expect(onSubmitQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
-      expect(onChangedQueryRef).toEqual(wrapper.find(QueryBar).props().onChangedQuery);
       expect(onSavedQueryRef).toEqual(wrapper.find(QueryBar).props().onSavedQuery);
     });
 
@@ -213,31 +152,25 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
-          filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
           setFilters={mockSetFilters}
-          setKqlFilterQueryDraft={mockSetKqlFilterQueryDraft}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}
         />
       );
       const queryBarProps = wrapper.find(QueryBar).props();
-      const onChangedQueryRef = queryBarProps.onChangedQuery;
       const onSubmitQueryRef = queryBarProps.onSubmitQuery;
       const onSavedQueryRef = queryBarProps.onSavedQuery;
 
@@ -245,13 +178,12 @@ describe('Timeline QueryBar ', () => {
       wrapper.update();
 
       expect(onSubmitQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
-      expect(onChangedQueryRef).toEqual(wrapper.find(QueryBar).props().onChangedQuery);
       expect(onSavedQueryRef).toEqual(wrapper.find(QueryBar).props().onSavedQuery);
     });
   });
 
   describe('#onSavedQuery', () => {
-    test('is only reference that changed when dataProviders props get updated', () => {
+    test('is only reference that changed when dataProviders props get updated', async () => {
       const Proxy = (props: QueryBarTimelineComponentProps) => (
         <TestProviders>
           <QueryBarTimeline {...props} />
@@ -260,43 +192,36 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
-          filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
           setFilters={mockSetFilters}
-          setKqlFilterQueryDraft={mockSetKqlFilterQueryDraft}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}
         />
       );
       const queryBarProps = wrapper.find(QueryBar).props();
-      const onChangedQueryRef = queryBarProps.onChangedQuery;
       const onSubmitQueryRef = queryBarProps.onSubmitQuery;
       const onSavedQueryRef = queryBarProps.onSavedQuery;
 
       wrapper.setProps({ dataProviders: mockDataProviders.slice(1, 0) });
-      wrapper.update();
+      await waitFor(() => wrapper.update());
 
       expect(onSavedQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSavedQuery);
-      expect(onChangedQueryRef).toEqual(wrapper.find(QueryBar).props().onChangedQuery);
       expect(onSubmitQueryRef).toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
     });
 
-    test('is only reference that changed when savedQueryId props get updated', () => {
+    test('is only reference that changed when savedQueryId props get updated', async () => {
       const Proxy = (props: QueryBarTimelineComponentProps) => (
         <TestProviders>
           <QueryBarTimeline {...props} />
@@ -305,41 +230,34 @@ describe('Timeline QueryBar ', () => {
 
       const wrapper = mount(
         <Proxy
-          applyKqlFilterQuery={mockApplyKqlFilterQuery}
-          browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
           filters={[]}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
-          filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
           to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
-          indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           refreshInterval={3000}
           savedQueryId={null}
           setFilters={mockSetFilters}
-          setKqlFilterQueryDraft={mockSetKqlFilterQueryDraft}
           setSavedQueryId={mockSetSavedQueryId}
           timelineId="timeline-real-id"
           updateReduxTime={mockUpdateReduxTime}
         />
       );
       const queryBarProps = wrapper.find(QueryBar).props();
-      const onChangedQueryRef = queryBarProps.onChangedQuery;
       const onSubmitQueryRef = queryBarProps.onSubmitQuery;
       const onSavedQueryRef = queryBarProps.onSavedQuery;
 
       wrapper.setProps({
         savedQueryId: 'new',
       });
-      wrapper.update();
+      await waitFor(() => wrapper.update());
 
       expect(onSavedQueryRef).not.toEqual(wrapper.find(QueryBar).props().onSavedQuery);
-      expect(onChangedQueryRef).toEqual(wrapper.find(QueryBar).props().onChangedQuery);
       expect(onSubmitQueryRef).toEqual(wrapper.find(QueryBar).props().onSubmitQuery);
     });
   });
@@ -384,7 +302,7 @@ describe('Timeline QueryBar ', () => {
           [
             {
               id: `id-exists`,
-              name,
+              name: 'name',
               enabled: true,
               excluded: false,
               kqlQuery: '',

@@ -1,36 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  IRouter,
   kibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Session } from '../../session_management';
 import { defineSessionInfoRoutes } from './info';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { sessionMock } from '../../session_management/session.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Info session routes', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    session = routeParamsMock.session;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
 
     defineSessionInfoRoutes(routeParamsMock);
   });
 
   describe('extend session', () => {
-    let routeHandler: RequestHandler<any, any, any>;
+    let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
     beforeEach(() => {
       const [extendRouteConfig, extendRouteHandler] = router.get.mock.calls.find(
@@ -52,7 +55,11 @@ describe('Info session routes', () => {
 
       const request = httpServerMock.createKibanaRequest();
       await expect(
-        routeHandler(({} as unknown) as RequestHandlerContext, request, kibanaResponseFactory)
+        routeHandler(
+          ({} as unknown) as SecurityRequestHandlerContext,
+          request,
+          kibanaResponseFactory
+        )
       ).resolves.toEqual({
         status: 500,
         options: {},
@@ -78,7 +85,7 @@ describe('Info session routes', () => {
       };
       await expect(
         routeHandler(
-          ({} as unknown) as RequestHandlerContext,
+          ({} as unknown) as SecurityRequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           kibanaResponseFactory
         )
@@ -94,7 +101,7 @@ describe('Info session routes', () => {
 
       await expect(
         routeHandler(
-          ({} as unknown) as RequestHandlerContext,
+          ({} as unknown) as SecurityRequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           kibanaResponseFactory
         )

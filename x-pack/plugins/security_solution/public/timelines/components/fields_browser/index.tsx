@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiPortal, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { DEFAULT_CATEGORY_NAME } from '../timeline/body/column_headers/default_headers';
 import { FieldsBrowser } from './field_browser';
 import { filterBrowserFieldsByFieldName, mergeBrowserFieldsWithDefaultCategory } from './helpers';
@@ -37,11 +37,10 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
   browserFields,
   height,
   onFieldSelected,
-  onUpdateColumns,
   timelineId,
-  toggleColumn,
   width,
 }) => {
+  const customizeColumnsButtonRef = useRef<HTMLButtonElement | null>(null);
   /** tracks the latest timeout id from `setTimeout`*/
   const inputTimeoutId = useRef(0);
 
@@ -109,24 +108,6 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     [browserFields, filterInput, inputTimeoutId.current]
   );
 
-  /**
-   * Invoked when the user clicks a category name in the left-hand side of
-   * the field browser
-   */
-  const updateSelectedCategoryId = useCallback((categoryId: string) => {
-    setSelectedCategoryId(categoryId);
-  }, []);
-
-  /**
-   * Invoked when the user clicks on the context menu to view a category's
-   * columns in the timeline, this function dispatches the action that
-   * causes the timeline display those columns.
-   */
-  const updateColumnsAndSelectCategoryId = useCallback((columns: ColumnHeaderOptions[]) => {
-    onUpdateColumns(columns); // show the category columns in the timeline
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   /** Invoked when the field browser should be hidden */
   const hideFieldBrowser = useCallback(() => {
     setFilterInput('');
@@ -136,6 +117,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
     setSelectedCategoryId(DEFAULT_CATEGORY_NAME);
     setShow(false);
   }, []);
+
   // only merge in the default category if the field browser is visible
   const browserFieldsWithDefaultCategory = useMemo(() => {
     return show ? mergeBrowserFieldsWithDefaultCategory(browserFields) : {};
@@ -146,6 +128,7 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       <EuiToolTip content={i18n.CUSTOMIZE_COLUMNS}>
         <EuiButtonIcon
           aria-label={i18n.CUSTOMIZE_COLUMNS}
+          buttonRef={customizeColumnsButtonRef}
           className={fieldsButtonClassName}
           data-test-subj="show-field-browser"
           iconType="list"
@@ -156,26 +139,29 @@ export const StatefulFieldsBrowserComponent: React.FC<FieldBrowserProps> = ({
       </EuiToolTip>
 
       {show && (
-        <FieldsBrowser
-          browserFields={browserFieldsWithDefaultCategory}
-          columnHeaders={columnHeaders}
-          filteredBrowserFields={
-            filteredBrowserFields != null ? filteredBrowserFields : browserFieldsWithDefaultCategory
-          }
-          height={height}
-          isSearching={isSearching}
-          onCategorySelected={updateSelectedCategoryId}
-          onFieldSelected={onFieldSelected}
-          onHideFieldBrowser={hideFieldBrowser}
-          onOutsideClick={show ? hideFieldBrowser : noop}
-          onSearchInputChange={updateFilter}
-          onUpdateColumns={updateColumnsAndSelectCategoryId}
-          searchInput={filterInput}
-          selectedCategoryId={selectedCategoryId}
-          timelineId={timelineId}
-          toggleColumn={toggleColumn}
-          width={width}
-        />
+        <EuiPortal>
+          <FieldsBrowser
+            browserFields={browserFieldsWithDefaultCategory}
+            columnHeaders={columnHeaders}
+            filteredBrowserFields={
+              filteredBrowserFields != null
+                ? filteredBrowserFields
+                : browserFieldsWithDefaultCategory
+            }
+            height={height}
+            isSearching={isSearching}
+            onCategorySelected={setSelectedCategoryId}
+            onFieldSelected={onFieldSelected}
+            onHideFieldBrowser={hideFieldBrowser}
+            onOutsideClick={show ? hideFieldBrowser : noop}
+            onSearchInputChange={updateFilter}
+            restoreFocusTo={customizeColumnsButtonRef}
+            searchInput={filterInput}
+            selectedCategoryId={selectedCategoryId}
+            timelineId={timelineId}
+            width={width}
+          />
+        </EuiPortal>
       )}
     </FieldsBrowserButtonContainer>
   );

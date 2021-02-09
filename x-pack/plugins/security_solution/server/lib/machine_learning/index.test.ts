@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { getExceptionListItemSchemaMock } from '../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getAnomalies, AnomaliesSearchParams } from '.';
 
 const getFiltersFromMock = (mock: jest.Mock) => {
@@ -23,6 +25,7 @@ describe('getAnomalies', () => {
       threshold: 5,
       earliestMs: 1588517231429,
       latestMs: 1588617231429,
+      exceptionItems: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
     };
   });
 

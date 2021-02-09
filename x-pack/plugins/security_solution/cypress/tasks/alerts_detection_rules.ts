@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -13,7 +14,6 @@ import {
   DELETE_RULE_BULK_BTN,
   LOAD_PREBUILT_RULES_BTN,
   LOADING_INITIAL_PREBUILT_RULES_TABLE,
-  LOADING_SPINNER,
   PAGINATION_POPOVER_BTN,
   RELOAD_PREBUILT_RULES_BTN,
   RULE_CHECKBOX,
@@ -26,6 +26,9 @@ import {
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
   NEXT_BTN,
+  ASYNC_LOADING_PROGRESS,
+  RULE_AUTO_REFRESH_IDLE_MODAL,
+  RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -39,7 +42,9 @@ export const changeToThreeHundredRowsPerPage = () => {
 };
 
 export const editFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+  cy.get(EDIT_RULE_ACTION_BTN).should('be.visible');
   cy.get(EDIT_RULE_ACTION_BTN).click();
 };
 
@@ -66,8 +71,8 @@ export const exportFirstRule = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
 };
 
 export const goToCreateNewRule = () => {
@@ -119,6 +124,31 @@ export const waitForRuleToBeActivated = () => {
 };
 
 export const waitForRulesToBeLoaded = () => {
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
+};
+
+export const checkAutoRefresh = (ms: number, condition: string) => {
+  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
+  cy.tick(ms);
+  cy.get(ASYNC_LOADING_PROGRESS).should(condition);
+};
+
+export const dismissAllRulesIdleModal = () => {
+  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE)
+    .eq(1)
+    .should('exist')
+    .click({ force: true, multiple: true });
+  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
+};
+
+export const checkAllRulesIdleModal = (condition: string) => {
+  cy.tick(2700000);
+  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should(condition);
+};
+
+export const resetAllRulesIdleModalTimeout = () => {
+  cy.tick(2000000);
+  cy.window().trigger('mousemove', { force: true });
+  cy.tick(700000);
 };

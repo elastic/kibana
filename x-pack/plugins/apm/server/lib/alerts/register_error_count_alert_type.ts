@@ -1,26 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerts/server';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  AlertingPlugin,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeState,
+} from '../../../../alerts/server';
+import {
+  AlertType,
+  ALERT_TYPES_CONFIG,
+  ThresholdMetActionGroupId,
+} from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
+import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -41,7 +51,13 @@ export function registerErrorCountAlertType({
   alerts,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerts.registerType<
+    TypeOf<typeof paramsSchema>,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    ThresholdMetActionGroupId
+  >({
     id: AlertType.ErrorCount,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -59,6 +75,7 @@ export function registerErrorCountAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const alertParams = params;
@@ -66,6 +83,7 @@ export function registerErrorCountAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
@@ -100,6 +118,7 @@ export function registerErrorCountAlertType({
                 environments: {
                   terms: {
                     field: SERVICE_ENVIRONMENT,
+                    size: maxServiceEnvironments,
                   },
                 },
               },
@@ -108,11 +127,7 @@ export function registerErrorCountAlertType({
         },
       };
 
-      const response: ESSearchResponse<
-        unknown,
-        typeof searchParams
-      > = await services.callCluster('search', searchParams);
-
+      const response = await alertingEsClient(services, searchParams);
       const errorCount = response.hits.total.value;
 
       if (errorCount > alertParams.threshold) {

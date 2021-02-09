@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { IUiSettingsClient } from 'kibana/server';
+
 import { i18n } from '@kbn/i18n';
 import { BaseAlert } from './base_alert';
 import {
@@ -12,106 +13,91 @@ import {
   AlertState,
   AlertMessage,
   AlertInstanceState,
-  LegacyAlert,
-} from './types';
+  CommonAlertParams,
+  AlertVersions,
+} from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_KIBANA_VERSION_MISMATCH } from '../../common/constants';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
+import {
+  ALERT_KIBANA_VERSION_MISMATCH,
+  LEGACY_ALERT_DETAILS,
+  INDEX_PATTERN_KIBANA,
+} from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { CommonAlertParams } from '../../common/types';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { AlertingDefaults } from './alerts_common';
-
-const WATCH_NAME = 'kibana_version_mismatch';
+import { AlertingDefaults } from './alert_helpers';
+import { SanitizedAlert } from '../../../alerts/common';
+import { Globals } from '../static_globals';
+import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
+import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
+import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 
 export class KibanaVersionMismatchAlert extends BaseAlert {
-  public type = ALERT_KIBANA_VERSION_MISMATCH;
-  public label = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.label', {
-    defaultMessage: 'Kibana version mismatch',
-  });
-  public isLegacy = true;
-
-  protected actionVariables = [
-    {
-      name: 'versionList',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterHealth',
+  constructor(public rawAlert?: SanitizedAlert) {
+    super(rawAlert, {
+      id: ALERT_KIBANA_VERSION_MISMATCH,
+      name: LEGACY_ALERT_DETAILS[ALERT_KIBANA_VERSION_MISMATCH].label,
+      interval: '1d',
+      actionVariables: [
         {
-          defaultMessage: 'The versions of Kibana running in this cluster.',
-        }
-      ),
-    },
-    {
-      name: 'clusterName',
-      description: i18n.translate(
-        'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterName',
+          name: 'versionList',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterHealth',
+            {
+              defaultMessage: 'The versions of Kibana running in this cluster.',
+            }
+          ),
+        },
         {
-          defaultMessage: 'The cluster to which the instances belong.',
-        }
-      ),
-    },
-    AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
-    AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
-    AlertingDefaults.ALERT_TYPE.context.state,
-    AlertingDefaults.ALERT_TYPE.context.action,
-    AlertingDefaults.ALERT_TYPE.context.actionPlain,
-  ];
+          name: 'clusterName',
+          description: i18n.translate(
+            'xpack.monitoring.alerts.kibanaVersionMismatch.actionVariables.clusterName',
+            {
+              defaultMessage: 'The cluster to which the instances belong.',
+            }
+          ),
+        },
+        AlertingDefaults.ALERT_TYPE.context.internalShortMessage,
+        AlertingDefaults.ALERT_TYPE.context.internalFullMessage,
+        AlertingDefaults.ALERT_TYPE.context.state,
+        AlertingDefaults.ALERT_TYPE.context.action,
+        AlertingDefaults.ALERT_TYPE.context.actionPlain,
+      ],
+    });
+  }
 
   protected async fetchData(
     params: CommonAlertParams,
     callCluster: any,
     clusters: AlertCluster[],
-    uiSettings: IUiSettingsClient,
     availableCcs: string[]
   ): Promise<AlertData[]> {
-    let alertIndexPattern = INDEX_ALERTS;
+    let kibanaIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_KIBANA);
     if (availableCcs) {
-      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
+      kibanaIndexPattern = getCcsIndexPattern(kibanaIndexPattern, availableCcs);
     }
-    const legacyAlerts = await fetchLegacyAlerts(
+    const kibanaVersions = await fetchKibanaVersions(
       callCluster,
       clusters,
-      alertIndexPattern,
-      WATCH_NAME,
-      this.config.ui.max_bucket_size
+      kibanaIndexPattern,
+      Globals.app.config.ui.max_bucket_size
     );
 
-    return legacyAlerts.reduce((accum: AlertData[], legacyAlert) => {
-      const severity = AlertSeverity.Warning;
-      accum.push({
-        instanceKey: `${legacyAlert.metadata.cluster_uuid}`,
-        clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: !legacyAlert.resolved_timestamp,
-        severity,
-        meta: legacyAlert,
-      });
-      return accum;
-    }, []);
-  }
-
-  private getVersions(legacyAlert: LegacyAlert) {
-    const prefixStr = 'Versions: ';
-    return legacyAlert.message.slice(
-      legacyAlert.message.indexOf(prefixStr) + prefixStr.length,
-      legacyAlert.message.length - 1
-    );
+    return kibanaVersions.map((kibanaVersion) => {
+      return {
+        shouldFire: kibanaVersion.versions.length > 1,
+        severity: AlertSeverity.Warning,
+        meta: kibanaVersion,
+        clusterUuid: kibanaVersion.clusterUuid,
+        ccs: kibanaVersion.ccs,
+      };
+    });
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const legacyAlert = item.meta as LegacyAlert;
-    const versions = this.getVersions(legacyAlert);
-    if (!alertState.ui.isFiring) {
-      return {
-        text: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.resolvedMessage', {
-          defaultMessage: `All versions of Kibana are the same in this cluster.`,
-        }),
-      };
-    }
-
+    const { versions } = item.meta as AlertVersions;
     const text = i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.ui.firingMessage', {
       defaultMessage: `Multiple versions of Kibana ({versions}) running in this cluster.`,
       values: {
-        versions,
+        versions: versions.join(', '),
       },
     });
 
@@ -122,81 +108,64 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
 
   protected async executeActions(
     instance: AlertInstance,
-    instanceState: AlertInstanceState,
-    item: AlertData,
+    { alertStates }: AlertInstanceState,
+    item: AlertData | null,
     cluster: AlertCluster
   ) {
-    if (instanceState.alertStates.length === 0) {
+    if (alertStates.length === 0) {
       return;
     }
-    const alertState = instanceState.alertStates[0];
-    const legacyAlert = item.meta as LegacyAlert;
-    const versions = this.getVersions(legacyAlert);
-    if (!alertState.ui.isFiring) {
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.kibanaVersionMismatch.resolved.internalShortMessage',
-          {
-            defaultMessage: `Kibana version mismatch alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.kibanaVersionMismatch.resolved.internalFullMessage',
-          {
-            defaultMessage: `Kibana version mismatch alert is resolved for {clusterName}.`,
-            values: {
-              clusterName: cluster.clusterName,
-            },
-          }
-        ),
-        state: AlertingDefaults.ALERT_STATE.resolved,
-        clusterName: cluster.clusterName,
-      });
-    } else {
-      const shortActionText = i18n.translate(
-        'xpack.monitoring.alerts.kibanaVersionMismatch.shortAction',
+
+    // Logic in the base alert assumes that all alerts will operate against multiple nodes/instances (such as a CPU alert against ES nodes)
+    // However, some alerts operate on the state of the cluster itself and are only concerned with a single state
+    const state = alertStates[0];
+    const { versions } = state.meta as AlertVersions;
+    const shortActionText = i18n.translate(
+      'xpack.monitoring.alerts.kibanaVersionMismatch.shortAction',
+      {
+        defaultMessage: 'Verify you have the same version across all instances.',
+      }
+    );
+    const fullActionText = i18n.translate(
+      'xpack.monitoring.alerts.kibanaVersionMismatch.fullAction',
+      {
+        defaultMessage: 'View instances',
+      }
+    );
+    const globalStateLink = this.createGlobalStateLink(
+      'kibana/instances',
+      cluster.clusterUuid,
+      state.ccs
+    );
+    const action = `[${fullActionText}](${globalStateLink})`;
+    const internalFullMessage = i18n.translate(
+      'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalFullMessage',
+      {
+        defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. Kibana is running {versions}. {action}`,
+        values: {
+          clusterName: cluster.clusterName,
+          versions: versions.join(', '),
+          action,
+        },
+      }
+    );
+    instance.scheduleActions('default', {
+      internalShortMessage: i18n.translate(
+        'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalShortMessage',
         {
-          defaultMessage: 'Verify you have the same version across all instances.',
+          defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. {shortActionText}`,
+          values: {
+            clusterName: cluster.clusterName,
+            shortActionText,
+          },
         }
-      );
-      const fullActionText = i18n.translate(
-        'xpack.monitoring.alerts.kibanaVersionMismatch.fullAction',
-        {
-          defaultMessage: 'View instances',
-        }
-      );
-      const action = `[${fullActionText}](kibana/instances)`;
-      instance.scheduleActions('default', {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalShortMessage',
-          {
-            defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. {shortActionText}`,
-            values: {
-              clusterName: cluster.clusterName,
-              shortActionText,
-            },
-          }
-        ),
-        internalFullMessage: i18n.translate(
-          'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalFullMessage',
-          {
-            defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. Kibana is running {versions}. {action}`,
-            values: {
-              clusterName: cluster.clusterName,
-              versions,
-              action,
-            },
-          }
-        ),
-        state: AlertingDefaults.ALERT_STATE.firing,
-        clusterName: cluster.clusterName,
-        versionList: versions,
-        action,
-        actionPlain: shortActionText,
-      });
-    }
+      ),
+      internalFullMessage,
+      state: AlertingDefaults.ALERT_STATE.firing,
+      clusterName: cluster.clusterName,
+      versionList: versions,
+      action,
+      actionPlain: shortActionText,
+    });
   }
 }

@@ -1,42 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   AppMountParameters,
+  CoreStart,
   CoreSetup,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { CloudSetup } from '../../cloud/public';
 import { LicensingPluginStart } from '../../licensing/public';
+
 import {
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
-import { IInitialAppData } from '../common/types';
+import { InitialAppData } from '../common/types';
+
+import { docLinks } from './applications/shared/doc_links';
 
 export interface ClientConfigType {
   host?: string;
 }
-export interface ClientData extends IInitialAppData {
+export interface ClientData extends InitialAppData {
   publicUrl?: string;
   errorConnecting?: boolean;
 }
 
-export interface PluginsSetup {
+interface PluginsSetup {
+  cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
 }
 export interface PluginsStart {
+  cloud?: CloudSetup;
   licensing: LicensingPluginStart;
+  charts: ChartsPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -49,6 +59,8 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
+    const { cloud } = plugins;
+
     core.application.register({
       id: ENTERPRISE_SEARCH_PLUGIN.ID,
       title: ENTERPRISE_SEARCH_PLUGIN.NAV_TITLE,
@@ -56,7 +68,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params);
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
 
@@ -77,7 +89,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params);
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
 
@@ -98,7 +110,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params);
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
@@ -145,15 +157,21 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    // This must be called here in start() and not in `applications/index.tsx` to prevent loading
+    // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
+    docLinks.setDocLinks(core.docLinks);
+  }
 
   public stop() {}
 
-  private async getKibanaDeps(core: CoreSetup, params: AppMountParameters) {
+  private async getKibanaDeps(core: CoreSetup, params: AppMountParameters, cloud?: CloudSetup) {
     // Helper for using start dependencies on mount (instead of setup dependencies)
     // and for grouping Kibana-related args together (vs. plugin-specific args)
     const [coreStart, pluginsStart] = await core.getStartServices();
-    return { params, core: coreStart, plugins: pluginsStart as PluginsStart };
+    const plugins = { ...pluginsStart, cloud } as PluginsStart;
+
+    return { params, core: coreStart, plugins };
   }
 
   private getPluginData() {

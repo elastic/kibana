@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -607,6 +608,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: false,
+              createNewCopies: false,
               overwrite: false,
             })
             .expect(tests.noConflictsWithoutReferences.statusCode)
@@ -625,6 +627,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: false,
             })
             .expect(tests.noConflictsWithReferences.statusCode)
@@ -643,6 +646,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: true,
             })
             .expect(tests.withConflictsOverwriting.statusCode)
@@ -661,6 +665,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [destination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: false,
             })
             .expect(tests.withConflictsWithoutOverwriting.statusCode)
@@ -678,6 +683,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: [conflictDestination, noConflictDestination],
               includeReferences: true,
+              createNewCopies: false,
               overwrite: true,
             })
             .expect(tests.multipleSpaces.statusCode)
@@ -710,6 +716,7 @@ export function copyToSpaceTestSuiteFactory(
               objects: [dashboardObject],
               spaces: ['non_existent_space'],
               includeReferences: false,
+              createNewCopies: false,
               overwrite: true,
             })
             .expect(tests.nonExistentSpace.statusCode)
@@ -720,6 +727,7 @@ export function copyToSpaceTestSuiteFactory(
       [false, true].forEach((overwrite) => {
         const spaces = ['space_2'];
         const includeReferences = false;
+        const createNewCopies = false;
         describe(`multi-namespace types with overwrite=${overwrite}`, () => {
           before(() => esArchiver.load('saved_objects/spaces'));
           after(() => esArchiver.unload('saved_objects/spaces'));
@@ -730,7 +738,7 @@ export function copyToSpaceTestSuiteFactory(
               return supertest
                 .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
                 .auth(user.username, user.password)
-                .send({ objects, spaces, includeReferences, overwrite })
+                .send({ objects, spaces, includeReferences, createNewCopies, overwrite })
                 .expect(statusCode)
                 .then(response);
             });

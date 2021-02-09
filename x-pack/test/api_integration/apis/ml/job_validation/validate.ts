@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -302,6 +304,12 @@ export default ({ getService }: FtrProviderContext) => {
             'The specified model memory limit is less than half of the estimated model memory limit and will likely hit the hard limit.',
           url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#model-memory-limits`,
           status: 'warning',
+        },
+        {
+          id: 'missing_summary_count_field_name',
+          status: 'error',
+          text:
+            'A job configured with a datafeed with aggregations must set summary_count_field_name; use doc_count or suitable alternative.',
         },
       ];
 

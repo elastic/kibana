@@ -1,61 +1,63 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller, Logger } from 'kibana/server';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ElasticsearchClient, Logger } from 'kibana/server';
+import { unwrapEsResponse } from '../../../../../observability/server';
+import { rangeFilter } from '../../../../common/utils/range_filter';
+import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
-import { SetupTimeRange, Setup } from '../../helpers/setup_request';
+import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getStoredAnnotations({
   setup,
   serviceName,
   environment,
-  apiCaller,
+  client,
   annotationsClient,
   logger,
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
   environment?: string;
-  apiCaller: LegacyAPICaller;
+  client: ElasticsearchClient;
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
 }): Promise<Annotation[]> {
-  try {
-    const response: ESSearchResponse<ESAnnotation, any> = (await apiCaller(
-      'search',
-      {
-        index: annotationsClient.index,
-        body: {
-          size: 50,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: setup.start,
-                      lt: setup.end,
-                    },
-                  },
-                },
-                { term: { 'annotation.type': 'deployment' } },
-                { term: { tags: 'apm' } },
-                { term: { [SERVICE_NAME]: serviceName } },
-                ...getEnvironmentUiFilterES(environment),
-              ],
-            },
+  const body = {
+    size: 50,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: rangeFilter(setup.start, setup.end),
           },
-        },
-      }
-    )) as any;
+          { term: { 'annotation.type': 'deployment' } },
+          { term: { tags: 'apm' } },
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...getEnvironmentUiFilterES(environment),
+        ],
+      },
+    },
+  };
+
+  try {
+    const response: ESSearchResponse<
+      ESAnnotation,
+      { body: typeof body }
+    > = await unwrapEsResponse(
+      client.search<any>({
+        index: annotationsClient.index,
+        body,
+      })
+    );
 
     return response.hits.hits.map((hit) => {
       return {

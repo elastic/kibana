@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { find, uniqBy } from 'lodash';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import {
@@ -10,7 +12,7 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { Connection, ConnectionNode } from '../../../common/service_map';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 export function getConnections({
@@ -79,7 +81,7 @@ export async function getServiceMapFromTraceIds({
   serviceName,
   environment,
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange;
   traceIds: string[];
   serviceName?: string;
   environment?: string;

@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+/* eslint-disable react/display-name */
 
 import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +21,7 @@ import {
 import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StyledPanel } from '../styles';
-import { BoldCode, noTimestampRetrievedText, StyledTime } from './panel_content_utilities';
+import { BoldCode, StyledTime } from './styles';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -40,28 +43,19 @@ export const NodeEventsInCategory = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    selectors.processEventForID(state)(nodeID)
-  );
-  const eventCount = useSelector((state: ResolverState) =>
-    selectors.totalRelatedEventCountForNode(state)(nodeID)
-  );
-  const eventsInCategoryCount = useSelector((state: ResolverState) =>
-    selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
-  );
-  const events = useSelector((state: ResolverState) => selectors.nodeEventsInCategory(state));
-
+  const node = useSelector((state: ResolverState) => selectors.graphNodeForID(state)(nodeID));
   const isLoading = useSelector(selectors.isLoadingNodeEventsInCategory);
   const hasError = useSelector(selectors.hadErrorLoadingNodeEventsInCategory);
+
   return (
     <>
-      {isLoading || processEvent === null ? (
+      {isLoading ? (
         <StyledPanel>
           <PanelLoading />
         </StyledPanel>
       ) : (
         <StyledPanel data-test-subj="resolver:panel:events-in-category">
-          {hasError ? (
+          {hasError || !node ? (
             <EuiCallOut
               title={i18n.translate(
                 'xpack.securitySolution.endpoint.resolver.panel.nodeEventsByType.errorPrimary',
@@ -83,14 +77,12 @@ export const NodeEventsInCategory = memo(function ({
           ) : (
             <>
               <NodeEventsInCategoryBreadcrumbs
-                nodeName={eventModel.processNameSafeVersion(processEvent)}
+                nodeName={node.name}
                 eventCategory={eventCategory}
-                eventCount={eventCount}
                 nodeID={nodeID}
-                eventsInCategoryCount={eventsInCategoryCount}
               />
               <EuiSpacer size="l" />
-              <NodeEventList eventCategory={eventCategory} nodeID={nodeID} events={events} />
+              <NodeEventList eventCategory={eventCategory} nodeID={nodeID} />
             </>
           )}
         </StyledPanel>
@@ -98,8 +90,6 @@ export const NodeEventsInCategory = memo(function ({
     </>
   );
 });
-
-NodeEventsInCategory.displayName = 'NodeEventsInCategory';
 
 /**
  * Rendered for each event in the list.
@@ -114,13 +104,21 @@ const NodeEventsListItem = memo(function ({
   eventCategory: string;
 }) {
   const timestamp = eventModel.eventTimestamp(event);
-  const date = useFormattedDate(timestamp) || noTimestampRetrievedText;
+  const eventID = eventModel.eventID(event);
+  const winlogRecordID = eventModel.winlogRecordID(event);
+  const date =
+    useFormattedDate(timestamp) ||
+    i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
+      defaultMessage: 'No timestamp retrieved',
+    });
   const linkProps = useLinkProps({
     panelView: 'eventDetail',
     panelParameters: {
       nodeID,
       eventCategory,
-      eventID: String(eventModel.eventID(event)),
+      eventID,
+      eventTimestamp: String(timestamp),
+      winlogRecordID: String(winlogRecordID),
     },
   });
   return (
@@ -160,16 +158,12 @@ const NodeEventsListItem = memo(function ({
  */
 const NodeEventList = memo(function NodeEventList({
   eventCategory,
-  events,
   nodeID,
 }: {
   eventCategory: string;
-  /**
-   * The events to list.
-   */
-  events: SafeResolverEvent[];
   nodeID: string;
 }) {
+  const events = useSelector(selectors.nodeEventsInCategory);
   const dispatch = useResolverDispatch();
   const handleLoadMore = useCallback(() => {
     dispatch({
@@ -213,25 +207,20 @@ const NodeEventList = memo(function NodeEventList({
 const NodeEventsInCategoryBreadcrumbs = memo(function ({
   nodeName,
   eventCategory,
-  eventCount,
   nodeID,
-  /**
-   * The count of events in the category that this list is showing.
-   */
-  eventsInCategoryCount,
 }: {
   nodeName: React.ReactNode;
   eventCategory: string;
-  /**
-   * The events to list.
-   */
-  eventCount: number | undefined;
   nodeID: string;
-  /**
-   * The count of events in the category that this list is showing.
-   */
-  eventsInCategoryCount: number | undefined;
 }) {
+  const eventCount = useSelector((state: ResolverState) =>
+    selectors.totalRelatedEventCountForNode(state)(nodeID)
+  );
+
+  const eventsInCategoryCount = useSelector((state: ResolverState) =>
+    selectors.relatedEventCountOfTypeForNode(state)(nodeID, eventCategory)
+  );
+
   const nodesLinkNavProps = useLinkProps({
     panelView: 'nodes',
   });
@@ -256,6 +245,7 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
               defaultMessage: 'Events',
             }
           ),
+          'data-test-subj': 'resolver:node-events-in-category:breadcrumbs:node-list-link',
           ...nodesLinkNavProps,
         },
         {

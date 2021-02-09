@@ -1,36 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, findTestSubject } from '@kbn/test/jest';
 import { RuleEditorPanel } from '.';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { JSONRuleEditor } from './json_rule_editor';
-import { findTestSubject } from 'test_utils/find_test_subject';
 
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import 'test_utils/stub_web_worker';
+import '@kbn/test/target/jest/utils/stub_web_worker';
+
 import { AllRule, FieldRule } from '../../model';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { DocumentationLinksService } from '../../documentation_links';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
 describe('RuleEditorPanel', () => {
+  const renderView = (props: Omit<React.ComponentProps<typeof RuleEditorPanel>, 'docLinks'>) => {
+    const coreStart = coreMock.createStart();
+    const viewProps = { ...props, docLinks: coreStart.docLinks };
+    return mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <RuleEditorPanel {...viewProps} />
+      </KibanaContextProvider>
+    );
+  };
   it('renders the visual editor when no rules are defined', () => {
     const props = {
       rawRules: {},
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
     expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
   });
@@ -49,9 +58,9 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
+      docLinks: coreMock.createStart().docLinks,
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(1);
     expect(wrapper.find(JSONRuleEditor)).toHaveLength(0);
 
@@ -73,9 +82,8 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
 
     findTestSubject(wrapper, 'roleMappingsJSONRuleEditorButton').simulate('click');
 
@@ -109,9 +117,8 @@ describe('RuleEditorPanel', () => {
       onChange: jest.fn(),
       onValidityChange: jest.fn(),
       validateForm: false,
-      docLinks: new DocumentationLinksService(coreMock.createStart().docLinks),
     };
-    const wrapper = mountWithIntl(<RuleEditorPanel {...props} />);
+    const wrapper = renderView(props);
 
     wrapper.find(VisualRuleEditor).simulateError(new Error('Something awful happened here.'));
 

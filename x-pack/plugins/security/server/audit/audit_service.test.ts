@@ -1,9 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { AuditService, filterEvent, createLoggingConfig } from './audit_service';
+
+import {
+  AuditService,
+  filterEvent,
+  createLoggingConfig,
+  RECORD_USAGE_INTERVAL,
+} from './audit_service';
 import { AuditEvent, EventCategory, EventType, EventOutcome } from './audit_events';
 import {
   coreMock,
@@ -16,6 +23,8 @@ import { ConfigSchema, ConfigType } from '../config';
 import { SecurityLicenseFeatures } from '../../common/licensing';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 
+jest.useFakeTimers();
+
 const createConfig = (settings: Partial<ConfigType['audit']>) => {
   return ConfigSchema.validate(settings);
 };
@@ -27,24 +36,29 @@ const { logging } = coreMock.createSetup();
 const http = httpServiceMock.createSetupContract();
 const getCurrentUser = jest.fn().mockReturnValue({ username: 'jdoe', roles: ['admin'] });
 const getSpaceId = jest.fn().mockReturnValue('default');
+const getSID = jest.fn().mockResolvedValue('SESSION_ID');
+const recordAuditLoggingUsage = jest.fn();
 
 beforeEach(() => {
   logger.info.mockClear();
   logging.configure.mockClear();
+  recordAuditLoggingUsage.mockClear();
   http.registerOnPostAuth.mockClear();
 });
 
 describe('#setup', () => {
   it('returns the expected contract', () => {
-    const auditService = new AuditService(logger);
+    const audit = new AuditService(logger);
     expect(
-      auditService.setup({
+      audit.setup({
         license,
         config,
         logging,
         http,
         getCurrentUser,
         getSpaceId,
+        getSID,
+        recordAuditLoggingUsage,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -52,10 +66,12 @@ describe('#setup', () => {
         "getLogger": [Function],
       }
     `);
+    audit.stop();
   });
 
   it('configures logging correctly when using ecs logger', async () => {
-    new AuditService(logger).setup({
+    const audit = new AuditService(logger);
+    audit.setup({
       license,
       config: {
         enabled: true,
@@ -70,49 +86,114 @@ describe('#setup', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
     expect(logging.configure).toHaveBeenCalledWith(expect.any(Observable));
+    audit.stop();
+  });
+
+  it('records feature usage correctly when using ecs logger', async () => {
+    const audit = new AuditService(logger);
+    audit.setup({
+      license: licenseMock.create({
+        allowAuditLogging: true,
+      }),
+      config: {
+        enabled: true,
+        appender: {
+          kind: 'console',
+          layout: {
+            kind: 'pattern',
+          },
+        },
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    expect(recordAuditLoggingUsage).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    expect(recordAuditLoggingUsage).toHaveBeenCalledTimes(2);
+    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    expect(recordAuditLoggingUsage).toHaveBeenCalledTimes(3);
+    audit.stop();
+  });
+
+  it('does not record feature usage when disabled', async () => {
+    const audit = new AuditService(logger);
+    audit.setup({
+      license,
+      config: {
+        enabled: false,
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    expect(recordAuditLoggingUsage).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    expect(recordAuditLoggingUsage).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(RECORD_USAGE_INTERVAL);
+    expect(recordAuditLoggingUsage).not.toHaveBeenCalled();
+    audit.stop();
   });
 
   it('registers post auth hook', () => {
-    new AuditService(logger).setup({
+    const audit = new AuditService(logger);
+    audit.setup({
       license,
       config,
       logging,
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
     expect(http.registerOnPostAuth).toHaveBeenCalledWith(expect.any(Function));
+    audit.stop();
   });
 });
 
 describe('#asScoped', () => {
   it('logs event enriched with meta data', async () => {
-    const audit = new AuditService(logger).setup({
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
       license,
       config,
       logging,
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
+      ecs: { version: '1.6.0' },
       event: { action: 'ACTION' },
-      kibana: { space_id: 'default' },
+      kibana: { space_id: 'default', session_id: 'SESSION_ID' },
       message: 'MESSAGE',
       trace: { id: 'REQUEST_ID' },
       user: { name: 'jdoe', roles: ['admin'] },
     });
+    audit.stop();
   });
 
   it('does not log to audit logger if event matches ignore filter', async () => {
-    const audit = new AuditService(logger).setup({
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
       license,
       config: {
         enabled: true,
@@ -122,13 +203,40 @@ describe('#asScoped', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    audit.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
+  });
+
+  it('does not log to audit logger if no event was generated', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config: {
+        enabled: true,
+        ignore_filters: [{ actions: ['ACTION'] }],
+      },
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest({
+      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+    });
+
+    await auditSetup.asScoped(request).log(undefined);
+    expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
   });
 });
 
@@ -337,7 +445,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -347,6 +455,8 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -367,7 +477,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -377,6 +487,8 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -405,7 +517,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -415,6 +527,8 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -431,7 +545,7 @@ describe('#getLogger', () => {
 
     const licenseWithFeatures = licenseMock.create();
     licenseWithFeatures.features$ = new BehaviorSubject({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures).asObservable();
 
     const auditService = new AuditService(logger).setup({
@@ -443,6 +557,8 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -460,7 +576,7 @@ describe('#getLogger', () => {
     const licenseWithFeatures = licenseMock.create();
 
     const features$ = new BehaviorSubject({
-      allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     } as SecurityLicenseFeatures);
 
     licenseWithFeatures.features$ = features$.asObservable();
@@ -472,6 +588,8 @@ describe('#getLogger', () => {
       http,
       getCurrentUser,
       getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
     });
 
     const auditLogger = auditService.getLogger(pluginId);
@@ -484,7 +602,7 @@ describe('#getLogger', () => {
 
     // perform license upgrade
     features$.next({
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     } as SecurityLicenseFeatures);
 
     auditLogger.log(eventType, message);

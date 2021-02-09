@@ -1,37 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { find, template } from 'lodash';
-import { stringify } from 'query-string';
 import $ from 'jquery';
-import rison from 'rison-node';
-import '../../doc_viewer';
-
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
-
-import { dispatchRenderComplete, url } from '../../../../../../kibana_utils/public';
+import { dispatchRenderComplete } from '../../../../../../kibana_utils/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
-import { esFilters } from '../../../../../../data/public';
 import { getServices } from '../../../../kibana_services';
+import { getContextUrl } from '../../../helpers/get_context_url';
+import { formatRow } from '../../helpers';
 
 const TAGS_WITH_WS = />\s+</g;
 
@@ -63,6 +48,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       row: '=kbnTableRow',
       onAddColumn: '=?',
       onRemoveColumn: '=?',
+      useNewFieldsApi: '<',
     },
     link: ($scope: LazyScope, $el: JQuery) => {
       $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');
@@ -115,25 +101,12 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       };
 
       $scope.getContextAppHref = () => {
-        const globalFilters: any = getServices().filterManager.getGlobalFilters();
-        const appFilters: any = getServices().filterManager.getAppFilters();
-
-        const hash = stringify(
-          url.encodeQuery({
-            _g: rison.encode({
-              filters: globalFilters || [],
-            }),
-            _a: rison.encode({
-              columns: $scope.columns,
-              filters: (appFilters || []).map(esFilters.disableFilter),
-            }),
-          }),
-          { encode: false, sort: false }
+        return getContextUrl(
+          $scope.row._id,
+          $scope.indexPattern.id,
+          $scope.columns,
+          getServices().filterManager
         );
-
-        return `#/context/${encodeURIComponent($scope.indexPattern.id)}/${encodeURIComponent(
-          $scope.row._id
-        )}?${hash}`;
       };
 
       // create a tr element that lists the value for each *column*
@@ -157,19 +130,33 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           );
         }
 
-        $scope.columns.forEach(function (column: any) {
-          const isFilterable = mapping(column) && mapping(column).filterable && $scope.filter;
+        if ($scope.columns.length === 0 && $scope.useNewFieldsApi) {
+          const formatted = formatRow(row, indexPattern);
 
           newHtmls.push(
             cellTemplate({
               timefield: false,
-              sourcefield: column === '_source',
-              formatted: _displayField(row, column, true),
-              filterable: isFilterable,
-              column,
+              sourcefield: true,
+              formatted,
+              filterable: false,
+              column: '__document__',
             })
           );
-        });
+        } else {
+          $scope.columns.forEach(function (column: string) {
+            const isFilterable = mapping(column) && mapping(column).filterable && $scope.filter;
+
+            newHtmls.push(
+              cellTemplate({
+                timefield: false,
+                sourcefield: column === '_source',
+                formatted: _displayField(row, column, true),
+                filterable: isFilterable,
+                column,
+              })
+            );
+          });
+        }
 
         let $cells = $el.children();
         newHtmls.forEach(function (html, i) {

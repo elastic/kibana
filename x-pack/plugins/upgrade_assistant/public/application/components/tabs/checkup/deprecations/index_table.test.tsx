@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 
-import { IndexDeprecationTableProps, IndexDeprecationTableUI } from './index_table';
+import { IndexDeprecationTableProps, IndexDeprecationTable } from './index_table';
 
 describe('IndexDeprecationTable', () => {
   const defaultProps = {
@@ -22,7 +23,7 @@ describe('IndexDeprecationTable', () => {
   // This test simply verifies that the props passed to EuiBaseTable are the ones
   // expected.
   test('render', () => {
-    expect(shallowWithIntl(<IndexDeprecationTableUI {...defaultProps} />)).toMatchInlineSnapshot(`
+    expect(shallow(<IndexDeprecationTable {...defaultProps} />)).toMatchInlineSnapshot(`
       <EuiBasicTable
         columns={
           Array [

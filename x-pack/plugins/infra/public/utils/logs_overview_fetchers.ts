@@ -1,17 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { encode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
-import {
-  FetchData,
-  FetchDataParams,
-  HasData,
-  LogsFetchDataResponse,
-} from '../../../observability/public';
+import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
@@ -38,9 +34,7 @@ interface LogParams {
 
 type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
-export function getLogsHasDataFetcher(
-  getStartServices: InfraClientCoreSetup['getStartServices']
-): HasData {
+export function getLogsHasDataFetcher(getStartServices: InfraClientCoreSetup['getStartServices']) {
   return async () => {
     const [core] = await getStartServices();
     const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);

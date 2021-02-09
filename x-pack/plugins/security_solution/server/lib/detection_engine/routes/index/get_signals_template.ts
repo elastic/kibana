@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
 
+export const SIGNALS_TEMPLATE_VERSION = 14;
+export const MIN_EQL_RULE_INDEX_VERSION = 2;
+
 export const getSignalsTemplate = (index: string) => {
-  const version = 2;
   const template = {
     settings: {
       index: {
@@ -31,10 +34,10 @@ export const getSignalsTemplate = (index: string) => {
         signal: signalsMapping.mappings.properties.signal,
       },
       _meta: {
-        version,
+        version: SIGNALS_TEMPLATE_VERSION,
       },
     },
-    version,
+    version: SIGNALS_TEMPLATE_VERSION,
   };
   return template;
 };

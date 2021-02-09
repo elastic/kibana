@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -67,14 +68,21 @@ export function registerTransactionDurationAnomalyAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params, state }) => {
       if (!ml) {
         return;
       }
       const alertParams = params;
       const request = {} as KibanaRequest;
-      const { mlAnomalySearch } = ml.mlSystemProvider(request);
-      const anomalyDetectors = ml.anomalyDetectorsProvider(request);
+      const { mlAnomalySearch } = ml.mlSystemProvider(
+        request,
+        services.savedObjectsClient
+      );
+      const anomalyDetectors = ml.anomalyDetectorsProvider(
+        request,
+        services.savedObjectsClient
+      );
 
       const mlJobs = await getMLJobs(anomalyDetectors, alertParams.environment);
 
@@ -94,6 +102,7 @@ export function registerTransactionDurationAnomalyAlertType({
         return {};
       }
 
+      const jobIds = mlJobs.map((job) => job.job_id);
       const anomalySearchParams = {
         terminateAfter: 1,
         body: {
@@ -102,7 +111,7 @@ export function registerTransactionDurationAnomalyAlertType({
             bool: {
               filter: [
                 { term: { result_type: 'record' } },
-                { terms: { job_id: mlJobs.map((job) => job.job_id) } },
+                { terms: { job_id: jobIds } },
                 {
                   range: {
                     timestamp: {
@@ -163,7 +172,8 @@ export function registerTransactionDurationAnomalyAlertType({
       };
 
       const response = ((await mlAnomalySearch(
-        anomalySearchParams
+        anomalySearchParams,
+        jobIds
       )) as unknown) as {
         hits: { total: { value: number } };
         aggregations?: {

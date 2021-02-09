@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './toolbar.scss';
 import React, { useState } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -17,11 +18,15 @@ import {
 } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { PieVisualizationState, SharedLayerState } from './types';
-import { VisualizationToolbarProps } from '../types';
+import { PieVisualizationState, SharedPieLayerState } from './types';
+import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
+import { PalettePicker } from '../shared_components';
 
-const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
+const numberOptions: Array<{
+  value: SharedPieLayerState['numberDisplay'];
+  inputDisplay: string;
+}> = [
   {
     value: 'hidden',
     inputDisplay: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
@@ -43,7 +48,7 @@ const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisp
 ];
 
 const categoryOptions: Array<{
-  value: SharedLayerState['categoryDisplay'];
+  value: SharedPieLayerState['categoryDisplay'];
   inputDisplay: string;
 }> = [
   {
@@ -67,7 +72,7 @@ const categoryOptions: Array<{
 ];
 
 const categoryOptionsTreemap: Array<{
-  value: SharedLayerState['categoryDisplay'];
+  value: SharedPieLayerState['categoryDisplay'];
   inputDisplay: string;
 }> = [
   {
@@ -85,7 +90,7 @@ const categoryOptionsTreemap: Array<{
 ];
 
 const legendOptions: Array<{
-  value: SharedLayerState['legendDisplay'];
+  value: SharedPieLayerState['legendDisplay'];
   label: string;
   id: string;
 }> = [
@@ -124,7 +129,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
         })}
-        type="values"
+        type="labels"
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >
@@ -244,3 +249,17 @@ const DecimalPlaceSlider = ({
     />
   );
 };
+
+export function DimensionEditor(props: VisualizationDimensionEditorProps<PieVisualizationState>) {
+  return (
+    <>
+      <PalettePicker
+        palettes={props.frame.availablePalettes}
+        activePalette={props.state.palette}
+        setPalette={(newPalette) => {
+          props.setState({ ...props.state, palette: newPalette });
+        }}
+      />
+    </>
+  );
+}

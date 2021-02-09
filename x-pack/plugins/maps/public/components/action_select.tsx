@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { isUrlDrilldown } from '../trigger_actions/trigger_utils';
 
 interface Props {
   value?: string;
@@ -41,7 +43,7 @@ export class ActionSelect extends Component<Props, State> {
     }
     const actions = await this.props.getFilterActions();
     if (this._isMounted) {
-      this.setState({ actions });
+      this.setState({ actions: actions.filter((action) => !isUrlDrilldown(action)) });
     }
   }
 

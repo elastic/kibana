@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, pick } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 import { HostsQueries } from '../../../../common/search_strategy/security_solution';
 import {
@@ -25,7 +23,7 @@ import {
 } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsModel } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -71,8 +69,8 @@ export const useAuthentications = ({
   skip,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const { activePage, limit } = useShallowEqualSelector((state) =>
-    getAuthenticationsSelector(state, type)
+  const { activePage, limit } = useDeepEqualSelector((state) =>
+    pick(['activePage', 'limit'], getAuthenticationsSelector(state, type))
   );
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
@@ -81,24 +79,7 @@ export const useAuthentications = ({
   const [
     authenticationsRequest,
     setAuthenticationsRequest,
-  ] = useState<HostAuthenticationsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: HostsQueries.authentications,
-          filterQuery: createFilter(filterQuery),
-          id: ID,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          sort: {} as SortField,
-        }
-      : null
-  );
+  ] = useState<HostAuthenticationsRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -137,7 +118,7 @@ export const useAuthentications = ({
 
   const authenticationsSearch = useCallback(
     (request: HostAuthenticationsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -192,7 +173,7 @@ export const useAuthentications = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -203,7 +184,6 @@ export const useAuthentications = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.authentications,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -212,12 +192,12 @@ export const useAuthentications = ({
         },
         sort: {} as SortField,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, skip, startDate]);
+  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +22,6 @@ import {
 import {
   AliasOption,
   DataType,
-  RuntimeType,
   ComboBoxOption,
   ParameterName,
   ParameterDefinition,
@@ -28,7 +29,6 @@ import {
 import { documentationService } from '../../../services/documentation';
 import { INDEX_DEFAULT } from './default_values';
 import { TYPE_DEFINITION } from './data_types_definition';
-import { RUNTIME_FIELD_OPTIONS } from './field_options';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField, numberGreaterThanField, isJsonField } = fieldValidators;
@@ -179,52 +179,6 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
               'xpack.idxMgmt.mappingsEditor.parameters.validations.typeIsRequiredErrorMessage',
               {
                 defaultMessage: 'Specify a field type.',
-              }
-            )
-          ),
-        },
-      ],
-    },
-    schema: t.string,
-  },
-  runtime_type: {
-    fieldConfig: {
-      type: FIELD_TYPES.COMBO_BOX,
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.runtimeTypeLabel', {
-        defaultMessage: 'Type',
-      }),
-      defaultValue: 'keyword',
-      deserializer: (fieldType: RuntimeType | undefined) => {
-        if (typeof fieldType === 'string' && Boolean(fieldType)) {
-          const label =
-            RUNTIME_FIELD_OPTIONS.find(({ value }) => value === fieldType)?.label ?? fieldType;
-          return [
-            {
-              label,
-              value: fieldType,
-            },
-          ];
-        }
-        return [];
-      },
-      serializer: (value: ComboBoxOption[]) => (value.length === 0 ? '' : value[0].value),
-    },
-    schema: t.string,
-  },
-  script: {
-    fieldConfig: {
-      defaultValue: '',
-      type: FIELD_TYPES.TEXT,
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.painlessScriptLabel', {
-        defaultMessage: 'Script',
-      }),
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.scriptIsRequiredErrorMessage',
-              {
-                defaultMessage: 'Script must emit() a value.',
               }
             )
           ),

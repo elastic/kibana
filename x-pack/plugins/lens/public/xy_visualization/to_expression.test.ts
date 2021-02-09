@@ -1,16 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Ast } from '@kbn/interpreter/target/common';
 import { Position } from '@elastic/charts';
-import { xyVisualization } from './xy_visualization';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 describe('#toExpression', () => {
+  const xyVisualization = getXyVisualization({
+    paletteService: chartPluginMock.createPaletteRegistry(),
+    data: dataPluginMock.createStartContract(),
+  });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
 
@@ -39,6 +46,7 @@ describe('#toExpression', () => {
       xyVisualization.toExpression(
         {
           legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
@@ -63,6 +71,7 @@ describe('#toExpression', () => {
       (xyVisualization.toExpression(
         {
           legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'hide',
           preferredSeriesType: 'bar',
           layers: [
             {
@@ -83,6 +92,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -109,6 +119,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -132,6 +143,7 @@ describe('#toExpression', () => {
       xyVisualization.toExpression(
         {
           legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'hide',
           preferredSeriesType: 'bar',
           layers: [
             {
@@ -152,6 +164,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -187,6 +200,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -213,6 +227,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -233,5 +248,26 @@ describe('#toExpression', () => {
       yLeft: [true],
       yRight: [true],
     });
+  });
+
+  it('should correctly report the valueLabels visibility settings', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'inside',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('inside');
   });
 });

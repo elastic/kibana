@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEvent, MouseEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -25,14 +24,13 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../components/shared/loading';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { Loading } from '../../../../shared/loading';
 import { SourceIcon } from '../../../components/shared/source_icon';
-
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { ContentSource } from '../../../types';
 import { GroupLogic } from '../group_logic';
-
-import { IContentSource } from '../../../types';
 
 const HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerTitle',
@@ -95,7 +93,7 @@ export const GroupSourcePrioritization: React.FC = () => {
     <EuiButton
       disabled={groupPrioritiesUnchanged}
       color="primary"
-      fill={true}
+      fill
       onClick={saveGroupSourcePrioritization}
     >
       {HEADER_ACTION_TEXT}
@@ -140,7 +138,7 @@ export const GroupSourcePrioritization: React.FC = () => {
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>
       </EuiTableHeader>
       <EuiTableBody>
-        {contentSources.map(({ id, name, serviceType }: IContentSource) => (
+        {contentSources.map(({ id, name, serviceType }: ContentSource) => (
           <EuiTableRow key={id} data-test-subj="GroupsRow">
             <EuiTableRowCell>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>

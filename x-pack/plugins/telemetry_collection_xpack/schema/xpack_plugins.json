@@ -1706,6 +1706,16 @@
           "properties": {
             "overview": {
               "type": "long"
+            },
+            "setup_guide": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
             }
           }
         },
@@ -1761,40 +1771,20 @@
         }
       }
     },
-    "fileUploadTelemetry": {
+    "fileUpload": {
       "properties": {
-        "filesUploadedTotalCount": {
-          "type": "long"
-        }
-      }
-    },
-    "infraops": {
-      "properties": {
-        "last_24_hours": {
+        "file_upload": {
           "properties": {
-            "hits": {
-              "properties": {
-                "infraops_hosts": {
-                  "type": "long"
-                },
-                "infraops_docker": {
-                  "type": "long"
-                },
-                "infraops_kubernetes": {
-                  "type": "long"
-                },
-                "logs": {
-                  "type": "long"
-                }
-              }
+            "index_creation_count": {
+              "type": "long"
             }
           }
         }
       }
     },
-    "ingest_manager": {
+    "fleet": {
       "properties": {
-        "fleet_enabled": {
+        "agents_enabled": {
           "type": "boolean"
         },
         "agents": {
@@ -1825,6 +1815,30 @@
               },
               "enabled": {
                 "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "infraops": {
+      "properties": {
+        "last_24_hours": {
+          "properties": {
+            "hits": {
+              "properties": {
+                "infraops_hosts": {
+                  "type": "long"
+                },
+                "infraops_docker": {
+                  "type": "long"
+                },
+                "infraops_kubernetes": {
+                  "type": "long"
+                },
+                "logs": {
+                  "type": "long"
+                }
               }
             }
           }
@@ -2205,6 +2219,13 @@
         }
       }
     },
+    "fileUploadTelemetry": {
+      "properties": {
+        "filesUploadedTotalCount": {
+          "type": "long"
+        }
+      }
+    },
     "maps": {
       "properties": {
         "settings": {
@@ -2293,17 +2314,6 @@
                   }
                 }
               }
-            }
-          }
-        }
-      }
-    },
-    "mlTelemetry": {
-      "properties": {
-        "file_data_visualizer": {
-          "properties": {
-            "index_creation_count": {
-              "type": "long"
             }
           }
         }
@@ -3126,6 +3136,60 @@
         }
       }
     },
+    "saved_objects_tagging": {
+      "properties": {
+        "usedTags": {
+          "type": "integer"
+        },
+        "taggedObjects": {
+          "type": "integer"
+        },
+        "types": {
+          "properties": {
+            "dashboard": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "lens": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "visualization": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "map": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "security_solution": {
       "properties": {
         "detections": {
@@ -3173,6 +3237,127 @@
                     },
                     "disabled": {
                       "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "detectionMetrics": {
+          "properties": {
+            "ml_jobs": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "job_id": {
+                    "type": "keyword"
+                  },
+                  "open_time": {
+                    "type": "keyword"
+                  },
+                  "create_time": {
+                    "type": "keyword"
+                  },
+                  "finished_time": {
+                    "type": "keyword"
+                  },
+                  "state": {
+                    "type": "keyword"
+                  },
+                  "data_counts": {
+                    "properties": {
+                      "bucket_count": {
+                        "type": "long"
+                      },
+                      "empty_bucket_count": {
+                        "type": "long"
+                      },
+                      "input_bytes": {
+                        "type": "long"
+                      },
+                      "input_record_count": {
+                        "type": "long"
+                      },
+                      "last_data_time": {
+                        "type": "long"
+                      },
+                      "processed_record_count": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "model_size_stats": {
+                    "properties": {
+                      "bucket_allocation_failures_count": {
+                        "type": "long"
+                      },
+                      "model_bytes": {
+                        "type": "long"
+                      },
+                      "model_bytes_exceeded": {
+                        "type": "long"
+                      },
+                      "model_bytes_memory_limit": {
+                        "type": "long"
+                      },
+                      "peak_model_bytes": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "timing_stats": {
+                    "properties": {
+                      "average_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "bucket_count": {
+                        "type": "long"
+                      },
+                      "exponential_average_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "exponential_average_bucket_processing_time_per_hour_ms": {
+                        "type": "long"
+                      },
+                      "maximum_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "minimum_bucket_processing_time_ms": {
+                        "type": "long"
+                      },
+                      "total_bucket_processing_time_ms": {
+                        "type": "long"
+                      }
+                    }
+                  },
+                  "datafeed": {
+                    "properties": {
+                      "datafeed_id": {
+                        "type": "keyword"
+                      },
+                      "state": {
+                        "type": "keyword"
+                      },
+                      "timing_stats": {
+                        "properties": {
+                          "average_search_time_per_bucket_ms": {
+                            "type": "long"
+                          },
+                          "bucket_count": {
+                            "type": "long"
+                          },
+                          "exponential_average_search_time_per_hour_ms": {
+                            "type": "long"
+                          },
+                          "search_count": {
+                            "type": "long"
+                          },
+                          "total_search_time_ms": {
+                            "type": "long"
+                          }
+                        }
+                      }
                     }
                   }
                 }
@@ -3240,7 +3425,7 @@
           "type": "boolean"
         },
         "authProviderCount": {
-          "type": "number"
+          "type": "long"
         },
         "enabledAuthProviders": {
           "type": "array",
@@ -3326,6 +3511,42 @@
           "type": "boolean"
         },
         "count": {
+          "type": "long"
+        },
+        "apiCalls.copySavedObjects.total": {
+          "type": "long"
+        },
+        "apiCalls.copySavedObjects.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.copySavedObjects.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.copySavedObjects.createNewCopiesEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.copySavedObjects.overwriteEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.copySavedObjects.overwriteEnabled.no": {
+          "type": "long"
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.total": {
+          "type": "long"
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes": {
+          "type": "long"
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no": {
+          "type": "long"
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes": {
+          "type": "long"
+        },
+        "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no": {
           "type": "long"
         }
       }

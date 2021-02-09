@@ -1,25 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createSavedObjectsStreamFromNdJson, validateTypes, validateObjects } from './utils';
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
+import { catchAndReturnBoomErrors } from './utils';
+import Boom from '@hapi/boom';
+import {
+  KibanaRequest,
+  RequestHandler,
+  RequestHandlerContext,
+  KibanaResponseFactory,
+  kibanaResponseFactory,
+} from '../../';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -27,7 +25,7 @@ async function readStreamToCompletion(stream: Readable) {
 
 describe('createSavedObjectsStreamFromNdJson', () => {
   it('transforms an ndjson stream into a stream of saved objects', async () => {
-    const savedObjectsStream = createSavedObjectsStreamFromNdJson(
+    const savedObjectsStream = await createSavedObjectsStreamFromNdJson(
       new Readable({
         read() {
           this.push('{"id": "foo", "type": "foo-type"}\n');
@@ -52,7 +50,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
   });
 
   it('skips empty lines', async () => {
-    const savedObjectsStream = createSavedObjectsStreamFromNdJson(
+    const savedObjectsStream = await createSavedObjectsStreamFromNdJson(
       new Readable({
         read() {
           this.push('{"id": "foo", "type": "foo-type"}\n');
@@ -79,7 +77,7 @@ describe('createSavedObjectsStreamFromNdJson', () => {
   });
 
   it('filters the export details entry from the stream', async () => {
-    const savedObjectsStream = createSavedObjectsStreamFromNdJson(
+    const savedObjectsStream = await createSavedObjectsStreamFromNdJson(
       new Readable({
         read() {
           this.push('{"id": "foo", "type": "foo-type"}\n');
@@ -152,5 +150,71 @@ describe('validateObjects', () => {
         allowedTypes
       )
     ).toBeUndefined();
+  });
+});
+
+describe('catchAndReturnBoomErrors', () => {
+  let context: RequestHandlerContext;
+  let request: KibanaRequest<any, any, any>;
+  let response: KibanaResponseFactory;
+
+  const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
+    return handler();
+  };
+
+  beforeEach(() => {
+    context = {} as any;
+    request = {} as any;
+    response = kibanaResponseFactory;
+  });
+
+  it('should pass-though call parameters to the handler', async () => {
+    const handler = jest.fn();
+    const wrapped = catchAndReturnBoomErrors(handler);
+    await wrapped(context, request, response);
+    expect(handler).toHaveBeenCalledWith(context, request, response);
+  });
+
+  it('should pass-though result from the handler', async () => {
+    const handler = createHandler(() => {
+      return 'handler-response';
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    const result = await wrapped(context, request, response);
+    expect(result).toBe('handler-response');
+  });
+
+  it('should intercept and convert thrown Boom errors', async () => {
+    const handler = createHandler(() => {
+      throw Boom.notFound('not there');
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    const result = await wrapped(context, request, response);
+    expect(result.status).toBe(404);
+    expect(result.payload).toEqual({
+      error: 'Not Found',
+      message: 'not there',
+      statusCode: 404,
+    });
+  });
+
+  it('should re-throw non-Boom errors', async () => {
+    const handler = createHandler(() => {
+      throw new Error('something went bad');
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    await expect(wrapped(context, request, response)).rejects.toMatchInlineSnapshot(
+      `[Error: something went bad]`
+    );
+  });
+
+  it('should re-throw Boom internal/500 errors', async () => {
+    const handler = createHandler(() => {
+      throw Boom.internal();
+    });
+    const wrapped = catchAndReturnBoomErrors(handler);
+    await expect(wrapped(context, request, response)).rejects.toMatchInlineSnapshot(
+      `[Error: Internal Server Error]`
+    );
   });
 });

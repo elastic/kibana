@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -46,10 +35,11 @@ This agent supports a variety of frameworks but can also be used with your custo
       }
     )}
 var apm = require('elastic-apm-node').start({curlyOpen}
+
   // ${i18n.translate(
     'apmOss.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment',
     {
-      defaultMessage: 'Override service name from package.json',
+      defaultMessage: 'Override the service name from package.json',
     }
   )}
   // ${i18n.translate('apmOss.tutorial.nodeClient.configure.commands.allowedCharactersComment', {
@@ -60,7 +50,7 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   // ${i18n.translate(
     'apmOss.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
     {
-      defaultMessage: 'Use if APM Server requires a token',
+      defaultMessage: 'Use if APM Server requires a secret token',
     }
   )}
   secretToken: '${secretToken}',
@@ -68,11 +58,19 @@ var apm = require('elastic-apm-node').start({curlyOpen}
   // ${i18n.translate(
     'apmOss.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
     {
-      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      defaultMessage: 'Set the custom APM Server URL (default: {defaultApmServerUrl})',
       values: { defaultApmServerUrl: 'http://localhost:8200' },
     }
   )}
-  serverUrl: '${apmServerUrl}'
+  serverUrl: '${apmServerUrl}',
+
+  // ${i18n.translate(
+    'apmOss.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',
+    {
+      defaultMessage: 'Set the service environment',
+    }
+  )}
+  environment: 'production'
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.nodeClient.configure.textPost', {
       defaultMessage:
@@ -121,7 +119,7 @@ ELASTIC_APM = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
     {
-      defaultMessage: 'Set required service name. Allowed characters:',
+      defaultMessage: 'Set the required service name. Allowed characters:',
     }
   )}
   # ${i18n.translate('apmOss.tutorial.djangoClient.configure.commands.allowedCharactersComment', {
@@ -132,7 +130,7 @@ ELASTIC_APM = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
     {
-      defaultMessage: 'Use if APM Server requires a token',
+      defaultMessage: 'Use if APM Server requires a secret token',
     }
   )}
   'SECRET_TOKEN': '${secretToken}',
@@ -140,11 +138,19 @@ ELASTIC_APM = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
     {
-      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      defaultMessage: 'Set the custom APM Server URL (default: {defaultApmServerUrl})',
       values: { defaultApmServerUrl: 'http://localhost:8200' },
     }
   )}
   'SERVER_URL': '${apmServerUrl}',
+
+  # ${i18n.translate(
+    'apmOss.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',
+    {
+      defaultMessage: 'Set the service environment',
+    }
+  )}
+  'ENVIRONMENT': 'production',
 {curlyClose}
 
 # ${i18n.translate('apmOss.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment', {
@@ -201,7 +207,7 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.flaskClient.configure.commands.setRequiredServiceNameComment',
     {
-      defaultMessage: 'Set required service name. Allowed characters:',
+      defaultMessage: 'Set the required service name. Allowed characters:',
     }
   )}
   # ${i18n.translate('apmOss.tutorial.flaskClient.configure.commands.allowedCharactersComment', {
@@ -212,7 +218,7 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.flaskClient.configure.commands.useIfApmServerRequiresTokenComment',
     {
-      defaultMessage: 'Use if APM Server requires a token',
+      defaultMessage: 'Use if APM Server requires a secret token',
     }
   )}
   'SECRET_TOKEN': '${secretToken}',
@@ -220,11 +226,19 @@ app.config['ELASTIC_APM'] = {curlyOpen}
   # ${i18n.translate(
     'apmOss.tutorial.flaskClient.configure.commands.setCustomApmServerUrlComment',
     {
-      defaultMessage: 'Set custom APM Server URL (default: {defaultApmServerUrl})',
+      defaultMessage: 'Set the custom APM Server URL (default: {defaultApmServerUrl})',
       values: { defaultApmServerUrl: 'http://localhost:8200' },
     }
   )}
   'SERVER_URL': '${apmServerUrl}',
+
+  # ${i18n.translate(
+    'apmOss.tutorial.flaskClient.configure.commands.setServiceEnvironmentComment',
+    {
+      defaultMessage: 'Set the service environment',
+    }
+  )}
+  'ENVIRONMENT': 'production',
 {curlyClose}
 
 apm = ElasticAPM(app)`.split('\n'),
@@ -259,15 +273,18 @@ export const createRailsAgentInstructions = (apmServerUrl = '', secretToken = ''
     }),
     commands: `# config/elastic_apm.yml:
 
-# Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
+# Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
 # Defaults to the name of your Rails app
-# service_name: 'my-service'
+service_name: 'my-service'
 
-# Use if APM Server requires a token
-# secret_token: '${secretToken}'
+# Use if APM Server requires a secret token
+secret_token: '${secretToken}'
 
-# Set custom APM Server URL (default: http://localhost:8200)
-# server_url: '${apmServerUrl || 'http://localhost:8200'}'`.split('\n'),
+# Set the custom APM Server URL (default: http://localhost:8200)
+server_url: '${apmServerUrl || 'http://localhost:8200'}'
+
+# Set the service environment
+environment: 'production'`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.railsClient.configure.textPost', {
       defaultMessage:
         'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
@@ -335,7 +352,7 @@ export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '')
     commands: `# config/elastic_apm.yml:
 
 # ${i18n.translate('apmOss.tutorial.rackClient.createConfig.commands.setServiceNameComment', {
-      defaultMessage: 'Set service name - allowed characters: a-z, A-Z, 0-9, -, _ and space',
+      defaultMessage: 'Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space',
     })}
 # ${i18n.translate(
       'apmOss.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
@@ -343,7 +360,7 @@ export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '')
         defaultMessage: "Defaults to the name of your Rack app's class.",
       }
     )}
-# service_name: 'my-service'
+service_name: 'my-service'
 
 # ${i18n.translate(
       'apmOss.tutorial.rackClient.createConfig.commands.useIfApmServerRequiresTokenComment',
@@ -351,13 +368,18 @@ export const createRackAgentInstructions = (apmServerUrl = '', secretToken = '')
         defaultMessage: 'Use if APM Server requires a token',
       }
     )}
-# secret_token: '${secretToken}'
+secret_token: '${secretToken}'
 
 # ${i18n.translate('apmOss.tutorial.rackClient.createConfig.commands.setCustomApmServerComment', {
       defaultMessage: 'Set custom APM Server URL (default: {defaultServerUrl})',
       values: { defaultServerUrl: 'http://localhost:8200' },
     })}
-# server_url: '${apmServerUrl || 'http://localhost:8200'}'`.split('\n'),
+server_url: '${apmServerUrl || 'http://localhost:8200'}',
+
+# ${i18n.translate('apmOss.tutorial.rackClient.createConfig.commands.setServiceEnvironment', {
+      defaultMessage: 'Set the service environment',
+    })}
+environment: 'production'`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.rackClient.createConfig.textPost', {
       defaultMessage:
         'See the [documentation]({documentationLink}) for configuration options and advanced usage.\n\n',
@@ -417,10 +439,18 @@ var apm = initApm({curlyOpen}
   // ${i18n.translate(
     'apmOss.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
     {
-      defaultMessage: 'Set service version (required for source map feature)',
+      defaultMessage: 'Set the service version (required for source map feature)',
     }
   )}
-  serviceVersion: ''
+  serviceVersion: '',
+
+  // ${i18n.translate(
+    'apmOss.tutorial.jsClient.installDependency.commands.setServiceEnvironmentComment',
+    {
+      defaultMessage: 'Set the service environment',
+    }
+  )}
+  environment: 'production'
 {curlyClose})`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.jsClient.installDependency.textPost', {
       defaultMessage:
@@ -502,9 +532,14 @@ export ELASTIC_APM_SERVICE_NAME=
 export ELASTIC_APM_SERVER_URL=${apmServerUrl}
 
 # ${i18n.translate('apmOss.tutorial.goClient.configure.commands.useIfApmRequiresTokenComment', {
-      defaultMessage: 'Use if APM Server requires a token',
+      defaultMessage: 'Use if APM Server requires a secret token',
     })}
 export ELASTIC_APM_SECRET_TOKEN=${secretToken}
+
+# ${i18n.translate('apmOss.tutorial.goClient.configure.commands.setServiceEnvironment', {
+      defaultMessage: 'Set the service environment',
+    })}
+export ELASTIC_APM_ENVIRONMENT=
 `.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.goClient.configure.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for advanced configuration.',
@@ -568,8 +603,10 @@ Do **not** add the agent as a dependency to your application.',
     textPre: i18n.translate('apmOss.tutorial.javaClient.startApplication.textPre', {
       defaultMessage:
         'Add the `-javaagent` flag and configure the agent with system properties.\n\n \
-* Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n \
-* Set custom APM Server URL (default: {customApmServerUrl})\n \
+* Set the required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)\n \
+* Set the custom APM Server URL (default: {customApmServerUrl})\n \
+* Set the APM Server secret token\n \
+* Set the service environment\n \
 * Set the base package of your application',
       values: { customApmServerUrl: 'http://localhost:8200' },
     }),
@@ -577,6 +614,7 @@ Do **not** add the agent as a dependency to your application.',
      -Delastic.apm.service_name=my-application \\
      -Delastic.apm.server_urls=${apmServerUrl || 'http://localhost:8200'} \\
      -Delastic.apm.secret_token=${secretToken} \\
+     -Delastic.apm.environment=production \\
      -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.javaClient.startApplication.textPost', {
@@ -647,7 +685,8 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     "ServerUrls": "${
       apmServerUrl || 'http://localhost:8200'
     }", //Set custom APM Server URL (default: http://localhost:8200)
-    "ServiceName" : "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
+    "ServiceName": "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
+    "Environment": "production", // Set the service environment
   {curlyClose}
 {curlyClose}`.split('\n'),
     textPost: i18n.translate('apmOss.tutorial.dotNetClient.configureAgent.textPost', {

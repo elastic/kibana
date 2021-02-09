@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as Rx from 'rxjs';
@@ -70,7 +71,7 @@ describe('Reporting server createConfig$', () => {
     `);
     expect((mockLogger.warn as any).mock.calls.length).toBe(1);
     expect((mockLogger.warn as any).mock.calls[0]).toMatchObject([
-      'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.reporting.encryptionKey in kibana.yml',
+      'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.reporting.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.',
     ]);
   });
 
@@ -115,28 +116,6 @@ describe('Reporting server createConfig$', () => {
       }
     `);
     expect((mockLogger.warn as any).mock.calls.length).toBe(0);
-  });
-
-  it('show warning when kibanaServer.hostName === "0"', async () => {
-    mockInitContext = makeMockInitContext({
-      encryptionKey: 'aaaaaaaaaaaaabbbbbbbbbbbbaaaaaaaaa',
-      kibanaServer: { hostname: '0' },
-    });
-    const mockConfig$: any = mockInitContext.config.create();
-    const result = await createConfig$(mockCoreSetup, mockConfig$, mockLogger).toPromise();
-
-    expect(result.kibanaServer).toMatchInlineSnapshot(`
-      Object {
-        "hostname": "0.0.0.0",
-        "port": 5601,
-        "protocol": "http",
-      }
-    `);
-    expect((mockLogger.warn as any).mock.calls.length).toBe(1);
-    expect((mockLogger.warn as any).mock.calls[0]).toMatchObject([
-      `Found 'server.host: \"0\"' in Kibana configuration. This is incompatible with Reporting. To enable Reporting to work, 'xpack.reporting.kibanaServer.hostname: 0.0.0.0' is being automatically ` +
-        `to the configuration. You can change the setting to 'server.host: 0.0.0.0' or add 'xpack.reporting.kibanaServer.hostname: 0.0.0.0' in kibana.yml to prevent this message.`,
-    ]);
   });
 
   it('uses user-provided disableSandbox: false', async () => {

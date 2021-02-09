@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -20,6 +21,10 @@ import { StatefulFieldsBrowserComponent } from '.';
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
 
+  beforeEach(() => {
+    window.HTMLElement.prototype.scrollIntoView = jest.fn();
+  });
+
   test('it renders the Fields button, which displays the fields browser on click', () => {
     const wrapper = mount(
       <TestProviders>
@@ -27,9 +32,7 @@ describe('StatefulFieldsBrowser', () => {
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -46,9 +49,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -64,9 +65,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -89,9 +88,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -103,7 +100,10 @@ describe('StatefulFieldsBrowser', () => {
       await waitFor(() => {
         wrapper.update();
         expect(
-          wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).at(1)
+          wrapper
+            .find(`.field-browser-category-pane-auditd-${timelineId}`)
+            .find('[data-test-subj="categoryName"]')
+            .at(1)
         ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
       });
     });
@@ -115,9 +115,7 @@ describe('StatefulFieldsBrowser', () => {
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
-            onUpdateColumns={jest.fn()}
             timelineId={timelineId}
-            toggleColumn={jest.fn()}
             width={FIELD_BROWSER_WIDTH}
           />
         </TestProviders>
@@ -125,9 +123,18 @@ describe('StatefulFieldsBrowser', () => {
 
       await waitFor(() => {
         wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
+        jest.runOnlyPendingTimers();
+        wrapper.update();
+
         expect(
-          wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
+          wrapper
+            .find(`.field-browser-category-pane-cloud-${timelineId}`)
+            .find('[data-test-subj="categoryName"]')
+            .at(1)
         ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
+      });
+
+      await waitFor(() => {
         wrapper
           .find('[data-test-subj="field-search"]')
           .last()
@@ -136,7 +143,10 @@ describe('StatefulFieldsBrowser', () => {
         jest.runOnlyPendingTimers();
         wrapper.update();
         expect(
-          wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
+          wrapper
+            .find(`.field-browser-category-pane-cloud-${timelineId}`)
+            .find('[data-test-subj="categoryName"]')
+            .at(1)
         ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
       });
     });
@@ -152,9 +162,7 @@ describe('StatefulFieldsBrowser', () => {
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>
@@ -173,9 +181,7 @@ describe('StatefulFieldsBrowser', () => {
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
           isEventViewer={isEventViewer}
-          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
-          toggleColumn={jest.fn()}
           width={FIELD_BROWSER_WIDTH}
         />
       </TestProviders>

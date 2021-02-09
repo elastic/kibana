@@ -6,10 +6,17 @@ behavior of Kibana. For example, you can change the format used to display dates
 specify the default index pattern, and set the precision for displayed decimal
 values.
 
-. Open the menu, then go to *Stack Management > {kib} > Advanced Settings*.
+. Open the main menu, then click *Stack Management > Advanced Settings*.
 . Scroll or search for the setting you want to modify.
 . Enter a new value for the setting.
 . Click *Save changes*.
+
+[float]
+=== Required permissions
+
+The `Advanced Settings` {kib} privilege is required to access *Advanced Settings*.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
 
 
 [float]
@@ -126,11 +133,6 @@ document when displaying it.
 The maximum numbers of buckets that a single data source can return. This might
 arise when the user selects a short interval (for example, 1s) for a long time
 period (1 year).
-
-[[pagenavigation]]`pageNavigation`::
-The style of navigation menu for Kibana. Choices are Legacy, the legacy style
-where every plugin is represented in the nav, and Modern, a new format that
-bundles related plugins together in flyaway nested navigation.
 
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
 Allows a wildcard (*) as the first character in a query clause. Only applies
@@ -254,6 +256,10 @@ Hides the "Time" column in *Discover* and in all saved searches on dashboards.
 [[doctable-highlight]]`doc_table:highlight`::
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
+
+[[doctable-legacy]]`doc_table:legacy`:: 
+Control the way the Discover's table looks and works. Set this property to `true` to revert to the legacy implementation.
+
 
 [float]
 [[kibana-ml-settings]]
@@ -446,8 +452,12 @@ of buckets to try to represent.
 ==== Visualization
 
 [horizontal]
+[[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
+Enables legacy charts library for area, line and bar charts in visualize.
+
 [[visualization-colormapping]]`visualization:colorMapping`::
-Maps values to specified colors in visualizations.
+**This setting is deprecated and will not be supported as of 8.0.**
+Maps values to specific colors in *Visualize* charts and *TSVB*. This setting does not apply to *Lens*.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
 The opacity of the chart items that are dimmed when highlighting another element

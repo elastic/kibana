@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
+import { has, isUndefined } from 'lodash';
 
 export function featuresProvider($window) {
   function getData() {
@@ -28,11 +29,11 @@ export function featuresProvider($window) {
 
   function isEnabled(featureName, defaultSetting) {
     const monitoringDataObj = getData();
-    if (_.has(monitoringDataObj, featureName)) {
+    if (has(monitoringDataObj, featureName)) {
       return monitoringDataObj[featureName];
     }
 
-    if (_.isUndefined(defaultSetting)) {
+    if (isUndefined(defaultSetting)) {
       return false;
     }
 

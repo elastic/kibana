@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface ExecutionParams<ExtraContext extends Record<string, unknown> = Record<string, unknown>> 
+export interface ExecutionParams 
 ```
 
 ## Properties
@@ -15,8 +15,7 @@ export interface ExecutionParams<ExtraContext extends Record<string, unknown> = 
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [ast](./kibana-plugin-plugins-expressions-public.executionparams.ast.md) | <code>ExpressionAstExpression</code> |  |
-|  [context](./kibana-plugin-plugins-expressions-public.executionparams.context.md) | <code>ExtraContext</code> |  |
-|  [debug](./kibana-plugin-plugins-expressions-public.executionparams.debug.md) | <code>boolean</code> | Whether to execute expression in \*debug mode\*. In \*debug mode\* inputs and outputs as well as all resolved arguments and time it took to execute each function are saved and are available for introspection. |
 |  [executor](./kibana-plugin-plugins-expressions-public.executionparams.executor.md) | <code>Executor&lt;any&gt;</code> |  |
 |  [expression](./kibana-plugin-plugins-expressions-public.executionparams.expression.md) | <code>string</code> |  |
+|  [params](./kibana-plugin-plugins-expressions-public.executionparams.params.md) | <code>ExpressionExecutionParams</code> |  |
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -31,11 +32,12 @@ const uxQueryRt = t.intersection([
   t.partial({ urlQuery: t.string, percentile: t.string }),
 ]);
 
-export const rumClientMetricsRoute = createRoute(() => ({
-  path: '/api/apm/rum/client-metrics',
-  params: {
+export const rumClientMetricsRoute = createRoute({
+  endpoint: 'GET /api/apm/rum/client-metrics',
+  params: t.type({
     query: uxQueryRt,
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -49,13 +51,14 @@ export const rumClientMetricsRoute = createRoute(() => ({
       percentile: percentile ? Number(percentile) : undefined,
     });
   },
-}));
+});
 
-export const rumPageLoadDistributionRoute = createRoute(() => ({
-  path: '/api/apm/rum-client/page-load-distribution',
-  params: {
+export const rumPageLoadDistributionRoute = createRoute({
+  endpoint: 'GET /api/apm/rum-client/page-load-distribution',
+  params: t.type({
     query: t.intersection([uxQueryRt, percentileRangeRt]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -70,17 +73,18 @@ export const rumPageLoadDistributionRoute = createRoute(() => ({
       urlQuery,
     });
   },
-}));
+});
 
-export const rumPageLoadDistBreakdownRoute = createRoute(() => ({
-  path: '/api/apm/rum-client/page-load-distribution/breakdown',
-  params: {
+export const rumPageLoadDistBreakdownRoute = createRoute({
+  endpoint: 'GET /api/apm/rum-client/page-load-distribution/breakdown',
+  params: t.type({
     query: t.intersection([
       uxQueryRt,
       percentileRangeRt,
       t.type({ breakdown: t.string }),
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -96,13 +100,14 @@ export const rumPageLoadDistBreakdownRoute = createRoute(() => ({
       urlQuery,
     });
   },
-}));
+});
 
-export const rumPageViewsTrendRoute = createRoute(() => ({
-  path: '/api/apm/rum-client/page-view-trends',
-  params: {
+export const rumPageViewsTrendRoute = createRoute({
+  endpoint: 'GET /api/apm/rum-client/page-view-trends',
+  params: t.type({
     query: t.intersection([uxQueryRt, t.partial({ breakdowns: t.string })]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -116,25 +121,27 @@ export const rumPageViewsTrendRoute = createRoute(() => ({
       urlQuery,
     });
   },
-}));
+});
 
-export const rumServicesRoute = createRoute(() => ({
-  path: '/api/apm/rum-client/services',
-  params: {
+export const rumServicesRoute = createRoute({
+  endpoint: 'GET /api/apm/rum-client/services',
+  params: t.type({
     query: t.intersection([uiFiltersRt, rangeRt]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
     return getRumServices({ setup });
   },
-}));
+});
 
-export const rumVisitorsBreakdownRoute = createRoute(() => ({
-  path: '/api/apm/rum-client/visitor-breakdown',
-  params: {
+export const rumVisitorsBreakdownRoute = createRoute({
+  endpoint: 'GET /api/apm/rum-client/visitor-breakdown',
+  params: t.type({
     query: uxQueryRt,
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -147,13 +154,14 @@ export const rumVisitorsBreakdownRoute = createRoute(() => ({
       urlQuery,
     });
   },
-}));
+});
 
-export const rumWebCoreVitals = createRoute(() => ({
-  path: '/api/apm/rum-client/web-core-vitals',
-  params: {
+export const rumWebCoreVitals = createRoute({
+  endpoint: 'GET /api/apm/rum-client/web-core-vitals',
+  params: t.type({
     query: uxQueryRt,
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -167,13 +175,14 @@ export const rumWebCoreVitals = createRoute(() => ({
       percentile: percentile ? Number(percentile) : undefined,
     });
   },
-}));
+});
 
-export const rumLongTaskMetrics = createRoute(() => ({
-  path: '/api/apm/rum-client/long-task-metrics',
-  params: {
+export const rumLongTaskMetrics = createRoute({
+  endpoint: 'GET /api/apm/rum-client/long-task-metrics',
+  params: t.type({
     query: uxQueryRt,
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -187,13 +196,14 @@ export const rumLongTaskMetrics = createRoute(() => ({
       percentile: percentile ? Number(percentile) : undefined,
     });
   },
-}));
+});
 
-export const rumUrlSearch = createRoute(() => ({
-  path: '/api/apm/rum-client/url-search',
-  params: {
+export const rumUrlSearch = createRoute({
+  endpoint: 'GET /api/apm/rum-client/url-search',
+  params: t.type({
     query: uxQueryRt,
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -203,18 +213,19 @@ export const rumUrlSearch = createRoute(() => ({
 
     return getUrlSearch({ setup, urlQuery, percentile: Number(percentile) });
   },
-}));
+});
 
-export const rumJSErrors = createRoute(() => ({
-  path: '/api/apm/rum-client/js-errors',
-  params: {
+export const rumJSErrors = createRoute({
+  endpoint: 'GET /api/apm/rum-client/js-errors',
+  params: t.type({
     query: t.intersection([
       uiFiltersRt,
       rangeRt,
       t.type({ pageSize: t.string, pageIndex: t.string }),
       t.partial({ urlQuery: t.string }),
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
@@ -229,15 +240,16 @@ export const rumJSErrors = createRoute(() => ({
       pageIndex: Number(pageIndex),
     });
   },
-}));
+});
 
-export const rumHasDataRoute = createRoute(() => ({
-  path: '/api/apm/observability_overview/has_rum_data',
-  params: {
+export const rumHasDataRoute = createRoute({
+  endpoint: 'GET /api/apm/observability_overview/has_rum_data',
+  params: t.type({
     query: t.intersection([uiFiltersRt, rangeRt]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return await hasRumData({ setup });
   },
-}));
+});

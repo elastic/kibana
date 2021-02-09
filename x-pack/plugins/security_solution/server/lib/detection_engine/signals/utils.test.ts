@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import sinon from 'sinon';
+import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
@@ -28,6 +30,7 @@ import {
   getListsClient,
   getSignalTimeTuples,
   getExceptions,
+  hasTimestampFields,
   wrapBuildingBlocks,
   generateSignalId,
   createErrorsFromShard,
@@ -36,6 +39,7 @@ import {
   mergeReturns,
   createTotalHitsFromSearchResult,
   lastValidDate,
+  calculateThresholdSignalUuid,
 } from './utils';
 import { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from './types';
 import {
@@ -59,6 +63,14 @@ const buildRuleMessage = buildRuleMessageFactory({
   index: 'fakeindex',
   name: 'fake name',
 });
+
+const ruleStatusServiceMock = {
+  success: jest.fn(),
+  find: jest.fn(),
+  goingToRun: jest.fn(),
+  error: jest.fn(),
+  partialFailure: jest.fn(),
+};
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -802,6 +814,89 @@ describe('utils', () => {
     });
   });
 
+  describe('hasTimestampFields', () => {
+    test('returns true when missing timestamp override field', async () => {
+      const timestampField = 'event.ingested';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+    test('returns true when missing timestamp field', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
+          fields: {
+            [timestampField]: {
+              date: {
+                type: 'date',
+                searchable: true,
+                aggregatable: true,
+                indices: ['myfakeindex-3', 'myfakeindex-4'],
+              },
+              unmapped: {
+                type: 'unmapped',
+                searchable: false,
+                aggregatable: false,
+                indices: ['myfakeindex-1', 'myfakeindex-2'],
+              },
+            },
+          },
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['myfa*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+  });
+
   describe('wrapBuildingBlocks', () => {
     it('should generate a unique id for each building block', () => {
       const wrappedBlocks = wrapBuildingBlocks(
@@ -878,7 +973,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: some reason, type: some type, caused by: some reason',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
       ]);
     });
 
@@ -917,8 +1012,56 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: some reason, type: some type, caused by: some reason',
-        'reason: some reason 2, type: some type 2, caused by: some reason 2',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-345" reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
+      ]);
+    });
+
+    test('You can have missing values for the shard errors and get the expected output of an empty string', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {},
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual(['index: "index-123"']);
+    });
+
+    test('You can have a single value for the shard errors and get expected output without extra spaces anywhere', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            reason: 'some reason something went wrong',
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'index: "index-123" reason: "some reason something went wrong"',
+      ]);
+    });
+
+    test('You can have two values for the shard errors and get expected output with one space exactly between the two values', () => {
+      const errors: ShardError[] = [
+        {
+          shard: 1,
+          index: 'index-123',
+          node: 'node-123',
+          reason: {
+            reason: 'some reason something went wrong',
+            caused_by: { type: 'some type' },
+          },
+        },
+      ];
+      const createdErrors = createErrorsFromShard({ errors });
+      expect(createdErrors).toEqual([
+        'index: "index-123" reason: "some reason something went wrong" caused by type: "some type"',
       ]);
     });
   });
@@ -933,6 +1076,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -950,6 +1094,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
@@ -961,6 +1106,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -971,6 +1117,21 @@ describe('utils', () => {
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: undefined,
+      });
+      expect(success).toEqual(false);
+    });
+
+    test('result with error will create success: false within the result set if mixed reasons for shard failures', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        { reason: { reason: 'Not a sort failure' } },
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -988,9 +1149,26 @@ describe('utils', () => {
       expect(success).toEqual(true);
     });
 
+    test('result with error will create success: true within the result set if shard failure reasons are sorting on timestamp field', () => {
+      const searchResult = sampleDocSearchResultsNoSortIdNoHits();
+      searchResult._shards.failed = 2;
+      searchResult._shards.failures = [
+        { reason: { reason: 'No mapping found for [event.ingested] in order to sort on' } },
+        { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
+      ];
+      const { success } = createSearchAfterReturnTypeFromResponse({
+        searchResult,
+        timestampOverride: 'event.ingested',
+      });
+      expect(success).toEqual(true);
+    });
+
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1001,6 +1179,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1011,6 +1192,9 @@ describe('utils', () => {
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
+      }
       const { lastLookBackDate } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1023,6 +1207,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1030,6 +1217,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1037,13 +1227,9 @@ describe('utils', () => {
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      const date = lastValidDate({ searchResult, timestampOverride: undefined });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns correct date time stamp if the search result contains an invalid string value', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
+      if (searchResult.hits.hits[0].fields != null) {
+        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
+      }
       const date = lastValidDate({ searchResult, timestampOverride: undefined });
       expect(date).toEqual(undefined);
     });
@@ -1101,6 +1287,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1113,6 +1300,7 @@ describe('utils', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
@@ -1121,6 +1309,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
@@ -1132,11 +1321,13 @@ describe('utils', () => {
     test('createSearchAfterReturnType can override select values', () => {
       const searchAfterReturnType = createSearchAfterReturnType({
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 5,
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1'],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1152,6 +1343,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: [],
         createdSignalsCount: 0,
+        createdSignals: [],
         errors: [],
         lastLookBackDate: null,
         searchAfterTimes: [],
@@ -1205,6 +1397,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['123'],
           createdSignalsCount: 3,
+          createdSignals: Array(3).fill(sampleSignalHit()),
           errors: ['error 1', 'error 2'],
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
@@ -1213,6 +1406,7 @@ describe('utils', () => {
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
           createdSignalsCount: 2,
+          createdSignals: Array(2).fill(sampleSignalHit()),
           errors: ['error 3'],
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
@@ -1222,6 +1416,7 @@ describe('utils', () => {
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123', '456'], // concatenates the prev and next together
         createdSignalsCount: 5, // Adds the 3 and 2 together
+        createdSignals: Array(5).fill(sampleSignalHit()),
         errors: ['error 1', 'error 2', 'error 3'], // concatenates the prev and next together
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
@@ -1244,6 +1439,20 @@ describe('utils', () => {
         searchResult: repeatedSearchResultsWithSortId(4, 1, ['1', '2', '3', '4']),
       });
       expect(result).toEqual(4);
+    });
+  });
+
+  describe('calculateThresholdSignalUuid', () => {
+    it('should generate a uuid without key', () => {
+      const startedAt = new Date('2020-12-17T16:27:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'agent.name');
+      expect(signalUuid).toEqual('a4832768-a379-583a-b1a2-e2ce2ad9e6e9');
+    });
+
+    it('should generate a uuid with key', () => {
+      const startedAt = new Date('2019-11-18T13:32:00Z');
+      const signalUuid = calculateThresholdSignalUuid('abcd', startedAt, 'host.ip', '1.2.3.4');
+      expect(signalUuid).toEqual('ee8870dc-45ff-5e6c-a2f9-80886651ce03');
     });
   });
 });

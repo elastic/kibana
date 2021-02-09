@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,9 +24,9 @@ import {
 } from '../types';
 import { Document } from '../persistence/saved_object_store';
 import { mergeTables } from './merge_tables';
-import { formatColumn } from './format_column';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { LensAttributeService } from '../lens_attribute_service';
 
@@ -33,6 +34,7 @@ export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   expressions: ExpressionsSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface EditorFrameStartPlugins {
@@ -41,6 +43,7 @@ export interface EditorFrameStartPlugins {
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
   uiActions?: UiActionsStart;
+  charts: ChartsPluginSetup;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
@@ -86,7 +89,6 @@ export class EditorFrameService {
     getAttributeService: () => Promise<LensAttributeService>
   ): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
-    plugins.expressions.registerFunction(() => formatColumn);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
       const [coreStart, deps] = await core.getStartServices();
@@ -124,6 +126,12 @@ export class EditorFrameService {
         collectAsyncDefinitions(this.visualizations),
       ]);
 
+      const unmount = () => {
+        if (domElement) {
+          unmountComponentAtNode(domElement);
+        }
+      };
+
       return {
         mount: async (
           element,
@@ -137,13 +145,19 @@ export class EditorFrameService {
             onChange,
             showNoDataPopover,
             initialContext,
+            searchSessionId,
           }
         ) => {
+          if (domElement !== element) {
+            unmount();
+          }
           domElement = element;
           const firstDatasourceId = Object.keys(resolvedDatasources)[0];
           const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
 
           const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
+
+          const palettes = await plugins.charts.palettes.getPalettes();
 
           render(
             <I18nProvider>
@@ -156,9 +170,11 @@ export class EditorFrameService {
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
+                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
+                palettes={palettes}
                 doc={doc}
                 dateRange={dateRange}
                 query={query}
@@ -167,16 +183,13 @@ export class EditorFrameService {
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}
+                searchSessionId={searchSessionId}
               />
             </I18nProvider>,
             domElement
           );
         },
-        unmount() {
-          if (domElement) {
-            unmountComponentAtNode(domElement);
-          }
-        },
+        unmount,
       };
     };
 

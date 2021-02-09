@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -10,7 +11,7 @@
 
 import { performance } from 'perf_hooks';
 import { after } from 'lodash';
-import { Subject, merge, interval, of, Observable } from 'rxjs';
+import { Subject, merge, of, Observable, combineLatest, timer } from 'rxjs';
 import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -33,6 +34,7 @@ type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 interface Opts<T, H> {
   logger: Logger;
   pollInterval$: Observable<number>;
+  pollIntervalDelay$: Observable<number>;
   bufferCapacity: number;
   getCapacity: () => number;
   pollRequests$: Observable<Option<T>>;
@@ -56,6 +58,7 @@ interface Opts<T, H> {
 export function createTaskPoller<T, H>({
   logger,
   pollInterval$,
+  pollIntervalDelay$,
   getCapacity,
   pollRequests$,
   bufferCapacity,
@@ -70,11 +73,22 @@ export function createTaskPoller<T, H>({
     // emit a polling event on demand
     pollRequests$,
     // emit a polling event on a fixed interval
-    pollInterval$.pipe(
-      switchMap((period) => {
-        logger.debug(`Task poller now using interval of ${period}ms`);
-        return interval(period);
-      }),
+    combineLatest([
+      pollInterval$.pipe(
+        tap((period) => {
+          logger.debug(`Task poller now using interval of ${period}ms`);
+        })
+      ),
+      pollIntervalDelay$.pipe(
+        tap((pollDelay) => {
+          logger.debug(`Task poller now delaying emission by ${pollDelay}ms`);
+        })
+      ),
+    ]).pipe(
+      // We don't have control over `pollDelay` in the poller, and a change to `delayOnClaimConflicts` could accidentally cause us to pause Task Manager
+      // polling for a far longer duration that we intended.
+      // Since the goal is to shift it within the range of `period`, we use modulo as a safe guard to ensure this doesn't happen.
+      switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
       mapTo(none)
     )
   ).pipe(

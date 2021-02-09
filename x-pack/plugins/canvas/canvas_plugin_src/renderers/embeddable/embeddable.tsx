@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -68,11 +69,17 @@ export const embeddableRendererFactory = (
 
         const embeddableObject = await factory.createFromSavedObject(input.id, input);
 
+        const palettes = await plugins.charts.palettes.getPalettes();
+
         embeddablesRegistry[uniqueId] = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
-          const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
+          const updatedExpression = embeddableInputToExpression(
+            updatedInput,
+            embeddableType,
+            palettes
+          );
 
           if (updatedExpression) {
             handlers.onEmbeddableInputChange(updatedExpression);

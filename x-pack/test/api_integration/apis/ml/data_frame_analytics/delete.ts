@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -113,14 +114,15 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show 404 error if job does not exist or has already been deleted', async () => {
+        const id = `${jobId}_invalid`;
         const { body } = await supertest
-          .delete(`/api/ml/data_frame/analytics/${jobId}_invalid`)
+          .delete(`/api/ml/data_frame/analytics/${id}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
           .set(COMMON_REQUEST_HEADERS)
           .expect(404);
 
         expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('resource_not_found_exception');
+        expect(body.message).to.eql(`No known job with id '${id}'`);
       });
 
       describe('with deleteDestIndex setting', function () {

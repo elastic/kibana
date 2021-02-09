@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import { TotalFeatureImportance } from './feature_importance';
+import { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 
 export interface IngestStats {
   count: number;
@@ -56,6 +57,7 @@ export interface TrainedModelConfigResponse {
         analytics_config: DataFrameAnalyticsConfig;
         input: any;
         total_feature_importance?: TotalFeatureImportance[];
+        feature_importance_baseline?: FeatureImportanceBaseline;
       }
     | Record<string, any>;
   model_id: string;

@@ -9,7 +9,7 @@ EmbeddableFactories create and initialize an embeddable instance
 <b>Signature:</b>
 
 ```typescript
-export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = EmbeddableInput, TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput, TEmbeddable extends IEmbeddable<TEmbeddableInput, TEmbeddableOutput> = IEmbeddable<TEmbeddableInput, TEmbeddableOutput>, TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes> extends PersistableState<EmbeddableInput> 
+export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = EmbeddableInput, TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput, TEmbeddable extends IEmbeddable<TEmbeddableInput, TEmbeddableOutput> = IEmbeddable<TEmbeddableInput, TEmbeddableOutput>, TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes> extends PersistableState<EmbeddableStateWithType> 
 ```
 
 ## Properties

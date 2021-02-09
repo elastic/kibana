@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -27,6 +28,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.INTEGER,
   ES_FIELD_TYPES.FLOAT,
   ES_FIELD_TYPES.LONG,
+  ES_FIELD_TYPES.UNSIGNED_LONG,
   ES_FIELD_TYPES.BYTE,
   ES_FIELD_TYPES.HALF_FLOAT,
   ES_FIELD_TYPES.SCALED_FLOAT,
@@ -245,6 +247,7 @@ function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
     (f) =>
       f.type === ES_FIELD_TYPES.LONG ||
+      f.type === ES_FIELD_TYPES.UNSIGNED_LONG ||
       f.type === ES_FIELD_TYPES.INTEGER ||
       f.type === ES_FIELD_TYPES.SHORT ||
       f.type === ES_FIELD_TYPES.BYTE ||

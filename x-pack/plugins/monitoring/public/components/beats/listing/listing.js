@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { PureComponent } from 'react';
@@ -26,12 +27,10 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
-import { AlertsStatus } from '../../../alerts/status';
 
 export class Listing extends PureComponent {
   getColumns() {
     const setupMode = this.props.setupMode;
-    const alerts = this.props.alerts;
 
     return [
       {
@@ -71,29 +70,6 @@ export class Listing extends PureComponent {
               </EuiLink>
               {setupModeStatus}
             </div>
-          );
-        },
-      },
-      {
-        name: i18n.translate('xpack.monitoring.beats.instances.alertsColumnTitle', {
-          defaultMessage: 'Alerts',
-        }),
-        field: 'alerts',
-        width: '175px',
-        sortable: true,
-        render: (_field, beat) => {
-          return (
-            <AlertsStatus
-              showBadge={true}
-              alerts={alerts}
-              stateFilter={(state) => state.stackProductUuid === beat.uuid}
-              nextStepsFilter={(nextStep) => {
-                if (nextStep.text.includes('Beat instances')) {
-                  return false;
-                }
-                return true;
-              }}
-            />
           );
         },
       },
@@ -147,7 +123,7 @@ export class Listing extends PureComponent {
   }
 
   render() {
-    const { stats, data, sorting, pagination, onTableChange, setupMode, alerts } = this.props;
+    const { stats, data, sorting, pagination, onTableChange, setupMode } = this.props;
 
     let setupModeCallOut = null;
     if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
@@ -180,7 +156,7 @@ export class Listing extends PureComponent {
             </h1>
           </EuiScreenReaderOnly>
           <EuiPanel>
-            <Stats stats={stats} alerts={alerts} />
+            <Stats stats={stats} />
           </EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>

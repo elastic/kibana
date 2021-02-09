@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { join } from 'path';
@@ -26,32 +15,31 @@ import { readFileSync } from 'fs';
 import { ApmAgentConfig } from './types';
 
 const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
-  if (isDistributable) {
-    return {
-      active: false,
-      globalLabels: {},
-      // Do not use a centralized controlled config
-      centralConfig: false,
-      // Capture all exceptions that are not caught
-      logUncaughtExceptions: true,
-      // Can be performance intensive, disabling by default
-      breakdownMetrics: false,
-    };
-  }
+  // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 
   return {
-    active: false,
-    serverUrl: 'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+    active: process.env.ELASTIC_APM_ACTIVE === 'true' || false,
+    environment: process.env.ELASTIC_APM_ENVIRONMENT || process.env.NODE_ENV || 'development',
+
+    serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
+
     // The secretToken below is intended to be hardcoded in this file even though
     // it makes it public. This is not a security/privacy issue. Normally we'd
     // instead disable the need for a secretToken in the APM Server config where
     // the data is transmitted to, but due to how it's being hosted, it's easier,
     // for now, to simply leave it in.
-    secretToken: 'R0Gjg46pE9K9wGestd',
-    globalLabels: {},
-    breakdownMetrics: true,
-    centralConfig: false,
+    secretToken: 'ZQHYvrmXEx04ozge8F',
+
     logUncaughtExceptions: true,
+    globalLabels: {},
+    centralConfig: false,
+    metricsInterval: isDistributable ? '120s' : '30s',
+    transactionSampleRate: process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE
+      ? parseFloat(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE)
+      : 1.0,
+
+    // Can be performance intensive, disabling by default
+    breakdownMetrics: isDistributable ? false : true,
   };
 };
 
@@ -84,7 +72,8 @@ export class ApmConfiguration {
         getDefaultConfig(this.isDistributable),
         this.getConfigFromKibanaConfig(),
         this.getDevConfig(),
-        this.getDistConfig()
+        this.getDistConfig(),
+        this.getCIConfig()
       );
 
       const rev = this.getGitRev();
@@ -143,6 +132,22 @@ export class ApmConfiguration {
       // Headers & body may contain sensitive info
       captureHeaders: false,
       captureBody: 'off',
+    };
+  }
+
+  private getCIConfig(): ApmAgentConfig {
+    if (process.env.ELASTIC_APM_ENVIRONMENT !== 'ci') {
+      return {};
+    }
+
+    return {
+      globalLabels: {
+        branch: process.env.GIT_BRANCH || '',
+        targetBranch: process.env.PR_TARGET_BRANCH || '',
+        ciBuildNumber: process.env.BUILD_NUMBER || '',
+        isPr: process.env.GITHUB_PR_NUMBER ? true : false,
+        prId: process.env.GITHUB_PR_NUMBER || '',
+      },
     };
   }
 

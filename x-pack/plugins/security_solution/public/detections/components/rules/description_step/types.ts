@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { ReactNode } from 'react';
+import { Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
   IIndexPattern,
   Filter,
   FilterManager,
 } from '../../../../../../../../src/plugins/data/public';
-import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 
 export interface ListItems {
   title: NonNullable<ReactNode>;
@@ -29,5 +31,5 @@ export interface BuildQueryBarDescription {
 
 export interface BuildThreatDescription {
   label: string;
-  threat: IMitreEnterpriseAttack[];
+  threat: Threats;
 }

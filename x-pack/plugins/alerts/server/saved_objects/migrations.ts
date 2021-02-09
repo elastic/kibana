@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
@@ -11,11 +13,9 @@ import {
 } from '../../../../../src/core/server';
 import { RawAlert } from '../types';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import {
-  APP_ID as SIEM_APP_ID,
-  SERVER_APP_ID as SIEM_SERVER_APP_ID,
-} from '../../../security_solution/common/constants';
 
+const SIEM_APP_ID = 'securitySolution';
+const SIEM_SERVER_APP_ID = 'siem';
 export const LEGACY_LAST_MODIFIED_VERSION = 'pre-7.10.0';
 
 type AlertMigration = (
@@ -37,8 +37,18 @@ export function getMigrations(
     )
   );
 
+  const migrationAlertUpdatedAtAndNotifyWhen = encryptedSavedObjects.createMigration<
+    RawAlert,
+    RawAlert
+  >(
+    // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyWhen" fields
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
+    '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
   };
 }
 
@@ -58,6 +68,32 @@ function executeMigrationWithErrorHandling(
     return doc;
   };
 }
+
+const setAlertUpdatedAtDate = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> => {
+  const updatedAt = doc.updated_at || doc.attributes.createdAt;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      updatedAt,
+    },
+  };
+};
+
+const setNotifyWhen = (
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> => {
+  const notifyWhen = doc.attributes.throttle ? 'onThrottleInterval' : 'onActiveAlert';
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      notifyWhen,
+    },
+  };
+};
 
 const consumersToChange: Map<string, string> = new Map(
   Object.entries({

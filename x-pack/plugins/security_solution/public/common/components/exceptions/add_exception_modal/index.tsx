@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+/* eslint complexity: ["error", 30]*/
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -53,6 +56,7 @@ import {
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
+import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -108,7 +112,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const { http } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
-  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
@@ -124,8 +128,22 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
     memoSignalIndexName
   );
-  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(ruleIndices);
 
+  const memoMlJobIds = useMemo(
+    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
+    [maybeRule]
+  );
+  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+
+  const memoRuleIndices = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    } else {
+      return ruleIndices;
+    }
+  }, [jobs, ruleIndices]);
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
   const onError = useCallback(
     (error: Error): void => {
       addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
@@ -364,6 +382,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           !isSignalIndexPatternLoading &&
           !isLoadingExceptionList &&
           !isIndexPatternLoading &&
+          !isRuleLoading &&
+          !mlJobLoading &&
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">

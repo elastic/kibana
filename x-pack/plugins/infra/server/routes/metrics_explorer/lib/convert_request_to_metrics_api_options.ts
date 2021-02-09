@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isObject, isArray } from 'lodash';
@@ -15,7 +16,9 @@ import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api
 export const convertRequestToMetricsAPIOptions = (
   options: MetricsExplorerRequestBody
 ): MetricsAPIRequest => {
-  const metrics = options.metrics.map(convertMetricToMetricsAPIMetric);
+  const metrics = options.metrics
+    .map(convertMetricToMetricsAPIMetric)
+    .filter(<M>(m: M): m is NonNullable<M> => !!m);
   const { limit, timerange, indexPattern } = options;
 
   const metricsApiOptions: MetricsAPIRequest = {

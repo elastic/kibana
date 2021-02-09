@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -16,6 +17,7 @@ import template from './index.html';
 import { Legacy } from '../../legacy_shims';
 import { CODE_PATH_ELASTICSEARCH } from '../../../common/constants';
 import { PageLoading } from '../../components';
+import { ajaxErrorHandlersProvider } from '../../lib/ajax_error_handler';
 
 const CODE_PATHS = [CODE_PATH_ELASTICSEARCH];
 uiRoutes.when('/loading', {
@@ -49,21 +51,28 @@ uiRoutes.when('/loading', {
       };
 
       const routeInit = Private(routeInitProvider);
-      routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true, unsetGlobalState: true }).then(
-        (clusters) => {
+      routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true, unsetGlobalState: true })
+        .then((clusters) => {
           if (!clusters || !clusters.length) {
             window.location.hash = '#/no-data';
+            $scope.$apply();
             return;
           }
           if (clusters.length === 1) {
             // Bypass the cluster listing if there is just 1 cluster
             window.history.replaceState(null, null, '#/overview');
+            $scope.$apply();
             return;
           }
 
           window.history.replaceState(null, null, '#/home');
-        }
-      );
+          $scope.$apply();
+        })
+        .catch((err) => {
+          const Private = $injector.get('Private');
+          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+          return $scope.$apply(() => ajaxErrorHandlers(err));
+        });
     }
   },
 });

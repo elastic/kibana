@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
-import { USES_HEADLESS_JOB_TYPES } from '../../../constants';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 
 interface Props {

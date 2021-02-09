@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line import/no-nodejs-modules
@@ -54,6 +55,8 @@ export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.en
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
+
+export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
 
 export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
   return state.agentsWithEndpointsTotal > state.endpointsTotal;
@@ -184,7 +187,7 @@ export const uiQueryParams: (
           typeof query[key] === 'string'
             ? (query[key] as string)
             : Array.isArray(query[key])
-            ? (query[key][query[key].length - 1] as string)
+            ? (query[key] as string[])[(query[key] as string[]).length - 1]
             : undefined;
 
         if (value !== undefined) {

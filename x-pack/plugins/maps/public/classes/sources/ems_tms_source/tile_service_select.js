@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -60,10 +61,7 @@ export class TileServiceSelect extends React.Component {
   };
 
   render() {
-    const helpText =
-      this.state.hasLoaded && this.state.emsTmsOptions.length === 0
-        ? getEmsUnavailableMessage()
-        : null;
+    const helpText = this.state.emsTmsOptions.length === 0 ? getEmsUnavailableMessage() : null;
 
     let selectedId;
     if (this.props.config) {

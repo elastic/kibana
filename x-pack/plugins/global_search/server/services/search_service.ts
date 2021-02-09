@@ -1,19 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable, timer, merge, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
-import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
+import {
+  GlobalSearchProviderResult,
+  GlobalSearchBatchedResults,
+  GlobalSearchFindParams,
+} from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
 import { defaultMaxProviderResults } from '../../common/constants';
 import { ILicenseChecker } from '../../common/license_checker';
-
 import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchConfigType } from '../config';
 import { getContextFactory, GlobalSearchContextFactory } from './context';
@@ -46,7 +51,7 @@ export interface SearchServiceStart {
    *
    * @example
    * ```ts
-   * startDeps.globalSearch.find('some term').subscribe({
+   * startDeps.globalSearch.find({ term: 'some term' }).subscribe({
    *  next: ({ results }) => {
    *   addNewResultsToList(results);
    *  },
@@ -64,10 +69,15 @@ export interface SearchServiceStart {
    * from the server-side `find` API.
    */
   find(
-    term: string,
+    params: GlobalSearchFindParams,
     options: GlobalSearchFindOptions,
     request: KibanaRequest
   ): Observable<GlobalSearchBatchedResults>;
+
+  /**
+   * Returns all the searchable types registered by the underlying result providers.
+   */
+  getSearchableTypes(request: KibanaRequest): Promise<string[]>;
 }
 
 interface SetupDeps {
@@ -115,11 +125,26 @@ export class SearchService {
     this.licenseChecker = licenseChecker;
     this.contextFactory = getContextFactory(core);
     return {
-      find: (term, options, request) => this.performFind(term, options, request),
+      find: (params, options, request) => this.performFind(params, options, request),
+      getSearchableTypes: (request) => this.getSearchableTypes(request),
     };
   }
 
-  private performFind(term: string, options: GlobalSearchFindOptions, request: KibanaRequest) {
+  private async getSearchableTypes(request: KibanaRequest) {
+    const context = this.contextFactory!(request);
+    const allTypes = (
+      await Promise.all(
+        [...this.providers.values()].map((provider) => provider.getSearchableTypes(context))
+      )
+    ).flat();
+    return uniq(allTypes);
+  }
+
+  private performFind(
+    params: GlobalSearchFindParams,
+    options: GlobalSearchFindOptions,
+    request: KibanaRequest
+  ) {
     const licenseState = this.licenseChecker!.getState();
     if (!licenseState.valid) {
       return throwError(
@@ -137,7 +162,7 @@ export class SearchService {
 
     const timeout$ = timer(this.config!.search_timeout.asMilliseconds()).pipe(map(mapToUndefined));
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
-    const providerOptions = {
+    const findOptions = {
       ...options,
       preference: options.preference ?? 'default',
       maxResults: this.maxProviderResults,
@@ -148,7 +173,7 @@ export class SearchService {
       processProviderResult(result, basePath);
 
     const providersResults$ = [...this.providers.values()].map((provider) =>
-      provider.find(term, providerOptions, context).pipe(
+      provider.find(params, findOptions, context).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
         map((results) => results.map((r) => processResult(r)))

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -17,17 +18,17 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
 } from '@elastic/eui';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { State } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-
-import { renderers } from './catalog';
-import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../../timelines/store/timeline/actions';
+import { RowRendererId } from '../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/timeline/actions';
+import { timelineSelectors } from '../../store/timeline';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import { RowRenderersBrowser } from './row_renderers_browser';
 import * as i18n from './translations';
 
@@ -80,10 +81,10 @@ interface StatefulRowRenderersBrowserProps {
 const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowserProps> = ({
   timelineId,
 }) => {
-  const tableRef = useRef<EuiInMemoryTable<{}>>();
   const dispatch = useDispatch();
-  const excludedRowRendererIds = useShallowEqualSelector(
-    (state: State) => state.timeline.timelineById[timelineId]?.excludedRowRendererIds || []
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const excludedRowRendererIds = useDeepEqualSelector(
+    (state: State) => (getTimeline(state, timelineId) ?? timelineDefaults).excludedRowRendererIds
   );
   const [show, setShow] = useState(false);
 
@@ -103,12 +104,12 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
   const handleDisableAll = useCallback(() => {
-    tableRef?.current?.setSelection([]);
-  }, [tableRef]);
+    setExcludedRowRendererIds(Object.values(RowRendererId));
+  }, [setExcludedRowRendererIds]);
 
   const handleEnableAll = useCallback(() => {
-    tableRef?.current?.setSelection(renderers);
-  }, [tableRef]);
+    setExcludedRowRendererIds([]);
+  }, [setExcludedRowRendererIds]);
 
   return (
     <>
@@ -166,7 +167,6 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
 
             <StyledEuiModalBody>
               <RowRenderersBrowser
-                ref={tableRef}
                 excludedRowRendererIds={excludedRowRendererIds}
                 setExcludedRowRendererIds={setExcludedRowRendererIds}
               />

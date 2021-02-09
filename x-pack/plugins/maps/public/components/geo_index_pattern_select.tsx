@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -14,11 +15,12 @@ import {
   getIndexPatternService,
   getHttp,
 } from '../kibana_services';
-import { ES_GEO_FIELD_TYPES } from '../../common/constants';
+import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
 
 interface Props {
   onChange: (indexPattern: IndexPattern) => void;
   value: string | null;
+  isGeoPointsOnly?: boolean;
 }
 
 interface State {
@@ -128,7 +130,9 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
             placeholder={i18n.translate('xpack.maps.indexPatternSelectPlaceholder', {
               defaultMessage: 'Select index pattern',
             })}
-            fieldTypes={ES_GEO_FIELD_TYPES}
+            fieldTypes={
+              this.props?.isGeoPointsOnly ? [ES_GEO_FIELD_TYPE.GEO_POINT] : ES_GEO_FIELD_TYPES
+            }
             onNoIndexPatterns={this._onNoIndexPatterns}
             isClearable={false}
           />

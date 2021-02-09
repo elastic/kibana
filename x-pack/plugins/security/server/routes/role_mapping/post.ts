@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapError } from '../../errors';
 import { RouteDefinitionParams } from '..';
 
-export function defineRoleMappingPostRoutes(params: RouteDefinitionParams) {
-  const { clusterClient, router } = params;
-
+export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/role_mapping/{name}',
@@ -43,13 +43,10 @@ export function defineRoleMappingPostRoutes(params: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const saveResponse = await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.saveRoleMapping', {
-            name: request.params.name,
-            body: request.body,
-          });
-        return response.ok({ body: saveResponse });
+        const saveResponse = await context.core.elasticsearch.client.asCurrentUser.security.putRoleMapping(
+          { name: request.params.name, body: request.body }
+        );
+        return response.ok({ body: saveResponse.body });
       } catch (error) {
         const wrappedError = wrapError(error);
         return response.customError({

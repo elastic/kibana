@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import path, { join, resolve } from 'path';
 
 import { TimelineSavedObject } from '../../../../../common/types/timeline';
@@ -48,8 +50,8 @@ export const checkTimelinesStatus = async (
     readStream,
     <T>(timelinesFromFileSystem: T) => {
       if (Array.isArray(timelinesFromFileSystem)) {
-        const parsedTimelinesFromFileSystem = timelinesFromFileSystem.map((t: string) =>
-          JSON.parse(t)
+        const parsedTimelinesFromFileSystem = (timelinesFromFileSystem as readonly string[]).map(
+          (t) => JSON.parse(t)
         );
         const prepackagedTimelines = timeline.timeline ?? [];
         const timelinesToInstall = getTimelinesToInstall(

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -24,17 +25,14 @@ import {
   caseUserActions,
   pushedCase,
   respReporters,
-  serviceConnector,
   tags,
 } from '../mock';
 import {
-  CaseExternalServiceRequest,
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
-  ServiceConnectorCaseParams,
-  ServiceConnectorCaseResponse,
   User,
+  CaseStatuses,
 } from '../../../../../case/common/api';
 
 export const getCase = async (
@@ -62,7 +60,7 @@ export const getCases = async ({
   filterOptions = {
     search: '',
     reporters: [],
-    status: 'open',
+    status: CaseStatuses.open,
     tags: [],
   },
   queryParams = {
@@ -108,15 +106,9 @@ export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promi
 
 export const pushCase = async (
   caseId: string,
-  push: CaseExternalServiceRequest,
+  connectorId: string,
   signal: AbortSignal
 ): Promise<Case> => Promise.resolve(pushedCase);
-
-export const pushToService = async (
-  connectorId: string,
-  casePushParams: ServiceConnectorCaseParams,
-  signal: AbortSignal
-): Promise<ServiceConnectorCaseResponse> => Promise.resolve(serviceConnector);
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> =>
   Promise.resolve(actionLicenses);

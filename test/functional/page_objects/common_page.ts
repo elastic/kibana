@@ -1,30 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
-import { get } from 'lodash';
 // @ts-ignore
 import fetch from 'node-fetch';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
-// @ts-ignore not TS yet
-import getUrl from '../../../src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -48,20 +35,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
   }
 
   class CommonPage {
-    /**
-     * Returns Kibana host URL
-     */
-    public getHostPort() {
-      return getUrl.baseUrl(config.get('servers.kibana'));
-    }
-
-    /**
-     * Returns ES host URL
-     */
-    public getEsHostPort() {
-      return getUrl.baseUrl(config.get('servers.elasticsearch'));
-    }
-
     /**
      * Logins to Kibana as default user and navigates to provided app
      * @param appUrl Kibana URL
@@ -117,10 +90,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         } else {
           log.debug(`navigateToUrl ${appUrl}`);
           await browser.get(appUrl, insertTimestamp);
-          // accept alert if it pops up
-          const alert = await browser.getAlert();
-          await alert?.accept();
         }
+
+        // accept alert if it pops up
+        const alert = await browser.getAlert();
+        await alert?.accept();
 
         const currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp)
@@ -402,7 +376,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     async closeToast() {
-      const toast = await find.byCssSelector('.euiToast', 2 * defaultFindTimeout);
+      const toast = await find.byCssSelector('.euiToast', 6 * defaultFindTimeout);
       await toast.moveMouseTo();
       const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
 
@@ -454,39 +428,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       return await body.getVisibleText();
     }
 
-    /**
-     * Helper to detect an OSS licensed Kibana
-     * Useful for functional testing in cloud environment
-     */
-    async isOss() {
-      const baseUrl = this.getEsHostPort();
-      const username = config.get('servers.elasticsearch.username');
-      const password = config.get('servers.elasticsearch.password');
-      const response = await fetch(baseUrl + '/_xpack', {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-        },
-      });
-      return response.status !== 200;
-    }
-
-    async isCloud(): Promise<boolean> {
-      const baseUrl = this.getHostPort();
-      const username = config.get('servers.kibana.username');
-      const password = config.get('servers.kibana.password');
-      const response = await fetch(baseUrl + '/api/stats?extended', {
-        method: 'get',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Basic ' + Buffer.from(username + ':' + password).toString('base64'),
-        },
-      });
-      const data = await response.json();
-      return get(data, 'usage.cloud.is_cloud_enabled', false);
-    }
-
     async waitForSaveModalToClose() {
       log.debug('Waiting for save modal to close');
       await retry.try(async () => {
@@ -514,6 +455,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         const button = await find.byButtonText('Dismiss');
         await button.click();
       }
+    }
+
+    /**
+     * Get visible text of the Welcome Banner
+     */
+    async getWelcomeText() {
+      return await testSubjects.getVisibleText('global-banner-item');
     }
   }
 

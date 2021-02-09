@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { SearchResponse } from 'elasticsearch';
 import {
@@ -106,10 +108,21 @@ export default function ({ getService }: FtrProviderContext) {
         // this id comes from the es archive file endpoint/pipeline/dns
         const id = 'LrLSOVHVsFY94TAi++++++eF';
         const { body }: { body: ResolverPaginatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/events?limit=1`)
+          .post(`/api/endpoint/resolver/events`)
+          .query({ limit: 1 })
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `event.id:"${id}"`,
+            filter: JSON.stringify({
+              bool: {
+                filter: [{ term: { 'event.id': id } }],
+              },
+            }),
+            indexPatterns: [eventsIndexPattern],
+            // these times are taken from the es archiver data endpoint/pipeline/dns for this specific event
+            timeRange: {
+              from: '2020-10-01T13:50:15.14364600Z',
+              to: '2020-10-01T13:50:15.14364600Z',
+            },
           })
           .expect(200);
         expect(body.events.length).to.eql(1);
@@ -121,10 +134,21 @@ export default function ({ getService }: FtrProviderContext) {
         // this id comes from the es archive file endpoint/pipeline/dns
         const id = 'LrLSOVHVsFY94TAi++++++eP';
         const { body }: { body: ResolverPaginatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/events?limit=1`)
+          .post(`/api/endpoint/resolver/events`)
+          .query({ limit: 1 })
           .set('kbn-xsrf', 'xxx')
           .send({
-            filter: `event.id:"${id}"`,
+            filter: JSON.stringify({
+              bool: {
+                filter: [{ term: { 'event.id': id } }],
+              },
+            }),
+            indexPatterns: [eventsIndexPattern],
+            // these times are taken from the es archiver data endpoint/pipeline/dns for this specific event
+            timeRange: {
+              from: '2020-10-01T13:50:15.44516300Z',
+              to: '2020-10-01T13:50:15.44516300Z',
+            },
           })
           .expect(200);
         expect(body.events.length).to.eql(1);

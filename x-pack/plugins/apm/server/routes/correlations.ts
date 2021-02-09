@@ -1,26 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
-import { rangeRt } from './default_api_types';
-import { getCorrelationsForSlowTransactions } from '../lib/transaction_groups/correlations/get_correlations_for_slow_transactions';
-import { getCorrelationsForRanges } from '../lib/transaction_groups/correlations/get_correlations_for_ranges';
-import { scoringRt } from '../lib/transaction_groups/correlations/scoring_rt';
-import { createRoute } from './create_route';
+import { isActivePlatinumLicense } from '../../common/license_check';
+import { getCorrelationsForFailedTransactions } from '../lib/correlations/get_correlations_for_failed_transactions';
+import { getCorrelationsForSlowTransactions } from '../lib/correlations/get_correlations_for_slow_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
+import { createRoute } from './create_route';
+import { rangeRt } from './default_api_types';
 
-export const correlationsForSlowTransactionsRoute = createRoute(() => ({
-  path: '/api/apm/correlations/slow_durations',
-  params: {
+const INVALID_LICENSE = i18n.translate(
+  'xpack.apm.significanTerms.license.text',
+  {
+    defaultMessage:
+      'To use the correlations API, you must be subscribed to an Elastic Platinum license.',
+  }
+);
+
+export const correlationsForSlowTransactionsRoute = createRoute({
+  endpoint: 'GET /api/apm/correlations/slow_transactions',
+  params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
-        scoring: scoringRt,
       }),
       t.type({
         durationPercentile: t.string,
@@ -29,8 +39,12 @@ export const correlationsForSlowTransactionsRoute = createRoute(() => ({
       t.partial({ uiFilters: t.string }),
       rangeRt,
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
     const setup = await setupRequest(context, request);
     const {
       serviceName,
@@ -38,7 +52,6 @@ export const correlationsForSlowTransactionsRoute = createRoute(() => ({
       transactionName,
       durationPercentile,
       fieldNames,
-      scoring = 'percentage',
     } = context.params.query;
 
     return getCorrelationsForSlowTransactions({
@@ -47,22 +60,19 @@ export const correlationsForSlowTransactionsRoute = createRoute(() => ({
       transactionName,
       durationPercentile: parseInt(durationPercentile, 10),
       fieldNames: fieldNames.split(','),
-      scoring,
       setup,
     });
   },
-}));
+});
 
-export const correlationsForRangesRoute = createRoute(() => ({
-  path: '/api/apm/correlations/ranges',
-  params: {
+export const correlationsForFailedTransactionsRoute = createRoute({
+  endpoint: 'GET /api/apm/correlations/failed_transactions',
+  params: t.type({
     query: t.intersection([
       t.partial({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
-        scoring: scoringRt,
-        gap: t.string,
       }),
       t.type({
         fieldNames: t.string,
@@ -70,32 +80,27 @@ export const correlationsForRangesRoute = createRoute(() => ({
       t.partial({ uiFilters: t.string }),
       rangeRt,
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
     const setup = await setupRequest(context, request);
-
     const {
       serviceName,
       transactionType,
       transactionName,
-      scoring = 'percentage',
-      gap,
+
       fieldNames,
     } = context.params.query;
 
-    const gapBetweenRanges = parseInt(gap || '0', 10) * 3600 * 1000;
-    if (gapBetweenRanges < 0) {
-      throw new Error('gap must be 0 or positive');
-    }
-
-    return getCorrelationsForRanges({
+    return getCorrelationsForFailedTransactions({
       serviceName,
       transactionType,
       transactionName,
-      scoring,
-      gapBetweenRanges,
       fieldNames: fieldNames.split(','),
       setup,
     });
   },
-}));
+});

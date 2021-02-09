@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
   buildOtherBucketAgg,
   mergeOtherBucketAggResponse,
   updateMissingBucket,
+  OTHER_BUCKET_SEPARATOR as SEP,
 } from './_terms_other_bucket_helper';
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -145,7 +135,7 @@ const nestedTermResponse = {
               { key: '__missing__', doc_count: 1430 },
             ],
           },
-          key: 'US',
+          key: 'US-with-dash',
           doc_count: 2850,
         },
         {
@@ -158,7 +148,7 @@ const nestedTermResponse = {
               { key: '__missing__', doc_count: 130 },
             ],
           },
-          key: 'IN',
+          key: 'IN-with-dash',
           doc_count: 2830,
         },
       ],
@@ -211,7 +201,10 @@ const nestedOtherResponse = {
   hits: { total: 14005, max_score: 0, hits: [] },
   aggregations: {
     'other-filter': {
-      buckets: { '-US': { doc_count: 2805 }, '-IN': { doc_count: 2804 } },
+      buckets: {
+        [`${SEP}US-with-dash`]: { doc_count: 2805 },
+        [`${SEP}IN-with-dash`]: { doc_count: 2804 },
+      },
     },
   },
   status: 200,
@@ -278,11 +271,11 @@ describe('Terms Agg Other bucket helper', () => {
           aggs: undefined,
           filters: {
             filters: {
-              '-IN': {
+              [`${SEP}IN-with-dash`]: {
                 bool: {
                   must: [],
                   filter: [
-                    { match_phrase: { 'geo.src': 'IN' } },
+                    { match_phrase: { 'geo.src': 'IN-with-dash' } },
                     { exists: { field: 'machine.os.raw' } },
                   ],
                   should: [],
@@ -292,11 +285,11 @@ describe('Terms Agg Other bucket helper', () => {
                   ],
                 },
               },
-              '-US': {
+              [`${SEP}US-with-dash`]: {
                 bool: {
                   must: [],
                   filter: [
-                    { match_phrase: { 'geo.src': 'US' } },
+                    { match_phrase: { 'geo.src': 'US-with-dash' } },
                     { exists: { field: 'machine.os.raw' } },
                   ],
                   should: [],
@@ -329,10 +322,10 @@ describe('Terms Agg Other bucket helper', () => {
           aggs: undefined,
           filters: {
             filters: {
-              '-IN': {
+              [`${SEP}IN-with-dash`]: {
                 bool: {
                   must: [],
-                  filter: [{ match_phrase: { 'geo.src': 'IN' } }],
+                  filter: [{ match_phrase: { 'geo.src': 'IN-with-dash' } }],
                   should: [],
                   must_not: [
                     {
@@ -356,10 +349,10 @@ describe('Terms Agg Other bucket helper', () => {
                   ],
                 },
               },
-              '-US': {
+              [`${SEP}US-with-dash`]: {
                 bool: {
                   must: [],
-                  filter: [{ match_phrase: { 'geo.src': 'US' } }],
+                  filter: [{ match_phrase: { 'geo.src': 'US-with-dash' } }],
                   should: [],
                   must_not: [
                     {

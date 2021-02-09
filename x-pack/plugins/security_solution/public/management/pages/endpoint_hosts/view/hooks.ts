@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useSelector } from 'react-redux';
@@ -24,22 +25,22 @@ export function useEndpointSelector<TSelected>(selector: (state: EndpointState) 
 }
 
 /**
- * Returns an object that contains Ingest app and URL information
+ * Returns an object that contains Fleet app and URL information
  */
 export const useIngestUrl = (subpath: string): { url: string; appId: string; appPath: string } => {
   const { services } = useKibana();
   return useMemo(() => {
     const appPath = `#/${subpath}`;
     return {
-      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
-      appId: 'ingestManager',
+      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
+      appId: 'fleet',
       appPath,
     };
   }, [services.application, subpath]);
 };
 
 /**
- * Returns an object that contains Ingest app and URL information
+ * Returns an object that contains Fleet app and URL information
  */
 export const useAgentDetailsIngestUrl = (
   agentId: string
@@ -48,8 +49,8 @@ export const useAgentDetailsIngestUrl = (
   return useMemo(() => {
     const appPath = `#/fleet/agents/${agentId}/activity`;
     return {
-      url: `${services.application.getUrlForApp('ingestManager')}${appPath}`,
-      appId: 'ingestManager',
+      url: `${services.application.getUrlForApp('fleet')}${appPath}`,
+      appId: 'fleet',
       appPath,
     };
   }, [services.application, agentId]);

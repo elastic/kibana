@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -42,8 +45,8 @@ import { RulesSchema } from '../../../../../common/detection_engine/schemas/resp
  *
  * @throws An error if response is not OK
  */
-export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
-  KibanaServices.get().http.fetch<RulesSchema>(DETECTION_ENGINE_RULES_URL, {
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<FullResponseSchema> =>
+  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
     method: 'POST',
     body: JSON.stringify(rule),
     signal,
@@ -107,19 +110,21 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
+  const showCustomRuleFilter = filterOptions.showCustomRules
+    ? [`alert.attributes.tags: "__internal_immutable:false"`]
+    : [];
+  const showElasticRuleFilter = filterOptions.showElasticRules
+    ? [`alert.attributes.tags: "__internal_immutable:true"`]
+    : [];
   const filtersWithoutTags = [
     ...(filterOptions.filter.length ? [`alert.attributes.name: ${filterOptions.filter}`] : []),
-    ...(filterOptions.showCustomRules
-      ? [`alert.attributes.tags: "__internal_immutable:false"`]
-      : []),
-    ...(filterOptions.showElasticRules
-      ? [`alert.attributes.tags: "__internal_immutable:true"`]
-      : []),
+    ...showCustomRuleFilter,
+    ...showElasticRuleFilter,
   ].join(' AND ');
 
-  const tags = [
-    ...(filterOptions.tags?.map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`) ?? []),
-  ].join(' AND ');
+  const tags = filterOptions.tags
+    .map((t) => `alert.attributes.tags: "${t.replace(/"/g, '\\"')}"`)
+    .join(' AND ');
 
   const filterString =
     filtersWithoutTags !== '' && tags !== ''
@@ -202,7 +207,7 @@ export const enableRules = async ({ ids, enabled }: EnableRulesProps): Promise<B
  */
 export const deleteRules = async ({ ids }: DeleteRulesProps): Promise<BulkRuleResponse> =>
   KibanaServices.get().http.fetch<Rule[]>(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`, {
-    method: 'DELETE',
+    method: 'POST',
     body: JSON.stringify(ids.map((id) => ({ id }))),
   });
 
@@ -245,13 +250,25 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
  *
  * @throws An error if response is not OK
  */
-export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> => {
-  await KibanaServices.get().http.fetch<unknown>(DETECTION_ENGINE_PREPACKAGED_URL, {
+export const createPrepackagedRules = async ({
+  signal,
+}: BasicFetchProps): Promise<{
+  rules_installed: number;
+  rules_updated: number;
+  timelines_installed: number;
+  timelines_updated: number;
+}> => {
+  const result = await KibanaServices.get().http.fetch<{
+    rules_installed: number;
+    rules_updated: number;
+    timelines_installed: number;
+    timelines_updated: number;
+  }>(DETECTION_ENGINE_PREPACKAGED_URL, {
     method: 'PUT',
     signal,
   });
 
-  return true;
+  return result;
 };
 
 /**

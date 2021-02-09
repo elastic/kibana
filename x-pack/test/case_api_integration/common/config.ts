@@ -1,13 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
+import path from 'path';
+import fs from 'fs';
 import { services } from './services';
+import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -26,6 +30,7 @@ const enabledActionTypes = [
   '.servicenow',
   '.slack',
   '.webhook',
+  '.case',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -48,6 +53,34 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         protocol: ssl ? 'https' : 'http',
       },
     };
+
+    const allFiles = fs.readdirSync(
+      path.resolve(
+        __dirname,
+        '..',
+        '..',
+        'alerting_api_integration',
+        'common',
+        'fixtures',
+        'plugins'
+      )
+    );
+    const plugins = allFiles.filter((file) =>
+      fs
+        .statSync(
+          path.resolve(
+            __dirname,
+            '..',
+            '..',
+            'alerting_api_integration',
+            'common',
+            'fixtures',
+            'plugins',
+            file
+          )
+        )
+        .isDirectory()
+    );
 
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
@@ -76,6 +109,20 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...plugins.map(
+            (pluginDir) =>
+              `--plugin-path=${path.resolve(
+                __dirname,
+                '..',
+                '..',
+                'alerting_api_integration',
+                'common',
+                'fixtures',
+                'plugins',
+                pluginDir
+              )}`
+          ),
+          `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

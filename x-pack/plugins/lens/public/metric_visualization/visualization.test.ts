@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { metricVisualization } from './visualization';
-import { State } from './types';
+import { MetricState } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { generateId } from '../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
 
 jest.mock('../id_generator');
 
-function exampleState(): State {
+function exampleState(): MetricState {
   return {
     accessor: 'a',
     layerId: 'l1',
@@ -191,6 +192,30 @@ describe('metric_visualization', () => {
           "type": "expression",
         }
       `);
+    });
+  });
+
+  describe('#getErrorMessages', () => {
+    it('returns undefined if no error is raised', () => {
+      const datasource: DatasourcePublicAPI = {
+        ...createMockDatasource('l1').publicAPIMock,
+        getOperationForColumnId(_: string) {
+          return {
+            id: 'a',
+            dataType: 'number',
+            isBucketed: false,
+            label: 'shazm',
+          };
+        },
+      };
+      const frame = {
+        ...mockFrame(),
+        datasourceLayers: { l1: datasource },
+      };
+
+      const error = metricVisualization.getErrorMessages(exampleState(), frame);
+
+      expect(error).not.toBeDefined();
     });
   });
 });

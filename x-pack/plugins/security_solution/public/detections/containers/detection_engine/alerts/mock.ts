@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertSearchResponse, AlertsIndex, Privilege } from './types';
@@ -980,7 +981,7 @@ export const mockStatusAlertQuery: object = {
 
 export const mockSignalIndex: AlertsIndex = {
   name: 'mock-signal-index',
-  template_outdated: false,
+  index_mapping_outdated: false,
 };
 
 export const mockUserPrivilege: Privilege = {
@@ -989,6 +990,7 @@ export const mockUserPrivilege: Privilege = {
   cluster: {
     monitor_ml: true,
     manage_ccr: true,
+    manage_api_key: true,
     manage_index_templates: true,
     monitor_watcher: true,
     monitor_transform: true,
@@ -1015,6 +1017,7 @@ export const mockUserPrivilege: Privilege = {
   index: {
     '.siem-signals-default': {
       all: true,
+      maintenance: true,
       manage_ilm: true,
       read: true,
       create_index: true,
@@ -1032,6 +1035,7 @@ export const mockUserPrivilege: Privilege = {
       write: true,
     },
   },
+  application: {},
   is_authenticated: true,
   has_encryption_key: true,
 };

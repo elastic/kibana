@@ -17,7 +17,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -29,9 +32,16 @@
       },
       "technique": [
         {
-          "id": "T1158",
-          "name": "Hidden Files and Directories",
-          "reference": "https://attack.mitre.org/techniques/T1158/"
+          "id": "T1564",
+          "name": "Hide Artifacts",
+          "reference": "https://attack.mitre.org/techniques/T1564/",
+          "subtechnique": [
+            {
+              "id": "T1564.001",
+              "name": "Hidden Files and Directories",
+              "reference": "https://attack.mitre.org/techniques/T1564/001/"
+            }
+          ]
         }
       ]
     },
@@ -42,15 +52,9 @@
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
       },
-      "technique": [
-        {
-          "id": "T1158",
-          "name": "Hidden Files and Directories",
-          "reference": "https://attack.mitre.org/techniques/T1158/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 6
 }

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint import/no-duplicates: 0 */
@@ -32,6 +21,11 @@ const TIME_PATTERN = '[logs-]dddd-YYYY.w';
 
 describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
   let sandbox;
+  const esClientMock = {
+    indices: {
+      getAlias: () => ({}),
+    },
+  };
   beforeEach(() => (sandbox = sinon.createSandbox()));
   afterEach(() => sandbox.restore());
 
@@ -39,7 +33,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
     describe('pre request', () => {
       it('uses callIndexAliasApi() fn', async () => {
         sandbox.stub(callIndexAliasApiNS, 'callIndexAliasApi').returns({});
-        await resolveTimePattern(noop, TIME_PATTERN);
+        await resolveTimePattern(esClientMock, TIME_PATTERN);
         sinon.assert.calledOnce(callIndexAliasApi);
       });
 
@@ -49,7 +43,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
 
         sandbox.stub(timePatternToWildcardNS, 'timePatternToWildcard').returns(wildcard);
 
-        await resolveTimePattern(noop, timePattern);
+        await resolveTimePattern(esClientMock, timePattern);
         sinon.assert.calledOnce(timePatternToWildcard);
         expect(timePatternToWildcard.firstCall.args).toEqual([timePattern]);
       });
@@ -61,7 +55,7 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
         sandbox.stub(callIndexAliasApiNS, 'callIndexAliasApi').returns({});
         sandbox.stub(timePatternToWildcardNS, 'timePatternToWildcard').returns(wildcard);
 
-        await resolveTimePattern(noop, timePattern);
+        await resolveTimePattern(esClientMock, timePattern);
         sinon.assert.calledOnce(callIndexAliasApi);
         expect(callIndexAliasApi.firstCall.args[1]).toBe(wildcard);
       });
@@ -70,13 +64,15 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
     describe('read response', () => {
       it('returns all aliases names in result.all, ordered by time desc', async () => {
         sandbox.stub(callIndexAliasApiNS, 'callIndexAliasApi').returns({
-          'logs-2016.2': {},
-          'logs-Saturday-2017.1': {},
-          'logs-2016.1': {},
-          'logs-Sunday-2017.1': {},
-          'logs-2015': {},
-          'logs-2016.3': {},
-          'logs-Friday-2017.1': {},
+          body: {
+            'logs-2016.2': {},
+            'logs-Saturday-2017.1': {},
+            'logs-2016.1': {},
+            'logs-Sunday-2017.1': {},
+            'logs-2015': {},
+            'logs-2016.3': {},
+            'logs-Friday-2017.1': {},
+          },
         });
 
         const resp = await resolveTimePattern(noop, TIME_PATTERN);
@@ -94,13 +90,15 @@ describe('server/index_patterns/service/lib/resolve_time_pattern', () => {
 
       it('returns all indices matching the time pattern in matches, ordered by time desc', async () => {
         sandbox.stub(callIndexAliasApiNS, 'callIndexAliasApi').returns({
-          'logs-2016.2': {},
-          'logs-Saturday-2017.1': {},
-          'logs-2016.1': {},
-          'logs-Sunday-2017.1': {},
-          'logs-2015': {},
-          'logs-2016.3': {},
-          'logs-Friday-2017.1': {},
+          body: {
+            'logs-2016.2': {},
+            'logs-Saturday-2017.1': {},
+            'logs-2016.1': {},
+            'logs-Sunday-2017.1': {},
+            'logs-2015': {},
+            'logs-2016.3': {},
+            'logs-Friday-2017.1': {},
+          },
         });
 
         const resp = await resolveTimePattern(noop, TIME_PATTERN);

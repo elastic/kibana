@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useCallback, useEffect, useReducer, useRef } from 'react';
 import { Unit } from '@elastic/datemath';
 import styled from 'styled-components';
@@ -312,7 +314,6 @@ export const PreviewQuery = ({
           inspect={inspect}
           refetch={refetch}
           isLoading={isMatrixHistogramLoading}
-          data-test-subj="previewNonEqlQueryHistogram"
         />
       )}
       {ruleType === 'threshold' && thresholdFieldExists && showHistogram && (
@@ -321,7 +322,6 @@ export const PreviewQuery = ({
           buckets={buckets}
           inspect={inspect}
           refetch={refetch}
-          data-test-subj="previewThresholdQueryHistogram"
         />
       )}
       {ruleType === 'eql' && showHistogram && (
@@ -333,7 +333,6 @@ export const PreviewQuery = ({
           inspect={eqlQueryInspect}
           refetch={eqlQueryRefetch}
           isLoading={eqlQueryLoading}
-          data-test-subj="previewEqlQueryHistogram"
         />
       )}
       {showHistogram &&

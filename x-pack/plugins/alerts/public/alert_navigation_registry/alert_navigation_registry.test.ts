@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertNavigationRegistry } from './alert_navigation_registry';
-import { AlertType, SanitizedAlert } from '../../common';
+import { AlertType, RecoveredActionGroup, SanitizedAlert } from '../../common';
 import uuid from 'uuid';
 
 beforeEach(() => jest.resetAllMocks());
@@ -14,9 +15,11 @@ const mockAlertType = (id: string): AlertType => ({
   id,
   name: id,
   actionGroups: [],
+  recoveryActionGroup: RecoveredActionGroup,
   actionVariables: [],
   defaultActionGroupId: 'default',
   producer: 'alerts',
+  minimumLicenseRequired: 'basic',
 });
 
 describe('AlertNavigationRegistry', () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import gql from 'graphql-tag';
@@ -174,7 +175,7 @@ export const timelineSchema = gql`
     timelineType: TimelineType
     dateRange: DateRangePickerInput
     savedQueryId: String
-    sort: SortTimelineInput
+    sort: [SortTimelineInput!]
     status: TimelineStatus
   }
 
@@ -238,10 +239,6 @@ export const timelineSchema = gql`
     ${favoriteTimeline}
   }
 
-  type SortTimelineResult {
-     ${sortTimeline}
-  }
-
   type FilterMetaTimelineResult {
     ${filtersMetaTimeline}
   }
@@ -277,7 +274,7 @@ export const timelineSchema = gql`
     pinnedEventsSaveObject: [PinnedEvent!]
     savedQueryId: String
     savedObjectId: String!
-    sort: SortTimelineResult
+    sort: ToAny
     status: TimelineStatus
     title: String
     templateTimelineId: String
@@ -298,6 +295,9 @@ export const timelineSchema = gql`
     code: Float
     message: String
     savedObjectId: String!
+    templateTimelineId: String
+    templateTimelineVersion: Int
+    timelineType: TimelineType
     version: String!
     favorite: [FavoriteTimelineResult!]
   }
@@ -324,7 +324,7 @@ export const timelineSchema = gql`
   extend type Mutation {
     "Persists a timeline"
     persistTimeline(id: ID, version: String, timeline: TimelineInput!): ResponseTimeline!
-    persistFavorite(timelineId: ID): ResponseFavoriteTimeline!
+    persistFavorite(timelineId: ID, templateTimelineId: String, templateTimelineVersion: Int, timelineType: TimelineType): ResponseFavoriteTimeline!
     deleteTimeline(id: [ID!]!): Boolean!
   }
 `;

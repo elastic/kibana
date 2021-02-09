@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'kibana/server';
@@ -14,7 +15,7 @@ import {
   DEFAULT_AD_RESULTS_TIME_FILTER,
   DEFAULT_ENABLE_AD_RESULTS_TIME_FILTER,
 } from '../../common/constants/settings';
-import { MAX_FILE_SIZE } from '../../common/constants/file_datavisualizer';
+import { MAX_FILE_SIZE } from '../../../file_upload/common';
 
 export function registerKibanaSettings(coreSetup: CoreSetup) {
   coreSetup.uiSettings.register({
@@ -27,7 +28,7 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
         defaultMessage:
           'Sets the file size limit when importing data in the File Data Visualizer. The highest supported value for this setting is 1GB.',
       }),
-      category: ['Machine Learning'],
+      category: ['machineLearning'],
       schema: schema.string(),
       validation: {
         regexString: '\\d+[mMgG][bB]',
@@ -49,7 +50,7 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
             'Use the default time filter in the Single Metric Viewer and Anomaly Explorer. If not enabled, the results for the full time range of the job are displayed.',
         }
       ),
-      category: ['Machine Learning'],
+      category: ['machineLearning'],
     },
     [ANOMALY_DETECTION_DEFAULT_TIME_RANGE]: {
       name: i18n.translate('xpack.ml.advancedSettings.anomalyDetectionDefaultTimeRangeName', {
@@ -69,7 +70,7 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
         to: schema.string(),
       }),
       requiresPageReload: true,
-      category: ['Machine Learning'],
+      category: ['machineLearning'],
     },
   });
 }

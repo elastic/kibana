@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { REFRESH_RATE_INDEX_LIST } from './refresh_intervals';
@@ -15,3 +16,5 @@ export {
 } from './detail_panel_tabs';
 
 export const REACT_ROOT_ID = 'indexManagementReactRoot';
+
+export * from './ilm_url_generator';

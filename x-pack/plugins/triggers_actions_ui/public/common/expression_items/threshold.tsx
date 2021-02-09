@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiExpression,
@@ -58,6 +59,10 @@ export const ThresholdExpression = ({
 }: ThresholdExpressionProps) => {
   const comparators = customComparators ?? builtInComparators;
   const [alertThresholdPopoverOpen, setAlertThresholdPopoverOpen] = useState(false);
+  const [comparator, setComparator] = useState<string>(thresholdComparator);
+  const [numRequiredThresholds, setNumRequiredThresholds] = useState<number>(
+    comparators[thresholdComparator].requiredValues
+  );
 
   const andThresholdText = i18n.translate(
     'xpack.triggersActionsUI.common.expressionItems.threshold.andLabel',
@@ -66,15 +71,23 @@ export const ThresholdExpression = ({
     }
   );
 
+  useEffect(() => {
+    const updateThresholdValue = comparators[comparator].requiredValues !== numRequiredThresholds;
+    if (updateThresholdValue) {
+      const thresholdValues = threshold.slice(0, comparators[comparator].requiredValues);
+      onChangeSelectedThreshold(thresholdValues);
+      setNumRequiredThresholds(comparators[comparator].requiredValues);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comparator]);
+
   return (
     <EuiPopover
       button={
         <EuiExpression
           data-test-subj="thresholdPopover"
-          description={comparators[thresholdComparator].text}
-          value={(threshold || [])
-            .slice(0, comparators[thresholdComparator].requiredValues)
-            .join(` ${andThresholdText} `)}
+          description={comparators[comparator].text}
+          value={(threshold || []).slice(0, numRequiredThresholds).join(` ${andThresholdText} `)}
           isActive={Boolean(
             alertThresholdPopoverOpen ||
               (errors.threshold0 && errors.threshold0.length) ||
@@ -97,38 +110,29 @@ export const ThresholdExpression = ({
         setAlertThresholdPopoverOpen(false);
       }}
       ownFocus
-      withTitle
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
+      repositionOnScroll
     >
       <div>
         <ClosablePopoverTitle onClose={() => setAlertThresholdPopoverOpen(false)}>
-          <>{comparators[thresholdComparator].text}</>
+          <>{comparators[comparator].text}</>
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSelect
               data-test-subj="comparatorOptionsComboBox"
-              value={thresholdComparator}
+              value={comparator}
               onChange={(e) => {
-                const updateThresholdValue =
-                  comparators[thresholdComparator].requiredValues !==
-                  comparators[e.target.value].requiredValues;
+                setComparator(e.target.value);
                 onChangeSelectedThresholdComparator(e.target.value);
-                if (updateThresholdValue) {
-                  const thresholdValues = threshold.slice(
-                    0,
-                    comparators[e.target.value].requiredValues
-                  );
-                  onChangeSelectedThreshold(thresholdValues);
-                }
               }}
               options={Object.values(comparators).map(({ text, value }) => {
                 return { text, value };
               })}
             />
           </EuiFlexItem>
-          {Array.from(Array(comparators[thresholdComparator].requiredValues)).map((_notUsed, i) => {
+          {Array.from(Array(numRequiredThresholds)).map((_notUsed, i) => {
             return (
               <Fragment key={`threshold${i}`}>
                 {i > 0 ? (

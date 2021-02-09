@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable max-classes-per-file */
 
 import React from 'react';
@@ -36,19 +38,6 @@ class LayerMock extends AbstractLayer implements ILayer {
   isVisible() {
     return true;
   }
-
-  getIconAndTooltipContent(zoom: number, isUsingSearch: boolean) {
-    return {
-      icon: <span>mockIcon</span>,
-      tooltipContent: `simulated tooltip content at zoom: ${zoom}`,
-      footnotes: [
-        {
-          icon: <span>mockFootnoteIcon</span>,
-          message: `simulated footnote at isUsingSearch: ${isUsingSearch}`,
-        },
-      ],
-    };
-  }
 }
 
 const defaultProps = {
@@ -59,11 +48,9 @@ const defaultProps = {
   fitToBounds: () => {},
   isEditButtonDisabled: false,
   isReadOnly: false,
-  isUsingSearch: true,
   layer: new LayerMock(),
   removeLayer: () => {},
   toggleVisible: () => {},
-  zoom: 0,
 };
 
 describe('TOCEntryActionsPopover', () => {

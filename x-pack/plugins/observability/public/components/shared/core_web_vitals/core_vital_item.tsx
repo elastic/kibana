@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -34,7 +35,7 @@ export interface Thresholds {
 
 interface Props {
   title: string;
-  value?: string;
+  value?: string | null;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;
@@ -88,14 +89,16 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
-  if (value === undefined && ranks[0] === 100 && !loading) {
+  if (!value && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
+
   return (
     <>
       <EuiStat
+        aria-label={`${title} ${value}`} // aria-label is required when passing a component, instead of a string, as the description
         titleSize="s"
-        title={value}
+        title={value ?? ''}
         description={
           <>
             {title}

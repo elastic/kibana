@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -30,7 +19,7 @@ import {
 import React from 'react';
 import { Query } from '@elastic/eui';
 import { ShallowWrapper } from 'enzyme';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 import {
   httpServiceMock,
   overlayServiceMock,
@@ -325,7 +314,7 @@ describe('SavedObjectsTable', () => {
       (component.find('Header') as any).prop('onExportAll')();
       component.update();
 
-      expect(component.find('EuiModal')).toMatchSnapshot();
+      expect(component.find('ExportModal')).toMatchSnapshot();
     });
 
     it('should export all', async () => {
@@ -342,12 +331,11 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        allowedTypes,
-        undefined,
-        true
-      );
+        types: allowedTypes,
+        includeReferencesDeep: true,
+      });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
@@ -372,12 +360,12 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        allowedTypes,
-        'test*',
-        true
-      );
+        types: allowedTypes,
+        search: 'test*',
+        includeReferencesDeep: true,
+      });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
@@ -505,7 +493,7 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
 
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('DeleteConfirmModal')).toMatchSnapshot();
     });
 
     it('should delete selected objects', async () => {

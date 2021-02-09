@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
@@ -15,11 +16,15 @@ interface Tab {
   path: string;
 }
 
-export const AnalyticsNavigationBar: FC<{ selectedTabId?: string }> = ({ selectedTabId }) => {
+export const AnalyticsNavigationBar: FC<{
+  selectedTabId?: string;
+  jobId?: string;
+  modelId?: string;
+}> = ({ jobId, modelId, selectedTabId }) => {
   const navigateToPath = useNavigateToPath();
 
-  const tabs = useMemo(
-    () => [
+  const tabs = useMemo(() => {
+    const navTabs = [
       {
         id: 'data_frame_analytics',
         name: i18n.translate('xpack.ml.dataframe.jobsTabLabel', {
@@ -34,13 +39,25 @@ export const AnalyticsNavigationBar: FC<{ selectedTabId?: string }> = ({ selecte
         }),
         path: '/data_frame_analytics/models',
       },
-    ],
-    []
-  );
+    ];
+    if (jobId !== undefined || modelId !== undefined) {
+      navTabs.push({
+        id: 'map',
+        name: i18n.translate('xpack.ml.dataframe.mapTabLabel', {
+          defaultMessage: 'Map',
+        }),
+        path: '/data_frame_analytics/map',
+      });
+    }
+    return navTabs;
+  }, [jobId !== undefined]);
 
-  const onTabClick = useCallback(async (tab: Tab) => {
-    await navigateToPath(tab.path);
-  }, []);
+  const onTabClick = useCallback(
+    async (tab: Tab) => {
+      await navigateToPath(tab.path, true);
+    },
+    [navigateToPath]
+  );
 
   return (
     <EuiTabs>

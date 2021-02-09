@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 
-interface ITablePaginationBarProps {
+interface TablePaginationBarProps {
   itemLabel?: string;
   itemsPerPage?: number;
   totalPages: number;
@@ -22,7 +23,7 @@ interface ITablePaginationBarProps {
 
 const MAX_PAGES = 100;
 
-export const TablePaginationBar: React.FC<ITablePaginationBarProps> = ({
+export const TablePaginationBar: React.FC<TablePaginationBarProps> = ({
   itemLabel = 'Items',
   itemsPerPage = 10,
   totalPages,

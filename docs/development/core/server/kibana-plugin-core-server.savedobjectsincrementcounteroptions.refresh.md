@@ -4,7 +4,7 @@
 
 ## SavedObjectsIncrementCounterOptions.refresh property
 
-The Elasticsearch Refresh setting for this operation
+(default='wait\_for') The Elasticsearch refresh setting for this operation. See [MutatingOperationRefreshSetting](./kibana-plugin-core-server.mutatingoperationrefreshsetting.md)
 
 <b>Signature:</b>
 

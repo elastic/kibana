@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertExecutionStatusErrorReasons } from '../types';
@@ -21,7 +22,7 @@ export function getReasonFromError(error: Error): AlertExecutionStatusErrorReaso
   if (isErrorWithReason(error)) {
     return error.reason;
   }
-  return 'unknown';
+  return AlertExecutionStatusErrorReasons.Unknown;
 }
 
 export function isErrorWithReason(error: Error | ErrorWithReason): error is ErrorWithReason {

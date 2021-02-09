@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'src/core/public';
@@ -29,7 +30,8 @@ export class PieVisualization {
     { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { pieVisualization, pie, getPieRenderer } = await import('../async_services');
+      const { getPieVisualization, pie, getPieRenderer } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
 
       expressions.registerFunction(() => pie);
 
@@ -37,9 +39,10 @@ export class PieVisualization {
         getPieRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          paletteService: palettes,
         })
       );
-      return pieVisualization;
+      return getPieVisualization({ paletteService: palettes });
     });
   }
 }

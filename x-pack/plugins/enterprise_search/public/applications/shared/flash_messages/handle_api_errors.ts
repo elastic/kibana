@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpResponse } from 'src/core/public';
 
-import { FlashMessagesLogic, IFlashMessage } from './';
+import { FlashMessagesLogic } from './flash_messages_logic';
+import { IFlashMessage } from './types';
 
 /**
  * The API errors we are handling can come from one of two ways:
@@ -17,7 +19,7 @@ import { FlashMessagesLogic, IFlashMessage } from './';
  * `errors` property in the response's data, which will contain messages we can
  * display to the user.
  */
-interface IErrorResponse {
+interface ErrorResponse {
   statusCode: number;
   error: string;
   message: string;
@@ -25,17 +27,14 @@ interface IErrorResponse {
     errors: string[];
   };
 }
-interface IOptions {
+interface Options {
   isQueued?: boolean;
 }
 
 /**
  * Converts API/HTTP errors into user-facing Flash Messages
  */
-export const flashAPIErrors = (
-  error: HttpResponse<IErrorResponse>,
-  { isQueued }: IOptions = {}
-) => {
+export const flashAPIErrors = (error: HttpResponse<ErrorResponse>, { isQueued }: Options = {}) => {
   const defaultErrorMessage = 'An unexpected error occurred';
 
   const errorFlashMessages: IFlashMessage[] = Array.isArray(error?.body?.attributes?.errors)

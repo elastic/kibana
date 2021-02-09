@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,9 +11,7 @@ import { shallow } from 'enzyme';
 import { EuiRange } from '@elastic/eui';
 import { ValuesRangeInput } from './values_range_input';
 
-jest.mock('react-use', () => ({
-  useDebounce: (fn: () => void) => fn(),
-}));
+jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
 
 describe('ValuesRangeInput', () => {
   it('should render EuiRange correctly', () => {
@@ -20,6 +19,13 @@ describe('ValuesRangeInput', () => {
     const instance = shallow(<ValuesRangeInput value={5} onChange={onChangeSpy} />);
 
     expect(instance.find(EuiRange).prop('value')).toEqual('5');
+  });
+
+  it('should not run onChange function on mount', () => {
+    const onChangeSpy = jest.fn();
+    shallow(<ValuesRangeInput value={5} onChange={onChangeSpy} />);
+
+    expect(onChangeSpy.mock.calls.length).toBe(0);
   });
 
   it('should run onChange function on update', () => {
@@ -32,11 +38,10 @@ describe('ValuesRangeInput', () => {
       );
     });
     expect(instance.find(EuiRange).prop('value')).toEqual('7');
-    // useDebounce runs on initialization and on change
-    expect(onChangeSpy.mock.calls.length).toBe(2);
-    expect(onChangeSpy.mock.calls[0][0]).toBe(5);
-    expect(onChangeSpy.mock.calls[1][0]).toBe(7);
+    expect(onChangeSpy.mock.calls.length).toBe(1);
+    expect(onChangeSpy.mock.calls[0][0]).toBe(7);
   });
+
   it('should not run onChange function on update when value is out of 1-100 range', () => {
     const onChangeSpy = jest.fn();
     const instance = shallow(<ValuesRangeInput value={5} onChange={onChangeSpy} />);
@@ -48,9 +53,7 @@ describe('ValuesRangeInput', () => {
     });
     instance.update();
     expect(instance.find(EuiRange).prop('value')).toEqual('107');
-    // useDebounce only runs on initialization
-    expect(onChangeSpy.mock.calls.length).toBe(2);
-    expect(onChangeSpy.mock.calls[0][0]).toBe(5);
-    expect(onChangeSpy.mock.calls[1][0]).toBe(100);
+    expect(onChangeSpy.mock.calls.length).toBe(1);
+    expect(onChangeSpy.mock.calls[0][0]).toBe(100);
   });
 });

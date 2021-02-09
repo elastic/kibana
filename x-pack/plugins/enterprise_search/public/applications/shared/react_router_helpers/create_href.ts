@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { History } from 'history';
+
 import { HttpSetup } from 'src/core/public';
 
 /**
@@ -22,18 +24,18 @@ import { HttpSetup } from 'src/core/public';
  *
  * Links completely outside of Kibana should not use our React Router helpers or navigateToUrl.
  */
-interface ICreateHrefDeps {
+interface CreateHrefDeps {
   history: History;
   http: HttpSetup;
 }
-export interface ICreateHrefOptions {
+export interface CreateHrefOptions {
   shouldNotCreateHref?: boolean;
 }
 
 export const createHref = (
   path: string,
-  { history, http }: ICreateHrefDeps,
-  { shouldNotCreateHref }: ICreateHrefOptions = {}
+  { history, http }: CreateHrefDeps,
+  { shouldNotCreateHref }: CreateHrefOptions = {}
 ): string => {
   return shouldNotCreateHref ? http.basePath.prepend(path) : history.createHref({ pathname: path });
 };

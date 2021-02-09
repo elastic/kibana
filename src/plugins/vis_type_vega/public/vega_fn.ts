@@ -1,37 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ExecutionContext,
-  ExpressionFunctionDefinition,
-  KibanaContext,
-  Render,
-} from '../../expressions/public';
+import { ExecutionContextSearch } from '../../data/public';
+import { ExecutionContext, ExpressionFunctionDefinition, Render } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 import { VegaInspectorAdapters } from './vega_inspector/index';
-import { TimeRange, Query } from '../../data/public';
+import { KibanaContext, TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
-type Input = KibanaContext | null;
+type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
@@ -40,21 +25,23 @@ interface Arguments {
 
 export type VisParams = Required<Arguments>;
 
-interface RenderValue {
+export interface RenderValue {
   visData: VegaParser;
   visType: 'vega';
   visConfig: VisParams;
 }
 
-export const createVegaFn = (
-  dependencies: VegaVisualizationDependencies
-): ExpressionFunctionDefinition<
+export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'vega',
   Input,
   Arguments,
   Output,
-  ExecutionContext<unknown, VegaInspectorAdapters>
-> => ({
+  ExecutionContext<VegaInspectorAdapters, ExecutionContextSearch>
+>;
+
+export const createVegaFn = (
+  dependencies: VegaVisualizationDependencies
+): VegaExpressionFunctionDefinition => ({
   name: 'vega',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -76,11 +63,12 @@ export const createVegaFn = (
       query: get(input, 'query') as Query,
       filters: get(input, 'filters') as any,
       visParams: { spec: args.spec },
+      searchSessionId: context.getSearchSessionId(),
     });
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'vega_vis',
       value: {
         visData: response,
         visType: 'vega',

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { omit } from 'lodash/fp';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
@@ -16,6 +18,7 @@ import {
 } from '../../__fixtures__';
 import { initPostCommentApi } from './post_comment';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CommentType } from '../../../../../common/api';
 
 describe('POST comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -26,6 +29,7 @@ describe('POST comment', () => {
       toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
     }));
   });
+
   it(`Posts a new comment`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
@@ -35,22 +39,192 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: CommentType.user,
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1].id).toEqual(
       'mock-comment'
     );
   });
+
+  it(`Posts a new comment of type alert`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-1',
+      },
+      body: {
+        type: CommentType.alert,
+        alertId: 'test-id',
+        index: 'test-index',
+      },
+    });
+
+    const { context } = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(context, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.comments[response.payload.comments.length - 1].id).toEqual(
+      'mock-comment'
+    );
+  });
+
+  it(`it throws when missing type`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-1',
+      },
+      body: {},
+    });
+
+    const { context } = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(context, request, kibanaResponseFactory);
+    expect(response.status).toEqual(400);
+    expect(response.payload.isBoom).toEqual(true);
+  });
+
+  it(`it throws when missing attributes: type user`, async () => {
+    const allRequestAttributes = {
+      type: CommentType.user,
+      comment: 'a comment',
+    };
+
+    for (const attribute of ['comment']) {
+      const requestAttributes = omit(attribute, allRequestAttributes);
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: requestAttributes,
+      });
+
+      const { context } = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(context, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
+  it(`it throws when excess attributes are provided: type user`, async () => {
+    for (const attribute of ['alertId', 'index']) {
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: {
+          [attribute]: attribute,
+          comment: 'a comment',
+          type: CommentType.user,
+        },
+      });
+
+      const { context } = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(context, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
+  it(`it throws when missing attributes: type alert`, async () => {
+    const allRequestAttributes = {
+      type: CommentType.alert,
+      index: 'test-index',
+      alertId: 'test-id',
+    };
+
+    for (const attribute of ['alertId', 'index']) {
+      const requestAttributes = omit(attribute, allRequestAttributes);
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: requestAttributes,
+      });
+
+      const { context } = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(context, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
+  it(`it throws when excess attributes are provided: type alert`, async () => {
+    for (const attribute of ['comment']) {
+      const request = httpServerMock.createKibanaRequest({
+        path: CASE_COMMENTS_URL,
+        method: 'post',
+        params: {
+          case_id: 'mock-id-1',
+        },
+        body: {
+          [attribute]: attribute,
+          type: CommentType.alert,
+          index: 'test-index',
+          alertId: 'test-id',
+        },
+      });
+
+      const { context } = await createRouteContext(
+        createMockSavedObjectsRepository({
+          caseSavedObject: mockCases,
+          caseCommentSavedObject: mockCaseComments,
+        })
+      );
+
+      const response = await routeHandler(context, request, kibanaResponseFactory);
+      expect(response.status).toEqual(400);
+      expect(response.payload.isBoom).toEqual(true);
+    }
+  });
+
   it(`Returns an error if the case does not exist`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
@@ -60,20 +234,22 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: CommentType.user,
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
     expect(response.payload.isBoom).toEqual(true);
   });
+
   it(`Returns an error if postNewCase throws`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
@@ -86,17 +262,18 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
   });
+
   it(`Allow user to create comments without authentications`, async () => {
     routeHandler = await createRoute(initPostCommentApi, 'post', true);
 
@@ -108,20 +285,23 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
+        type: CommentType.user,
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
-      })
+      }),
+      true
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1]).toEqual({
       comment: 'Wow, good luck catching that bad meanie!',
+      type: CommentType.user,
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         email: null,

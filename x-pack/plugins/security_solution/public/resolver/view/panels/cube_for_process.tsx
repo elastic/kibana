@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import styled from 'styled-components';
@@ -17,40 +18,44 @@ interface StyledSVGCube {
 }
 import { useCubeAssets } from '../use_cube_assets';
 import { useSymbolIDs } from '../use_symbol_ids';
+import { NodeDataStatus } from '../../types';
 
 /**
  * Icon representing a process node.
  */
 export const CubeForProcess = memo(function ({
   className,
-  running,
+  size = '2.15em',
+  state,
   isOrigin,
   'data-test-subj': dataTestSubj,
 }: {
   'data-test-subj'?: string;
   /**
-   * True if the process represented by the node is still running.
+   * The state of the process's node data (for endpoint the process's lifecycle events)
    */
-  running: boolean;
+  state: NodeDataStatus;
+  /** The css size (px, em, etc...) for the width and height of the svg cube. Defaults to 2.15em */
+  size?: string;
   isOrigin?: boolean;
   className?: string;
 }) {
-  const { cubeSymbol, strokeColor } = useCubeAssets(!running, false);
+  const { cubeSymbol, strokeColor } = useCubeAssets(state, false);
   const { processCubeActiveBacking } = useSymbolIDs();
 
   return (
     <StyledSVG
       className={className}
-      width="2.15em"
-      height="2.15em"
+      width={size}
+      height={size}
       viewBox="0 0 34 34"
       data-test-subj={dataTestSubj}
       isOrigin={isOrigin}
     >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
-          defaultMessage: '{running, select, true {Running Process} false {Terminated Process}}',
-          values: { running },
+          defaultMessage: `{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process}}`,
+          values: { state },
         })}
       </desc>
       {isOrigin && (

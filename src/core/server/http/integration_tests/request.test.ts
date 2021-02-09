@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('uuid', () => ({
@@ -124,6 +113,54 @@ describe('KibanaRequest', () => {
       });
     });
   });
+
+  describe('route options', () => {
+    describe('authRequired', () => {
+      it('returns false if a route configured with "authRequired": false', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        registerAuth((req, res, t) => t.authenticated());
+        const router = createRouter('/');
+        router.get(
+          { path: '/', validate: false, options: { authRequired: false } },
+          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener).get('/').expect(200, {
+          authRequired: false,
+        });
+      });
+      it('returns "optional" if a route configured with "authRequired": optional', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        registerAuth((req, res, t) => t.authenticated());
+        const router = createRouter('/');
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener).get('/').expect(200, {
+          authRequired: 'optional',
+        });
+      });
+      it('returns true if a route configured with "authRequired": true', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        registerAuth((req, res, t) => t.authenticated());
+        const router = createRouter('/');
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener).get('/').expect(200, {
+          authRequired: true,
+        });
+      });
+    });
+  });
+
   describe('events', () => {
     describe('aborted$', () => {
       it('emits once and completes when request aborted', async (done) => {
@@ -313,7 +350,6 @@ describe('KibanaRequest', () => {
       expect(resp3.body).toEqual({ requestId: 'gamma' });
     });
   });
-
   describe('request uuid', () => {
     it('generates a UUID', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);

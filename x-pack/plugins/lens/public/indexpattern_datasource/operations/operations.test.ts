@@ -1,15 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColumn } from './index';
-import { AvgIndexPatternColumn } from './definitions/metrics';
-import { IndexPatternPrivateState } from '../types';
-import { documentField } from '../document_field';
+import { getOperationTypesForField, getAvailableOperationsByMetadata } from './index';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
+
+const fields = [
+  {
+    name: 'timestamp',
+    displayName: 'timestamp',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -17,29 +40,8 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestamp',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-    ],
+    fields,
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 
@@ -153,73 +155,6 @@ describe('getOperationTypesForField', () => {
     });
   });
 
-  describe('buildColumn', () => {
-    const state: IndexPatternPrivateState = {
-      indexPatternRefs: [],
-      existingFields: {},
-      currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      indexPatterns: expectedIndexPatterns,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columnOrder: ['col1'],
-          columns: {
-            col1: {
-              label: 'Date histogram of timestamp',
-              dataType: 'date',
-              isBucketed: true,
-
-              // Private
-              operationType: 'date_histogram',
-              params: {
-                interval: '1d',
-              },
-              sourceField: 'timestamp',
-            },
-          },
-        },
-      },
-    };
-
-    it('should build a column for the given field-based operation type if it is passed in', () => {
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        op: 'count',
-        field: documentField,
-      });
-      expect(column.operationType).toEqual('count');
-    });
-
-    it('should build a column for the given no-input operation type if it is passed in', () => {
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        op: 'filters',
-      });
-      expect(column.operationType).toEqual('filters');
-    });
-
-    it('should build a column for the given operation type and field if it is passed in', () => {
-      const field = expectedIndexPatterns[1].fields[1];
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        op: 'avg',
-        field,
-      }) as AvgIndexPatternColumn;
-      expect(column.operationType).toEqual('avg');
-      expect(column.sourceField).toEqual(field.name);
-    });
-  });
-
   describe('getAvailableOperationsByMetaData', () => {
     it('should put the average operation first', () => {
       const numberOperation = getAvailableOperationsByMetadata(expectedIndexPatterns[1]).find(
@@ -314,13 +249,29 @@ describe('getOperationTypesForField', () => {
                 "type": "field",
               },
               Object {
-                "field": "bytes",
-                "operationType": "max",
-                "type": "field",
+                "operationType": "cumulative_sum",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "counter_rate",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "derivative",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "moving_average",
+                "type": "fullReference",
               },
               Object {
                 "field": "bytes",
                 "operationType": "min",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "max",
                 "type": "field",
               },
               Object {
@@ -341,6 +292,30 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "bytes",
                 "operationType": "median",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "percentile",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "last_value",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "string",
+              "isBucketed": false,
+              "scale": "ordinal",
+            },
+            "operations": Array [
+              Object {
+                "field": "source",
+                "operationType": "last_value",
                 "type": "field",
               },
             ],

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
 import { Timeline } from '../../lib/timeline/saved_object';
+import { TimelineType } from '../../../common/types/timeline';
 
 export type QueryTimelineResolver = AppResolverOf<QueryResolvers.GetOneTimelineResolver>;
 
@@ -19,9 +21,7 @@ export type MutationTimelineResolver = AppResolverOf<
   MutationResolvers.PersistTimelineResolver<QueryTimelineResolver>
 >;
 
-export type MutationDeleteTimelineResolver = AppResolverOf<
-  MutationResolvers.DeleteTimelineResolver
->;
+export type MutationDeleteTimelineResolver = AppResolverOf<MutationResolvers.DeleteTimelineResolver>;
 
 export type MutationFavoriteResolver = AppResolverOf<MutationResolvers.PersistFavoriteResolver>;
 
@@ -65,7 +65,13 @@ export const createTimelineResolvers = (
       return true;
     },
     async persistFavorite(root, args, { req }) {
-      return libs.timeline.persistFavorite(req, args.timelineId || null);
+      return libs.timeline.persistFavorite(
+        req,
+        args.timelineId || null,
+        args.templateTimelineId || null,
+        args.templateTimelineVersion || null,
+        args.timelineType || TimelineType.default
+      );
     },
     async persistTimeline(root, args, { req }) {
       return libs.timeline.persistTimeline(

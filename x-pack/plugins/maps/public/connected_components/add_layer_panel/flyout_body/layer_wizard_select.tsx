@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -14,12 +15,18 @@ import {
   EuiLoadingContent,
   EuiFacetGroup,
   EuiFacetButton,
+  EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { getLayerWizards, LayerWizard } from '../../../classes/layers/layer_wizard_registry';
+import {
+  getLayerWizards,
+  LayerWizard,
+  LayerWizardWithMeta,
+} from '../../../classes/layers/layer_wizard_registry';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import './layer_wizard_select.scss';
 
 interface Props {
   onSelect: (layerWizard: LayerWizard) => void;
@@ -28,7 +35,7 @@ interface Props {
 interface State {
   activeCategories: LAYER_WIZARD_CATEGORY[];
   hasLoadedWizards: boolean;
-  layerWizards: LayerWizard[];
+  layerWizards: LayerWizardWithMeta[];
   selectedCategory: LAYER_WIZARD_CATEGORY | null;
 }
 
@@ -138,28 +145,43 @@ export class LayerWizardSelect extends Component<Props, State> {
     }
 
     const wizardCards = this.state.layerWizards
-      .filter((layerWizard: LayerWizard) => {
+      .filter((layerWizard: LayerWizardWithMeta) => {
         return this.state.selectedCategory
           ? layerWizard.categories.includes(this.state.selectedCategory!)
           : true;
       })
-      .map((layerWizard: LayerWizard) => {
+      .map((layerWizard: LayerWizardWithMeta) => {
         const icon = layerWizard.icon ? <EuiIcon type={layerWizard.icon} size="l" /> : undefined;
 
         const onClick = () => {
           this.props.onSelect(layerWizard);
         };
 
+        const card = (
+          <EuiCard
+            title={layerWizard.title}
+            titleSize="xs"
+            icon={icon}
+            onClick={onClick}
+            description={layerWizard.description}
+            isDisabled={layerWizard.isDisabled}
+            data-test-subj={_.camelCase(layerWizard.title)}
+          />
+        );
+
         return (
           <EuiFlexItem key={layerWizard.title}>
-            <EuiCard
-              title={layerWizard.title}
-              titleSize="xs"
-              icon={icon}
-              onClick={onClick}
-              description={layerWizard.description}
-              data-test-subj={_.camelCase(layerWizard.title)}
-            />
+            {layerWizard.isDisabled && layerWizard.disabledReason ? (
+              <EuiToolTip
+                position="top"
+                anchorClassName="mapMapLayerWizardSelect__tooltip"
+                content={layerWizard.disabledReason}
+              >
+                {card}
+              </EuiToolTip>
+            ) : (
+              card
+            )}
           </EuiFlexItem>
         );
       });

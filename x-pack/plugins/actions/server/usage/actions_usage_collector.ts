@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -26,11 +27,14 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
 
 export function createActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   return usageCollection.makeUsageCollector<ActionsUsage>({
     type: 'actions',
-    isReady: () => true,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     schema: {
       count_total: { type: 'long' },
       count_active_total: { type: 'long' },
@@ -79,7 +83,7 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 
 export function registerActionsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   const collector = createActionsUsageCollector(usageCollection, taskManager);
   usageCollection.registerCollector(collector);

@@ -1,24 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
 
-import { CredentialsLogic } from './credentials_logic';
+jest.mock('../../app_logic', () => ({
+  AppLogic: {
+    selectors: { myRole: jest.fn(() => ({})) },
+    values: { myRole: jest.fn(() => ({})) },
+  },
+}));
+
+import { nextTick } from '@kbn/test/jest';
+
+import { AppLogic } from '../../app_logic';
+
 import { ApiTokenTypes } from './constants';
 
-jest.mock('../../../shared/http', () => ({
-  HttpLogic: { values: { http: { get: jest.fn(), delete: jest.fn() } } },
-}));
-import { HttpLogic } from '../../../shared/http';
-jest.mock('../../../shared/flash_messages', () => ({
-  flashAPIErrors: jest.fn(),
-}));
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { CredentialsLogic } from './credentials_logic';
 
 describe('CredentialsLogic', () => {
+  const { mount } = new LogicMounter(CredentialsLogic);
+  const { http } = mockHttpValues;
+  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+
   const DEFAULT_VALUES = {
     activeApiToken: {
       name: '',
@@ -38,25 +46,7 @@ describe('CredentialsLogic', () => {
     meta: {},
     nameInputBlurred: false,
     shouldShowCredentialsForm: false,
-  };
-
-  const mount = (defaults?: object) => {
-    if (!defaults) {
-      resetContext({});
-    } else {
-      resetContext({
-        defaults: {
-          enterprise_search: {
-            app_search: {
-              credentials_logic: {
-                ...defaults,
-              },
-            },
-          },
-        },
-      });
-    }
-    CredentialsLogic.mount();
+    fullEngineAccessChecked: false,
   };
 
   const newToken = {
@@ -71,8 +61,8 @@ describe('CredentialsLogic', () => {
 
   const credentialsDetails = {
     engines: [
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
-      { name: 'engine1', type: 'indexed', language: 'english', result_fields: [] },
+      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
+      { name: 'engine1', type: 'indexed', language: 'english', result_fields: {} },
     ],
   };
 
@@ -952,6 +942,13 @@ describe('CredentialsLogic', () => {
           });
         });
       });
+
+      describe('listener side-effects', () => {
+        it('should clear flashMessages whenever the credentials form flyout is opened', () => {
+          CredentialsLogic.actions.showCredentialsForm();
+          expect(clearFlashMessages).toHaveBeenCalled();
+        });
+      });
     });
 
     describe('hideCredentialsForm', () => {
@@ -1067,30 +1064,26 @@ describe('CredentialsLogic', () => {
       it('will call an API endpoint and set the results with the `setCredentialsData` action', async () => {
         mount();
         jest.spyOn(CredentialsLogic.actions, 'setCredentialsData').mockImplementationOnce(() => {});
-        const promise = Promise.resolve({ meta, results });
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve({ meta, results }));
 
         CredentialsLogic.actions.fetchCredentials(2);
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials', {
           query: {
             'page[current]': 2,
           },
         });
-        await promise;
+        await nextTick();
         expect(CredentialsLogic.actions.setCredentialsData).toHaveBeenCalledWith(meta, results);
       });
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occured'));
 
         CredentialsLogic.actions.fetchCredentials();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1100,14 +1093,11 @@ describe('CredentialsLogic', () => {
         jest
           .spyOn(CredentialsLogic.actions, 'setCredentialsDetails')
           .mockImplementationOnce(() => {});
-        const promise = Promise.resolve(credentialsDetails);
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.resolve(credentialsDetails));
 
         CredentialsLogic.actions.fetchDetails();
-        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
-          '/api/app_search/credentials/details'
-        );
-        await promise;
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/credentials/details');
+        await nextTick();
         expect(CredentialsLogic.actions.setCredentialsDetails).toHaveBeenCalledWith(
           credentialsDetails
         );
@@ -1115,15 +1105,12 @@ describe('CredentialsLogic', () => {
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
-        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        http.get.mockReturnValue(Promise.reject('An error occured'));
 
         CredentialsLogic.actions.fetchDetails();
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
       });
     });
 
@@ -1133,33 +1120,203 @@ describe('CredentialsLogic', () => {
       it('will call an API endpoint and set the results with the `onApiKeyDelete` action', async () => {
         mount();
         jest.spyOn(CredentialsLogic.actions, 'onApiKeyDelete').mockImplementationOnce(() => {});
-        const promise = Promise.resolve();
-        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.resolve());
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        expect(HttpLogic.values.http.delete).toHaveBeenCalledWith(
-          `/api/app_search/credentials/${tokenName}`
-        );
-        await promise;
+        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/credentials/${tokenName}`);
+        await nextTick();
         expect(CredentialsLogic.actions.onApiKeyDelete).toHaveBeenCalledWith(tokenName);
+        expect(setSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
         mount();
-        const promise = Promise.reject('An error occured');
-        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(promise);
+        http.delete.mockReturnValue(Promise.reject('An error occured'));
 
         CredentialsLogic.actions.deleteApiKey(tokenName);
-        try {
-          await promise;
-        } catch {
-          expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
-        }
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+      });
+    });
+
+    describe('onApiTokenChange', () => {
+      it('calls a POST API endpoint that creates a new token if the active token does not exist yet', async () => {
+        const createdToken = {
+          name: 'new-key',
+          type: ApiTokenTypes.Admin,
+        };
+        mount({
+          activeApiToken: createdToken,
+        });
+        jest.spyOn(CredentialsLogic.actions, 'onApiTokenCreateSuccess');
+        http.post.mockReturnValue(Promise.resolve(createdToken));
+
+        CredentialsLogic.actions.onApiTokenChange();
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+          body: JSON.stringify(createdToken),
+        });
+        await nextTick();
+        expect(CredentialsLogic.actions.onApiTokenCreateSuccess).toHaveBeenCalledWith(createdToken);
+        expect(setSuccessMessage).toHaveBeenCalled();
+      });
+
+      it('calls a PUT endpoint that updates the active token if it already exists', async () => {
+        const updatedToken = {
+          name: 'test-key',
+          type: ApiTokenTypes.Private,
+          read: true,
+          write: false,
+          access_all_engines: false,
+          engines: ['engine1'],
+        };
+        mount({
+          activeApiToken: {
+            ...updatedToken,
+            id: 'some-id',
+          },
+        });
+        jest.spyOn(CredentialsLogic.actions, 'onApiTokenUpdateSuccess');
+        http.put.mockReturnValue(Promise.resolve(updatedToken));
+
+        CredentialsLogic.actions.onApiTokenChange();
+        expect(http.put).toHaveBeenCalledWith('/api/app_search/credentials/test-key', {
+          body: JSON.stringify(updatedToken),
+        });
+        await nextTick();
+        expect(CredentialsLogic.actions.onApiTokenUpdateSuccess).toHaveBeenCalledWith(updatedToken);
+        expect(setSuccessMessage).toHaveBeenCalled();
+      });
+
+      it('handles errors', async () => {
+        mount();
+        http.post.mockReturnValue(Promise.reject('An error occured'));
+
+        CredentialsLogic.actions.onApiTokenChange();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+      });
+
+      describe('token type data', () => {
+        it('does not send extra read/write/engine access data for admin tokens', () => {
+          const correctAdminToken = {
+            name: 'bogus-admin',
+            type: ApiTokenTypes.Admin,
+          };
+          const extraData = {
+            read: true,
+            write: true,
+            access_all_engines: true,
+          };
+          mount({ activeApiToken: { ...correctAdminToken, ...extraData } });
+
+          CredentialsLogic.actions.onApiTokenChange();
+          expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+            body: JSON.stringify(correctAdminToken),
+          });
+        });
+
+        it('does not send extra read/write access data for search tokens', () => {
+          const correctSearchToken = {
+            name: 'bogus-search',
+            type: ApiTokenTypes.Search,
+            access_all_engines: false,
+            engines: ['some-engine'],
+          };
+          const extraData = {
+            read: true,
+            write: false,
+          };
+          mount({ activeApiToken: { ...correctSearchToken, ...extraData } });
+
+          CredentialsLogic.actions.onApiTokenChange();
+          expect(http.post).toHaveBeenCalledWith('/api/app_search/credentials', {
+            body: JSON.stringify(correctSearchToken),
+          });
+        });
+
+        // Private tokens send all data per the PUT test above.
+        // If that ever changes, we should capture that in another test here.
+      });
+    });
+
+    describe('onEngineSelect', () => {
+      it('calls addEngineName if the engine is not selected', () => {
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            engines: [],
+          },
+        });
+        jest.spyOn(CredentialsLogic.actions, 'addEngineName');
+
+        CredentialsLogic.actions.onEngineSelect('engine1');
+        expect(CredentialsLogic.actions.addEngineName).toHaveBeenCalledWith('engine1');
+        expect(CredentialsLogic.values.activeApiToken.engines).toEqual(['engine1']);
+      });
+
+      it('calls removeEngineName if the engine is already selected', () => {
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            engines: ['engine1', 'engine2'],
+          },
+        });
+        jest.spyOn(CredentialsLogic.actions, 'removeEngineName');
+
+        CredentialsLogic.actions.onEngineSelect('engine1');
+        expect(CredentialsLogic.actions.removeEngineName).toHaveBeenCalledWith('engine1');
+        expect(CredentialsLogic.values.activeApiToken.engines).toEqual(['engine2']);
       });
     });
   });
 
   describe('selectors', () => {
+    describe('fullEngineAccessChecked', () => {
+      it('should be true if active token is set to access all engines and the user can access all engines', () => {
+        (AppLogic.selectors.myRole as jest.Mock).mockReturnValueOnce({
+          canAccessAllEngines: true,
+        });
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            access_all_engines: true,
+          },
+        });
+
+        expect(CredentialsLogic.values.fullEngineAccessChecked).toEqual(true);
+      });
+
+      it('should be false if the token is not set to access all engines', () => {
+        (AppLogic.selectors.myRole as jest.Mock).mockReturnValueOnce({
+          canAccessAllEngines: true,
+        });
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            access_all_engines: false,
+          },
+        });
+
+        expect(CredentialsLogic.values.fullEngineAccessChecked).toEqual(false);
+      });
+
+      it('should be false if the user cannot acess all engines', () => {
+        (AppLogic.selectors.myRole as jest.Mock).mockReturnValueOnce({
+          canAccessAllEngines: false,
+        });
+        mount({
+          activeApiToken: {
+            ...DEFAULT_VALUES.activeApiToken,
+            access_all_engines: true,
+          },
+        });
+
+        expect(CredentialsLogic.values.fullEngineAccessChecked).toEqual(false);
+      });
+    });
+
     describe('activeApiTokenExists', () => {
       it('should be false if the token has no id', () => {
         mount({

@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createElement } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AdvancedUiActionsStart } from '../../../../../plugins/ui_actions_enhanced/public';
-import { Embeddable, EmbeddableInput } from '../../../../../../src/plugins/embeddable/public';
+import {
+  Embeddable,
+  EmbeddableInput,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/embeddable/public';
 import { ButtonEmbeddableComponent } from './button_embeddable_component';
-import { VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 export const BUTTON_EMBEDDABLE = 'BUTTON_EMBEDDABLE';
 

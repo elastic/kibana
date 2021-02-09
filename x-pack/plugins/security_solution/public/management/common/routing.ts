@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -32,9 +33,9 @@ type Exact<T, Shape> = T extends Shape ? ExactKeys<T, Shape> : never;
  * Ensures that when creating a URL query param string, that the given input strictly
  * matches the expected interface (guards against possibly leaking internal state)
  */
-const querystringStringify: <ExpectedType extends object, ArgType>(
+const querystringStringify = <ExpectedType, ArgType>(
   params: Exact<ExpectedType, ArgType>
-) => string = querystring.stringify;
+): string => querystring.stringify((params as unknown) as querystring.ParsedUrlQueryInput);
 
 /** Make `selected_endpoint` required */
 type EndpointDetailsUrlProps = Omit<EndpointIndexUIQueryParams, 'selected_endpoint'> &
@@ -118,7 +119,10 @@ const normalizeTrustedAppsPageLocation = (
  * @param query
  * @param key
  */
-export const extractFirstParamValue = (query: querystring.ParsedUrlQuery, key: string): string => {
+export const extractFirstParamValue = (
+  query: querystring.ParsedUrlQuery,
+  key: string
+): string | undefined => {
   const value = query[key];
 
   return Array.isArray(value) ? value[value.length - 1] : value;

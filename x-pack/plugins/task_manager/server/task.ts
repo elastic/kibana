@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Joi from 'joi';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { isErr, tryAsResult } from './lib/result_type';
 
 /*
  * Type definitions and validations for tasks.
@@ -37,50 +40,54 @@ export interface RunContext {
 /**
  * The return value of a task's run function should be a promise of RunResult.
  */
-export interface RunResult {
-  /**
-   * Specifies the next run date / time for this task. If unspecified, this is
-   * treated as a single-run task, and will not be rescheduled after
-   * completion.
-   */
-  runAt?: Date;
 
-  /**
-   * If specified, indicates that the task failed to accomplish its work. This is
-   * logged out as a warning, and the task will be reattempted after a delay.
-   */
-  error?: object;
-
+export type SuccessfulRunResult = {
   /**
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
-}
+} & (
+  | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
+  {
+      /**
+       * Specifies the next run date / time for this task. If unspecified, this is
+       * treated as a single-run task, and will not be rescheduled after
+       * completion.
+       */
+      runAt?: Date;
+      schedule?: never;
+    }
+  | {
+      /**
+       * Specifies a new schedule for this tasks. If unspecified, the task will
+       * continue to use which ever schedule it already has, and if no there is
+       * no previous schedule then it will be treated as a single-run task.
+       */
+      schedule?: IntervalSchedule;
+      runAt?: never;
+    }
+);
 
-export interface SuccessfulRunResult {
-  runAt?: Date;
-  state?: Record<string, unknown>;
-}
-
-export interface FailedRunResult extends SuccessfulRunResult {
+export type FailedRunResult = SuccessfulRunResult & {
+  /**
+   * If specified, indicates that the task failed to accomplish its work. This is
+   * logged out as a warning, and the task will be reattempted after a delay.
+   */
   error: Error;
-}
+};
+
+export type RunResult = FailedRunResult | SuccessfulRunResult;
+
+export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
+  !!((result as FailedRunResult)?.error ?? false);
 
 export interface FailedTaskResult {
   status: TaskStatus.Failed;
 }
 
-export const validateRunResult = Joi.object({
-  runAt: Joi.date().optional(),
-  error: Joi.object().optional(),
-  state: Joi.object().optional(),
-}).optional();
-
 export type RunFunction = () => Promise<RunResult | undefined | void>;
-
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
-
 export interface CancellableTask {
   run: RunFunction;
   cancel?: CancelFunction;
@@ -88,40 +95,53 @@ export interface CancellableTask {
 
 export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
 
+export const taskDefinitionSchema = schema.object(
+  {
+    /**
+     * A unique identifier for the type of task being defined.
+     */
+    type: schema.string(),
+    /**
+     * A brief, human-friendly title for this task.
+     */
+    title: schema.maybe(schema.string()),
+    /**
+     * An optional more detailed description of what this task does.
+     */
+    description: schema.maybe(schema.string()),
+    /**
+     * How long, in minutes or seconds, the system should wait for the task to complete
+     * before it is considered to be timed out. (e.g. '5m', the default). If
+     * the task takes longer than this, Kibana will send it a kill command and
+     * the task will be re-attempted.
+     */
+    timeout: schema.string({
+      defaultValue: '5m',
+    }),
+    /**
+     * Up to how many times the task should retry when it fails to run. This will
+     * default to the global variable.
+     */
+    maxAttempts: schema.maybe(
+      schema.number({
+        min: 1,
+      })
+    ),
+  },
+  {
+    validate({ timeout }) {
+      if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
+        return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
+      }
+    },
+  }
+);
+
 /**
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export interface TaskDefinition {
-  /**
-   * A unique identifier for the type of task being defined.
-   */
-  type: string;
-
-  /**
-   * A brief, human-friendly title for this task.
-   */
-  title: string;
-
-  /**
-   * An optional more detailed description of what this task does.
-   */
-  description?: string;
-
-  /**
-   * How long, in minutes or seconds, the system should wait for the task to complete
-   * before it is considered to be timed out. (e.g. '5m', the default). If
-   * the task takes longer than this, Kibana will send it a kill command and
-   * the task will be re-attempted.
-   */
-  timeout?: string;
-
-  /**
-   * Up to how many times the task should retry when it fails to run. This will
-   * default to the global variable.
-   */
-  maxAttempts?: number;
-
+export type TaskDefinition = TypeOf<typeof taskDefinitionSchema> & {
   /**
    * Function that customizes how the task should behave when the task fails. This
    * function can return `true`, `false` or a Date. True will tell task manager
@@ -136,23 +156,14 @@ export interface TaskDefinition {
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
-}
-
-export const validateTaskDefinition = Joi.object({
-  type: Joi.string().required(),
-  title: Joi.string().optional(),
-  description: Joi.string().optional(),
-  timeout: Joi.string().default('5m'),
-  maxAttempts: Joi.number().min(1).optional(),
-  createTaskRunner: Joi.func().required(),
-  getRetry: Joi.func().optional(),
-}).default();
+};
 
 export enum TaskStatus {
   Idle = 'idle',
   Claiming = 'claiming',
   Running = 'running',
   Failed = 'failed',
+  Unrecognized = 'unrecognized',
 }
 
 export enum TaskLifecycleResult {
@@ -160,12 +171,11 @@ export enum TaskLifecycleResult {
 }
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
-
 export interface IntervalSchedule {
   /**
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
-  interval: string;
+  interval: Interval;
 }
 
 /*

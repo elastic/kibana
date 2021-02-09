@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
@@ -11,7 +12,10 @@ export const ML_PAGES = {
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
+  DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
+  DATA_FRAME_ANALYTICS_MODELS_MANAGE: 'data_frame_analytics/models',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
+  DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
   /**
    * Page: Data Visualizer
    */
@@ -44,3 +48,5 @@ export const ML_PAGES = {
   ACCESS_DENIED: 'access-denied',
   OVERVIEW: 'overview',
 } as const;
+
+export type MlPages = typeof ML_PAGES[keyof typeof ML_PAGES];

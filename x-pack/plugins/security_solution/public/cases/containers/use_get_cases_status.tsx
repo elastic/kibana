@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ interface CasesStatusState extends CasesStatus {
 
 const initialData: CasesStatusState = {
   countClosedCases: null,
+  countInProgressCases: null,
   countOpenCases: null,
   isLoading: true,
   isError: false,
@@ -57,6 +59,7 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
           });
           setCasesStatusState({
             countClosedCases: 0,
+            countInProgressCases: 0,
             countOpenCases: 0,
             isLoading: false,
             isError: true,

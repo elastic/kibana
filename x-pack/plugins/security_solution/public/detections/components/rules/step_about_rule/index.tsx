@@ -1,15 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import {
   RuleStepProps,
   RuleStep,
@@ -18,7 +17,7 @@ import {
 } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
-import { AddMitreThreat } from '../mitre';
+import { AddMitreAttackThreat } from '../mitre';
 import {
   Field,
   Form,
@@ -75,11 +74,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const initialState = defaultValues ?? stepAboutDefaultValue;
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
   const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
-
-  const canUseExceptions =
-    defineRuleData?.ruleType &&
-    !isMlRule(defineRuleData.ruleType) &&
-    !isThresholdRule(defineRuleData.ruleType);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
@@ -234,7 +228,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             />
             <UseField
               path="threat"
-              component={AddMitreThreat}
+              component={AddMitreAttackThreat}
               componentProps={{
                 idAria: 'detectionEngineStepAboutRuleMitreThreat',
                 isDisabled: isLoading,
@@ -286,7 +280,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                   idAria: 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   'data-test-subj': 'detectionEngineStepAboutRuleAssociatedToEndpointList',
                   euiFieldProps: {
-                    disabled: isLoading || !canUseExceptions,
+                    disabled: isLoading,
                   },
                 }}
               />

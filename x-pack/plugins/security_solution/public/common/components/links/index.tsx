@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -327,6 +328,20 @@ const ReputationLinkComponent: React.FC<{
     [ipReputationLinksSetting, domain, defaultNameMapping, allItemsLimit]
   );
 
+  const renderCallback = useCallback(
+    (rowItem) =>
+      isReputationLink(rowItem) && (
+        <ExternalLink
+          url={rowItem.url_template}
+          overflowIndexStart={overflowIndexStart}
+          allItemsLimit={allItemsLimit}
+        >
+          <>{rowItem.name ?? domain}</>
+        </ExternalLink>
+      ),
+    [allItemsLimit, domain, overflowIndexStart]
+  );
+
   return ipReputationLinks?.length > 0 ? (
     <section>
       <EuiFlexGroup
@@ -357,19 +372,7 @@ const ReputationLinkComponent: React.FC<{
           <DefaultFieldRendererOverflow
             rowItems={ipReputationLinks}
             idPrefix="moreReputationLink"
-            render={(rowItem) => {
-              return (
-                isReputationLink(rowItem) && (
-                  <ExternalLink
-                    url={rowItem.url_template}
-                    overflowIndexStart={overflowIndexStart}
-                    allItemsLimit={allItemsLimit}
-                  >
-                    <>{rowItem.name ?? domain}</>
-                  </ExternalLink>
-                )
-              );
-            }}
+            render={renderCallback}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={overflowIndexStart}
           />

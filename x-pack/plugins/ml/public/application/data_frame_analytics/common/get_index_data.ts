@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { SearchResponse7 } from '../../../../common/types/es_client';
@@ -53,7 +54,7 @@ export const getIndexData = async (
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],
-          _source: [],
+          _source: false,
           query: searchQuery,
           from: pageIndex * pageSize,
           size: pageSize,
@@ -63,7 +64,13 @@ export const getIndexData = async (
 
       if (!options.didCancel) {
         setRowCount(resp.hits.total.value);
-        setTableItems(resp.hits.hits.map((d) => getProcessedFields(d.fields)));
+        setTableItems(
+          resp.hits.hits.map((d) =>
+            getProcessedFields(d.fields, (key: string) =>
+              key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
+            )
+          )
+        );
         setStatus(INDEX_STATUS.LOADED);
       }
     } catch (e) {

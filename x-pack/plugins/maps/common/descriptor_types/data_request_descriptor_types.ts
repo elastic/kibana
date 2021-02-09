@@ -1,11 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
+import { Query } from 'src/plugins/data/public';
+import { SortDirection } from 'src/plugins/data/common/search';
+import { RENDER_AS, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
@@ -16,13 +20,14 @@ export type MapFilters = {
   filters: Filter[];
   query?: MapQuery;
   refreshTimerLastTriggeredAt?: string;
+  searchSessionId?: string;
   timeFilters: TimeRange;
   zoom: number;
 };
 
 type ESSearchSourceSyncMeta = {
   sortField: string;
-  sortOrder: SORT_ORDER;
+  sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
   topHitsSplitField: string;
   topHitsSize: number;
@@ -32,20 +37,33 @@ type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta | null;
+type ESGeoLineSourceSyncMeta = {
+  splitField: string;
+  sortField: string;
+};
+
+type ESTermSourceSyncMeta = {
+  size: number;
+};
+
+export type VectorSourceSyncMeta =
+  | ESSearchSourceSyncMeta
+  | ESGeoGridSourceSyncMeta
+  | ESGeoLineSourceSyncMeta
+  | ESTermSourceSyncMeta
+  | null;
 
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
   sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };
 
-export type VectorJoinSourceRequestMeta = MapFilters & {
-  applyGlobalQuery: boolean;
-  fieldNames: string[];
-  sourceQuery: MapQuery;
+export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'> & {
+  sourceQuery?: Query;
 };
 
 export type VectorStyleRequestMeta = MapFilters & {
@@ -64,12 +82,26 @@ export type ESSearchSourceResponseMeta = {
   totalEntities?: number;
 };
 
+export type ESGeoLineSourceResponseMeta = {
+  areResultsTrimmed: boolean;
+  areEntitiesTrimmed: boolean;
+  entityCount: number;
+  numTrimmedTracks: number;
+  totalEntities: number;
+};
+
+export type VectorTileLayerMeta = {
+  tileLayerId: string;
+};
+
 // Partial because objects are justified downstream in constructors
 export type DataMeta = Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
-    ESSearchSourceResponseMeta
+    ESSearchSourceResponseMeta &
+    ESGeoLineSourceResponseMeta &
+    VectorTileLayerMeta
 >;
 
 type NumericalStyleFieldData = {

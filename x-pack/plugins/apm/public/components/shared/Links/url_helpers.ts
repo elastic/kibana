@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 import { LocalUIFilterName } from '../../../../common/ui_filter';
@@ -18,6 +20,48 @@ export function fromQuery(query: Record<string, any>) {
   );
 
   return stringify(encodedQuery, { sort: false, encode: false });
+}
+
+type LocationWithQuery = Partial<
+  History['location'] & {
+    query: Record<string, string>;
+  }
+>;
+
+function getNextLocation(
+  history: History,
+  locationWithQuery: LocationWithQuery
+) {
+  const { query, ...rest } = locationWithQuery;
+  return {
+    ...history.location,
+    ...rest,
+    search: fromQuery({
+      ...toQuery(history.location.search),
+      ...query,
+    }),
+  };
+}
+
+export function replace(
+  history: History,
+  locationWithQuery: LocationWithQuery
+) {
+  const location = getNextLocation(history, locationWithQuery);
+  return history.replace(location);
+}
+
+export function push(history: History, locationWithQuery: LocationWithQuery) {
+  const location = getNextLocation(history, locationWithQuery);
+  return history.push(location);
+}
+
+export function createHref(
+  history: History,
+  locationWithQuery: LocationWithQuery
+) {
+  const location = getNextLocation(history, locationWithQuery);
+  return history.createHref(location);
 }
 
 export type APMQueryParams = {
@@ -41,6 +85,9 @@ export type APMQueryParams = {
   refreshInterval?: string | number;
   searchTerm?: string;
   percentile?: 50 | 75 | 90 | 95 | 99;
+  latencyAggregationType?: string;
+  comparisonEnabled?: boolean;
+  comparisonType?: string;
 } & { [key in LocalUIFilterName]?: string };
 
 // forces every value of T[K] to be type: string

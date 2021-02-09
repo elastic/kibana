@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -19,13 +20,12 @@ import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { px, unit, units } from '../../../../style/variables';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
@@ -42,21 +42,21 @@ import {
 } from './ErrorTabs';
 import { ExceptionStacktrace } from './ExceptionStacktrace';
 
-const HeaderContainer = styled.div`
+const HeaderContainer = euiStyled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: ${px(unit)};
 `;
 
-const TransactionLinkName = styled.div`
+const TransactionLinkName = euiStyled.div`
   margin-left: ${px(units.half)};
   display: inline-block;
   vertical-align: middle;
 `;
 
 interface Props {
-  errorGroup: ErrorGroupAPIResponse;
+  errorGroup: APIReturnType<'GET /api/apm/services/{serviceName}/errors/{groupId}'>;
   urlParams: IUrlParams;
   location: Location;
 }

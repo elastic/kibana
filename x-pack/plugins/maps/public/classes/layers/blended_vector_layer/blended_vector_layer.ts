@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -25,7 +26,6 @@ import { ESGeoGridSource } from '../../sources/es_geo_grid_source/es_geo_grid_so
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { IVectorLayer } from '../vector_layer/vector_layer';
 import { IESSource } from '../../sources/es_source';
-import { IESAggSource } from '../../sources/es_agg_source';
 import { ISource } from '../../sources/source';
 import { DataRequestContext } from '../../../actions';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -36,9 +36,13 @@ import {
   StylePropertyOptions,
   LayerDescriptor,
   VectorLayerDescriptor,
+  VectorSourceRequestMeta,
+  VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { LICENSED_FEATURES } from '../../../licensed_features';
+import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
+import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -46,17 +50,20 @@ interface CountData {
   isSyncClustered: boolean;
 }
 
-function getAggType(dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>): AGG_TYPE {
+function getAggType(
+  dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>
+): AGG_TYPE.AVG | AGG_TYPE.TERMS {
   return dynamicProperty.isOrdinal() ? AGG_TYPE.AVG : AGG_TYPE.TERMS;
 }
 
-function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle): IESAggSource {
+function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle): ESGeoGridSource {
   const clusterSourceDescriptor = ESGeoGridSource.createDescriptor({
     indexPatternId: documentSource.getIndexPatternId(),
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
+  clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,
@@ -75,16 +82,18 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
 
 function getClusterStyleDescriptor(
   documentStyle: IVectorStyle,
-  clusterSource: IESAggSource
+  clusterSource: ESGeoGridSource
 ): VectorStyleDescriptor {
   const defaultDynamicProperties = getDefaultDynamicProperties();
-  const clusterStyleDescriptor: VectorStyleDescriptor = {
+  const clusterStyleDescriptor: Omit<VectorStyleDescriptor, 'properties'> & {
+    properties: Partial<VectorStylePropertiesDescriptor>;
+  } = {
     type: LAYER_STYLE_TYPE.VECTOR,
     properties: {
       [VECTOR_STYLES.LABEL_TEXT]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
+          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
           field: {
             name: COUNT_PROP_NAME,
             origin: FIELD_ORIGIN.SOURCE,
@@ -94,7 +103,7 @@ function getClusterStyleDescriptor(
       [VECTOR_STYLES.ICON_SIZE]: {
         type: STYLE_TYPE.DYNAMIC,
         options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
           field: {
             name: COUNT_PROP_NAME,
             origin: FIELD_ORIGIN.SOURCE,
@@ -156,10 +165,11 @@ function getClusterStyleDescriptor(
       }
     });
 
-  return clusterStyleDescriptor;
+  return clusterStyleDescriptor as VectorStyleDescriptor;
 }
 
 export interface BlendedVectorLayerArguments {
+  chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
 }
@@ -177,9 +187,9 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   }
 
   private readonly _isClustered: boolean;
-  private readonly _clusterSource: IESAggSource;
+  private readonly _clusterSource: ESGeoGridSource;
   private readonly _clusterStyle: IVectorStyle;
-  private readonly _documentSource: IESSource;
+  private readonly _documentSource: ESSearchSource;
   private readonly _documentStyle: IVectorStyle;
 
   constructor(options: BlendedVectorLayerArguments) {
@@ -188,7 +198,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       joins: [],
     });
 
-    this._documentSource = this._source as IESSource; // VectorLayer constructor sets _source as document source
+    this._documentSource = this._source as ESSearchSource; // VectorLayer constructor sets _source as document source
     this._documentStyle = this._style as IVectorStyle; // VectorLayer constructor sets _style as document source
 
     this._clusterSource = getClusterSource(this._documentSource, this._documentStyle);
@@ -196,7 +206,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       this._documentStyle,
       this._clusterSource
     );
-    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
+    this._clusterStyle = new VectorStyle(
+      clusterStyleDescriptor,
+      this._clusterSource,
+      this,
+      options.chartsPaletteServiceGetColor
+    );
 
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
@@ -279,7 +294,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
-    const searchFilters = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       syncContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
@@ -305,14 +320,19 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       let isSyncClustered;
       try {
         syncContext.startLoading(dataRequestId, requestToken, searchFilters);
+        const abortController = new AbortController();
+        syncContext.registerCancelCallback(requestToken, () => abortController.abort());
         const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-        const resp = await searchSource.fetch();
+        const resp = await searchSource.fetch({
+          abortSignal: abortController.signal,
+          sessionId: syncContext.dataFilters.searchSessionId,
+        });
         const maxResultWindow = await this._documentSource.getMaxResultWindow();
         isSyncClustered = resp.hits.total > maxResultWindow;
         const countData = { isSyncClustered } as CountData;
         syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
       } catch (error) {
-        if (!(error instanceof DataRequestAbortError)) {
+        if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);
         }
         return;

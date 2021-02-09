@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
@@ -12,8 +14,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { UIProcessorEvent } from '../../../../common/processor_event';
-import { ESFilter } from '../../../../typings/elasticsearch';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
+import { IUrlParams } from '../../../context/url_params_context/types';
 
 export function getBoolFilter({
   groupId,
@@ -26,23 +27,7 @@ export function getBoolFilter({
   serviceName?: string;
   urlParams: IUrlParams;
 }) {
-  const { start, end } = urlParams;
-
-  if (!start || !end) {
-    throw new Error('Date range was not defined');
-  }
-
-  const boolFilter: ESFilter[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: new Date(start).getTime(),
-          lte: new Date(end).getTime(),
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
+  const boolFilter: ESFilter[] = [];
 
   if (serviceName) {
     boolFilter.push({

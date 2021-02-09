@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Visualization, OperationMetadata } from '../types';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { Visualization, OperationMetadata, AccessorConfig } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
-import { LayerState, PieVisualizationState } from './types';
+import { PieLayerState, PieVisualizationState } from './types';
 import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
-import { PieToolbar } from './toolbar';
+import { DimensionEditor, PieToolbar } from './toolbar';
 
-function newLayerState(layerId: string): LayerState {
+function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
     groups: [],
@@ -31,7 +33,11 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number';
 
-export const pieVisualization: Visualization<PieVisualizationState> = {
+export const getPieVisualization = ({
+  paletteService,
+}: {
+  paletteService: PaletteRegistry;
+}): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
 
   visualizationTypes: [
@@ -82,14 +88,17 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
 
-  initialize(frame, state) {
+  initialize(frame, state, mainPalette) {
     return (
       state || {
         shape: 'donut',
         layers: [newLayerState(frame.addNewLayer())],
+        palette: mainPalette,
       }
     );
   },
+
+  getMainPalette: (state) => (state ? state.palette : undefined),
 
   getSuggestions: suggestions,
 
@@ -105,7 +114,18 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
       .map(({ columnId }) => columnId)
       .filter((columnId) => columnId !== layer.metric);
     // When we add a column it could be empty, and therefore have no order
-    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.groups)));
+    const sortedColumns: AccessorConfig[] = Array.from(
+      new Set(originalOrder.concat(layer.groups))
+    ).map((accessor) => ({ columnId: accessor }));
+    if (sortedColumns.length > 0) {
+      sortedColumns[0] = {
+        columnId: sortedColumns[0].columnId,
+        triggerIcon: 'colorBy',
+        palette: paletteService
+          .get(state.palette?.name || 'default')
+          .getColors(10, state.palette?.params),
+      };
+    }
 
     if (state.shape === 'treemap') {
       return {
@@ -121,6 +141,7 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
             filterOperations: bucketedOperations,
             required: true,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
+            enableDimensionEditor: true,
           },
           {
             groupId: 'metric',
@@ -128,7 +149,7 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
               defaultMessage: 'Size by',
             }),
             layerId,
-            accessors: layer.metric ? [layer.metric] : [],
+            accessors: layer.metric ? [{ columnId: layer.metric }] : [],
             supportsMoreColumns: !layer.metric,
             filterOperations: numberMetricOperations,
             required: true,
@@ -151,6 +172,7 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
           filterOperations: bucketedOperations,
           required: true,
           dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+          enableDimensionEditor: true,
         },
         {
           groupId: 'metric',
@@ -158,7 +180,7 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
             defaultMessage: 'Size by',
           }),
           layerId,
-          accessors: layer.metric ? [layer.metric] : [],
+          accessors: layer.metric ? [{ columnId: layer.metric }] : [],
           supportsMoreColumns: !layer.metric,
           filterOperations: numberMetricOperations,
           required: true,
@@ -202,9 +224,18 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
       }),
     };
   },
+  renderDimensionEditor(domElement, props) {
+    render(
+      <I18nProvider>
+        <DimensionEditor {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
 
-  toExpression,
-  toPreviewExpression,
+  toExpression: (state, layers, attributes) =>
+    toExpression(state, layers, paletteService, attributes),
+  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
   renderToolbar(domElement, props) {
     render(
@@ -214,4 +245,37 @@ export const pieVisualization: Visualization<PieVisualizationState> = {
       domElement
     );
   },
-};
+
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const metricColumnsWithArrayValues = [];
+
+    for (const layer of state.layers) {
+      const { layerId, metric } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows || !metric) {
+        break;
+      }
+      const columnToLabel = frame.datasourceLayers[layerId].getOperationForColumnId(metric)?.label;
+
+      const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
+      if (hasArrayValues) {
+        metricColumnsWithArrayValues.push(columnToLabel || metric);
+      }
+    }
+    return metricColumnsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
+  },
+
+  getErrorMessages(state, frame) {
+    // not possible to break it?
+    return undefined;
+  },
+});

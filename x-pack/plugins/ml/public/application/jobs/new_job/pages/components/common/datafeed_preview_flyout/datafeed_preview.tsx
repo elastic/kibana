@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
@@ -61,9 +62,12 @@ export const DatafeedPreview: FC<{
     if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
       try {
         const resp = await mlJobService.searchPreview(combinedJob);
-        const data = resp.aggregations
-          ? resp.aggregations.buckets.buckets.slice(0, ML_DATA_PREVIEW_COUNT)
-          : resp.hits.hits;
+        let data = resp.hits.hits;
+        // the first item under aggregations can be any name
+        if (typeof resp.aggregations === 'object' && Object.keys(resp.aggregations).length > 0) {
+          const accessor = Object.keys(resp.aggregations)[0];
+          data = resp.aggregations[accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
+        }
 
         setPreviewJsonString(JSON.stringify(data, null, 2));
       } catch (error) {

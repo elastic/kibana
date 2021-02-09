@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { SavedObjectsClientContract, HttpSetup, SavedObjectReference } from 'kibana/public';
-import { StateSetter } from '../types';
+import { InitializationOptions, StateSetter } from '../types';
 import {
   IndexPattern,
   IndexPatternRef,
@@ -16,7 +17,7 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './state_helpers';
+import { updateLayerIndexPattern } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
@@ -26,6 +27,7 @@ import {
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
+import { getFieldByNameFactory } from './pure_helpers';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find'>;
@@ -103,8 +105,16 @@ export async function loadIndexPatterns({
         id: indexPattern.id!, // id exists for sure because we got index patterns by id
         title,
         timeFieldName,
-        fieldFormatMap,
+        fieldFormatMap:
+          fieldFormatMap &&
+          Object.fromEntries(
+            Object.entries(fieldFormatMap).map(([id, format]) => [
+              id,
+              'toJSON' in format ? format.toJSON() : format,
+            ])
+          ),
         fields: newFields,
+        getFieldByName: getFieldByNameFactory(newFields),
         hasRestrictions: !!typeMeta?.aggs,
       };
 
@@ -181,6 +191,7 @@ export async function loadInitialState({
   storage,
   indexPatternsService,
   initialContext,
+  options,
 }: {
   persistedState?: IndexPatternPersistedState;
   references?: SavedObjectReference[];
@@ -189,8 +200,10 @@ export async function loadInitialState({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
   initialContext?: VisualizeFieldContext;
+  options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
-  const indexPatternRefs = await loadIndexPatternRefs(savedObjectsClient);
+  const { isFullEditor } = options ?? {};
+  const indexPatternRefs = await (isFullEditor ? loadIndexPatternRefs(savedObjectsClient) : []);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
 
   const state =
@@ -201,11 +214,15 @@ export async function loadInitialState({
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
           .concat(state.currentIndexPatternId)
-      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0].id]
-  );
+      : [lastUsedIndexPatternId || defaultIndexPatternId || indexPatternRefs[0]?.id]
+  )
+    // take out the undefined from the list
+    .filter(Boolean);
 
   const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
-  setLastUsedIndexPatternId(storage, currentIndexPatternId);
+  if (currentIndexPatternId) {
+    setLastUsedIndexPatternId(storage, currentIndexPatternId);
+  }
 
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -9,11 +10,11 @@ import produce from 'immer';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { routes } from '../components/app/Main/route_config';
-import { ApmPluginContextValue } from '../context/ApmPluginContext';
+import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../context/ApmPluginContext/MockApmPluginContext';
+} from '../context/apm_plugin/mock_apm_plugin_context';
 import { useBreadcrumbs } from './use_breadcrumbs';
 
 function createWrapper(path: string) {

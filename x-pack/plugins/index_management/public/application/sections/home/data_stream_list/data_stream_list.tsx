@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -20,16 +21,22 @@ import {
 } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
-import { reactRouterNavigate, extractQueryParams } from '../../../../shared_imports';
+import {
+  reactRouterNavigate,
+  extractQueryParams,
+  attemptToURIDecode,
+} from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
-import { encodePathForReactRouter, decodePathFromReactRouter } from '../../../services/routing';
 import { documentationService } from '../../../services/documentation';
-import { Section } from '../../home';
+import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
+import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
+import { FilterListButton, Filters } from '../components';
 
+export type DataStreamFilterName = 'managed' | 'hidden';
 interface MatchParams {
   dataStreamName?: string;
 }
@@ -41,17 +48,119 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   location: { search },
   history,
 }) => {
-  const { isDeepLink } = extractQueryParams(search);
+  const { isDeepLink, includeHidden } = extractQueryParams(search);
+  const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
     core: { getUrlForApp },
-    plugins: { ingestManager },
+    plugins: { isFleetEnabled },
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
   const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
+
+  const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
+    managed: {
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.viewManagedLabel', {
+        defaultMessage: 'Fleet-managed data streams',
+      }),
+      checked: 'on',
+    },
+    hidden: {
+      name: i18n.translate('xpack.idxMgmt.dataStreamList.viewHiddenLabel', {
+        defaultMessage: 'Hidden data streams',
+      }),
+      checked: includeHidden ? 'on' : 'off',
+    },
+  });
+
+  const activateHiddenFilter = (shouldBeActive: boolean) => {
+    if (shouldBeActive && filters.hidden.checked === 'off') {
+      setFilters({
+        ...filters,
+        hidden: {
+          ...filters.hidden,
+          checked: 'on',
+        },
+      });
+    }
+  };
+
+  const filteredDataStreams = useMemo(() => {
+    if (!dataStreams) {
+      // If dataStreams are not fetched, return empty array.
+      return [];
+    }
+
+    const visibleTypes = Object.entries(filters)
+      .filter(([name, _filter]) => _filter.checked === 'on')
+      .map(([name]) => name);
+
+    return filterDataStreams(dataStreams, visibleTypes);
+  }, [dataStreams, filters]);
+
+  const renderHeader = () => {
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
+              defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink
+                    href={documentationService.getDataStreamsDocumentationLink()}
+                    target="_blank"
+                    external
+                  >
+                    {i18n.translate('xpack.idxMgmt.dataStreamListDescription.learnMoreLinkText', {
+                      defaultMessage: 'Learn more.',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
+                  {
+                    defaultMessage: 'Include stats',
+                  }
+                )}
+                checked={isIncludeStatsChecked}
+                onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
+                data-test-subj="includeStatsSwitch"
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
+                  {
+                    defaultMessage: 'Including stats can increase reload times',
+                  }
+                )}
+                position="top"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FilterListButton<DataStreamFilterName> filters={filters} onChange={setFilters} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   let content;
 
@@ -95,7 +204,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               defaultMessage="Data streams store time-series data across multiple indices."
             />
             {' ' /* We need this space to separate these two sentences. */}
-            {ingestManager ? (
+            {isFleetEnabled ? (
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
                 defaultMessage="Get started with data streams in {link}."
@@ -103,12 +212,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                   link: (
                     <EuiLink
                       data-test-subj="dataStreamsEmptyPromptTemplateLink"
-                      href={getUrlForApp('ingestManager')}
+                      href={getUrlForApp('fleet')}
                     >
                       {i18n.translate(
                         'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
                         {
-                          defaultMessage: 'Ingest Manager',
+                          defaultMessage: 'Fleet',
                         }
                       )}
                     </EuiLink>
@@ -144,72 +253,19 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       />
     );
   } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
+    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams, decodedDataStreamName));
     content = (
       <>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem>
-            {/* TODO: Add a switch for toggling on data streams created by Ingest Manager */}
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-                defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
-                values={{
-                  learnMoreLink: (
-                    <EuiLink
-                      href={documentationService.getDataStreamsDocumentationLink()}
-                      target="_blank"
-                      external
-                    >
-                      {i18n.translate('xpack.idxMgmt.dataStreamListDescription.learnMoreLinkText', {
-                        defaultMessage: 'Learn more.',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchLabel',
-                    {
-                      defaultMessage: 'Include stats',
-                    }
-                  )}
-                  checked={isIncludeStatsChecked}
-                  onChange={(e) => setIsIncludeStatsChecked(e.target.checked)}
-                  data-test-subj="includeStatsSwitch"
-                />
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.idxMgmt.dataStreamListControls.includeStatsSwitchToolTip',
-                    {
-                      defaultMessage: 'Including stats can increase reload times',
-                    }
-                  )}
-                  position="top"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
+        {renderHeader()}
         <EuiSpacer size="l" />
 
         <DataStreamTable
           filters={
-            isDeepLink && dataStreamName !== undefined
-              ? `name=${decodePathFromReactRouter(dataStreamName)}`
+            isDeepLink && decodedDataStreamName !== undefined
+              ? `name="${decodedDataStreamName}"`
               : ''
           }
-          dataStreams={dataStreams}
+          dataStreams={filteredDataStreams}
           reload={reload}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
@@ -226,15 +282,9 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         If the user has been deep-linked, they'll expect to see the detail panel because it reflects
         the URL state, even if there are no data streams or if there was an error loading them.
       */}
-      {dataStreamName && (
+      {decodedDataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={decodePathFromReactRouter(dataStreamName)}
-          backingIndicesLink={reactRouterNavigate(history, {
-            pathname: '/indices',
-            search: `includeHiddenIndices=true&filter=data_stream=${encodePathForReactRouter(
-              dataStreamName
-            )}`,
-          })}
+          dataStreamName={decodedDataStreamName}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 

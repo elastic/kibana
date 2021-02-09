@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { merge } from 'lodash';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { AggregationInputMap } from '../../../typings/elasticsearch/aggregations';
+import { AggregationInputMap } from '../../../../../typings/elasticsearch';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
@@ -66,13 +68,6 @@ export async function getCounts({
   searchAggregatedTransactions,
 }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
-    count: {
-      value_count: {
-        field: getTransactionDurationFieldForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      },
-    },
     transaction_type: {
       top_hits: {
         size: 1,
@@ -92,7 +87,7 @@ export async function getCounts({
 
     return {
       key: bucket.key as BucketKey,
-      count: bucket.count.value,
+      count: bucket.doc_count,
       transactionType: source.transaction.type,
     };
   });

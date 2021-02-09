@@ -1,11 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import {
   WebhookActionParams,
   WebhookConfig,
@@ -34,17 +40,23 @@ export function getActionType(): ActionTypeModel<
         defaultMessage: 'Webhook data',
       }
     ),
-    validateConnector: (action: WebhookActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
+    validateConnector: (
+      action: WebhookActionConnector
+    ): ConnectorValidationResult<Pick<WebhookConfig, 'url' | 'method'>, WebhookSecrets> => {
+      const configErrors = {
         url: new Array<string>(),
         method: new Array<string>(),
+      };
+      const secretsErrors = {
         user: new Array<string>(),
         password: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = {
+        config: { errors: configErrors },
+        secrets: { errors: secretsErrors },
+      };
       if (!action.config.url) {
-        errors.url.push(
+        configErrors.url.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.requiredUrlText',
             {
@@ -54,8 +66,8 @@ export function getActionType(): ActionTypeModel<
         );
       }
       if (action.config.url && !isValidUrl(action.config.url)) {
-        errors.url = [
-          ...errors.url,
+        configErrors.url = [
+          ...configErrors.url,
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.invalidUrlTextField',
             {
@@ -65,7 +77,7 @@ export function getActionType(): ActionTypeModel<
         ];
       }
       if (!action.config.method) {
-        errors.method.push(
+        configErrors.method.push(
           i18n.translate(
             'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredMethodText',
             {
@@ -74,33 +86,55 @@ export function getActionType(): ActionTypeModel<
           )
         );
       }
-      if (!action.secrets.user && action.secrets.password) {
-        errors.user.push(
+      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+        secretsErrors.user.push(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHostText',
+            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthUserNameText',
             {
               defaultMessage: 'Username is required.',
             }
           )
         );
       }
-      if (!action.secrets.password && action.secrets.user) {
-        errors.password.push(
+      if (action.config.hasAuth && !action.secrets.user && !action.secrets.password) {
+        secretsErrors.password.push(
           i18n.translate(
-            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
+            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthPasswordText',
             {
               defaultMessage: 'Password is required.',
             }
           )
         );
       }
+      if (action.secrets.user && !action.secrets.password) {
+        secretsErrors.password.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
+            {
+              defaultMessage: 'Password is required when username is used.',
+            }
+          )
+        );
+      }
+      if (!action.secrets.user && action.secrets.password) {
+        secretsErrors.user.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredUserText',
+            {
+              defaultMessage: 'Username is required when password is used.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
-    validateParams: (actionParams: WebhookActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (
+      actionParams: WebhookActionParams
+    ): GenericValidationResult<WebhookActionParams> => {
       const errors = {
         body: new Array<string>(),
       };
+      const validationResult = { errors };
       validationResult.errors = errors;
       if (!actionParams.body?.length) {
         errors.body.push(

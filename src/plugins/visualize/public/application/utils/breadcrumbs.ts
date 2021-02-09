@@ -1,36 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../visualize_constants';
 
-const appPrefixes: Record<string, any> = {
-  dashboards: {
-    text: i18n.translate('visualize.dashboard.prefix.breadcrumb', {
-      defaultMessage: 'Dashboard',
-    }),
-  },
-};
-
 const defaultEditText = i18n.translate('visualize.editor.defaultEditBreadcrumbText', {
-  defaultMessage: 'Edit',
+  defaultMessage: 'Edit visualization',
 });
 
 export function getLandingBreadcrumbs() {
@@ -44,9 +25,18 @@ export function getLandingBreadcrumbs() {
   ];
 }
 
-export function getCreateBreadcrumbs() {
+export function getCreateBreadcrumbs({
+  byValue,
+  originatingAppName,
+  redirectToOrigin,
+}: {
+  byValue?: boolean;
+  originatingAppName?: string;
+  redirectToOrigin?: () => void;
+}) {
   return [
-    ...getLandingBreadcrumbs(),
+    ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...(!byValue ? getLandingBreadcrumbs() : []),
     {
       text: i18n.translate('visualize.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -55,16 +45,23 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getBreadcrumbsPrefixedWithApp(originatingApp: string) {
-  const originatingAppBreadcrumb = appPrefixes[originatingApp];
-  return [originatingAppBreadcrumb, ...getLandingBreadcrumbs(), { text: defaultEditText }];
-}
-
-export function getEditBreadcrumbs(text: string = defaultEditText) {
+export function getEditBreadcrumbs(
+  {
+    byValue,
+    originatingAppName,
+    redirectToOrigin,
+  }: {
+    byValue?: boolean;
+    originatingAppName?: string;
+    redirectToOrigin?: () => void;
+  },
+  title: string = defaultEditText
+) {
   return [
-    ...getLandingBreadcrumbs(),
+    ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...(!byValue ? getLandingBreadcrumbs() : []),
     {
-      text,
+      text: title,
     },
   ];
 }

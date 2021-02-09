@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
-import { SpacesServiceSetup } from '../../spaces/server';
+import { IClusterClient, KibanaRequest } from 'src/core/server';
+import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-import { SavedObjectGetter } from './saved_object_provider_registry';
-export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
+import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
+export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
 const optionalDateFieldSchema = schema.maybe(
@@ -48,27 +49,28 @@ export const findOptionsSchema = schema.object({
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
     defaultValue: 'asc',
   }),
+  filter: schema.maybe(schema.string()),
 });
 // page & perPage are required, other fields are optional
 // using schema.maybe allows us to set undefined, but not to make the field optional
 export type FindOptionsType = Pick<
   TypeOf<typeof findOptionsSchema>,
-  'page' | 'per_page' | 'sort_field' | 'sort_order'
+  'page' | 'per_page' | 'sort_field' | 'sort_order' | 'filter'
 > &
   Partial<TypeOf<typeof findOptionsSchema>>;
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
-  savedObjectGetter: SavedObjectGetter;
-  spacesService?: SpacesServiceSetup;
+  savedObjectGetter: SavedObjectBulkGetterResult;
+  spacesService?: SpacesServiceStart;
   request: KibanaRequest;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
   private esContext: EsContext;
-  private savedObjectGetter: SavedObjectGetter;
-  private spacesService?: SpacesServiceSetup;
+  private savedObjectGetter: SavedObjectBulkGetterResult;
+  private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
 
   constructor({ esContext, savedObjectGetter, spacesService, request }: EventLogServiceCtorParams) {
@@ -78,9 +80,9 @@ export class EventLogClient implements IEventLogClient {
     this.request = request;
   }
 
-  async findEventsBySavedObject(
+  async findEventsBySavedObjectIds(
     type: string,
-    id: string,
+    ids: string[],
     options?: Partial<FindOptionsType>
   ): Promise<QueryEventsBySavedObjectResult> {
     const findOptions = findOptionsSchema.validate(options ?? {});
@@ -88,14 +90,14 @@ export class EventLogClient implements IEventLogClient {
     const space = await this.spacesService?.getActiveSpace(this.request);
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
 
-    // verify the user has the required permissions to view this saved object
-    await this.savedObjectGetter(type, id);
+    // verify the user has the required permissions to view this saved objects
+    await this.savedObjectGetter(type, ids);
 
-    return await this.esContext.esAdapter.queryEventsBySavedObject(
-      this.esContext.esNames.alias,
+    return await this.esContext.esAdapter.queryEventsBySavedObjects(
+      this.esContext.esNames.indexPattern,
       namespace,
       type,
-      id,
+      ids,
       findOptions
     );
   }

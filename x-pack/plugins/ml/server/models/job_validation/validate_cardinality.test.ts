@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -187,6 +188,38 @@ describe('ML - validateCardinality', () => {
         expect(ids).toStrictEqual(['field_not_aggregatable']);
       }
     );
+  });
+
+  it('cardinality no results', () => {
+    const job = getJobConfig('partition_field_name');
+
+    const mockCardinality = cloneDeep(mockResponses);
+    mockCardinality.search.hits.total.value = 0;
+    mockCardinality.search.aggregations.airline_count.doc_count = 0;
+
+    return validateCardinality(
+      mlClusterClientFactory(mockCardinality),
+      (job as unknown) as CombinedJob
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
+      expect(ids).toStrictEqual(['cardinality_no_results']);
+    });
+  });
+
+  it('cardinality field not exists', () => {
+    const job = getJobConfig('partition_field_name');
+
+    const mockCardinality = cloneDeep(mockResponses);
+    mockCardinality.search.hits.total.value = 1;
+    mockCardinality.search.aggregations.airline_count.doc_count = 0;
+
+    return validateCardinality(
+      mlClusterClientFactory(mockCardinality),
+      (job as unknown) as CombinedJob
+    ).then((messages) => {
+      const ids = messages.map((m) => m.id);
+      expect(ids).toStrictEqual(['cardinality_field_not_exists']);
+    });
   });
 
   it('fields not aggregatable', () => {

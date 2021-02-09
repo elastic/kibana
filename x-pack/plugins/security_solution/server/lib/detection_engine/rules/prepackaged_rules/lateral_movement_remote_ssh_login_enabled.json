@@ -21,7 +21,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "MacOS"
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Lateral Movement"
   ],
   "threat": [
     {

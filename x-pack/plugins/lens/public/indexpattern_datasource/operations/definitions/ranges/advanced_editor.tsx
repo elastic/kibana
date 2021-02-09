@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './advanced_editor.scss';
 
-import React, { useState, MouseEventHandler } from 'react';
+import React, { useState, MouseEventHandler, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDebounce } from 'react-use';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,10 +20,10 @@ import {
   EuiPopover,
   EuiToolTip,
   htmlIdGenerator,
+  keys,
 } from '@elastic/eui';
-import { keys } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
-import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
+import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
   NewBucketButton,
@@ -31,6 +31,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
+import { isValidNumber, useDebounceWithOptions } from '../helpers';
 
 const generateId = htmlIdGenerator();
 
@@ -39,26 +40,29 @@ type LocalRangeType = RangeTypeLens & { id: string };
 const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
   formatter.convert({
-    gte: isValidNumber(range.from) ? range.from : FROM_PLACEHOLDER,
-    lt: isValidNumber(range.to) ? range.to : TO_PLACEHOLDER,
+    gte: isValidNumber(range.from) ? range.from : -Infinity,
+    lt: isValidNumber(range.to) ? range.to : Infinity,
   });
 
 export const RangePopover = ({
   range,
   setRange,
   Button,
-  isOpenByCreation,
-  setIsOpenByCreation,
+  initiallyOpen,
 }: {
   range: LocalRangeType;
   setRange: (newRange: LocalRangeType) => void;
   Button: React.FunctionComponent<{ onClick: MouseEventHandler }>;
-  isOpenByCreation: boolean;
-  setIsOpenByCreation: (open: boolean) => void;
-  formatter: IFieldFormat;
+  initiallyOpen: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [tempRange, setTempRange] = useState(range);
+
+  // set popover open on start to work around EUI bug
+  useEffect(() => {
+    setIsPopoverOpen(initiallyOpen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const saveRangeAndReset = (newRange: LocalRangeType, resetRange = false) => {
     if (resetRange) {
@@ -87,22 +91,21 @@ export const RangePopover = ({
   });
 
   const onSubmit = () => {
-    setIsPopoverOpen(false);
-    setIsOpenByCreation(false);
-    saveRangeAndReset(tempRange, true);
+    if (isPopoverOpen) {
+      setIsPopoverOpen(false);
+    }
   };
 
   return (
     <EuiPopover
       display="block"
       ownFocus
-      isOpen={isOpenByCreation || isPopoverOpen}
+      isOpen={isPopoverOpen}
       closePopover={onSubmit}
       button={
         <Button
           onClick={() => {
             setIsPopoverOpen((isOpen) => !isOpen);
-            setIsOpenByCreation(false);
           }}
         />
       }
@@ -112,6 +115,7 @@ export const RangePopover = ({
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
             <EuiFieldNumber
+              className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(from) ? Number(from) : ''}
               onChange={({ target }) => {
                 const newRange = {
@@ -126,7 +130,6 @@ export const RangePopover = ({
                   <EuiText size="s">{lteAppendLabel}</EuiText>
                 </EuiToolTip>
               }
-              fullWidth
               compressed
               placeholder={FROM_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
@@ -137,6 +140,7 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
+              className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(to) ? Number(to) : ''}
               onChange={({ target }) => {
                 const newRange = {
@@ -151,7 +155,6 @@ export const RangePopover = ({
                   <EuiText size="s">{ltPrependLabel}</EuiText>
                 </EuiToolTip>
               }
-              fullWidth
               compressed
               placeholder={TO_PLACEHOLDER}
               isInvalid={!isValidRange(tempRange)}
@@ -180,6 +183,7 @@ export const RangePopover = ({
             { defaultMessage: 'Custom label' }
           )}
           onSubmit={onSubmit}
+          compressed
           dataTestSubj="indexPattern-ranges-label"
         />
       </EuiFormRow>
@@ -208,12 +212,13 @@ export const AdvancedRangeEditor = ({
 
   const lastIndex = localRanges.length - 1;
 
-  // Update locally all the time, but bounce the parents prop function
-  // to aviod too many requests
-  useDebounce(
+  // Update locally all the time, but bounce the parents prop function to avoid too many requests
+  // Avoid to trigger on first render
+  useDebounceWithOptions(
     () => {
       setRanges(localRanges.map(({ id, ...rest }) => ({ ...rest })));
     },
+    { skipFirstRender: true },
     TYPING_DEBOUNCE_TIME,
     [localRanges]
   );
@@ -249,7 +254,7 @@ export const AdvancedRangeEditor = ({
       <>
         <DragDropBuckets
           onDragEnd={setLocalRanges}
-          onDragStart={() => setIsOpenByCreation(false)}
+          onDragStart={() => {}}
           droppableId="RANGES_DROPPABLE_AREA"
           items={localRanges}
         >
@@ -273,8 +278,7 @@ export const AdvancedRangeEditor = ({
             >
               <RangePopover
                 range={range}
-                isOpenByCreation={idx === lastIndex && isOpenByCreation}
-                setIsOpenByCreation={setIsOpenByCreation}
+                initiallyOpen={idx === lastIndex && isOpenByCreation}
                 setRange={(newRange: LocalRangeType) => {
                   const newRanges = [...localRanges];
                   if (newRange.id === newRanges[idx].id) {
@@ -284,7 +288,6 @@ export const AdvancedRangeEditor = ({
                   }
                   setLocalRanges(newRanges);
                 }}
-                formatter={formatter}
                 Button={({ onClick }: { onClick: MouseEventHandler }) => (
                   <EuiLink
                     color="text"

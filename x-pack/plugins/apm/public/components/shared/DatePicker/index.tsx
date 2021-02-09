@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { clearCache } from '../../../services/rest/callApi';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';

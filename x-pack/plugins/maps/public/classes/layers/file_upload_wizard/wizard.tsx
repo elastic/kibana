@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component } from 'react';
@@ -14,12 +15,11 @@ import {
   SCALING_TYPES,
 } from '../../../../common/constants';
 import { getFileUploadComponent } from '../../../kibana_services';
-import { GeojsonFileSource } from '../../sources/geojson_file_source';
+import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-// @ts-expect-error
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { FileUploadComponentProps } from '../../../../../file_upload/public';
+import { FileUploadComponentProps } from '../../../../../maps_file_upload/public';
 
 export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
 export const INDEXING_STEP_ID = 'INDEXING_STEP_ID';
@@ -80,7 +80,10 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
-    const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
+    const sourceDescriptor = GeoJsonFileSource.createDescriptor({
+      __featureCollection: geojsonFile,
+      name,
+    });
     const layerDescriptor = VectorLayer.createDescriptor(
       { sourceDescriptor },
       this.props.mapColors

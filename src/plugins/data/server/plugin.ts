@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
+import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
@@ -51,6 +41,7 @@ export interface DataPluginStart {
 }
 
 export interface DataPluginSetupDependencies {
+  bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -70,7 +61,7 @@ export class DataServerPlugin
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly autocompleteService: AutocompleteService;
-  private readonly indexPatterns = new IndexPatternsService();
+  private readonly indexPatterns = new IndexPatternsServiceProvider();
   private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
@@ -85,18 +76,19 @@ export class DataServerPlugin
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions, usageCollection }: DataPluginSetupDependencies
+    { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
   ) {
-    this.indexPatterns.setup(core);
     this.scriptsService.setup(core);
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
+    this.indexPatterns.setup(core, { expressions });
 
     core.uiSettings.register(getUiSettings());
 
     const searchSetup = this.searchService.setup(core, {
-      registerFunction: expressions.registerFunction,
+      bfetch,
+      expressions,
       usageCollection,
     });
 

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouteDependencies } from '../../plugin';
 import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
+import { RouteDependencies } from '../../plugin';
 
-export function registerConfigDataRoute({ router, config, log }: IRouteDependencies) {
+export function registerConfigDataRoute({ router, config, log }: RouteDependencies) {
   router.get(
     {
       path: '/api/enterprise_search/config_data',

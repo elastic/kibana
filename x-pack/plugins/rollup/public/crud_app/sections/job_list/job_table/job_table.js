@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -310,6 +311,10 @@ export class JobTable extends Component {
                 this.toggleItem(id);
               }}
               data-test-subj={`indexTableRowCheckbox-${id}`}
+              aria-label={i18n.translate('xpack.rollupJobs.jobTable.selectRow', {
+                defaultMessage: 'Select this row {id}',
+                values: { id },
+              })}
             />
           </EuiTableRowCellCheckbox>
 
@@ -380,6 +385,9 @@ export class JobTable extends Component {
                   checked={this.areAllItemsSelected()}
                   onChange={this.toggleAll}
                   type="inList"
+                  aria-label={i18n.translate('xpack.rollupJobs.jobTable.selectAllRows', {
+                    defaultMessage: 'Select all rows',
+                  })}
                 />
               </EuiTableHeaderCellCheckbox>
               {this.buildHeader()}

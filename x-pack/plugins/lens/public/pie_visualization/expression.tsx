@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,7 +18,7 @@ import {
 import { LensMultiTable, FormatFactory, LensFilterEvent } from '../types';
 import { PieExpressionProps, PieExpressionArgs } from './types';
 import { PieComponent } from './render_function';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 
 export interface PieRender {
   type: 'render';
@@ -91,6 +92,11 @@ export const pie: ExpressionFunctionDefinition<
       types: ['number'],
       help: '',
     },
+    palette: {
+      default: `{theme "palette" default={system_palette name="default"} }`,
+      help: '',
+      types: ['palette'],
+    },
   },
   inputTypes: ['lens_multitable'],
   fn(data: LensMultiTable, args: PieExpressionArgs) {
@@ -108,6 +114,7 @@ export const pie: ExpressionFunctionDefinition<
 export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {
@@ -131,7 +138,10 @@ export const getPieRenderer = (dependencies: {
           {...config}
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          paletteService={dependencies.paletteService}
           onClickValue={onClickValue}
+          renderMode={handlers.getRenderMode()}
+          syncColors={handlers.isSyncColorsEnabled()}
         />
       </I18nProvider>,
       domNode,

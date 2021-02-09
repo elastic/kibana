@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
-import { Dispatch } from 'react';
-import { Case } from '../../containers/types';
 
-import * as i18n from './translations';
+import { Dispatch } from 'react';
+import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
+
+import { CaseStatuses } from '../../../../../case/common/api';
+import { Case } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
+import * as i18n from './translations';
 
 interface GetActions {
   caseStatus: string;
@@ -29,7 +32,7 @@ export const getActions = ({
     type: 'icon',
     'data-test-subj': 'action-delete',
   },
-  caseStatus === 'open'
+  caseStatus === CaseStatuses.open
     ? {
         description: i18n.CLOSE_CASE,
         icon: 'folderCheck',
@@ -37,7 +40,7 @@ export const getActions = ({
         onClick: (theCase: Case) =>
           dispatchUpdate({
             updateKey: 'status',
-            updateValue: 'closed',
+            updateValue: CaseStatuses.closed,
             caseId: theCase.id,
             version: theCase.version,
           }),
@@ -51,7 +54,7 @@ export const getActions = ({
         onClick: (theCase: Case) =>
           dispatchUpdate({
             updateKey: 'status',
-            updateValue: 'open',
+            updateValue: CaseStatuses.open,
             caseId: theCase.id,
             version: theCase.version,
           }),

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { debounce, pick, uniqBy, isEqual } from 'lodash';
+import { debounce, pick, omit } from 'lodash';
 import { Unit } from '@elastic/datemath';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
+import { IFieldType } from 'src/plugins/data/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,10 +21,10 @@ import {
   EuiCheckbox,
   EuiToolTip,
   EuiIcon,
+  EuiHealth,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertPreview } from '../../common';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -31,7 +32,7 @@ import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   ThresholdExpression,
   ForLastExpression,
@@ -39,8 +40,6 @@ import {
 } from '../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
@@ -68,6 +67,7 @@ import {
 } from '../../../../common/http_api/snapshot_api';
 
 import { validateMetricThreshold } from './validation';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -90,34 +90,33 @@ interface Props {
   };
   alertInterval: string;
   alertThrottle: string;
-  alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
+  metadata: AlertContextMeta;
 }
 
-const defaultExpression = {
+export const defaultExpression = {
   metric: 'cpu' as SnapshotMetricType,
   comparator: Comparator.GT,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
-  customMetric: undefined,
+  customMetric: {
+    type: 'custom',
+    id: 'alert-custom-metric',
+    field: '',
+    aggregation: 'avg',
+  },
 } as InventoryMetricConditions;
 
 export const Expressions: React.FC<Props> = (props) => {
-  const {
-    setAlertParams,
-    alertParams,
-    errors,
-    alertsContext,
-    alertInterval,
-    alertThrottle,
-  } = props;
+  const { http, notifications } = useKibanaContextForPlugin().services;
+  const { setAlertParams, alertParams, errors, alertInterval, alertThrottle, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
-    fetch: alertsContext.http.fetch,
-    toastWarning: alertsContext.toastNotifications.addWarning,
+    fetch: http.fetch,
+    toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
@@ -143,7 +142,6 @@ export const Expressions: React.FC<Props> = (props) => {
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setAlertParams('criteria', exp);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
@@ -218,7 +216,7 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const preFillAlertCriteria = useCallback(() => {
-    const md = alertsContext.metadata;
+    const md = metadata;
     if (md && md.options) {
       setAlertParams('criteria', [
         {
@@ -226,16 +224,16 @@ export const Expressions: React.FC<Props> = (props) => {
           metric: md.options.metric!.type,
           customMetric: SnapshotCustomMetricInputRT.is(md.options.metric)
             ? md.options.metric
-            : undefined,
+            : defaultExpression.customMetric,
         } as InventoryMetricConditions,
       ]);
     } else {
       setAlertParams('criteria', [defaultExpression]);
     }
-  }, [alertsContext.metadata, setAlertParams]);
+  }, [metadata, setAlertParams]);
 
   const preFillAlertFilter = useCallback(() => {
-    const md = alertsContext.metadata;
+    const md = metadata;
     if (md && md.filter) {
       setAlertParams('filterQueryText', md.filter);
       setAlertParams(
@@ -243,10 +241,10 @@ export const Expressions: React.FC<Props> = (props) => {
         convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
       );
     }
-  }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+  }, [metadata, derivedIndexPattern, setAlertParams]);
 
   useEffect(() => {
-    const md = alertsContext.metadata;
+    const md = metadata;
     if (!alertParams.nodeType) {
       if (md && md.nodeType) {
         setAlertParams('nodeType', md.nodeType);
@@ -269,7 +267,7 @@ export const Expressions: React.FC<Props> = (props) => {
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id || 'default');
     }
-  }, [alertsContext.metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -305,7 +303,7 @@ export const Expressions: React.FC<Props> = (props) => {
               setAlertParams={updateParams}
               errors={errors[idx] || emptyError}
               expression={e || {}}
-              alertsContextMetadata={alertsContext.metadata}
+              fields={derivedIndexPattern.fields}
             />
           );
         })}
@@ -365,9 +363,9 @@ export const Expressions: React.FC<Props> = (props) => {
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
-        compressed
+        display="rowCompressed"
       >
-        {(alertsContext.metadata && (
+        {(metadata && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
@@ -390,7 +388,6 @@ export const Expressions: React.FC<Props> = (props) => {
         alertType={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
         alertParams={pick(alertParams, 'criteria', 'nodeType', 'sourceId', 'filterQuery')}
         validate={validateMetricThreshold}
-        fetch={alertsContext.http.fetch}
         groupByDisplayName={alertParams.nodeType}
         showNoDataResults={alertParams.alertOnNoData}
       />
@@ -414,7 +411,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setAlertParams(id: number, params: Partial<InventoryMetricConditions>): void;
-  alertsContextMetadata: AlertsContextValue<AlertContextMeta>['metadata'];
+  fields: IFieldType[];
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -427,54 +424,53 @@ const StyledExpression = euiStyled.div`
   padding: 0 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const {
-    setAlertParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    canDelete,
-    alertsContextMetadata,
-  } = props;
-  const { metric, comparator = Comparator.GT, threshold = [], customMetric } = expression;
-  const [customMetrics, updateCustomMetrics] = useState<SnapshotCustomMetricInput[]>([]);
+const StyledHealth = euiStyled(EuiHealth)`
+  margin-left: 4px;
+`;
 
-  // Create and uniquify a list of custom metrics including:
-  // - The alert metadata context (which only gives us custom metrics on the inventory page)
-  // - The custom metric stored in the expression (necessary when editing this alert without having
-  //    access to the metadata context)
-  // - Whatever custom metrics were previously stored in this list (to preserve the custom metric in the dropdown
-  //    if the user edits the alert and switches away from the custom metric)
-  useEffect(() => {
-    const ctxCustomMetrics = alertsContextMetadata?.customMetrics ?? [];
-    const expressionCustomMetrics = customMetric ? [customMetric] : [];
-    const newCustomMetrics = uniqBy(
-      [...customMetrics, ...ctxCustomMetrics, ...expressionCustomMetrics],
-      (cm: SnapshotCustomMetricInput) => cm.id
-    );
-    if (!isEqual(customMetrics, newCustomMetrics)) updateCustomMetrics(newCustomMetrics);
-  }, [alertsContextMetadata, customMetric, customMetrics, updateCustomMetrics]);
+export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+  const { setAlertParams, expression, errors, expressionId, remove, canDelete, fields } = props;
+  const {
+    metric,
+    comparator = Comparator.GT,
+    threshold = [],
+    customMetric,
+    warningThreshold = [],
+    warningComparator,
+  } = expression;
+
+  const [displayWarningThreshold, setDisplayWarningThreshold] = useState(
+    Boolean(warningThreshold?.length)
+  );
 
   const updateMetric = useCallback(
     (m?: SnapshotMetricType | string) => {
-      const newMetric = SnapshotMetricTypeRT.is(m) ? m : 'custom';
+      const newMetric = SnapshotMetricTypeRT.is(m) ? m : Boolean(m) ? 'custom' : undefined;
       const newAlertParams = { ...expression, metric: newMetric };
-      if (newMetric === 'custom' && customMetrics) {
-        set(
-          newAlertParams,
-          'customMetric',
-          customMetrics.find((cm) => cm.id === m)
-        );
-      }
       setAlertParams(expressionId, newAlertParams);
     },
-    [expressionId, expression, setAlertParams, customMetrics]
+    [expressionId, expression, setAlertParams]
+  );
+
+  const updateCustomMetric = useCallback(
+    (cm?: SnapshotCustomMetricInput) => {
+      if (SnapshotCustomMetricInputRT.is(cm)) {
+        setAlertParams(expressionId, { ...expression, customMetric: cm });
+      }
+    },
+    [expressionId, expression, setAlertParams]
   );
 
   const updateComparator = useCallback(
     (c?: string) => {
       setAlertParams(expressionId, { ...expression, comparator: c as Comparator | undefined });
+    },
+    [expressionId, expression, setAlertParams]
+  );
+
+  const updateWarningComparator = useCallback(
+    (c?: string) => {
+      setAlertParams(expressionId, { ...expression, warningComparator: c as Comparator });
     },
     [expressionId, expression, setAlertParams]
   );
@@ -486,6 +482,58 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       }
     },
     [expressionId, expression, setAlertParams]
+  );
+
+  const updateWarningThreshold = useCallback(
+    (t) => {
+      if (t.join() !== expression.warningThreshold?.join()) {
+        setAlertParams(expressionId, { ...expression, warningThreshold: t });
+      }
+    },
+    [expressionId, expression, setAlertParams]
+  );
+
+  const toggleWarningThreshold = useCallback(() => {
+    if (!displayWarningThreshold) {
+      setDisplayWarningThreshold(true);
+      setAlertParams(expressionId, {
+        ...expression,
+        warningComparator: comparator,
+        warningThreshold: [],
+      });
+    } else {
+      setDisplayWarningThreshold(false);
+      setAlertParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
+    }
+  }, [
+    displayWarningThreshold,
+    setDisplayWarningThreshold,
+    setAlertParams,
+    comparator,
+    expression,
+    expressionId,
+  ]);
+
+  const criticalThresholdExpression = (
+    <ThresholdElement
+      comparator={comparator}
+      threshold={threshold}
+      updateComparator={updateComparator}
+      updateThreshold={updateThreshold}
+      errors={(errors.critical as IErrorObject) ?? {}}
+      metric={metric}
+    />
+  );
+
+  const warningThresholdExpression = displayWarningThreshold && (
+    <ThresholdElement
+      comparator={warningComparator || comparator}
+      threshold={warningThreshold}
+      updateComparator={updateWarningComparator}
+      updateThreshold={updateWarningThreshold}
+      errors={(errors.warning as IErrorObject) ?? {}}
+      metric={metric}
+    />
   );
 
   const ofFields = useMemo(() => {
@@ -515,17 +563,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         myMetrics = containerMetricTypes;
         break;
     }
-    const baseMetricOpts = myMetrics.map(toMetricOpt);
-    const customMetricOpts = customMetrics
-      ? customMetrics.map((m, i) => ({
-          text: getCustomMetricLabel(m),
-          value: m.id,
-        }))
-      : [];
-    return [...baseMetricOpts, ...customMetricOpts];
-  }, [props.nodeType, customMetrics]);
-
-  const selectedMetricValue = metric === 'custom' && customMetric ? customMetric.id : metric!;
+    return myMetrics.map(toMetricOpt);
+  }, [props.nodeType]);
 
   return (
     <>
@@ -535,8 +574,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <StyledExpression>
               <MetricExpression
                 metric={{
-                  value: selectedMetricValue,
-                  text: ofFields.find((v) => v?.value === selectedMetricValue)?.text || '',
+                  value: metric!,
+                  text: ofFields.find((v) => v?.value === metric)?.text || '',
                 }}
                 metrics={
                   ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
@@ -545,28 +584,68 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   }>
                 }
                 onChange={updateMetric}
+                onChangeCustom={updateCustomMetric}
                 errors={errors}
+                customMetric={customMetric}
+                fields={fields}
               />
             </StyledExpression>
-            <StyledExpression>
-              <ThresholdExpression
-                thresholdComparator={comparator || Comparator.GT}
-                threshold={threshold}
-                onChangeSelectedThresholdComparator={updateComparator}
-                onChangeSelectedThreshold={updateThreshold}
-                errors={errors}
-              />
-            </StyledExpression>
-            {metric && (
-              <div
-                style={{
-                  alignSelf: 'center',
-                }}
-              >
-                <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
-              </div>
-            )}
+            {!displayWarningThreshold && criticalThresholdExpression}
           </StyledExpressionRow>
+          {displayWarningThreshold && (
+            <>
+              <StyledExpressionRow>
+                {criticalThresholdExpression}
+                <StyledHealth color="danger">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.criticalThreshold"
+                    defaultMessage="Alert"
+                  />
+                </StyledHealth>
+              </StyledExpressionRow>
+              <StyledExpressionRow>
+                {warningThresholdExpression}
+                <StyledHealth color="warning">
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.warningThreshold"
+                    defaultMessage="Warning"
+                  />
+                </StyledHealth>
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                    {
+                      defaultMessage: 'Remove warningThreshold',
+                    }
+                  )}
+                  iconSize="s"
+                  color={'subdued'}
+                  iconType={'crossInACircleFilled'}
+                  onClick={toggleWarningThreshold}
+                />
+              </StyledExpressionRow>
+            </>
+          )}
+          {!displayWarningThreshold && (
+            <>
+              {' '}
+              <EuiSpacer size={'xs'} />
+              <StyledExpressionRow>
+                <EuiButtonEmpty
+                  color={'primary'}
+                  flush={'left'}
+                  size="xs"
+                  iconType={'plusInCircleFilled'}
+                  onClick={toggleWarningThreshold}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.metrics.alertFlyout.addWarningThreshold"
+                    defaultMessage="Add warning threshold"
+                  />
+                </EuiButtonEmpty>
+              </StyledExpressionRow>
+            </>
+          )}
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
@@ -582,6 +661,38 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         )}
       </EuiFlexGroup>
       <EuiSpacer size={'s'} />
+    </>
+  );
+};
+
+const ThresholdElement: React.FC<{
+  updateComparator: (c?: string) => void;
+  updateThreshold: (t?: number[]) => void;
+  threshold: InventoryMetricConditions['threshold'];
+  comparator: InventoryMetricConditions['comparator'];
+  errors: IErrorObject;
+  metric?: SnapshotMetricType;
+}> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
+  return (
+    <>
+      <StyledExpression>
+        <ThresholdExpression
+          thresholdComparator={comparator || Comparator.GT}
+          threshold={threshold}
+          onChangeSelectedThresholdComparator={updateComparator}
+          onChangeSelectedThreshold={updateThreshold}
+          errors={errors}
+        />
+      </StyledExpression>
+      {metric && (
+        <div
+          style={{
+            alignSelf: 'center',
+          }}
+        >
+          <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
+        </div>
+      )}
     </>
   );
 };

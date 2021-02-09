@@ -1,28 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import mapSavedObjects from './test_resources/sample_map_saved_objects.json';
 import indexPatternSavedObjects from './test_resources/sample_index_pattern_saved_objects';
-import { buildMapsTelemetry } from './maps_telemetry';
+import {
+  buildMapsIndexPatternsTelemetry,
+  buildMapsSavedObjectsTelemetry,
+  getLayerLists,
+} from './maps_telemetry';
 
-describe('buildMapsTelemetry', () => {
-  const settings = { showMapVisualizationTypes: false };
-
+describe('buildMapsSavedObjectsTelemetry', () => {
   test('returns zeroed telemetry data when there are no saved objects', async () => {
-    const result = buildMapsTelemetry({
-      mapSavedObjects: [],
-      indexPatternSavedObjects: [],
-      settings,
-    });
+    const result = buildMapsSavedObjectsTelemetry([]);
 
     expect(result).toMatchObject({
-      indexPatternsWithGeoFieldCount: 0,
-      indexPatternsWithGeoPointFieldCount: 0,
-      indexPatternsWithGeoShapeFieldCount: 0,
-      geoShapeAggLayersCount: 0,
       attributesPerMap: {
         dataSourcesCount: {
           avg: 0,
@@ -38,20 +33,14 @@ describe('buildMapsTelemetry', () => {
         },
       },
       mapsTotalCount: 0,
-      settings: {
-        showMapVisualizationTypes: false,
-      },
     });
   });
 
   test('returns expected telemetry data from saved objects', async () => {
-    const result = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
+    const layerLists = getLayerLists(mapSavedObjects);
+    const result = buildMapsSavedObjectsTelemetry(layerLists);
 
     expect(result).toMatchObject({
-      indexPatternsWithGeoFieldCount: 3,
-      indexPatternsWithGeoPointFieldCount: 2,
-      indexPatternsWithGeoShapeFieldCount: 1,
-      geoShapeAggLayersCount: 2,
       attributesPerMap: {
         dataSourcesCount: {
           avg: 2,
@@ -94,9 +83,18 @@ describe('buildMapsTelemetry', () => {
         },
       },
       mapsTotalCount: 5,
-      settings: {
-        showMapVisualizationTypes: false,
-      },
+    });
+  });
+
+  test('returns expected telemetry data from index patterns', async () => {
+    const layerLists = getLayerLists(mapSavedObjects);
+    const result = buildMapsIndexPatternsTelemetry(indexPatternSavedObjects, layerLists);
+
+    expect(result).toMatchObject({
+      indexPatternsWithGeoFieldCount: 3,
+      indexPatternsWithGeoPointFieldCount: 2,
+      indexPatternsWithGeoShapeFieldCount: 1,
+      geoShapeAggLayersCount: 2,
     });
   });
 });

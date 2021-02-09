@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { AnyAction, Dispatch } from 'redux';
@@ -47,8 +49,8 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
 export type DataRequestContext = {
-  startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
-  stopLoading(dataId: string, requestToken: symbol, data: object, meta?: DataMeta): void;
+  startLoading(dataId: string, requestToken: symbol, requestMeta: DataMeta): void;
+  stopLoading(dataId: string, requestToken: symbol, data: object, resultsMeta?: DataMeta): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
@@ -227,11 +229,15 @@ function endDataLoad(
   data: object,
   meta: DataMeta
 ) {
-  return async (
+  return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     dispatch(unregisterCancelCallback(requestToken));
+    const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
+    if (dataRequest && dataRequest.dataRequestToken !== requestToken) {
+      throw new DataRequestAbortError();
+    }
 
     const features = data && 'features' in data ? (data as FeatureCollection).features : [];
 

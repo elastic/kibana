@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../common/model';
 import { isInternalURL } from '../../../common/is_internal_url';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair } from '../tokens';
+import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 /**
@@ -193,7 +195,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
+    this.logger.debug(
+      `Trying to authenticate user request to ${request.url.pathname}${request.url.search}`
+    );
 
     if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
@@ -232,7 +236,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+    this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
     // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
     // and user will eventually be redirected to the home page to log in. But when SAML SLO is
@@ -280,7 +284,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
@@ -336,24 +340,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         : 'Login has been initiated by Identity Provider.'
     );
 
-    let accessToken;
-    let refreshToken;
+    let result: { access_token: string; refresh_token: string; authentication: AuthenticationInfo };
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
-      const authenticateResponse = await this.options.client.callAsInternalUser(
-        'shield.samlAuthenticate',
-        {
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      result = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/saml/authenticate',
           body: {
             ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
             content: samlResponse,
             realm: this.realm,
           },
-        }
-      );
-
-      accessToken = authenticateResponse.access_token;
-      refreshToken = authenticateResponse.refresh_token;
+        })
+      ).body as any;
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
 
@@ -363,17 +366,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return isIdPInitiatedLogin
         ? AuthenticationResult.notHandled()
         : AuthenticationResult.failed(err);
-    }
-
-    // Now we need to retrieve full user information.
-    let user: Readonly<AuthenticatedUser>;
-    try {
-      user = await this.getUser(request, {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      });
-    } catch (err) {
-      this.logger.debug(`Failed to retrieve user using access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
     }
 
     // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
@@ -399,7 +391,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Login has been performed with SAML response.');
     return AuthenticationResult.redirectTo(
       redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
-      { state: { accessToken, refreshToken, realm: this.realm }, user }
+      {
+        state: {
+          accessToken: result.access_token,
+          refreshToken: result.refresh_token,
+          realm: this.realm,
+        },
+        user: this.authenticationInfoToAuthenticatedUser(result.authentication),
+      }
     );
   }
 
@@ -492,20 +491,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(
-    request: KibanaRequest,
-    { refreshToken }: ProviderState
-  ) {
+  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
     this.logger.debug('Trying to refresh access token.');
 
-    if (!refreshToken) {
+    if (!state.refreshToken) {
       this.logger.debug('Refresh token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    let refreshedTokenPair: TokenPair | null;
+    let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
       return AuthenticationResult.failed(err);
     }
@@ -515,7 +511,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
     // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
     // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
-    if (refreshedTokenPair === null) {
+    if (refreshTokenResult === null) {
       if (canStartNewSession(request)) {
         this.logger.debug(
           'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
@@ -528,26 +524,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
-    try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader(
-          'Bearer',
-          refreshedTokenPair.accessToken
-        ).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
-        state: { realm: this.realm, ...refreshedTokenPair },
-      });
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate user using newly refreshed access token: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
+    this.logger.debug('Request has been authenticated via refreshed token.');
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken, realm: this.realm },
+      }
+    );
   }
 
   /**
@@ -561,12 +548,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
-      const { id: requestId, redirect } = await this.options.client.callAsInternalUser(
-        'shield.samlPrepare',
-        {
+      // We can replace generic `transport.request` with a dedicated API method call once
+      // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+      const { id: requestId, redirect } = (
+        await this.options.client.asInternalUser.transport.request({
+          method: 'POST',
+          path: '/_security/saml/prepare',
           body: { realm: this.realm },
-        }
-      );
+        })
+      ).body as any;
 
       this.logger.debug('Redirecting to Identity Provider with SAML request.');
 
@@ -590,9 +580,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/logout`.
-    const { redirect } = await this.options.client.callAsInternalUser('shield.samlLogout', {
-      body: { token: accessToken, refresh_token: refreshToken },
-    });
+    // We can replace generic `transport.request` with a dedicated API method call once
+    // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+    const { redirect } = (
+      await this.options.client.asInternalUser.transport.request({
+        method: 'POST',
+        path: '/_security/saml/logout',
+        body: { token: accessToken, refresh_token: refreshToken },
+      })
+    ).body as any;
 
     this.logger.debug('User session has been successfully invalidated.');
 
@@ -609,13 +605,19 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // This operation should be performed on behalf of the user with a privilege that normal
     // user usually doesn't have `cluster:admin/xpack/security/saml/invalidate`.
-    const { redirect } = await this.options.client.callAsInternalUser('shield.samlInvalidate', {
-      // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-      body: {
-        queryString: request.url.search ? request.url.search.slice(1) : '',
-        realm: this.realm,
-      },
-    });
+    // We can replace generic `transport.request` with a dedicated API method call once
+    // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
+    const { redirect } = (
+      await this.options.client.asInternalUser.transport.request({
+        method: 'POST',
+        path: '/_security/saml/invalidate',
+        // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
+        body: {
+          queryString: request.url.search ? request.url.search.slice(1) : '',
+          realm: this.realm,
+        },
+      })
+    ).body as any;
 
     this.logger.debug('User session has been successfully invalidated.');
 
@@ -627,14 +629,18 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private captureRedirectURL(request: KibanaRequest) {
+    const searchParams = new URLSearchParams([
+      [
+        NEXT_URL_QUERY_STRING_PARAMETER,
+        `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`,
+      ],
+      ['providerType', this.type],
+      ['providerName', this.options.name],
+    ]);
     return AuthenticationResult.redirectTo(
       `${
         this.options.basePath.serverBasePath
-      }/internal/security/capture-url?next=${encodeURIComponent(
-        `${this.options.basePath.get(request)}${request.url.path}`
-      )}&providerType=${encodeURIComponent(this.type)}&providerName=${encodeURIComponent(
-        this.options.name
-      )}`,
+      }/internal/security/capture-url?${searchParams.toString()}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
       { state: null }

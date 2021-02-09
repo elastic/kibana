@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBasicTable,
@@ -19,6 +21,7 @@ import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
+import { CaseStatuses } from '../../../../../case/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -37,7 +40,6 @@ import { getCreateCaseUrl, useFormatUrl } from '../../../common/components/link_
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { OpenClosedStats } from '../open_closed_stats';
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
@@ -50,6 +52,7 @@ import { LinkButton } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
+import { Stats } from '../status';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -81,7 +84,7 @@ const getSortField = (field: string): SortFieldCase => {
 };
 
 interface AllCasesProps {
-  onRowClick?: (id?: string) => void;
+  onRowClick?: (theCase?: Case) => void;
   isModal?: boolean;
   userCanCrud: boolean;
 }
@@ -91,8 +94,9 @@ export const AllCases = React.memo<AllCasesProps>(
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
     const { actionLicense } = useGetActionLicense();
     const {
-      countClosedCases,
       countOpenCases,
+      countInProgressCases,
+      countClosedCases,
       isLoading: isCasesStatusLoading,
       fetchCasesStatus,
     } = useGetCasesStatus();
@@ -291,10 +295,15 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
-        if (newFilterOptions.status && newFilterOptions.status === 'closed') {
+        if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
           setQueryParams({ sortField: SortFieldCase.closedAt });
-        } else if (newFilterOptions.status && newFilterOptions.status === 'open') {
+        } else if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.open) {
           setQueryParams({ sortField: SortFieldCase.createdAt });
+        } else if (
+          newFilterOptions.status &&
+          newFilterOptions.status === CaseStatuses['in-progress']
+        ) {
+          setQueryParams({ sortField: SortFieldCase.updatedAt });
         }
         setFilters(newFilterOptions);
         refreshCases(false);
@@ -332,32 +341,20 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const TableWrap = useMemo(() => (isModal ? 'span' : Panel), [isModal]);
 
-    const onTableRowClick = useMemo(
-      () =>
-        memoize<(id: string) => () => void>((id) => () => {
-          if (onRowClick) {
-            onRowClick(id);
-          }
-        }),
-      [onRowClick]
-    );
-
     const tableRowProps = useCallback(
-      (item) => {
-        const rowProps = {
-          'data-test-subj': `cases-table-row-${item.id}`,
+      (theCase: Case) => {
+        const onTableRowClick = memoize(() => {
+          if (onRowClick) {
+            onRowClick(theCase);
+          }
+        });
+
+        return {
+          'data-test-subj': `cases-table-row-${theCase.id}`,
+          ...(isModal ? { onClick: onTableRowClick } : {}),
         };
-
-        if (isModal) {
-          return {
-            ...rowProps,
-            onClick: onTableRowClick(item.id),
-          };
-        }
-
-        return rowProps;
       },
-      [isModal, onTableRowClick]
+      [isModal, onRowClick]
     );
 
     return (
@@ -375,18 +372,26 @@ export const AllCases = React.memo<AllCasesProps>(
               data-test-subj="all-cases-header"
             >
               <EuiFlexItem grow={false}>
-                <OpenClosedStats
+                <Stats
                   dataTestSubj="openStatsHeader"
                   caseCount={countOpenCases}
-                  caseStatus={'open'}
+                  caseStatus={CaseStatuses.open}
+                  isLoading={isCasesStatusLoading}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <Stats
+                  dataTestSubj="inProgressStatsHeader"
+                  caseCount={countInProgressCases}
+                  caseStatus={CaseStatuses['in-progress']}
                   isLoading={isCasesStatusLoading}
                 />
               </EuiFlexItem>
               <FlexItemDivider grow={false}>
-                <OpenClosedStats
+                <Stats
                   dataTestSubj="closedStatsHeader"
                   caseCount={countClosedCases}
-                  caseStatus={'closed'}
+                  caseStatus={CaseStatuses.closed}
                   isLoading={isCasesStatusLoading}
                 />
               </FlexItemDivider>
@@ -422,6 +427,7 @@ export const AllCases = React.memo<AllCasesProps>(
           <CasesTableFilters
             countClosedCases={data.countClosedCases}
             countOpenCases={data.countOpenCases}
+            countInProgressCases={data.countInProgressCases}
             onFilterChanged={onFilterChangedCallback}
             initial={{
               search: filterOptions.search,

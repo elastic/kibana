@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useLocation } from 'react-router-dom';
 import { useMemo } from 'react';
 import { parse } from 'query-string';
 import { UI_SETTINGS, useKibanaUISettings } from './use_kibana_ui_settings';
-import { TimePickerTime } from '../components/shared/data_picker';
+import { TimePickerTime } from '../components/shared/date_picker';
 import { getAbsoluteTime } from '../utils/date';
 
 const getParsedParams = (search: string) => {

@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
+
+import { isEqual } from 'lodash';
 
 import { useNotifyService } from '../../services';
 import { RenderToDom } from '../render_to_dom';
@@ -82,8 +85,12 @@ export const RenderWithFn: FC<Props> = ({
   );
 
   const render = useCallback(() => {
+    if (!isEqual(handlers.current, incomingHandlers)) {
+      handlers.current = incomingHandlers;
+    }
+
     renderFn(renderTarget.current!, config, handlers.current);
-  }, [renderTarget, config, renderFn]);
+  }, [renderTarget, config, renderFn, incomingHandlers]);
 
   useEffect(() => {
     if (!domNode) {

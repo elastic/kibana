@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpServiceSetup, Logger } from '../../../../../src/core/server';
@@ -33,11 +34,13 @@ export function initAPIAuthorization(
 
     // we've actually authorized the request
     if (checkPrivilegesResponse.hasAllRequested) {
-      logger.debug(`User authorized for "${request.url.path}"`);
+      logger.debug(`User authorized for "${request.url.pathname}${request.url.search}"`);
       return toolkit.next();
     }
 
-    logger.warn(`User not authorized for "${request.url.path}": responding with 403`);
+    logger.warn(
+      `User not authorized for "${request.url.pathname}${request.url.search}": responding with 403`
+    );
     return response.forbidden();
   });
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -59,7 +60,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         type: 'boolean',
       },
       authProviderCount: {
-        type: 'number',
+        type: 'long',
       },
       enabledAuthProviders: {
         type: 'array',
@@ -75,7 +76,12 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       },
     },
     fetch: () => {
-      const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
+      const {
+        allowRbac,
+        allowAccessAgreement,
+        allowAuditLogging,
+        allowLegacyAuditLogging,
+      } = license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,
@@ -87,7 +93,10 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         };
       }
 
-      const auditLoggingEnabled = allowAuditLogging && config.audit.enabled;
+      const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
+      const auditLoggingEnabled =
+        allowAuditLogging && config.audit.enabled && config.audit.appender != null;
+
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
@@ -107,7 +116,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       );
 
       return {
-        auditLoggingEnabled,
+        auditLoggingEnabled: legacyAuditLoggingEnabled || auditLoggingEnabled,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,

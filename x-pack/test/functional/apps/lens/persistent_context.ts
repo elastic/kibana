@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -50,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.toggleFilterEnabled('ip');
       await appsMenu.clickLink('Visualize', { category: 'kibana' });
       await PageObjects.visualize.clickNewVisualization();
-      await PageObjects.visualize.waitForVisualizationSelectPage();
+      await PageObjects.visualize.waitForGroupsSelectPage();
       await PageObjects.visualize.clickVisType('lens');
       const timeRange = await PageObjects.timePicker.getTimeConfig();
       expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
@@ -59,6 +60,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('keep time range and pinned filters after refresh', async () => {
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const timeRange = await PageObjects.timePicker.getTimeConfig();
+      expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
+      expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
+      await filterBar.hasFilter('ip', '97.220.3.248', false, true);
+    });
+
+    it('keeps selected index pattern after refresh', async () => {
+      await PageObjects.lens.switchDataPanelIndexPattern('log*');
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('log*');
+    });
+
+    it('keeps time range and pinned filters after refreshing directly after saving', async () => {
+      // restore defaults so visualization becomes saveable
+      await security.testUser.restoreDefaults();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+      await PageObjects.lens.save('persistentcontext');
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const timeRange = await PageObjects.timePicker.getTimeConfig();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getSafeForExternalLink } from './get_safe_for_external_link';
@@ -51,7 +52,7 @@ describe('getSafeForExternalLink', () => {
         location
       )
     ).toBe(
-      `#/overview?_g=(cluster_uuid:NDKg6VXAT6-TaGzEK2Zy7g,filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'))`
+      `#/overview?_g=(cluster_uuid:'NDKg6VXAT6-TaGzEK2Zy7g',filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'))`
     );
   });
 
@@ -68,7 +69,7 @@ describe('getSafeForExternalLink', () => {
         location
       )
     ).toBe(
-      `#/overview?_g=(filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'),cluster_uuid:NDKg6VXAT6-TaGzEK2Zy7g)`
+      `#/overview?_g=(filters:!(),refreshInterval:(pause:!t,value:10000),time:(from:'2017-09-07T20:12:04.011Z',to:'2017-09-07T20:18:55.733Z'),cluster_uuid:'NDKg6VXAT6-TaGzEK2Zy7g')`
     );
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneHttpFetchQuery } from './clone_http_fetch_query';
@@ -14,7 +15,7 @@ describe('cloneHttpFetchQuery', () => {
       a: 'a',
       '1': 1,
       undefined,
-      array: [1, 2, undefined],
+      array: [1, 2],
     };
     expect(cloneHttpFetchQuery(query)).toMatchInlineSnapshot(`
       Object {
@@ -23,7 +24,6 @@ describe('cloneHttpFetchQuery', () => {
         "array": Array [
           1,
           2,
-          undefined,
         ],
         "undefined": undefined,
       }

@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { Datatable } from 'src/plugins/expressions';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
@@ -14,8 +17,10 @@ import {
   TableChangeType,
   TableSuggestion,
   DatasourceSuggestion,
+  DatasourcePublicAPI,
 } from '../../types';
 import { Action } from './state_management';
+import { DragDropIdentifier } from '../../drag_drop';
 
 export interface Suggestion {
   visualizationId: string;
@@ -49,6 +54,8 @@ export function getSuggestions({
   visualizationState,
   field,
   visualizeTriggerFieldContext,
+  activeData,
+  mainPalette,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -64,6 +71,8 @@ export function getSuggestions({
   visualizationState: unknown;
   field?: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  activeData?: Record<string, Datatable>;
+  mainPalette?: PaletteOutput;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -84,7 +93,8 @@ export function getSuggestions({
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
       } else {
         dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
-          datasourceState
+          datasourceState,
+          activeData
         );
       }
       return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
@@ -100,13 +110,21 @@ export function getSuggestions({
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
+          const palette =
+            mainPalette ||
+            (activeVisualizationId &&
+            visualizationMap[activeVisualizationId] &&
+            visualizationMap[activeVisualizationId].getMainPalette
+              ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
+              : undefined);
           return getVisualizationSuggestions(
             visualization,
             table,
             visualizationId,
             datasourceSuggestion,
             currentVisualizationState,
-            subVisualizationId
+            subVisualizationId,
+            palette
           );
         })
       )
@@ -165,7 +183,8 @@ function getVisualizationSuggestions(
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
-  subVisualizationId?: string
+  subVisualizationId?: string,
+  mainPalette?: PaletteOutput
 ) {
   return visualization
     .getSuggestions({
@@ -173,6 +192,7 @@ function getVisualizationSuggestions(
       state: currentVisualizationState,
       keptLayerIds: datasourceSuggestion.keptLayerIds,
       subVisualizationId,
+      mainPalette,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,
@@ -203,4 +223,36 @@ export function switchToSuggestion(
   };
 
   dispatch(action);
+}
+
+export function getTopSuggestionForField(
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  activeVisualizationId: string | null,
+  visualizationMap: Record<string, Visualization<unknown>>,
+  visualizationState: unknown,
+  datasource: Datasource,
+  datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
+  field: DragDropIdentifier
+) {
+  const hasData = Object.values(datasourceLayers).some(
+    (datasourceLayer) => datasourceLayer.getTableSpec().length > 0
+  );
+
+  const mainPalette =
+    activeVisualizationId && visualizationMap[activeVisualizationId]?.getMainPalette
+      ? visualizationMap[activeVisualizationId].getMainPalette?.(visualizationState)
+      : undefined;
+  const suggestions = getSuggestions({
+    datasourceMap: { [datasource.id]: datasource },
+    datasourceStates,
+    visualizationMap:
+      hasData && activeVisualizationId
+        ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
+        : visualizationMap,
+    activeVisualizationId,
+    visualizationState,
+    field,
+    mainPalette,
+  });
+  return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,10 +14,16 @@ import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
 import { resolverReducer } from '../../store/reducer';
 import { MockResolver } from './mock_resolver';
-import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
+import {
+  ResolverState,
+  DataAccessLayer,
+  SpyMiddleware,
+  SideEffectSimulator,
+  TimeFilters,
+} from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
-import { getUiSettings } from '../../mocks/get_ui_settings';
+import { uiSetting } from '../../mocks/ui_setting';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -62,12 +69,21 @@ export class Simulator {
     return selector;
   }
 
+  /**
+   * The simulator returns enzyme `ReactWrapper`s from various methods. Use this predicate to determine if they are DOM nodes.
+   */
+  public static isDOM(wrapper: ReactWrapper): boolean {
+    return typeof wrapper.type() === 'string';
+  }
+
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
     indices,
     history,
+    filters,
+    shouldUpdate,
   }: {
     /**
      * A (mock) data access layer that will be used to create the Resolver store.
@@ -86,6 +102,8 @@ export class Simulator {
      */
     databaseDocumentID: string;
     history?: HistoryPackageHistoryInterface<never>;
+    filters: TimeFilters;
+    shouldUpdate: boolean;
   }) {
     // create the spy middleware (for debugging tests)
     this.spyMiddleware = spyMiddlewareFactory();
@@ -110,7 +128,7 @@ export class Simulator {
     // Used for `KibanaContextProvider`
     const coreStart = coreMock.createStart();
 
-    coreStart.uiSettings.get.mockImplementation(getUiSettings);
+    coreStart.uiSettings.get.mockImplementation(uiSetting);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
@@ -124,6 +142,8 @@ export class Simulator {
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
         indices={indices}
+        filters={filters}
+        shouldUpdate={shouldUpdate}
       />
     );
   }
@@ -164,6 +184,25 @@ export class Simulator {
   }
 
   /**
+   * Change the shouldUpdate prop (updates the React component props.)
+   */
+  public set shouldUpdate(value: boolean) {
+    this.wrapper.setProps({ shouldUpdate: value });
+  }
+
+  public get shouldUpdate(): boolean {
+    return this.wrapper.prop('shouldUpdate');
+  }
+
+  public set filters(value: TimeFilters) {
+    this.wrapper.setProps({ filters: value });
+  }
+
+  public get filters(): TimeFilters {
+    return this.wrapper.prop('filters');
+  }
+
+  /**
    * Call this to console.log actions (and state). Use this to debug your tests.
    * State and actions aren't exposed otherwise because the tests using this simulator should
    * assert stuff about the DOM instead of internal state. Use selector/middleware/reducer
@@ -190,12 +229,12 @@ export class Simulator {
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
    */
-  public async *map<R>(mapper: () => R): AsyncIterable<R> {
+  public async *map<R>(mapper: (() => Promise<R>) | (() => R)): AsyncIterable<R> {
     let timeoutCount = 0;
     while (timeoutCount < 10) {
       timeoutCount++;
       yield mapper();
-      await new Promise((resolve) => {
+      await new Promise<void>((resolve) => {
         setTimeout(() => {
           this.forceAutoSizerOpen();
           this.wrapper.update();
@@ -268,6 +307,20 @@ export class Simulator {
   }
 
   /**
+   * The last value written to the clipboard via the `SideEffectors`.
+   */
+  public get clipboardText(): string {
+    return this.sideEffectSimulator.controls.clipboardText;
+  }
+
+  /**
+   * Call this to resolve the promise returned by the `SideEffectors` `writeText` method (which in production points to `navigator.clipboard.writeText`.
+   */
+  confirmTextWrittenToClipboard(): void {
+    this.sideEffectSimulator.controls.confirmTextWrittenToClipboard();
+  }
+
+  /**
    * The 'search' part of the URL.
    */
   public get historyLocationSearch(): string {
@@ -297,12 +350,35 @@ export class Simulator {
   }
 
   /**
+   * Given a `ReactWrapper`, returns a wrapper containing immediately following `dd` siblings.
+   * `subject` must contain just 1 element.
+   */
+  public descriptionDetails(subject: ReactWrapper): ReactWrapper {
+    // find the associated DOM nodes, then return an enzyme wrapper that only contains those.
+    const subjectNode = subject.getDOMNode();
+    let current = subjectNode.nextElementSibling;
+    const associated: Set<Element> = new Set();
+    // Multiple `dt`s can be associated with a set of `dd`s. Skip immediately following `dt`s.
+    while (current !== null && current.nodeName === 'DT') {
+      current = current.nextElementSibling;
+    }
+    while (current !== null && current.nodeName === 'DD') {
+      associated.add(current);
+      current = current.nextElementSibling;
+    }
+    return subject
+      .closest('dl')
+      .find('dd')
+      .filterWhere((candidate) => {
+        return associated.has(candidate.getDOMNode());
+      });
+  }
+
+  /**
    * Return DOM nodes that match `enzymeSelector`.
    */
   private domNodes(enzymeSelector: string): ReactWrapper {
-    return this.wrapper
-      .find(enzymeSelector)
-      .filterWhere((wrapper) => typeof wrapper.type() === 'string');
+    return this.wrapper.find(enzymeSelector).filterWhere(Simulator.isDOM);
   }
 
   /**
@@ -331,7 +407,7 @@ export class Simulator {
    * Resolve the wrapper returned by `wrapperFactory` only once it has at least 1 element in it.
    */
   public async resolveWrapper(
-    wrapperFactory: () => ReactWrapper,
+    wrapperFactory: (() => Promise<ReactWrapper>) | (() => ReactWrapper),
     predicate: (wrapper: ReactWrapper) => boolean = (wrapper) => wrapper.length > 0
   ): Promise<ReactWrapper | undefined> {
     for await (const wrapper of this.map(wrapperFactory)) {

@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { flow } from 'lodash';
 
+/**
+ * Escapes backslashes and double-quotes. (Useful when putting a string in quotes to use as a value
+ * in a KQL expression. See the QuotedCharacter rule in kuery.peg.)
+ */
 export function escapeQuotes(str: string) {
-  return str.replace(/"/g, '\\"');
+  return str.replace(/[\\"]/g, '\\$&');
 }
 
 export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);

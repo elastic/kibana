@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Duration } from 'moment';
-import { SearchResponse } from 'elasticsearch';
 import { ListClient } from '../../../../../../lists/server';
 import {
   Type,
@@ -17,15 +17,23 @@ import {
   ThreatMappingEntries,
   ThreatIndex,
   ThreatLanguageOrUndefined,
+  ConcurrentSearches,
+  ItemsPerSearch,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
-import { AlertServices } from '../../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
+
+export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
   threatMapping: ThreatMapping;
@@ -35,7 +43,7 @@ export interface CreateThreatSignalsOptions {
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
@@ -62,6 +70,8 @@ export interface CreateThreatSignalsOptions {
   threatIndex: ThreatIndex;
   threatLanguage: ThreatLanguageOrUndefined;
   name: string;
+  concurrentSearches: ConcurrentSearches;
+  itemsPerSearch: ItemsPerSearch;
 }
 
 export interface CreateThreatSignalOptions {
@@ -72,7 +82,7 @@ export interface CreateThreatSignalOptions {
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
@@ -93,24 +103,15 @@ export interface CreateThreatSignalOptions {
   tags: string[];
   refresh: false | 'wait_for';
   throttle: string;
-  threatFilters: PartialFilter[];
-  threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
-  threatIndex: ThreatIndex;
-  threatLanguage: ThreatLanguageOrUndefined;
   name: string;
-  currentThreatList: SearchResponse<ThreatListItem>;
+  currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
-}
-
-export interface ThreatSignalResults {
-  threatList: SearchResponse<ThreatListItem>;
-  results: SearchAfterAndBulkCreateReturnType;
 }
 
 export interface BuildThreatMappingFilterOptions {
   threatMapping: ThreatMapping;
-  threatList: SearchResponse<ThreatListItem>;
+  threatList: ThreatListItem[];
   chunkSize?: number;
 }
 
@@ -131,7 +132,7 @@ export interface CreateAndOrClausesOptions {
 
 export interface BuildEntriesMappingFilterOptions {
   threatMapping: ThreatMapping;
-  threatList: SearchResponse<ThreatListItem>;
+  threatList: ThreatListItem[];
   chunkSize: number;
 }
 
@@ -152,15 +153,26 @@ export interface GetThreatListOptions {
   perPage?: number;
   searchAfter: string[] | undefined;
   sortField: string | undefined;
-  sortOrder: 'asc' | 'desc' | undefined;
+  sortOrder: SortOrderOrUndefined;
   threatFilters: PartialFilter[];
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
+  buildRuleMessage: BuildRuleMessage;
+  logger: Logger;
+}
+
+export interface ThreatListCountOptions {
+  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  query: string;
+  language: ThreatLanguageOrUndefined;
+  threatFilters: PartialFilter[];
+  index: string[];
+  exceptionItems: ExceptionListItemSchema[];
 }
 
 export interface GetSortWithTieBreakerOptions {
   sortField: string | undefined;
-  sortOrder: 'asc' | 'desc' | undefined;
+  sortOrder: SortOrderOrUndefined;
   index: string[];
   listItemIndex: string;
 }

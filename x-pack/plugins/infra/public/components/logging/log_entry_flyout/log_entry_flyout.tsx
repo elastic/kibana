@@ -1,149 +1,143 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  EuiBasicTable,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTextColor,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
-import React, { useCallback, useMemo } from 'react';
-
-import { euiStyled } from '../../../../../observability/public';
+import React, { useEffect } from 'react';
 import { TimeKey } from '../../../../common/time';
-import { InfraLoadingPanel } from '../../loading';
+import { useLogEntry } from '../../../containers/logs/log_entry';
+import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
+import { DataSearchErrorCallout } from '../../data_search_error_callout';
+import { DataSearchProgress } from '../../data_search_progress';
 import { LogEntryActionsMenu } from './log_entry_actions_menu';
-import { LogEntriesItem, LogEntriesItemField } from '../../../../common/http_api';
+import { LogEntryFieldsTable } from './log_entry_fields_table';
 
 export interface LogEntryFlyoutProps {
-  flyoutItem: LogEntriesItem | null;
-  setFlyoutVisibility: (visible: boolean) => void;
-  setFilter: (filter: string, flyoutItemId: string, timeKey?: TimeKey) => void;
-  loading: boolean;
+  logEntryId: string | null | undefined;
+  onCloseFlyout: () => void;
+  onSetFieldFilter?: (filter: string, logEntryId: string, timeKey?: TimeKey) => void;
+  sourceId: string | null | undefined;
 }
 
 export const LogEntryFlyout = ({
-  flyoutItem,
-  loading,
-  setFlyoutVisibility,
-  setFilter,
+  logEntryId,
+  onCloseFlyout,
+  onSetFieldFilter,
+  sourceId,
 }: LogEntryFlyoutProps) => {
-  const createFilterHandler = useCallback(
-    (field: LogEntriesItemField) => () => {
-      if (!flyoutItem) {
-        return;
-      }
+  const {
+    cancelRequest: cancelLogEntryRequest,
+    errors: logEntryErrors,
+    fetchLogEntry,
+    isRequestRunning,
+    loaded: logEntryRequestProgress,
+    logEntry,
+    total: logEntryRequestTotal,
+  } = useLogEntry({
+    sourceId,
+    logEntryId,
+  });
 
-      const filter = `${field.field}:"${field.value}"`;
-      const timestampMoment = moment(flyoutItem.key.time);
-      let target;
-
-      if (timestampMoment.isValid()) {
-        target = {
-          time: timestampMoment.valueOf(),
-          tiebreaker: flyoutItem.key.tiebreaker,
-        };
-      }
-
-      setFilter(filter, flyoutItem.id, target);
-    },
-    [flyoutItem, setFilter]
-  );
-
-  const closeFlyout = useCallback(() => setFlyoutVisibility(false), [setFlyoutVisibility]);
-
-  const columns = useMemo(
-    () => [
-      {
-        field: 'field',
-        name: i18n.translate('xpack.infra.logFlyout.fieldColumnLabel', {
-          defaultMessage: 'Field',
-        }),
-        sortable: true,
-      },
-      {
-        field: 'value',
-        name: i18n.translate('xpack.infra.logFlyout.valueColumnLabel', {
-          defaultMessage: 'Value',
-        }),
-        sortable: true,
-        render: (_name: string, item: LogEntriesItemField) => (
-          <span>
-            <EuiToolTip
-              content={i18n.translate('xpack.infra.logFlyout.setFilterTooltip', {
-                defaultMessage: 'View event with filter',
-              })}
-            >
-              <EuiButtonIcon
-                color="text"
-                iconType="filter"
-                aria-label={i18n.translate('xpack.infra.logFlyout.filterAriaLabel', {
-                  defaultMessage: 'Filter',
-                })}
-                onClick={createFilterHandler(item)}
-              />
-            </EuiToolTip>
-            {item.value}
-          </span>
-        ),
-      },
-    ],
-    [createFilterHandler]
-  );
+  useEffect(() => {
+    if (sourceId && logEntryId) {
+      fetchLogEntry();
+    }
+  }, [fetchLogEntry, sourceId, logEntryId]);
 
   return (
-    <EuiFlyout onClose={closeFlyout} size="m">
+    <EuiFlyout onClose={onCloseFlyout} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
             <EuiTitle size="s">
               <h3 id="flyoutTitle">
                 <FormattedMessage
-                  defaultMessage="Log event document details"
+                  defaultMessage="Details for log entry {logEntryId}"
                   id="xpack.infra.logFlyout.flyoutTitle"
+                  values={{
+                    logEntryId: logEntryId ? <code>{logEntryId}</code> : '',
+                  }}
                 />
               </h3>
             </EuiTitle>
+            {logEntry ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.infra.logFlyout.flyoutSubTitle"
+                    defaultMessage="From index {indexName}"
+                    values={{
+                      indexName: <code>{logEntry.index}</code>,
+                    }}
+                  />
+                </EuiTextColor>
+              </>
+            ) : null}
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {flyoutItem !== null ? <LogEntryActionsMenu logItem={flyoutItem} /> : null}
+          <EuiFlexItem style={{ padding: 8 }} grow={false}>
+            {logEntry ? <LogEntryActionsMenu logEntry={logEntry} /> : null}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {loading || flyoutItem === null ? (
-          <InfraFlyoutLoadingPanel>
-            <InfraLoadingPanel
-              height="100%"
-              width="100%"
-              text={i18n.translate('xpack.infra.logFlyout.loadingMessage', {
-                defaultMessage: 'Loading Event',
-              })}
+      {isRequestRunning ? (
+        <CenteredEuiFlyoutBody>
+          <div style={{ width: '75%' }}>
+            <DataSearchProgress
+              label={loadingProgressMessage}
+              maxValue={logEntryRequestTotal}
+              onCancel={cancelLogEntryRequest}
+              value={logEntryRequestProgress}
             />
-          </InfraFlyoutLoadingPanel>
-        ) : (
-          <EuiBasicTable columns={columns} items={flyoutItem.fields} />
-        )}
-      </EuiFlyoutBody>
+          </div>
+        </CenteredEuiFlyoutBody>
+      ) : logEntry ? (
+        <EuiFlyoutBody
+          banner={
+            (logEntryErrors?.length ?? 0) > 0 ? (
+              <DataSearchErrorCallout
+                title={loadingErrorCalloutTitle}
+                errors={logEntryErrors ?? []}
+                onRetry={fetchLogEntry}
+              />
+            ) : undefined
+          }
+        >
+          <LogEntryFieldsTable logEntry={logEntry} onSetFieldFilter={onSetFieldFilter} />
+        </EuiFlyoutBody>
+      ) : (
+        <CenteredEuiFlyoutBody>
+          <div style={{ width: '75%' }}>
+            <DataSearchErrorCallout
+              title={loadingErrorCalloutTitle}
+              errors={logEntryErrors ?? []}
+              onRetry={fetchLogEntry}
+            />
+          </div>
+        </CenteredEuiFlyoutBody>
+      )}
     </EuiFlyout>
   );
 };
 
-export const InfraFlyoutLoadingPanel = euiStyled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-`;
+const loadingProgressMessage = i18n.translate('xpack.infra.logFlyout.loadingMessage', {
+  defaultMessage: 'Searching log entry in shards',
+});
+
+const loadingErrorCalloutTitle = i18n.translate('xpack.infra.logFlyout.loadingErrorCalloutTitle', {
+  defaultMessage: 'Error while searching the log entry',
+});

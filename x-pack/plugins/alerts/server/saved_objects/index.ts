@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
@@ -16,6 +17,7 @@ export const AlertAttributesExcludedFromAAD = [
   'muteAll',
   'mutedInstanceIds',
   'updatedBy',
+  'updatedAt',
   'executionStatus',
 ];
 
@@ -28,6 +30,7 @@ export type AlertAttributesExcludedFromAADType =
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'updatedBy'
+  | 'updatedAt'
   | 'executionStatus';
 
 export function setupSavedObjects(
@@ -42,10 +45,32 @@ export function setupSavedObjects(
     mappings: mappings.alert,
   });
 
+  savedObjects.registerType({
+    name: 'api_key_pending_invalidation',
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        apiKeyId: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
+        },
+      },
+    },
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey']),
     attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+  });
+
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: 'api_key_pending_invalidation',
+    attributesToEncrypt: new Set(['apiKeyId']),
   });
 }

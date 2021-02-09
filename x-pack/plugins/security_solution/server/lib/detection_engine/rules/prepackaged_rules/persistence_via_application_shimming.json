@@ -4,7 +4,8 @@
   ],
   "description": "The Application Shim was created to allow for backward compatibility of software as the operating system codebase changes over time. This Windows functionality has been abused by attackers to stealthily gain persistence and arbitrary code execution in legitimate Windows processes.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -15,7 +16,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
   ],
   "threat": [
     {
@@ -27,9 +31,16 @@
       },
       "technique": [
         {
-          "id": "T1138",
-          "name": "Application Shimming",
-          "reference": "https://attack.mitre.org/techniques/T1138/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.011",
+              "name": "Application Shimming",
+              "reference": "https://attack.mitre.org/techniques/T1546/011/"
+            }
+          ]
         }
       ]
     },
@@ -42,13 +53,20 @@
       },
       "technique": [
         {
-          "id": "T1138",
-          "name": "Application Shimming",
-          "reference": "https://attack.mitre.org/techniques/T1138/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.011",
+              "name": "Application Shimming",
+              "reference": "https://attack.mitre.org/techniques/T1546/011/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

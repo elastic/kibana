@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useMount } from 'react-use';
-import { euiStyled } from '../../../../../../../observability/public';
-import { LogEntryAnomaly } from '../../../../../../common/http_api';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import useMount from 'react-use/lib/useMount';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { LogEntryAnomaly, isCategoryAnomaly } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogSourceContext } from '../../../../../containers/logs/log_source';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
@@ -40,7 +41,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     exampleCount: EXAMPLE_COUNT,
     sourceId,
     startTime: anomaly.startTime,
-    categoryId: anomaly.categoryId,
+    categoryId: isCategoryAnomaly(anomaly) ? anomaly.categoryId : undefined,
   });
 
   useMount(() => {
@@ -51,9 +52,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     <>
       <ExpandedContentWrapper direction="column">
         <EuiFlexItem>
-          <EuiTitle size="s">
+          <EuiTitle size="xs">
             <h3>{examplesTitle}</h3>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <LogEntryExampleMessages
             isLoading={isLoadingLogEntryExamples}
             hasFailedLoading={hasFailedLoadingLogEntryExamples}
@@ -84,8 +87,8 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiStat
-                titleSize="s"
-                title={`${numeral(anomaly.typical).format('0.00a')} ${i18n.translate(
+                titleSize="xs"
+                title={`${numeral(anomaly.typical).format('0.[00]a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowTypicalRateTitle',
                   {
                     defaultMessage: '{typicalCount, plural, one {message} other {messages}}',
@@ -102,8 +105,8 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiStat
-                titleSize="s"
-                title={`${numeral(anomaly.actual).format('0.00a')} ${i18n.translate(
+                titleSize="xs"
+                title={`${numeral(anomaly.actual).format('0.[00]a')} ${i18n.translate(
                   'xpack.infra.logs.analysis.anomaliesExpandedRowActualRateTitle',
                   {
                     defaultMessage: '{actualCount, plural, one {message} other {messages}}',

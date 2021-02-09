@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { ESFilter } from '../../../typings/elasticsearch';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getEnvironments({
   setup,
@@ -24,7 +25,7 @@ export async function getEnvironments({
   serviceName?: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const filter: ESFilter[] = [{ range: rangeFilter(start, end) }];
 
@@ -33,6 +34,8 @@ export async function getEnvironments({
       term: { [SERVICE_NAME]: serviceName },
     });
   }
+
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   const params = {
     apm: {
@@ -56,6 +59,7 @@ export async function getEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ENVIRONMENT_NOT_DEFINED.value,
+            size: maxServiceEnvironments,
           },
         },
       },

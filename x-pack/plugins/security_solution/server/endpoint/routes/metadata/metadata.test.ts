@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   ILegacyClusterClient,
-  IRouter,
   ILegacyScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
@@ -39,23 +40,24 @@ import {
   Agent,
   ElasticsearchAssetType,
   EsAssetReference,
-} from '../../../../../ingest_manager/common/types/models';
+} from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
-import { PackageService } from '../../../../../ingest_manager/server/services';
+import { PackageService } from '../../../../../fleet/server/services';
 import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
 describe('test endpoint route', () => {
-  let routerMock: jest.Mocked<IRouter>;
+  let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: jest.Mocked<ILegacyClusterClient>;
   let mockScopedClient: jest.Mocked<ILegacyScopedClusterClient>;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   let mockPackageService: jest.Mocked<PackageService>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  // tests assume that ingestManager is enabled, and thus agentService is available
+  // tests assume that fleet is enabled, and thus agentService is available
   let mockAgentService: Required<
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
@@ -69,9 +71,7 @@ describe('test endpoint route', () => {
 
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
-      ILegacyClusterClient
-    >;
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<ILegacyClusterClient>;
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
@@ -254,16 +254,14 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-      expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
-        bool: {
-          must_not: {
-            terms: {
-              'HostDetails.elastic.agent.id': [
-                '00000000-0000-0000-0000-000000000000',
-                '11111111-1111-1111-1111-111111111111',
-              ],
-            },
-          },
+      expect(
+        mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must_not
+      ).toContainEqual({
+        terms: {
+          'elastic.agent.id': [
+            '00000000-0000-0000-0000-000000000000',
+            '11111111-1111-1111-1111-111111111111',
+          ],
         },
       });
       expect(routeConfig.options).toEqual({
@@ -313,35 +311,46 @@ describe('test endpoint route', () => {
       );
 
       expect(mockScopedClient.callAsCurrentUser).toBeCalled();
-      expect(mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query).toEqual({
+      expect(
+        // KQL filter to be passed through
+        mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must
+      ).toContainEqual({
         bool: {
-          must: [
-            {
-              bool: {
-                must_not: {
-                  terms: {
-                    'HostDetails.elastic.agent.id': [
-                      '00000000-0000-0000-0000-000000000000',
-                      '11111111-1111-1111-1111-111111111111',
-                    ],
+          must_not: {
+            bool: {
+              should: [
+                {
+                  match: {
+                    'host.ip': '10.140.73.246',
                   },
                 },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      });
+      expect(
+        mockScopedClient.callAsCurrentUser.mock.calls[0][1]?.body?.query.bool.must
+      ).toContainEqual({
+        bool: {
+          must_not: [
+            {
+              terms: {
+                'elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                ],
               },
             },
             {
-              bool: {
-                must_not: {
-                  bool: {
-                    should: [
-                      {
-                        match: {
-                          'host.ip': '10.140.73.246',
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
+              terms: {
+                // here we DO want to see both schemas are present
+                // to make this schema-compatible forward and back
+                'HostDetails.elastic.agent.id': [
+                  '00000000-0000-0000-0000-000000000000',
+                  '11111111-1111-1111-1111-111111111111',
+                ],
               },
             },
           ],

@@ -1,25 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { createHash } from 'crypto';
-import Boom from 'boom';
-import { i18n } from '@kbn/i18n';
+import Boom from '@hapi/boom';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { KibanaRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
@@ -37,36 +24,6 @@ import { getApmConfig } from '../apm';
  * @param {KbnServer['config']} config
  */
 export function uiRenderMixin(kbnServer, server, config) {
-  const translationsCache = { translations: null, hash: null };
-  server.route({
-    path: '/translations/{locale}.json',
-    method: 'GET',
-    config: { auth: false },
-    handler(request, h) {
-      // Kibana server loads translations only for a single locale
-      // that is specified in `i18n.locale` config value.
-      const { locale } = request.params;
-      if (i18n.getLocale() !== locale.toLowerCase()) {
-        throw Boom.notFound(`Unknown locale: ${locale}`);
-      }
-
-      // Stringifying thousands of labels and calculating hash on the resulting
-      // string can be expensive so it makes sense to do it once and cache.
-      if (translationsCache.translations == null) {
-        translationsCache.translations = JSON.stringify(i18n.getTranslation());
-        translationsCache.hash = createHash('sha1')
-          .update(translationsCache.translations)
-          .digest('hex');
-      }
-
-      return h
-        .response(translationsCache.translations)
-        .header('cache-control', 'must-revalidate')
-        .header('content-type', 'application/json')
-        .etag(translationsCache.hash);
-    },
-  });
-
   const authEnabled = !!server.auth.settings.default;
   server.route({
     path: '/bootstrap.js',

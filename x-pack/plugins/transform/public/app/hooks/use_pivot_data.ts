@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment-timezone';
@@ -15,48 +16,51 @@ import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
-import { dictionaryToArray } from '../../../common/types/common';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
 import { RenderCellValue, UseIndexDataReturnType } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
-import {
-  getPreviewTransformRequestBody,
-  PivotAggsConfigDict,
-  PivotGroupByConfigDict,
-  PivotGroupByConfig,
-  PivotQuery,
-  PivotAggsConfig,
-} from '../common';
-import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
+import { getPreviewTransformRequestBody, PivotQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
+import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import {
+  isLatestPartialRequest,
+  isPivotPartialRequest,
+} from '../sections/create_transform/components/step_define/common/types';
 
-/**
- * Checks if the aggregations collection is invalid.
- */
-function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
-  return aggsArray.some((agg) => {
-    return (
-      (isPivotAggsWithExtendedForm(agg) && !agg.isValid()) ||
-      (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
-    );
-  });
-}
-
-function sortColumns(groupByArr: PivotGroupByConfig[]) {
+function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
     // make sure groupBy fields are always most left columns
-    if (groupByArr.some((d) => d.aggName === a) && groupByArr.some((d) => d.aggName === b)) {
+    if (
+      groupByArr.some((aggName) => aggName === a) &&
+      groupByArr.some((aggName) => aggName === b)
+    ) {
       return a.localeCompare(b);
     }
-    if (groupByArr.some((d) => d.aggName === a)) {
+    if (groupByArr.some((aggName) => aggName === a)) {
       return -1;
     }
-    if (groupByArr.some((d) => d.aggName === b)) {
+    if (groupByArr.some((aggName) => aggName === b)) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  };
+}
+
+function sortColumnsForLatest(sortField: string) {
+  return (a: string, b: string) => {
+    // make sure sort field is always the most left column
+    if (sortField === a && sortField === b) {
+      return a.localeCompare(b);
+    }
+    if (sortField === a) {
+      return -1;
+    }
+    if (sortField === b) {
       return 1;
     }
     return a.localeCompare(b);
@@ -66,25 +70,29 @@ function sortColumns(groupByArr: PivotGroupByConfig[]) {
 export const usePivotData = (
   indexPatternTitle: SearchItems['indexPattern']['title'],
   query: PivotQuery,
-  aggs: PivotAggsConfigDict,
-  groupBy: PivotGroupByConfigDict
+  validationStatus: StepDefineExposedState['validationStatus'],
+  requestPayload: StepDefineExposedState['previewRequest']
 ): UseIndexDataReturnType => {
-  const [previewMappingsProperties, setPreviewMappingsProperties] = useState<
-    PreviewMappingsProperties
-  >({});
+  const [
+    previewMappingsProperties,
+    setPreviewMappingsProperties,
+  ] = useState<PreviewMappingsProperties>({});
   const api = useApi();
   const {
     ml: { formatHumanReadableDateTimeSeconds, multiColumnSortFactory, useDataGrid, INDEX_STATUS },
   } = useAppDependencies();
 
-  const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
-  const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
-
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappingsProperties).filter(
     (key) => previewMappingsProperties[key].type !== 'object'
   );
-  columnKeys.sort(sortColumns(groupByArr));
+
+  if (isPivotPartialRequest(requestPayload)) {
+    const groupByArr = Object.keys(requestPayload.pivot.group_by);
+    columnKeys.sort(sortColumns(groupByArr));
+  } else if (isLatestPartialRequest(requestPayload)) {
+    columnKeys.sort(sortColumnsForLatest(requestPayload.latest.sort));
+  }
 
   // EuiDataGrid State
   const columns: EuiDataGridColumn[] = columnKeys.map((id) => {
@@ -140,18 +148,10 @@ export const usePivotData = (
   } = dataGrid;
 
   const getPreviewData = async () => {
-    if (aggsArr.length === 0 || groupByArr.length === 0) {
+    if (!validationStatus.isValid) {
       setTableItems([]);
       setRowCount(0);
-      setNoDataMessage(
-        i18n.translate('xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody', {
-          defaultMessage: 'Please choose at least one group-by field and aggregation.',
-        })
-      );
-      return;
-    }
-
-    if (isConfigInvalid(aggsArr)) {
+      setNoDataMessage(validationStatus.errorMessage!);
       return;
     }
 
@@ -159,12 +159,7 @@ export const usePivotData = (
     setNoDataMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
-    const previewRequest = getPreviewTransformRequestBody(
-      indexPatternTitle,
-      query,
-      groupByArr,
-      aggsArr
-    );
+    const previewRequest = getPreviewTransformRequestBody(indexPatternTitle, query, requestPayload);
     const resp = await api.getTransformsPreview(previewRequest);
 
     if (!isPostTransformsPreviewResponseSchema(resp)) {
@@ -203,8 +198,7 @@ export const usePivotData = (
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPatternTitle,
-    aggsArr,
-    JSON.stringify([groupByArr, query]),
+    JSON.stringify([requestPayload, query]),
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 

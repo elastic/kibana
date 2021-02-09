@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo, useCallback } from 'react';
 import {
   Axis,
@@ -21,8 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import {
   Comparator,
@@ -31,16 +31,16 @@ import {
 import { Color, colorTransformer } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression, AlertContextMeta } from '../types';
+import { MetricExpression } from '../types';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { getChartTheme } from '../../../pages/metrics/metrics_explorer/components/helpers/get_chart_theme';
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface Props {
-  context: AlertsContextValue<AlertContextMeta>;
   expression: MetricExpression;
   derivedIndexPattern: IIndexPattern;
   source: InfraSource | null;
@@ -62,7 +62,6 @@ const TIME_LABELS = {
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
-  context,
   derivedIndexPattern,
   source,
   filterQuery,
@@ -70,19 +69,20 @@ export const ExpressionChart: React.FC<Props> = ({
 }) => {
   const { loading, data } = useMetricsExplorerChartData(
     expression,
-    context,
     derivedIndexPattern,
     source,
     filterQuery,
     groupBy
   );
 
+  const { uiSettings } = useKibanaContextForPlugin().services;
+
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
+  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
     const firstSeries = first(data?.series);
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;
@@ -111,7 +111,9 @@ export const ExpressionChart: React.FC<Props> = ({
     );
   }
 
-  const thresholds = expression.threshold.slice().sort();
+  const criticalThresholds = expression.threshold.slice().sort();
+  const warningThresholds = expression.warningThreshold?.slice().sort() ?? [];
+  const thresholds = [...criticalThresholds, ...warningThresholds].sort();
 
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domian
@@ -145,18 +147,143 @@ export const ExpressionChart: React.FC<Props> = ({
   const dataDomain = calculateDomain(series, [metric], false);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
-    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min),
+    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor,
   };
 
   if (domain.min === first(expression.threshold)) {
     domain.min = domain.min * 0.9;
   }
 
-  const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(expression.comparator);
-  const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(expression.comparator);
   const opacity = 0.3;
   const { timeSize, timeUnit } = expression;
   const timeLabel = TIME_LABELS[timeUnit as keyof typeof TIME_LABELS];
+
+  const ThresholdAnnotations = ({
+    threshold,
+    sortedThresholds,
+    comparator,
+    color,
+    id,
+  }: Partial<MetricExpression> & { sortedThresholds: number[]; color: Color; id: string }) => {
+    if (!comparator || !threshold) return null;
+    const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(comparator);
+    const isBelow = [Comparator.LT, Comparator.LT_OR_EQ].includes(comparator);
+    return (
+      <>
+        <LineAnnotation
+          id={`${id}-thresholds`}
+          domainType={AnnotationDomainTypes.YDomain}
+          dataValues={sortedThresholds.map((t) => ({
+            dataValue: t,
+          }))}
+          style={{
+            line: {
+              strokeWidth: 2,
+              stroke: colorTransformer(color),
+              opacity: 1,
+            },
+          }}
+        />
+        {sortedThresholds.length === 2 && comparator === Comparator.BETWEEN ? (
+          <>
+            <RectAnnotation
+              id={`${id}-lower-threshold`}
+              style={{
+                fill: colorTransformer(color),
+                opacity,
+              }}
+              dataValues={[
+                {
+                  coordinates: {
+                    x0: firstTimestamp,
+                    x1: lastTimestamp,
+                    y0: first(expression.threshold),
+                    y1: last(expression.threshold),
+                  },
+                },
+              ]}
+            />
+          </>
+        ) : null}
+        {sortedThresholds.length === 2 && comparator === Comparator.OUTSIDE_RANGE ? (
+          <>
+            <RectAnnotation
+              id={`${id}-lower-threshold`}
+              style={{
+                fill: colorTransformer(color),
+                opacity,
+              }}
+              dataValues={[
+                {
+                  coordinates: {
+                    x0: firstTimestamp,
+                    x1: lastTimestamp,
+                    y0: domain.min,
+                    y1: first(threshold),
+                  },
+                },
+              ]}
+            />
+            <RectAnnotation
+              id={`${id}-upper-threshold`}
+              style={{
+                fill: colorTransformer(color),
+                opacity,
+              }}
+              dataValues={[
+                {
+                  coordinates: {
+                    x0: firstTimestamp,
+                    x1: lastTimestamp,
+                    y0: last(threshold),
+                    y1: domain.max,
+                  },
+                },
+              ]}
+            />
+          </>
+        ) : null}
+        {isBelow && first(threshold) != null ? (
+          <RectAnnotation
+            id={`${id}-upper-threshold`}
+            style={{
+              fill: colorTransformer(color),
+              opacity,
+            }}
+            dataValues={[
+              {
+                coordinates: {
+                  x0: firstTimestamp,
+                  x1: lastTimestamp,
+                  y0: domain.min,
+                  y1: first(threshold),
+                },
+              },
+            ]}
+          />
+        ) : null}
+        {isAbove && first(threshold) != null ? (
+          <RectAnnotation
+            id={`${id}-upper-threshold`}
+            style={{
+              fill: colorTransformer(color),
+              opacity,
+            }}
+            dataValues={[
+              {
+                coordinates: {
+                  x0: firstTimestamp,
+                  x1: lastTimestamp,
+                  y0: first(threshold),
+                  y1: domain.max,
+                },
+              },
+            ]}
+          />
+        ) : null}
+      </>
+    );
+  };
 
   return (
     <>
@@ -169,117 +296,22 @@ export const ExpressionChart: React.FC<Props> = ({
             series={series}
             stack={false}
           />
-          <LineAnnotation
-            id={`thresholds`}
-            domainType={AnnotationDomainTypes.YDomain}
-            dataValues={thresholds.map((threshold) => ({
-              dataValue: threshold,
-            }))}
-            style={{
-              line: {
-                strokeWidth: 2,
-                stroke: colorTransformer(Color.color1),
-                opacity: 1,
-              },
-            }}
+          <ThresholdAnnotations
+            comparator={expression.comparator}
+            threshold={expression.threshold}
+            sortedThresholds={criticalThresholds}
+            color={Color.color1}
+            id="critical"
           />
-          {thresholds.length === 2 && expression.comparator === Comparator.BETWEEN ? (
-            <>
-              <RectAnnotation
-                id="lower-threshold"
-                style={{
-                  fill: colorTransformer(Color.color1),
-                  opacity,
-                }}
-                dataValues={[
-                  {
-                    coordinates: {
-                      x0: firstTimestamp,
-                      x1: lastTimestamp,
-                      y0: first(expression.threshold),
-                      y1: last(expression.threshold),
-                    },
-                  },
-                ]}
-              />
-            </>
-          ) : null}
-          {thresholds.length === 2 && expression.comparator === Comparator.OUTSIDE_RANGE ? (
-            <>
-              <RectAnnotation
-                id="lower-threshold"
-                style={{
-                  fill: colorTransformer(Color.color1),
-                  opacity,
-                }}
-                dataValues={[
-                  {
-                    coordinates: {
-                      x0: firstTimestamp,
-                      x1: lastTimestamp,
-                      y0: domain.min,
-                      y1: first(expression.threshold),
-                    },
-                  },
-                ]}
-              />
-              <RectAnnotation
-                id="upper-threshold"
-                style={{
-                  fill: colorTransformer(Color.color1),
-                  opacity,
-                }}
-                dataValues={[
-                  {
-                    coordinates: {
-                      x0: firstTimestamp,
-                      x1: lastTimestamp,
-                      y0: last(expression.threshold),
-                      y1: domain.max,
-                    },
-                  },
-                ]}
-              />
-            </>
-          ) : null}
-          {isBelow && first(expression.threshold) != null ? (
-            <RectAnnotation
-              id="upper-threshold"
-              style={{
-                fill: colorTransformer(Color.color1),
-                opacity,
-              }}
-              dataValues={[
-                {
-                  coordinates: {
-                    x0: firstTimestamp,
-                    x1: lastTimestamp,
-                    y0: domain.min,
-                    y1: first(expression.threshold),
-                  },
-                },
-              ]}
+          {expression.warningComparator && expression.warningThreshold && (
+            <ThresholdAnnotations
+              comparator={expression.warningComparator}
+              threshold={expression.warningThreshold}
+              sortedThresholds={warningThresholds}
+              color={Color.color5}
+              id="warning"
             />
-          ) : null}
-          {isAbove && first(expression.threshold) != null ? (
-            <RectAnnotation
-              id="upper-threshold"
-              style={{
-                fill: colorTransformer(Color.color1),
-                opacity,
-              }}
-              dataValues={[
-                {
-                  coordinates: {
-                    x0: firstTimestamp,
-                    x1: lastTimestamp,
-                    y0: first(expression.threshold),
-                    y1: domain.max,
-                  },
-                },
-              ]}
-            />
-          ) : null}
+          )}
           <Axis
             id={'timestamp'}
             position={Position.Bottom}

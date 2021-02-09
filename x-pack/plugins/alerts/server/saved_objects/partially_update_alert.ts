@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pick } from 'lodash';
@@ -20,6 +21,7 @@ export type PartiallyUpdateableAlertAttributes = Partial<
 >;
 
 export interface PartiallyUpdateAlertSavedObjectOptions {
+  refresh?: SavedObjectsUpdateOptions['refresh'];
   version?: string;
   ignore404?: boolean;
   namespace?: string; // only should be used  with ISavedObjectsRepository
@@ -38,7 +40,7 @@ export async function partiallyUpdateAlert(
 ): Promise<void> {
   // ensure we only have the valid attributes excluded from AAD
   const attributeUpdates = pick(attributes, AlertAttributesExcludedFromAAD);
-  const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version');
+  const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version', 'refresh');
 
   try {
     await savedObjectsClient.update<RawAlert>('alert', id, attributeUpdates, updateOptions);

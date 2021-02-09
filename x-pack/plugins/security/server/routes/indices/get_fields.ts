@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -22,7 +23,7 @@ interface FieldMappingResponse {
   };
 }
 
-export function defineGetFieldsRoutes({ router, clusterClient }: RouteDefinitionParams) {
+export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
   router.get(
     {
       path: '/internal/security/fields/{query}',
@@ -30,14 +31,16 @@ export function defineGetFieldsRoutes({ router, clusterClient }: RouteDefinition
     },
     async (context, request, response) => {
       try {
-        const indexMappings = (await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('indices.getFieldMapping', {
+        const {
+          body: indexMappings,
+        } = await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping<FieldMappingResponse>(
+          {
             index: request.params.query,
             fields: '*',
-            allowNoIndices: false,
-            includeDefaults: true,
-          })) as FieldMappingResponse;
+            allow_no_indices: false,
+            include_defaults: true,
+          }
+        );
 
         // The flow is the following (see response format at https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html):
         // 1. Iterate over all matched indices.

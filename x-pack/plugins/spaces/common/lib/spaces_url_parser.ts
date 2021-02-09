@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { DEFAULT_SPACE_ID } from '../constants';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 
 export function getSpaceIdFromPath(
-  requestBasePath: string = '/',
-  serverBasePath: string = '/'
+  requestBasePath?: string | null,
+  serverBasePath?: string | null
 ): { spaceId: string; pathHasExplicitSpaceIdentifier: boolean } {
+  if (requestBasePath == null) requestBasePath = '/';
+  if (serverBasePath == null) serverBasePath = '/';
   const pathToCheck: string = stripServerBasePath(requestBasePath, serverBasePath);
 
   // Look for `/s/space-url-context` in the base path
@@ -45,10 +49,12 @@ export function addSpaceIdToPath(
     throw new Error(`path must start with a /`);
   }
 
+  const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+
   if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-    return `${basePath}/s/${spaceId}${requestedPath}`;
+    return `${normalizedBasePath}/s/${spaceId}${requestedPath}`;
   }
-  return `${basePath}${requestedPath}`;
+  return `${normalizedBasePath}${requestedPath}` || '/';
 }
 
 function stripServerBasePath(requestBasePath: string, serverBasePath: string) {

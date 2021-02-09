@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, NotificationsStart } from 'src/core/public';
 import { getUserDisplayName, AuthenticatedUser } from '../../common/model';
 import { AuthenticationServiceSetup } from '../authentication';

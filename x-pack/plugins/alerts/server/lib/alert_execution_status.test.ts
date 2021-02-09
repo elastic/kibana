@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
@@ -57,7 +58,9 @@ describe('AlertExecutionStatus', () => {
     });
 
     test('error with a reason', () => {
-      const status = executionStatusFromError(new ErrorWithReason('execute', new Error('hoo!')));
+      const status = executionStatusFromError(
+        new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, new Error('hoo!'))
+      );
       expect(status.status).toBe('error');
       expect(status.error).toMatchInlineSnapshot(`
         Object {
@@ -71,7 +74,7 @@ describe('AlertExecutionStatus', () => {
   describe('alertExecutionStatusToRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z');
     const status = 'ok';
-    const reason: AlertExecutionStatusErrorReasons = 'decrypt';
+    const reason = AlertExecutionStatusErrorReasons.Decrypt;
     const error = { reason, message: 'wops' };
 
     test('status without an error', () => {
@@ -102,7 +105,7 @@ describe('AlertExecutionStatus', () => {
   describe('alertExecutionStatusFromRaw()', () => {
     const date = new Date('2020-09-03T16:26:58Z').toISOString();
     const status = 'active';
-    const reason: AlertExecutionStatusErrorReasons = 'execute';
+    const reason = AlertExecutionStatusErrorReasons.Execute;
     const error = { reason, message: 'wops' };
 
     test('no input', () => {

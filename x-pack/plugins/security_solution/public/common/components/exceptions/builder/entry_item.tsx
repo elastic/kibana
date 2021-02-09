@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { isEqlRule } from '../../../../../common/detection_engine/utils';
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
@@ -149,7 +151,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && !isEqlRule(ruleType)
+          isFirst && !isEqlRule(ruleType) && !isThresholdRule(ruleType)
         );
     const comboBox = (
       <OperatorComponent

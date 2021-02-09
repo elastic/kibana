@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -28,7 +29,6 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
-import { AlertsStatus } from '../../../alerts/status';
 
 function getColumns(alerts, setupMode) {
   return [
@@ -69,29 +69,6 @@ function getColumns(alerts, setupMode) {
             </EuiLink>
             {setupModeStatus}
           </Fragment>
-        );
-      },
-    },
-    {
-      name: i18n.translate('xpack.monitoring.beats.instances.alertsColumnTitle', {
-        defaultMessage: 'Alerts',
-      }),
-      field: 'alerts',
-      width: '175px',
-      sortable: true,
-      render: (_field, beat) => {
-        return (
-          <AlertsStatus
-            showBadge={true}
-            alerts={alerts}
-            stateFilter={(state) => state.stackProductUuid === beat.uuid}
-            nextStepsFilter={(nextStep) => {
-              if (nextStep.text.includes('APM servers')) {
-                return false;
-              }
-              return true;
-            }}
-          />
         );
       },
     },

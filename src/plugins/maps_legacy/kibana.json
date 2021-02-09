@@ -5,5 +5,6 @@
   "configPath": ["map"],
   "ui": true,
   "server": true,
-  "requiredBundles": ["kibanaReact", "charts"]
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["kibanaReact", "visDefaultEditor"]
 }

@@ -1,11 +1,22 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-test"
-  },
   "include": [
     "types/**/*",
     "src/**/*",
     "index.d.ts"
-  ]
+  ],
+  "exclude": [
+    "types/ftr_globals/**/*"
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./target/types",
+    "types": [
+      "jest",
+      "node"
+    ],
+    "stripInternal": true,
+    "declarationMap": true
+  }
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -20,7 +21,6 @@ import {
   getDataGridSchemasFromFieldTypes,
   getFieldType,
   showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
@@ -29,12 +29,16 @@ import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../..
 import {
   getPredictionFieldName,
   getDefaultPredictionFieldName,
+  isClassificationAnalysis,
 } from '../../../../../../../common/util/analytics_utils';
 import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
 import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 import { isRegressionAnalysis } from '../../../../common/analytics';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
+import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
+import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
@@ -43,7 +47,9 @@ export const useExplorationResults = (
   toastNotifications: CoreSetup['notifications']['toasts'],
   mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
-  const [baseline, setBaseLine] = useState();
+  const [baseline, setBaseLine] = useState<FeatureImportanceBaseline | undefined>();
+
+  const trainedModelsApiService = useTrainedModelsApiService();
 
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
@@ -59,19 +65,14 @@ export const useExplorationResults = (
       )
     );
   }
-  const dataGrid = useDataGrid(
+  const dataGrid = useExplorationDataGrid(
     columns,
-    25,
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-importance and top-classes columns and the doc id copy
     (d) =>
       !d.includes(`.${FEATURE_IMPORTANCE}.`) && !d.includes(`.${TOP_CLASSES}.`) && d !== ML__ID_COPY
   );
-
-  useEffect(() => {
-    dataGrid.resetPagination();
-  }, [JSON.stringify(searchQuery)]);
 
   // The pattern using `didCancel` allows us to abort out of date remote request.
   // We wrap `didCancel` in a object so we can mutate the value as it's being
@@ -135,11 +136,18 @@ export const useExplorationResults = (
       if (
         jobConfig !== undefined &&
         jobConfig.analysis !== undefined &&
-        isRegressionAnalysis(jobConfig.analysis)
+        (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis))
       ) {
-        const result = await mlApiServices.dataFrameAnalytics.getAnalyticsBaseline(jobConfig.id);
-        if (result?.baseline) {
-          setBaseLine(result.baseline);
+        const jobId = jobConfig.id;
+        const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
+          include: 'feature_importance_baseline',
+        });
+        const inferenceModel = inferenceModels.find(
+          (model) => model.metadata?.analytics_config?.id === jobId
+        );
+
+        if (inferenceModel?.metadata?.feature_importance_baseline !== undefined) {
+          setBaseLine(inferenceModel?.metadata?.feature_importance_baseline);
         }
       }
     } catch (e) {

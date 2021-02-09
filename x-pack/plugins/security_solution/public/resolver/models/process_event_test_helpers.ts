@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { defaults } from 'lodash/fp';
@@ -30,7 +31,7 @@ export function mockProcessEvent(parts: DeepPartial<LegacyEndpointEvent>): Legac
         timestamp_utc: '',
         serial_event_id: 1,
       },
-      '@timestamp': 1582233383000,
+      '@timestamp': 0,
       agent: {
         type: '',
         id: '',

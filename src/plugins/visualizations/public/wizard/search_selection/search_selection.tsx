@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
@@ -24,13 +13,15 @@ import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
 
 import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
-import { VisType } from '../../vis_types';
+import type { BaseVisType } from '../../vis_types';
+import { DialogNavigation } from '../dialog_navigation';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
-  visType: VisType;
+  visType: BaseVisType;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
+  goBack: () => void;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
@@ -54,6 +45,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
+          <DialogNavigation goBack={this.props.goBack} />
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}

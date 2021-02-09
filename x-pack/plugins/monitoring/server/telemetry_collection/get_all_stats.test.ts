@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -9,14 +10,10 @@ import { getStackStats, getAllStats, handleAllStats } from './get_all_stats';
 import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
 import { ClustersHighLevelStats } from './get_high_level_stats';
-import { coreMock } from 'src/core/server/mocks';
 
 describe('get_all_stats', () => {
-  const start = 0;
-  const end = 1;
+  const timestamp = Date.now();
   const callCluster = sinon.stub();
-  const esClient = sinon.stub();
-  const soClient = sinon.stub();
 
   const esClusters = [
     { cluster_uuid: 'a' },
@@ -173,24 +170,7 @@ describe('get_all_stats', () => {
         .onCall(4)
         .returns(Promise.resolve({})); // Beats state
 
-      expect(
-        await getAllStats(
-          [{ clusterUuid: 'a' }],
-          {
-            callCluster: callCluster as any,
-            esClient: esClient as any,
-            soClient: soClient as any,
-            usageCollection: {} as any,
-            start,
-            end,
-          },
-          {
-            logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            version: 'version',
-            maxBucketSize: 1,
-          }
-        )
-      ).toStrictEqual(allClusters);
+      expect(await getAllStats(['a'], callCluster, timestamp, 1)).toStrictEqual(allClusters);
     });
 
     it('returns empty clusters', async () => {
@@ -200,24 +180,7 @@ describe('get_all_stats', () => {
 
       callCluster.withArgs('search').returns(Promise.resolve(clusterUuidsResponse));
 
-      expect(
-        await getAllStats(
-          [],
-          {
-            callCluster: callCluster as any,
-            esClient: esClient as any,
-            soClient: soClient as any,
-            usageCollection: {} as any,
-            start,
-            end,
-          },
-          {
-            logger: coreMock.createPluginInitializerContext().logger.get('test'),
-            version: 'version',
-            maxBucketSize: 1,
-          }
-        )
-      ).toStrictEqual([]);
+      expect(await getAllStats([], callCluster, timestamp, 1)).toStrictEqual([]);
     });
   });
 

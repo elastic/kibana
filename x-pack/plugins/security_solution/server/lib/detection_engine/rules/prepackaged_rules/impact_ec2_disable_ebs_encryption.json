@@ -26,11 +26,12 @@
   "rule_id": "bb9b13b2-1700-48a8-a750-b43b0a72ab69",
   "severity": "medium",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
     "SecOps",
-    "Data Protection",
-    "Continuous Monitoring"
+    "Data Protection"
   ],
   "threat": [
     {
@@ -42,13 +43,20 @@
       },
       "technique": [
         {
-          "id": "T1492",
-          "name": "Stored Data Manipulation",
-          "reference": "https://attack.mitre.org/techniques/T1492/"
+          "id": "T1565",
+          "name": "Data Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1565/",
+          "subtechnique": [
+            {
+              "id": "T1565.001",
+              "name": "Stored Data Manipulation",
+              "reference": "https://attack.mitre.org/techniques/T1565/001/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

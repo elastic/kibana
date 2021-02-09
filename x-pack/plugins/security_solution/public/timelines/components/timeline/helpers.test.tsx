@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash/fp';
@@ -14,8 +15,6 @@ import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { EsQueryConfig, Filter, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
-const startDate = '2018-03-23T18:49:23.132Z';
-const endDate = '2018-03-24T03:33:52.253Z';
 
 describe('Build KQL Query', () => {
   test('Build KQL query with one data provider', () => {
@@ -238,8 +237,6 @@ describe('Combined Queries', () => {
         filters: [],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',
-        start: startDate,
-        end: endDate,
       })
     ).toBeNull();
   });
@@ -255,8 +252,6 @@ describe('Combined Queries', () => {
         filters: [],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',
-        start: startDate,
-        end: endDate,
         isEventViewer,
       })
     ).toEqual({
@@ -300,8 +295,6 @@ describe('Combined Queries', () => {
         ],
         kqlQuery: { query: '', language: 'kuery' },
         kqlMode: 'search',
-        start: startDate,
-        end: endDate,
         isEventViewer,
       })
     ).toEqual({
@@ -320,8 +313,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -340,8 +331,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -360,8 +349,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1521848183232,"lte":1521848183232}}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -380,8 +367,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -400,8 +385,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: '', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"event.end":1521848183232}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -417,8 +400,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -435,8 +416,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -453,8 +432,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'filter',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
@@ -473,8 +450,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'search',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"should":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}'
@@ -493,8 +468,6 @@ describe('Combined Queries', () => {
       filters: [],
       kqlQuery: { query: 'host.name: "host-1"', language: 'kuery' },
       kqlMode: 'filter',
-      start: startDate,
-      end: endDate,
     })!;
     expect(filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 1"}}],"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 3"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 4"}}],"minimum_should_match":1}}]}}]}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"name":"Provider 2"}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"name":"Provider 5"}}],"minimum_should_match":1}}]}}],"minimum_should_match":1}},{"bool":{"should":[{"match_phrase":{"host.name":"host-1"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'

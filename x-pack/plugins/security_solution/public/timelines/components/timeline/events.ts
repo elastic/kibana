@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
@@ -38,12 +39,13 @@ export type OnFilterChange = (filter: { columnId: ColumnId; filter: string }) =>
 /** Invoked when a column is sorted */
 export type OnColumnSorted = (sorted: { columnId: ColumnId; sortDirection: SortDirection }) => void;
 
+export type OnColumnsSorted = (
+  sorted: Array<{ columnId: ColumnId; sortDirection: SortDirection }>
+) => void;
+
 export type OnColumnRemoved = (columnId: ColumnId) => void;
 
 export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta: number }) => void;
-
-/** Invoked when a user clicks to change the number items to show per page */
-export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
 
 /** Invoked when a user clicks to load more item */
 export type OnChangePage = (nextPage: number) => void;

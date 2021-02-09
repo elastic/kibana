@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerEnginesRoute } from './engines';
+import { registerEnginesRoutes } from './engines';
 
 describe('engine routes', () => {
   describe('GET /api/app_search/engines', () => {
@@ -25,9 +26,12 @@ describe('engine routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines',
+      });
 
-      registerEnginesRoute({
+      registerEnginesRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -55,6 +59,7 @@ describe('engine routes', () => {
 
     describe('hasValidData', () => {
       it('should correctly validate that the response has data', () => {
+        mockRequestHandler.createRequest.mockClear();
         const response = {
           meta: {
             page: {
@@ -69,6 +74,7 @@ describe('engine routes', () => {
       });
 
       it('should correctly validate that a response does not have data', () => {
+        mockRequestHandler.createRequest.mockClear();
         const response = {};
 
         mockRouter.callRoute(mockRequest);
@@ -100,6 +106,52 @@ describe('engine routes', () => {
       it('missing type', () => {
         const request = { query: { pageIndex: 1 } };
         mockRouter.shouldThrow(request);
+      });
+    });
+  });
+
+  describe('GET /api/app_search/engines/{name}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:name/details',
+      });
+    });
+  });
+
+  describe('GET /api/app_search/engines/{name}/overview', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}/overview',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:name/overview_metrics',
       });
     });
   });

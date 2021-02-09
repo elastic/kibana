@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -43,7 +44,7 @@ import {
   timeline_id,
   timeline_title,
   type,
-  threat,
+  threats,
   threshold,
   throttle,
   job_status,
@@ -63,6 +64,8 @@ import {
 } from '../common/schemas';
 import {
   threat_index,
+  concurrent_searches,
+  items_per_search,
   threat_query,
   threat_filters,
   threat_mapping,
@@ -104,7 +107,7 @@ export const requiredRulesSchema = t.type({
   tags,
   to,
   type,
-  threat,
+  threat: threats,
   created_at,
   updated_at,
   created_by,
@@ -144,6 +147,8 @@ export const dependentRulesSchema = t.partial({
   threat_filters,
   threat_index,
   threat_query,
+  concurrent_searches,
+  items_per_search,
   threat_mapping,
   threat_language,
 });
@@ -282,6 +287,12 @@ export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): 
       t.exact(t.partial({ threat_language: dependentRulesSchema.props.threat_language })),
       t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
+      t.exact(
+        t.partial({
+          items_per_search: dependentRulesSchema.props.items_per_search,
+        })
+      ),
     ];
   } else {
     return [];

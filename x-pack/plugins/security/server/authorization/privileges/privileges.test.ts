@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaFeature } from '../../../../features/server';
@@ -48,6 +49,7 @@ describe('features', () => {
 
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      getType: jest.fn().mockReturnValue('basic'),
     };
     const privileges = privilegesFactory(actions, mockFeaturesService, mockLicenseService);
 
@@ -89,6 +91,7 @@ describe('features', () => {
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      getType: jest.fn().mockReturnValue('basic'),
     };
     const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -177,6 +180,7 @@ describe('features', () => {
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      getType: jest.fn().mockReturnValue('basic'),
     };
     const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -245,6 +249,7 @@ describe('features', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -368,6 +373,7 @@ describe('features', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -443,6 +449,7 @@ describe('features', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -508,6 +515,7 @@ describe('features', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -574,6 +582,7 @@ describe('features', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -633,6 +642,7 @@ describe('reserved', () => {
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      getType: jest.fn().mockReturnValue('basic'),
     };
     const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -671,6 +681,7 @@ describe('reserved', () => {
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      getType: jest.fn().mockReturnValue('basic'),
     };
     const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -737,6 +748,7 @@ describe('reserved', () => {
     };
     const mockLicenseService = {
       getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+      getType: jest.fn().mockReturnValue('basic'),
     };
     const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -800,6 +812,7 @@ describe('subFeatures', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -928,6 +941,7 @@ describe('subFeatures', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -1135,6 +1149,7 @@ describe('subFeatures', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -1278,6 +1293,7 @@ describe('subFeatures', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -1446,6 +1462,7 @@ describe('subFeatures', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -1576,6 +1593,7 @@ describe('subFeatures', () => {
       };
       const mockLicenseService = {
         getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: false }),
+        getType: jest.fn().mockReturnValue('basic'),
       };
       const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
 
@@ -1702,6 +1720,504 @@ describe('subFeatures', () => {
         actions.savedObject.get('read-sub-feature-type', 'find'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+    });
+  });
+
+  describe(`when license allows subfeatures, but not a specific sub feature`, () => {
+    test(`should create minimal privileges, but not augment the primary feature privileges or create the disallowed sub-feature privileges`, () => {
+      const features: KibanaFeature[] = [
+        new KibanaFeature({
+          id: 'foo',
+          name: 'Foo KibanaFeature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'read',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'licensedSubFeaturePriv',
+                      name: 'licensed sub feature priv',
+                      includeIn: 'read',
+                      minimumLicense: 'platinum',
+                      savedObject: {
+                        all: ['all-licensed-sub-feature-type'],
+                        read: ['read-licensed-sub-feature-type'],
+                      },
+                      ui: ['licensed-sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('gold'),
+      };
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);
+      expect(actual.features).not.toHaveProperty(`foo.licensedSubFeaturePriv`);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+
+      expect(actual).toHaveProperty('space.all', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+      ]);
+    });
+  });
+
+  describe(`when license allows subfeatures, but and a licensed sub feature`, () => {
+    test(`should create minimal privileges, augment the primary feature privileges, and create the licensed sub-feature privileges`, () => {
+      const features: KibanaFeature[] = [
+        new KibanaFeature({
+          id: 'foo',
+          name: 'Foo KibanaFeature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+            read: {
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['foo'],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'subFeature1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'subFeaturePriv1',
+                      name: 'sub feature priv 1',
+                      includeIn: 'read',
+                      savedObject: {
+                        all: ['all-sub-feature-type'],
+                        read: ['read-sub-feature-type'],
+                      },
+                      ui: ['sub-feature-ui'],
+                    },
+                  ],
+                },
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'licensedSubFeaturePriv',
+                      name: 'licensed sub feature priv',
+                      includeIn: 'read',
+                      minimumLicense: 'platinum',
+                      savedObject: {
+                        all: ['all-licensed-sub-feature-type'],
+                        read: ['read-licensed-sub-feature-type'],
+                      },
+                      ui: ['licensed-sub-feature-ui'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ];
+
+      const mockFeaturesPlugin = {
+        getKibanaFeatures: jest.fn().mockReturnValue(features),
+      };
+      const mockLicenseService = {
+        getFeatures: jest.fn().mockReturnValue({ allowSubFeaturePrivileges: true }),
+        getType: jest.fn().mockReturnValue('platinum'),
+      };
+      const privileges = privilegesFactory(actions, mockFeaturesPlugin as any, mockLicenseService);
+
+      const actual = privileges.get();
+      expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);
+      expect(actual.features).toHaveProperty(`foo.licensedSubFeaturePriv`);
+
+      expect(actual.features).toHaveProperty(`foo.all`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'find'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+        actions.ui.get('foo', 'licensed-sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_all`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.read`, [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'find'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+        actions.ui.get('foo', 'licensed-sub-feature-ui'),
+      ]);
+
+      expect(actual.features).toHaveProperty(`foo.minimal_read`, [
+        actions.login,
+        actions.version,
+        actions.ui.get('foo', 'foo'),
+      ]);
+
+      expect(actual).toHaveProperty('global.all', [
+        actions.login,
+        actions.version,
+        actions.api.get('features'),
+        actions.space.manage,
+        actions.ui.get('spaces', 'manage'),
+        actions.ui.get('management', 'kibana', 'spaces'),
+        actions.ui.get('catalogue', 'spaces'),
+        actions.ui.get('enterpriseSearch', 'all'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'find'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+        actions.ui.get('foo', 'licensed-sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('global.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'find'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+        actions.ui.get('foo', 'licensed-sub-feature-ui'),
+      ]);
+
+      expect(actual).toHaveProperty('space.all', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'find'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+        actions.ui.get('foo', 'licensed-sub-feature-ui'),
+      ]);
+      expect(actual).toHaveProperty('space.read', [
+        actions.login,
+        actions.version,
+        actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-sub-feature-type', 'get'),
+        actions.savedObject.get('all-sub-feature-type', 'find'),
+        actions.savedObject.get('all-sub-feature-type', 'create'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-sub-feature-type', 'update'),
+        actions.savedObject.get('all-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'find'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_create'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'bulk_update'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'delete'),
+        actions.savedObject.get('all-licensed-sub-feature-type', 'share_to_space'),
+        actions.savedObject.get('read-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-sub-feature-type', 'get'),
+        actions.savedObject.get('read-sub-feature-type', 'find'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'bulk_get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'get'),
+        actions.savedObject.get('read-licensed-sub-feature-type', 'find'),
+        actions.ui.get('foo', 'foo'),
+        actions.ui.get('foo', 'sub-feature-ui'),
+        actions.ui.get('foo', 'licensed-sub-feature-ui'),
       ]);
     });
   });

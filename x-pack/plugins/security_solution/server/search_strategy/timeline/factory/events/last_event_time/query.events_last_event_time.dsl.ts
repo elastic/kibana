@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -40,7 +41,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.network,
             ignoreUnavailable: true,
             body: {
-              ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -58,7 +59,7 @@ export const buildLastEventTimeQuery = ({
             index: indicesToQuery.hosts,
             ignoreUnavailable: true,
             body: {
-              ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
                 last_seen_event: { max: { field: '@timestamp' } },
               },
@@ -76,7 +77,7 @@ export const buildLastEventTimeQuery = ({
           index: indicesToQuery[indexKey],
           ignoreUnavailable: true,
           body: {
-            ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+            ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
             aggregations: {
               last_seen_event: { max: { field: '@timestamp' } },
             },

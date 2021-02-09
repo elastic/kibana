@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent, useState } from 'react';
@@ -12,6 +13,7 @@ import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { Popover, ClosePopoverFn } from '../../popover';
 import { PDFPanel } from './pdf_panel';
 import { ShareWebsiteFlyout } from './flyout';
+import { LayoutType } from './utils';
 
 const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
 
@@ -21,9 +23,9 @@ type ExportUrlTypes = 'pdf';
 type CloseTypes = 'share';
 
 export type OnCopyFn = (type: CopyTypes) => void;
-export type OnExportFn = (type: ExportTypes) => void;
+export type OnExportFn = (type: ExportTypes, layout?: LayoutType) => void;
 export type OnCloseFn = (type: CloseTypes) => void;
-export type GetExportUrlFn = (type: ExportUrlTypes) => string;
+export type GetExportUrlFn = (type: ExportUrlTypes, layout: LayoutType) => string;
 
 export interface Props {
   /** Handler to invoke when an export URL is copied to the clipboard. */
@@ -47,9 +49,9 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
   const getPDFPanel = (closePopover: ClosePopoverFn) => {
     return (
       <PDFPanel
-        pdfURL={getExportUrl('pdf')}
-        onExport={() => {
-          onExport('pdf');
+        getPdfURL={(layoutType: LayoutType) => getExportUrl('pdf', layoutType)}
+        onExport={(layoutType) => {
+          onExport('pdf', layoutType);
           closePopover();
         }}
         onCopy={() => {
@@ -79,6 +81,7 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
           title: strings.getShareDownloadPDFTitle(),
           content: getPDFPanel(closePopover),
         },
+        'data-test-subj': 'sharePanel-PDFReports',
       },
       {
         name: strings.getShareWebsiteTitle(),
@@ -92,7 +95,12 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
   });
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonEmpty size="xs" aria-label={strings.getShareWorkpadMessage()} onClick={togglePopover}>
+    <EuiButtonEmpty
+      size="xs"
+      aria-label={strings.getShareWorkpadMessage()}
+      onClick={togglePopover}
+      data-test-subj="shareTopNavButton"
+    >
       {strings.getShareMenuButtonLabel()}
     </EuiButtonEmpty>
   );

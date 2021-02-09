@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { isInSetupMode } from './setup_mode';
 import { getClusterFromClusters } from './get_cluster_from_clusters';
@@ -13,7 +13,7 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
   const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
 
   function isOnPage(hash) {
-    return _.includes(window.location.hash, hash);
+    return window.location.hash.includes(hash);
   }
 
   /*

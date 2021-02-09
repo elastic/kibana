@@ -1,61 +1,7 @@
 {
   "pipelines": [
     {
-      "id": "tweets_and_beats",
-      "description": "ingest tweets and beats",
-      "last_modified": "2017-08-02T18:59:07.724Z",
-      "username": "elastic"
-    },
-    {
       "id": "empty_pipeline_1",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_2",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_3",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_4",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_5",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_6",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_7",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_8",
-      "description": "an empty pipeline",
-      "last_modified": "2017-08-02T18:57:32.907Z",
-      "username": "elastic"
-    },
-    {
-      "id": "empty_pipeline_9",
       "description": "an empty pipeline",
       "last_modified": "2017-08-02T18:57:32.907Z",
       "username": "elastic"
@@ -121,6 +67,12 @@
       "username": "elastic"
     },
     {
+      "id": "empty_pipeline_2",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
       "id": "empty_pipeline_20",
       "description": "an empty pipeline",
       "last_modified": "2017-08-02T18:57:32.907Z",
@@ -130,6 +82,54 @@
       "id": "empty_pipeline_21",
       "description": "an empty pipeline",
       "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "empty_pipeline_3",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "empty_pipeline_4",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "empty_pipeline_5",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "empty_pipeline_6",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "empty_pipeline_7",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "empty_pipeline_8",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "empty_pipeline_9",
+      "description": "an empty pipeline",
+      "last_modified": "2017-08-02T18:57:32.907Z",
+      "username": "elastic"
+    },
+    {
+      "id": "tweets_and_beats",
+      "description": "ingest tweets and beats",
+      "last_modified": "2017-08-02T18:59:07.724Z",
       "username": "elastic"
     }
   ]

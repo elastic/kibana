@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -13,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import * as i18n from '../../../pages/detection_engine/rules/translations';
 import { enableRules } from '../../../containers/detection_engine/rules';
@@ -63,8 +64,11 @@ export const RuleSwitchComponent = ({
       if (dispatch != null) {
         await enableRulesAction([id], event.target.checked!, dispatch, dispatchToaster);
       } else {
+        const enabling = event.target.checked!;
+        const title = enabling
+          ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(1)
+          : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(1);
         try {
-          const enabling = event.target.checked!;
           const response = await enableRules({
             ids: [id],
             enabled: enabling,
@@ -73,9 +77,7 @@ export const RuleSwitchComponent = ({
 
           if (errors.length > 0) {
             setMyIsLoading(false);
-            const title = enabling
-              ? i18n.BATCH_ACTION_ACTIVATE_SELECTED_ERROR(1)
-              : i18n.BATCH_ACTION_DEACTIVATE_SELECTED_ERROR(1);
+
             displayErrorToast(
               title,
               errors.map((e) => e.error.message),
@@ -88,8 +90,9 @@ export const RuleSwitchComponent = ({
               onChange(rule.enabled);
             }
           }
-        } catch {
+        } catch (err) {
           setMyIsLoading(false);
+          displayErrorToast(title, err.message, dispatchToaster);
         }
       }
       setMyIsLoading(false);
@@ -105,21 +108,22 @@ export const RuleSwitchComponent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
 
-  useEffect(() => {
+  const showLoader = useMemo((): boolean => {
     if (myIsLoading !== isLoading) {
-      setMyIsLoading(isLoading ?? false);
+      return isLoading ?? false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading]);
+
+    return myIsLoading;
+  }, [myIsLoading, isLoading]);
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
-        {myIsLoading ? (
-          <EuiLoadingSpinner size="m" data-test-subj="rule-switch-loader" />
+        {showLoader ? (
+          <EuiLoadingSpinner size="m" data-test-subj="ruleSwitchLoader" />
         ) : (
           <StaticSwitch
-            data-test-subj="rule-switch"
+            data-test-subj="ruleSwitch"
             label={optionLabel ?? ''}
             showLabel={!isEmpty(optionLabel)}
             disabled={isDisabled}

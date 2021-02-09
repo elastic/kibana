@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -52,6 +54,7 @@ export default function spaceSelectorFunctonalTests({
       await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('A Dashboard');
 
       await PageObjects.copySavedObjectsToSpace.setupForm({
+        createNewCopies: false,
         overwrite: true,
         destinationSpaceId,
       });
@@ -80,6 +83,7 @@ export default function spaceSelectorFunctonalTests({
       await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('A Dashboard');
 
       await PageObjects.copySavedObjectsToSpace.setupForm({
+        createNewCopies: false,
         overwrite: false,
         destinationSpaceId,
       });
@@ -109,6 +113,64 @@ export default function spaceSelectorFunctonalTests({
       expect(updatedSummaryCounts).to.eql({
         success: 0,
         pending: 3,
+        skipped: 0,
+        errors: 0,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.finishCopy();
+    });
+
+    it('avoids conflicts when createNewCopies is enabled', async () => {
+      const destinationSpaceId = 'sales';
+
+      await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('A Dashboard');
+
+      await PageObjects.copySavedObjectsToSpace.setupForm({
+        createNewCopies: true,
+        overwrite: false,
+        destinationSpaceId,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.startCopy();
+
+      // Wait for successful copy
+      await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
+      await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
+
+      const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
+
+      expect(summaryCounts).to.eql({
+        success: 3,
+        pending: 0,
+        skipped: 0,
+        errors: 0,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.finishCopy();
+    });
+
+    it('allows a dashboard to be copied to the marketing space, with circular references', async () => {
+      const destinationSpaceId = 'marketing';
+
+      await PageObjects.copySavedObjectsToSpace.openCopyToSpaceFlyoutForObject('Dashboard Foo');
+
+      await PageObjects.copySavedObjectsToSpace.setupForm({
+        createNewCopies: false,
+        overwrite: true,
+        destinationSpaceId,
+      });
+
+      await PageObjects.copySavedObjectsToSpace.startCopy();
+
+      // Wait for successful copy
+      await testSubjects.waitForDeleted(`cts-summary-indicator-loading-${destinationSpaceId}`);
+      await testSubjects.existOrFail(`cts-summary-indicator-success-${destinationSpaceId}`);
+
+      const summaryCounts = await PageObjects.copySavedObjectsToSpace.getSummaryCounts();
+
+      expect(summaryCounts).to.eql({
+        success: 2,
+        pending: 0,
         skipped: 0,
         errors: 0,
       });

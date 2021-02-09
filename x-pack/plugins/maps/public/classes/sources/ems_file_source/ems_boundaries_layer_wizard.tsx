@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,21 +10,39 @@ import { i18n } from '@kbn/i18n';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
-import { EMSFileSource, sourceTitle } from './ems_file_source';
+import { EMSFileSource, getSourceTitle } from './ems_file_source';
+
 // @ts-ignore
-import { getIsEmsEnabled } from '../../../kibana_services';
+import { getEMSSettings } from '../../../kibana_services';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
+import { EMSBoundariesLayerIcon } from '../../layers/icons/ems_boundaries_layer_icon';
+
+function getDescription() {
+  const emsSettings = getEMSSettings();
+  return i18n.translate('xpack.maps.source.emsFileSourceDescription', {
+    defaultMessage: 'Administrative boundaries from {host}',
+    values: {
+      host: emsSettings.isEMSUrlSet() ? emsSettings.getEMSRoot() : 'Elastic Maps Service',
+    },
+  });
+}
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
-    return getIsEmsEnabled();
+    const emsSettings = getEMSSettings();
+    return emsSettings.isIncludeElasticMapsService();
   },
-  description: i18n.translate('xpack.maps.source.emsFileDescription', {
-    defaultMessage: 'Administrative boundaries from Elastic Maps Service',
+  description: getDescription(),
+  disabledReason: i18n.translate('xpack.maps.source.emsFileDisabledReason', {
+    defaultMessage: 'Elastic Maps Server requires an Enterprise license',
   }),
-  icon: 'emsApp',
+  getIsDisabled: () => {
+    const emsSettings = getEMSSettings();
+    return emsSettings.isEMSUrlSet() && !emsSettings.hasOnPremLicense();
+  },
+  icon: EMSBoundariesLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
@@ -32,5 +51,5 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
     };
     return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
-  title: sourceTitle,
+  title: getSourceTitle(),
 };

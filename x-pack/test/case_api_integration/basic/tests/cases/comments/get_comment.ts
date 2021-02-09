@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/case/common/constants';
-import { postCaseReq, postCommentReq } from '../../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import { deleteCases, deleteCasesUserActions, deleteComments } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,12 +28,14 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
 
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentUserReq)
+        .expect(200);
 
       const { body: comment } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)

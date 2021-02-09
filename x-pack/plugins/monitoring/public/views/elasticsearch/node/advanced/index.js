@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -20,6 +21,8 @@ import { MonitoringViewBaseController } from '../../../base_controller';
 import {
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
@@ -76,6 +79,8 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             alertTypeIds: [
               ALERT_CPU_USAGE,
               ALERT_DISK_USAGE,
+              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+              ALERT_THREAD_POOL_WRITE_REJECTIONS,
               ALERT_MEMORY_USAGE,
               ALERT_MISSING_MONITORING_DATA,
             ],
@@ -117,6 +122,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
             <AdvancedNode
               nodeSummary={data.nodeSummary}
               alerts={this.alerts}
+              nodeId={data.nodeSummary.resolver}
               metrics={data.metrics}
               onBrush={this.onBrush}
               zoomInfo={this.zoomInfo}

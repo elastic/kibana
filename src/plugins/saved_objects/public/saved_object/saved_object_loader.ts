@@ -1,24 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/public';
+
+import {
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SavedObjectReference,
+} from 'kibana/public';
 import { SavedObject } from '../types';
 import { StringUtils } from './helpers/string_utils';
+
+export interface SavedObjectLoaderFindOptions {
+  size?: number;
+  fields?: string[];
+  hasReference?: SavedObjectsFindOptionsReference[];
+}
 
 /**
  * The SavedObjectLoader class provides some convenience functions
@@ -80,15 +81,21 @@ export class SavedObjectLoader {
   }
 
   /**
-   * Updates source to contain an id and url field, and returns the updated
+   * Updates source to contain an id, url and references fields, and returns the updated
    * source object.
    * @param source
    * @param id
+   * @param references
    * @returns {source} The modified source object, with an id and url field.
    */
-  mapHitSource(source: Record<string, unknown>, id: string) {
+  mapHitSource(
+    source: Record<string, unknown>,
+    id: string,
+    references: SavedObjectReference[] = []
+  ) {
     source.id = id;
     source.url = this.urlFor(id);
+    source.references = references;
     return source;
   }
 
@@ -98,8 +105,16 @@ export class SavedObjectLoader {
    * @param hit
    * @returns {hit.attributes} The modified hit.attributes object, with an id and url field.
    */
-  mapSavedObjectApiHits(hit: { attributes: Record<string, unknown>; id: string }) {
-    return this.mapHitSource(hit.attributes, hit.id);
+  mapSavedObjectApiHits({
+    attributes,
+    id,
+    references = [],
+  }: {
+    attributes: Record<string, unknown>;
+    id: string;
+    references?: SavedObjectReference[];
+  }) {
+    return this.mapHitSource(attributes, id, references);
   }
 
   /**
@@ -111,7 +126,10 @@ export class SavedObjectLoader {
    * @param fields
    * @returns {Promise}
    */
-  findAll(search: string = '', size: number = 100, fields?: string[]) {
+  private findAll(
+    search: string = '',
+    { size = 100, fields, hasReference }: SavedObjectLoaderFindOptions
+  ) {
     return this.savedObjectsClient
       .find<Record<string, unknown>>({
         type: this.lowercaseType,
@@ -121,6 +139,7 @@ export class SavedObjectLoader {
         searchFields: ['title^3', 'description'],
         defaultSearchOperator: 'AND',
         fields,
+        hasReference,
       } as SavedObjectsFindOptions)
       .then((resp) => {
         return {
@@ -130,8 +149,15 @@ export class SavedObjectLoader {
       });
   }
 
-  find(search: string = '', size: number = 100) {
-    return this.findAll(search, size).then((resp) => {
+  find(search: string = '', sizeOrOptions: number | SavedObjectLoaderFindOptions = 100) {
+    const options: SavedObjectLoaderFindOptions =
+      typeof sizeOrOptions === 'number'
+        ? {
+            size: sizeOrOptions,
+          }
+        : sizeOrOptions;
+
+    return this.findAll(search, options).then((resp) => {
       return {
         total: resp.total,
         hits: resp.hits.filter((savedObject) => !savedObject.error),

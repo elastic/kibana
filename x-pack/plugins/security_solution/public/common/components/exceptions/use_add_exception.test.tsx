@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act, renderHook, RenderHookResult } from '@testing-library/react-hooks';
@@ -37,16 +38,16 @@ mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 describe('useAddOrUpdateException', () => {
   let updateAlertStatus: jest.SpyInstance<ReturnType<typeof alertsApi.updateAlertStatus>>;
   let addExceptionListItem: jest.SpyInstance<ReturnType<typeof listsApi.addExceptionListItem>>;
-  let updateExceptionListItem: jest.SpyInstance<ReturnType<
-    typeof listsApi.updateExceptionListItem
-  >>;
+  let updateExceptionListItem: jest.SpyInstance<
+    ReturnType<typeof listsApi.updateExceptionListItem>
+  >;
   let getQueryFilter: jest.SpyInstance<ReturnType<typeof getQueryFilterHelper.getQueryFilter>>;
-  let buildAlertStatusFilter: jest.SpyInstance<ReturnType<
-    typeof buildFilterHelpers.buildAlertStatusFilter
-  >>;
-  let buildAlertsRuleIdFilter: jest.SpyInstance<ReturnType<
-    typeof buildFilterHelpers.buildAlertsRuleIdFilter
-  >>;
+  let buildAlertStatusFilter: jest.SpyInstance<
+    ReturnType<typeof buildFilterHelpers.buildAlertStatusFilter>
+  >;
+  let buildAlertsRuleIdFilter: jest.SpyInstance<
+    ReturnType<typeof buildFilterHelpers.buildAlertsRuleIdFilter>
+  >;
   let addOrUpdateItemsArgs: Parameters<AddOrUpdateExceptionItemsFunc>;
   let render: () => RenderHookResult<UseAddOrUpdateExceptionProps, ReturnUseAddOrUpdateException>;
   const onError = jest.fn();

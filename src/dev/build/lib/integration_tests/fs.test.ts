@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -177,6 +166,16 @@ describe('copyAll()', () => {
   });
 
   it('copies files and directories from source to dest, creating dest if necessary, respecting mode', async () => {
+    const path777 = resolve(FIXTURES, 'bin/world_executable');
+    const path644 = resolve(FIXTURES, 'foo_dir/bar.txt');
+
+    // we're seeing flaky failures because the resulting files sometimes have
+    // 755 permissions. Unless there's a bug in vinyl-fs I can't figure out
+    // where the issue might be, so trying to validate the mode first to narrow
+    // down where the issue might be
+    expect(getCommonMode(path777)).toBe(isWindows ? '666' : '777');
+    expect(getCommonMode(path644)).toBe(isWindows ? '666' : '644');
+
     const destination = resolve(TMP, 'a/b/c');
     await copyAll(FIXTURES, destination);
 
@@ -185,10 +184,8 @@ describe('copyAll()', () => {
       resolve(destination, 'foo_dir/foo'),
     ]);
 
-    expect(getCommonMode(resolve(destination, 'bin/world_executable'))).toBe(
-      isWindows ? '666' : '777'
-    );
-    expect(getCommonMode(resolve(destination, 'foo_dir/bar.txt'))).toBe(isWindows ? '666' : '644');
+    expect(getCommonMode(path777)).toBe(isWindows ? '666' : '777');
+    expect(getCommonMode(path644)).toBe(isWindows ? '666' : '644');
   });
 
   it('applies select globs if specified, ignores dot files', async () => {
@@ -246,6 +243,20 @@ describe('copyAll()', () => {
     expect(Math.abs(barTxt.atimeMs - time.getTime())).toBeLessThan(oneDay);
     expect(Math.abs(fooDir.atimeMs - time.getTime())).toBeLessThan(oneDay);
     expect(Math.abs(barTxt.mtimeMs - time.getTime())).toBeLessThan(oneDay);
+  });
+
+  it('defaults atime and mtime to now', async () => {
+    const destination = resolve(TMP, 'a/b/c/d/e/f');
+    await copyAll(FIXTURES, destination);
+    const barTxt = statSync(resolve(destination, 'foo_dir/bar.txt'));
+    const fooDir = statSync(resolve(destination, 'foo_dir'));
+
+    // precision is platform specific
+    const now = new Date();
+    const oneDay = 86400000;
+    expect(Math.abs(barTxt.atimeMs - now.getTime())).toBeLessThan(oneDay);
+    expect(Math.abs(fooDir.atimeMs - now.getTime())).toBeLessThan(oneDay);
+    expect(Math.abs(barTxt.mtimeMs - now.getTime())).toBeLessThan(oneDay);
   });
 });
 

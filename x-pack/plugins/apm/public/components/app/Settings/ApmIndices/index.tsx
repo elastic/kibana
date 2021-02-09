@@ -1,28 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useFetcher } from '../../../../hooks/useFetcher';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect, useState } from 'react';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { clearCache } from '../../../../services/rest/callApi';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { callApmApi } from '../../../../services/rest/createCallApmApi';
 
 const APM_INDEX_LABELS = [
   {
@@ -72,8 +74,8 @@ async function saveApmIndices({
   apmIndices: Record<string, string>;
 }) {
   await callApmApi({
-    method: 'POST',
-    pathname: '/api/apm/settings/apm-indices/save',
+    endpoint: 'POST /api/apm/settings/apm-indices/save',
+    signal: null,
     params: {
       body: apmIndices,
     },
@@ -86,17 +88,22 @@ async function saveApmIndices({
 const INITIAL_STATE = [] as [];
 
 export function ApmIndices() {
-  const { toasts } = useApmPluginContext().core.notifications;
+  const { core } = useApmPluginContext();
+  const { notifications, application } = core;
+  const canSave = application.capabilities.apm.save;
 
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, status, refetch } = useFetcher(
-    (_callApmApi) =>
-      _callApmApi({
-        pathname: `/api/apm/settings/apm-index-settings`,
-      }),
-    []
+  const { data = INITIAL_STATE, refetch } = useFetcher(
+    (_callApmApi) => {
+      if (canSave) {
+        return _callApmApi({
+          endpoint: `GET /api/apm/settings/apm-index-settings`,
+        });
+      }
+    },
+    [canSave]
   );
 
   useEffect(() => {
@@ -120,7 +127,7 @@ export function ApmIndices() {
     setIsSaving(true);
     try {
       await saveApmIndices({ apmIndices });
-      toasts.addSuccess({
+      notifications.toasts.addSuccess({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.succeeded.title',
           { defaultMessage: 'Indices applied' }
@@ -134,7 +141,7 @@ export function ApmIndices() {
         ),
       });
     } catch (error) {
-      toasts.addDanger({
+      notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.apm.settings.apmIndices.applyChanges.failed.title',
           { defaultMessage: 'Indices could not be applied.' }
@@ -163,23 +170,24 @@ export function ApmIndices() {
   };
 
   return (
-    <EuiPanel>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.apm.settings.apmIndices.title', {
-                defaultMessage: 'Indices',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiText size="s" grow={false}>
-            <p>
-              {i18n.translate('xpack.apm.settings.apmIndices.description', {
-                defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
-              })}
-            </p>
+    <>
+      <EuiTitle size="l">
+        <h1>
+          {i18n.translate('xpack.apm.settings.apmIndices.title', {
+            defaultMessage: 'Indices',
+          })}
+        </h1>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiText>
+        {i18n.translate('xpack.apm.settings.apmIndices.description', {
+          defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
+        })}
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiPanel>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
             <EuiForm>
               {APM_INDEX_LABELS.map(({ configurationName, label }) => {
                 const matchedConfiguration = data.find(
@@ -205,6 +213,7 @@ export function ApmIndices() {
                     fullWidth
                   >
                     <EuiFieldText
+                      disabled={!canSave}
                       fullWidth
                       name={configurationName}
                       placeholder={defaultValue}
@@ -225,25 +234,37 @@ export function ApmIndices() {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    onClick={handleApplyChangesEvent}
-                    isLoading={isSaving}
-                    disabled={status !== 'success'}
+                  <EuiToolTip
+                    content={
+                      !canSave &&
+                      i18n.translate(
+                        'xpack.apm.settings.apmIndices.noPermissionTooltipLabel',
+                        {
+                          defaultMessage:
+                            "Your user role doesn't have permissions to change APM indices",
+                        }
+                      )
+                    }
                   >
-                    {i18n.translate(
-                      'xpack.apm.settings.apmIndices.applyButton',
-                      { defaultMessage: 'Apply changes' }
-                    )}
-                  </EuiButton>
+                    <EuiButton
+                      fill
+                      onClick={handleApplyChangesEvent}
+                      isLoading={isSaving}
+                      isDisabled={!canSave}
+                    >
+                      {i18n.translate(
+                        'xpack.apm.settings.apmIndices.applyButton',
+                        { defaultMessage: 'Apply changes' }
+                      )}
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiForm>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-    </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+      </EuiPanel>
+    </>
   );
 }

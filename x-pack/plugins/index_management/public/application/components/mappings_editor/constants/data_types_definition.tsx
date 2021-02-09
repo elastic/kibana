@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,25 +14,6 @@ import { documentationService } from '../../../services/documentation';
 import { MainType, SubType, DataType, DataTypeDefinition } from '../types';
 
 export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
-  runtime: {
-    value: 'runtime',
-    isBeta: true,
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldDescription', {
-      defaultMessage: 'Runtime',
-    }),
-    // TODO: Add this once the page exists.
-    // documentation: {
-    //   main: '/runtime_field.html',
-    // },
-    description: () => (
-      <p>
-        <FormattedMessage
-          id="xpack.idxMgmt.mappingsEditor.dataType.runtimeFieldLongDescription"
-          defaultMessage="Runtime fields define scripts that calculate field values at runtime."
-        />
-      </p>
-    ),
-  },
   text: {
     value: 'text',
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.textDescription', {
@@ -944,7 +926,6 @@ export const MAIN_TYPES: MainType[] = [
   'range',
   'rank_feature',
   'rank_features',
-  'runtime',
   'search_as_you_type',
   'shape',
   'text',

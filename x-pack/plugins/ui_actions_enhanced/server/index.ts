@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AdvancedUiActionsPublicPlugin } from './plugin';
+import { AdvancedUiActionsServerPlugin } from './plugin';
 
 export function plugin() {
-  return new AdvancedUiActionsPublicPlugin();
+  return new AdvancedUiActionsServerPlugin();
 }
 
-export { AdvancedUiActionsPublicPlugin as Plugin };
+export { AdvancedUiActionsServerPlugin as Plugin };
 export {
   SetupContract as AdvancedUiActionsSetup,
   StartContract as AdvancedUiActionsStart,

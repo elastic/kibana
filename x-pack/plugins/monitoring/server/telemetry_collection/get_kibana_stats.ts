@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import {
   fetchHighLevelStats,
@@ -114,7 +115,6 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
     } = currUsage;
 
     // Stats filtered by telemetry collectors need to be flattened since they're pulled in a generic way.
-    // A plugin might not provide flat stats if it implements formatForBulkUpload in its collector.
     // e.g: we want `xpack.reporting` to just be `reporting`
     const plugins = { ...pluginsTop, ...xpack };
 
@@ -147,13 +147,21 @@ export function combineStats(
  * Ensure the start and end dates are, at least, TELEMETRY_COLLECTION_INTERVAL apart
  * because, otherwise, we are sending telemetry with empty Kibana usage data.
  *
- * @param {date} [start] The start time from which to get the telemetry data
- * @param {date} [end] The end time from which to get the telemetry data
+ * @param {string} [start] The start time (in ISO string format) from which to get the telemetry data
+ * @param {string} [end] The end time (in ISO string format) from which to get the telemetry data
  */
+export function ensureTimeSpan(start: string, end: string): { start: string; end: string };
+export function ensureTimeSpan(start: string, end: undefined): { start: string; end: undefined };
+export function ensureTimeSpan(start: undefined, end: string): { start: undefined; end: string };
 export function ensureTimeSpan(
-  start?: StatsCollectionConfig['start'],
-  end?: StatsCollectionConfig['end']
-) {
+  start: undefined,
+  end: undefined
+): { start: undefined; end: undefined };
+
+export function ensureTimeSpan(
+  start?: string,
+  end?: string
+): { start: string | undefined; end: string | undefined } {
   // We only care if we have a start date, because that's the limit that might make us lose the document
   if (start) {
     const duration = moment.duration(TELEMETRY_COLLECTION_INTERVAL, 'milliseconds');
@@ -175,10 +183,10 @@ export function ensureTimeSpan(
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
-  start: StatsCollectionConfig['start'],
-  end: StatsCollectionConfig['end'],
+  start: string,
+  end: string,
   maxBucketSize: number
 ) {
   const { start: safeStart, end: safeEnd } = ensureTimeSpan(start, end);

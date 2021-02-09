@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsType } from 'kibana/server';
 
-import { migrations } from './migrations';
+import {
+  exceptionListAgnosticSavedObjectType,
+  exceptionListSavedObjectType,
+} from '../../common/types';
 
-export const exceptionListSavedObjectType = 'exception-list';
-export const exceptionListAgnosticSavedObjectType = 'exception-list-agnostic';
-export type SavedObjectType = 'exception-list' | 'exception-list-agnostic';
+import { migrations } from './migrations';
 
 /**
  * This is a super set of exception list and exception list items. The switch

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -28,7 +29,7 @@ function getTimeFieldRange(client: IScopedClusterClient, payload: any) {
 /**
  * Routes for fields service
  */
-export function fieldsService({ router, mlLicense }: RouteInitialization) {
+export function fieldsService({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup FieldsService
    *
@@ -50,7 +51,7 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const resp = await getCardinalityOfFields(client, request.body);
 
@@ -85,7 +86,7 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const resp = await getTimeFieldRange(client, request.body);
 

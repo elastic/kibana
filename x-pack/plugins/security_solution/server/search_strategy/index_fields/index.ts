@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { from } from 'rxjs';
@@ -26,13 +27,10 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
 
   return {
-    search: (request, options, context) =>
+    search: (request, options, { esClient }) =>
       from(
         new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
-          const { elasticsearch } = context.core;
-          const indexPatternsFetcher = new IndexPatternsFetcher(
-            elasticsearch.legacy.client.callAsCurrentUser
-          );
+          const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
           const dedupeIndices = dedupeIndexName(request.indices);
 
           const responsesIndexFields = await Promise.all(

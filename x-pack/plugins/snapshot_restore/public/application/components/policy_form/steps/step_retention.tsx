@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -14,6 +16,7 @@ import {
   EuiButtonEmpty,
   EuiFieldNumber,
   EuiSelect,
+  EuiCode,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../common/types';
@@ -135,7 +138,10 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.countDescription"
-          defaultMessage="The minimum and maximum number of snapshots to store in your cluster."
+          defaultMessage="The minimum and maximum number of snapshots to store in your cluster. It should not exceed {maxNumber}."
+          values={{
+            maxNumber: <EuiCode>200</EuiCode>,
+          }}
         />
       }
       fullWidth

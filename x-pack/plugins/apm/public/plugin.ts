@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ConfigSchema } from '.';
@@ -38,6 +39,7 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import { MapsStartApi } from '../../maps/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -61,6 +63,7 @@ export interface ApmPluginStartDeps {
   licensing: void;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   embeddable: EmbeddableStart;
+  maps?: MapsStartApi;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -81,14 +84,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     if (plugins.observability) {
       const getApmDataHelper = async () => {
         const {
-          fetchOverviewPageData,
+          fetchObservabilityOverviewPageData,
           hasData,
           createCallApmApi,
-        } = await import('./services/rest/apm_overview_fetchers');
+        } = await import('./services/rest/apm_observability_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core.http);
 
-        return { fetchOverviewPageData, hasData };
+        return { fetchObservabilityOverviewPageData, hasData };
       };
       plugins.observability.dashboard.register({
         appName: 'apm',
@@ -98,7 +101,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         },
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getApmDataHelper();
-          return await dataHelper.fetchOverviewPageData(params);
+          return await dataHelper.fetchObservabilityOverviewPageData(params);
         },
       });
 
@@ -138,12 +141,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start services
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return renderApp(coreStart, pluginSetupDeps, params, config);
+        return renderApp(
+          coreStart,
+          pluginSetupDeps,
+          params,
+          config,
+          corePlugins as ApmPluginStartDeps
+        );
       },
     });
 

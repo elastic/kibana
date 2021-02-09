@@ -1,33 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { ToastsApi } from 'kibana/public';
 import { AlertInstancesRoute, getAlertInstanceSummary } from './alert_instances_route';
-import { Alert, AlertInstanceSummary } from '../../../../types';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
-jest.mock('../../../app_context', () => {
-  const toastNotifications = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ toastNotifications })),
-  };
-});
 describe('alert_instance_summary_route', () => {
   it('render a loader while fetching data', () => {
     const alert = mockAlert();
+    const alertType = mockAlertType();
 
     expect(
       shallow(
-        <AlertInstancesRoute readOnly={false} alert={alert} {...mockApis()} />
-      ).containsMatchingElement(<EuiLoadingSpinner size="l" />)
+        <AlertInstancesRoute readOnly={false} alert={alert} alertType={alertType} {...mockApis()} />
+      ).containsMatchingElement(<CenterJustifiedSpinner />)
     ).toBeTruthy();
   });
 });
@@ -130,12 +128,33 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     updatedAt: new Date(),
     apiKeyOwner: null,
     throttle: null,
+    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    ...overloads,
+  };
+}
+
+function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
+  return {
+    id: 'test.testAlertType',
+    name: 'My Test Alert Type',
+    actionGroups: [{ id: 'default', name: 'Default Action Group' }],
+    actionVariables: {
+      context: [],
+      state: [],
+      params: [],
+    },
+    defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    authorizedConsumers: {},
+    producer: 'alerts',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
     ...overloads,
   };
 }

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
+
 import classNames from 'classnames';
 
 import { EuiPage, EuiPageSideBar, EuiPageBody, EuiButton, EuiCallOut } from '@elastic/eui';
@@ -12,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import './layout.scss';
 
-interface ILayoutProps {
+interface LayoutProps {
   navigation: React.ReactNode;
   restrictWidth?: boolean;
   readOnlyMode?: boolean;
@@ -23,7 +25,7 @@ export interface INavContext {
 }
 export const NavContext = React.createContext({});
 
-export const Layout: React.FC<ILayoutProps> = ({
+export const Layout: React.FC<LayoutProps> = ({
   children,
   navigation,
   restrictWidth,

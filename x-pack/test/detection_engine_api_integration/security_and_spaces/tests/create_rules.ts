@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -23,13 +25,16 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleMlRule,
   getSimpleMlRuleOutput,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
+  waitForSignalsToBePresent,
+  getRuleForSignalTesting,
+  getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('create_rules', () => {
     describe('validation errors', () => {
@@ -51,11 +56,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -89,14 +96,14 @@ export default ({ getService }: FtrProviderContext) => {
        this pops up again elsewhere.
       */
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const simpleRule = getSimpleRule();
+        const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send(simpleRule)
           .expect(200);
 
-        await waitForRuleSuccess(supertest, body.id);
+        await waitForRuleSuccessOrStatus(supertest, body.id);
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -104,19 +111,96 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [body.id] })
           .expect(200);
 
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        expect(statusBody[body.id].current_status.status).to.eql('succeeded');
+      });
+
+      it('should create a single rule with a rule_id and an index pattern that does not match anything available and fail the rule', async () => {
+        const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(supertest, body.id, 'failed');
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body.id] })
+          .expect(200);
+
+        expect(statusBody[body.id].current_status.status).to.eql('failed');
+        expect(statusBody[body.id].current_status.last_failure_message).to.eql(
+          'The following index patterns did not match any indices: ["does-not-exist-*"]'
+        );
+      });
+
+      it('should create a single rule with a rule_id and an index pattern that does not match anything and an index pattern that does and the rule should be successful', async () => {
+        const simpleRule = getRuleForSignalTesting(['does-not-exist-*', 'auditbeat-*']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+
+        await waitForRuleSuccessOrStatus(supertest, body.id, 'succeeded');
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [body.id] })
+          .expect(200);
+
         expect(statusBody[body.id].current_status.status).to.eql('succeeded');
       });
 
       it('should create a single rule without an input index', async () => {
-        const { index, ...payload } = getSimpleRule();
-        const { index: _index, ...expected } = getSimpleRuleOutput();
+        const rule: CreateRulesSchema = {
+          name: 'Simple Rule Query',
+          description: 'Simple Rule Query',
+          enabled: true,
+          risk_score: 1,
+          rule_id: 'rule-1',
+          severity: 'high',
+          type: 'query',
+          query: 'user.name: root or user.name: admin',
+        };
+        const expected = {
+          actions: [],
+          author: [],
+          created_by: 'elastic',
+          description: 'Simple Rule Query',
+          enabled: true,
+          false_positives: [],
+          from: 'now-6m',
+          immutable: false,
+          interval: '5m',
+          rule_id: 'rule-1',
+          language: 'kuery',
+          output_index: '.siem-signals-default',
+          max_signals: 100,
+          risk_score: 1,
+          risk_score_mapping: [],
+          name: 'Simple Rule Query',
+          query: 'user.name: root or user.name: admin',
+          references: [],
+          severity: 'high',
+          severity_mapping: [],
+          updated_by: 'elastic',
+          tags: [],
+          to: 'now',
+          type: 'query',
+          threat: [],
+          throttle: 'no_actions',
+          exceptions_list: [],
+          version: 1,
+        };
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(payload)
+          .send(rule)
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -162,6 +246,48 @@ export default ({ getService }: FtrProviderContext) => {
           message: 'rule_id: "rule-1" already exists',
           status_code: 409,
         });
+      });
+    });
+
+    describe('missing timestamps', () => {
+      beforeEach(async () => {
+        await createSignalsIndex(supertest);
+        // to edit these files run the following script
+        // cd $HOME/kibana/x-pack && nvm use && node ../scripts/es_archiver edit security_solution/timestamp_override
+        await esArchiver.load('security_solution/timestamp_override');
+      });
+      afterEach(async () => {
+        await deleteSignalsIndex(supertest);
+        await deleteAllAlerts(supertest);
+        await esArchiver.unload('security_solution/timestamp_override');
+      });
+      it('should create a single rule which has a timestamp override and generates two signals with a failing status', async () => {
+        // should be a failing status because one of the indices in the index pattern is missing
+        // the timestamp override field.
+
+        // defaults to event.ingested timestamp override.
+        // event.ingested is one of the timestamp fields set on the es archive data
+        // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
+        const simpleRule = getRuleForSignalTestingWithTimestampOverride(['myfa*']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+        const bodyId = body.id;
+
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+        await waitForSignalsToBePresent(supertest, 2, [bodyId]);
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [bodyId] })
+          .expect(200);
+
+        // set to "failed" for now. Will update this with a partial failure
+        // once I figure out the logic
+        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
       });
     });
   });

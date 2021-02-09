@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ConnectorTypes } from '../../../../../../case/common/api';
 import { ActionConnector } from '../../../containers/configure/types';
 import { UseConnectorsResponse } from '../../../containers/configure/use_connectors';
-import { connectorsMock } from '../../../containers/configure/mock';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
-export { mapping } from '../../../containers/configure/mock';
-import { ConnectorTypes } from '../../../../../../case/common/api';
-
+import { UseActionTypesResponse } from '../../../containers/configure/use_action_types';
+import { connectorsMock, actionTypesMock } from '../../../containers/configure/mock';
+export { mappings } from '../../../containers/configure/mock';
 export const connectors: ActionConnector[] = connectorsMock;
 
 // x - pack / plugins / triggers_actions_ui;
@@ -36,14 +37,14 @@ export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
   },
   firstLoad: false,
   loading: false,
-  mapping: null,
+  mappings: [],
   persistCaseConfigure: jest.fn(),
   persistLoading: false,
   refetchCaseConfigure: jest.fn(),
   setClosureType: jest.fn(),
   setConnector: jest.fn(),
   setCurrentConfiguration: jest.fn(),
-  setMapping: jest.fn(),
+  setMappings: jest.fn(),
   version: '',
 };
 
@@ -51,4 +52,10 @@ export const useConnectorsResponse: UseConnectorsResponse = {
   loading: false,
   connectors,
   refetchConnectors: jest.fn(),
+};
+
+export const useActionTypesResponse: UseActionTypesResponse = {
+  loading: false,
+  actionTypes: actionTypesMock,
+  refetchActionTypes: jest.fn(),
 };

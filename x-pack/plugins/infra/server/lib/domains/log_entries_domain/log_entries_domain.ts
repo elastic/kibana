@@ -1,34 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { sortBy } from 'lodash';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 
-import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
-  LogEntry,
-  LogEntriesItem,
-  LogEntriesCursor,
-  LogColumn,
+  LogEntriesRequest,
 } from '../../../../common/http_api';
+import { LogColumn, LogEntryCursor, LogEntry } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
   InfraSources,
   SavedSourceConfigurationFieldColumnRuntimeType,
 } from '../../sources';
-import { getBuiltinRules } from './builtin_rules';
-import { convertESFieldsToLogItemFields } from './convert_document_source_to_log_item_fields';
+import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
 import {
   CompiledLogMessageFormattingRule,
   Fields,
   Highlights,
   compileFormattingRules,
-} from './message';
+} from '../../../services/log_entries/message/message';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
@@ -43,14 +40,14 @@ export interface LogEntriesParams {
   endTimestamp: number;
   size?: number;
   query?: JsonObject;
-  cursor?: { before: LogEntriesCursor | 'last' } | { after: LogEntriesCursor | 'first' };
+  cursor?: { before: LogEntryCursor | 'last' } | { after: LogEntryCursor | 'first' };
   highlightTerm?: string;
 }
 export interface LogEntriesAroundParams {
   startTimestamp: number;
   endTimestamp: number;
   size?: number;
-  center: LogEntriesCursor;
+  center: LogEntryCursor;
   query?: JsonObject;
   highlightTerm?: string;
 }
@@ -71,10 +68,11 @@ export class InfraLogEntriesDomain {
   ) {}
 
   public async getLogEntriesAround(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
-    params: LogEntriesAroundParams
-  ) {
+    params: LogEntriesAroundParams,
+    columnOverrides?: LogEntriesRequest['columns']
+  ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { startTimestamp, endTimestamp, center, query, size, highlightTerm } = params;
 
     /*
@@ -87,14 +85,19 @@ export class InfraLogEntriesDomain {
      */
     const halfSize = (size || LOG_ENTRIES_PAGE_SIZE) / 2;
 
-    const entriesBefore = await this.getLogEntries(requestContext, sourceId, {
-      startTimestamp,
-      endTimestamp,
-      query,
-      cursor: { before: center },
-      size: Math.floor(halfSize),
-      highlightTerm,
-    });
+    const { entries: entriesBefore, hasMoreBefore } = await this.getLogEntries(
+      requestContext,
+      sourceId,
+      {
+        startTimestamp,
+        endTimestamp,
+        query,
+        cursor: { before: center },
+        size: Math.floor(halfSize),
+        highlightTerm,
+      },
+      columnOverrides
+    );
 
     /*
      * Elasticsearch's `search_after` returns documents after the specified cursor.
@@ -108,27 +111,34 @@ export class InfraLogEntriesDomain {
         ? entriesBefore[entriesBefore.length - 1].cursor
         : { time: center.time - 1, tiebreaker: 0 };
 
-    const entriesAfter = await this.getLogEntries(requestContext, sourceId, {
-      startTimestamp,
-      endTimestamp,
-      query,
-      cursor: { after: cursorAfter },
-      size: Math.ceil(halfSize),
-      highlightTerm,
-    });
+    const { entries: entriesAfter, hasMoreAfter } = await this.getLogEntries(
+      requestContext,
+      sourceId,
+      {
+        startTimestamp,
+        endTimestamp,
+        query,
+        cursor: { after: cursorAfter },
+        size: Math.ceil(halfSize),
+        highlightTerm,
+      }
+    );
 
-    return [...entriesBefore, ...entriesAfter];
+    return { entries: [...entriesBefore, ...entriesAfter], hasMoreBefore, hasMoreAfter };
   }
 
   public async getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
-    params: LogEntriesParams
-  ): Promise<LogEntry[]> {
+    params: LogEntriesParams,
+    columnOverrides?: LogEntriesRequest['columns']
+  ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
       requestContext.core.savedObjects.client,
       sourceId
     );
+
+    const columnDefinitions = columnOverrides ?? configuration.logColumns;
 
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(configuration.fields.message)
@@ -136,7 +146,7 @@ export class InfraLogEntriesDomain {
 
     const requiredFields = getRequiredFields(configuration, messageFormattingRules);
 
-    const documents = await this.adapter.getLogEntries(
+    const { documents, hasMoreBefore, hasMoreAfter } = await this.adapter.getLogEntries(
       requestContext,
       configuration,
       requiredFields,
@@ -146,8 +156,9 @@ export class InfraLogEntriesDomain {
     const entries = documents.map((doc) => {
       return {
         id: doc.id,
+        index: doc.index,
         cursor: doc.cursor,
-        columns: configuration.logColumns.map(
+        columns: columnDefinitions.map(
           (column): LogColumn => {
             if ('timestampColumn' in column) {
               return {
@@ -163,8 +174,8 @@ export class InfraLogEntriesDomain {
               return {
                 columnId: column.fieldColumn.id,
                 field: column.fieldColumn.field,
-                value: doc.fields[column.fieldColumn.field],
-                highlights: doc.highlights[column.fieldColumn.field] || [],
+                value: doc.fields[column.fieldColumn.field] ?? [],
+                highlights: doc.highlights[column.fieldColumn.field] ?? [],
               };
             }
           }
@@ -173,11 +184,11 @@ export class InfraLogEntriesDomain {
       };
     });
 
-    return entries;
+    return { entries, hasMoreBefore, hasMoreAfter };
   }
 
   public async getLogSummaryBucketsBetween(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     start: number,
     end: number,
@@ -200,7 +211,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryHighlightBucketsBetween(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     startTimestamp: number,
     endTimestamp: number,
@@ -245,33 +256,8 @@ export class InfraLogEntriesDomain {
     return summaries;
   }
 
-  public async getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    sourceConfiguration: InfraSourceConfiguration
-  ): Promise<LogEntriesItem> {
-    const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
-    const defaultFields = [
-      { field: '_index', value: document._index },
-      { field: '_id', value: document._id },
-    ];
-
-    return {
-      id: document._id,
-      index: document._index,
-      key: {
-        time: document.sort[0],
-        tiebreaker: document.sort[1],
-      },
-      fields: sortBy(
-        [...defaultFields, ...convertESFieldsToLogItemFields(document.fields)],
-        'field'
-      ),
-    };
-  }
-
   public async getLogEntryDatasets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     timestampField: string,
     indexName: string,
     startTime: number,
@@ -310,51 +296,39 @@ export class InfraLogEntriesDomain {
   }
 }
 
-interface LogItemHit {
-  _index: string;
-  _id: string;
-  fields: { [field: string]: [value: unknown] };
-  sort: [number, number];
-}
-
 export interface LogEntriesAdapter {
   getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<LogEntryDocument[]>;
+  ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
 
   getContainedLogSummaryBuckets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     startTimestamp: number,
     endTimestamp: number,
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<LogSummaryBucket[]>;
-
-  getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    source: InfraSourceConfiguration
-  ): Promise<LogItemHit>;
 }
 
 export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
   id: string;
+  index: string;
   fields: Fields;
   highlights: Highlights;
-  cursor: LogEntriesCursor;
+  cursor: LogEntryCursor;
 }
 
 export interface LogSummaryBucket {
   entriesCount: number;
   start: number;
   end: number;
-  topEntryKeys: LogEntriesCursor[];
+  topEntryKeys: LogEntryCursor[];
 }
 
 const logSummaryBucketHasEntries = (bucket: LogSummaryBucket) =>
@@ -400,9 +374,9 @@ const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
 
 const getContextFromDoc = (doc: LogEntryDocument): LogEntry['context'] => {
   // Get all context fields, then test for the presence and type of the ones that go together
-  const containerId = doc.fields['container.id'];
-  const hostName = doc.fields['host.name'];
-  const logFilePath = doc.fields['log.file.path'];
+  const containerId = doc.fields['container.id']?.[0];
+  const hostName = doc.fields['host.name']?.[0];
+  const logFilePath = doc.fields['log.file.path']?.[0];
 
   if (typeof containerId === 'string') {
     return { 'container.id': containerId };

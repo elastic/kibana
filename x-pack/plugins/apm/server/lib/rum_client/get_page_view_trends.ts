@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import { mergeProjection } from '../../projections/util/merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -20,6 +22,7 @@ export async function getPageViewTrends({
   const projection = getRumPageLoadTransactionsProjection({
     setup,
     urlQuery,
+    checkFetchStartFieldExists: false,
   });
   let breakdownItem: BreakdownItem | null = null;
   if (breakdowns) {

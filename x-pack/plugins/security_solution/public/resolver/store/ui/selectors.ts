@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { encode } from 'rison-node';
@@ -16,7 +17,7 @@ import { parameterName } from '../parameter_name';
  */
 export const ariaActiveDescendant = createSelector(
   (uiState: ResolverUIState) => uiState,
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   ({ ariaActiveDescendant }) => {
     return ariaActiveDescendant;
   }
@@ -27,7 +28,7 @@ export const ariaActiveDescendant = createSelector(
  */
 export const selectedNode = createSelector(
   (uiState: ResolverUIState) => uiState,
-  /* eslint-disable no-shadow */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   ({ selectedNode }: ResolverUIState) => {
     return selectedNode;
   }
@@ -83,6 +84,7 @@ export const relatedEventsRelativeHrefs: (
 ) => (
   categories: Record<string, number> | undefined,
   nodeID: string
+  // eslint-disable-next-line @typescript-eslint/no-shadow
 ) => Map<string, string | undefined> = createSelector(relativeHref, (relativeHref) => {
   return (categories: Record<string, number> | undefined, nodeID: string) => {
     const hrefsByCategory = new Map<string, string | undefined>();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,7 +10,7 @@ import React, { useCallback } from 'react';
 import { getBreakpoint } from '@elastic/eui';
 
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -37,6 +38,7 @@ interface Props {
   formatter: InfraFormatter;
   bottomMargin: number;
   topMargin: number;
+  showLoading: boolean;
 }
 
 export const NodesOverview = ({
@@ -53,6 +55,7 @@ export const NodesOverview = ({
   onDrilldown,
   bottomMargin,
   topMargin,
+  showLoading,
 }: Props) => {
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -66,7 +69,8 @@ export const NodesOverview = ({
   );
 
   const noData = !loading && nodes && nodes.length === 0;
-  if (loading) {
+  if (loading && showLoading) {
+    // Don't show loading screen when we're auto-reloading
     return (
       <InfraLoadingPanel
         height="100%"

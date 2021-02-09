@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import uuid from 'uuid';
 import {
   SavedObject,
   SavedObjectsBaseOptions,
@@ -22,8 +22,11 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   ISavedObjectTypeRegistry,
-} from 'src/core/server';
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsUtils,
+} from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
@@ -33,14 +36,6 @@ interface EncryptedSavedObjectsClientOptions {
   baseTypeRegistry: ISavedObjectTypeRegistry;
   service: Readonly<EncryptedSavedObjectsService>;
   getCurrentUser: () => AuthenticatedUser | undefined;
-}
-
-/**
- * Generates UUIDv4 ID for the any newly created saved object that is supposed to contain
- * encrypted attributes.
- */
-function generateID() {
-  return uuid.v4();
 }
 
 export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientContract {
@@ -65,21 +60,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       return await this.options.baseClient.create(type, attributes, options);
     }
 
-    // Saved objects with encrypted attributes should have IDs that are hard to guess especially
-    // since IDs are part of the AAD used during encryption, that's why we control them within this
-    // wrapper and don't allow consumers to specify their own IDs directly.
-
-    // only allow a specified ID if we're overwriting an existing ESO with a Version
-    // this helps us ensure that the document really was previously created using ESO
-    // and not being used to get around the specified ID limitation
-    const canSpecifyID = options.overwrite && options.version;
-    if (options.id && !canSpecifyID) {
-      throw new Error(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes.'
-      );
-    }
-
-    const id = options.id ?? generateID();
+    const id = this.getValidId(options.id, options.version, options.overwrite);
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -113,17 +94,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           return object;
         }
 
-        // Saved objects with encrypted attributes should have IDs that are hard to guess especially
-        // since IDs are part of the AAD used during encryption, that's why we control them within this
-        // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
-        const canSpecifyID = options?.overwrite && object.version;
-        if (object.id && !canSpecifyID) {
-          throw new Error(
-            'Predefined IDs are not allowed for saved objects with encrypted attributes.'
-          );
-        }
-
-        const id = object.id ?? generateID();
+        const id = this.getValidId(object.id, object.version, options?.overwrite);
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
@@ -211,6 +182,19 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     );
   }
 
+  public async resolve<T>(type: string, id: string, options?: SavedObjectsBaseOptions) {
+    const resolveResult = await this.options.baseClient.resolve<T>(type, id, options);
+    const object = await this.handleEncryptedAttributesInResponse(
+      resolveResult.saved_object,
+      undefined as unknown,
+      getDescriptorNamespace(this.options.baseTypeRegistry, type, options?.namespace)
+    );
+    return {
+      ...resolveResult,
+      saved_object: object,
+    };
+  }
+
   public async update<T>(
     type: string,
     id: string,
@@ -255,6 +239,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     options?: SavedObjectsDeleteFromNamespacesOptions
   ) {
     return await this.options.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+  }
+
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ): Promise<SavedObjectsRemoveReferencesToResponse> {
+    return await this.options.baseClient.removeReferencesTo(type, id, options);
   }
 
   /**
@@ -315,5 +307,28 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     }
 
     return response;
+  }
+
+  // Saved objects with encrypted attributes should have IDs that are hard to guess especially
+  // since IDs are part of the AAD used during encryption, that's why we control them within this
+  // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
+  private getValidId(
+    id: string | undefined,
+    version: string | undefined,
+    overwrite: boolean | undefined
+  ) {
+    if (id) {
+      // only allow a specified ID if we're overwriting an existing ESO with a Version
+      // this helps us ensure that the document really was previously created using ESO
+      // and not being used to get around the specified ID limitation
+      const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
+      if (!canSpecifyID) {
+        throw this.errors.createBadRequestError(
+          'Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID.'
+        );
+      }
+      return id;
+    }
+    return SavedObjectsUtils.generateId();
   }
 }

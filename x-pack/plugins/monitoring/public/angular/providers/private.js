@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -81,9 +82,9 @@
  *
  * @param {[type]} prov [description]
  */
-import _ from 'lodash';
+import { partial, uniqueId, isObject } from 'lodash';
 
-const nextId = _.partial(_.uniqueId, 'privateProvider#');
+const nextId = partial(uniqueId, 'privateProvider#');
 
 function name(fn) {
   return fn.name || fn.toString().split('\n').shift();
@@ -141,7 +142,7 @@ export function PrivateProvider() {
 
         const context = {};
         let instance = $injector.invoke(prov, context, locals);
-        if (!_.isObject(instance)) instance = context;
+        if (!isObject(instance)) instance = context;
 
         privPath.pop();
         return instance;
@@ -155,7 +156,7 @@ export function PrivateProvider() {
 
         if ($delegateId != null && $delegateProv != null) {
           instance = instantiate(prov, {
-            $decorate: _.partial(get, $delegateId, $delegateProv),
+            $decorate: partial(get, $delegateId, $delegateProv),
           });
         } else {
           instance = instantiate(prov);

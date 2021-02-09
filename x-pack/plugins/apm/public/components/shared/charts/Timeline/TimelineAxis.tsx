@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode } from 'react';
 import { inRange } from 'lodash';
-import { Sticky } from 'react-sticky';
 import { XAxis, XYPlot } from 'react-vis';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/useTheme';
+import { useTheme } from '../../../../hooks/use_theme';
 import { px } from '../../../../style/variables';
 import { Mark } from './';
 import { LastTickValue } from './LastTickValue';
@@ -54,57 +54,51 @@ export function TimelineAxis({
   const topTraceDurationFormatted = tickFormatter(topTraceDuration).formatted;
 
   return (
-    <Sticky disableCompensation>
-      {({ style }) => {
-        return (
-          <div
-            style={{
-              position: 'absolute',
-              borderBottom: `1px solid ${theme.eui.euiColorMediumShade}`,
-              height: px(margins.top),
-              zIndex: 2,
-              width: '100%',
-              ...style,
-            }}
-          >
-            <XYPlot
-              dontCheckIfEmpty
-              width={width}
-              height={margins.top}
-              margin={{
-                top: margins.top,
-                left: margins.left,
-                right: margins.right,
-              }}
-              xDomain={xDomain}
-            >
-              <XAxis
-                hideLine
-                orientation="top"
-                tickSize={0}
-                tickValues={xAxisTickValues}
-                tickFormat={(time?: number) => tickFormatter(time).formatted}
-                tickPadding={20}
-                style={{
-                  text: { fill: theme.eui.euiColorDarkShade },
-                }}
-              />
-
-              {topTraceDuration > 0 && (
-                <LastTickValue
-                  x={xScale(topTraceDuration)}
-                  value={topTraceDurationFormatted}
-                  marginTop={28}
-                />
-              )}
-
-              {marks.map((mark) => (
-                <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
-              ))}
-            </XYPlot>
-          </div>
-        );
+    <div
+      style={{
+        position: 'sticky',
+        top: 0,
+        borderBottom: `1px solid ${theme.eui.euiColorMediumShade}`,
+        height: px(margins.top),
+        zIndex: 2,
+        width: '100%',
       }}
-    </Sticky>
+    >
+      <XYPlot
+        dontCheckIfEmpty
+        width={width}
+        height={margins.top}
+        margin={{
+          top: margins.top,
+          left: margins.left,
+          right: margins.right,
+        }}
+        xDomain={xDomain}
+      >
+        <XAxis
+          hideLine
+          orientation="top"
+          tickSize={0}
+          tickValues={xAxisTickValues}
+          tickFormat={(time?: number) => tickFormatter(time).formatted}
+          tickPadding={20}
+          style={{
+            text: { fill: theme.eui.euiColorDarkShade },
+          }}
+        />
+
+        {topTraceDuration > 0 && (
+          <LastTickValue
+            x={xScale(topTraceDuration)}
+            value={topTraceDurationFormatted}
+            marginTop={28}
+          />
+        )}
+
+        {marks.map((mark) => (
+          <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
+        ))}
+      </XYPlot>
+    </div>
   );
 }

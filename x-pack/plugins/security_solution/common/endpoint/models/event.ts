@@ -1,9 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { LegacyEndpointEvent, ResolverEvent, SafeResolverEvent, ECSField } from '../types';
+
+import {
+  LegacyEndpointEvent,
+  ResolverEvent,
+  SafeResolverEvent,
+  ECSField,
+  WinlogEvent,
+} from '../types';
 import { firstNonNullValue, hasValue, values } from './ecs_safety_helpers';
 
 /**
@@ -186,6 +194,15 @@ export function eventID(event: SafeResolverEvent): number | undefined | string {
   return firstNonNullValue(
     isLegacyEventSafeVersion(event) ? event.endgame.serial_event_id : event.event?.id
   );
+}
+
+/**
+ * Retrieve the record_id field from a winlog event.
+ *
+ * @param event a winlog event
+ */
+export function winlogRecordID(event: WinlogEvent): undefined | string {
+  return firstNonNullValue(event.winlog?.record_id);
 }
 
 /**

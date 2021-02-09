@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 interface LocationLinkProps {
   location?: string | null;
@@ -32,8 +33,6 @@ export const LocationLink = ({ location, textSize }: LocationLinkProps) => {
         description:
           'Text that instructs the user to navigate to our docs to add a geographic location to their data',
       })}
-      &nbsp;
-      <EuiIcon size="s" type="popout" />
     </EuiLink>
   );
 };

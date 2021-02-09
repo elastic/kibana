@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, FC } from 'react';
@@ -132,7 +133,7 @@ export const ExpandableSectionAnalytics: FC<ExpandableSectionAnalyticsProps> = (
         dataTestId="analysis"
         content={analyticsSectionContent}
         headerItems={analyticsSectionHeaderItems}
-        isExpanded={false}
+        urlStateKey={'analysis'}
         title={
           <FormattedMessage
             id="xpack.ml.dataframe.analytics.exploration.analysisSectionTitle"

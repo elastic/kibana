@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -9,11 +10,17 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
+import {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+} from 'src/core/types';
 import { RiskScore } from '../types/risk_score';
 import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
+import { NonEmptyString } from '../types/non_empty_string';
 import { parseScheduleDates } from '../../parse_schedule_dates';
 
 export const author = t.array(t.string);
@@ -28,7 +35,7 @@ export type BuildingBlockType = t.TypeOf<typeof building_block_type>;
 export const buildingBlockTypeOrUndefined = t.union([building_block_type, t.undefined]);
 export type BuildingBlockTypeOrUndefined = t.TypeOf<typeof buildingBlockTypeOrUndefined>;
 
-export const description = t.string;
+export const description = NonEmptyString;
 export type Description = t.TypeOf<typeof description>;
 
 export const descriptionOrUndefined = t.union([description, t.undefined]);
@@ -65,6 +72,22 @@ export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-able yet
 
+export const filtersOrUndefined = t.union([filters, t.undefined]);
+export type FiltersOrUndefined = t.TypeOf<typeof filtersOrUndefined>;
+
+export const saved_object_attribute_single: t.Type<SavedObjectAttributeSingle> = t.recursion(
+  'saved_object_attribute_single',
+  () => t.union([t.string, t.number, t.boolean, t.null, t.undefined, saved_object_attributes])
+);
+export const saved_object_attribute: t.Type<SavedObjectAttribute> = t.recursion(
+  'saved_object_attribute',
+  () => t.union([saved_object_attribute_single, t.array(saved_object_attribute_single)])
+);
+export const saved_object_attributes: t.Type<SavedObjectAttributes> = t.recursion(
+  'saved_object_attributes',
+  () => t.record(t.string, saved_object_attribute)
+);
+
 /**
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerts/common/alert.ts
@@ -72,7 +95,7 @@ export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-a
 export const action_group = t.string;
 export const action_id = t.string;
 export const action_action_type_id = t.string;
-export const action_params = t.object;
+export const action_params = saved_object_attributes;
 export const action = t.exact(
   t.type({
     group: action_group,
@@ -84,6 +107,18 @@ export const action = t.exact(
 
 export const actions = t.array(action);
 export type Actions = t.TypeOf<typeof actions>;
+
+export const actionsCamel = t.array(
+  t.exact(
+    t.type({
+      group: action_group,
+      id: action_id,
+      actionTypeId: action_action_type_id,
+      params: action_params,
+    })
+  )
+);
+export type ActionsCamel = t.TypeOf<typeof actions>;
 
 const stringValidator = (input: unknown): input is string => typeof input === 'string';
 export const from = new t.Type<string, string, unknown>(
@@ -216,7 +251,7 @@ export type MaxSignals = t.TypeOf<typeof max_signals>;
 export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
 export type MaxSignalsOrUndefined = t.TypeOf<typeof maxSignalsOrUndefined>;
 
-export const name = t.string;
+export const name = NonEmptyString;
 export type Name = t.TypeOf<typeof name>;
 
 export const nameOrUndefined = t.union([name, t.undefined]);
@@ -286,7 +321,12 @@ export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefi
 export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
 
-export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
+export const job_status = t.keyof({
+  succeeded: null,
+  failed: null,
+  'going to run': null,
+  'partial failure': null,
+});
 export type JobStatus = t.TypeOf<typeof job_status>;
 
 export const conflicts = t.keyof({ abort: null, proceed: null });
@@ -374,31 +414,50 @@ export const threat_tactic = t.type({
   name: threat_tactic_name,
   reference: threat_tactic_reference,
 });
+export type ThreatTactic = t.TypeOf<typeof threat_tactic>;
+export const threat_subtechnique_id = t.string;
+export const threat_subtechnique_name = t.string;
+export const threat_subtechnique_reference = t.string;
+export const threat_subtechnique = t.type({
+  id: threat_subtechnique_id,
+  name: threat_subtechnique_name,
+  reference: threat_subtechnique_reference,
+});
+export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
+export const threat_subtechniques = t.array(threat_subtechnique);
 export const threat_technique_id = t.string;
 export const threat_technique_name = t.string;
 export const threat_technique_reference = t.string;
-export const threat_technique = t.exact(
-  t.type({
-    id: threat_technique_id,
-    name: threat_technique_name,
-    reference: threat_technique_reference,
-  })
-);
-export const threat_techniques = t.array(threat_technique);
-export const threat = t.array(
+export const threat_technique = t.intersection([
   t.exact(
     t.type({
-      framework: threat_framework,
-      tactic: threat_tactic,
-      technique: threat_techniques,
+      id: threat_technique_id,
+      name: threat_technique_name,
+      reference: threat_technique_reference,
     })
-  )
+  ),
+  t.exact(
+    t.partial({
+      subtechnique: threat_subtechniques,
+    })
+  ),
+]);
+export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
+export const threat_techniques = t.array(threat_technique);
+export const threat = t.exact(
+  t.type({
+    framework: threat_framework,
+    tactic: threat_tactic,
+    technique: threat_techniques,
+  })
 );
-
 export type Threat = t.TypeOf<typeof threat>;
 
-export const threatOrUndefined = t.union([threat, t.undefined]);
-export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
+export const threats = t.array(threat);
+export type Threats = t.TypeOf<typeof threats>;
+
+export const threatsOrUndefined = t.union([threats, t.undefined]);
+export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
 export const threshold = t.exact(
   t.type({
@@ -415,6 +474,10 @@ export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
 export const created_by = t.string;
+export const updatedByOrNull = t.union([updated_by, t.null]);
+export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
+export const createdByOrNull = t.union([created_by, t.null]);
+export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
 
 export const version = PositiveIntegerGreaterThanZero;
 export type Version = t.TypeOf<typeof version>;
@@ -459,3 +522,68 @@ export type Note = t.TypeOf<typeof note>;
 
 export const noteOrUndefined = t.union([note, t.undefined]);
 export type NoteOrUndefined = t.TypeOf<typeof noteOrUndefined>;
+
+export const indexRecord = t.record(
+  t.string,
+  t.type({
+    all: t.boolean,
+    maintenance: t.boolean,
+    manage_ilm: t.boolean,
+    read: t.boolean,
+    create_index: t.boolean,
+    read_cross_cluster: t.boolean,
+    index: t.boolean,
+    monitor: t.boolean,
+    delete: t.boolean,
+    manage: t.boolean,
+    delete_index: t.boolean,
+    create_doc: t.boolean,
+    view_index_metadata: t.boolean,
+    create: t.boolean,
+    manage_follow_index: t.boolean,
+    manage_leader_index: t.boolean,
+    write: t.boolean,
+  })
+);
+export type IndexRecord = t.TypeOf<typeof indexRecord>;
+
+export const indexType = t.type({
+  index: indexRecord,
+});
+export type IndexType = t.TypeOf<typeof indexType>;
+
+export const privilege = t.type({
+  username: t.string,
+  has_all_requested: t.boolean,
+  cluster: t.type({
+    monitor_ml: t.boolean,
+    manage_ccr: t.boolean,
+    manage_index_templates: t.boolean,
+    monitor_watcher: t.boolean,
+    monitor_transform: t.boolean,
+    read_ilm: t.boolean,
+    manage_security: t.boolean,
+    manage_own_api_key: t.boolean,
+    manage_saml: t.boolean,
+    all: t.boolean,
+    manage_ilm: t.boolean,
+    manage_ingest_pipelines: t.boolean,
+    read_ccr: t.boolean,
+    manage_rollup: t.boolean,
+    monitor: t.boolean,
+    manage_watcher: t.boolean,
+    manage: t.boolean,
+    manage_transform: t.boolean,
+    manage_token: t.boolean,
+    manage_ml: t.boolean,
+    manage_pipeline: t.boolean,
+    monitor_rollup: t.boolean,
+    transport_client: t.boolean,
+    create_snapshot: t.boolean,
+  }),
+  index: indexRecord,
+  is_authenticated: t.boolean,
+  has_encryption_key: t.boolean,
+});
+
+export type Privilege = t.TypeOf<typeof privilege>;

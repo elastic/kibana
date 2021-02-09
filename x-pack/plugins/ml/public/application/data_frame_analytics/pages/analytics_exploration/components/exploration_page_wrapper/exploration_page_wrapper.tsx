@@ -1,32 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useUrlState } from '../../../../../util/url_state';
+import { getAnalysisType, getDependentVar } from '../../../../../../../common/util/analytics_utils';
+
+import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 
 import {
   defaultSearchQuery,
-  getDefaultTrainingFilterQuery,
+  getScatterplotMatrixLegendType,
   useResultsViewConfig,
   DataFrameAnalyticsConfig,
 } from '../../../../common';
-import { ResultsSearchQuery } from '../../../../common/analytics';
+import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 
-import { ExpandableSectionAnalytics } from '../expandable_section';
+import { ExpandableSectionAnalytics, ExpandableSectionSplom } from '../expandable_section';
 import { ExplorationResultsTable } from '../exploration_results_table';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 import { JobConfigErrorCallout } from '../job_config_error_callout';
 import { LoadingPanel } from '../loading_panel';
 import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
+import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
+import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 
 const filters = {
   options: [
@@ -49,7 +54,7 @@ const filters = {
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus?: DATA_FRAME_TASK_STATE;
+  jobStatus?: DataFrameTaskStateType;
   searchQuery: ResultsSearchQuery;
 }
 
@@ -58,7 +63,6 @@ interface Props {
   title: string;
   EvaluatePanel: FC<EvaluatePanelProps>;
   FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps>;
-  defaultIsTraining?: boolean;
 }
 
 export const ExplorationPageWrapper: FC<Props> = ({
@@ -66,7 +70,6 @@ export const ExplorationPageWrapper: FC<Props> = ({
   title,
   EvaluatePanel,
   FeatureImportanceSummaryPanel,
-  defaultIsTraining,
 }) => {
   const {
     indexPattern,
@@ -81,24 +84,34 @@ export const ExplorationPageWrapper: FC<Props> = ({
     totalFeatureImportance,
   } = useResultsViewConfig(jobId);
 
-  const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
-  const [globalState, setGlobalState] = useUrlState('_g');
-  const [defaultQueryString, setDefaultQueryString] = useState<string | undefined>();
+  const [pageUrlState, setPageUrlState] = useExplorationUrlState();
 
-  useEffect(() => {
-    if (defaultIsTraining !== undefined && jobConfig !== undefined) {
-      // Apply defaultIsTraining filter
-      setSearchQuery(
-        getDefaultTrainingFilterQuery(jobConfig.dest.results_field, defaultIsTraining)
-      );
-      setDefaultQueryString(`${jobConfig.dest.results_field}.is_training : ${defaultIsTraining}`);
-      // Clear defaultIsTraining from url
-      setGlobalState('ml', {
-        analysisType: globalState.ml.analysisType,
-        jobId: globalState.ml.jobId,
-      });
-    }
-  }, [jobConfig?.dest.results_field]);
+  const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
+
+  const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
+    (update) => {
+      if (update.query) {
+        setSearchQuery(update.query);
+      }
+      if (update.queryString !== pageUrlState.queryText) {
+        setPageUrlState({ queryText: update.queryString, queryLanguage: update.language });
+      }
+    },
+    [pageUrlState, setPageUrlState]
+  );
+
+  const query: ExplorationQueryBarProps['query'] = {
+    query: pageUrlState.queryText,
+    language: pageUrlState.queryLanguage,
+  };
+
+  const resultsField = jobConfig?.dest.results_field ?? '';
+  const scatterplotFieldOptions = useScatterplotFieldOptions(
+    indexPattern,
+    jobConfig?.analyzed_fields.includes,
+    jobConfig?.analyzed_fields.excludes,
+    resultsField
+  );
 
   if (indexPatternErrorMessage !== undefined) {
     return (
@@ -126,6 +139,9 @@ export const ExplorationPageWrapper: FC<Props> = ({
     );
   }
 
+  const jobType =
+    jobConfig && jobConfig.analysis ? getAnalysisType(jobConfig?.analysis) : undefined;
+
   return (
     <>
       {typeof jobConfig?.description !== 'undefined' && (
@@ -144,8 +160,8 @@ export const ExplorationPageWrapper: FC<Props> = ({
                 <EuiFlexItem>
                   <ExplorationQueryBar
                     indexPattern={indexPattern}
-                    setSearchQuery={setSearchQuery}
-                    defaultQueryString={defaultQueryString}
+                    setSearchQuery={searchQueryUpdateHandler}
+                    query={query}
                     filters={filters}
                   />
                 </EuiFlexItem>
@@ -179,6 +195,27 @@ export const ExplorationPageWrapper: FC<Props> = ({
       {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
         <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
       )}
+
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false &&
+        jobConfig !== undefined &&
+        isInitialized === true &&
+        typeof jobConfig?.id === 'string' &&
+        scatterplotFieldOptions.length > 1 &&
+        typeof jobConfig?.analysis !== 'undefined' && (
+          <ExpandableSectionSplom
+            fields={scatterplotFieldOptions}
+            index={jobConfig?.dest.index}
+            color={
+              jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+              jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+                ? getDependentVar(jobConfig.analysis)
+                : undefined
+            }
+            legendType={getScatterplotMatrixLegendType(jobType)}
+            searchQuery={searchQuery}
+          />
+        )}
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&

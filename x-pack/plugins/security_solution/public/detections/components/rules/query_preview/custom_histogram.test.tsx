@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -51,7 +52,7 @@ describe('PreviewCustomQueryHistogram', () => {
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeTruthy();
     expect(
-      wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').at(0).prop('subtitle')
+      wrapper.find('[dataTestSubj="queryPreviewCustomHistogram"]').at(0).prop('subtitle')
     ).toEqual(i18n.QUERY_PREVIEW_SUBTITLE_LOADING);
   });
 
@@ -78,32 +79,32 @@ describe('PreviewCustomQueryHistogram', () => {
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeFalsy();
     expect(
-      wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').at(0).prop('subtitle')
+      wrapper.find('[dataTestSubj="queryPreviewCustomHistogram"]').at(0).prop('subtitle')
     ).toEqual(i18n.QUERY_PREVIEW_TITLE(9154));
-    expect(
-      wrapper.find('[data-test-subj="queryPreviewCustomHistogram"]').at(0).props().data
-    ).toEqual([
-      {
-        key: 'hits',
-        value: [
-          {
-            g: 'All others',
-            x: 1602247050000,
-            y: 2314,
-          },
-          {
-            g: 'All others',
-            x: 1602247162500,
-            y: 3471,
-          },
-          {
-            g: 'All others',
-            x: 1602247275000,
-            y: 3369,
-          },
-        ],
-      },
-    ]);
+    expect(wrapper.find('[dataTestSubj="queryPreviewCustomHistogram"]').at(0).props().data).toEqual(
+      [
+        {
+          key: 'hits',
+          value: [
+            {
+              g: 'All others',
+              x: 1602247050000,
+              y: 2314,
+            },
+            {
+              g: 'All others',
+              x: 1602247162500,
+              y: 3471,
+            },
+            {
+              g: 'All others',
+              x: 1602247275000,
+              y: 3369,
+            },
+          ],
+        },
+      ]
+    );
   });
 
   test('it invokes setQuery with id, inspect, isLoading and refetch', async () => {

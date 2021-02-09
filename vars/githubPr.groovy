@@ -149,7 +149,7 @@ def getTestFailuresMessage() {
 def getBuildStatusIncludingMetrics() {
   def status = buildUtils.getBuildStatus()
 
-  if (status == 'SUCCESS' && !ciStats.getMetricsSuccess()) {
+  if (status == 'SUCCESS' && shouldCheckCiMetricSuccess() && !ciStats.getMetricsSuccess()) {
     return 'FAILURE'
   }
 
@@ -182,12 +182,14 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       ## :green_heart: Build Succeeded
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${getDocsChangesLink()}
     """
   } else if(status == 'UNSTABLE') {
     def message = """
       ## :yellow_heart: Build succeeded, but was flaky
       * [continuous-integration/kibana-ci/pull-request](${env.BUILD_URL})
       * Commit: ${getCommitHash()}
+      ${getDocsChangesLink()}
     """.stripIndent()
 
     def failures = retryable.getFlakyFailures()
@@ -204,6 +206,7 @@ def getNextCommentMessage(previousCommentInfo = [:], isFinal = false) {
       * Commit: ${getCommitHash()}
       * [Pipeline Steps](${env.BUILD_URL}flowGraphTable) (look for red circles / failed steps)
       * [Interpreting CI Failures](https://www.elastic.co/guide/en/kibana/current/interpreting-ci-failures.html)
+      ${getDocsChangesLink()}
     """
   }
 
@@ -292,8 +295,37 @@ def getCommitHash() {
   return env.ghprbActualCommit
 }
 
+def getDocsChangesLink() {
+  def url = "https://kibana_${env.ghprbPullId}.docs-preview.app.elstc.co/diff"
+
+  try {
+    // httpRequest throws on status codes >400 and failures
+    def resp = httpRequest([ method: "GET", url: url ])
+
+    if (resp.contains("There aren't any differences!")) {
+      return ""
+    }
+
+    return "* [Documentation Changes](${url})"
+  } catch (ex) {
+    print "Failed to reach ${url}"
+    buildUtils.printStacktrace(ex)
+  }
+
+  return ""
+}
+
 def getFailedSteps() {
   return jenkinsApi.getFailedSteps()?.findAll { step ->
     step.displayName != 'Check out from version control'
   }
+}
+
+def shouldCheckCiMetricSuccess() {
+  // disable ciMetrics success check when a PR is targetting a non-tracked branch
+  if (buildState.has('checkoutInfo') && !buildState.get('checkoutInfo').targetsTrackedBranch) {
+    return false
+  }
+
+  return true
 }

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +18,7 @@ import {
   SelectOption,
   SuperSelectOption,
 } from '../../../types';
-import { useIndexSettings } from '../../../index_settings_context';
+import { useConfig } from '../../../config_context';
 import { AnalyzerParameterSelects } from './analyzer_parameter_selects';
 
 interface Props {
@@ -71,7 +73,9 @@ export const AnalyzerParameter = ({
   allowsIndexDefaultOption = true,
   'data-test-subj': dataTestSubj,
 }: Props) => {
-  const { value: indexSettings } = useIndexSettings();
+  const {
+    value: { indexSettings },
+  } = useConfig();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
   const analyzerOptions = allowsIndexDefaultOption
     ? ANALYZER_OPTIONS

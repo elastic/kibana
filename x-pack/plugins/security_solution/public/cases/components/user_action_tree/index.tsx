@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import classNames from 'classnames';
 
 import {
@@ -22,16 +24,17 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector } from '../../../../../case/common/api/cases';
+import { ActionConnector, CommentType } from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
-import { OnUpdateFields } from '../case_view';
+import { Alert, OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
+  getAlertComment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -50,6 +53,8 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
+  alerts: Record<string, Alert>;
+  onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -78,6 +83,17 @@ const MyEuiCommentList = styled(EuiCommentList)`
         display: none;
       }
     }
+
+    & .comment-alert .euiCommentEvent {
+      background-color: ${theme.eui.euiColorLightestShade};
+      border: ${theme.eui.euiFlyoutBorder};
+      padding: 10px;
+      border-radius: ${theme.eui.paddingSizes.xs};
+    }
+
+    & .comment-alert .euiCommentEvent__headerData {
+      flex-grow: 1;
+    }
   `}
 `;
 
@@ -96,6 +112,8 @@ export const UserActionTree = React.memo(
     onUpdateField,
     updateCase,
     userCanCrud,
+    alerts,
+    onShowAlertDetails,
   }: UserActionTreeProps) => {
     const { commentId } = useParams<{ commentId?: string }>();
     const handlerTimeoutId = useRef(0);
@@ -105,6 +123,7 @@ export const UserActionTree = React.memo(
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
         if (!manageMarkdownEditIds.includes(id)) {
@@ -217,8 +236,8 @@ export const UserActionTree = React.memo(
       () => ({
         username: (
           <UserActionUsername
-            username={caseData.createdBy.username ?? i18n.UNKNOWN}
-            fullName={caseData.createdBy.fullName ?? caseData.createdBy.username ?? ''}
+            username={caseData.createdBy.username}
+            fullName={caseData.createdBy.fullName}
           />
         ),
         event: i18n.ADDED_DESCRIPTION,
@@ -264,14 +283,14 @@ export const UserActionTree = React.memo(
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (comment != null) {
+              if (comment != null && comment.type === CommentType.user) {
                 return [
                   ...comments,
                   {
                     username: (
                       <UserActionUsername
-                        username={comment.createdBy.username ?? ''}
-                        fullName={comment.createdBy.fullName ?? comment.createdBy.username ?? ''}
+                        username={comment.createdBy.username}
+                        fullName={comment.createdBy.fullName}
                       />
                     ),
                     'data-test-subj': `comment-create-action-${comment.id}`,
@@ -316,6 +335,9 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
+              } else if (comment != null && comment.type === CommentType.alert) {
+                const alert = alerts[comment.alertId];
+                return [...comments, getAlertComment({ action, alert, onShowAlertDetails })];
               }
             }
 
@@ -380,10 +402,10 @@ export const UserActionTree = React.memo(
               ];
             }
 
-            // description, comments, tags
+            // title, description, comment updates, tags
             if (
               action.actionField.length === 1 &&
-              ['title', 'description', 'comment', 'tags'].includes(action.actionField[0])
+              ['title', 'description', 'comment', 'tags', 'status'].includes(action.actionField[0])
             ) {
               const myField = action.actionField[0];
               const label: string | JSX.Element = getLabelTitle({
@@ -412,23 +434,19 @@ export const UserActionTree = React.memo(
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         userCanCrud,
+        alerts,
+        onShowAlertDetails,
       ]
     );
 
     const bottomActions = [
       {
         username: (
-          <UserActionUsername
-            username={currentUser != null ? currentUser.username ?? '' : ''}
-            fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
-          />
+          <UserActionUsername username={currentUser?.username} fullName={currentUser?.fullName} />
         ),
         'data-test-subj': 'add-comment',
         timelineIcon: (
-          <UserActionAvatar
-            username={currentUser != null ? currentUser.username ?? '' : ''}
-            fullName={currentUser != null ? currentUser.fullName ?? '' : ''}
-          />
+          <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
         ),
         className: 'isEdit',
         children: MarkdownNewComment,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -35,19 +36,32 @@ export const destSchema = schema.object({
   index: schema.string(),
   pipeline: schema.maybe(schema.string()),
 });
+
 export const pivotSchema = schema.object({
   group_by: schema.any(),
   aggregations: schema.any(),
 });
+
+export const latestFunctionSchema = schema.object({
+  unique_key: schema.arrayOf(schema.string()),
+  sort: schema.string(),
+});
+
+export type PivotConfig = TypeOf<typeof pivotSchema>;
+
+export type LatestFunctionConfig = TypeOf<typeof latestFunctionSchema>;
+
 export const settingsSchema = schema.object({
   max_page_search_size: schema.maybe(schema.number()),
   // The default value is null, which disables throttling.
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
 });
+
 export const sourceSchema = schema.object({
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
+
 export const syncSchema = schema.object({
   time: schema.object({
     delay: schema.maybe(schema.string()),
@@ -55,23 +69,51 @@ export const syncSchema = schema.object({
   }),
 });
 
-// PUT transforms/{transformId}
-export const putTransformsRequestSchema = schema.object({
-  description: schema.maybe(schema.string()),
-  dest: destSchema,
-  frequency: schema.maybe(schema.string()),
-  pivot: pivotSchema,
-  settings: schema.maybe(settingsSchema),
-  source: sourceSchema,
-  sync: schema.maybe(syncSchema),
-});
+function transformConfigPayloadValidator<
+  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig }
+>(value: T) {
+  if (!value.pivot && !value.latest) {
+    return 'pivot or latest is required for transform configuration';
+  }
+  if (value.pivot && value.latest) {
+    return 'pivot and latest are not allowed together';
+  }
+}
 
-export interface PutTransformsRequestSchema extends TypeOf<typeof putTransformsRequestSchema> {
+// PUT transforms/{transformId}
+export const putTransformsRequestSchema = schema.object(
+  {
+    description: schema.maybe(schema.string()),
+    dest: destSchema,
+    frequency: schema.maybe(schema.string()),
+    /**
+     * Pivot and latest are mutually exclusive, i.e. exactly one must be specified in the transform configuration
+     */
+    pivot: schema.maybe(pivotSchema),
+    /**
+     * Latest and pivot are mutually exclusive, i.e. exactly one must be specified in the transform configuration
+     */
+    latest: schema.maybe(latestFunctionSchema),
+    settings: schema.maybe(settingsSchema),
+    source: sourceSchema,
+    sync: schema.maybe(syncSchema),
+  },
+  {
+    validate: transformConfigPayloadValidator,
+  }
+);
+
+export type PutTransformsRequestSchema = TypeOf<typeof putTransformsRequestSchema>;
+
+export interface PutTransformsPivotRequestSchema
+  extends Omit<PutTransformsRequestSchema, 'latest'> {
   pivot: {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;
   };
 }
+
+export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 'pivot'>;
 
 interface TransformCreated {
   transform: TransformId;
@@ -86,18 +128,30 @@ export interface PutTransformsResponseSchema {
 }
 
 // POST transforms/_preview
-export const postTransformsPreviewRequestSchema = schema.object({
-  pivot: pivotSchema,
-  source: sourceSchema,
-});
+export const postTransformsPreviewRequestSchema = schema.object(
+  {
+    pivot: schema.maybe(pivotSchema),
+    latest: schema.maybe(latestFunctionSchema),
+    source: sourceSchema,
+  },
+  {
+    validate: transformConfigPayloadValidator,
+  }
+);
 
-export interface PostTransformsPreviewRequestSchema
-  extends TypeOf<typeof postTransformsPreviewRequestSchema> {
+export type PostTransformsPreviewRequestSchema = TypeOf<typeof postTransformsPreviewRequestSchema>;
+
+export type PivotTransformPreviewRequestSchema = Omit<
+  PostTransformsPreviewRequestSchema,
+  'latest'
+> & {
   pivot: {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;
   };
-}
+};
+
+export type LatestTransformPreviewRequestSchema = Omit<PostTransformsPreviewRequestSchema, 'pivot'>;
 
 interface EsMappingType {
   type: ES_FIELD_TYPES;

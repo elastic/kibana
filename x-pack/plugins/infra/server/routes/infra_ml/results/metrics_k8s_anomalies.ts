@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH,
@@ -32,6 +33,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       const {
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
@@ -52,6 +54,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
         } = await getMetricK8sAnomalies(
           requestContext,
           sourceId,
+          anomalyThreshold,
           startTime,
           endTime,
           metric,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
@@ -38,7 +39,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await makeChecksWithStatus(es, LessAvailMonitor, 5, 2, 10000, {}, 'down');
   };
 
-  describe('Observer location', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/85208
+  describe.skip('Observer location', () => {
     const start = '~ 15 minutes ago';
     const end = 'now';
 

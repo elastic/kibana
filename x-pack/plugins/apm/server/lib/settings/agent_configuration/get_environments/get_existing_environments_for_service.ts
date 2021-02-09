@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Setup } from '../../../helpers/setup_request';
@@ -18,7 +19,8 @@ export async function getExistingEnvironmentsForService({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { internalClient, indices } = setup;
+  const { internalClient, indices, config } = setup;
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
@@ -34,7 +36,7 @@ export async function getExistingEnvironmentsForService({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ALL_OPTION_VALUE,
-            size: 50,
+            size: maxServiceEnvironments,
           },
         },
       },

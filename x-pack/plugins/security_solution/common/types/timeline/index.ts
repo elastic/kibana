@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as runtimeTypes from 'io-ts';
@@ -143,10 +144,16 @@ const SavedFavoriteRuntimeType = runtimeTypes.partial({
 /*
  *  Sort Types
  */
-const SavedSortRuntimeType = runtimeTypes.partial({
+
+const SavedSortObject = runtimeTypes.partial({
   columnId: unionWithNullType(runtimeTypes.string),
+  columnType: unionWithNullType(runtimeTypes.string),
   sortDirection: unionWithNullType(runtimeTypes.string),
 });
+const SavedSortRuntimeType = runtimeTypes.union([
+  runtimeTypes.array(SavedSortObject),
+  SavedSortObject,
+]);
 
 /*
  *  Timeline Statuses
@@ -271,6 +278,7 @@ export enum TimelineId {
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
   active = 'timeline-1',
+  casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
 }
 
@@ -401,3 +409,24 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
+
+export enum TimelineTabs {
+  query = 'query',
+  graph = 'graph',
+  notes = 'notes',
+  pinned = 'pinned',
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EmptyObject = Record<any, never>;
+
+export type TimelineExpandedEventType =
+  | {
+      eventId: string;
+      indexName: string;
+    }
+  | EmptyObject;
+
+export type TimelineExpandedEvent = {
+  [tab in TimelineTabs]?: TimelineExpandedEventType;
+};

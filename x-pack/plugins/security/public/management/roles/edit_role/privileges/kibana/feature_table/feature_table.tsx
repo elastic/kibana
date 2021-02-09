@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -249,7 +250,7 @@ export class FeatureTable extends Component<Props, {}> {
       );
 
       const extraAction = (
-        <EuiText size={'s'} data-test-subj="reservedFeatureDescription">
+        <EuiText style={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
           {feature.reserved.description}
         </EuiText>
       );
@@ -320,6 +321,15 @@ export class FeatureTable extends Component<Props, {}> {
         options={options}
         idSelected={`${feature.id}_${selectedPrivilegeId ?? NO_PRIVILEGE_VALUE}`}
         onChange={this.onChange(feature.id)}
+        legend={i18n.translate('xpack.security.management.editRole.featureTable.actionLegendText', {
+          defaultMessage: '{featureName} feature privilege',
+          values: {
+            featureName: feature.name,
+          },
+        })}
+        style={{
+          minWidth: 200,
+        }}
       />
     );
 

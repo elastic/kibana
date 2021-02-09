@@ -1,12 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,6 +12,15 @@ import '../../../../../../common/mock/match_media';
 
 import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 describe('EndgameSecurityEventDetailsLine', () => {
   const mount = useMountAppended();
@@ -34,6 +39,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="admin_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -64,6 +70,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -94,6 +101,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -124,6 +132,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -154,6 +163,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -184,6 +194,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -214,6 +225,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -244,6 +256,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -274,6 +287,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName={undefined}
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -304,6 +318,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction={undefined}
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -334,6 +349,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode={undefined}
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -364,6 +380,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName={undefined}
           id="1"
           processExecutable="[processExecutable]"
@@ -394,6 +411,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable={undefined}
@@ -424,6 +442,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -454,6 +473,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="explicit_user_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -484,6 +504,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="admin_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -514,6 +535,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="admin_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -544,6 +566,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="admin_logon"
           eventCode="[eventCode]"
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"
@@ -574,6 +597,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           endgameTargetUserName="[endgameTargetUserName]"
           eventAction="admin_logon"
           eventCode={undefined}
+          eventOutcome={undefined}
           hostName="[hostName]"
           id="1"
           processExecutable="[processExecutable]"

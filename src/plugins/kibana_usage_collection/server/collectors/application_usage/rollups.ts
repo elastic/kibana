@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { ISavedObjectsRepository, SavedObject, Logger } from 'kibana/server';
@@ -28,6 +17,7 @@ import {
   SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './saved_objects_types';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 
 /**
  * For Rolling the daily data, we only care about the stored attributes and the version (to avoid overwriting via concurrent requests)
@@ -36,6 +26,10 @@ type ApplicationUsageDailyWithVersion = Pick<
   SavedObject<ApplicationUsageDaily>,
   'version' | 'attributes'
 >;
+
+export function serializeKey(appId: string, viewId: string) {
+  return `${appId}___${viewId}`;
+}
 
 /**
  * Aggregates all the transactional events into daily aggregates
@@ -51,21 +45,27 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
     let toCreate: Map<string, ApplicationUsageDailyWithVersion>;
     do {
       toCreate = new Map();
-      const { saved_objects: rawApplicationUsageTransactional } = await savedObjectsClient.find<
-        ApplicationUsageTransactional
-      >({
+      const {
+        saved_objects: rawApplicationUsageTransactional,
+      } = await savedObjectsClient.find<ApplicationUsageTransactional>({
         type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
         perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
       });
 
       for (const doc of rawApplicationUsageTransactional) {
         const {
-          attributes: { appId, minutesOnScreen, numberOfClicks, timestamp },
+          attributes: { appId, viewId, minutesOnScreen, numberOfClicks, timestamp },
         } = doc;
         const dayId = moment(timestamp).format('YYYY-MM-DD');
-        const dailyId = `${appId}:${dayId}`;
+
+        const dailyId =
+          !viewId || viewId === MAIN_APP_DEFAULT_VIEW_ID
+            ? `${appId}:${dayId}`
+            : `${appId}:${dayId}:${viewId}`;
+
         const existingDoc =
-          toCreate.get(dailyId) || (await getDailyDoc(savedObjectsClient, dailyId, appId, dayId));
+          toCreate.get(dailyId) ||
+          (await getDailyDoc(savedObjectsClient, dailyId, appId, viewId, dayId));
         toCreate.set(dailyId, {
           ...existingDoc,
           attributes: {
@@ -85,16 +85,27 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
           })),
           { overwrite: true }
         );
-        await Promise.all(
+        const promiseStatuses = await Promise.allSettled(
           rawApplicationUsageTransactional.map(
             ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_TRANSACTIONAL_TYPE, id) // There is no bulkDelete :(
           )
         );
+        const rejectedPromises = promiseStatuses.filter(
+          (settledResult): settledResult is PromiseRejectedResult =>
+            settledResult.status === 'rejected'
+        );
+        if (rejectedPromises.length > 0) {
+          throw new Error(
+            `Failed to delete some items in ${SAVED_OBJECTS_TRANSACTIONAL_TYPE}: ${JSON.stringify(
+              rejectedPromises.map(({ reason }) => reason)
+            )}`
+          );
+        }
       }
     } while (toCreate.size > 0);
   } catch (err) {
-    logger.warn(`Failed to rollup transactional to daily entries`);
-    logger.warn(err);
+    logger.debug(`Failed to rollup transactional to daily entries`);
+    logger.debug(err);
   }
 }
 
@@ -103,12 +114,14 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
  * @param savedObjectsClient
  * @param id The ID of the document to retrieve (typically, `${appId}:${dayId}`)
  * @param appId The application ID
+ * @param viewId The application view ID
  * @param dayId The date of the document in the format YYYY-MM-DD
  */
 async function getDailyDoc(
   savedObjectsClient: ISavedObjectsRepository,
   id: string,
   appId: string,
+  viewId: string,
   dayId: string
 ): Promise<ApplicationUsageDailyWithVersion> {
   try {
@@ -118,6 +131,7 @@ async function getDailyDoc(
       return {
         attributes: {
           appId,
+          viewId,
           // Concatenating the day in YYYY-MM-DD form to T00:00:00Z to reduce the TZ effects
           timestamp: moment(`${moment(dayId).format('YYYY-MM-DD')}T00:00:00Z`).toISOString(),
           minutesOnScreen: 0,
@@ -156,25 +170,41 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
     ]);
 
     const existingTotals = rawApplicationUsageTotals.reduce(
-      (acc, { attributes: { appId, numberOfClicks, minutesOnScreen } }) => {
+      (
+        acc,
+        {
+          attributes: { appId, viewId = MAIN_APP_DEFAULT_VIEW_ID, numberOfClicks, minutesOnScreen },
+        }
+      ) => {
+        const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
+
         return {
           ...acc,
           // No need to sum because there should be 1 document per appId only
-          [appId]: { appId, numberOfClicks, minutesOnScreen },
+          [key]: { appId, viewId, numberOfClicks, minutesOnScreen },
         };
       },
-      {} as Record<string, { appId: string; minutesOnScreen: number; numberOfClicks: number }>
+      {} as Record<
+        string,
+        { appId: string; viewId: string; minutesOnScreen: number; numberOfClicks: number }
+      >
     );
 
     const totals = rawApplicationUsageDaily.reduce((acc, { attributes }) => {
-      const { appId, numberOfClicks, minutesOnScreen } = attributes;
-
-      const existing = acc[appId] || { minutesOnScreen: 0, numberOfClicks: 0 };
+      const {
+        appId,
+        viewId = MAIN_APP_DEFAULT_VIEW_ID,
+        numberOfClicks,
+        minutesOnScreen,
+      } = attributes;
+      const key = viewId === MAIN_APP_DEFAULT_VIEW_ID ? appId : serializeKey(appId, viewId);
+      const existing = acc[key] || { minutesOnScreen: 0, numberOfClicks: 0 };
 
       return {
         ...acc,
-        [appId]: {
+        [key]: {
           appId,
+          viewId,
           numberOfClicks: numberOfClicks + existing.numberOfClicks,
           minutesOnScreen: minutesOnScreen + existing.minutesOnScreen,
         },
@@ -196,7 +226,7 @@ export async function rollTotals(logger: Logger, savedObjectsClient?: ISavedObje
       ),
     ]);
   } catch (err) {
-    logger.warn(`Failed to rollup daily entries to totals`);
-    logger.warn(err);
+    logger.debug(`Failed to rollup daily entries to totals`);
+    logger.debug(err);
   }
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,7 @@ export const QUERY_LABEL = i18n.translate(
 export const THREAT_QUERY_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.threatQueryLabel',
   {
-    defaultMessage: 'Threat query',
+    defaultMessage: 'Indicator index query',
   }
 );
 
@@ -65,7 +66,7 @@ export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
 export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.threatMatchRuleTypeDescription',
   {
-    defaultMessage: 'Threat Match',
+    defaultMessage: 'Indicator Match',
   }
 );
 

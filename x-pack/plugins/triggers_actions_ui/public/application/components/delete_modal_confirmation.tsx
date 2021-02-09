@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
-import { useAppDependencies } from '../app_context';
+import { useKibana } from '../../common/lib/kibana';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,
@@ -40,7 +42,10 @@ export const DeleteModalConfirmation = ({
     setDeleteModalVisibility(idsToDelete.length > 0);
   }, [idsToDelete]);
 
-  const { http, toastNotifications } = useAppDependencies();
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
   const numIdsToDelete = idsToDelete.length;
   if (!deleteModalFlyoutVisible) {
     return null;
@@ -86,7 +91,7 @@ export const DeleteModalConfirmation = ({
           const numSuccesses = successes.length;
           const numErrors = errors.length;
           if (numSuccesses > 0) {
-            toastNotifications.addSuccess(
+            toasts.addSuccess(
               i18n.translate(
                 'xpack.triggersActionsUI.components.deleteSelectedIdsSuccessNotification.descriptionText',
                 {
@@ -99,7 +104,7 @@ export const DeleteModalConfirmation = ({
           }
 
           if (numErrors > 0) {
-            toastNotifications.addDanger(
+            toasts.addDanger(
               i18n.translate(
                 'xpack.triggersActionsUI.components.deleteSelectedIdsErrorNotification.descriptionText',
                 {

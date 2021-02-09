@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -10,108 +11,192 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
-import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
 import {
+  Embeddable,
+  IContainer,
+  ReferenceOrValueEmbeddable,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../src/plugins/embeddable/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import {
+  ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,
-  ActionExecutionContext,
-  TriggerContextMapping,
-} from '../../../../../src/plugins/ui_actions/public';
-import {
   esFilters,
   TimeRange,
   Filter,
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-import { createMapStore, MapStore } from '../reducers/store';
-import { MapSettings } from '../reducers/map';
 import {
-  setGotoWithCenter,
   replaceLayerList,
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
-  disableInteractive,
-  disableTooltipControl,
-  hideToolbarOverlay,
-  hideLayerControl,
-  hideViewControl,
-  setHiddenLayers,
-  setMapSettings,
   setReadOnly,
-  setIsLayerTOCOpen,
-  setOpenTOCDetails,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
+  setChartsPaletteServiceGetColor,
   setEventHandlers,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
-import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  getMapCenter,
+  getMapZoom,
+  getHiddenLayerIds,
+  getQueryableUniqueIndexPatternIds,
+} from '../selectors/map_selectors';
+import {
+  APP_ID,
+  getExistingMapPath,
+  MAP_SAVED_OBJECT_TYPE,
+  MAP_PATH,
+  RawValue,
+} from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
-import { getUiActions, getCoreI18n } from '../kibana_services';
+import {
+  getUiActions,
+  getCoreI18n,
+  getHttp,
+  getChartsPaletteServiceGetColor,
+} from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
+import { SavedMap } from '../routes/map_page';
+import { getIndexPatternsFromIds } from '../index_pattern_util';
+import { getMapAttributeService } from '../map_attribute_service';
+import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 
-import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from './types';
-export { MapEmbeddableInput, MapEmbeddableConfig };
+import {
+  MapByValueInput,
+  MapByReferenceInput,
+  MapEmbeddableConfig,
+  MapEmbeddableInput,
+  MapEmbeddableOutput,
+} from './types';
+export { MapEmbeddableInput, MapEmbeddableOutput };
 
-export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
+export class MapEmbeddable
+  extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  private _description: string;
+  private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
-  private _eventHandlers?: EventHandlers;
-  private _layerList: LayerDescriptor[];
-  private _store: MapStore;
   private _subscription: Subscription;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters?: Filter[];
+  private _prevSyncColors?: boolean;
+  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
-  private _settings?: MapSettings;
+  private _isInitialized = false;
 
-  constructor(
-    config: MapEmbeddableConfig,
-    initialInput: MapEmbeddableInput,
-    parent?: IContainer,
-    renderTooltipContent?: RenderToolTipContent,
-    eventHandlers?: EventHandlers
-  ) {
+  constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
       initialInput,
       {
-        editUrl: config.editUrl,
-        editApp: config.editApp,
-        editPath: config.editPath,
-        indexPatterns: config.indexPatterns,
+        editApp: APP_ID,
         editable: config.editable,
-        defaultTitle: config.title,
+        indexPatterns: [],
       },
       parent
     );
 
-    this._description = config.description ? config.description : '';
-    this._renderTooltipContent = renderTooltipContent;
-    this._eventHandlers = eventHandlers;
-    this._layerList = config.layerList;
-    this._settings = config.settings;
-    this._store = createMapStore();
+    this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
+    this._initializeSaveMap();
+    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
+  }
 
-    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+  private async _initializeSaveMap() {
+    try {
+      await this._savedMap.whenReady();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
+    this._initializeStore();
+    try {
+      await this._initializeOutput();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
+
+    this._isInitialized = true;
+    if (this._domNode) {
+      this.render(this._domNode);
+    }
+  }
+
+  private _initializeStore() {
+    this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
+
+    const store = this._savedMap.getStore();
+    store.dispatch(setReadOnly(true));
+    store.dispatch(disableScrollZoom());
+
+    this._dispatchSetQuery({
+      query: this.input.query,
+      timeRange: this.input.timeRange,
+      filters: this.input.filters,
+      forceRefresh: false,
+      searchSessionId: this.input.searchSessionId,
+    });
+    if (this.input.refreshConfig) {
+      this._dispatchSetRefreshConfig(this.input.refreshConfig);
+    }
+
+    this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
+      this._handleStoreChanges();
+    });
+  }
+
+  private async _initializeOutput() {
+    const savedMapTitle = this._savedMap.getAttributes()?.title
+      ? this._savedMap.getAttributes().title
+      : '';
+    const input = this.getInput();
+    const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
+    const savedObjectId = (input as MapByReferenceInput).savedObjectId;
+    this.updateOutput({
+      ...this.getOutput(),
+      defaultTitle: savedMapTitle,
+      title,
+      editPath: `/${MAP_PATH}/${savedObjectId}`,
+      editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
+      indexPatterns: await this._getIndexPatterns(),
+    });
+  }
+
+  public inputIsRefType(
+    input: MapByValueInput | MapByReferenceInput
+  ): input is MapByReferenceInput {
+    return getMapAttributeService().inputIsRefType(input);
+  }
+
+  public async getInputAsRefType(): Promise<MapByReferenceInput> {
+    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
+    return getMapAttributeService().getInputAsRefType(input, {
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
+    });
+  }
+
+  public async getInputAsValueType(): Promise<MapByValueInput> {
+    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
+    return getMapAttributeService().getInputAsValueType(input);
   }
 
   public getDescription() {
-    return this._description;
+    return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
-  supportedTriggers(): Array<keyof TriggerContextMapping> {
-    return [APPLY_FILTER_TRIGGER];
+  public supportedTriggers(): string[] {
+    return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -119,59 +204,87 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
   };
 
   setEventHandlers = (eventHandlers: EventHandlers) => {
-    this._eventHandlers = eventHandlers;
+    this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
 
   getInspectorAdapters() {
-    return getInspectorAdapters(this._store.getState());
+    return getInspectorAdapters(this._savedMap.getStore().getState());
   }
 
-  onContainerStateChanged(containerState: MapEmbeddableInput) {
+  onUpdate() {
     if (
-      !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
-      !_.isEqual(containerState.query, this._prevQuery) ||
-      !esFilters.onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
+      !_.isEqual(this.input.query, this._prevQuery) ||
+      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this._prevFilters) ||
+      this.input.searchSessionId !== this._prevSearchSessionId
     ) {
-      this._dispatchSetQuery(containerState);
+      this._dispatchSetQuery({
+        query: this.input.query,
+        timeRange: this.input.timeRange,
+        filters: this.input.filters,
+        forceRefresh: false,
+        searchSessionId: this.input.searchSessionId,
+      });
     }
 
-    if (!_.isEqual(containerState.refreshConfig, this._prevRefreshConfig)) {
-      this._dispatchSetRefreshConfig(containerState);
+    if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
+      this._dispatchSetRefreshConfig(this.input.refreshConfig);
+    }
+
+    if (this.input.syncColors !== this._prevSyncColors) {
+      this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
   }
 
   _dispatchSetQuery({
     query,
     timeRange,
-    filters,
+    filters = [],
     forceRefresh,
+    searchSessionId,
   }: {
     query?: Query;
     timeRange?: TimeRange;
-    filters: Filter[];
-    forceRefresh?: boolean;
+    filters?: Filter[];
+    forceRefresh: boolean;
+    searchSessionId?: string;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
-    this._store.dispatch<any>(
+    this._prevSearchSessionId = searchSessionId;
+    this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         forceRefresh,
+        searchSessionId,
       })
     );
   }
 
-  _dispatchSetRefreshConfig({ refreshConfig }: Pick<MapEmbeddableInput, 'refreshConfig'>) {
+  _dispatchSetRefreshConfig(refreshConfig: RefreshInterval) {
     this._prevRefreshConfig = refreshConfig;
-    this._store.dispatch(
+    this._savedMap.getStore().dispatch(
       setRefreshConfig({
         isPaused: refreshConfig.pause,
         interval: refreshConfig.value,
       })
     );
+  }
+
+  async _dispatchSetChartsPaletteServiceGetColor(syncColors?: boolean) {
+    this._prevSyncColors = syncColors;
+    const chartsPaletteServiceGetColor = syncColors
+      ? await getChartsPaletteServiceGetColor()
+      : null;
+    if (syncColors !== this._prevSyncColors) {
+      return;
+    }
+    this._savedMap
+      .getStore()
+      .dispatch(setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor));
   }
 
   /**
@@ -180,87 +293,61 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
    * @param {ContainerState} containerState
    */
   render(domNode: HTMLElement) {
-    this._store.dispatch(setEventHandlers(this._eventHandlers));
-    this._store.dispatch(setReadOnly(true));
-    this._store.dispatch(disableScrollZoom());
-
-    if (this._settings) {
-      this._store.dispatch(setMapSettings(this._settings));
-    }
-
-    if (_.has(this.input, 'isLayerTOCOpen')) {
-      this._store.dispatch(setIsLayerTOCOpen(this.input.isLayerTOCOpen));
-    }
-
-    if (_.has(this.input, 'openTOCDetails')) {
-      this._store.dispatch(setOpenTOCDetails(this.input.openTOCDetails));
-    }
-
-    if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      this._store.dispatch(disableInteractive());
-    }
-
-    if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      this._store.dispatch(disableTooltipControl());
-    }
-    if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      this._store.dispatch(hideToolbarOverlay());
-    }
-
-    if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      this._store.dispatch(hideLayerControl());
-    }
-
-    if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      this._store.dispatch(hideViewControl());
-    }
-
-    if (this.input.mapCenter) {
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: this.input.mapCenter.lat,
-          lon: this.input.mapCenter.lon,
-          zoom: this.input.mapCenter.zoom,
-        })
-      );
-    }
-
-    this._store.dispatch<any>(replaceLayerList(this._layerList));
-    if (this.input.hiddenLayers) {
-      this._store.dispatch<any>(setHiddenLayers(this.input.hiddenLayers));
-    }
-    this._dispatchSetQuery(this.input);
-    this._dispatchSetRefreshConfig(this.input);
-
     this._domNode = domNode;
+    if (!this._isInitialized) {
+      return;
+    }
 
     const I18nContext = getCoreI18n().Context;
 
     render(
-      <Provider store={this._store}>
+      <Provider store={this._savedMap.getStore()}>
         <I18nContext>
           <MapContainer
+            onSingleValueTrigger={this.onSingleValueTrigger}
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
             getFilterActions={this.getFilterActions}
             getActionContext={this.getActionContext}
             renderTooltipContent={this._renderTooltipContent}
             title={this.getTitle()}
-            description={this._description}
+            description={this.getDescription()}
           />
         </I18nContext>
       </Provider>,
       this._domNode
     );
+  }
 
-    this._unsubscribeFromStore = this._store.subscribe(() => {
-      this._handleStoreChanges();
+  setLayerList(layerList: LayerDescriptor[]) {
+    this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
+    this._getIndexPatterns().then((indexPatterns) => {
+      this.updateOutput({
+        ...this.getOutput(),
+        indexPatterns,
+      });
     });
   }
 
-  async setLayerList(layerList: LayerDescriptor[]) {
-    this._layerList = layerList;
-    return await this._store.dispatch<any>(replaceLayerList(this._layerList));
+  private async _getIndexPatterns() {
+    const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(
+      this._savedMap.getStore().getState()
+    );
+    return await getIndexPatternsFromIds(queryableIndexPatternIds);
   }
+
+  onSingleValueTrigger = (actionId: string, key: string, value: RawValue) => {
+    const action = getUiActions().getAction(actionId);
+    if (!action) {
+      throw new Error('Unable to apply action, could not locate action');
+    }
+    const executeContext = {
+      ...this.getActionContext(),
+      data: {
+        data: toValueClickDataFormat(key, value),
+      },
+    };
+    action.execute(executeContext);
+  };
 
   addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
     const executeContext = {
@@ -275,10 +362,24 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
   };
 
   getFilterActions = async () => {
-    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+    const filterActions = await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,
       filters: [],
     });
+    const valueClickActions = await getUiActions().getTriggerCompatibleActions(
+      VALUE_CLICK_TRIGGER,
+      {
+        embeddable: this,
+        data: {
+          // uiActions.getTriggerCompatibleActions validates action with provided context
+          // so if event.key and event.value are used in the URL template but can not be parsed from context
+          // then the action is filtered out.
+          // To prevent filtering out actions, provide dummy context when initially fetching actions.
+          data: toValueClickDataFormat('anyfield', 'anyvalue'),
+        },
+      }
+    );
+    return [...filterActions, ...valueClickActions.filter(isUrlDrilldown)];
   };
 
   getActionContext = () => {
@@ -309,16 +410,17 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
 
   reload() {
     this._dispatchSetQuery({
-      query: this._prevQuery,
-      timeRange: this._prevTimeRange,
-      filters: this._prevFilters ?? [],
+      query: this.input.query,
+      timeRange: this.input.timeRange,
+      filters: this.input.filters,
       forceRefresh: true,
+      searchSessionId: this.input.searchSessionId,
     });
   }
 
   _handleStoreChanges() {
-    const center = getMapCenter(this._store.getState());
-    const zoom = getMapZoom(this._store.getState());
+    const center = getMapCenter(this._savedMap.getStore().getState());
+    const zoom = getMapZoom(this._savedMap.getStore().getState());
 
     const mapCenter = this.input.mapCenter || undefined;
     if (
@@ -336,21 +438,21 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       });
     }
 
-    const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
+    const isLayerTOCOpen = getIsLayerTOCOpen(this._savedMap.getStore().getState());
     if (this.input.isLayerTOCOpen !== isLayerTOCOpen) {
       this.updateInput({
         isLayerTOCOpen,
       });
     }
 
-    const openTOCDetails = getOpenTOCDetails(this._store.getState());
+    const openTOCDetails = getOpenTOCDetails(this._savedMap.getStore().getState());
     if (!_.isEqual(this.input.openTOCDetails, openTOCDetails)) {
       this.updateInput({
         openTOCDetails,
       });
     }
 
-    const hiddenLayerIds = getHiddenLayerIds(this._store.getState());
+    const hiddenLayerIds = getHiddenLayerIds(this._savedMap.getStore().getState());
 
     if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
       this.updateInput({

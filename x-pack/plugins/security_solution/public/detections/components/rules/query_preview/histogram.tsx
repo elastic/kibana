@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -21,6 +22,7 @@ const LoadingChart = styled(EuiLoadingChart)`
 interface PreviewHistogramProps {
   id: string;
   data: ChartSeriesData[];
+  dataTestSubj?: string;
   barConfig: ChartSeriesConfigs;
   title: string;
   subtitle: string;
@@ -31,6 +33,7 @@ interface PreviewHistogramProps {
 export const PreviewHistogram = ({
   id,
   data,
+  dataTestSubj,
   barConfig,
   title,
   subtitle,
@@ -39,7 +42,7 @@ export const PreviewHistogram = ({
 }: PreviewHistogramProps) => {
   return (
     <>
-      <Panel height={300}>
+      <Panel height={300} data-test-subj={dataTestSubj}>
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
             <HeaderSection id={id} title={title} titleSize="xs" subtitle={subtitle} />

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,7 +10,7 @@ import { createHash } from 'crypto';
 import { inflateSync } from 'zlib';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { getSupertestWithoutAuth } from '../../../ingest_manager_api_integration/apis/fleet/agents/services';
+import { getSupertestWithoutAuth } from '../../../fleet_api_integration/apis/agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useState, useEffect } from 'react';
@@ -23,6 +24,12 @@ import {
 import { useUrlState } from '../../../../utils/use_url_state';
 import { InventoryItemType, ItemTypeRT } from '../../../../../common/inventory_models/types';
 
+export const DEFAULT_LEGEND: WaffleLegendOptions = {
+  palette: 'cool',
+  steps: 10,
+  reverseColors: false,
+};
+
 export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   metric: { type: 'cpu' },
   groupBy: [],
@@ -34,11 +41,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   accountId: '',
   region: '',
   customMetrics: [],
-  legend: {
-    palette: 'cool',
-    steps: 10,
-    reverseColors: false,
-  },
+  legend: DEFAULT_LEGEND,
   source: 'default',
   sort: { by: 'name', direction: 'desc' },
 };
@@ -183,10 +186,9 @@ export const WaffleOptionsStateRT = rt.intersection([
     accountId: rt.string,
     region: rt.string,
     customMetrics: rt.array(SnapshotCustomMetricInputRT),
-    legend: WaffleLegendOptionsRT,
     sort: WaffleSortOptionRT,
   }),
-  rt.partial({ source: rt.string }),
+  rt.partial({ source: rt.string, legend: WaffleLegendOptionsRT }),
 ]);
 
 export type WaffleSortOption = rt.TypeOf<typeof WaffleSortOptionRT>;

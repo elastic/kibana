@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
+import { timelineActions } from '../../../../../store/timeline';
 import { Direction } from '../../../../../../graphql/types';
 import { TestProviders } from '../../../../../../common/mock';
 import { ColumnHeaderType } from '../../../../../store/timeline/model';
@@ -17,40 +19,43 @@ import { defaultHeaders } from '../default_headers';
 import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
 
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+
 const filteredColumnHeader: ColumnHeaderType = 'text-filter';
 
 describe('Header', () => {
   const columnHeader = defaultHeaders[0];
-  const sort: Sort = {
-    columnId: columnHeader.id,
-    sortDirection: Direction.desc,
-  };
+  const sort: Sort[] = [
+    {
+      columnId: columnHeader.id,
+      columnType: columnHeader.type ?? 'number',
+      sortDirection: Direction.desc,
+    },
+  ];
   const timelineId = 'fakeId';
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <HeaderComponent
-        header={columnHeader}
-        onColumnRemoved={jest.fn()}
-        onColumnSorted={jest.fn()}
-        sort={sort}
-        timelineId={timelineId}
-      />
+      <TestProviders>
+        <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('HeaderComponent').dive()).toMatchSnapshot();
   });
 
   describe('rendering', () => {
     test('it renders the header text', () => {
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -64,13 +69,7 @@ describe('Header', () => {
       const headerWithLabel = { ...columnHeader, label };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerWithLabel}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerWithLabel} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -83,13 +82,7 @@ describe('Header', () => {
       const headerSortable = { ...columnHeader, aggregatable: true };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -106,13 +99,7 @@ describe('Header', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnWithFilter}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnWithFilter} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -124,40 +111,34 @@ describe('Header', () => {
 
   describe('onColumnSorted', () => {
     test('it invokes the onColumnSorted callback when the header sort button is clicked', () => {
-      const mockOnColumnSorted = jest.fn();
       const headerSortable = { ...columnHeader, aggregatable: true };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
       wrapper.find('[data-test-subj="header-sort-button"]').first().simulate('click');
 
-      expect(mockOnColumnSorted).toBeCalledWith({
-        columnId: columnHeader.id,
-        sortDirection: 'asc', // (because the previous state was Direction.desc)
-      });
+      expect(mockDispatch).toBeCalledWith(
+        timelineActions.updateSort({
+          id: timelineId,
+          sort: [
+            {
+              columnId: columnHeader.id,
+              columnType: columnHeader.type ?? 'number',
+              sortDirection: Direction.asc, // (because the previous state was Direction.desc)
+            },
+          ],
+        })
+      );
     });
 
     test('it does NOT render the header sort button when aggregatable is false', () => {
-      const mockOnColumnSorted = jest.fn();
       const headerSortable = { ...columnHeader, aggregatable: false };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -165,17 +146,10 @@ describe('Header', () => {
     });
 
     test('it does NOT render the header sort button when aggregatable is missing', () => {
-      const mockOnColumnSorted = jest.fn();
       const headerSortable = { ...columnHeader };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -187,17 +161,11 @@ describe('Header', () => {
       const headerSortable = { ...columnHeader, aggregatable: undefined };
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={headerSortable}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={mockOnColumnSorted}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={headerSortable} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="header"]').first().simulate('click');
+      wrapper.find(`[data-test-subj="header-${columnHeader.id}"]`).first().simulate('click');
 
       expect(mockOnColumnSorted).not.toHaveBeenCalled();
     });
@@ -219,14 +187,17 @@ describe('Header', () => {
 
   describe('getSortDirection', () => {
     test('it returns the sort direction when the header id matches the sort column id', () => {
-      expect(getSortDirection({ header: columnHeader, sort })).toEqual(sort.sortDirection);
+      expect(getSortDirection({ header: columnHeader, sort })).toEqual(sort[0].sortDirection);
     });
 
     test('it returns "none" when sort direction when the header id does NOT match the sort column id', () => {
-      const nonMatching: Sort = {
-        columnId: 'differentSocks',
-        sortDirection: Direction.desc,
-      };
+      const nonMatching: Sort[] = [
+        {
+          columnId: 'differentSocks',
+          columnType: columnHeader.type ?? 'number',
+          sortDirection: Direction.desc,
+        },
+      ];
 
       expect(getSortDirection({ header: columnHeader, sort: nonMatching })).toEqual('none');
     });
@@ -234,7 +205,11 @@ describe('Header', () => {
 
   describe('getNextSortDirection', () => {
     test('it returns "asc" when the current direction is "desc"', () => {
-      const sortDescending: Sort = { columnId: columnHeader.id, sortDirection: Direction.desc };
+      const sortDescending: Sort = {
+        columnId: columnHeader.id,
+        columnType: columnHeader.type ?? 'number',
+        sortDirection: Direction.desc,
+      };
 
       expect(getNextSortDirection(sortDescending)).toEqual('asc');
     });
@@ -242,6 +217,7 @@ describe('Header', () => {
     test('it returns "desc" when the current direction is "asc"', () => {
       const sortAscending: Sort = {
         columnId: columnHeader.id,
+        columnType: columnHeader.type ?? 'number',
         sortDirection: Direction.asc,
       };
 
@@ -251,6 +227,7 @@ describe('Header', () => {
     test('it returns "desc" by default', () => {
       const sortNone: Sort = {
         columnId: columnHeader.id,
+        columnType: columnHeader.type ?? 'number',
         sortDirection: 'none',
       };
 
@@ -260,10 +237,13 @@ describe('Header', () => {
 
   describe('getNewSortDirectionOnClick', () => {
     test('it returns the expected new sort direction when the header id matches the sort column id', () => {
-      const sortMatches: Sort = {
-        columnId: columnHeader.id,
-        sortDirection: Direction.desc,
-      };
+      const sortMatches: Sort[] = [
+        {
+          columnId: columnHeader.id,
+          columnType: columnHeader.type ?? 'number',
+          sortDirection: Direction.desc,
+        },
+      ];
 
       expect(
         getNewSortDirectionOnClick({
@@ -274,10 +254,13 @@ describe('Header', () => {
     });
 
     test('it returns the expected new sort direction when the header id does NOT match the sort column id', () => {
-      const sortDoesNotMatch: Sort = {
-        columnId: 'someOtherColumn',
-        sortDirection: 'none',
-      };
+      const sortDoesNotMatch: Sort[] = [
+        {
+          columnId: 'someOtherColumn',
+          columnType: columnHeader.type ?? 'number',
+          sortDirection: 'none',
+        },
+      ];
 
       expect(
         getNewSortDirectionOnClick({
@@ -292,13 +275,7 @@ describe('Header', () => {
     test('truncates the header text with an ellipsis', () => {
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 
@@ -312,13 +289,7 @@ describe('Header', () => {
     test('it has a tooltip to display the properties of the field', () => {
       const wrapper = mount(
         <TestProviders>
-          <HeaderComponent
-            header={columnHeader}
-            onColumnRemoved={jest.fn()}
-            onColumnSorted={jest.fn()}
-            sort={sort}
-            timelineId={timelineId}
-          />
+          <HeaderComponent header={columnHeader} sort={sort} timelineId={timelineId} />
         </TestProviders>
       );
 

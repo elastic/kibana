@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,7 +15,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
-import { GetPackagesResponse } from '../../../../../ingest_manager/common';
+import { GetPackagesResponse } from '../../../../../fleet/common';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 export interface EndpointState {
@@ -76,6 +77,8 @@ export interface EndpointState {
   endpointsTotalError?: ServerApiError;
   /** The query strategy version that informs whether the transform for KQL is enabled or not */
   queryStrategyVersion?: MetadataQueryStrategyVersions;
+  /** The policy IDs and revision number of the corresponding agent, and endpoint. May be more recent than what's running */
+  policyVersionInfo?: HostInfo['policy_info'];
 }
 
 /**

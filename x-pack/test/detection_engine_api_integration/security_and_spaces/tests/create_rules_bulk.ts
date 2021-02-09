@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -15,19 +16,20 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getRuleForSignalTesting,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('create_rules_bulk', () => {
     describe('validation errors', () => {
@@ -54,11 +56,13 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('creating rules in bulk', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -92,14 +96,14 @@ export default ({ getService }: FtrProviderContext): void => {
        this pops up again elsewhere.
       */
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const simpleRule = getSimpleRule();
+        const simpleRule = getRuleForSignalTesting(['auditbeat-*']);
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_bulk_create`)
           .set('kbn-xsrf', 'true')
           .send([simpleRule])
           .expect(200);
 
-        await waitForRuleSuccess(supertest, body[0].id);
+        await waitForRuleSuccessOrStatus(supertest, body[0].id);
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -107,8 +111,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({ ids: [body[0].id] })
           .expect(200);
 
-        const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
         expect(statusBody[body[0].id].current_status.status).to.eql('succeeded');
       });
 

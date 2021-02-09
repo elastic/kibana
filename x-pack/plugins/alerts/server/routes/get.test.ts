@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getAlertRoute } from './get';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -22,7 +23,9 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert: Alert = {
+  const mockedAlert: Alert<{
+    bar: true;
+  }> = {
     id: '1',
     alertTypeId: '1',
     schedule: { interval: '10s' },
@@ -46,6 +49,7 @@ describe('getAlertRoute', () => {
     tags: ['foo'],
     enabled: true,
     muteAll: false,
+    notifyWhen: 'onActionGroupChange',
     createdBy: '',
     updatedBy: '',
     apiKey: '',
@@ -59,7 +63,7 @@ describe('getAlertRoute', () => {
   };
 
   it('gets an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
@@ -87,7 +91,7 @@ describe('getAlertRoute', () => {
   });
 
   it('ensures the license allows getting alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
@@ -110,7 +114,7 @@ describe('getAlertRoute', () => {
   });
 
   it('ensures the license check prevents getting alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {

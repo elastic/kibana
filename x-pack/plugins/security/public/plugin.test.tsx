@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -31,9 +32,9 @@ describe('Security Plugin', () => {
       const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
       expect(
         plugin.setup(
-          coreMock.createSetup({ basePath: '/some-base-path' }) as CoreSetup<
-            PluginStartDependencies
-          >,
+          coreMock.createSetup({
+            basePath: '/some-base-path',
+          }) as CoreSetup<PluginStartDependencies>,
           {
             licensing: licensingMock.createSetup(),
             securityOss: mockSecurityOssPlugin.createSetup(),
@@ -45,6 +46,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getType: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
@@ -73,6 +75,7 @@ describe('Security Plugin', () => {
         license: {
           isLicenseAvailable: expect.any(Function),
           isEnabled: expect.any(Function),
+          getType: expect.any(Function),
           getFeatures: expect.any(Function),
           features$: expect.any(Observable),
         },
@@ -97,7 +100,12 @@ describe('Security Plugin', () => {
           data: {} as DataPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
-      ).toBeUndefined();
+      ).toEqual({
+        navControlService: {
+          getUserMenuLinks$: expect.any(Function),
+          addUserMenuLinks: expect.any(Function),
+        },
+      });
     });
 
     it('starts Management Service if `management` plugin is available', () => {

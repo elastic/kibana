@@ -9,7 +9,7 @@
   "license": "Elastic License",
   "machine_learning_job_id": "linux_anomalous_network_activity_ecs",
   "name": "Unusual Linux Network Activity",
-  "note": "### Investigating Unusual Network Activity ###\nDetection alerts from this rule indicate the presence of network activity from a Linux process for which network activity is rare and unusual.  Here are some possible avenues of investigation:\n- Consider the IP addresses and ports. Are these used by normal but infrequent network workflows? Are they expected or unexpected? \n- If the destination IP address is remote or external, does it associate with an expected domain, organization or geography? Note: avoid interacting directly with suspected malicious IP addresses.\n- Consider the user as identified by the username field. Is this network activity part of an expected workflow for the user who ran the program?\n- Examine the history of execution. If this process manifested only very recently, it might be part of a new software package. If it has a consistent cadence - for example if it runs monthly or quarterly - it might be part of a monthly or quarterly business or maintenance process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.",
+  "note": "### Investigating Unusual Network Activity ###\nDetection alerts from this rule indicate the presence of network activity from a Linux process for which network activity is rare and unusual.  Here are some possible avenues of investigation:\n- Consider the IP addresses and ports. Are these used by normal but infrequent network workflows? Are they expected or unexpected?\n- If the destination IP address is remote or external, does it associate with an expected domain, organization or geography? Note: avoid interacting directly with suspected malicious IP addresses.\n- Consider the user as identified by the username field. Is this network activity part of an expected workflow for the user who ran the program?\n- Examine the history of execution. If this process manifested only very recently, it might be part of a new software package. If it has a consistent cadence - for example if it runs monthly or quarterly - it might be part of a monthly or quarterly business or maintenance process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.",
   "references": [
     "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
   ],
@@ -18,9 +18,11 @@
   "severity": "low",
   "tags": [
     "Elastic",
+    "Host",
     "Linux",
+    "Threat Detection",
     "ML"
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 3
 }

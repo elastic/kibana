@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -34,7 +35,7 @@ expect.extend({
     expected: T
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
-    const matcherName = 'toSometimesYieldEqualTo';
+    const matcherName = 'toYieldEqualTo';
     const options: jest.MatcherHintOptions = {
       comment: 'deep equality with any yielded value',
       isNot: this.isNot,
@@ -100,9 +101,9 @@ expect.extend({
     expected: T
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
-    const matcherName = 'toSometimesYieldEqualTo';
+    const matcherName = 'toYieldObjectEqualTo';
     const options: jest.MatcherHintOptions = {
-      comment: 'deep equality with any yielded value',
+      comment: 'subset equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
     };

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 
@@ -14,7 +16,6 @@ import { IndexManagementHome, homeSections } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
-
 import { useServices } from './app_context';
 import {
   ComponentTemplateCreate,
@@ -24,7 +25,7 @@ import {
 
 export const App = ({ history }: { history: ScopedHistory }) => {
   const { uiMetricService } = useServices();
-  useEffect(() => uiMetricService.trackMetric('loaded', UIM_APP_LOAD), [uiMetricService]);
+  useEffect(() => uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), [uiMetricService]);
 
   return (
     <Router history={history}>

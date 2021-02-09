@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SearchResponse } from 'elasticsearch';
@@ -10,6 +11,7 @@ import {
   GetSortWithTieBreakerOptions,
   GetThreatListOptions,
   SortWithTieBreaker,
+  ThreatListCountOptions,
   ThreatListItem,
 } from './types';
 
@@ -30,6 +32,8 @@ export const getThreatList = async ({
   exceptionItems,
   threatFilters,
   listClient,
+  buildRuleMessage,
+  logger,
 }: GetThreatListOptions): Promise<SearchResponse<ThreatListItem>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -43,9 +47,20 @@ export const getThreatList = async ({
     exceptionItems
   );
 
+  logger.debug(
+    buildRuleMessage(
+      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
+    )
+  );
   const response: SearchResponse<ThreatListItem> = await callCluster('search', {
     body: {
       query: queryFilter,
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+      ],
       search_after: searchAfter,
       sort: getSortWithTieBreaker({
         sortField,
@@ -58,6 +73,8 @@ export const getThreatList = async ({
     index,
     size: calculatedPerPage,
   });
+
+  logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
   return response;
 };
 
@@ -88,4 +105,31 @@ export const getSortWithTieBreaker = ({
       return [{ '@timestamp': 'asc' }];
     }
   }
+};
+
+export const getThreatListCount = async ({
+  callCluster,
+  query,
+  language,
+  threatFilters,
+  index,
+  exceptionItems,
+}: ThreatListCountOptions): Promise<number> => {
+  const queryFilter = getQueryFilter(
+    query,
+    language ?? 'kuery',
+    threatFilters,
+    index,
+    exceptionItems
+  );
+  const response: {
+    count: number;
+  } = await callCluster('count', {
+    body: {
+      query: queryFilter,
+    },
+    ignoreUnavailable: true,
+    index,
+  });
+  return response.count;
 };

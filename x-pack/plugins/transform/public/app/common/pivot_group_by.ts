@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AggName } from '../../../common/types/aggregations';
@@ -52,17 +53,20 @@ interface GroupByDateHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
   field: EsFieldName;
   calendar_interval: string;
+  missing_bucket?: boolean;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM;
   field: EsFieldName;
   interval: string;
+  missing_bucket?: boolean;
 }
 
 interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
   field: EsFieldName;
+  missing_bucket?: boolean;
 }
 
 export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;

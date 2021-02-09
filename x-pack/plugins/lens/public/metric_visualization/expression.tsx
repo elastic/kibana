@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './expression.scss';
-
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
@@ -93,7 +94,9 @@ export const getMetricChartRenderer = (
   ) => {
     const resolvedFormatFactory = await formatFactory;
     ReactDOM.render(
-      <MetricChart {...config} formatFactory={resolvedFormatFactory} />,
+      <I18nProvider>
+        <MetricChart {...config} formatFactory={resolvedFormatFactory} />
+      </I18nProvider>,
       domNode,
       () => {
         handlers.done();

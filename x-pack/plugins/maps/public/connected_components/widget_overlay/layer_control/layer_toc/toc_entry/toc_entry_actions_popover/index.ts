@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AnyAction } from 'redux';
@@ -14,15 +15,12 @@ import {
   cloneLayer,
   removeLayer,
 } from '../../../../../../actions';
-import { getMapZoom, isUsingSearch } from '../../../../../../selectors/map_selectors';
 import { getIsReadOnly } from '../../../../../../selectors/ui_selectors';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     isReadOnly: getIsReadOnly(state),
-    isUsingSearch: isUsingSearch(state),
-    zoom: getMapZoom(state),
   };
 }
 
@@ -43,8 +41,5 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
   };
 }
 
-const connectedTOCEntryActionsPopover = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TOCEntryActionsPopover);
-export { connectedTOCEntryActionsPopover as TOCEntryActionsPopover };
+const connected = connect(mapStateToProps, mapDispatchToProps)(TOCEntryActionsPopover);
+export { connected as TOCEntryActionsPopover };

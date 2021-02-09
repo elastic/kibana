@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, IconSize } from '@elastic/eui';
@@ -17,6 +18,7 @@ export type PinIcon = 'pin' | 'pinFilled';
 export const getPinIcon = (pinned: boolean): PinIcon => (pinned ? 'pinFilled' : 'pin');
 
 interface Props {
+  ariaLabel?: string;
   allowUnpinning: boolean;
   iconSize?: IconSize;
   timelineType?: TimelineTypeLiteral;
@@ -25,11 +27,14 @@ interface Props {
 }
 
 export const Pin = React.memo<Props>(
-  ({ allowUnpinning, iconSize = 'm', onClick = noop, pinned, timelineType }) => {
+  ({ ariaLabel, allowUnpinning, iconSize = 'm', onClick = noop, pinned, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
+    const defaultAriaLabel = isTemplate ? i18n.DISABLE_PIN : pinned ? i18n.PINNED : i18n.UNPINNED;
+    const pinAriaLabel = ariaLabel != null ? ariaLabel : defaultAriaLabel;
+
     return (
       <EuiButtonIcon
-        aria-label={isTemplate ? i18n.DISABLE_PIN : pinned ? i18n.PINNED : i18n.UNPINNED}
+        aria-label={pinAriaLabel}
         data-test-subj="pin"
         iconSize={iconSize}
         iconType={getPinIcon(pinned)}

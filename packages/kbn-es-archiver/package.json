@@ -1,20 +1,19 @@
 {
   "name": "@kbn/es-archiver",
   "version": "1.0.0",
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "private": "true",
   "main": "target/index.js",
   "kibana": {
     "devOnly": true
   },
   "scripts": {
-    "kbn:bootstrap": "rm -rf target && tsc",
-    "kbn:watch": "rm -rf target && tsc --watch"
+    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
+    "kbn:watch": "rm -rf target && ../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "1.0.0",
-    "elasticsearch": "^16.7.0"
-  },
-  "devDependencies": {
-    "@types/elasticsearch": "^5.0.33"
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/test": "link:../kbn-test",
+    "@kbn/utils": "link:../kbn-utils"
   }
 }

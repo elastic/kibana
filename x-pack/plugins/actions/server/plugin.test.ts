@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
@@ -12,7 +13,7 @@ import { featuresPluginMock } from '../../features/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
-import { ActionType } from './types';
+import { ActionType, ActionsApiRequestHandlerContext } from './types';
 import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
@@ -56,7 +57,7 @@ describe('Actions Plugin', () => {
       await plugin.setup(coreSetup as any, pluginsSetup);
       expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
 
@@ -73,7 +74,10 @@ describe('Actions Plugin', () => {
         });
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
         const actionsContextHandler = ((await handler[1](
@@ -91,7 +95,7 @@ describe('Actions Plugin', () => {
           } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as RequestHandlerContext['actions'];
+        )) as unknown) as ActionsApiRequestHandlerContext;
         actionsContextHandler!.getActionsClient();
       });
 
@@ -101,7 +105,10 @@ describe('Actions Plugin', () => {
         await plugin.setup(coreSetup as any, pluginsSetup);
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
-        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+        const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
+          string,
+          Function
+        ];
         expect(handler[0]).toEqual('actions');
 
         const actionsContextHandler = ((await handler[1](
@@ -114,9 +121,9 @@ describe('Actions Plugin', () => {
           } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as RequestHandlerContext['actions'];
+        )) as unknown) as ActionsApiRequestHandlerContext;
         expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
     });
@@ -252,7 +259,7 @@ describe('Actions Plugin', () => {
         await expect(
           pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
     });

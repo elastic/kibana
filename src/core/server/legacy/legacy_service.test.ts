@@ -1,30 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('../../../legacy/server/kbn_server');
-jest.mock('./cluster_manager');
+jest.mock('./cli_dev_mode');
 
 import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@kbn/dev-utils';
 
 // @ts-expect-error js file to remove TS dependency on cli
-import { ClusterManager as MockClusterManager } from './cluster_manager';
+import { CliDevMode as MockCliDevMode } from './cli_dev_mode';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { BasePathProxyServer } from '../http';
@@ -46,6 +35,7 @@ import { coreMock } from '../mocks';
 import { statusServiceMock } from '../status/status_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { i18nServiceMock } from '../i18n/i18n_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -75,6 +65,7 @@ beforeEach(() => {
       capabilities: capabilitiesServiceMock.createSetupContract(),
       context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
+      i18n: i18nServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
       http: {
         ...httpServiceMock.createInternalSetupContract(),
@@ -237,7 +228,7 @@ describe('once LegacyService is set up with connection info', () => {
     );
 
     expect(MockKbnServer).not.toHaveBeenCalled();
-    expect(MockClusterManager).not.toHaveBeenCalled();
+    expect(MockCliDevMode).not.toHaveBeenCalled();
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
@@ -353,14 +344,14 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     });
   });
 
-  test('creates ClusterManager without base path proxy.', async () => {
+  test('creates CliDevMode without base path proxy.', async () => {
     const devClusterLegacyService = new LegacyService({
       coreId,
       env: Env.createDefault(
         REPO_ROOT,
         getEnvOptions({
           cliArgs: { silent: true, basePath: false },
-          isDevClusterMaster: true,
+          isDevCliParent: true,
         })
       ),
       logger,
@@ -371,8 +362,8 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager).toHaveBeenCalledTimes(1);
-    expect(MockClusterManager).toHaveBeenCalledWith(
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledTimes(1);
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledWith(
       expect.objectContaining({ silent: true, basePath: false }),
       expect.objectContaining({
         get: expect.any(Function),
@@ -382,14 +373,14 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     );
   });
 
-  test('creates ClusterManager with base path proxy.', async () => {
+  test('creates CliDevMode with base path proxy.', async () => {
     const devClusterLegacyService = new LegacyService({
       coreId,
       env: Env.createDefault(
         REPO_ROOT,
         getEnvOptions({
           cliArgs: { quiet: true, basePath: true },
-          isDevClusterMaster: true,
+          isDevCliParent: true,
         })
       ),
       logger,
@@ -400,8 +391,8 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.setup(setupDeps);
     await devClusterLegacyService.start(startDeps);
 
-    expect(MockClusterManager).toHaveBeenCalledTimes(1);
-    expect(MockClusterManager).toHaveBeenCalledWith(
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledTimes(1);
+    expect(MockCliDevMode.fromCoreServices).toHaveBeenCalledWith(
       expect.objectContaining({ quiet: true, basePath: true }),
       expect.objectContaining({
         get: expect.any(Function),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'kibana/public';
@@ -33,16 +34,27 @@ export class IndexPatternDatasource {
     { expressions, editorFrame, charts }: IndexPatternDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
-      const { getIndexPatternDatasource, renameColumns } = await import('../async_services');
-      expressions.registerFunction(renameColumns);
-      return core.getStartServices().then(([coreStart, { data }]) =>
-        getIndexPatternDatasource({
+      const {
+        getIndexPatternDatasource,
+        renameColumns,
+        formatColumn,
+        counterRate,
+        getTimeScaleFunction,
+        getSuffixFormatter,
+      } = await import('../async_services');
+      return core.getStartServices().then(([coreStart, { data }]) => {
+        data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
+        expressions.registerFunction(getTimeScaleFunction(data));
+        expressions.registerFunction(counterRate);
+        expressions.registerFunction(renameColumns);
+        expressions.registerFunction(formatColumn);
+        return getIndexPatternDatasource({
           core: coreStart,
           storage: new Storage(localStorage),
           data,
           charts,
-        })
-      ) as Promise<Datasource>;
+        });
+      }) as Promise<Datasource>;
     });
   }
 }

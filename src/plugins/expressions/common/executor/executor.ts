@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable max-classes-per-file */
@@ -32,7 +21,8 @@ import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState } from '../../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
+import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
   /**
@@ -88,7 +78,7 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 }
 
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
-  implements PersistableState<ExpressionAstExpression> {
+  implements PersistableStateService<ExpressionAstExpression> {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
@@ -166,43 +156,34 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    * @param context Extra global context object that will be merged into the
    *    expression global context object that is provided to each function to allow side-effects.
    */
-  public async run<
-    Input,
-    Output,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
-  >(
+  public async run<Input, Output>(
     ast: string | ExpressionAstExpression,
     input: Input,
-    context?: ExtraContext,
-    options?: ExpressionExecOptions
+    params: ExpressionExecutionParams = {}
   ) {
-    const execution = this.createExecution(ast, context, options);
+    const execution = this.createExecution(ast, params);
     execution.start(input);
     return (await execution.result) as Output;
   }
 
-  public createExecution<
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
-    Input = unknown,
-    Output = unknown
-  >(
+  public createExecution<Input = unknown, Output = unknown>(
     ast: string | ExpressionAstExpression,
-    context: ExtraContext = {} as ExtraContext,
-    { debug }: ExpressionExecOptions = {} as ExpressionExecOptions
-  ): Execution<Context & ExtraContext, Input, Output> {
-    const params: ExecutionParams<Context & ExtraContext> = {
+    params: ExpressionExecutionParams = {}
+  ): Execution<Input, Output> {
+    const executionParams: ExecutionParams = {
       executor: this,
-      context: {
-        ...this.context,
-        ...context,
-      } as Context & ExtraContext,
-      debug,
+      params: {
+        ...params,
+        // for canvas we are passing this in,
+        // canvas should be refactored to not pass any extra context in
+        extraContext: this.context,
+      } as any,
     };
 
-    if (typeof ast === 'string') params.expression = ast;
-    else params.ast = ast;
+    if (typeof ast === 'string') executionParams.expression = ast;
+    else executionParams.ast = ast;
 
-    const execution = new Execution<Context & ExtraContext, Input, Output>(params);
+    const execution = new Execution<Input, Output>(executionParams);
 
     return execution;
   }
@@ -255,6 +236,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     });
 
     return telemetryData;
+  }
+
+  public migrate(ast: SerializableState, version: string) {
+    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      if (!fn.migrations[version]) return link;
+      const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;
+      link.arguments = updatedAst.arguments;
+      link.type = updatedAst.type;
+    });
   }
 
   public fork(): Executor<Context> {

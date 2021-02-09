@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
@@ -9,13 +10,14 @@ import supertestAsPromised from 'supertest-as-promised';
 import { format, UrlObject } from 'url';
 import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import { PromiseReturnType } from '../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
+import { APMFtrConfigName } from '../configs';
+import { registry } from './registry';
 
-interface Settings {
+interface Config {
+  name: APMFtrConfigName;
   license: 'basic' | 'trial';
-  testFiles: string[];
-  name: string;
 }
 
 const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
@@ -34,8 +36,8 @@ const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async 
   return supertestAsPromised(url);
 };
 
-export function createTestConfig(settings: Settings) {
-  const { testFiles, license, name } = settings;
+export function createTestConfig(config: Config) {
+  const { license, name } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackAPITestsConfig = await readConfigFile(
@@ -47,8 +49,10 @@ export function createTestConfig(settings: Settings) {
 
     const supertestAsApmReadUser = supertestAsApmUser(servers.kibana, ApmUser.apmReadUser);
 
+    registry.init(config.name);
+
     return {
-      testFiles,
+      testFiles: [require.resolve('../tests')],
       servers,
       esArchiver: {
         directory: path.resolve(__dirname, './fixtures/es_archiver'),
@@ -69,7 +73,7 @@ export function createTestConfig(settings: Settings) {
         ),
       },
       junit: {
-        reportName: name,
+        reportName: `APM API Integration tests (${name})`,
       },
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),

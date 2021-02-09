@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiInMemoryTable,
@@ -160,7 +163,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 {
                   pathname: encodeURI(`/component_templates/${encodeURIComponent(name)}`),
                 },
-                () => trackMetric('click', UIM_COMPONENT_TEMPLATE_DETAILS)
+                () => trackMetric(METRIC_TYPE.CLICK, UIM_COMPONENT_TEMPLATE_DETAILS)
               )}
               data-test-subj="templateDetailsLink"
             >

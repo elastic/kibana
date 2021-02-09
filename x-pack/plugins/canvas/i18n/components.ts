@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -870,6 +871,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.textStylePicker.alignRightOption', {
         defaultMessage: 'Align right',
       }),
+    getAlignmentOptionsControlLegend: () =>
+      i18n.translate('xpack.canvas.textStylePicker.alignmentOptionsControl', {
+        defaultMessage: 'Alignment options',
+      }),
     getFontColorLabel: () =>
       i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
         defaultMessage: 'Font Color',
@@ -885,6 +890,10 @@ export const ComponentStrings = {
     getStyleUnderlineOption: () =>
       i18n.translate('xpack.canvas.textStylePicker.styleUnderlineOption', {
         defaultMessage: 'Underline',
+      }),
+    getStyleOptionsControlLegend: () =>
+      i18n.translate('xpack.canvas.textStylePicker.styleOptionsControl', {
+        defaultMessage: 'Style options',
       }),
   },
   TimePicker: {
@@ -1061,6 +1070,10 @@ export const ComponentStrings = {
       }),
   },
   VarConfigVarValueField: {
+    getBooleanOptionsLegend: () =>
+      i18n.translate('xpack.canvas.varConfigVarValueField.booleanOptionsLegend', {
+        defaultMessage: 'Boolean value',
+      }),
     getFalseOption: () =>
       i18n.translate('xpack.canvas.varConfigVarValueField.falseOption', {
         defaultMessage: 'False',
@@ -1408,6 +1421,18 @@ export const ComponentStrings = {
           workpadName,
         },
       }),
+    getPDFFullPageLayoutHelpText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutHelpText', {
+        defaultMessage: 'Remove borders and footer logo',
+      }),
+    getPDFFullPageLayoutLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.FullPageLayoutLabel', {
+        defaultMessage: 'Full page layout',
+      }),
+    getPDFPanelAdvancedOptionsLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelAdvancedOptionsLabel', {
+        defaultMessage: 'Advanced options',
+      }),
     getPDFPanelCopyAriaLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelCopyAriaLabel', {
         defaultMessage:
@@ -1449,6 +1474,10 @@ export const ComponentStrings = {
         values: {
           PDF,
         },
+      }),
+    getPDFPanelOptionsLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderShareMenu.pdfPanelOptionsLabel', {
+        defaultMessage: 'Options',
       }),
     getShareableZipErrorTitle: (workpadName: string) =>
       i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {

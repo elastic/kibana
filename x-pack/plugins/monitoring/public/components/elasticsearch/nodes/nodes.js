@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -27,7 +28,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { get } from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
@@ -58,7 +59,7 @@ const getNodeTooltip = (node) => {
   return null;
 };
 
-const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
+const getSortHandler = (type) => (item) => get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
@@ -87,7 +88,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 
       let setupModeStatus = null;
       if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
-        const list = _.get(setupMode, 'data.byUuid', {});
+        const list = get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
         const instance = {
           uuid: node.resolver,
@@ -130,22 +131,13 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       defaultMessage: 'Alerts',
     }),
     field: 'alerts',
-    // width: '175px',
     sortable: true,
     render: (_field, node) => {
       return (
         <AlertsStatus
           showBadge={true}
           alerts={alerts}
-          stateFilter={(state) =>
-            state.nodeId === node.resolver || state.stackProductUuid === node.resolver
-          }
-          nextStepsFilter={(nextStep) => {
-            if (nextStep.text.includes('Elasticsearch nodes')) {
-              return false;
-            }
-            return true;
-          }}
+          stateFilter={(state) => (state.nodeId || state.nodeUuid) === node.resolver.uuid}
         />
       );
     },
@@ -396,7 +388,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             setupMode.data.totalUniqueInstanceCount
           ) {
             const finishMigrationAction =
-              _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+              get(setupMode.meta, 'liveClusterUuid') === clusterUuid
                 ? setupMode.shortcutToFinishMigration
                 : setupMode.openFlyout;
 

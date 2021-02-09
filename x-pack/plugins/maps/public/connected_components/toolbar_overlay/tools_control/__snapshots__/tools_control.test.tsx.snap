@@ -24,7 +24,6 @@ exports[`Should render cancel button when drawing 1`] = `
       isOpen={false}
       ownFocus={false}
       panelPaddingSize="none"
-      withTitle={true}
     >
       <EuiContextMenu
         initialPanelId={0}
@@ -111,6 +110,7 @@ exports[`Should render cancel button when drawing 1`] = `
             },
           ]
         }
+        size="m"
       />
     </EuiPopover>
   </EuiFlexItem>
@@ -150,7 +150,6 @@ exports[`renders 1`] = `
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     initialPanelId={0}
@@ -237,6 +236,7 @@ exports[`renders 1`] = `
         },
       ]
     }
+    size="m"
   />
 </EuiPopover>
 `;

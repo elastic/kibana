@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment-timezone';
 import {
   asRelativeDateTimeRange,
@@ -73,19 +75,37 @@ describe('date time formatters', () => {
         const dateRange = asRelativeDateTimeRange(start, end);
         expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 15:01 (UTC+1)');
       });
-    });
-    describe('MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)', () => {
       it('range: 14 minutes', () => {
         const start = formatDateToTimezone('2019-10-29 10:01:01');
         const end = formatDateToTimezone('2019-10-29 10:15:01');
         const dateRange = asRelativeDateTimeRange(start, end);
-        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:15:01 (UTC+1)');
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 10:15 (UTC+1)');
       });
       it('range: 5 minutes', () => {
         const start = formatDateToTimezone('2019-10-29 10:01:01');
         const end = formatDateToTimezone('2019-10-29 10:06:01');
         const dateRange = asRelativeDateTimeRange(start, end);
-        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:06:01 (UTC+1)');
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 10:06 (UTC+1)');
+      });
+      it('range: 1 minute', () => {
+        const start = formatDateToTimezone('2019-10-29 10:01:01');
+        const end = formatDateToTimezone('2019-10-29 10:02:01');
+        const dateRange = asRelativeDateTimeRange(start, end);
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01 - 10:02 (UTC+1)');
+      });
+    });
+    describe('MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)', () => {
+      it('range: 50 seconds', () => {
+        const start = formatDateToTimezone('2019-10-29 10:01:01');
+        const end = formatDateToTimezone('2019-10-29 10:01:50');
+        const dateRange = asRelativeDateTimeRange(start, end);
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:01:50 (UTC+1)');
+      });
+      it('range: 10 seconds', () => {
+        const start = formatDateToTimezone('2019-10-29 10:01:01');
+        const end = formatDateToTimezone('2019-10-29 10:01:11');
+        const dateRange = asRelativeDateTimeRange(start, end);
+        expect(dateRange).toEqual('Oct 29, 2019, 10:01:01 - 10:01:11 (UTC+1)');
       });
     });
     describe('MMM D, YYYY, HH:mm:ss.SSS - HH:mm:ss.SSS (UTC)', () => {
@@ -150,37 +170,52 @@ describe('date time formatters', () => {
     it('milliseconds', () => {
       const start = moment('2019-10-29 08:00:00.001');
       const end = moment('2019-10-29 08:00:00.005');
-      expect(getDateDifference(start, end, 'milliseconds')).toEqual(4);
+      expect(
+        getDateDifference({ start, end, unitOfTime: 'milliseconds' })
+      ).toEqual(4);
     });
     it('seconds', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 08:00:10');
-      expect(getDateDifference(start, end, 'seconds')).toEqual(10);
+      expect(getDateDifference({ start, end, unitOfTime: 'seconds' })).toEqual(
+        10
+      );
     });
     it('minutes', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 08:15:00');
-      expect(getDateDifference(start, end, 'minutes')).toEqual(15);
+      expect(getDateDifference({ start, end, unitOfTime: 'minutes' })).toEqual(
+        15
+      );
     });
     it('hours', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-29 10:00:00');
-      expect(getDateDifference(start, end, 'hours')).toEqual(2);
+      expect(getDateDifference({ start, end, unitOfTime: 'hours' })).toEqual(2);
     });
     it('days', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-10-30 10:00:00');
-      expect(getDateDifference(start, end, 'days')).toEqual(1);
+      expect(getDateDifference({ start, end, unitOfTime: 'days' })).toEqual(1);
     });
     it('months', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2019-12-29 08:00:00');
-      expect(getDateDifference(start, end, 'months')).toEqual(2);
+      expect(getDateDifference({ start, end, unitOfTime: 'months' })).toEqual(
+        2
+      );
     });
     it('years', () => {
       const start = moment('2019-10-29 08:00:00');
       const end = moment('2020-10-29 08:00:00');
-      expect(getDateDifference(start, end, 'years')).toEqual(1);
+      expect(getDateDifference({ start, end, unitOfTime: 'years' })).toEqual(1);
+    });
+    it('precise days', () => {
+      const start = moment('2019-10-29 08:00:00');
+      const end = moment('2019-10-30 10:00:00');
+      expect(
+        getDateDifference({ start, end, unitOfTime: 'days', precise: true })
+      ).toEqual(1.0833333333333333);
     });
   });
 });

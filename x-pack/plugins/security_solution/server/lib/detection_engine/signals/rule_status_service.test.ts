@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ruleStatusSavedObjectsClientMock } from './__mocks__/rule_status_saved_objects_client.mock';
@@ -13,7 +14,7 @@ import {
 } from './rule_status_service';
 import { exampleRuleStatus, exampleFindRuleStatusResponse } from './__mocks__/es_results';
 
-const expectIsoDateString = expect.stringMatching(/Z$/);
+const expectIsoDateString = expect.stringMatching(/2.*Z$/);
 const buildStatuses = (n: number) =>
   Array(n)
     .fill(exampleRuleStatus())
@@ -48,6 +49,21 @@ describe('buildRuleStatusAttributes', () => {
       statusDate: expectIsoDateString,
       lastSuccessAt: expectIsoDateString,
       lastSuccessMessage: 'success message',
+    });
+
+    expect(result.statusDate).toEqual(result.lastSuccessAt);
+  });
+
+  it('returns partial failure fields if "partial failure"', () => {
+    const result = buildRuleStatusAttributes(
+      'partial failure',
+      'some indices missing timestamp override field'
+    );
+    expect(result).toEqual({
+      status: 'partial failure',
+      statusDate: expectIsoDateString,
+      lastSuccessAt: expectIsoDateString,
+      lastSuccessMessage: 'some indices missing timestamp override field',
     });
 
     expect(result.statusDate).toEqual(result.lastSuccessAt);

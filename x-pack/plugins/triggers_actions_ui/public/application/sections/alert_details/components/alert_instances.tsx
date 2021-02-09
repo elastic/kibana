@@ -1,26 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { AlertInstanceStatusValues } from '../../../../../../alerts/common';
-import { Alert, AlertInstanceSummary, AlertInstanceStatus, Pagination } from '../../../../types';
+import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerts/common';
+import {
+  Alert,
+  AlertInstanceSummary,
+  AlertInstanceStatus,
+  AlertType,
+  Pagination,
+} from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import './alert_instances.scss';
 
 type AlertInstancesProps = {
   alert: Alert;
+  alertType: AlertType;
   readOnly: boolean;
   alertInstanceSummary: AlertInstanceSummary;
   requestRefresh: () => Promise<void>;
@@ -39,7 +48,15 @@ export const alertInstancesTableColumns = (
     ),
     sortable: false,
     truncateText: true,
+    width: '45%',
     'data-test-subj': 'alertInstancesTableCell-instance',
+    render: (value: string) => {
+      return (
+        <EuiToolTip anchorClassName={'eui-textTruncate'} content={value}>
+          <span>{value}</span>
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'status',
@@ -47,14 +64,21 @@ export const alertInstancesTableColumns = (
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
       { defaultMessage: 'Status' }
     ),
+    width: '15%',
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
-      return <EuiHealth color={value.healthColor}>{value.label}</EuiHealth>;
+      return (
+        <EuiHealth color={value.healthColor} className="actionsInstanceList__health">
+          {value.label}
+          {value.actionGroup ? ` (${value.actionGroup})` : ``}
+        </EuiHealth>
+      );
     },
     sortable: false,
     'data-test-subj': 'alertInstancesTableCell-status',
   },
   {
     field: 'start',
+    width: '190px',
     render: (value: Date | undefined, instance: AlertInstanceListItem) => {
       return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
     },
@@ -67,7 +91,6 @@ export const alertInstancesTableColumns = (
   },
   {
     field: 'duration',
-    align: CENTER_ALIGNMENT,
     render: (value: number, instance: AlertInstanceListItem) => {
       return value ? durationAsString(moment.duration(value)) : '';
     },
@@ -76,11 +99,13 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Duration' }
     ),
     sortable: false,
+    width: '80px',
     'data-test-subj': 'alertInstancesTableCell-duration',
   },
   {
     field: '',
     align: RIGHT_ALIGNMENT,
+    width: '60px',
     name: i18n.translate(
       'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
       { defaultMessage: 'Mute' }
@@ -113,6 +138,7 @@ function durationAsString(duration: Duration): string {
 
 export function AlertInstances({
   alert,
+  alertType,
   readOnly,
   alertInstanceSummary,
   muteAlertInstance,
@@ -127,7 +153,7 @@ export function AlertInstances({
 
   const alertInstances = Object.entries(alertInstanceSummary.instances)
     .map(([instanceId, instance]) =>
-      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
+      alertInstanceToListItem(durationEpoch, alertType, instanceId, instance)
     )
     .sort((leftInstance, rightInstance) => leftInstance.sortPriority - rightInstance.sortPriority);
 
@@ -167,6 +193,8 @@ export function AlertInstances({
         })}
         columns={alertInstancesTableColumns(onMuteAction, readOnly)}
         data-test-subj="alertInstancesList"
+        tableLayout="fixed"
+        className="alertInstancesList"
       />
     </Fragment>
   );
@@ -180,6 +208,7 @@ function getPage(items: any[], pagination: Pagination) {
 interface AlertInstanceListItemStatus {
   label: string;
   healthColor: string;
+  actionGroup?: string;
 }
 export interface AlertInstanceListItem {
   instance: string;
@@ -200,16 +229,28 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'OK' }
 );
 
+function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
+  actionGroupId = actionGroupId || alertType.defaultActionGroupId;
+  const actionGroup = alertType?.actionGroups?.find(
+    (group: ActionGroup<string>) => group.id === actionGroupId
+  );
+  return actionGroup?.name;
+}
+
 export function alertInstanceToListItem(
   durationEpoch: number,
-  alert: Alert,
+  alertType: AlertType,
   instanceId: string,
   instance: AlertInstanceStatus
 ): AlertInstanceListItem {
   const isMuted = !!instance?.muted;
   const status =
     instance?.status === 'Active'
-      ? { label: ACTIVE_LABEL, healthColor: 'primary' }
+      ? {
+          label: ACTIVE_LABEL,
+          actionGroup: getActionGroupName(alertType, instance?.actionGroupId),
+          healthColor: 'primary',
+        }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' };
   const start = instance?.activeStartDate ? new Date(instance.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, has, merge, uniq } from 'lodash/fp';
 import { EventHit, TimelineEdges } from '../../../../../../common/search_strategy';
 import { toStringArray } from '../../../../helpers/to_array';
+import { formatGeoLocation, isGeoField } from '../details/helpers';
 
 export const formatTimelineData = (
   dataFields: readonly string[],
@@ -18,7 +20,7 @@ export const formatTimelineData = (
       flattenedFields.node._id = hit._id;
       flattenedFields.node._index = hit._index;
       flattenedFields.node.ecs._id = hit._id;
-      flattenedFields.node.ecs.timestamp = hit._source['@timestamp'];
+      flattenedFields.node.ecs.timestamp = (hit.fields['@timestamp'][0] ?? '') as string;
       flattenedFields.node.ecs._index = hit._index;
       if (hit.sort && hit.sort.length > 1) {
         flattenedFields.cursor.value = hit.sort[0];
@@ -40,13 +42,16 @@ const specialFields = ['_id', '_index', '_type', '_score'];
 const mergeTimelineFieldsWithHit = <T>(
   fieldName: string,
   flattenedFields: T,
-  hit: { _source: {} },
+  hit: { _source: {}; fields: Record<string, unknown[]> },
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
   if (fieldName != null || dataFields.includes(fieldName)) {
-    const esField = fieldName;
-    if (has(esField, hit._source) || specialFields.includes(esField)) {
+    if (
+      has(fieldName, hit._source) ||
+      has(fieldName, hit.fields) ||
+      specialFields.includes(fieldName)
+    ) {
       const objectWithProperty = {
         node: {
           ...get('node', flattenedFields),
@@ -55,9 +60,13 @@ const mergeTimelineFieldsWithHit = <T>(
                 ...get('node.data', flattenedFields),
                 {
                   field: fieldName,
-                  value: specialFields.includes(esField)
-                    ? toStringArray(get(esField, hit))
-                    : toStringArray(get(esField, hit._source)),
+                  value: specialFields.includes(fieldName)
+                    ? toStringArray(get(fieldName, hit))
+                    : isGeoField(fieldName)
+                    ? formatGeoLocation(hit.fields[fieldName])
+                    : has(fieldName, hit._source)
+                    ? toStringArray(get(fieldName, hit._source))
+                    : toStringArray(hit.fields[fieldName]),
                 },
               ]
             : get('node.data', flattenedFields),
@@ -68,7 +77,11 @@ const mergeTimelineFieldsWithHit = <T>(
                 ...fieldName.split('.').reduceRight(
                   // @ts-expect-error
                   (obj, next) => ({ [next]: obj }),
-                  toStringArray<string>(get(esField, hit._source))
+                  toStringArray(
+                    has(fieldName, hit._source)
+                      ? get(fieldName, hit._source)
+                      : hit.fields[fieldName]
+                  )
                 ),
               }
             : get('node.ecs', flattenedFields),

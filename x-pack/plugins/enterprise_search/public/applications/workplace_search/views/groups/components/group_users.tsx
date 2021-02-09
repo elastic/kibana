@@ -1,25 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 
 import { UserIcon } from '../../../components/shared/user_icon';
 import { MAX_TABLE_ROW_ICONS } from '../../../constants';
-
-import { IUser } from '../../../types';
+import { User } from '../../../types';
 
 import { GroupRowUsersDropdown } from './group_row_users_dropdown';
 
-interface IGroupUsersProps {
-  groupUsers: IUser[];
+interface GroupUsersProps {
+  groupUsers: User[];
   usersCount: number;
   groupId: string;
 }
 
-export const GroupUsers: React.FC<IGroupUsersProps> = ({ groupUsers, usersCount, groupId }) => {
+export const GroupUsers: React.FC<GroupUsersProps> = ({ groupUsers, usersCount, groupId }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const closePopover = () => setPopoverOpen(false);
   const togglePopover = () => setPopoverOpen(!popoverOpen);

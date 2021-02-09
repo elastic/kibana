@@ -17,7 +17,7 @@
 |  [EmbeddableFactoryNotFoundError](./kibana-plugin-plugins-embeddable-public.embeddablefactorynotfounderror.md) |  |
 |  [EmbeddablePanel](./kibana-plugin-plugins-embeddable-public.embeddablepanel.md) |  |
 |  [EmbeddableRoot](./kibana-plugin-plugins-embeddable-public.embeddableroot.md) |  |
-|  [EmbeddableStateTransfer](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.md) | A wrapper around the state object in  which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure. |
+|  [EmbeddableStateTransfer](./kibana-plugin-plugins-embeddable-public.embeddablestatetransfer.md) | A wrapper around the session storage which provides strongly typed helper methods for common incoming and outgoing states used by the embeddable infrastructure. |
 |  [ErrorEmbeddable](./kibana-plugin-plugins-embeddable-public.errorembeddable.md) |  |
 |  [PanelNotFoundError](./kibana-plugin-plugins-embeddable-public.panelnotfounderror.md) |  |
 
@@ -77,12 +77,17 @@
 |  [contextMenuTrigger](./kibana-plugin-plugins-embeddable-public.contextmenutrigger.md) |  |
 |  [defaultEmbeddableFactoryProvider](./kibana-plugin-plugins-embeddable-public.defaultembeddablefactoryprovider.md) |  |
 |  [EmbeddableRenderer](./kibana-plugin-plugins-embeddable-public.embeddablerenderer.md) | Helper react component to render an embeddable Can be used if you have an embeddable object or an embeddable factory Supports updating input by passing <code>input</code> prop |
+|  [isContextMenuTriggerContext](./kibana-plugin-plugins-embeddable-public.iscontextmenutriggercontext.md) |  |
+|  [isEmbeddable](./kibana-plugin-plugins-embeddable-public.isembeddable.md) |  |
 |  [isRangeSelectTriggerContext](./kibana-plugin-plugins-embeddable-public.israngeselecttriggercontext.md) |  |
+|  [isRowClickTriggerContext](./kibana-plugin-plugins-embeddable-public.isrowclicktriggercontext.md) |  |
 |  [isValueClickTriggerContext](./kibana-plugin-plugins-embeddable-public.isvalueclicktriggercontext.md) |  |
 |  [PANEL\_BADGE\_TRIGGER](./kibana-plugin-plugins-embeddable-public.panel_badge_trigger.md) |  |
 |  [PANEL\_NOTIFICATION\_TRIGGER](./kibana-plugin-plugins-embeddable-public.panel_notification_trigger.md) |  |
 |  [panelBadgeTrigger](./kibana-plugin-plugins-embeddable-public.panelbadgetrigger.md) |  |
 |  [panelNotificationTrigger](./kibana-plugin-plugins-embeddable-public.panelnotificationtrigger.md) |  |
+|  [SELECT\_RANGE\_TRIGGER](./kibana-plugin-plugins-embeddable-public.select_range_trigger.md) |  |
+|  [VALUE\_CLICK\_TRIGGER](./kibana-plugin-plugins-embeddable-public.value_click_trigger.md) |  |
 |  [withEmbeddableSubscription](./kibana-plugin-plugins-embeddable-public.withembeddablesubscription.md) |  |
 
 ## Type Aliases

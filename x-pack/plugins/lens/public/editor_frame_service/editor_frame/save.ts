@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
+import { Datatable } from 'src/plugins/expressions';
 import { EditorFrameState } from './state_management';
 import { Document } from '../../persistence/saved_object_store';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
@@ -28,6 +30,7 @@ export function getSavedObjectFormat({
   doc: Document;
   filterableIndexPatterns: string[];
   isSaveable: boolean;
+  activeData: Record<string, Datatable> | undefined;
 } {
   const datasourceStates: Record<string, unknown> = {};
   const references: SavedObjectReference[] = [];
@@ -74,5 +77,6 @@ export function getSavedObjectFormat({
     },
     filterableIndexPatterns: uniqueFilterableIndexPatternIds,
     isSaveable: expression !== null,
+    activeData: state.activeData,
   };
 }

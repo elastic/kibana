@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,9 +10,8 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { GeoJsonProperties } from 'geojson';
 import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
-import { esAggFieldsFactory } from '../../fields/es_agg_field';
+import { esAggFieldsFactory, IESAggField } from '../../fields/agg';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
-import { IESAggField } from '../../fields/es_agg_field';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
@@ -22,20 +22,31 @@ export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
-  getAggLabel(aggType: AGG_TYPE, fieldName: string): string;
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
   getMetricFields(): IESAggField[];
-  hasMatchingMetricField(fieldName: string): boolean;
   getMetricFieldForName(fieldName: string): IESAggField | null;
   getValueAggsDsl(indexPattern: IndexPattern): { [key: string]: unknown };
 }
 
-export abstract class AbstractESAggSource extends AbstractESSource {
+export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
   private readonly _metricFields: IESAggField[];
   private readonly _canReadFromGeoJson: boolean;
 
+  static createDescriptor(
+    descriptor: Partial<AbstractESAggSourceDescriptor>
+  ): AbstractESAggSourceDescriptor {
+    const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
+    return {
+      ...normalizedDescriptor,
+      type: descriptor.type ? descriptor.type : '',
+      metrics:
+        descriptor.metrics && descriptor.metrics.length > 0 ? descriptor.metrics : [DEFAULT_METRIC],
+    };
+  }
+
   constructor(
     descriptor: AbstractESAggSourceDescriptor,
-    inspectorAdapters: Adapters,
+    inspectorAdapters?: Adapters,
     canReadFromGeoJson = true
   ) {
     super(descriptor, inspectorAdapters);
@@ -55,17 +66,12 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     }
   }
 
-  getFieldByName(fieldName: string) {
+  getFieldByName(fieldName: string): IField | null {
     return this.getMetricFieldForName(fieldName);
   }
 
   createField({ fieldName }: { fieldName: string }): IField {
     throw new Error('Cannot create a new field from just a fieldname for an es_agg_source.');
-  }
-
-  hasMatchingMetricField(fieldName: string): boolean {
-    const matchingField = this.getMetricFieldForName(fieldName);
-    return !!matchingField;
   }
 
   getMetricFieldForName(fieldName: string): IESAggField | null {
@@ -99,21 +105,21 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldName: string): string {
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
     switch (aggType) {
       case AGG_TYPE.COUNT:
         return COUNT_PROP_LABEL;
       case AGG_TYPE.TERMS:
         return i18n.translate('xpack.maps.source.esAggSource.topTermLabel', {
-          defaultMessage: `Top {fieldName}`,
-          values: { fieldName },
+          defaultMessage: `Top {fieldLabel}`,
+          values: { fieldLabel },
         });
       default:
-        return `${aggType} ${fieldName}`;
+        return `${aggType} ${fieldLabel}`;
     }
   }
 
-  async getFields() {
+  async getFields(): Promise<IField[]> {
     return this.getMetricFields();
   }
 
@@ -128,7 +134,7 @@ export abstract class AbstractESAggSource extends AbstractESSource {
     return valueAggsDsl;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const metricFields = await this.getFields();
     const promises: Array<Promise<ITooltipProperty>> = [];
     metricFields.forEach((metricField) => {

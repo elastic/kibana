@@ -1,23 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
 import {
-  validateTree,
   validateEvents,
-  validateChildren,
-  validateAncestry,
-  validateAlerts,
   validateEntities,
+  validateTree,
 } from '../../../common/endpoint/schema/resolver';
-import { handleChildren } from './resolver/children';
-import { handleAncestry } from './resolver/ancestry';
-import { handleTree } from './resolver/tree';
-import { handleAlerts } from './resolver/alerts';
+
+import { handleTree } from './resolver/tree/handler';
 import { handleEntities } from './resolver/entity';
 import { handleEvents } from './resolver/events';
 
@@ -26,47 +22,20 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
 
   router.post(
     {
+      path: '/api/endpoint/resolver/tree',
+      validate: validateTree,
+      options: { authRequired: true },
+    },
+    handleTree(log)
+  );
+
+  router.post(
+    {
       path: '/api/endpoint/resolver/events',
       validate: validateEvents,
       options: { authRequired: true },
     },
     handleEvents(log)
-  );
-
-  router.post(
-    {
-      path: '/api/endpoint/resolver/{id}/alerts',
-      validate: validateAlerts,
-      options: { authRequired: true },
-    },
-    handleAlerts(log, endpointAppContext)
-  );
-
-  router.get(
-    {
-      path: '/api/endpoint/resolver/{id}/children',
-      validate: validateChildren,
-      options: { authRequired: true },
-    },
-    handleChildren(log, endpointAppContext)
-  );
-
-  router.get(
-    {
-      path: '/api/endpoint/resolver/{id}/ancestry',
-      validate: validateAncestry,
-      options: { authRequired: true },
-    },
-    handleAncestry(log, endpointAppContext)
-  );
-
-  router.get(
-    {
-      path: '/api/endpoint/resolver/{id}',
-      validate: validateTree,
-      options: { authRequired: true },
-    },
-    handleTree(log, endpointAppContext)
   );
 
   /**

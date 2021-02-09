@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -208,66 +209,108 @@ export class ValidateJobUI extends Component {
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
     const fields = this.props.fields;
 
+    // Run job validation only if a job config has been passed on and the duration makes sense to run it.
+    // Otherwise we skip the call and display a generic warning, but let the user move on to the next wizard step.
     if (typeof job === 'object') {
-      let shouldShowLoadingIndicator = true;
+      if (typeof duration === 'object' && duration.start !== null && duration.end !== null) {
+        let shouldShowLoadingIndicator = true;
 
-      this.props.ml
-        .validateJob({ duration, fields, job })
-        .then((messages) => {
-          shouldShowLoadingIndicator = false;
-          this.setState({
-            ...this.state,
-            ui: {
-              ...this.state.ui,
-              iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
-              isLoading: false,
-              isModalVisible: true,
-            },
-            data: {
-              messages,
-              success: true,
-            },
-            title: job.job_id,
-          });
-          if (typeof this.props.setIsValid === 'function') {
-            this.props.setIsValid(
-              messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
+        this.props.ml
+          .validateJob({ duration, fields, job })
+          .then((messages) => {
+            shouldShowLoadingIndicator = false;
+
+            const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
+
+            if (messagesContainError) {
+              messages.push({
+                id: 'job_validation_includes_error',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationIncludesErrorText', {
+                  defaultMessage:
+                    'Job validation has failed, but you can still continue and create the job. Please be aware the job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              });
+            }
+
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
+                isLoading: false,
+                isModalVisible: true,
+              },
+              data: {
+                messages,
+                success: true,
+              },
+              title: job.job_id,
+            });
+            if (typeof this.props.setIsValid === 'function') {
+              this.props.setIsValid(!messagesContainError);
+            }
+          })
+          .catch((error) => {
+            const { toasts } = this.props.kibana.services.notifications;
+            const toastNotificationService = toastNotificationServiceProvider(toasts);
+            toastNotificationService.displayErrorToast(
+              error,
+              i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
+                defaultMessage: 'Job Validation Error',
+              })
             );
-          }
-        })
-        .catch((error) => {
-          const { toasts } = this.props.kibana.services.notifications;
-          const toastNotificationService = toastNotificationServiceProvider(toasts);
-          toastNotificationService.displayErrorToast(
-            error,
-            i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
-              defaultMessage: 'Job Validation Error',
-            })
-          );
-        });
-
-      // wait for 250ms before triggering the loading indicator
-      // to avoid flickering when there's a loading time below
-      // 250ms for the job validation data
-      const delay = 250;
-      setTimeout(() => {
-        if (shouldShowLoadingIndicator) {
-          this.setState({
-            ...this.state,
-            ui: {
-              ...this.state.ui,
-              isLoading: true,
-              isModalVisible: false,
-            },
           });
+
+        // wait for 250ms before triggering the loading indicator
+        // to avoid flickering when there's a loading time below
+        // 250ms for the job validation data
+        const delay = 250;
+        setTimeout(() => {
+          if (shouldShowLoadingIndicator) {
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                isLoading: true,
+                isModalVisible: false,
+              },
+            });
+          }
+        }, delay);
+      } else {
+        this.setState({
+          ...this.state,
+          ui: {
+            ...this.state.ui,
+            iconType: statusToEuiIconType(VALIDATION_STATUS.WARNING),
+            isLoading: false,
+            isModalVisible: true,
+          },
+          data: {
+            messages: [
+              {
+                id: 'job_validation_skipped',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationSkippedText', {
+                  defaultMessage:
+                    'Job validation could not be run because of insufficient sample data. Please be aware the job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              },
+            ],
+            success: true,
+          },
+          title: job.job_id,
+        });
+        if (typeof this.props.setIsValid === 'function') {
+          this.props.setIsValid(true);
         }
-      }, delay);
+      }
     }
   };
 
   render() {
-    const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
-    const jobTipsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`;
+    const jobTipsUrl = getDocLinks().links.ml.anomalyDetectionJobTips;
     // only set to false if really false and not another falsy value, so it defaults to true.
     const fill = this.props.fill === false ? false : true;
     // default to false if not explicitly set to true

@@ -1,18 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from '../case/schema';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
   projectKey: schema.string(),
-  // TODO: to remove - set it optional for the current stage to support Case Jira implementation
-  incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
-  isCaseOwned: schema.nullable(schema.boolean()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
@@ -37,17 +34,31 @@ export const ExecutorSubActionSchema = schema.oneOf([
 ]);
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
-  savedObjectId: schema.nullable(schema.string()),
-  title: schema.string(),
-  description: schema.nullable(schema.string()),
-  externalId: schema.nullable(schema.string()),
-  issueType: schema.nullable(schema.string()),
-  priority: schema.nullable(schema.string()),
-  labels: schema.nullable(schema.arrayOf(schema.string())),
-  parent: schema.nullable(schema.string()),
-  // TODO: modify later to string[] - need for support Case schema
-  comments: schema.nullable(schema.arrayOf(CommentSchema)),
-  ...EntityInformation,
+  incident: schema.object({
+    summary: schema.string(),
+    description: schema.nullable(schema.string()),
+    externalId: schema.nullable(schema.string()),
+    issueType: schema.nullable(schema.string()),
+    priority: schema.nullable(schema.string()),
+    labels: schema.nullable(
+      schema.arrayOf(
+        schema.string({
+          validate: (label) =>
+            // Matches any space, tab or newline character.
+            label.match(/\s/g) ? `The label ${label} cannot contain spaces` : undefined,
+        })
+      )
+    ),
+    parent: schema.nullable(schema.string()),
+  }),
+  comments: schema.nullable(
+    schema.arrayOf(
+      schema.object({
+        comment: schema.string(),
+        commentId: schema.string(),
+      })
+    )
+  ),
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
@@ -55,6 +66,7 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 });
 
 // Reserved for future implementation
+export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionGetCapabilitiesParamsSchema = schema.object({});
 export const ExecutorSubActionGetIssueTypesParamsSchema = schema.object({});
@@ -65,6 +77,10 @@ export const ExecutorSubActionGetIssuesParamsSchema = schema.object({ title: sch
 export const ExecutorSubActionGetIssueParamsSchema = schema.object({ id: schema.string() });
 
 export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getFields'),
+    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+  }),
   schema.object({
     subAction: schema.literal('getIncident'),
     subActionParams: ExecutorSubActionGetIncidentParamsSchema,

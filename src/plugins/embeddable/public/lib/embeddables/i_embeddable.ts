@@ -1,26 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
-import { TriggerContextMapping } from '../../../../ui_actions/public';
 import { EmbeddableInput } from '../../../common/types';
 
 export interface EmbeddableError {
@@ -33,7 +21,7 @@ export { EmbeddableInput };
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
-  // Whether the embeddable finshed loading with an error.
+  // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
   editApp?: string;
@@ -84,6 +72,11 @@ export interface IEmbeddable<
    * Extra abilities added to Embeddable by `*_enhanced` plugins.
    */
   enhancements?: object;
+
+  /**
+   * If this embeddable has encountered a fatal error, that error will be stored here
+   **/
+  fatalError?: Error;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
@@ -168,5 +161,5 @@ export interface IEmbeddable<
   /**
    * List of triggers that this embeddable will execute.
    */
-  supportedTriggers(): Array<keyof TriggerContextMapping>;
+  supportedTriggers(): string[];
 }

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   ButtonColor,
   EuiButton,
@@ -222,6 +224,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             idSelected={this.getDisplayedBasePrivilege()}
             isDisabled={!hasSelectedSpaces}
             onChange={this.onSpaceBasePrivilegeChange}
+            legend={i18n.translate(
+              'xpack.security.management.editRole.spacePrivilegeForm.basePrivilegeControlLegend',
+              {
+                defaultMessage: 'Privileges for all features',
+              }
+            )}
           />
         </EuiFormRow>
 

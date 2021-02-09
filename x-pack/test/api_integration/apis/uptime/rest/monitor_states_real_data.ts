@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -17,7 +18,6 @@ interface ExpectedMonitorStatesPage {
   absFrom: number;
   absTo: number;
   size: number;
-  totalCount: number;
   prevPagination: null | string;
   nextPagination: null | string;
 }
@@ -34,14 +34,13 @@ const checkMonitorStatesResponse = ({
   absFrom,
   absTo,
   size,
-  totalCount,
   prevPagination,
   nextPagination,
 }: ExpectedMonitorStatesPage) => {
   const decoded = MonitorSummariesResultType.decode(response);
   expect(isRight(decoded)).to.be.ok();
   if (isRight(decoded)) {
-    const { summaries, prevPagePagination, nextPagePagination, totalSummaryCount } = decoded.right;
+    const { summaries, prevPagePagination, nextPagePagination } = decoded.right;
     expect(summaries).to.have.length(size);
     expect(summaries?.map((s) => s.monitor_id)).to.eql(statesIds);
     expect(
@@ -55,7 +54,6 @@ const checkMonitorStatesResponse = ({
         expect(point.timestamp).to.be.lessThan(absTo);
       });
     });
-    expect(totalSummaryCount).to.be(totalCount);
     expect(prevPagePagination).to.be(prevPagination);
     expect(nextPagePagination).to.eql(nextPagination);
   }
@@ -84,10 +82,19 @@ export default function ({ getService }: FtrProviderContext) {
         absFrom,
         absTo,
         size: 1,
-        totalCount: 2000,
         prevPagination: null,
         nextPagination: null,
       });
+    });
+
+    it('will fetch monitor state data for the given down filters', async () => {
+      const statusFilter = 'down';
+      const size = 2;
+      const { body } = await supertest.get(
+        `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&pageSize=${size}`
+      );
+
+      expectSnapshot(body).toMatch();
     });
 
     it('can navigate forward and backward using pagination', async () => {
@@ -458,7 +465,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
       ];
 
-      const totalCount = 2000;
       let pagination: string | null = null;
       for (let page = 1; page <= expectedPageCount; page++) {
         const baseUrl = `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&pageSize=${size}`;
@@ -472,7 +478,6 @@ export default function ({ getService }: FtrProviderContext) {
           absFrom,
           absTo,
           size,
-          totalCount,
         });
 
         // Test to see if the previous page pagination works on every page (other than the first)
@@ -486,7 +491,6 @@ export default function ({ getService }: FtrProviderContext) {
             absFrom,
             absTo,
             size,
-            totalCount,
           });
         }
       }
@@ -515,7 +519,6 @@ export default function ({ getService }: FtrProviderContext) {
         absFrom,
         absTo,
         size: LENGTH,
-        totalCount: 2000,
         prevPagination: null,
         nextPagination:
           '{"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
@@ -18,14 +19,12 @@ import {
   LastEventIndexKey,
 } from '../../../../../common/search_strategy/timeline';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
-
-const ID = 'timelineEventsLastEventTimeQuery';
 
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;
@@ -50,20 +49,21 @@ export const useTimelineLastEventTime = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [TimelineLastEventTimeRequest, setTimelineLastEventTimeRequest] = useState<
-    TimelineEventsLastEventTimeRequestOptions
-  >({
+  const [
+    TimelineLastEventTimeRequest,
+    setTimelineLastEventTimeRequest,
+  ] = useState<TimelineEventsLastEventTimeRequestOptions>({
     defaultIndex: indexNames,
     docValueFields,
     factoryQueryType: TimelineEventsQueries.lastEventTime,
-    id: ID,
     indexKey,
     details,
   });
 
-  const [timelineLastEventTimeResponse, setTimelineLastEventTimeResponse] = useState<
-    UseTimelineLastEventTimeArgs
-  >({
+  const [
+    timelineLastEventTimeResponse,
+    setTimelineLastEventTimeResponse,
+  ] = useState<UseTimelineLastEventTimeArgs>({
     lastSeen: null,
     refetch: refetch.current,
     errorMessage: undefined,

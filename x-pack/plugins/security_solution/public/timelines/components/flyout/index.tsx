@@ -1,33 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { i18n } from '@kbn/i18n';
+import { EuiFocusTrap } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { State } from '../../../common/store';
-import { DataProvider } from '../timeline/data_providers/data_provider';
-import { FlyoutButton } from './button';
+import { AppLeaveHandler } from '../../../../../../../src/core/public';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { timelineActions } from '../../store/timeline';
+import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
-import { StatefulTimeline } from '../timeline';
-import { TimelineById } from '../../store/timeline/types';
-
-export const Badge = (styled(EuiBadge)`
-  position: absolute;
-  padding-left: 4px;
-  padding-right: 4px;
-  right: 0%;
-  top: 0%;
-  border-bottom-left-radius: 5px;
-` as unknown) as typeof EuiBadge;
-
-Badge.displayName = 'Badge';
+import { getTimelineShowStatusByIdSelector } from './selectors';
 
 const Visible = styled.div<{ show?: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
@@ -37,69 +27,71 @@ Visible.displayName = 'Visible';
 
 interface OwnProps {
   timelineId: string;
-  usersViewing: string[];
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-type Props = OwnProps & ProsFromRedux;
+const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
+  const dispatch = useDispatch();
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+    getTimelineShowStatus(state, timelineId)
+  );
 
-export const FlyoutComponent = React.memo<Props>(
-  ({ dataProviders, show = true, showTimeline, timelineId, usersViewing, width }) => {
-    const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
-      showTimeline,
-      timelineId,
-    ]);
-    const handleOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
-      showTimeline,
-      timelineId,
-    ]);
+  useEffect(() => {
+    onAppLeave((actions, nextAppId) => {
+      if (show) {
+        dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
+      }
+      // Confirm when the user has made any changes to a timeline
+      if (
+        !(nextAppId ?? '').includes('securitySolution') &&
+        timelineStatus === TimelineStatus.draft &&
+        updated != null
+      ) {
+        const showSaveTimelineModal = () => {
+          dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: true }));
+          dispatch(
+            timelineActions.setActiveTabTimeline({
+              id: TimelineId.active,
+              activeTab: TimelineTabs.query,
+            })
+          );
+          dispatch(
+            timelineActions.toggleModalSaveTimeline({
+              id: TimelineId.active,
+              showModalSaveTimeline: true,
+            })
+          );
+        };
 
-    return (
-      <>
+        return actions.confirm(
+          i18n.translate('xpack.securitySolution.timeline.unsavedWorkMessage', {
+            defaultMessage: 'Leave Timeline with unsaved work?',
+          }),
+          i18n.translate('xpack.securitySolution.timeline.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
+          }),
+          showSaveTimelineModal
+        );
+      } else {
+        return actions.default();
+      }
+    });
+  }, [dispatch, onAppLeave, show, timelineStatus, updated]);
+  return (
+    <>
+      <EuiFocusTrap disabled={!show}>
         <Visible show={show}>
-          <Pane onClose={handleClose} timelineId={timelineId} width={width}>
-            <StatefulTimeline onClose={handleClose} usersViewing={usersViewing} id={timelineId} />
-          </Pane>
+          <Pane timelineId={timelineId} />
         </Visible>
-        <FlyoutButton
-          dataProviders={dataProviders}
-          show={!show}
-          timelineId={timelineId}
-          onOpen={handleOpen}
-        />
-      </>
-    );
-  }
-);
+      </EuiFocusTrap>
+      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
+    </>
+  );
+};
 
 FlyoutComponent.displayName = 'FlyoutComponent';
 
-const DEFAULT_DATA_PROVIDERS: DataProvider[] = [];
-const DEFAULT_TIMELINE_BY_ID = {};
-
-const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById: TimelineById =
-    timelineSelectors.timelineByIdSelector(state) ?? DEFAULT_TIMELINE_BY_ID;
-  /*
-    In case timelineById[timelineId]?.dataProviders is an empty array it will cause unnecessary rerender
-    of StatefulTimeline which can be expensive, so to avoid that return DEFAULT_DATA_PROVIDERS
-  */
-  const dataProviders = timelineById[timelineId]?.dataProviders.length
-    ? timelineById[timelineId]?.dataProviders
-    : DEFAULT_DATA_PROVIDERS;
-  const show = timelineById[timelineId]?.show ?? false;
-  const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
-
-  return { dataProviders, show, width };
-};
-
-const mapDispatchToProps = {
-  showTimeline: timelineActions.showTimeline,
-};
-
-const connector = connect(mapStateToProps, mapDispatchToProps);
-
-type ProsFromRedux = ConnectedProps<typeof connector>;
-
-export const Flyout = connector(FlyoutComponent);
+export const Flyout = React.memo(FlyoutComponent);
 
 Flyout.displayName = 'Flyout';

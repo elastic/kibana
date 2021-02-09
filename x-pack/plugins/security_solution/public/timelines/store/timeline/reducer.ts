@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -12,7 +14,6 @@ import {
   addProvider,
   addTimeline,
   applyDeltaToColumnWidth,
-  applyDeltaToWidth,
   applyKqlFilterQuery,
   clearEventsDeleted,
   clearEventsLoading,
@@ -24,16 +25,17 @@ import {
   removeColumn,
   removeProvider,
   setEventsDeleted,
+  setActiveTabTimeline,
   setEventsLoading,
   setExcludedRowRendererIds,
   setFilters,
   setInsertTimeline,
-  setKqlFilterQueryDraft,
   setSavedQueryId,
   setSelected,
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
+  toggleExpandedEvent,
   unPinEvent,
   updateAutoSaveMsg,
   updateColumns,
@@ -41,9 +43,7 @@ import {
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateDescription,
   updateEventType,
-  updateHighlightedDropAndProviderId,
   updateIndexNames,
   updateIsFavorite,
   updateIsLive,
@@ -57,8 +57,9 @@ import {
   updateSort,
   updateTimeline,
   updateTimelineGraphEventId,
-  updateTitle,
+  updateTitleAndDescription,
   upsertColumn,
+  toggleModalSaveTimeline,
 } from './actions';
 import {
   addNewTimeline,
@@ -67,7 +68,6 @@ import {
   addTimelineNoteToEvent,
   addTimelineProvider,
   addTimelineToStore,
-  applyDeltaToCurrentWidth,
   applyDeltaToTimelineColumnWidth,
   applyKqlFilterQueryDraft,
   pinTimelineEvent,
@@ -78,10 +78,7 @@ import {
   setSelectedTimelineEvents,
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
-  updateHighlightedDropAndProvider,
-  updateKqlFilterQueryDraft,
   updateTimelineColumns,
-  updateTimelineDescription,
   updateTimelineIsFavorite,
   updateTimelineIsLive,
   updateTimelineItemsPerPage,
@@ -97,7 +94,7 @@ import {
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
-  updateTimelineTitle,
+  updateTimelineTitleAndDescription,
   upsertTimelineColumn,
   updateSavedQuery,
   updateGraphEventId,
@@ -106,7 +103,7 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -181,6 +178,22 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
+  .case(toggleExpandedEvent, (state, { tabType, timelineId, event = {} }) => {
+    const expandedTabType = tabType ?? TimelineTabs.query;
+    return {
+      ...state,
+      timelineById: {
+        ...state.timelineById,
+        [timelineId]: {
+          ...state.timelineById[timelineId],
+          expandedEvent: {
+            ...state.timelineById[timelineId].expandedEvent,
+            [expandedTabType]: event,
+          },
+        },
+      },
+    };
+  })
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
@@ -190,14 +203,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: applyKqlFilterQueryDraft({
       id,
       filterQuery,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(setKqlFilterQueryDraft, (state, { id, filterQueryDraft }) => ({
-    ...state,
-    timelineById: updateKqlFilterQueryDraft({
-      id,
-      filterQueryDraft,
       timelineById: state.timelineById,
     }),
   }))
@@ -218,20 +223,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(
-    applyDeltaToWidth,
-    (state, { id, delta, bodyClientWidthPixels, minWidthPixels, maxWidthPercent }) => ({
-      ...state,
-      timelineById: applyDeltaToCurrentWidth({
-        id,
-        delta,
-        bodyClientWidthPixels,
-        minWidthPixels,
-        maxWidthPercent,
-        timelineById: state.timelineById,
-      }),
-    })
-  )
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,
     timelineById: pinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
@@ -369,10 +360,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(updateDescription, (state, { id, description }) => ({
-    ...state,
-    timelineById: updateTimelineDescription({ id, description, timelineById: state.timelineById }),
-  }))
   .case(updateEventType, (state, { id, eventType }) => ({
     ...state,
     timelineById: updateTimelineEventType({ id, eventType, timelineById: state.timelineById }),
@@ -389,9 +376,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
   }))
-  .case(updateTitle, (state, { id, title }) => ({
+  .case(updateTitleAndDescription, (state, { id, title, description }) => ({
     ...state,
-    timelineById: updateTimelineTitle({ id, title, timelineById: state.timelineById }),
+    timelineById: updateTimelineTitleAndDescription({
+      id,
+      title,
+      description,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(updateProviders, (state, { id, providers }) => ({
     ...state,
@@ -485,14 +477,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(updateHighlightedDropAndProviderId, (state, { id, providerId }) => ({
-    ...state,
-    timelineById: updateHighlightedDropAndProvider({
-      id,
-      providerId,
-      timelineById: state.timelineById,
-    }),
-  }))
   .case(updateAutoSaveMsg, (state, { timelineId, newTimelineModel }) => ({
     ...state,
     autoSavedWarningMsg: {
@@ -531,6 +515,26 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         indexNames,
+      },
+    },
+  }))
+  .case(setActiveTabTimeline, (state, { id, activeTab }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        activeTab,
+      },
+    },
+  }))
+  .case(toggleModalSaveTimeline, (state, { id, showModalSaveTimeline }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        showSaveModal: showModalSaveTimeline,
       },
     },
   }))

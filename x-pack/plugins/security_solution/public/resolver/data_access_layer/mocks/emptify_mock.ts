@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { SafeResolverEvent } from './../../../../common/endpoint/types/index';
 
 import {
   ResolverRelatedEvents,
-  ResolverTree,
+  ResolverNode,
   ResolverEntityIndex,
+  SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
 import { DataAccessLayer } from '../../types';
@@ -19,7 +19,8 @@ type EmptiableRequests =
   | 'resolverTree'
   | 'entities'
   | 'eventsWithEntityIDAndCategory'
-  | 'event';
+  | 'event'
+  | 'nodeData';
 
 interface Metadata<T> {
   /**
@@ -58,7 +59,7 @@ export function emptifyMock<T>(
       async relatedEvents(...args): Promise<ResolverRelatedEvents> {
         return dataShouldBeEmpty.includes('relatedEvents')
           ? Promise.resolve({
-              entityID: args[0],
+              entityID: args[0].entityID,
               events: [],
               nextEvent: null,
             })
@@ -79,6 +80,16 @@ export function emptifyMock<T>(
           : dataAccessLayer.eventsWithEntityIDAndCategory(...args);
       },
 
+      /**
+       * Fetch the node data (lifecycle events for endpoint) for a set of nodes
+       */
+      async nodeData(...args): Promise<SafeResolverEvent[]> {
+        return dataShouldBeEmpty.includes('nodeData') ? [] : dataAccessLayer.nodeData(...args);
+      },
+
+      /**
+       * Retrieve the related events for a node.
+       */
       async event(...args): Promise<SafeResolverEvent | null> {
         return dataShouldBeEmpty.includes('event') ? null : dataAccessLayer.event(...args);
       },
@@ -86,9 +97,9 @@ export function emptifyMock<T>(
       /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(...args): Promise<ResolverTree> {
+      async resolverTree(...args): Promise<ResolverNode[]> {
         return dataShouldBeEmpty.includes('resolverTree')
-          ? Promise.resolve(mockTreeWithNoProcessEvents())
+          ? Promise.resolve(mockTreeWithNoProcessEvents().nodes)
           : dataAccessLayer.resolverTree(...args);
       },
 

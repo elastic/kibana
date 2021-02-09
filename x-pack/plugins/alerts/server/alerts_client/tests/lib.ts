@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { IEventLogClient } from '../../../../event_log/server';
 import { actionsClientMock } from '../../../../actions/server/mocks';
 import { ConstructorOptions } from '../alerts_client';
 import { eventLogClientMock } from '../../../../event_log/server/mocks';
 import { AlertTypeRegistry } from '../../alert_type_registry';
+import { RecoveredActionGroup } from '../../../common';
 
 export const mockedDateString = '2019-02-12T21:01:22.479Z';
 
@@ -46,14 +49,6 @@ export function getBeforeSetup(
 ) {
   jest.resetAllMocks();
   alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
-  alertsClientParams.invalidateAPIKey.mockResolvedValue({
-    apiKeysEnabled: true,
-    result: {
-      invalidated_api_keys: [],
-      previously_invalidated_api_keys: [],
-      error_count: 0,
-    },
-  });
   alertsClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runNow.mockResolvedValue({ id: '' });
   const actionsClient = actionsClientMock.create();
@@ -90,7 +85,9 @@ export function getBeforeSetup(
     id: '123',
     name: 'Test',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    recoveryActionGroup: RecoveredActionGroup,
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
   }));

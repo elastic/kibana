@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { Role } from '../../../plugins/security/common/model';
+import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
+import type { UserFormValues } from '../../../plugins/security/public/management/users/edit_user/user_form';
 
 export function SecurityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -17,6 +20,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
   const comboBox = getService('comboBox');
+  const supertest = getService('supertestWithoutAuth');
+  const deployment = getService('deployment');
   const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
@@ -41,10 +46,14 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     });
   }
 
+  async function isLoginFormVisible() {
+    return await testSubjects.exists('loginForm');
+  }
+
   async function waitForLoginForm() {
     log.debug('Waiting for Login Form to appear.');
     await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
-      return await testSubjects.exists('loginForm');
+      return await isLoginFormVisible();
     });
   }
 
@@ -107,16 +116,17 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
 
   const loginPage = Object.freeze({
     async login(username?: string, password?: string, options: LoginOptions = {}) {
-      await PageObjects.common.navigateToApp('login');
+      if (!(await isLoginFormVisible())) {
+        await PageObjects.common.navigateToApp('login');
+      }
 
       // ensure welcome screen won't be shown. This is relevant for environments which don't allow
       // to use the yml setting, e.g. cloud
       await browser.setLocalStorageItem('home:welcome:show', 'false');
       await waitForLoginForm();
 
-      const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-      await testSubjects.setValue('loginUsername', username || superUsername);
-      await testSubjects.setValue('loginPassword', password || superPassword);
+      await testSubjects.setValue('loginUsername', username || adminTestUser.username);
+      await testSubjects.setValue('loginPassword', password || adminTestUser.password);
       await testSubjects.click('loginSubmit');
 
       await waitForLoginResult(
@@ -154,9 +164,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       if (providerType === 'basic' || providerType === 'token') {
         await waitForLoginForm();
 
-        const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
-        await testSubjects.setValue('loginUsername', options?.username ?? superUsername);
-        await testSubjects.setValue('loginPassword', options?.password ?? superPassword);
+        await testSubjects.setValue('loginUsername', options?.username ?? adminTestUser.username);
+        await testSubjects.setValue('loginPassword', options?.password ?? adminTestUser.password);
         await testSubjects.click('loginSubmit');
       }
 
@@ -218,6 +227,21 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       await waitForLoginPage();
     }
 
+    async getCurrentUser() {
+      const sidCookie = await browser.getCookie('sid');
+      if (!sidCookie?.value) {
+        log.debug('User is not authenticated yet.');
+        return null;
+      }
+
+      const { body: user } = await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .set('Cookie', `sid=${sidCookie.value}`)
+        .expect(200);
+      return user as AuthenticatedUser;
+    }
+
     async forceLogout() {
       log.debug('SecurityPage.forceLogout');
       if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
@@ -226,7 +250,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       }
 
       log.debug('Redirecting to /logout to force the logout');
-      const url = PageObjects.common.getHostPort() + '/logout';
+      const url = deployment.getHostPort() + '/logout';
       await browser.get(url);
       log.debug('Waiting on the login form to appear');
       await waitForLoginPage();
@@ -253,7 +277,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickCancelEditUser() {
-      await testSubjects.click('userFormCancelButton');
+      await find.clickByButtonText('Cancel');
     }
 
     async clickCancelEditRole() {
@@ -261,7 +285,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickSaveEditUser() {
-      await testSubjects.click('userFormSaveButton');
+      await find.clickByButtonText('Update user');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -358,53 +382,58 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       return roles;
     }
 
+    /**
+     * @deprecated Use `PageObjects.security.clickCreateNewUser` instead
+     */
     async clickNewUser() {
       return await testSubjects.click('createUserButton');
     }
 
+    /**
+     * @deprecated Use `PageObjects.security.clickCreateNewUser` instead
+     */
     async clickNewRole() {
       return await testSubjects.click('createRoleButton');
     }
 
-    async addUser(userObj: {
-      username: string;
-      password: string;
-      confirmPassword: string;
-      email: string;
-      fullname: string;
-      roles: string[];
-      save?: boolean;
-    }) {
-      const self = this;
-      await this.clickNewUser();
-      log.debug('username = ' + userObj.username);
-      await testSubjects.setValue('userFormUserNameInput', userObj.username);
-      await testSubjects.setValue('passwordInput', userObj.password);
-      await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
-      if (userObj.fullname) {
-        await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
+    async fillUserForm(user: UserFormValues) {
+      if (user.username) {
+        await find.setValue('[name=username]', user.username);
       }
-      if (userObj.email) {
-        await testSubjects.setValue('userFormEmailInput', userObj.email);
+      if (user.password) {
+        await find.setValue('[name=password]', user.password);
+      }
+      if (user.confirm_password) {
+        await find.setValue('[name=confirm_password]', user.confirm_password);
+      }
+      if (user.full_name) {
+        await find.setValue('[name=full_name]', user.full_name);
+      }
+      if (user.email) {
+        await find.setValue('[name=email]', user.email);
       }
 
-      log.debug('Add roles: ', userObj.roles);
-      const rolesToAdd = userObj.roles || [];
+      const rolesToAdd = user.roles || [];
       for (let i = 0; i < rolesToAdd.length; i++) {
-        await self.selectRole(rolesToAdd[i]);
+        await this.selectRole(rolesToAdd[i]);
       }
-      log.debug('After Add role: , userObj.roleName');
-      if (userObj.save === true) {
-        await testSubjects.click('userFormSaveButton');
-      } else {
-        await testSubjects.click('userFormCancelButton');
-      }
+    }
+
+    async submitCreateUserForm() {
+      await find.clickByButtonText('Create user');
+    }
+
+    async createUser(user: UserFormValues) {
+      await this.clickElasticsearchUsers();
+      await this.clickCreateNewUser();
+      await this.fillUserForm(user);
+      await this.submitCreateUserForm();
     }
 
     async addRole(roleName: string, roleObj: Role) {
       const self = this;
 
-      await this.clickNewRole();
+      await this.clickCreateNewRole();
 
       // We have to use non-test-subject selectors because this markup is generated by ui-select.
       log.debug('roleObj.indices[0].names = ' + roleObj.elasticsearch.indices[0].names);
@@ -476,37 +505,23 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       const dropdown = await testSubjects.find('rolesDropdown');
       const input = await dropdown.findByCssSelector('input');
       await input.type(role);
-      await testSubjects.click(`roleOption-${role}`);
+      await find.clickByCssSelector(`[role=option][title="${role}"]`);
       await testSubjects.click('comboBoxToggleListButton');
-      await testSubjects.find(`roleOption-${role}`);
     }
 
-    deleteUser(username: string) {
-      let alertText: string;
+    async deleteUser(username: string) {
       log.debug('Delete user ' + username);
-      return find
-        .clickByDisplayedLinkText(username)
-        .then(() => {
-          return PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-        })
-        .then(() => {
-          log.debug('Find delete button and click');
-          return testSubjects.click('userFormDeleteButton');
-        })
-        .then(() => {
-          return PageObjects.common.sleep(2000);
-        })
-        .then(() => {
-          return testSubjects.getVisibleText('confirmModalBodyText');
-        })
-        .then((alert) => {
-          alertText = alert;
-          log.debug('Delete user alert text = ' + alertText);
-          return testSubjects.click('confirmModalConfirmButton');
-        })
-        .then(() => {
-          return alertText;
-        });
+      await find.clickByDisplayedLinkText(username);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+
+      log.debug('Find delete button and click');
+      await find.clickByButtonText('Delete user');
+      await PageObjects.common.sleep(2000);
+
+      const confirmText = await testSubjects.getVisibleText('confirmModalBodyText');
+      log.debug('Delete user alert text = ' + confirmText);
+      await testSubjects.click('confirmModalConfirmButton');
+      return confirmText;
     }
   }
   return new SecurityPage();

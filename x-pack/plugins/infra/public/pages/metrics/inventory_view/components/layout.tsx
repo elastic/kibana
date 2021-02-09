@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
-import { useInterval } from 'react-use';
+import React, { useCallback, useEffect, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -16,10 +17,10 @@ import { PageContent } from '../../../../components/page';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
+import { DEFAULT_LEGEND, useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useSourceContext } from '../../../../containers/source';
 import { InfraFormatterType } from '../../../../lib/lib';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Toolbar } from './toolbars/toolbar';
 import { ViewSwitcher } from './waffle/view_switcher';
 import { IntervalLabel } from './waffle/interval_label';
@@ -32,6 +33,7 @@ import { BottomDrawer } from './bottom_drawer';
 import { Legend } from './waffle/legend';
 
 export const Layout = () => {
+  const [showLoading, setShowLoading] = useState(true);
   const { sourceId, source } = useSourceContext();
   const { currentView, shouldLoadDefault } = useSavedViewContext();
   const {
@@ -61,10 +63,14 @@ export const Layout = () => {
     false
   );
 
+  const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
+  const legendSteps = legend?.steps ?? DEFAULT_LEGEND.steps;
+  const legendReverseColors = legend?.reverseColors ?? DEFAULT_LEGEND.reverseColors;
+
   const options = {
     formatter: InfraFormatterType.percent,
     formatTemplate: '{{value}}',
-    legend: createLegend(legend.palette, legend.steps, legend.reverseColors),
+    legend: createLegend(legendPalette, legendSteps, legendReverseColors),
     metric,
     sort,
     fields: source?.configuration?.fields,
@@ -98,67 +104,100 @@ export const Layout = () => {
     if (currentView != null || !shouldLoadDefault) {
       reload();
     }
-  }, [reload, currentView, shouldLoadDefault]);
+
+    /**
+     * INFO: why disable exhaustive-deps
+     * We need to wait on the currentView not to be null because it is loaded async and could change the view state.
+     * We don't actually need to watch the value of currentView though, since the view state will be synched up by the
+     * changing params in the reload method so we should only "watch" the reload method.
+     *
+     * TODO: Should refactor this in the future to make it more clear where all the view state is coming
+     * from and it's precedence [query params, localStorage, defaultView, out of the box view]
+     */
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [reload, shouldLoadDefault]);
+
+  useEffect(() => {
+    setShowLoading(true);
+  }, [options.metric, nodeType]);
+
+  useEffect(() => {
+    const hasNodes = nodes && nodes.length;
+    // Don't show loading screen when we're auto-reloading
+    setShowLoading(!hasNodes);
+  }, [nodes]);
 
   return (
     <>
       <PageContent>
-        <MainContainer>
-          <AutoSizer bounds>
-            {({ measureRef: topActionMeasureRef, bounds: { height: topActionHeight = 0 } }) => (
-              <>
-                <TopActionContainer ref={topActionMeasureRef}>
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-                    <Toolbar nodeType={nodeType} />
-                    <EuiFlexItem grow={false}>
-                      <IntervalLabel intervalAsString={intervalAsString} />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ViewSwitcher view={view} onChange={changeView} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer />
-                  <SavedViewContainer>
-                    <SavedViewsToolbarControls viewState={viewState} />
-                  </SavedViewContainer>
-                </TopActionContainer>
-                <AutoSizer bounds>
-                  {({ measureRef, bounds: { height = 0 } }) => (
-                    <>
-                      <NodesOverview
-                        nodes={nodes}
-                        options={options}
-                        nodeType={nodeType}
-                        loading={loading}
-                        reload={reload}
-                        onDrilldown={applyFilterQuery}
-                        currentTime={currentTime}
-                        view={view}
-                        autoBounds={autoBounds}
-                        boundsOverride={boundsOverride}
-                        formatter={formatter}
-                        bottomMargin={height}
-                        topMargin={topActionHeight}
-                      />
-                      <BottomDrawer
-                        measureRef={measureRef}
-                        interval={interval}
-                        formatter={formatter}
+        <AutoSizer bounds>
+          {({ measureRef: pageMeasureRef, bounds: { width = 0 } }) => (
+            <MainContainer ref={pageMeasureRef}>
+              <AutoSizer bounds>
+                {({ measureRef: topActionMeasureRef, bounds: { height: topActionHeight = 0 } }) => (
+                  <>
+                    <TopActionContainer ref={topActionMeasureRef}>
+                      <EuiFlexGroup
+                        justifyContent="spaceBetween"
+                        alignItems="center"
+                        gutterSize="m"
                       >
-                        <Legend
-                          formatter={formatter}
-                          bounds={bounds}
-                          dataBounds={dataBounds}
-                          legend={options.legend}
-                        />
-                      </BottomDrawer>
-                    </>
-                  )}
-                </AutoSizer>
-              </>
-            )}
-          </AutoSizer>
-        </MainContainer>
+                        <Toolbar nodeType={nodeType} currentTime={currentTime} />
+                        <EuiFlexItem grow={false}>
+                          <IntervalLabel intervalAsString={intervalAsString} />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <ViewSwitcher view={view} onChange={changeView} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer />
+                      <SavedViewContainer>
+                        <SavedViewsToolbarControls viewState={viewState} />
+                      </SavedViewContainer>
+                    </TopActionContainer>
+                    <AutoSizer bounds>
+                      {({ measureRef, bounds: { height = 0 } }) => (
+                        <>
+                          <NodesOverview
+                            nodes={nodes}
+                            options={options}
+                            nodeType={nodeType}
+                            loading={loading}
+                            showLoading={showLoading}
+                            reload={reload}
+                            onDrilldown={applyFilterQuery}
+                            currentTime={currentTime}
+                            view={view}
+                            autoBounds={autoBounds}
+                            boundsOverride={boundsOverride}
+                            formatter={formatter}
+                            bottomMargin={height}
+                            topMargin={topActionHeight}
+                          />
+                          {view === 'map' && (
+                            <BottomDrawer
+                              measureRef={measureRef}
+                              interval={interval}
+                              formatter={formatter}
+                              width={width}
+                            >
+                              <Legend
+                                formatter={formatter}
+                                bounds={bounds}
+                                dataBounds={dataBounds}
+                                legend={options.legend}
+                              />
+                            </BottomDrawer>
+                          )}
+                        </>
+                      )}
+                    </AutoSizer>
+                  </>
+                )}
+              </AutoSizer>
+            </MainContainer>
+          )}
+        </AutoSizer>
       </PageContent>
     </>
   );

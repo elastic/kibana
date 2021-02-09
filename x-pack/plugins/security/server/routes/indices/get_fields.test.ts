@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { httpServerMock, elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock, coreMock } from '../../../../../../src/core/server/mocks';
 import { kibanaResponseFactory } from '../../../../../../src/core/server';
 
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -36,10 +37,12 @@ const mockFieldMappingResponse = {
 describe('GET /internal/security/fields/{query}', () => {
   it('returns a list of deduplicated fields, omitting empty and runtime fields', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-
-    const scopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    scopedClient.callAsCurrentUser.mockResolvedValue(mockFieldMappingResponse);
-    mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(scopedClient);
+    const mockContext = {
+      core: coreMock.createRequestHandlerContext(),
+    };
+    mockContext.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping.mockImplementation(
+      (async () => ({ body: mockFieldMappingResponse })) as any
+    );
 
     defineGetFieldsRoutes(mockRouteDefinitionParams);
 
@@ -51,7 +54,7 @@ describe('GET /internal/security/fields/{query}', () => {
       path: `/internal/security/fields/foo`,
       headers,
     });
-    const response = await handler({} as any, mockRequest, kibanaResponseFactory);
+    const response = await handler(mockContext as any, mockRequest, kibanaResponseFactory);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(['fooField', 'commonField', 'barField']);
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Service for carrying out requests to run ML forecasts and to obtain
@@ -48,17 +49,20 @@ function getForecastsSummary(job, query, earliestMs, maxResults) {
     }
 
     ml.results
-      .anomalySearch({
-        size: maxResults,
-        body: {
-          query: {
-            bool: {
-              filter: filterCriteria,
+      .anomalySearch(
+        {
+          size: maxResults,
+          body: {
+            query: {
+              bool: {
+                filter: filterCriteria,
+              },
             },
+            sort: [{ forecast_create_timestamp: { order: 'desc' } }],
           },
-          sort: [{ forecast_create_timestamp: { order: 'desc' } }],
         },
-      })
+        [job.job_id]
+      )
       .then((resp) => {
         if (resp.hits.total.value > 0) {
           obj.forecasts = resp.hits.hits.map((hit) => hit._source);
@@ -105,28 +109,31 @@ function getForecastDateRange(job, forecastId) {
     // once forecasting with these parameters is supported.
 
     ml.results
-      .anomalySearch({
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: filterCriteria,
-            },
-          },
-          aggs: {
-            earliest: {
-              min: {
-                field: 'timestamp',
+      .anomalySearch(
+        {
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: filterCriteria,
               },
             },
-            latest: {
-              max: {
-                field: 'timestamp',
+            aggs: {
+              earliest: {
+                min: {
+                  field: 'timestamp',
+                },
+              },
+              latest: {
+                max: {
+                  field: 'timestamp',
+                },
               },
             },
           },
         },
-      })
+        [job.job_id]
+      )
       .then((resp) => {
         obj.earliest = get(resp, 'aggregations.earliest.value', null);
         obj.latest = get(resp, 'aggregations.latest.value', null);
@@ -242,42 +249,45 @@ function getForecastData(
         };
 
   return ml.results
-    .anomalySearch$({
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: filterCriteria,
-          },
-        },
-        aggs: {
-          times: {
-            date_histogram: {
-              field: 'timestamp',
-              fixed_interval: `${intervalMs}ms`,
-              min_doc_count: 1,
+    .anomalySearch$(
+      {
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter: filterCriteria,
             },
-            aggs: {
-              prediction: {
-                [forecastAggs.avg]: {
-                  field: 'forecast_prediction',
-                },
+          },
+          aggs: {
+            times: {
+              date_histogram: {
+                field: 'timestamp',
+                fixed_interval: `${intervalMs}ms`,
+                min_doc_count: 1,
               },
-              forecastUpper: {
-                [forecastAggs.max]: {
-                  field: 'forecast_upper',
+              aggs: {
+                prediction: {
+                  [forecastAggs.avg]: {
+                    field: 'forecast_prediction',
+                  },
                 },
-              },
-              forecastLower: {
-                [forecastAggs.min]: {
-                  field: 'forecast_lower',
+                forecastUpper: {
+                  [forecastAggs.max]: {
+                    field: 'forecast_upper',
+                  },
+                },
+                forecastLower: {
+                  [forecastAggs.min]: {
+                    field: 'forecast_lower',
+                  },
                 },
               },
             },
           },
         },
       },
-    })
+      [job.job_id]
+    )
     .pipe(
       map((resp) => {
         const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
@@ -341,16 +351,19 @@ function getForecastRequestStats(job, forecastId) {
     ];
 
     ml.results
-      .anomalySearch({
-        size: 1,
-        body: {
-          query: {
-            bool: {
-              filter: filterCriteria,
+      .anomalySearch(
+        {
+          size: 1,
+          body: {
+            query: {
+              bool: {
+                filter: filterCriteria,
+              },
             },
           },
         },
-      })
+        [job.job_id]
+      )
       .then((resp) => {
         if (resp.hits.total.value > 0) {
           obj.stats = resp.hits.hits[0]._source;

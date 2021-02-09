@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
@@ -10,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
@@ -23,11 +24,8 @@ import {
   NetworkTopCountriesStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
@@ -66,8 +64,8 @@ export const useNetworkTopCountries = ({
   startDate,
   type,
 }: UseNetworkTopCountries): [boolean, NetworkTopCountriesArgs] => {
-  const getTopCountriesSelector = networkSelectors.topCountriesSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTopCountriesSelector = useMemo(() => networkSelectors.topCountriesSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopCountriesSelector(state, type, flowTarget)
   );
   const { data, notifications } = useKibana().services;
@@ -79,25 +77,7 @@ export const useNetworkTopCountries = ({
   const [
     networkTopCountriesRequest,
     setHostRequest,
-  ] = useState<NetworkTopCountriesRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkQueries.topCountries,
-          filterQuery: createFilter(filterQuery),
-          flowTarget,
-          id: queryId,
-          ip,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          sort,
-          timerange: {
-            interval: '12h',
-            from: startDate ? startDate : '',
-            to: endDate ? endDate : new Date(Date.now()).toISOString(),
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkTopCountriesRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -115,9 +95,10 @@ export const useNetworkTopCountries = ({
     [limit]
   );
 
-  const [networkTopCountriesResponse, setNetworkTopCountriesResponse] = useState<
-    NetworkTopCountriesArgs
-  >({
+  const [
+    networkTopCountriesResponse,
+    setNetworkTopCountriesResponse,
+  ] = useState<NetworkTopCountriesArgs>({
     networkTopCountries: [],
     id: queryId,
     inspect: {
@@ -137,7 +118,7 @@ export const useNetworkTopCountries = ({
 
   const networkTopCountriesSearch = useCallback(
     (request: NetworkTopCountriesRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -193,7 +174,7 @@ export const useNetworkTopCountries = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -204,7 +185,6 @@ export const useNetworkTopCountries = ({
         factoryQueryType: NetworkQueries.topCountries,
         filterQuery: createFilter(filterQuery),
         flowTarget,
-        id: queryId,
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
@@ -214,24 +194,12 @@ export const useNetworkTopCountries = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    indexNames,
-    endDate,
-    filterQuery,
-    ip,
-    limit,
-    startDate,
-    sort,
-    skip,
-    flowTarget,
-    queryId,
-  ]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

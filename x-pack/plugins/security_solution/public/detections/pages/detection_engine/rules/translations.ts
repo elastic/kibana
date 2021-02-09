@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -353,7 +354,7 @@ export const COLUMN_QUERY_TIMES = i18n.translate(
 export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
-    defaultMessage: 'Gap (if any)',
+    defaultMessage: 'Last Gap (if any)',
   }
 );
 
@@ -374,7 +375,14 @@ export const RULES_TAB = i18n.translate(
 export const MONITORING_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.tabs.monitoring',
   {
-    defaultMessage: 'Monitoring',
+    defaultMessage: 'Rule Monitoring',
+  }
+);
+
+export const EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tabs.exceptions',
+  {
+    defaultMessage: 'Exception Lists',
   }
 );
 
@@ -554,3 +562,44 @@ export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, messa
       defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
     }
   );
+
+export const REFRESH_PROMPT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptTitle',
+  {
+    defaultMessage: 'Are you still there?',
+  }
+);
+
+export const REFRESH_PROMPT_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptConfirm',
+  {
+    defaultMessage: 'Continue',
+  }
+);
+
+export const REFRESH_PROMPT_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
+  {
+    defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
+  }
+);
+
+export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
+  {
+    defaultMessage: 'Automatically refresh table',
+  }
+);
+
+export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
+  {
+    defaultMessage: 'Refresh settings',
+  }
+);
+
+export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
+    values: { totalLists },
+    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
+  });

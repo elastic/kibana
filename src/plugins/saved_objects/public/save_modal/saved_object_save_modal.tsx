@@ -1,27 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import {
   htmlIdGenerator,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiModal,
@@ -53,12 +45,15 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  onCopyOnSaveChange?: (copyOnChange: boolean) => void;
   initialCopyOnSave?: boolean;
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
+  rightOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   description?: string;
   showDescription: boolean;
+  isValid?: boolean;
 }
 
 export interface SaveModalState {
@@ -87,12 +82,54 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title } = this.state;
     const duplicateWarningId = generateId();
 
+    const hasColumns = !!this.props.rightOptions;
+
+    const formBodyContent = (
+      <>
+        <EuiFormRow
+          fullWidth
+          label={<FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />}
+        >
+          <EuiFieldText
+            fullWidth
+            autoFocus
+            data-test-subj="savedObjectTitle"
+            value={title}
+            onChange={this.onTitleChange}
+            isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
+            aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
+          />
+        </EuiFormRow>
+
+        {this.renderViewDescription()}
+
+        {typeof this.props.options === 'function'
+          ? this.props.options(this.state)
+          : this.props.options}
+      </>
+    );
+
+    const formBody = hasColumns ? (
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>{formBodyContent}</EuiFlexItem>
+        <EuiFlexItem>
+          {typeof this.props.rightOptions === 'function'
+            ? this.props.rightOptions(this.state)
+            : this.props.rightOptions}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      formBodyContent
+    );
+
     return (
       <EuiOverlayMask>
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className="kbnSavedObjectSaveModal"
+            className={`kbnSavedObjectSaveModal${
+              hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''
+            }`}
             onClose={this.props.onClose}
           >
             <EuiModalHeader>
@@ -114,38 +151,8 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
                     {this.props.description}
                   </EuiText>
                 )}
-
-                <EuiSpacer />
-
+                {formBody}
                 {this.renderCopyOnSave()}
-
-                <EuiFormRow
-                  fullWidth
-                  label={
-                    <FormattedMessage
-                      id="savedObjects.saveModal.titleLabel"
-                      defaultMessage="Title"
-                    />
-                  }
-                >
-                  <EuiFieldText
-                    fullWidth
-                    autoFocus
-                    data-test-subj="savedObjectTitle"
-                    value={title}
-                    onChange={this.onTitleChange}
-                    isInvalid={
-                      (!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0
-                    }
-                    aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
-                  />
-                </EuiFormRow>
-
-                {this.renderViewDescription()}
-
-                {typeof this.props.options === 'function'
-                  ? this.props.options(this.state)
-                  : this.props.options}
               </EuiForm>
             </EuiModalBody>
 
@@ -238,6 +245,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     this.setState({
       copyOnSave: event.target.checked,
     });
+
+    if (this.props.onCopyOnSaveChange) {
+      this.props.onCopyOnSaveChange(event.target.checked);
+    }
   };
 
   private onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -259,12 +270,14 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       confirmLabel = this.props.confirmButtonLabel;
     }
 
+    const isValid = this.props.isValid !== undefined ? this.props.isValid : true;
+
     return (
       <EuiButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
         isLoading={isLoading}
-        isDisabled={title.length === 0}
+        isDisabled={title.length === 0 || !isValid}
         type="submit"
       >
         {confirmLabel}
@@ -315,6 +328,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     return (
       <>
+        <EuiSpacer />
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"
           checked={this.state.copyOnSave}
@@ -327,7 +341,6 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             />
           }
         />
-        <EuiSpacer />
       </>
     );
   };

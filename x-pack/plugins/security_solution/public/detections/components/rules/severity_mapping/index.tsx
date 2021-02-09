@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -34,12 +35,12 @@ import {
   SeverityMappingItem,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-const SeverityMappingEuiFormRow = styled(EuiFormRow)`
-  width: 468px;
-`;
-
 const NestedContent = styled.div`
   margin-left: 24px;
+`;
+
+const EuiFlexItemComboBoxColumn = styled(EuiFlexItem)`
+  max-width: 376px;
 `;
 
 const EuiFlexItemIconColumn = styled(EuiFlexItem)`
@@ -52,7 +53,7 @@ const EuiFlexItemSeverityColumn = styled(EuiFlexItem)`
 
 interface SeverityFieldProps {
   dataTestSubj: string;
-  field: FieldHook;
+  field: FieldHook<AboutStepSeverity>;
   idAria: string;
   indices: IIndexPattern;
   isDisabled: boolean;
@@ -67,9 +68,8 @@ export const SeverityField = ({
   isDisabled,
   options,
 }: SeverityFieldProps) => {
-  const fieldValueInputWidth = 160;
+  const { value, isMappingChecked, mapping } = field.value;
   const { setValue } = field;
-  const { value, isMappingChecked, mapping } = field.value as AboutStepSeverity;
 
   const handleFieldValueChange = useCallback(
     (newMappingItems: SeverityMapping, index: number): void => {
@@ -98,8 +98,8 @@ export const SeverityField = ({
     [mapping, handleFieldValueChange]
   );
 
-  const handleSecurityLevelChange = useCallback(
-    (newValue: string) => {
+  const handleDefaultSeverityChange = useCallback(
+    (newValue: Severity) => {
       setValue({
         value: newValue,
         isMappingChecked,
@@ -124,14 +124,6 @@ export const SeverityField = ({
     },
     [mapping, handleFieldValueChange]
   );
-
-  const getIFieldTypeFromFieldName = (
-    fieldName: string | undefined,
-    iIndexPattern: IIndexPattern
-  ): IFieldType | undefined => {
-    const [iFieldType] = iIndexPattern.fields.filter(({ name }) => fieldName === name);
-    return iFieldType;
-  };
 
   const handleSeverityMappingChecked = useCallback(() => {
     setValue({
@@ -180,7 +172,7 @@ export const SeverityField = ({
   }, [handleSeverityMappingChecked, isDisabled, isMappingChecked]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction={'column'}>
       <EuiFlexItem>
         <EuiFormRow
           label={severityLabel}
@@ -196,7 +188,7 @@ export const SeverityField = ({
             fullWidth={false}
             disabled={false}
             valueOfSelected={value}
-            onChange={handleSecurityLevelChange}
+            onChange={handleDefaultSeverityChange}
             options={options}
             data-test-subj="select"
           />
@@ -204,7 +196,7 @@ export const SeverityField = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <SeverityMappingEuiFormRow
+        <EuiFormRow
           label={severityMappingLabel}
           labelAppend={field.labelAppend}
           helpText={
@@ -222,12 +214,12 @@ export const SeverityField = ({
               <EuiFlexGroup direction={'column'} gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem>
+                    <EuiFlexItemComboBoxColumn>
                       <EuiFormLabel>{i18n.SOURCE_FIELD}</EuiFormLabel>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
+                    </EuiFlexItemComboBoxColumn>
+                    <EuiFlexItemComboBoxColumn>
                       <EuiFormLabel>{i18n.SOURCE_VALUE}</EuiFormLabel>
-                    </EuiFlexItem>
+                    </EuiFlexItemComboBoxColumn>
                     <EuiFlexItemIconColumn grow={false} />
                     <EuiFlexItemSeverityColumn grow={false}>
                       <EuiFormLabel>{i18n.DEFAULT_SEVERITY}</EuiFormLabel>
@@ -242,18 +234,14 @@ export const SeverityField = ({
                       alignItems="center"
                       gutterSize="s"
                     >
-                      <EuiFlexItem>
+                      <EuiFlexItemComboBoxColumn>
                         <FieldComponent
                           placeholder={''}
-                          selectedField={getIFieldTypeFromFieldName(
-                            severityMappingItem.field,
-                            indices
-                          )}
+                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           isLoading={false}
                           isDisabled={isDisabled}
                           isClearable={false}
                           indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
                           onChange={handleFieldChange.bind(
                             null,
                             index,
@@ -262,21 +250,17 @@ export const SeverityField = ({
                           data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
                           aria-label={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
                         />
-                      </EuiFlexItem>
+                      </EuiFlexItemComboBoxColumn>
 
-                      <EuiFlexItem>
+                      <EuiFlexItemComboBoxColumn>
                         <AutocompleteFieldMatchComponent
                           placeholder={''}
-                          selectedField={getIFieldTypeFromFieldName(
-                            severityMappingItem.field,
-                            indices
-                          )}
+                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           selectedValue={severityMappingItem.value}
                           isClearable={false}
                           isDisabled={isDisabled}
                           isLoading={false}
                           indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
                           onChange={handleFieldMatchValueChange.bind(
                             null,
                             index,
@@ -285,7 +269,7 @@ export const SeverityField = ({
                           data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
                           aria-label={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
                         />
-                      </EuiFlexItem>
+                      </EuiFlexItemComboBoxColumn>
                       <EuiFlexItemIconColumn grow={false}>
                         <EuiIcon type={'sortRight'} />
                       </EuiFlexItemIconColumn>
@@ -301,8 +285,25 @@ export const SeverityField = ({
               </EuiFlexGroup>
             )}
           </NestedContent>
-        </SeverityMappingEuiFormRow>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+/**
+ * Looks for field metadata (IFieldType) in existing index pattern.
+ * If specified field doesn't exist, returns a stub IFieldType created based on the mapping --
+ * because the field might not have been indexed yet, but we still need to display the mapping.
+ *
+ * @param mapping Mapping of a specified field name + value to a certain severity value.
+ * @param pattern Existing index pattern.
+ */
+const getFieldTypeByMapping = (
+  mapping: SeverityMappingItem,
+  pattern: IIndexPattern
+): IFieldType => {
+  const { field } = mapping;
+  const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);
+  return knownFieldType ?? { name: field, type: 'string' };
 };

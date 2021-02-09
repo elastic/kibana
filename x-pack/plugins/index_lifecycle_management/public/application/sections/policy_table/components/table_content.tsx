@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactElement, useState, Fragment, ReactNode } from 'react';
@@ -35,7 +36,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../index_management/public';
 import { PolicyFromES } from '../../../../../common/types';
-import { getPolicyPath } from '../../../services/navigation';
+import { getPolicyEditPath } from '../../../services/navigation';
 import { sortTable } from '../../../services';
 import { trackUiMetric } from '../../../services/ui_metric';
 
@@ -193,7 +194,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
         icon: 'list',
         onClick: () => {
           navigateToApp('management', {
-            path: `/data/index_management${getIndexListUri(`ilm.policy:${policy.name}`, true)}`,
+            path: `/data/index_management${getIndexListUri(`ilm.policy:"${policy.name}"`, true)}`,
           });
         },
       });
@@ -229,7 +230,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       return (
         <EuiLink
           data-test-subj="policyTablePolicyNameLink"
-          {...reactRouterNavigate(history, getPolicyPath(value as string), () =>
+          {...reactRouterNavigate(history, getPolicyEditPath(value as string), () =>
             trackUiMetric(METRIC_TYPE.CLICK, UIM_EDIT_CLICK)
           )}
         >
@@ -301,12 +302,11 @@ export const TableContent: React.FunctionComponent<Props> = ({
         style={{ width: 150 }}
       >
         <EuiPopover
-          id="contextMenuPolicy"
+          id={`contextMenuPolicy-${name}`}
           button={button}
           isOpen={isPolicyPopoverOpen(policy.name)}
           closePopover={closePolicyPopover}
           panelPaddingSize="none"
-          withTitle
           anchorPosition="rightUp"
           repositionOnScroll
         >

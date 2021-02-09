@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -29,7 +18,7 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';
 import { render } from '@testing-library/react';
 
-import { EuiTextArea } from '@elastic/eui';
+import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
 import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput } from './';
@@ -95,12 +84,15 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   );
 }
 
-describe('QueryStringInput', () => {
+// FAILING: https://github.com/elastic/kibana/issues/85715
+// FAILING: https://github.com/elastic/kibana/issues/89603
+// FAILING: https://github.com/elastic/kibana/issues/89641
+describe.skip('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('Should render the given query', async () => {
+  it.skip('Should render the given query', async () => {
     const { getByText } = render(
       wrapQueryStringInputInContext({
         query: kqlQuery,
@@ -170,6 +162,30 @@ describe('QueryStringInput', () => {
     component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
+  });
+
+  it('Should not show the language switcher when disabled', () => {
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: luceneQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableLanguageSwitcher: true,
+      })
+    );
+    expect(component.find(QueryLanguageSwitcher).exists()).toBeFalsy();
+  });
+
+  it('Should show an icon when an iconType is specified', () => {
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: luceneQuery,
+        onSubmit: noop,
+        indexPatterns: [stubIndexPatternWithFields],
+        iconType: 'search',
+      })
+    );
+    expect(component.find(EuiIcon).exists()).toBeTruthy();
   });
 
   it('Should call onSubmit when the user hits enter inside the query bar', () => {
@@ -255,20 +271,16 @@ describe('QueryStringInput', () => {
   });
 
   it('Should accept index pattern strings and fetch the full object', () => {
+    const patternStrings = ['logstash-*'];
     mockFetchIndexPatterns.mockClear();
     mount(
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
-        indexPatterns: ['logstash-*'],
+        indexPatterns: patternStrings,
         disableAutoFocus: true,
       })
     );
-
-    expect(mockFetchIndexPatterns).toHaveBeenCalledWith(
-      startMock.savedObjects.client,
-      ['logstash-*'],
-      startMock.uiSettings
-    );
+    expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
   });
 });

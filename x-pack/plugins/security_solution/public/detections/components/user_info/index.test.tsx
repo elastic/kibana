@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -37,12 +38,14 @@ describe('useUserInfo', () => {
           canUserCRUD: null,
           hasEncryptionKey: null,
           hasIndexManage: null,
+          hasIndexMaintenance: null,
           hasIndexWrite: null,
+          hasIndexUpdateDelete: null,
           isAuthenticated: null,
           isSignalIndexExists: null,
           loading: true,
           signalIndexName: null,
-          signalIndexTemplateOutdated: null,
+          signalIndexMappingOutdated: null,
         },
         error: undefined,
       });
@@ -53,7 +56,7 @@ describe('useUserInfo', () => {
     const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
     const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex').mockResolvedValueOnce({
       name: 'mock-signal-index',
-      template_outdated: true,
+      index_mapping_outdated: true,
     });
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() => useUserInfo(), { wrapper: ManageUserInfo });

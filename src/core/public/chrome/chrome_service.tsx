@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
@@ -24,6 +13,7 @@ import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } 
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
+import { MountPoint } from '../types';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
@@ -57,6 +47,11 @@ export interface ChromeBrand {
 
 /** @public */
 export type ChromeBreadcrumb = EuiBreadcrumb;
+
+/** @public */
+export interface ChromeBreadcrumbsAppendExtension {
+  content: MountPoint<HTMLDivElement>;
+}
 
 /** @public */
 export interface ChromeHelpExtension {
@@ -146,6 +141,9 @@ export class ChromeService {
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const breadcrumbsAppendExtension$ = new BehaviorSubject<
+      ChromeBreadcrumbsAppendExtension | undefined
+    >(undefined);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
@@ -225,6 +223,7 @@ export class ChromeService {
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+          breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
@@ -288,6 +287,14 @@ export class ChromeService {
 
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbs$.next(newBreadcrumbs);
+      },
+
+      getBreadcrumbsAppendExtension$: () => breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$)),
+
+      setBreadcrumbsAppendExtension: (
+        breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
+      ) => {
+        breadcrumbsAppendExtension$.next(breadcrumbsAppendExtension);
       },
 
       getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
@@ -430,6 +437,18 @@ export interface ChromeStart {
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+
+  /**
+   * Get an observable of the current extension appended to breadcrumbs
+   */
+  getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
+
+  /**
+   * Mount an element next to the last breadcrumb
+   */
+  setBreadcrumbsAppendExtension(
+    breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
+  ): void;
 
   /**
    * Get an observable of the current custom nav link

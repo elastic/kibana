@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -15,7 +17,7 @@ import {
   NetworkTopNFlowEdges,
   NetworkTopTablesFields,
 } from '../../../../common/search_strategy';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getNFlowColumnsCurated } from './columns';
@@ -60,8 +62,8 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const getTopNFlowSelector = networkSelectors.topNFlowSelector();
-  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+  const getTopNFlowSelector = useMemo(() => networkSelectors.topNFlowSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) =>
     getTopNFlowSelector(state, type, flowTargeted)
   );
 
@@ -112,11 +114,17 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
     [sort, dispatch, type, tableType]
   );
 
-  const field =
-    sort.field === NetworkTopTablesFields.bytes_out ||
-    sort.field === NetworkTopTablesFields.bytes_in
-      ? `node.network.${sort.field}`
-      : `node.${flowTargeted}.${sort.field}`;
+  const sorting = useMemo(
+    () => ({
+      field:
+        sort.field === NetworkTopTablesFields.bytes_out ||
+        sort.field === NetworkTopTablesFields.bytes_in
+          ? `node.network.${sort.field}`
+          : `node.${flowTargeted}.${sort.field}`,
+      direction: sort.direction,
+    }),
+    [flowTargeted, sort]
+  );
 
   const updateActivePage = useCallback(
     (newPage) =>
@@ -159,7 +167,7 @@ const NetworkTopNFlowTableComponent: React.FC<NetworkTopNFlowTableProps> = ({
       onChange={onChange}
       pageOfItems={data}
       showMorePagesIndicator={showMorePagesIndicator}
-      sorting={{ field, direction: sort.direction }}
+      sorting={sorting}
       totalCount={fakeTotalCount}
       updateActivePage={updateActivePage}
       updateLimitPagination={updateLimitPagination}

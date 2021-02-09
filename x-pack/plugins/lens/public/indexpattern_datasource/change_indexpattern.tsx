@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
+import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { ToolbarButtonProps, ToolbarButton } from '../shared_components';
+import { ToolbarButton, ToolbarButtonProps } from '../../../../../src/plugins/kibana_react/public';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -63,7 +63,12 @@ export function ChangeIndexPattern({
               defaultMessage: 'Change index pattern',
             })}
           </EuiPopoverTitle>
-          <EuiSelectable
+          <EuiSelectable<{
+            key?: string;
+            label: string;
+            value?: string;
+            checked?: 'on' | 'off' | undefined;
+          }>
             {...selectableProps}
             searchable
             singleSelection="always"

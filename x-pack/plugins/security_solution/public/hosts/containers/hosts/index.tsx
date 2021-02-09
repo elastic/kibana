@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useKibana } from '../../../common/lib/kibana';
-import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsModel, hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import {
@@ -25,11 +26,8 @@ import {
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 
@@ -68,35 +66,15 @@ export const useAllHost = ({
   startDate,
   type,
 }: UseAllHost): [boolean, HostsArgs] => {
-  const getHostsSelector = hostsSelectors.hostsSelector();
-  const { activePage, direction, limit, sortField } = useShallowEqualSelector((state: State) =>
+  const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
+  const { activePage, direction, limit, sortField } = useDeepEqualSelector((state: State) =>
     getHostsSelector(state, type)
   );
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: HostsQueries.hosts,
-          filterQuery: createFilter(filterQuery),
-          id: ID,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          sort: {
-            direction,
-            field: sortField,
-          },
-        }
-      : null
-  );
+  const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -136,7 +114,7 @@ export const useAllHost = ({
 
   const hostsSearch = useCallback(
     (request: HostsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -189,7 +167,7 @@ export const useAllHost = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -200,7 +178,6 @@ export const useAllHost = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.hosts,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -212,7 +189,7 @@ export const useAllHost = ({
           field: sortField,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
@@ -225,7 +202,6 @@ export const useAllHost = ({
     filterQuery,
     indexNames,
     limit,
-    skip,
     startDate,
     sortField,
   ]);

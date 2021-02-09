@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
@@ -26,8 +27,19 @@ describe('TaskPollingLifecycle', () => {
       index: 'foo',
       max_attempts: 9,
       poll_interval: 6000000,
+      version_conflict_threshold: 80,
       max_poll_inactivity_cycles: 10,
       request_capacity: 1000,
+      monitored_aggregated_stats_refresh_rate: 5000,
+      monitored_stats_required_freshness: 5000,
+      monitored_stats_running_average_window: 50,
+      monitored_task_execution_thresholds: {
+        default: {
+          error_threshold: 90,
+          warn_threshold: 80,
+        },
+        custom: {},
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
@@ -45,15 +57,64 @@ describe('TaskPollingLifecycle', () => {
   afterEach(() => clock.restore());
 
   describe('start', () => {
-    test('begins polling once start is called', () => {
-      const taskManager = new TaskPollingLifecycle(taskManagerOpts);
+    test('begins polling once the ES and SavedObjects services are available', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({
+        elasticsearchAndSOAvailability$,
+        ...taskManagerOpts,
+      });
 
       clock.tick(150);
       expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
 
-      taskManager.start();
+      elasticsearchAndSOAvailability$.next(true);
 
       clock.tick(150);
+      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
+    });
+  });
+
+  describe('stop', () => {
+    test('stops polling once the ES and SavedObjects services become unavailable', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({
+        elasticsearchAndSOAvailability$,
+        ...taskManagerOpts,
+      });
+
+      elasticsearchAndSOAvailability$.next(true);
+
+      clock.tick(150);
+      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
+
+      elasticsearchAndSOAvailability$.next(false);
+
+      mockTaskStore.claimAvailableTasks.mockClear();
+      clock.tick(150);
+      expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
+    });
+
+    test('restarts polling once the ES and SavedObjects services become available again', () => {
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      new TaskPollingLifecycle({
+        elasticsearchAndSOAvailability$,
+        ...taskManagerOpts,
+      });
+
+      elasticsearchAndSOAvailability$.next(true);
+
+      clock.tick(150);
+      expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
+
+      elasticsearchAndSOAvailability$.next(false);
+      mockTaskStore.claimAvailableTasks.mockClear();
+      clock.tick(150);
+
+      expect(mockTaskStore.claimAvailableTasks).not.toHaveBeenCalled();
+
+      elasticsearchAndSOAvailability$.next(true);
+      clock.tick(150);
+
       expect(mockTaskStore.claimAvailableTasks).toHaveBeenCalled();
     });
   });
@@ -61,7 +122,12 @@ describe('TaskPollingLifecycle', () => {
   describe('claimAvailableTasks', () => {
     test('should claim Available Tasks when there are available workers', () => {
       const logger = mockLogger();
-      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+      const claim = jest.fn(() =>
+        Promise.resolve({
+          docs: [],
+          stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+        })
+      );
 
       const availableWorkers = 1;
 
@@ -72,7 +138,12 @@ describe('TaskPollingLifecycle', () => {
 
     test('should not claim Available Tasks when there are no available workers', () => {
       const logger = mockLogger();
-      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+      const claim = jest.fn(() =>
+        Promise.resolve({
+          docs: [],
+          stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+        })
+      );
 
       const availableWorkers = 0;
 

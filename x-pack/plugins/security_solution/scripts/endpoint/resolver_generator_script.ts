@@ -1,21 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable no-console */
 import yargs from 'yargs';
+import fs from 'fs';
 import { Client, ClientOptions } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
+import { KbnClient, ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../ingest_manager/common/constants';
+import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../fleet/common/constants';
 import {
   CreateFleetSetupResponse,
   PostIngestSetupResponse,
-} from '../../../ingest_manager/common/types/rest_spec';
+} from '../../../fleet/common/types/rest_spec';
 import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
 
 main();
@@ -202,8 +205,41 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    ssl: {
+      alias: 'ssl',
+      describe: 'Use https for elasticsearch and kbn clients',
+      type: 'boolean',
+      default: false,
+    },
   }).argv;
-  const kbnClient = new KbnClientWithApiKeySupport(new ToolingLog(), { url: argv.kibana });
+  let ca: Buffer;
+  let kbnClient: KbnClientWithApiKeySupport;
+  let clientOptions: ClientOptions;
+
+  if (argv.ssl) {
+    ca = fs.readFileSync(CA_CERT_PATH);
+    const url = argv.kibana.replace('http:', 'https:');
+    const node = argv.node.replace('http:', 'https:');
+    kbnClient = new KbnClientWithApiKeySupport({
+      log: new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      }),
+      url,
+      certificateAuthorities: [ca],
+    });
+    clientOptions = { node, ssl: { ca: [ca] } };
+  } else {
+    kbnClient = new KbnClientWithApiKeySupport({
+      log: new ToolingLog({
+        level: 'info',
+        writeTo: process.stdout,
+      }),
+      url: argv.kibana,
+    });
+    clientOptions = { node: argv.node };
+  }
+  const client = new Client(clientOptions);
 
   try {
     await doIngestSetup(kbnClient);
@@ -211,9 +247,6 @@ async function main() {
     // eslint-disable-next-line no-process-exit
     process.exit(1);
   }
-
-  const clientOptions: ClientOptions = { node: argv.node };
-  const client = new Client(clientOptions);
 
   if (argv.delete) {
     await deleteIndices(

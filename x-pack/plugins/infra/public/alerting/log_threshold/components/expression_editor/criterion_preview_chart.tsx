@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   ScaleType,
   AnnotationDomainTypes,
@@ -19,6 +20,7 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   ChartContainer,
   LoadingState,
@@ -33,7 +35,7 @@ import {
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
 import {
-  AlertParams,
+  PartialAlertParams,
   Threshold,
   Criterion,
   Comparator,
@@ -43,15 +45,13 @@ import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
 } from '../../../../../common/http_api/log_alerts/';
-import { AlertsContext } from './editor';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 const GROUP_LIMIT = 5;
 
 interface Props {
-  alertParams: Partial<AlertParams>;
-  context: AlertsContext;
+  alertParams: PartialAlertParams;
   chartCriterion: Partial<Criterion>;
   sourceId: string;
   showThreshold: boolean;
@@ -59,7 +59,6 @@ interface Props {
 
 export const CriterionPreview: React.FC<Props> = ({
   alertParams,
-  context,
   chartCriterion,
   sourceId,
   showThreshold,
@@ -91,7 +90,6 @@ export const CriterionPreview: React.FC<Props> = ({
           ? NUM_BUCKETS
           : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
-      context={context}
       sourceId={sourceId}
       threshold={alertParams.count}
       chartAlertParams={chartAlertParams}
@@ -102,7 +100,6 @@ export const CriterionPreview: React.FC<Props> = ({
 
 interface ChartProps {
   buckets: number;
-  context: AlertsContext;
   sourceId: string;
   threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
@@ -111,13 +108,13 @@ interface ChartProps {
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
   buckets,
-  context,
   sourceId,
   threshold,
   chartAlertParams,
   showThreshold,
 }) => {
-  const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
+  const { uiSettings } = useKibana().services;
+  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
 
   const {
     getChartPreviewData,
@@ -125,7 +122,6 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     hasError,
     chartPreviewData: series,
   } = useChartPreviewData({
-    context,
     sourceId,
     alertParams: chartAlertParams,
     buckets,

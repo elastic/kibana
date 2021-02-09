@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { filter } from 'lodash';
@@ -57,19 +46,6 @@ const mappingConflictHeader = i18n.translate(
     defaultMessage: 'Mapping conflict',
   }
 );
-
-const confirmMessage = i18n.translate('indexPatternManagement.editIndexPattern.refreshLabel', {
-  defaultMessage: 'This action resets the popularity counter of each field.',
-});
-
-const confirmModalOptionsRefresh = {
-  confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.refreshButton', {
-    defaultMessage: 'Refresh',
-  }),
-  title: i18n.translate('indexPatternManagement.editIndexPattern.refreshHeader', {
-    defaultMessage: 'Refresh field list?',
-  }),
-};
 
 const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
@@ -117,16 +93,6 @@ export const EditIndexPattern = withRouter(
       uiSettings.set('defaultIndex', indexPattern.id);
       setDefaultIndex(indexPattern.id || '');
     }, [uiSettings, indexPattern.id]);
-
-    const refreshFields = () => {
-      overlays.openConfirm(confirmMessage, confirmModalOptionsRefresh).then(async (isConfirmed) => {
-        if (isConfirmed) {
-          await data.indexPatterns.refreshFields(indexPattern);
-          await data.indexPatterns.updateSavedObject(indexPattern);
-          setFields(indexPattern.getNonScriptedFields());
-        }
-      });
-    };
 
     const removePattern = () => {
       async function doRemove() {
@@ -183,14 +149,14 @@ export const EditIndexPattern = withRouter(
     chrome.docTitle.change(indexPattern.title);
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
-
+    const kibana = useKibana();
+    const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     return (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
           <IndexHeader
             indexPattern={indexPattern}
             setDefault={setDefaultPattern}
-            refreshFields={refreshFields}
             deleteIndexPatternClick={removePattern}
             defaultIndex={defaultIndex}
           />
@@ -217,11 +183,7 @@ export const EditIndexPattern = withRouter(
                 defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
                 values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
               />{' '}
-              <EuiLink
-                href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html"
-                target="_blank"
-                external
-              >
+              <EuiLink href={docsUrl} target="_blank" external>
                 {mappingAPILink}
               </EuiLink>
             </p>

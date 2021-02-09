@@ -1,8 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { esArchiverResetKibana } from './es_archiver';
+import { RuleEcs } from '../../common/ecs/rule';
 
 const primaryButton = 0;
 
@@ -23,14 +27,14 @@ export const drag = (subject: JQuery<HTMLElement>) => {
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(3000)
+    .wait(300)
     .trigger('mousemove', {
       button: primaryButton,
       clientX: subjectLocation.left + dndSloppyClickDetectionThreshold,
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(3000);
+    .wait(300);
 };
 
 /** Drags the subject being dragged on the specified drop target, but does not drop it  */
@@ -42,15 +46,105 @@ export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
 
 /** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
+  const targetLocation = dropTarget[0].getBoundingClientRect();
   cy.wrap(dropTarget)
-    .trigger('mousemove', { button: primaryButton, force: true })
-    .wait(3000)
+    .trigger('mousemove', {
+      button: primaryButton,
+      clientX: targetLocation.left,
+      clientY: targetLocation.top,
+      force: true,
+    })
+    .wait(300)
     .trigger('mouseup', { force: true })
-    .wait(3000);
+    .wait(300);
 };
 
-export const reload = (afterReload: () => void) => {
+export const reload = () => {
   cy.reload();
   cy.contains('a', 'Security');
-  afterReload();
+};
+
+export const cleanKibana = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+
+  cy.request('GET', '/api/detection_engine/rules/_find').then((response) => {
+    const rules: RuleEcs[] = response.body.data;
+
+    if (response.body.data.length > 0) {
+      rules.forEach((rule) => {
+        const jsonRule = rule;
+        cy.request({
+          method: 'DELETE',
+          url: `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`,
+          headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+        });
+      });
+    }
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'alert',
+            },
+          },
+          {
+            match: {
+              'alert.alertTypeId': 'siem.signals',
+            },
+          },
+          {
+            match: {
+              'alert.consumer': 'siem',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'cases',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'siem-ui-timeline',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request(
+    'POST',
+    `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    {
+      query: {
+        match_all: {},
+      },
+    }
+  );
+
+  esArchiverResetKibana();
 };

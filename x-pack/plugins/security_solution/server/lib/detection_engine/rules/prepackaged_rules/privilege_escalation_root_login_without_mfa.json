@@ -24,11 +24,12 @@
   "rule_id": "bc0c6f0d-dab0-47a3-b135-0925f0a333bc",
   "severity": "high",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
     "SecOps",
-    "Identity and Access",
-    "Continuous Monitoring"
+    "Identity and Access"
   ],
   "threat": [
     {

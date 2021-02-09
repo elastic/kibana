@@ -17,6 +17,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -103,7 +104,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
             className="euiSpacer euiSpacer--l"
           />
           <div
-            className="euiPanel euiPanel--paddingMedium canvasAssetManager__emptyPanel"
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAssetManager__emptyPanel"
           >
             <div
               className="euiEmptyPrompt"
@@ -146,6 +147,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
               aria-labelledby="CanvasAssetManagerLabel"
               className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
               max={25000}
+              style={null}
               value={0}
             />
           </div>
@@ -162,7 +164,13 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         </div>
         <button
           className="euiButton euiButton--primary euiButton--small"
+          disabled={false}
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span
@@ -198,6 +206,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
     <button
       aria-label="Closes this modal window"
       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
@@ -290,13 +299,13 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall canvasAsset"
+                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
                 >
                   <figure
-                    className="euiImage canvasAsset__img "
+                    className="euiImage canvasAsset__img euiImage--original"
                   >
                     <img
                       alt="Asset thumbnail"
@@ -348,6 +357,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -381,6 +391,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -412,6 +423,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -436,6 +448,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -457,13 +470,13 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               className="euiFlexItem"
             >
               <div
-                className="euiPanel euiPanel--paddingSmall canvasAsset"
+                className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
               >
                 <div
                   className="canvasAsset__thumb canvasCheckered"
                 >
                   <figure
-                    className="euiImage canvasAsset__img "
+                    className="euiImage canvasAsset__img euiImage--original"
                   >
                     <img
                       alt="Asset thumbnail"
@@ -515,6 +528,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Create image element"
                         className="euiButtonIcon euiButtonIcon--primary"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -548,6 +562,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Download"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -579,6 +594,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                         <button
                           aria-label="Copy id to clipboard"
                           className="euiButtonIcon euiButtonIcon--primary"
+                          disabled={false}
                           type="button"
                         >
                           <span
@@ -603,6 +619,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
                       <button
                         aria-label="Delete"
                         className="euiButtonIcon euiButtonIcon--danger"
+                        disabled={false}
                         onBlur={[Function]}
                         onClick={[Function]}
                         onFocus={[Function]}
@@ -637,6 +654,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               aria-labelledby="CanvasAssetManagerLabel"
               className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
               max={25000}
+              style={null}
               value={2}
             />
           </div>
@@ -653,7 +671,13 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         </div>
         <button
           className="euiButton euiButton--primary euiButton--small"
+          disabled={false}
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span

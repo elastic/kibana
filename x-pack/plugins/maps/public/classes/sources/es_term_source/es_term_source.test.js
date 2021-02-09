@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
@@ -34,6 +35,7 @@ describe('getMetricFields', () => {
       id: '1234',
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
+      indexPatternId: 'foobar',
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__count__1234');
@@ -46,6 +48,7 @@ describe('getMetricFields', () => {
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
+      indexPatternId: 'foobar',
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed__1234');

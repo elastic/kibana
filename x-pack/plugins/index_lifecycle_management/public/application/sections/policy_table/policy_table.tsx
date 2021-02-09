@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, ReactElement, ReactNode, useState } from 'react';
@@ -26,6 +27,7 @@ import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_rea
 import { PolicyFromES } from '../../../../common/types';
 import { filterItems } from '../../services';
 import { TableContent } from './components/table_content';
+import { getPolicyCreatePath } from '../../services/navigation';
 
 interface Props {
   policies: PolicyFromES[];
@@ -45,7 +47,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
   const createPolicyButton = (
     <EuiButton
-      {...reactRouterNavigate(history, '/policies/edit')}
+      {...reactRouterNavigate(history, getPolicyCreatePath())}
       fill
       iconType="plusInCircle"
       data-test-subj="createPolicyButton"

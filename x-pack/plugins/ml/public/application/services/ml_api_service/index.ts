@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
@@ -14,12 +15,18 @@ import { filters } from './filters';
 import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
-import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
+import { savedObjectsApiProvider } from './saved_objects';
+import {
+  MlServerDefaults,
+  MlServerLimits,
+  MlNodeCount,
+} from '../../../../common/types/ml_server_info';
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import {
   Job,
+  JobStats,
   Datafeed,
   CombinedJob,
   Detector,
@@ -115,14 +122,14 @@ export function mlApiServicesProvider(httpService: HttpService) {
   return {
     getJobs(obj?: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-      return httpService.http<any>({
+      return httpService.http<{ jobs: Job[]; count: number }>({
         path: `${basePath()}/anomaly_detectors${jobId}`,
       });
     },
 
     getJobStats(obj: { jobId?: string }) {
       const jobId = obj && obj.jobId ? `/${obj.jobId}` : '';
-      return httpService.http<any>({
+      return httpService.http<{ jobs: JobStats[]; count: number }>({
         path: `${basePath()}/anomaly_detectors${jobId}/_stats`,
       });
     },
@@ -613,7 +620,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     mlNodeCount() {
-      return httpService.http<{ count: number }>({
+      return httpService.http<MlNodeCount>({
         path: `${basePath()}/ml_node_count`,
         method: 'GET',
       });
@@ -627,6 +634,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     calculateModelMemoryLimit$({
+      datafeedConfig,
       analysisConfig,
       indexPattern,
       query,
@@ -634,6 +642,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliestMs,
       latestMs,
     }: {
+      datafeedConfig?: Datafeed;
       analysisConfig: AnalysisConfig;
       indexPattern: string;
       query: any;
@@ -642,6 +651,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       latestMs: number;
     }) {
       const body = JSON.stringify({
+        datafeedConfig,
         analysisConfig,
         indexPattern,
         query,
@@ -765,5 +775,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     results: resultsApiProvider(httpService),
     jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
+    savedObjects: savedObjectsApiProvider(httpService),
   };
 }

@@ -1,27 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import {
-  TriggerId,
-  TriggerContextMapping,
-} from '../../../../../../../src/plugins/ui_actions/public';
 import { CollectConfigContainer } from './components';
 import {
-  UiActionsEnhancedDrilldownDefinition as Drilldown,
-  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   AdvancedUiActionsStart,
+  UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
+  UiActionsEnhancedDrilldownDefinition as Drilldown,
 } from '../../../../../ui_actions_enhanced/public';
 import { txtGoToDashboard } from './i18n';
 import {
-  StartServicesGetter,
   CollectConfigProps,
+  StartServicesGetter,
 } from '../../../../../../../src/plugins/kibana_utils/public';
 import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { Config } from './types';
@@ -34,15 +31,15 @@ export interface Params {
   }>;
 }
 
-export abstract class AbstractDashboardDrilldown<T extends TriggerId>
-  implements Drilldown<Config, T, BaseActionFactoryContext<T>> {
+export abstract class AbstractDashboardDrilldown<Context extends object = object>
+  implements Drilldown<Config, Context> {
   constructor(protected readonly params: Params) {}
 
   public abstract readonly id: string;
 
-  public abstract readonly supportedTriggers: () => T[];
+  public abstract readonly supportedTriggers: () => string[];
 
-  protected abstract getURL(config: Config, context: TriggerContextMapping[T]): Promise<KibanaURL>;
+  protected abstract getURL(config: Config, context: Context): Promise<KibanaURL>;
 
   public readonly order = 100;
 
@@ -51,7 +48,7 @@ export abstract class AbstractDashboardDrilldown<T extends TriggerId>
   public readonly euiIcon = 'dashboardApp';
 
   private readonly ReactCollectConfig: React.FC<
-    CollectConfigProps<Config, BaseActionFactoryContext<T>>
+    CollectConfigProps<Config, BaseActionFactoryContext>
   > = (props) => <CollectConfigContainer {...props} params={this.params} />;
 
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
@@ -67,15 +64,12 @@ export abstract class AbstractDashboardDrilldown<T extends TriggerId>
     return true;
   };
 
-  public readonly getHref = async (
-    config: Config,
-    context: TriggerContextMapping[T]
-  ): Promise<string> => {
+  public readonly getHref = async (config: Config, context: Context): Promise<string> => {
     const url = await this.getURL(config, context);
     return url.path;
   };
 
-  public readonly execute = async (config: Config, context: TriggerContextMapping[T]) => {
+  public readonly execute = async (config: Config, context: Context) => {
     const url = await this.getURL(config, context);
     await this.params.start().core.application.navigateToApp(url.appName, { path: url.appPath });
   };

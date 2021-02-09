@@ -16,10 +16,12 @@
 |  [ExpressionRenderer](./kibana-plugin-plugins-expressions-public.expressionrenderer.md) |  |
 |  [ExpressionRendererRegistry](./kibana-plugin-plugins-expressions-public.expressionrendererregistry.md) |  |
 |  [ExpressionRenderHandler](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.md) |  |
+|  [ExpressionsInspectorAdapter](./kibana-plugin-plugins-expressions-public.expressionsinspectoradapter.md) |  |
 |  [ExpressionsPublicPlugin](./kibana-plugin-plugins-expressions-public.expressionspublicplugin.md) |  |
 |  [ExpressionsService](./kibana-plugin-plugins-expressions-public.expressionsservice.md) | <code>ExpressionsService</code> class is used for multiple purposes:<!-- -->1. It implements the same Expressions service that can be used on both: (1) server-side and (2) browser-side. 2. It implements the same Expressions service that users can fork/clone, thus have their own instance of the Expressions plugin. 3. <code>ExpressionsService</code> defines the public contracts of \*setup\* and \*start\* Kibana Platform life-cycles for ease-of-use on server-side and browser-side. 4. <code>ExpressionsService</code> creates a bound version of all exported contract functions. 5. Functions are bound the way there are:<!-- -->\`\`\`<!-- -->ts registerFunction = (...args: Parameters<!-- -->&lt;<!-- -->Executor\['registerFunction'\]<!-- -->&gt; ): ReturnType<!-- -->&lt;<!-- -->Executor\['registerFunction'\]<!-- -->&gt; =<!-- -->&gt; this.executor.registerFunction(...args); \`\`\`<!-- -->so that JSDoc appears in developers IDE when they use those <code>plugins.expressions.registerFunction(</code>. |
 |  [ExpressionType](./kibana-plugin-plugins-expressions-public.expressiontype.md) |  |
 |  [FunctionsRegistry](./kibana-plugin-plugins-expressions-public.functionsregistry.md) |  |
+|  [TablesAdapter](./kibana-plugin-plugins-expressions-public.tablesadapter.md) |  |
 |  [TypesRegistry](./kibana-plugin-plugins-expressions-public.typesregistry.md) |  |
 
 ## Enumerations
@@ -99,7 +101,6 @@
 |  [ExpressionAstExpression](./kibana-plugin-plugins-expressions-public.expressionastexpression.md) |  |
 |  [ExpressionAstFunction](./kibana-plugin-plugins-expressions-public.expressionastfunction.md) |  |
 |  [ExpressionAstNode](./kibana-plugin-plugins-expressions-public.expressionastnode.md) |  |
-|  [ExpressionFunctionKibana](./kibana-plugin-plugins-expressions-public.expressionfunctionkibana.md) |  |
 |  [ExpressionRendererComponent](./kibana-plugin-plugins-expressions-public.expressionrenderercomponent.md) |  |
 |  [ExpressionsServiceSetup](./kibana-plugin-plugins-expressions-public.expressionsservicesetup.md) | The public contract that <code>ExpressionsService</code> provides to other plugins in Kibana Platform in \*setup\* life-cycle. |
 |  [ExpressionsSetup](./kibana-plugin-plugins-expressions-public.expressionssetup.md) | Expressions public setup contract, extends [ExpressionsServiceSetup](./kibana-plugin-plugins-expressions-public.expressionsservicesetup.md) |
@@ -110,13 +111,10 @@
 |  [ExpressionValueFilter](./kibana-plugin-plugins-expressions-public.expressionvaluefilter.md) | Represents an object that is a Filter. |
 |  [ExpressionValueNum](./kibana-plugin-plugins-expressions-public.expressionvaluenum.md) |  |
 |  [ExpressionValueRender](./kibana-plugin-plugins-expressions-public.expressionvaluerender.md) | Represents an object that is intended to be rendered. |
-|  [ExpressionValueSearchContext](./kibana-plugin-plugins-expressions-public.expressionvaluesearchcontext.md) |  |
 |  [ExpressionValueUnboxed](./kibana-plugin-plugins-expressions-public.expressionvalueunboxed.md) |  |
 |  [FontLabel](./kibana-plugin-plugins-expressions-public.fontlabel.md) | This type contains a unions of all supported font labels, or the the name of the font the user would see in a UI. |
 |  [FontValue](./kibana-plugin-plugins-expressions-public.fontvalue.md) | This type contains a union of all supported font values, equivalent to the CSS <code>font-value</code> property. |
 |  [InterpreterErrorType](./kibana-plugin-plugins-expressions-public.interpretererrortype.md) |  |
-|  [KIBANA\_CONTEXT\_NAME](./kibana-plugin-plugins-expressions-public.kibana_context_name.md) |  |
-|  [KibanaContext](./kibana-plugin-plugins-expressions-public.kibanacontext.md) |  |
 |  [KnownTypeToString](./kibana-plugin-plugins-expressions-public.knowntypetostring.md) | Map the type of the generic to a string-based representation of the type.<!-- -->If the provided generic is its own type interface, we use the value of the <code>type</code> key as a string literal type for it. |
 |  [PointSeries](./kibana-plugin-plugins-expressions-public.pointseries.md) | A <code>PointSeries</code> is a unique structure that represents dots on a chart. |
 |  [PointSeriesColumnName](./kibana-plugin-plugins-expressions-public.pointseriescolumnname.md) | Allowed column names in a PointSeries |

@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
@@ -24,15 +14,13 @@ import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
 import { DocViewTableRowBtnFilterExists } from './table_row_btn_filter_exists';
-import { DocViewTableRowIconNoMapping } from './table_row_icon_no_mapping';
 import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from '../field_name/field_name';
 
 export interface Props {
-  field: string;
+  field?: string;
   fieldMapping?: FieldMapping;
   fieldType: string;
-  displayNoMappingWarning: boolean;
   displayUnderscoreWarning: boolean;
   isCollapsible: boolean;
   isColumnActive: boolean;
@@ -48,7 +36,6 @@ export function DocViewTableRow({
   field,
   fieldMapping,
   fieldType,
-  displayNoMappingWarning,
   displayUnderscoreWarning,
   isCollapsible,
   isCollapsed,
@@ -64,9 +51,38 @@ export function DocViewTableRow({
     kbnDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
   });
-
+  const key = field ? field : fieldMapping?.displayName;
   return (
-    <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
+    <tr key={key} data-test-subj={`tableDocViewRow-${key}`}>
+      <td className="kbnDocViewer__field">
+        {field ? (
+          <FieldName
+            fieldName={field}
+            fieldType={fieldType}
+            fieldMapping={fieldMapping}
+            scripted={Boolean(fieldMapping?.scripted)}
+          />
+        ) : (
+          <span>&nbsp;</span>
+        )}
+      </td>
+      <td>
+        {isCollapsible && (
+          <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
+        )}
+        {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
+        {field ? null : <div className={valueClassName}>{key}:&nbsp;</div>}
+        <div
+          className={valueClassName}
+          data-test-subj={`tableDocViewRow-${key}-value`}
+          /*
+           * Justification for dangerouslySetInnerHTML:
+           * We just use values encoded by our field formatters
+           */
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: value as string }}
+        />
+      </td>
       {typeof onFilter === 'function' && (
         <td className="kbnDocViewer__buttons">
           <DocViewTableRowBtnFilterAdd
@@ -87,31 +103,6 @@ export function DocViewTableRow({
           />
         </td>
       )}
-      <td className="kbnDocViewer__field">
-        <FieldName
-          fieldName={field}
-          fieldType={fieldType}
-          fieldIconProps={{ fill: 'none', color: 'gray' }}
-          scripted={Boolean(fieldMapping?.scripted)}
-        />
-      </td>
-      <td>
-        {isCollapsible && (
-          <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
-        )}
-        {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-        {displayNoMappingWarning && <DocViewTableRowIconNoMapping />}
-        <div
-          className={valueClassName}
-          data-test-subj={`tableDocViewRow-${field}-value`}
-          /*
-           * Justification for dangerouslySetInnerHTML:
-           * We just use values encoded by our field formatters
-           */
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: value as string }}
-        />
-      </td>
     </tr>
   );
 }

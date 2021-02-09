@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
@@ -16,7 +17,7 @@ import {
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
 import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
-import { ConnectorTypes } from '../../../../common/api/connectors';
+import { ConnectorTypes, CaseStatuses } from '../../../../common/api';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -36,20 +37,20 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-1',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual([
       {
@@ -67,13 +68,16 @@ describe('PATCH cases', () => {
         description: 'This is a brand new case of a bad meanie defacing data',
         id: 'mock-id-1',
         external_service: null,
-        status: 'closed',
+        status: CaseStatuses.closed,
         tags: ['defacement'],
         title: 'Super Bad Security Issue',
         totalComment: 0,
         updated_at: '2019-11-25T21:54:48.952Z',
         updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
         version: 'WzE3LDFd',
+        settings: {
+          syncAlerts: true,
+        },
       },
     ]);
   });
@@ -86,21 +90,21 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-4',
-            status: 'open',
+            status: CaseStatuses.open,
             version: 'WzUsMV0=',
           },
         ],
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual([
       {
@@ -118,13 +122,69 @@ describe('PATCH cases', () => {
         description: 'Oh no, a bad meanie going LOLBins all over the place!',
         id: 'mock-id-4',
         external_service: null,
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['LOLBins'],
         title: 'Another bad one',
         totalComment: 0,
         updated_at: '2019-11-25T21:54:48.952Z',
         updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
         version: 'WzE3LDFd',
+        settings: {
+          syncAlerts: true,
+        },
+      },
+    ]);
+  });
+
+  it(`Change case to in-progress`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-1',
+            status: CaseStatuses['in-progress'],
+            version: 'WzAsMV0=',
+          },
+        ],
+      },
+    });
+
+    const { context } = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(context, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual([
+      {
+        closed_at: null,
+        closed_by: null,
+        comments: [],
+        connector: {
+          id: 'none',
+          name: 'none',
+          type: ConnectorTypes.none,
+          fields: null,
+        },
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        id: 'mock-id-1',
+        external_service: null,
+        status: CaseStatuses['in-progress'],
+        tags: ['defacement'],
+        title: 'Super Bad Security Issue',
+        totalComment: 0,
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        version: 'WzE3LDFd',
+        settings: {
+          syncAlerts: true,
+        },
       },
     ]);
   });
@@ -137,20 +197,20 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-no-connector_id',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload[0].connector.id).toEqual('none');
   });
@@ -163,20 +223,20 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-3',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzUsMV0=',
           },
         ],
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload[0].connector.id).toEqual('123');
   });
@@ -201,13 +261,13 @@ describe('PATCH cases', () => {
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload[0].connector).toEqual({
       id: '456',
@@ -225,20 +285,20 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-1',
-            case: { status: 'closed' },
+            case: { status: CaseStatuses.closed },
             version: 'badv=',
           },
         ],
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(409);
   });
 
@@ -250,21 +310,21 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-1',
-            case: { status: 'open' },
+            case: { status: CaseStatuses.open },
             version: 'WzAsMV0=',
           },
         ],
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(406);
   });
 
@@ -276,20 +336,20 @@ describe('PATCH cases', () => {
         cases: [
           {
             id: 'mock-id-does-not-exist',
-            status: 'closed',
+            status: CaseStatuses.closed,
             version: 'WzAsMV0=',
           },
         ],
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
     expect(response.payload.isBoom).toEqual(true);
   });

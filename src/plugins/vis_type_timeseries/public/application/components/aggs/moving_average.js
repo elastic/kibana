@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -25,6 +14,7 @@ import { MetricSelect } from './metric_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createNumberHandler } from '../lib/create_number_handler';
+import { METRIC_TYPES } from '../../../../common/metric_types';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -36,7 +26,7 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MODEL_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/model_options';
+import { MODEL_TYPES } from '../../../../common/model_options';
 
 const DEFAULTS = {
   model_type: MODEL_TYPES.UNWEIGHTED,
@@ -52,7 +42,7 @@ const shouldShowHint = ({ model_type: type, window, period }) =>
   type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE && period * 2 > window;
 
 export const MovingAverageAgg = (props) => {
-  const { siblings } = props;
+  const { siblings, fields, indexPattern } = props;
 
   const model = { ...DEFAULTS, ...props.model };
   const modelOptions = [
@@ -152,7 +142,9 @@ export const MovingAverageAgg = (props) => {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
+              fields={fields[indexPattern]}
               value={model.field}
+              exclude={[METRIC_TYPES.TOP_HIT]}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -313,6 +305,7 @@ export const MovingAverageAgg = (props) => {
 MovingAverageAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

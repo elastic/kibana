@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -24,11 +25,14 @@ import {
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
+import { constants, getDefaultLayoutSelectors } from '../common';
 import { durationToNumber } from '../common/schema_utils';
-import { JobId, ReportingConfigType } from '../common/types';
-import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
-import { JobSummarySet } from './';
-import { getGeneralErrorToast } from './components';
+import { JobId, JobSummarySet } from '../common/types';
+import { ReportingSetup, ReportingStart } from './';
+import {
+  getGeneralErrorToast,
+  ScreenCapturePanelContent as ScreenCapturePanel,
+} from './components';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { GetCsvReportPanelAction } from './panel_actions/get_csv_panel_action';
@@ -36,11 +40,16 @@ import { csvReportingProvider } from './share_context_menu/register_csv_reportin
 import { reportingPDFPNGProvider } from './share_context_menu/register_pdf_png_reporting';
 
 export interface ClientConfigType {
-  poll: ReportingConfigType['poll'];
+  poll: {
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
 }
 
 function getStored(): JobId[] {
-  const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+  const sessionValue = sessionStorage.getItem(constants.JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
@@ -75,8 +84,17 @@ export interface ReportingPublicPluginStartDendencies {
 
 export class ReportingPublicPlugin
   implements
-    Plugin<void, void, ReportingPublicPluginSetupDendencies, ReportingPublicPluginStartDendencies> {
-  private config: ClientConfigType;
+    Plugin<
+      ReportingSetup,
+      ReportingStart,
+      ReportingPublicPluginSetupDendencies,
+      ReportingPublicPluginStartDendencies
+    > {
+  private readonly contract: ReportingStart = {
+    components: { ScreenCapturePanel },
+    getDefaultLayoutSelectors,
+    ReportingAPIClient,
+  };
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
@@ -84,6 +102,7 @@ export class ReportingPublicPlugin
   private readonly breadcrumbText = i18n.translate('xpack.reporting.breadcrumb', {
     defaultMessage: 'Reporting',
   });
+  private config: ClientConfigType;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -149,6 +168,8 @@ export class ReportingPublicPlugin
         uiSettings,
       })
     );
+
+    return this.contract;
   }
 
   public start(core: CoreStart) {
@@ -166,6 +187,8 @@ export class ReportingPublicPlugin
         catchError((err) => handleError(notifications, err))
       )
       .subscribe();
+
+    return this.contract;
   }
 
   public stop() {

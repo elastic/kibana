@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -28,8 +17,8 @@ import {
 } from './flyout.test.mocks';
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { coreMock, httpServiceMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
@@ -58,6 +47,7 @@ describe('Flyout', () => {
   beforeEach(() => {
     const { http, overlays } = coreMock.createStart();
     const search = dataPluginMock.createStartContract().search;
+    const basePath = httpServiceMock.createBasePath();
 
     defaultProps = {
       close: jest.fn(),
@@ -74,6 +64,7 @@ describe('Flyout', () => {
       allowedTypes: ['search', 'index-pattern', 'visualization'],
       serviceRegistry: serviceRegistryMock.create(),
       search,
+      basePath,
     };
   });
 
@@ -460,7 +451,9 @@ describe('Flyout', () => {
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
 
-      expect(component.state('error')).toEqual('foobar');
+      expect(component.state('error')).toMatchInlineSnapshot(
+        `"The file could not be processed due to error: \\"foobar\\""`
+      );
       expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();
     });
   });

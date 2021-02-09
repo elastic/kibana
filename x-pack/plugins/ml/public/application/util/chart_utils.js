@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import d3 from 'd3';
@@ -15,6 +16,7 @@ import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 export const LINE_CHART_ANOMALY_RADIUS = 7;
 export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
+export const ANNOTATION_SYMBOL_HEIGHT = 10;
 
 const MAX_LABEL_WIDTH = 100;
 
@@ -76,7 +78,10 @@ export function chartExtendedLimits(data = [], functionDescription) {
       metricValue = actualValue;
     }
 
-    if (d.anomalyScore !== undefined) {
+    // Check for both an anomaly and for an actual value as anomalies in detectors with
+    // by and over fields and more than one cause will not have actual / typical values
+    // at the top level of the anomaly record.
+    if (d.anomalyScore !== undefined && actualValue !== undefined) {
       _min = Math.min(_min, metricValue, actualValue, typicalValue);
       _max = Math.max(_max, metricValue, actualValue, typicalValue);
     } else {
@@ -172,6 +177,11 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 // get the chart type based on its configuration
 export function getChartType(config) {
   let chartType = CHART_TYPE.SINGLE_METRIC;
+
+  if (config.functionDescription === 'lat_long' || config.mapData !== undefined) {
+    return CHART_TYPE.GEO_MAP;
+  }
+
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
@@ -260,7 +270,7 @@ export async function getExploreSeriesLink(mlUrlGenerator, series) {
         },
       },
     },
-    excludeBasePath: false,
+    excludeBasePath: true,
   });
   return url;
 }

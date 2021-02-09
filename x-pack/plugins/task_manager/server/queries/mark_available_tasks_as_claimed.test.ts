@@ -1,25 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import {
-  asUpdateByQuery,
-  shouldBeOneOf,
-  mustBeAllOf,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
-} from './query_clauses';
+import { asUpdateByQuery, shouldBeOneOf, mustBeAllOf } from './query_clauses';
 
 import {
-  updateFields,
+  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  TaskWithSchedule,
-  taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
 } from './mark_available_tasks_as_claimed';
 
@@ -40,29 +32,30 @@ describe('mark_available_tasks_as_claimed', () => {
         createTaskRunner: () => ({ run: () => Promise.resolve() }),
       },
     });
+    const claimTasksById = undefined;
     const defaultMaxAttempts = 1;
     const taskManagerId = '3478fg6-82374f6-83467gf5-384g6f';
     const claimOwnershipUntil = '2019-02-12T21:01:22.479Z';
+    const fieldUpdates = {
+      ownerId: taskManagerId,
+      retryAt: claimOwnershipUntil,
+    };
 
     expect(
       asUpdateByQuery({
         query: mustBeAllOf(
           // Either a task with idle status and runAt <= now or
           // status running or claiming with a retryAt <= now.
-          shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-          // Either task has an schedule or the attempts < the maximum configured
-          shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
-            TaskWithSchedule,
-            ...Array.from(definitions).map(([type, { maxAttempts }]) =>
-              taskWithLessThanMaxAttempts(type, maxAttempts || defaultMaxAttempts)
-            )
-          )
+          shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
         ),
-        update: updateFields({
-          ownerId: taskManagerId,
-          status: 'claiming',
-          retryAt: claimOwnershipUntil,
-        }),
+        update: updateFieldsAndMarkAsFailed(
+          fieldUpdates,
+          claimTasksById || [],
+          definitions.getAllTypes(),
+          Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
+            return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
+          }, {})
+        ),
         sort: SortByRunAtAndRetryAt,
       })
     ).toEqual({
@@ -100,42 +93,6 @@ describe('mark_available_tasks_as_claimed', () => {
                 ],
               },
             },
-            // Either task has an recurring schedule or the attempts < the maximum configured
-            {
-              bool: {
-                should: [
-                  { exists: { field: 'task.schedule' } },
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.taskType': 'sampleTask' } },
-                        {
-                          range: {
-                            'task.attempts': {
-                              lt: 5,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      must: [
-                        { term: { 'task.taskType': 'otherTask' } },
-                        {
-                          range: {
-                            'task.attempts': {
-                              lt: 1,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
           ],
         },
       },
@@ -158,12 +115,31 @@ if (doc['task.runAt'].size()!=0) {
       },
       seq_no_primary_term: true,
       script: {
-        source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+        source: `
+  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
+    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+        .join(' ')}
+    } else {
+      ctx._source.task.status = "failed";
+    }
+  } else {
+    ctx._source.task.status = "unrecognized";
+  }
+  `,
         lang: 'painless',
         params: {
-          ownerId: taskManagerId,
-          retryAt: claimOwnershipUntil,
-          status: 'claiming',
+          fieldUpdates: {
+            ownerId: taskManagerId,
+            retryAt: claimOwnershipUntil,
+          },
+          claimTasksById: [],
+          registeredTaskTypes: ['sampleTask', 'otherTask'],
+          taskMaxAttempts: {
+            sampleTask: 5,
+            otherTask: 1,
+          },
         },
       },
     });

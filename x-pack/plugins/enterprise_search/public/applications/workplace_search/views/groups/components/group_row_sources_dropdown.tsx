@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
+import { EuiFilterGroup, EuiPopover, EuiPopoverTitle, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFilterGroup, EuiPopover, EuiPopoverTitle, EuiButtonEmpty } from '@elastic/eui';
-
-import { IContentSource } from '../../../types';
+import { ContentSource } from '../../../types';
 
 import { SourceOptionItem } from './source_option_item';
 
-interface IGroupRowSourcesDropdownProps {
+interface GroupRowSourcesDropdownProps {
   isPopoverOpen: boolean;
   numOptions: number;
-  groupSources: IContentSource[];
+  groupSources: ContentSource[];
   onButtonClick(): void;
   closePopover(): void;
 }
 
-export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = ({
+export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = ({
   isPopoverOpen,
   numOptions,
   groupSources,
@@ -56,7 +56,6 @@ export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = 
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        withTitle={true}
       >
         <EuiPopoverTitle>{contentSourceCountHeading}</EuiPopoverTitle>
         <div className="euiFilterSelect__items">{sources}</div>

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import type { PostTransformsPreviewRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
@@ -54,6 +56,30 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.preview).to.have.length(expected.apiTransformTransformsPreview.previewItemCount);
       expect(typeof body.generated_dest_index).to.eql(
         expected.apiTransformTransformsPreview.typeOfGeneratedDestIndex
+      );
+    });
+
+    it('should return a correct error for transform preview', async () => {
+      const { body } = await supertest
+        .post(`/api/transform/transforms/_preview`)
+        .auth(
+          USER.TRANSFORM_POWERUSER,
+          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+        )
+        .set(COMMON_REQUEST_HEADERS)
+        .send({
+          ...getTransformPreviewConfig(),
+          pivot: {
+            group_by: { airline: { terms: { field: 'airline' } } },
+            aggregations: {
+              '@timestamp.value_count': { value_countt: { field: '@timestamp' } },
+            },
+          },
+        })
+        .expect(400);
+
+      expect(body.message).to.eql(
+        '[parsing_exception] Unknown aggregation type [value_countt] did you mean [value_count]?, with line=1 & col=43'
       );
     });
 

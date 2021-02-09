@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { usePromise } from 'react-use';
+import usePromise from 'react-use/lib/usePromise';
 import { History } from 'history';
 
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'src/core/public';
 
-// @ts-ignore
-import { UpgradeFailure } from './components/upgrade_failure';
 // @ts-ignore
 import { PipelineEditor } from './components/pipeline_editor';
 // @ts-ignore
@@ -59,23 +58,9 @@ const usePipeline = (
   return pipeline;
 };
 
-const useIsUpgraded = (upgradeService: any) => {
-  const [isUpgraded, setIsUpgraded] = useState<null | boolean>(null);
-  const mounted = usePromise();
-
-  useLayoutEffect(() => {
-    mounted(upgradeService.executeUpgrade() as Promise<boolean>).then((result) =>
-      setIsUpgraded(result)
-    );
-  }, [mounted, upgradeService]);
-
-  return isUpgraded;
-};
-
 interface EditProps {
   pipelineService: any;
   logstashLicenseService: any;
-  upgradeService: any;
   toasts: ToastsStart;
   history: History;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -87,24 +72,16 @@ interface EditProps {
 export const PipelineEditView: React.FC<EditProps> = ({
   pipelineService,
   logstashLicenseService,
-  upgradeService,
   toasts,
   history,
   setBreadcrumbs,
   id,
 }) => {
   const params = new URLSearchParams(history.location.search);
-  const shouldRetry = params.get('retry') === 'true';
   const shouldClone = params.get('clone') === '';
 
   const pipeline = usePipeline(pipelineService, logstashLicenseService, toasts, shouldClone, id);
-  const isUpgraded = useIsUpgraded(upgradeService);
 
-  const onRetry = useCallback(() => {
-    const newParams = new URLSearchParams(history.location.search);
-    newParams.set('retry', 'true');
-    history.replace({ search: newParams.toString() });
-  }, [history]);
   const close = useCallback(() => {
     history.push('/');
   }, [history]);
@@ -115,7 +92,7 @@ export const PipelineEditView: React.FC<EditProps> = ({
     [history]
   );
 
-  if (!pipeline || isUpgraded === null) {
+  if (!pipeline) {
     return null;
   }
 
@@ -125,17 +102,6 @@ export const PipelineEditView: React.FC<EditProps> = ({
       ? Breadcrumbs.getPipelineCreateBreadcrumbs()
       : Breadcrumbs.getPipelineEditBreadcrumbs(pipeline.id)
   );
-
-  if (!isUpgraded) {
-    return (
-      <UpgradeFailure
-        isNewPipeline={isNewPipeline}
-        isManualUpgrade={!!shouldRetry}
-        onRetry={onRetry}
-        onClose={close}
-      />
-    );
-  }
 
   return (
     <PipelineEditor

@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
-import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
   getClusterUuids,
   fetchClusterUuids,
@@ -14,8 +14,6 @@ import {
 
 describe('get_cluster_uuids', () => {
   const callCluster = sinon.stub();
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  const soClient = savedObjectsRepositoryMock.create();
   const response = {
     aggregations: {
       cluster_uuids: {
@@ -23,37 +21,20 @@ describe('get_cluster_uuids', () => {
       },
     },
   };
-  const expectedUuids = response.aggregations.cluster_uuids.buckets
-    .map((bucket) => bucket.key)
-    .map((expectedUuid) => ({ clusterUuid: expectedUuid }));
-  const start = new Date().toISOString();
-  const end = new Date().toISOString();
+  const expectedUuids = response.aggregations.cluster_uuids.buckets.map((bucket) => bucket.key);
+  const timestamp = Date.now();
 
   describe('getClusterUuids', () => {
     it('returns cluster UUIDs', async () => {
       callCluster.withArgs('search').returns(Promise.resolve(response));
-      expect(
-        await getClusterUuids(
-          { callCluster, esClient, soClient, start, end, usageCollection: {} as any },
-          {
-            maxBucketSize: 1,
-          } as any
-        )
-      ).toStrictEqual(expectedUuids);
+      expect(await getClusterUuids(callCluster, timestamp, 1)).toStrictEqual(expectedUuids);
     });
   });
 
   describe('fetchClusterUuids', () => {
     it('searches for clusters', async () => {
       callCluster.returns(Promise.resolve(response));
-      expect(
-        await fetchClusterUuids(
-          { callCluster, esClient, soClient, start, end, usageCollection: {} as any },
-          {
-            maxBucketSize: 1,
-          } as any
-        )
-      ).toStrictEqual(response);
+      expect(await fetchClusterUuids(callCluster, timestamp, 1)).toStrictEqual(response);
     });
   });
 

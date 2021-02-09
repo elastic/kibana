@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
 import { Logger } from '../../../../src/core/server';
-import { TaskRunner } from './task_runner';
+import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
+import { TaskManagerStat, asTaskManagerStatEvent } from './task_events';
+import { asOk } from './lib/result_type';
 
 interface Opts {
   maxWorkers$: Observable<number>;
@@ -22,7 +25,11 @@ interface Opts {
 }
 
 export enum TaskPoolRunResult {
+  // This means we're running all the tasks we claimed
   RunningAllClaimedTasks = 'RunningAllClaimedTasks',
+  // This means we're running all the tasks we claimed and we're at capacity
+  RunningAtCapacity = 'RunningAtCapacity',
+  // This means we're prematurely out of capacity and have accidentally claimed more tasks than we had capacity for
   RanOutOfCapacity = 'RanOutOfCapacity',
 }
 
@@ -35,6 +42,7 @@ export class TaskPool {
   private maxWorkers: number = 0;
   private running = new Set<TaskRunner>();
   private logger: Logger;
+  private load$ = new Subject<TaskManagerStat>();
 
   /**
    * Creates an instance of TaskPool.
@@ -52,6 +60,10 @@ export class TaskPool {
     });
   }
 
+  public get load(): Observable<TaskManagerStat> {
+    return this.load$;
+  }
+
   /**
    * Gets how many workers are currently in use.
    */
@@ -60,17 +72,25 @@ export class TaskPool {
   }
 
   /**
-   * Gets how many workers are currently available.
+   * Gets % of workers in use
    */
-  public get availableWorkers() {
-    return this.maxWorkers - this.occupiedWorkers;
+  public get workerLoad() {
+    return this.maxWorkers ? Math.round((this.occupiedWorkers * 100) / this.maxWorkers) : 100;
   }
 
   /**
    * Gets how many workers are currently available.
    */
-  public get hasAvailableWorkers() {
-    return this.availableWorkers > 0;
+  public get availableWorkers() {
+    // emit load whenever we check how many available workers there are
+    // this should happen less often than the actual changes to the worker queue
+    // so is lighter than emitting the load every time we add/remove a task from the queue
+    this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
+    // cancel expired task whenever a call is made to check for capacity
+    // this ensures that we don't end up with a queue of hung tasks causing both
+    // the poller and the pool from hanging due to lack of capacity
+    this.cancelExpiredTasks();
+    return this.maxWorkers - this.occupiedWorkers;
   }
 
   /**
@@ -81,19 +101,7 @@ export class TaskPool {
    * @param {TaskRunner[]} tasks
    * @returns {Promise<boolean>}
    */
-  public run = (tasks: TaskRunner[]) => {
-    this.cancelExpiredTasks();
-    return this.attemptToRun(tasks);
-  };
-
-  public cancelRunningTasks() {
-    this.logger.debug('Cancelling running tasks.');
-    for (const task of this.running) {
-      this.cancelTask(task);
-    }
-  }
-
-  private async attemptToRun(tasks: TaskRunner[]): Promise<TaskPoolRunResult> {
+  public run = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
     const [tasksToRun, leftOverTasks] = partitionListByCount(tasks, this.availableWorkers);
     if (tasksToRun.length) {
       performance.mark('attemptToRun_start');
@@ -120,11 +128,20 @@ export class TaskPool {
 
     if (leftOverTasks.length) {
       if (this.availableWorkers) {
-        return this.attemptToRun(leftOverTasks);
+        return this.run(leftOverTasks);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
+    } else if (!this.availableWorkers) {
+      return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
+  };
+
+  public cancelRunningTasks() {
+    this.logger.debug('Cancelling running tasks.');
+    for (const task of this.running) {
+      this.cancelTask(task);
+    }
   }
 
   private handleMarkAsRunning(taskRunner: TaskRunner) {

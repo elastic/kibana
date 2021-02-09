@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApmRoute } from '@elastic/apm-rum-react';
@@ -11,7 +12,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
-import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
@@ -19,22 +21,22 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { LicenseProvider } from '../context/LicenseContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue,
+} from '../context/apm_plugin/apm_plugin_context';
+import { LicenseProvider } from '../context/license/license_context';
+import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { ApmPluginSetupDeps } from '../plugin';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
-import { px, units } from '../style/variables';
 import { setReadonlyBadge } from '../updateBadge';
 
-const MainContainer = styled.div`
-  padding: ${px(units.plus)};
+const MainContainer = euiStyled.div`
   height: 100%;
 `;
 
@@ -64,48 +66,30 @@ function App() {
 }
 
 export function ApmAppRoot({
-  core,
-  deps,
-  history,
-  config,
+  apmPluginContextValue,
+  startDeps,
 }: {
-  core: CoreStart;
-  deps: ApmPluginSetupDeps;
-  history: AppMountParameters['history'];
-  config: ConfigSchema;
+  apmPluginContextValue: ApmPluginContextValue;
+  startDeps: ApmPluginStartDeps;
 }) {
+  const { appMountParameters, core } = apmPluginContextValue;
+  const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
-  const apmPluginContextValue = {
-    config,
-    core,
-    plugins,
-  };
+
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
-        <AlertsContextProvider
-          value={{
-            http: core.http,
-            docLinks: core.docLinks,
-            capabilities: core.application.capabilities,
-            toastNotifications: core.notifications.toasts,
-            actionTypeRegistry: plugins.triggersActionsUi.actionTypeRegistry,
-            alertTypeRegistry: plugins.triggersActionsUi.alertTypeRegistry,
-          }}
-        >
-          <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <i18nCore.Context>
-              <Router history={history}>
-                <UrlParamsProvider>
-                  <LicenseProvider>
-                    <App />
-                  </LicenseProvider>
-                </UrlParamsProvider>
-              </Router>
-            </i18nCore.Context>
-          </KibanaContextProvider>
-        </AlertsContextProvider>
+        <KibanaContextProvider services={{ ...core, ...startDeps }}>
+          <i18nCore.Context>
+            <Router history={history}>
+              <UrlParamsProvider>
+                <LicenseProvider>
+                  <App />
+                </LicenseProvider>
+              </UrlParamsProvider>
+            </Router>
+          </i18nCore.Context>
+        </KibanaContextProvider>
       </ApmPluginContext.Provider>
     </RedirectAppLinks>
   );
@@ -117,14 +101,22 @@ export function ApmAppRoot({
 
 export const renderApp = (
   core: CoreStart,
-  deps: ApmPluginSetupDeps,
-  { element, history }: AppMountParameters,
-  config: ConfigSchema
+  setupDeps: ApmPluginSetupDeps,
+  appMountParameters: AppMountParameters,
+  config: ConfigSchema,
+  startDeps: ApmPluginStartDeps
 ) => {
+  const { element } = appMountParameters;
+  const apmPluginContextValue = {
+    appMountParameters,
+    config,
+    core,
+    plugins: setupDeps,
+  };
+
   // render APM feedback link in global help menu
   setHelpExtension(core);
   setReadonlyBadge(core);
-
   createCallApmApi(core.http);
 
   // Automatically creates static index pattern and stores as saved object
@@ -134,7 +126,10 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <ApmAppRoot core={core} deps={deps} history={history} config={config} />,
+    <ApmAppRoot
+      apmPluginContextValue={apmPluginContextValue}
+      startDeps={startDeps}
+    />,
     element
   );
   return () => {

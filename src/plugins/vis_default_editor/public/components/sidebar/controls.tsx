@@ -1,34 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonToggle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 
 import { Vis } from 'src/plugins/visualizations/public';
 import { discardChanges, EditorAction } from './state';
@@ -52,7 +34,10 @@ function DefaultEditorControls({
 }: DefaultEditorControlsProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
-  const toggleAutoApply = useCallback((e) => setAutoApplyEnabled(e.target.checked), []);
+  const toggleAutoApply = useCallback(
+    (nextAutoApplyEnabled) => setAutoApplyEnabled(nextAutoApplyEnabled),
+    []
+  );
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
 
   useDebounce(
@@ -131,19 +116,33 @@ function DefaultEditorControls({
             defaultMessage: 'Auto updates the visualization on every change.',
           })}
         >
-          <EuiButtonToggle
-            label={i18n.translate('visDefaultEditor.sidebar.autoApplyChangesAriaLabel', {
-              defaultMessage: 'Auto apply editor changes',
-            })}
+          <EuiButton
             className="visEditorSidebar__autoApplyButton"
             data-test-subj="visualizeEditorAutoButton"
-            fill={autoApplyEnabled}
             iconType="refresh"
-            isSelected={autoApplyEnabled}
-            onChange={toggleAutoApply}
+            color={autoApplyEnabled ? 'primary' : 'text'}
+            fill
+            onClick={() => toggleAutoApply(!autoApplyEnabled)}
             size="s"
-            isIconOnly
-          />
+            minWidth={80}
+            aria-label={
+              autoApplyEnabled
+                ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOn', {
+                    defaultMessage: 'Auto apply is on',
+                  })
+                : i18n.translate('visDefaultEditor.sidebar.autoApplyChangesLabelOff', {
+                    defaultMessage: 'Auto apply is off',
+                  })
+            }
+          >
+            {autoApplyEnabled
+              ? i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOn', {
+                  defaultMessage: 'On',
+                })
+              : i18n.translate('visDefaultEditor.sidebar.autoApplyChangesOff', {
+                  defaultMessage: 'Off',
+                })}
+          </EuiButton>
         </EuiToolTip>
       )}
     </div>

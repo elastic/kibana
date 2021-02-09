@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import LRU from 'lru-cache';
-import { LegacyAPICaller } from '../../../../../../src/core/server';
 import {
   IndexPatternsFetcher,
   FieldDescriptor,
@@ -45,8 +45,7 @@ export const getDynamicIndexPattern = async ({
   }
 
   const indexPatternsFetcher = new IndexPatternsFetcher(
-    (...rest: Parameters<LegacyAPICaller>) =>
-      context.core.elasticsearch.legacy.client.callAsCurrentUser(...rest)
+    context.core.elasticsearch.client.asCurrentUser
   );
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)

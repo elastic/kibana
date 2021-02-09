@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @elastic/eui/href-or-on-click */
@@ -30,7 +31,7 @@ import {
   StyledLabelContainer,
   StyledButtonTextContainer,
 } from './styles';
-import * as eventModel from '../../../../common/endpoint/models/event';
+import * as nodeModel from '../../../../common/endpoint/models/node';
 import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
@@ -38,17 +39,14 @@ import { LimitWarning } from '../limit_warnings';
 import { ResolverState } from '../../types';
 import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { CopyablePanelField } from './copyable_panel_field';
 
 interface ProcessTableView {
   name?: string;
   timestamp?: Date;
   nodeID: string;
-  event: SafeResolverEvent;
 }
 
 /**
@@ -68,7 +66,7 @@ export const NodeList = memo(() => {
         sortable: true,
         truncateText: true,
         render(name: string | undefined, item: ProcessTableView) {
-          return <NodeDetailLink name={name} event={item.event} nodeID={item.nodeID} />;
+          return <NodeDetailLink name={name} nodeID={item.nodeID} />;
         },
       },
       {
@@ -93,15 +91,14 @@ export const NodeList = memo(() => {
     useCallback((state: ResolverState) => {
       const { processNodePositions } = selectors.layout(state);
       const view: ProcessTableView[] = [];
-      for (const processEvent of processNodePositions.keys()) {
-        const name = eventModel.processNameSafeVersion(processEvent);
-        const nodeID = eventModel.entityIDSafeVersion(processEvent);
+      for (const treeNode of processNodePositions.keys()) {
+        const name = nodeModel.nodeName(treeNode);
+        const nodeID = nodeModel.nodeID(treeNode);
         if (nodeID !== undefined) {
           view.push({
             name,
-            timestamp: eventModel.timestampAsDateSafeVersion(processEvent),
+            timestamp: nodeModel.timestampAsDate(treeNode),
             nodeID,
-            event: processEvent,
           });
         }
       }
@@ -111,7 +108,7 @@ export const NodeList = memo(() => {
 
   const numberOfProcesses = processTableView.length;
 
-  const crumbs = useMemo(() => {
+  const breadcrumbs = useMemo(() => {
     return [
       {
         text: i18n.translate('xpack.securitySolution.resolver.panel.nodeList.title', {
@@ -123,11 +120,12 @@ export const NodeList = memo(() => {
 
   const children = useSelector(selectors.hasMoreChildren);
   const ancestors = useSelector(selectors.hasMoreAncestors);
-  const showWarning = children === true || ancestors === true;
+  const generations = useSelector(selectors.hasMoreGenerations);
+  const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
     <StyledPanel>
-      <Breadcrumbs breadcrumbs={crumbs} />
+      <Breadcrumbs breadcrumbs={breadcrumbs} />
       {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />
       <EuiInMemoryTable<ProcessTableView>
@@ -141,21 +139,11 @@ export const NodeList = memo(() => {
   );
 });
 
-function NodeDetailLink({
-  name,
-  nodeID,
-  event,
-}: {
-  name?: string;
-  nodeID: string;
-  event: SafeResolverEvent;
-}) {
+function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
   const isOrigin = useSelector((state: ResolverState) => {
     return selectors.originID(state) === nodeID;
   });
-  const isTerminated = useSelector((state: ResolverState) =>
-    nodeID === undefined ? false : selectors.isProcessTerminated(state)(nodeID)
-  );
+  const nodeState = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
   const { descriptionText } = useColors();
   const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });
   const dispatch: (action: ResolverAction) => void = useDispatch();
@@ -164,7 +152,7 @@ function NodeDetailLink({
     (mouseEvent: React.MouseEvent<HTMLAnchorElement>) => {
       linkProps.onClick(mouseEvent);
       dispatch({
-        type: 'userBroughtNodeIntoView',
+        type: 'userSelectedResolverNode',
         payload: {
           nodeID,
           time: timestamp(),
@@ -174,8 +162,13 @@ function NodeDetailLink({
     [timestamp, linkProps, dispatch, nodeID]
   );
   return (
-    <EuiButtonEmpty onClick={handleOnClick} href={linkProps.href}>
-      {name === '' ? (
+    <EuiButtonEmpty
+      onClick={handleOnClick}
+      href={linkProps.href}
+      data-test-subj="resolver:node-list:node-link"
+      data-test-node-id={nodeID}
+    >
+      {name === undefined ? (
         <EuiBadge color="warning">
           {i18n.translate(
             'xpack.securitySolution.endpoint.resolver.panel.table.row.valueMissingDescription',
@@ -187,7 +180,7 @@ function NodeDetailLink({
       ) : (
         <StyledButtonTextContainer>
           <CubeForProcess
-            running={!isTerminated}
+            state={nodeState}
             isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
           />
@@ -218,6 +211,6 @@ const NodeDetailTimestamp = memo(({ eventDate }: { eventDate: Date | undefined }
   return formattedDate ? (
     <CopyablePanelField textToCopy={formattedDate} content={formattedDate} />
   ) : (
-    getEmptyTagValue()
+    <span>{'—'}</span>
   );
 });

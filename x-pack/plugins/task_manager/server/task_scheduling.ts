@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { filter } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -10,7 +12,15 @@ import { Option, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 
 import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult } from './lib/result_type';
-import { isTaskRunEvent, isTaskClaimEvent, isTaskRunRequestEvent } from './task_events';
+import {
+  isTaskRunEvent,
+  isTaskClaimEvent,
+  isTaskRunRequestEvent,
+  RanTask,
+  ErroredTask,
+  OkResultOf,
+  ErrResultOf,
+} from './task_events';
 import { Middleware } from './lib/middleware';
 import {
   ConcreteTaskInstance,
@@ -118,16 +128,16 @@ export class TaskScheduling {
               return reject(await this.identifyTaskFailureReason(taskId, error));
             }, taskEvent.event);
           } else {
-            either<ConcreteTaskInstance, Error | Option<ConcreteTaskInstance>>(
+            either<OkResultOf<TaskLifecycleEvent>, ErrResultOf<TaskLifecycleEvent>>(
               taskEvent.event,
-              (taskInstance: ConcreteTaskInstance) => {
+              (taskInstance: OkResultOf<TaskLifecycleEvent>) => {
                 // resolve if the task has run sucessfully
                 if (isTaskRunEvent(taskEvent)) {
                   subscription.unsubscribe();
-                  resolve({ id: taskInstance.id });
+                  resolve({ id: (taskInstance as RanTask).task.id });
                 }
               },
-              async (error: Error | Option<ConcreteTaskInstance>) => {
+              async (errorResult: ErrResultOf<TaskLifecycleEvent>) => {
                 // reject if any error event takes place for the requested task
                 subscription.unsubscribe();
                 return reject(
@@ -135,7 +145,9 @@ export class TaskScheduling {
                     `Failed to run task "${taskId}": ${
                       isTaskRunRequestEvent(taskEvent)
                         ? `Task Manager is at capacity, please try again later`
-                        : error
+                        : isTaskRunEvent(taskEvent)
+                        ? `${(errorResult as ErroredTask).error}`
+                        : `${errorResult}`
                     }`
                   )
                 );

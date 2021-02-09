@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getInitialState, reducer } from './state_management';
@@ -12,6 +13,7 @@ import { coreMock } from 'src/core/public/mocks';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 describe('editor_frame state management', () => {
   describe('initialization', () => {
@@ -31,11 +33,14 @@ describe('editor_frame state management', () => {
           uiActions: uiActionsPluginMock.createStartContract(),
           data: dataPluginMock.createStartContract(),
           expressions: expressionsPluginMock.createStartContract(),
+          charts: chartPluginMock.createStartContract(),
         },
+        palettes: chartPluginMock.createPaletteRegistry(),
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
         query: { query: '', language: 'lucene' },
         filters: [],
         showNoDataPopover: jest.fn(),
+        searchSessionId: 'sessionId',
       };
     });
 
@@ -126,7 +131,7 @@ describe('editor_frame state management', () => {
         {
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: 'testVis',
-          newState: newVisState,
+          updater: newVisState,
         }
       );
 

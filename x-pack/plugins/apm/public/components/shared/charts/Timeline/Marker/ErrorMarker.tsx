@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../hooks/useTheme';
+import { useTheme } from '../../../../../hooks/use_theme';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import { useUrlParams } from '../../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { px, unit, units } from '../../../../../style/variables';
-import { ErrorMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
+import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
 
@@ -23,21 +24,21 @@ interface Props {
   mark: ErrorMark;
 }
 
-const Popover = styled.div`
+const Popover = euiStyled.div`
   max-width: ${px(280)};
 `;
 
-const TimeLegend = styled(Legend)`
+const TimeLegend = euiStyled(Legend)`
   margin-bottom: ${px(unit)};
 `;
 
-const ErrorLink = styled(ErrorDetailLink)`
+const ErrorLink = euiStyled(ErrorDetailLink)`
   display: block;
   margin: ${px(units.half)} 0 ${px(units.half)} 0;
   overflow-wrap: break-word;
 `;
 
-const Button = styled(Legend)`
+const Button = euiStyled(Legend)`
   height: 20px;
   display: flex;
   align-items: flex-end;

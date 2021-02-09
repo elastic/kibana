@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { UPGRADE_ASSISTANT_DOC_ID, UPGRADE_ASSISTANT_TYPE } from '../../../common/types';
 
@@ -29,17 +31,17 @@ describe('Upgrade Assistant Telemetry SavedObject UIOpen', () => {
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_open.overview`
+        [`ui_open.overview`]
       );
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_open.cluster`
+        [`ui_open.cluster`]
       );
       expect(internalRepo.incrementCounter).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_open.indices`
+        [`ui_open.indices`]
       );
     });
   });

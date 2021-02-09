@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fold, Either, mapLeft } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { fromEither, TaskEither } from 'fp-ts/lib/TaskEither';
 import * as t from 'io-ts';
 import { exactCheck } from './exact_check';
 import { formatErrors } from './format_errors';
@@ -33,3 +35,8 @@ export const validateEither = <T extends t.Mixed, A extends unknown>(
     (a) => schema.validate(a, t.getDefaultContext(schema.asDecoder())),
     mapLeft((errors) => new Error(formatErrors(errors).join(',')))
   );
+
+export const validateTaskEither = <T extends t.Mixed, A extends unknown>(
+  schema: T,
+  obj: A
+): TaskEither<Error, A> => fromEither(validateEither(schema, obj));

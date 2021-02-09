@@ -2,12 +2,15 @@
 
 exports[`IndexPatterns savedObjectToSpec 1`] = `
 Object {
+  "allowNoIndex": undefined,
+  "fieldAttrs": Object {},
   "fieldFormats": Object {
     "field": Object {},
   },
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "runtimeFieldMap": Object {},
   "sourceFilters": Array [
     Object {
       "value": "item1",

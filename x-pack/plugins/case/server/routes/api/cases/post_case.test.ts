@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
@@ -16,7 +17,7 @@ import {
 import { initPostCaseApi } from './post_case';
 import { CASES_URL } from '../../../../common/constants';
 import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
-import { ConnectorTypes } from '../../../../common/api/connectors';
+import { ConnectorTypes, CaseStatuses } from '../../../../common/api';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -42,18 +43,22 @@ describe('POST cases', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.id).toEqual('mock-it');
+    expect(response.payload.status).toEqual('open');
     expect(response.payload.created_by.username).toEqual('awesome');
     expect(response.payload.connector).toEqual({
       id: 'none',
@@ -77,17 +82,20 @@ describe('POST cases', () => {
           type: '.jira',
           fields: { issueType: 'Task', priority: 'High', parent: null },
         },
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({
       id: '123',
@@ -104,19 +112,22 @@ describe('POST cases', () => {
       body: {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
-        status: 'open',
+        status: CaseStatuses.open,
         tags: ['defacement'],
         connector: null,
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
   });
 
@@ -129,16 +140,19 @@ describe('POST cases', () => {
         title: 'Super Bad Security Issue',
         tags: ['error'],
         connector: null,
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
   });
@@ -159,17 +173,21 @@ describe('POST cases', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       },
     });
 
-    const theContext = createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
-      })
+      }),
+      true
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload).toEqual({
       closed_at: null,
@@ -190,13 +208,16 @@ describe('POST cases', () => {
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
       id: 'mock-it',
-      status: 'open',
+      status: CaseStatuses.open,
       tags: ['defacement'],
       title: 'Super Bad Security Issue',
       totalComment: 0,
       updated_at: null,
       updated_by: null,
       version: 'WzksMV0=',
+      settings: {
+        syncAlerts: true,
+      },
     });
   });
 });

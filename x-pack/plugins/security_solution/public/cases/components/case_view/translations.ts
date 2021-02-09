@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -128,14 +129,6 @@ export const COMMENT = i18n.translate('xpack.securitySolution.case.caseView.comm
   defaultMessage: 'comment',
 });
 
-export const CASE_OPENED = i18n.translate('xpack.securitySolution.case.caseView.caseOpened', {
-  defaultMessage: 'Case opened',
-});
-
-export const CASE_CLOSED = i18n.translate('xpack.securitySolution.case.caseView.caseClosed', {
-  defaultMessage: 'Case closed',
-});
-
 export const CASE_REFRESH = i18n.translate('xpack.securitySolution.case.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
 });
@@ -152,13 +145,13 @@ export const EMAIL_BODY = (caseUrl: string) =>
     defaultMessage: 'Case reference: {caseUrl}',
   });
 
-export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unknown', {
-  defaultMessage: 'Unknown',
-});
-
 export const CHANGED_CONNECTOR_FIELD = i18n.translate(
   'xpack.securitySolution.case.caseView.fieldChanged',
   {
     defaultMessage: `changed connector field`,
   }
 );
+
+export const SYNC_ALERTS = i18n.translate('xpack.securitySolution.case.caseView.syncAlertsLabel', {
+  defaultMessage: `Sync alerts`,
+});

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -23,6 +12,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function InspectorProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
+  const browser = getService('browser');
   const renderable = getService('renderable');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
@@ -90,7 +80,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param expectedData
      */
     public async expectTableData(expectedData: string[][]): Promise<void> {
-      await log.debug(`Inspector.expectTableData(${expectedData.join(',')})`);
+      log.debug(`Inspector.expectTableData(${expectedData.join(',')})`);
       const data = await this.getTableData();
       expect(data).to.eql(expectedData);
     }
@@ -169,7 +159,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param column column index
      * @param row row index
      */
-    public async filterForTableCell(column: string, row: string): Promise<void> {
+    public async filterForTableCell(column: string | number, row: string | number): Promise<void> {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(
@@ -187,7 +177,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param column column index
      * @param row row index
      */
-    public async filterOutTableCell(column: string, row: string): Promise<void> {
+    public async filterOutTableCell(column: string | number, row: string | number): Promise<void> {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(
@@ -244,6 +234,18 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
 
     public getOpenRequestDetailResponseButton() {
       return testSubjects.find('inspectorRequestDetailResponse');
+    }
+
+    public async getCodeEditorValue() {
+      let request: string = '';
+
+      await retry.try(async () => {
+        request = await browser.execute(
+          () => (window as any).monaco.editor.getModels()[0].getValue() as string
+        );
+      });
+
+      return request;
     }
   }
 

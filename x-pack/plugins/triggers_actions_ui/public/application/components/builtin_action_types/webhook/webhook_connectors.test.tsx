@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { WebhookActionConnector } from '../types';
 import WebhookActionConnectorFields from './webhook_connectors';
-import { DocLinksStart } from 'kibana/public';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
@@ -24,6 +25,7 @@ describe('WebhookActionConnectorFields renders', () => {
         method: 'PUT',
         url: 'http:\\test',
         headers: { 'content-type': 'text' },
+        hasAuth: true,
       },
     } as WebhookActionConnector;
     const wrapper = mountWithIntl(
@@ -32,7 +34,6 @@ describe('WebhookActionConnectorFields renders', () => {
         errors={{ url: [], method: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         readOnly={false}
       />
     );
@@ -43,5 +44,57 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
+  });
+
+  test('should display a message on create to remember credentials', () => {
+    const actionConnector = {
+      secrets: {},
+      actionTypeId: '.webhook',
+      isPreconfigured: false,
+      config: {
+        hasAuth: true,
+      },
+    } as WebhookActionConnector;
+    const wrapper = mountWithIntl(
+      <WebhookActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], method: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message on edit to re-enter credentials', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.webhook',
+      isPreconfigured: false,
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'http:\\test',
+        headers: { 'content-type': 'text' },
+        hasAuth: true,
+      },
+    } as WebhookActionConnector;
+    const wrapper = mountWithIntl(
+      <WebhookActionConnectorFields
+        action={actionConnector}
+        errors={{ url: [], method: [], user: [], password: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
 });

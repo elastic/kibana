@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -12,6 +13,7 @@ import {
   NetworkDetailsHostHit,
   NetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
+import { toStringArray } from '../../../../helpers/to_array';
 
 export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) => {
   const firstSeen = getOr(null, `firstSeen.value_as_string`, networkHit);
@@ -41,11 +43,24 @@ export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) 
   };
 };
 
+const formatHostEcs = (data: Record<string, unknown> | null): HostEcs | null => {
+  if (data == null) {
+    return null;
+  }
+  return Object.entries(data).reduce<HostEcs>((acc, [key, value]) => {
+    if (typeof value === 'object' && value != null && !Array.isArray(value)) {
+      return { ...acc, [key]: formatHostEcs(value as Record<string, unknown>) };
+    }
+    return {
+      ...acc,
+      [key]: toStringArray(value),
+    };
+  }, {});
+};
+
 export const getNetworkDetailsHostAgg = (hostDetailsHit: NetworkDetailsHostHit | {}) => {
-  const hostFields: HostEcs | null = getOr(
-    null,
-    `results.hits.hits[0]._source.host`,
-    hostDetailsHit
+  const hostFields: HostEcs | null = formatHostEcs(
+    getOr(null, `results.hits.hits[0]._source.host`, hostDetailsHit)
   );
   return {
     host: {

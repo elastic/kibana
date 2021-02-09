@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFilterGroup } from '@elastic/eui';
 import { FilterStatusButton } from './filter_status_button';
 import { useGetUrlParams } from '../../../hooks';
+import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../common/translations';
 
 export const StatusFilter: React.FC = () => {
   const { statusFilter } = useGetUrlParams();
@@ -28,18 +30,14 @@ export const StatusFilter: React.FC = () => {
         isActive={statusFilter === ''}
       />
       <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
-          defaultMessage: 'Up',
-        })}
+        content={STATUS_UP_LABEL}
         dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
         value="up"
         withNext={true}
         isActive={statusFilter === 'up'}
       />
       <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
-          defaultMessage: 'Down',
-        })}
+        content={STATUS_DOWN_LABEL}
         dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
         value="down"
         withNext={false}

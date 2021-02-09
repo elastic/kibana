@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+.enginesOverview {
+  padding: $euiSize;
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    padding: $euiSizeXL;
+  }
+}
+
+.engineIcon {
+  display: inline-block;
+  width: $euiSize;
+  // Use line-height of EuiTitle - SVG will vertically center accordingly
+  height: map-get(map-get($euiTitles, 's'), 'line-height');
+  vertical-align: top;
+  margin-right: $euiSizeXS;
+}

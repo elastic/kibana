@@ -1,30 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Transform } from 'stream';
 import { ExecaChildProcess } from 'execa';
 
-import {
-  createPromiseFromStreams,
-  createSplitStream,
-  createMapStream,
-} from '../../../core/server/utils';
+import { createPromiseFromStreams, createSplitStream, createMapStream } from '@kbn/utils';
 
 // creates a stream that skips empty lines unless they are followed by
 // another line, preventing the empty lines produced by splitStream
@@ -69,13 +54,13 @@ export async function watchStdioForLine(
       }
     }),
     createPromiseFromStreams([
-      proc.stdout,
+      proc.stdout!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),
     ]),
     createPromiseFromStreams([
-      proc.stderr,
+      proc.stderr!, // TypeScript note: As long as the proc stdio[1] is 'pipe', then stderr will not be null
       createSplitStream('\n'),
       skipLastEmptyLineStream(),
       createMapStream(onLogLine),

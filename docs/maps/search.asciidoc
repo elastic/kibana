@@ -2,9 +2,11 @@
 [[maps-search]]
 == Search geographic data
 
-Maps embeds the search bar for real-time search.
-Only layers requesting data from {es} are filtered when you submit a search request.
-Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
+Use the filters, query bar, and time filter to focus in on just the data you want.
+Only layers requesting data from {es} are narrowed when you submit a search request.
+Layers narrowed by the filters and query bar contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
+Only layers requesting data from {es} using an <<index-patterns, index pattern>> with a configured time field are narrowed by the time filter.
+Layers narrowed by the time filter contain the clock icon image:maps/images/clock_icon.png[] next to the layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
 
@@ -14,7 +16,11 @@ You can create a layer that requests data from {es} from the following:
 
 ** Clusters and grid
 
+** Point to point
+
 ** <<terms-join>>
+
+** Tracks
 
 * <<heatmap-layer>>
 
@@ -30,6 +36,9 @@ You can create two types of filters by interacting with your map:
 * <<maps-spatial-filters, Spatial filters>>
 * <<maps-phrase-filter, Phrase filters>>
 
+[role="screenshot"]
+image::maps/images/create_spatial_filter.png[]
+
 [float]
 [[maps-spatial-filters]]
 ==== Spatial filters
@@ -40,9 +49,6 @@ You can create spatial filters in two ways:
 
 * Click the tool icon image:maps/images/tools_icon.png[], and then draw a polygon or bounding box on the map to define the spatial filter.
 * Click *Filter by geometry* in a <<maps-vector-tooltip-locking, locked tooltip>>, and then use the feature's geometry for the spatial filter.
-+
-[role="screenshot"]
-image::maps/images/create_spatial_filter.png[]
 
 Spatial filters have the following properties:
 
@@ -58,9 +64,6 @@ Spatial filters have the following properties:
 A phrase filter narrows search results to documents that contain the specified text.
 You can create a phrase filter by clicking the plus icon image:maps/images/gs_plus_icon.png[] in a <<maps-vector-tooltip-locking, locked tooltip>>.
 If the map is a dashboard panel with drilldowns, you can apply a phrase filter to a drilldown by selecting the drilldown action.
-
-[role="screenshot"]
-image::maps/images/create_phrase_filter.png[]
 
 [role="xpack"]
 [[maps-layer-based-filtering]]

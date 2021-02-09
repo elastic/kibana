@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
@@ -9,36 +10,22 @@ import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../typings/elasticsearch/aggregations';
-import { getTransactionDurationFieldForAggregatedTransactions } from './aggregated_transactions';
+} from '../../../../../typings/elasticsearch/aggregations';
 
-export function getOutcomeAggregation({
-  searchAggregatedTransactions,
-}: {
-  searchAggregatedTransactions: boolean;
-}) {
-  return {
-    terms: { field: EVENT_OUTCOME },
-    aggs: {
-      count: {
-        value_count: {
-          field: getTransactionDurationFieldForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        },
-      },
-    },
-  };
-}
+export const getOutcomeAggregation = () => ({
+  terms: {
+    field: EVENT_OUTCOME,
+    include: [EventOutcome.failure, EventOutcome.success],
+  },
+});
+
+type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
 export function calculateTransactionErrorPercentage(
-  outcomeResponse: AggregationResultOf<
-    ReturnType<typeof getOutcomeAggregation>,
-    {}
-  >
+  outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>
 ) {
   const outcomes = Object.fromEntries(
-    outcomeResponse.buckets.map(({ key, count }) => [key, count.value])
+    outcomeResponse.buckets.map(({ key, doc_count: count }) => [key, count])
   );
 
   const failedTransactions = outcomes[EventOutcome.failure] ?? 0;
@@ -51,7 +38,7 @@ export function getTransactionErrorRateTimeSeries(
   buckets: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
-      aggs: { outcomes: ReturnType<typeof getOutcomeAggregation> };
+      aggs: { outcomes: OutcomeAggregation };
     },
     {}
   >['buckets']

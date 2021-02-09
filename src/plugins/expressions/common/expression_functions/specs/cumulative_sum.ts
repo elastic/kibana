@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { Datatable, DatatableRow } from '../../expression_types';
+import { Datatable } from '../../expression_types';
+import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
 
 export interface CumulativeSumArgs {
   by?: string[];
@@ -34,15 +24,6 @@ export type ExpressionFunctionCumulativeSum = ExpressionFunctionDefinition<
   CumulativeSumArgs,
   Datatable
 >;
-
-/**
- * Returns a string identifying the group of a row by a list of columns to group by
- */
-function getBucketIdentifier(row: DatatableRow, groupColumns?: string[]) {
-  return (groupColumns || [])
-    .map((groupColumnId) => (row[groupColumnId] == null ? '' : String(row[groupColumnId])))
-    .join('|');
-}
 
 /**
  * Calculates the cumulative sum of a specified column in the data table.
@@ -114,37 +95,16 @@ export const cumulativeSum: ExpressionFunctionCumulativeSum = {
   },
 
   fn(input, { by, inputColumnId, outputColumnId, outputColumnName }) {
-    if (input.columns.some((column) => column.id === outputColumnId)) {
-      throw new Error(
-        i18n.translate('expressions.functions.cumulativeSum.columnConflictMessage', {
-          defaultMessage:
-            'Specified outputColumnId {columnId} already exists. Please pick another column id.',
-          values: {
-            columnId: outputColumnId,
-          },
-        })
-      );
-    }
+    const resultColumns = buildResultColumns(
+      input,
+      outputColumnId,
+      inputColumnId,
+      outputColumnName
+    );
 
-    const inputColumnDefinition = input.columns.find((column) => column.id === inputColumnId);
-
-    if (!inputColumnDefinition) {
+    if (!resultColumns) {
       return input;
     }
-
-    const outputColumnDefinition = {
-      ...inputColumnDefinition,
-      id: outputColumnId,
-      name: outputColumnName || outputColumnId,
-    };
-
-    const resultColumns = [...input.columns];
-    // add output column after input column in the table
-    resultColumns.splice(
-      resultColumns.indexOf(inputColumnDefinition) + 1,
-      0,
-      outputColumnDefinition
-    );
 
     const accumulators: Partial<Record<string, number>> = {};
     return {

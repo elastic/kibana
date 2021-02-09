@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { alertsClientMock } from './alerts_client.mock';
@@ -11,6 +12,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
+import { AlertInstanceContext, AlertInstanceState } from './types';
 
 export { alertsClientMock };
 
@@ -25,12 +27,19 @@ const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
     getAlertsClientWithRequest: jest.fn().mockResolvedValue(alertsClientMock.create()),
+    getFrameworkHealth: jest.fn(),
   };
   return mock;
 };
 
-export type AlertInstanceMock = jest.Mocked<AlertInstance>;
-const createAlertInstanceFactoryMock = () => {
+export type AlertInstanceMock<
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext
+> = jest.Mocked<AlertInstance<State, Context>>;
+const createAlertInstanceFactoryMock = <
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+>() => {
   const mock = {
     hasScheduledActions: jest.fn(),
     isThrottled: jest.fn(),
@@ -49,14 +58,17 @@ const createAlertInstanceFactoryMock = () => {
   mock.unscheduleActions.mockReturnValue(mock);
   mock.scheduleActions.mockReturnValue(mock);
 
-  return (mock as unknown) as AlertInstanceMock;
+  return (mock as unknown) as AlertInstanceMock<InstanceState, InstanceContext>;
 };
 
-const createAlertServicesMock = () => {
-  const alertInstanceFactoryMock = createAlertInstanceFactoryMock();
+const createAlertServicesMock = <
+  InstanceState extends AlertInstanceState = AlertInstanceState,
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+>() => {
+  const alertInstanceFactoryMock = createAlertInstanceFactoryMock<InstanceState, InstanceContext>();
   return {
     alertInstanceFactory: jest
-      .fn<jest.Mocked<AlertInstance>, [string]>()
+      .fn<jest.Mocked<AlertInstance<InstanceState, InstanceContext>>, [string]>()
       .mockReturnValue(alertInstanceFactoryMock),
     callCluster: elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser,
     getLegacyScopedClusterClient: jest.fn(),

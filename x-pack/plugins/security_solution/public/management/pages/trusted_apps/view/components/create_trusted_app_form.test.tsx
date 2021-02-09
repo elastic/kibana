@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import React from 'react';
+import * as reactTestingLibrary from '@testing-library/react';
+import { fireEvent, getByTestId } from '@testing-library/dom';
+
+import { ConditionEntryField, OperatingSystem } from '../../../../../../common/endpoint/types';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import * as reactTestingLibrary from '@testing-library/react';
-import React from 'react';
+
 import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_trusted_app_form';
-import { fireEvent, getByTestId } from '@testing-library/dom';
 
 describe('When showing the Trusted App Create Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -118,7 +122,7 @@ describe('When showing the Trusted App Create Form', () => {
         '.euiSuperSelect__listbox button.euiSuperSelect__item'
       )
     ).map((button) => button.textContent);
-    expect(options).toEqual(['Mac OS', 'Windows', 'Linux']);
+    expect(options).toEqual(['Mac', 'Windows', 'Linux']);
   });
 
   it('should show Description as optional', () => {
@@ -161,7 +165,7 @@ describe('When showing the Trusted App Create Form', () => {
           '.euiSuperSelect__listbox button.euiSuperSelect__item'
         )
       ).map((button) => button.textContent);
-      expect(options).toEqual(['Hash', 'Path']);
+      expect(options).toEqual(['Hash', 'Path', 'Signature']);
     });
 
     it('should show the value field as required', () => {
@@ -234,14 +238,14 @@ describe('When showing the Trusted App Create Form', () => {
           description: '',
           entries: [
             {
-              field: 'process.hash.*',
+              field: ConditionEntryField.HASH,
               operator: 'included',
               type: 'match',
               value: '',
             },
           ],
           name: '',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
         },
       });
     });
@@ -289,14 +293,14 @@ describe('When showing the Trusted App Create Form', () => {
           description: 'some description',
           entries: [
             {
-              field: 'process.hash.*',
+              field: ConditionEntryField.HASH,
               operator: 'included',
               type: 'match',
               value: 'someHASH',
             },
           ],
           name: 'Some Process',
-          os: 'windows',
+          os: OperatingSystem.WINDOWS,
         },
       });
     });

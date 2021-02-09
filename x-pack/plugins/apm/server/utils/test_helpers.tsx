@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { APMConfig } from '../';
+import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESFilter,
-  ESSearchResponse,
   ESSearchRequest,
-} from '../../typings/elasticsearch';
-import { PromiseReturnType } from '../../typings/common';
+  ESSearchResponse,
+} from '../../../../typings/elasticsearch';
 import { UIFilters } from '../../typings/ui_filters';
-import { APMConfig } from '..';
 
 interface Options {
   mockResponse?: (
@@ -76,6 +78,12 @@ export async function inspectSearchParams(
 
             case 'xpack.apm.metricsInterval':
               return 30;
+
+            case 'xpack.apm.maxServiceEnvironments':
+              return 100;
+
+            case 'xpack.apm.maxServiceSelection':
+              return 50;
           }
         },
       }

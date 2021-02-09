@@ -1,21 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import '../../../../__mocks__/kea.mock';
 
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiFieldSearch, EuiFilterSelectItem, EuiCard, EuiPopoverTitle } from '@elastic/eui';
 
-import { FilterableUsersList } from './filterable_users_list';
+import { User } from '../../../types';
 
-import { IUser } from '../../../types';
+import { FilterableUsersList } from './filterable_users_list';
 
 const mockSetState = jest.fn();
 const useStateMock: any = (initState: any) => [initState, mockSetState];
@@ -96,7 +96,7 @@ describe('FilterableUsersList', () => {
   });
 
   it('handles hidden users when count is higher than 20', () => {
-    const _users = [] as IUser[];
+    const _users = [] as User[];
     const NUM_TOTAL_USERS = 30;
     const NUM_VISIBLE_USERS = 20;
 

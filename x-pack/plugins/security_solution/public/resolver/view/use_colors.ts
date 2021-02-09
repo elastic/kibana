@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
@@ -15,6 +16,7 @@ type ResolverColorNames =
   | 'full'
   | 'graphControls'
   | 'graphControlsBackground'
+  | 'graphControlsBorderColor'
   | 'linkColor'
   | 'resolverBackground'
   | 'resolverEdge'
@@ -38,6 +40,7 @@ export function useColors(): ColorMap {
       full: theme.euiColorFullShade,
       graphControls: theme.euiColorDarkestShade,
       graphControlsBackground: theme.euiColorEmptyShade,
+      graphControlsBorderColor: theme.euiColorLightShade,
       processBackingFill: `${theme.euiColorPrimary}${isDarkMode ? '1F' : '0F'}`, // Add opacity 0F = 6% , 1F = 12%
       resolverBackground: theme.euiColorEmptyShade,
       resolverEdge: isDarkMode ? theme.euiColorLightShade : theme.euiColorLightestShade,

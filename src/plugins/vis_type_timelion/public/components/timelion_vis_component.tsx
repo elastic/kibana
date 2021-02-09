@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -33,6 +22,8 @@ import {
   SERIES_ID_ATTR,
   colors,
   Axis,
+  ACTIVE_CURSOR,
+  eventBus,
 } from '../helpers/panel_utils';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
@@ -40,7 +31,7 @@ import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
 
-import './index.scss';
+import './timelion_vis.scss';
 
 interface CrosshairPlot extends jquery.flot.plot {
   setCrosshair: (pos: Position) => void;
@@ -338,16 +329,40 @@ function TimelionVisComponent({
     });
   }, [legendCaption, legendValueNumbers]);
 
-  const plotHoverHandler = useCallback(
-    (event: JQuery.TriggeredEvent, pos: Position) => {
-      if (!plot) {
-        return;
-      }
+  const plotHover = useCallback(
+    (pos: Position) => {
       (plot as CrosshairPlot).setCrosshair(pos);
       debouncedSetLegendNumbers(pos);
     },
     [plot, debouncedSetLegendNumbers]
   );
+
+  const plotHoverHandler = useCallback(
+    (event: JQuery.TriggeredEvent, pos: Position) => {
+      if (!plot) {
+        return;
+      }
+      plotHover(pos);
+      eventBus.trigger(ACTIVE_CURSOR, [event, pos]);
+    },
+    [plot, plotHover]
+  );
+
+  useEffect(() => {
+    const updateCursor = (_: any, event: JQuery.TriggeredEvent, pos: Position) => {
+      if (!plot) {
+        return;
+      }
+      plotHover(pos);
+    };
+
+    eventBus.on(ACTIVE_CURSOR, updateCursor);
+
+    return () => {
+      eventBus.off(ACTIVE_CURSOR, updateCursor);
+    };
+  }, [plot, plotHover]);
+
   const mouseLeaveHandler = useCallback(() => {
     if (!plot) {
       return;

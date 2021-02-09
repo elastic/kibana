@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import deepEqual from 'fast-deep-equal';
@@ -19,7 +20,7 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -55,25 +56,12 @@ export const useHostsKpiAuthentications = ({
   const [
     hostsKpiAuthenticationsRequest,
     setHostsKpiAuthenticationsRequest,
-  ] = useState<HostsKpiAuthenticationsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: HostsKpiQueries.kpiAuthentications,
-          filterQuery: createFilter(filterQuery),
-          id: ID,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<HostsKpiAuthenticationsRequestOptions | null>(null);
 
-  const [hostsKpiAuthenticationsResponse, setHostsKpiAuthenticationsResponse] = useState<
-    HostsKpiAuthenticationsArgs
-  >({
+  const [
+    hostsKpiAuthenticationsResponse,
+    setHostsKpiAuthenticationsResponse,
+  ] = useState<HostsKpiAuthenticationsArgs>({
     authenticationsSuccess: 0,
     authenticationsSuccessHistogram: [],
     authenticationsFailure: 0,
@@ -89,7 +77,7 @@ export const useHostsKpiAuthentications = ({
 
   const hostsKpiAuthenticationsSearch = useCallback(
     (request: HostsKpiAuthenticationsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -149,7 +137,7 @@ export const useHostsKpiAuthentications = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -159,19 +147,18 @@ export const useHostsKpiAuthentications = ({
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiAuthentications,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     hostsKpiAuthenticationsSearch(hostsKpiAuthenticationsRequest);

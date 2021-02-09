@@ -1,33 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { EuiButton as EuiLinkButton } from '../../../shared/react_router_helpers';
+import { i18n } from '@kbn/i18n';
 
-import { AppLogic } from '../../app_logic';
-
-import { Loading } from '../../components/shared/loading';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-
-import { getGroupPath, USERS_PATH } from '../../routes';
-
-import { useDidUpdateEffect } from '../../../shared/use_did_update_effect';
 import { FlashMessages, FlashMessagesLogic } from '../../../shared/flash_messages';
-
-import { GroupsLogic } from './groups_logic';
+import { Loading } from '../../../shared/loading';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { AppLogic } from '../../app_logic';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { getGroupPath, USERS_PATH } from '../../routes';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
 import { GroupsTable } from './components/groups_table';
 import { TableFilters } from './components/table_filters';
+import { GroupsLogic } from './groups_logic';
 
 export const Groups: React.FC = () => {
   const { messages } = useValues(FlashMessagesLogic);
@@ -40,7 +36,7 @@ export const Groups: React.FC = () => {
     groupListLoading,
     hasFiltersSet,
     groupsMeta: {
-      page: { current: activePage, total_results: numGroups },
+      page: { total_results: numGroups },
     },
     filteredSources,
     filteredUsers,
@@ -56,38 +52,37 @@ export const Groups: React.FC = () => {
     return resetGroups;
   }, [filteredSources, filteredUsers, filterValue]);
 
-  // Because the initial search happens above, we want to skip the initial search and use the custom hook to do so.
-  useDidUpdateEffect(() => {
-    getSearchResults();
-  }, [activePage]);
-
   if (groupsDataLoading) {
     return <Loading />;
   }
 
   if (newGroup && hasMessages) {
     messages[0].description = (
-      <EuiLinkButton to={getGroupPath(newGroup.id)} color="primary">
+      <EuiButtonTo
+        to={getGroupPath(newGroup.id)}
+        color="primary"
+        data-test-subj="NewGroupManageButton"
+      >
         {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.newGroup.action', {
           defaultMessage: 'Manage Group',
         })}
-      </EuiLinkButton>
+      </EuiButtonTo>
     );
   }
 
   const clearFilters = hasFiltersSet && <ClearFiltersLink />;
   const inviteUsersButton = !isFederatedAuth ? (
-    <EuiLinkButton to={USERS_PATH} data-test-subj="InviteUsersButton">
+    <EuiButtonTo to={USERS_PATH} data-test-subj="InviteUsersButton">
       {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.inviteUsers.action', {
         defaultMessage: 'Invite users',
       })}
-    </EuiLinkButton>
+    </EuiButtonTo>
   ) : null;
 
   const headerAction = (
     <EuiFlexGroup responsive={false} gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiButton data-test-subj="AddGroupButton" fill={true} onClick={openNewGroupModal}>
+        <EuiButton data-test-subj="AddGroupButton" fill onClick={openNewGroupModal}>
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.groups.addGroupForm.action', {
             defaultMessage: 'Create a group',
           })}

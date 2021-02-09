@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 interface TimestampFieldFromEs {
@@ -10,6 +11,20 @@ interface TimestampFieldFromEs {
 
 type TimestampField = TimestampFieldFromEs;
 
+interface MetaFromEs {
+  managed_by: string;
+  package: any;
+  managed: boolean;
+}
+
+type Meta = MetaFromEs;
+
+interface PrivilegesFromEs {
+  delete_index: boolean;
+}
+
+type Privileges = PrivilegesFromEs;
+
 export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
 
 export interface DataStreamFromEs {
@@ -17,11 +32,15 @@ export interface DataStreamFromEs {
   timestamp_field: TimestampFieldFromEs;
   indices: DataStreamIndexFromEs[];
   generation: number;
+  _meta?: MetaFromEs;
   status: HealthFromEs;
   template: string;
   ilm_policy?: string;
   store_size?: string;
+  store_size_bytes?: number;
   maximum_timestamp?: number;
+  privileges: PrivilegesFromEs;
+  hidden: boolean;
 }
 
 export interface DataStreamIndexFromEs {
@@ -40,7 +59,11 @@ export interface DataStream {
   indexTemplateName: string;
   ilmPolicyName?: string;
   storageSize?: string;
+  storageSizeBytes?: number;
   maxTimeStamp?: number;
+  _meta?: Meta;
+  privileges: Privileges;
+  hidden: boolean;
 }
 
 export interface DataStreamIndex {

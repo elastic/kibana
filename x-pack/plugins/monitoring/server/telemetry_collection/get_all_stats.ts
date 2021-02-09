@@ -1,37 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
 import { get, merge } from 'lodash';
 
-import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { LOGSTASH_SYSTEM_ID, KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID } from '../../common/constants';
+import moment from 'moment';
+import { LegacyAPICaller } from 'kibana/server';
+import {
+  LOGSTASH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  BEATS_SYSTEM_ID,
+  USAGE_FETCH_INTERVAL,
+} from '../../common/constants';
 import { getElasticsearchStats, ESClusterStats } from './get_es_stats';
 import { getKibanaStats, KibanaStats } from './get_kibana_stats';
-import { getBeatsStats } from './get_beats_stats';
-import { getHighLevelStats } from './get_high_level_stats';
+import { getBeatsStats, BeatsStatsByClusterUuid } from './get_beats_stats';
+import { getHighLevelStats, ClustersHighLevelStats } from './get_high_level_stats';
 
-type PromiseReturnType<T extends (...args: any[]) => any> = ReturnType<T> extends Promise<infer R>
-  ? R
-  : T;
-
-export interface CustomContext {
-  maxBucketSize: number;
-}
 /**
  * Get statistics for all products joined by Elasticsearch cluster.
  * Returns the array of clusters joined with the Kibana and Logstash instances.
  *
  */
-export const getAllStats: StatsGetter<CustomContext> = async (
-  clustersDetails,
-  { callCluster, start, end, esClient, soClient },
-  { maxBucketSize }
-) => {
-  const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);
+export async function getAllStats(
+  clusterUuids: string[],
+  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  timestamp: number,
+  maxBucketSize: number
+) {
+  const start = moment(timestamp).subtract(USAGE_FETCH_INTERVAL, 'ms').toISOString();
+  const end = moment(timestamp).toISOString();
 
   const [esClusters, kibana, logstash, beats] = await Promise.all([
     getElasticsearchStats(callCluster, clusterUuids, maxBucketSize), // cluster_stats, stack_stats.xpack, cluster_name/uuid, license, version
@@ -41,7 +43,7 @@ export const getAllStats: StatsGetter<CustomContext> = async (
   ]);
 
   return handleAllStats(esClusters, { kibana, logstash, beats });
-};
+}
 
 /**
  * Combine the statistics from the stack to create "cluster" stats that associate all products together based on the cluster
@@ -61,8 +63,8 @@ export function handleAllStats(
     beats,
   }: {
     kibana: KibanaStats;
-    logstash: PromiseReturnType<typeof getHighLevelStats>;
-    beats: PromiseReturnType<typeof getBeatsStats>;
+    logstash: ClustersHighLevelStats;
+    beats: BeatsStatsByClusterUuid;
   }
 ) {
   return clusters.map((cluster) => {

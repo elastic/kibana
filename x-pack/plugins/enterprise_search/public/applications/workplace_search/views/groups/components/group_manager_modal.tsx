@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { useValues } from 'kea';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -25,23 +24,16 @@ import {
   EuiOverlayMask,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { EuiButton as EuiLinkButton } from '../../../../shared/react_router_helpers';
-
-import { IGroup } from '../../../types';
-import { ORG_SOURCES_PATH } from '../../../routes';
-
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
-
+import { CANCEL_BUTTON } from '../../../constants';
+import { SOURCES_PATH } from '../../../routes';
+import { Group } from '../../../types';
 import { GroupLogic } from '../group_logic';
 import { GroupsLogic } from '../groups_logic';
 
-const CANCEL_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerCancel',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
 const UPDATE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdate',
   {
@@ -67,17 +59,17 @@ const EMPTY_STATE_BODY = i18n.translate(
   }
 );
 
-interface IGroupManagerModalProps {
+interface GroupManagerModalProps {
   children: React.ReactElement;
   label: string;
   allItems: object[];
   numSelected: number;
-  hideModal(group: IGroup): void;
+  hideModal(group: Group): void;
   selectAll(allItems: object[]): void;
   saveItems(): void;
 }
 
-export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
+export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   children,
   label,
   allItems,
@@ -96,9 +88,9 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
   const sourcesButton = (
-    <EuiLinkButton to={ORG_SOURCES_PATH} fill color="primary">
+    <EuiButtonTo to={SOURCES_PATH} fill color="primary">
       {ADD_SOURCE_BUTTON_TEXT}
-    </EuiLinkButton>
+    </EuiButtonTo>
   );
 
   const emptyState = (
@@ -153,7 +145,7 @@ export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty data-test-subj="CloseGroupsModal" onClick={handleClose}>
-                  {CANCEL_BUTTON_TEXT}
+                  {CANCEL_BUTTON}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

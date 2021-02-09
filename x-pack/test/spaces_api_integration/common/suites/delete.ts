@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { getTestScenariosForSpace } from '../lib/space_test_utils';
@@ -167,7 +169,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       error: 'Bad Request',
       statusCode: 400,
-      message: `This Space cannot be deleted because it is reserved.`,
+      message: `The default space cannot be deleted because it is reserved.`,
     });
   };
 

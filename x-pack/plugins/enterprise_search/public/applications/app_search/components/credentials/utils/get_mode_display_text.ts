@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ApiTokenTypes, READ_ONLY, READ_WRITE, SEARCH_DISPLAY, WRITE_ONLY } from '../constants';
-import { IApiToken } from '../types';
+import { ApiToken } from '../types';
 
-export const getModeDisplayText = (apiToken: IApiToken): string => {
+export const getModeDisplayText = (apiToken: ApiToken): string => {
   const { read = false, write = false, type } = apiToken;
 
   switch (type) {

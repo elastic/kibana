@@ -5,11 +5,6 @@ exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
   <div
     className="euiPopover euiPopover--anchorDownCenter"
     id="color-picker-popover"
-    onKeyDown={[Function]}
-    onMouseDown={[Function]}
-    onMouseUp={[Function]}
-    onTouchEnd={[Function]}
-    onTouchStart={[Function]}
   >
     <div
       className="euiPopover__anchor"
@@ -17,6 +12,7 @@ exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
       <button
         aria-label="Color Picker black"
         className="euiLink euiLink--primary"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -66,11 +62,6 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   id="color-picker-popover"
-  onKeyDown={[Function]}
-  onMouseDown={[Function]}
-  onMouseUp={[Function]}
-  onTouchEnd={[Function]}
-  onTouchStart={[Function]}
 >
   <div
     className="euiPopover__anchor"
@@ -78,6 +69,7 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
     <button
       aria-label="Color Picker white"
       className="euiLink euiLink--primary"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -110,11 +102,6 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors, value missin
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   id="color-picker-popover"
-  onKeyDown={[Function]}
-  onMouseDown={[Function]}
-  onMouseUp={[Function]}
-  onTouchEnd={[Function]}
-  onTouchStart={[Function]}
 >
   <div
     className="euiPopover__anchor"
@@ -122,6 +109,7 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors, value missin
     <button
       aria-label="Color Picker #a1b2c3"
       className="euiLink euiLink--primary"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {
@@ -154,11 +142,6 @@ exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
   id="color-picker-popover"
-  onKeyDown={[Function]}
-  onMouseDown={[Function]}
-  onMouseUp={[Function]}
-  onTouchEnd={[Function]}
-  onTouchStart={[Function]}
 >
   <div
     className="euiPopover__anchor"
@@ -166,6 +149,7 @@ exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
     <button
       aria-label="Color Picker white"
       className="euiLink euiLink--primary"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {

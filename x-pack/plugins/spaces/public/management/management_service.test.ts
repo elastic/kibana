@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ManagementService } from '.';
@@ -22,9 +23,8 @@ describe('ManagementService', () => {
       managementMockSetup.sections.section.kibana = mockKibanaSection;
       const deps = {
         management: managementMockSetup,
-        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
-          PluginsStart
-        >['getStartServices'],
+        getStartServices: coreMock.createSetup()
+          .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
@@ -43,9 +43,8 @@ describe('ManagementService', () => {
     it('will not crash if the kibana section is missing', () => {
       const deps = {
         management: managementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
-          PluginsStart
-        >['getStartServices'],
+        getStartServices: coreMock.createSetup()
+          .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
@@ -65,9 +64,8 @@ describe('ManagementService', () => {
 
       const deps = {
         management: managementMockSetup,
-        getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
-          PluginsStart
-        >['getStartServices'],
+        getStartServices: coreMock.createSetup()
+          .getStartServices as CoreSetup<PluginsStart>['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { DEFAULT_SPACE_ID } from '../constants';
 import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
 
@@ -102,6 +104,6 @@ describe('addSpaceIdToPath', () => {
   test('it throws an error when the requested path does not start with a slash', () => {
     expect(() => {
       addSpaceIdToPath('', '', 'foo');
-    }).toThrowErrorMatchingSnapshot();
+    }).toThrowErrorMatchingInlineSnapshot(`"path must start with a /"`);
   });
 });

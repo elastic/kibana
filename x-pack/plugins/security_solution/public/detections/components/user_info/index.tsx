@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
@@ -14,25 +15,29 @@ import { useKibana } from '../../../common/lib/kibana';
 export interface State {
   canUserCRUD: boolean | null;
   hasIndexManage: boolean | null;
+  hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexUpdateDelete: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
   loading: boolean;
   signalIndexName: string | null;
-  signalIndexTemplateOutdated: boolean | null;
+  signalIndexMappingOutdated: boolean | null;
 }
 
 export const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
+  hasIndexMaintenance: null,
   hasIndexWrite: null,
+  hasIndexUpdateDelete: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
   hasEncryptionKey: null,
   loading: true,
   signalIndexName: null,
-  signalIndexTemplateOutdated: null,
+  signalIndexMappingOutdated: null,
 };
 
 export type Action =
@@ -42,8 +47,16 @@ export type Action =
       hasIndexManage: boolean | null;
     }
   | {
+      type: 'updateHasIndexMaintenance';
+      hasIndexMaintenance: boolean | null;
+    }
+  | {
       type: 'updateHasIndexWrite';
       hasIndexWrite: boolean | null;
+    }
+  | {
+      type: 'updateHasIndexUpdateDelete';
+      hasIndexUpdateDelete: boolean | null;
     }
   | {
       type: 'updateIsSignalIndexExists';
@@ -66,8 +79,8 @@ export type Action =
       signalIndexName: string | null;
     }
   | {
-      type: 'updateSignalIndexTemplateOutdated';
-      signalIndexTemplateOutdated: boolean | null;
+      type: 'updateSignalIndexMappingOutdated';
+      signalIndexMappingOutdated: boolean | null;
     };
 
 export const userInfoReducer = (state: State, action: Action): State => {
@@ -84,10 +97,22 @@ export const userInfoReducer = (state: State, action: Action): State => {
         hasIndexManage: action.hasIndexManage,
       };
     }
+    case 'updateHasIndexMaintenance': {
+      return {
+        ...state,
+        hasIndexMaintenance: action.hasIndexMaintenance,
+      };
+    }
     case 'updateHasIndexWrite': {
       return {
         ...state,
         hasIndexWrite: action.hasIndexWrite,
+      };
+    }
+    case 'updateHasIndexUpdateDelete': {
+      return {
+        ...state,
+        hasIndexUpdateDelete: action.hasIndexUpdateDelete,
       };
     }
     case 'updateIsSignalIndexExists': {
@@ -120,10 +145,10 @@ export const userInfoReducer = (state: State, action: Action): State => {
         signalIndexName: action.signalIndexName,
       };
     }
-    case 'updateSignalIndexTemplateOutdated': {
+    case 'updateSignalIndexMappingOutdated': {
       return {
         ...state,
-        signalIndexTemplateOutdated: action.signalIndexTemplateOutdated,
+        signalIndexMappingOutdated: action.signalIndexMappingOutdated,
       };
     }
     default:
@@ -150,13 +175,15 @@ export const useUserInfo = (): State => {
     {
       canUserCRUD,
       hasIndexManage,
+      hasIndexMaintenance,
       hasIndexWrite,
+      hasIndexUpdateDelete,
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
       loading,
       signalIndexName,
-      signalIndexTemplateOutdated,
+      signalIndexMappingOutdated,
     },
     dispatch,
   ] = useUserData();
@@ -165,13 +192,15 @@ export const useUserInfo = (): State => {
     isAuthenticated: isApiAuthenticated,
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
+    hasIndexMaintenance: hasApiIndexMaintenance,
     hasIndexWrite: hasApiIndexWrite,
+    hasIndexUpdateDelete: hasApiIndexUpdateDelete,
   } = usePrivilegeUser();
   const {
     loading: indexNameLoading,
     signalIndexExists: isApiSignalIndexExists,
     signalIndexName: apiSignalIndexName,
-    signalIndexTemplateOutdated: apiSignalIndexTemplateOutdated,
+    signalIndexMappingOutdated: apiSignalIndexMappingOutdated,
     createDeSignalIndex: createSignalIndex,
   } = useSignalIndex();
 
@@ -196,6 +225,29 @@ export const useUserInfo = (): State => {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
   }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexUpdateDelete !== hasApiIndexUpdateDelete &&
+      hasApiIndexUpdateDelete != null
+    ) {
+      dispatch({
+        type: 'updateHasIndexUpdateDelete',
+        hasIndexUpdateDelete: hasApiIndexUpdateDelete,
+      });
+    }
+  }, [dispatch, loading, hasIndexUpdateDelete, hasApiIndexUpdateDelete]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexMaintenance !== hasApiIndexMaintenance &&
+      hasApiIndexMaintenance != null
+    ) {
+      dispatch({ type: 'updateHasIndexMaintenance', hasIndexMaintenance: hasApiIndexMaintenance });
+    }
+  }, [dispatch, loading, hasIndexMaintenance, hasApiIndexMaintenance]);
 
   useEffect(() => {
     if (
@@ -234,15 +286,15 @@ export const useUserInfo = (): State => {
   useEffect(() => {
     if (
       !loading &&
-      signalIndexTemplateOutdated !== apiSignalIndexTemplateOutdated &&
-      apiSignalIndexTemplateOutdated != null
+      signalIndexMappingOutdated !== apiSignalIndexMappingOutdated &&
+      apiSignalIndexMappingOutdated != null
     ) {
       dispatch({
-        type: 'updateSignalIndexTemplateOutdated',
-        signalIndexTemplateOutdated: apiSignalIndexTemplateOutdated,
+        type: 'updateSignalIndexMappingOutdated',
+        signalIndexMappingOutdated: apiSignalIndexMappingOutdated,
       });
     }
-  }, [dispatch, loading, signalIndexTemplateOutdated, apiSignalIndexTemplateOutdated]);
+  }, [dispatch, loading, signalIndexMappingOutdated, apiSignalIndexMappingOutdated]);
 
   useEffect(() => {
     if (
@@ -250,7 +302,7 @@ export const useUserInfo = (): State => {
       hasEncryptionKey &&
       hasIndexManage &&
       ((isSignalIndexExists != null && !isSignalIndexExists) ||
-        (signalIndexTemplateOutdated != null && signalIndexTemplateOutdated)) &&
+        (signalIndexMappingOutdated != null && signalIndexMappingOutdated)) &&
       createSignalIndex != null
     ) {
       createSignalIndex();
@@ -261,7 +313,7 @@ export const useUserInfo = (): State => {
     hasEncryptionKey,
     isSignalIndexExists,
     hasIndexManage,
-    signalIndexTemplateOutdated,
+    signalIndexMappingOutdated,
   ]);
 
   return {
@@ -271,8 +323,10 @@ export const useUserInfo = (): State => {
     hasEncryptionKey,
     canUserCRUD,
     hasIndexManage,
+    hasIndexMaintenance,
     hasIndexWrite,
+    hasIndexUpdateDelete,
     signalIndexName,
-    signalIndexTemplateOutdated,
+    signalIndexMappingOutdated,
   };
 };

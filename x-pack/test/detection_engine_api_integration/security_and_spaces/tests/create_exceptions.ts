@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import { CreateExceptionListItemSchema } from '../../../../plugins/lists/common';
 import { EXCEPTION_LIST_URL } from '../../../../plugins/lists/common/constants';
@@ -26,13 +27,15 @@ import {
   removeServerGeneratedProperties,
   downgradeImmutableRule,
   createRule,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   installPrePackagedRules,
   getRule,
   createExceptionList,
   createExceptionListItem,
   waitForSignalsToBePresent,
-  getAllSignals,
+  getSignalsByIds,
+  findImmutableRuleById,
+  getPrePackagedRulesStatus,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -45,12 +48,14 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(es);
+        await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id and add an exception list to the rule', async () => {
@@ -101,6 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const ruleWithException: CreateRulesSchema = {
           ...getSimpleRule(),
+          enabled: true,
           exceptions_list: [
             {
               id,
@@ -112,11 +118,12 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const rule = await createRule(supertest, ruleWithException);
-        await waitForRuleSuccess(supertest, rule.id);
+        await waitForRuleSuccessOrStatus(supertest, rule.id);
         const bodyToCompare = removeServerGeneratedProperties(rule);
 
         const expected: Partial<RulesSchema> = {
           ...getSimpleRuleOutput(),
+          enabled: true,
           exceptions_list: [
             {
               id,
@@ -349,10 +356,10 @@ export default ({ getService }: FtrProviderContext) => {
           getCreateExceptionListMinimalSchemaMock()
         );
 
-        // Rule id of "6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/c2_reg_beacon.json
+        // Rule id of "eb079c62-4481-4d6e-9643-3ca499df7aaa" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/external_alerts.json
         // since this rule does not have existing exceptions_list that we are going to use for tests
-        const immutableRule = await getRule(supertest, '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6');
+        const immutableRule = await getRule(supertest, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
         expect(immutableRule.exceptions_list.length).eql(0); // make sure we have no exceptions_list
 
         // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -360,7 +367,7 @@ export default ({ getService }: FtrProviderContext) => {
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6',
+            rule_id: 'eb079c62-4481-4d6e-9643-3ca499df7aaa',
             exceptions_list: [
               {
                 id,
@@ -372,11 +379,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await downgradeImmutableRule(es, '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6');
+        await downgradeImmutableRule(es, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
         await installPrePackagedRules(supertest);
         const immutableRuleSecondTime = await getRule(
           supertest,
-          '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6'
+          'eb079c62-4481-4d6e-9643-3ca499df7aaa'
         );
 
         expect(immutableRuleSecondTime.exceptions_list).to.eql([
@@ -389,6 +396,83 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
 
+      it('should not change the immutable tags when adding a second exception list to an immutable rule through patch', async () => {
+        await installPrePackagedRules(supertest);
+
+        const { id, list_id, namespace_type, type } = await createExceptionList(
+          supertest,
+          getCreateExceptionListMinimalSchemaMock()
+        );
+
+        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+        // This rule has an existing exceptions_list that we are going to use
+        const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+
+        // add a second exceptions list as a user is allowed to add a second list to an immutable rule
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_id: '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+            exceptions_list: [
+              ...immutableRule.exceptions_list,
+              {
+                id,
+                list_id,
+                namespace_type,
+                type,
+              },
+            ],
+          })
+          .expect(200);
+
+        const body = await findImmutableRuleById(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        expect(body.data.length).to.eql(1); // should have only one length to the data set, otherwise we have duplicates or the tags were removed and that is incredibly bad.
+
+        const bodyToCompare = removeServerGeneratedProperties(body.data[0]);
+        expect(bodyToCompare.rule_id).to.eql(immutableRule.rule_id); // Rule id should not change with a a patch
+        expect(bodyToCompare.immutable).to.eql(immutableRule.immutable); // Immutable should always stay the same which is true and never flip to false.
+        expect(bodyToCompare.version).to.eql(immutableRule.version); // The version should never update on a patch
+      });
+
+      it('should not change count of prepacked rules when adding a second exception list to an immutable rule through patch. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
+        await installPrePackagedRules(supertest);
+
+        const { id, list_id, namespace_type, type } = await createExceptionList(
+          supertest,
+          getCreateExceptionListMinimalSchemaMock()
+        );
+
+        // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint.json
+        // This rule has an existing exceptions_list that we are going to use
+        const immutableRule = await getRule(supertest, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
+        expect(immutableRule.exceptions_list.length).greaterThan(0); // make sure we have at least one
+
+        // add a second exceptions list as a user is allowed to add a second list to an immutable rule
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_id: '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+            exceptions_list: [
+              ...immutableRule.exceptions_list,
+              {
+                id,
+                list_id,
+                namespace_type,
+                type,
+              },
+            ],
+          })
+          .expect(200);
+
+        const status = await getPrePackagedRulesStatus(supertest);
+        expect(status.rules_not_installed).to.eql(0);
+      });
+
       describe('tests with auditbeat data', () => {
         beforeEach(async () => {
           await createSignalsIndex(supertest);
@@ -397,7 +481,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(es);
+          await deleteAllAlerts(supertest);
           await deleteAllExceptions(es);
           await esArchiver.unload('auditbeat/hosts');
         });
@@ -422,7 +506,14 @@ export default ({ getService }: FtrProviderContext) => {
           await createExceptionListItem(supertest, exceptionListItem);
 
           const ruleWithException: CreateRulesSchema = {
-            ...getSimpleRule(),
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
             from: '1900-01-01T00:00:00.000Z',
             query: 'host.name: "suricata-sensor-amsterdam"',
             exceptions_list: [
@@ -434,9 +525,10 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           };
-          await createRule(supertest, ruleWithException);
-          await waitForSignalsToBePresent(supertest, 10);
-          const signalsOpen = await getAllSignals(supertest);
+          const { id: createdId } = await createRule(supertest, ruleWithException);
+          await waitForRuleSuccessOrStatus(supertest, createdId);
+          await waitForSignalsToBePresent(supertest, 10, [createdId]);
+          const signalsOpen = await getSignalsByIds(supertest, [createdId]);
           expect(signalsOpen.hits.hits.length).equal(10);
         });
 
@@ -460,9 +552,16 @@ export default ({ getService }: FtrProviderContext) => {
           await createExceptionListItem(supertest, exceptionListItem);
 
           const ruleWithException: CreateRulesSchema = {
-            ...getSimpleRule(),
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
             from: '1900-01-01T00:00:00.000Z',
-            query: 'host.name: "suricata-sensor-amsterdam"', // this matches all the exceptions we should exclude
+            query: 'host.name: "suricata-sensor-amsterdam"',
             exceptions_list: [
               {
                 id,
@@ -473,8 +572,8 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           };
           const rule = await createRule(supertest, ruleWithException);
-          await waitForRuleSuccess(supertest, rule.id);
-          const signalsOpen = await getAllSignals(supertest);
+          await waitForRuleSuccessOrStatus(supertest, rule.id);
+          const signalsOpen = await getSignalsByIds(supertest, [rule.id]);
           expect(signalsOpen.hits.hits.length).equal(0);
         });
       });

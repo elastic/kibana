@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { RequestHandlerContext, Logger, RequestHandler } from 'kibana/server';
+import Boom from '@hapi/boom';
+import type { Logger, RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import {
   HostInfo,
@@ -14,8 +15,10 @@ import {
   HostStatus,
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+
 import { getESQueryHostMetadataByID, kibanaRequestToMetadataListESQuery } from './query_builders';
-import { Agent, AgentStatus } from '../../../../../ingest_manager/common/types/models';
+import { Agent, AgentStatus, PackagePolicy } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataListRequestSchema, GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
@@ -25,7 +28,7 @@ import { EndpointAppContextService } from '../../endpoint_app_context_services';
 export interface MetadataRequestContext {
   endpointAppContextService: EndpointAppContextService;
   logger: Logger;
-  requestHandlerContext: RequestHandlerContext;
+  requestHandlerContext: SecuritySolutionRequestHandlerContext;
 }
 
 const HOST_STATUS_MAPPING = new Map<AgentStatus, HostStatus>([
@@ -52,7 +55,12 @@ export const getMetadataListRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
   queryStrategyVersion?: MetadataQueryStrategyVersions
-): RequestHandler<undefined, undefined, TypeOf<typeof GetMetadataListRequestSchema.body>> {
+): RequestHandler<
+  unknown,
+  unknown,
+  TypeOf<typeof GetMetadataListRequestSchema.body>,
+  SecuritySolutionRequestHandlerContext
+> {
   return async (context, request, response) => {
     try {
       const agentService = endpointAppContext.service.getAgentService();
@@ -68,13 +76,15 @@ export const getMetadataListRequestHandler = function (
 
       const unenrolledAgentIds = await findAllUnenrolledAgentIds(
         agentService,
-        context.core.savedObjects.client
+        context.core.savedObjects.client,
+        context.core.elasticsearch.client.asCurrentUser
       );
 
       const statusIDs = request?.body?.filters?.host_status?.length
         ? await findAgentIDsByStatus(
             agentService,
             context.core.savedObjects.client,
+            context.core.elasticsearch.client.asCurrentUser,
             request.body?.filters?.host_status
           )
         : undefined;
@@ -110,7 +120,12 @@ export const getMetadataRequestHandler = function (
   endpointAppContext: EndpointAppContext,
   logger: Logger,
   queryStrategyVersion?: MetadataQueryStrategyVersions
-): RequestHandler<TypeOf<typeof GetMetadataRequestSchema.params>, undefined, undefined> {
+): RequestHandler<
+  TypeOf<typeof GetMetadataRequestSchema.params>,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> {
   return async (context, request, response) => {
     const agentService = endpointAppContext.service.getAgentService();
     if (agentService === undefined) {
@@ -193,6 +208,7 @@ async function findAgent(
       ?.getAgentService()
       ?.getAgent(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         hostMetadata.elastic.agent.id
       );
   } catch (e) {
@@ -245,7 +261,7 @@ export async function mapToHostResultList(
   }
 }
 
-async function enrichHostMetadata(
+export async function enrichHostMetadata(
   hostMetadata: HostMetadata,
   metadataRequestContext: MetadataRequestContext,
   metadataQueryStrategyVersion: MetadataQueryStrategyVersions
@@ -267,6 +283,7 @@ async function enrichHostMetadata(
       ?.getAgentService()
       ?.getAgentStatusById(
         metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
         elasticAgentId
       );
     hostStatus = HOST_STATUS_MAPPING.get(status!) || HostStatus.ERROR;
@@ -282,9 +299,54 @@ async function enrichHostMetadata(
       throw e;
     }
   }
+
+  let policyInfo: HostInfo['policy_info'];
+  try {
+    const agent = await metadataRequestContext.endpointAppContextService
+      ?.getAgentService()
+      ?.getAgent(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        metadataRequestContext.requestHandlerContext.core.elasticsearch.client.asCurrentUser,
+        elasticAgentId
+      );
+    const agentPolicy = await metadataRequestContext.endpointAppContextService
+      .getAgentPolicyService()
+      ?.get(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        agent?.policy_id!,
+        true
+      );
+    const endpointPolicy = ((agentPolicy?.package_policies || []) as PackagePolicy[]).find(
+      (policy: PackagePolicy) => policy.package?.name === 'endpoint'
+    );
+
+    policyInfo = {
+      agent: {
+        applied: {
+          revision: agent?.policy_revision || 0,
+          id: agent?.policy_id || '',
+        },
+        configured: {
+          revision: agentPolicy?.revision || 0,
+          id: agentPolicy?.id || '',
+        },
+      },
+      endpoint: {
+        revision: endpointPolicy?.revision || 0,
+        id: endpointPolicy?.id || '',
+      },
+    };
+  } catch (e) {
+    // this is a non-vital enrichment of expected policy revisions.
+    // if we fail just fetching these, the rest of the endpoint
+    // data should still be returned. log the error and move on
+    log.error(e);
+  }
+
   return {
     metadata: hostMetadata,
     host_status: hostStatus,
+    policy_info: policyInfo,
     query_strategy_version: metadataQueryStrategyVersion,
   };
 }

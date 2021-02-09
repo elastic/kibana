@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -95,7 +96,7 @@ export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
 export const THREAT_MATCH_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError',
   {
-    defaultMessage: 'At least one threat match is required.',
+    defaultMessage: 'At least one indicator match is required.',
   }
 );
 

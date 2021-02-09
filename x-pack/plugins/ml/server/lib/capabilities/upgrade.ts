@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { mlLog } from '../../client/log';
+import type { MlClient } from '../../lib/ml_client';
+import { mlLog } from '../../lib/log';
 
-export function upgradeCheckProvider({ asInternalUser }: IScopedClusterClient) {
+export function upgradeCheckProvider(mlClient: MlClient) {
   async function isUpgradeInProgress(): Promise<boolean> {
     let upgradeInProgress = false;
     try {
-      const { body } = await asInternalUser.ml.info();
+      const { body } = await mlClient.info();
       // if ml indices are currently being migrated, upgrade_mode will be set to true
       // pass this back with the privileges to allow for the disabling of UI controls.
       upgradeInProgress = body.upgrade_mode === true;

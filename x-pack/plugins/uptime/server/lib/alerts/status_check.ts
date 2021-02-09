@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
+import { ActionGroupIdsOf } from '../../../../alerts/common';
 import { UptimeAlertTypeFactory } from './types';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/common';
 import {
   StatusCheckFilters,
-  DynamicSettings,
   Ping,
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { MONITOR_STATUS } from '../../../common/constants/alerts';
 import { updateState } from './common';
 import { commonMonitorStateI18, commonStateTranslations, DOWN_LABEL } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../common/lib';
@@ -25,17 +26,26 @@ import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 import { MonitorStatusTranslations } from '../../../common/translations';
-import { ESAPICaller } from '../adapters/framework';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
-import { UMServerLibs } from '../lib';
+import { UMServerLibs, UptimeESClient } from '../lib';
 
-const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
+export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
+
+const getMonIdByLoc = (monitorId: string, location: string) => {
+  return monitorId + '-' + location;
+};
 
 const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
 
 const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
-  items.reduce((acc, { monitorId, location }) => acc.add(monitorId + location), new Set<string>());
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
 
 export const getUniqueIdsByLoc = (
   downMonitorsByLocation: GetMonitorStatusResult[],
@@ -79,8 +89,7 @@ export const generateFilterDSL = async (
 };
 
 export const formatFilterString = async (
-  dynamicSettings: DynamicSettings,
-  callES: ESAPICaller,
+  uptimeEsClient: UptimeESClient,
   filters: StatusCheckFilters,
   search: string,
   libs?: UMServerLibs
@@ -88,10 +97,9 @@ export const formatFilterString = async (
   await generateFilterDSL(
     () =>
       libs?.requests?.getIndexPattern
-        ? libs?.requests?.getIndexPattern({ callES, dynamicSettings })
+        ? libs?.requests?.getIndexPattern({ uptimeEsClient })
         : getUptimeIndexPattern({
-            callES,
-            dynamicSettings,
+            uptimeEsClient,
           }),
     filters,
     search
@@ -157,8 +165,23 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
-  uptimeAlertWrapper({
+const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+  const normalizeText = (txt: string) => {
+    // replace url and name special characters with -
+    return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+  };
+  const urlText = normalizeText(monitorInfo.url?.full || '');
+
+  const monName = normalizeText(monitorInfo.monitor.name || '');
+
+  if (monName) {
+    return `${monName}_${urlText}_${monIdByLoc}`;
+  }
+  return `${urlText}_${monIdByLoc}`;
+};
+
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) =>
+  uptimeAlertWrapper<ActionGroupIds>({
     id: 'xpack.uptime.alerts.monitorStatus',
     name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
       defaultMessage: 'Uptime monitor status',
@@ -234,11 +257,16 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       ],
       state: [...commonMonitorStateI18, ...commonStateTranslations],
     },
-    async executor(
-      { params: rawParams, state, services: { alertInstanceFactory } },
-      callES,
-      dynamicSettings
-    ) {
+    minimumLicenseRequired: 'basic',
+    async executor({
+      options: {
+        params: rawParams,
+        state,
+        services: { alertInstanceFactory },
+      },
+      dynamicSettings,
+      uptimeEsClient,
+    }) {
       const {
         filters,
         search,
@@ -252,7 +280,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         timerange: oldVersionTimeRange,
       } = rawParams;
 
-      const filterString = await formatFilterString(dynamicSettings, callES, filters, search, libs);
+      const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
 
       const timerange = oldVersionTimeRange || {
         from: isAutoGenerated
@@ -267,8 +295,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       // after that shouldCheckStatus should be explicitly false
       if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
         downMonitorsByLocation = await libs.requests.getMonitorStatus({
-          callES,
-          dynamicSettings,
+          uptimeEsClient,
           timerange,
           numTimes,
           locations: [],
@@ -280,7 +307,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         for (const monitorLoc of downMonitorsByLocation) {
           const monitorInfo = monitorLoc.monitorInfo;
 
-          const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monitorLoc.location);
+          const alertInstance = alertInstanceFactory(
+            getInstanceId(monitorInfo, monitorLoc.location)
+          );
 
           const monitorSummary = getMonitorSummary(monitorInfo);
           const statusMessage = getStatusMessage(monitorInfo);
@@ -300,8 +329,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       let availabilityResults: GetMonitorAvailabilityResult[] = [];
       if (shouldCheckAvailability) {
         availabilityResults = await libs.requests.getMonitorAvailability({
-          callES,
-          dynamicSettings,
+          uptimeEsClient,
           ...availability,
           filters: JSON.stringify(filterString) || undefined,
         });
@@ -310,18 +338,20 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       const mergedIdsByLoc = getUniqueIdsByLoc(downMonitorsByLocation, availabilityResults);
 
       mergedIdsByLoc.forEach((monIdByLoc) => {
-        const alertInstance = alertInstanceFactory(MONITOR_STATUS.id + monIdByLoc);
-
         const availMonInfo = availabilityResults.find(
-          ({ monitorId, location }) => monitorId + location === monIdByLoc
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
         );
 
         const downMonInfo = downMonitorsByLocation.find(
-          ({ monitorId, location }) => monitorId + location === monIdByLoc
+          ({ monitorId, location }) => getMonIdByLoc(monitorId, location) === monIdByLoc
         )?.monitorInfo;
 
-        const monitorSummary = getMonitorSummary(downMonInfo || availMonInfo?.monitorInfo!);
+        const monitorInfo = downMonInfo || availMonInfo?.monitorInfo!;
+
+        const monitorSummary = getMonitorSummary(monitorInfo);
         const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
+
+        const alertInstance = alertInstanceFactory(getInstanceId(monitorInfo, monIdByLoc));
 
         alertInstance.replaceState({
           ...updateState(state, true),

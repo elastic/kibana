@@ -1,24 +1,37 @@
 [[access]]
 == Access {kib}
 
-Kibana is a web application that you access through port 5601. All you need to do is point your web browser at the
-machine where Kibana is running and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
-If you want to allow remote users to connect, set the parameter `server.host` in `kibana.yml` to a non-loopback address.
+The fastest way to access {kib} is to use our hosted {es} Service. If you <<install, installed {kib} on your own>>, access {kib} through the web application.
 
-When you access Kibana, the <<discover,Discover>> page loads by default with the default index pattern selected. The
-time filter is set to the last 15 minutes and the search query is set to match-all (\*).
+[float]
+=== Set up on cloud
 
-If you don't see any documents, try setting the time filter to a wider time range.
-If you still don't see any results, it's possible that you don't *have* any documents.
+include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
+
+[float]
+[[log-on-to-the-web-application]]
+=== Log on to the web application
+
+If you are using a self-managed deployment, you access {kib} through the web application on port 5601.
+
+. Point your web browser to the machine where you are running {kib} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
+
+. To allow remote users to connect to {kib}, set the parameter `server.host` in kibana.yml to a non-loopback address.
+
+. On the home page, click *{kib}*.
++
+To make the {kib} page your landing page, click *Make this my landing page*.
 
 [float]
 [[status]]
-=== Check {kib} status
+=== Check the {kib} status
 
-You can reach the Kibana server's status page by navigating to the status endpoint, for example, `localhost:5601/status`. The status page displays
-information about the server's resource usage and lists the installed plugins.
+To view the {kib} status page, use the status endpoint. For example, `localhost:5601/status`. The status page displays
+information about the server resource usage and installed plugins.
 
 [role="screenshot"]
 image::images/kibana-status-page-7_5_0.png[]
 
-NOTE: For JSON-formatted server status details, use the API endpoint at `localhost:5601/api/status`
+For JSON-formatted server status details, use the `localhost:5601/api/status` API endpoint. 
+
+

@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { IScopedClusterClient } from 'kibana/server';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider } from './datafeeds';
 import { FormCalendar, CalendarManager } from '../calendar';
+import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelSnapshotsResponse {
   count: number;
@@ -19,9 +20,8 @@ export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
 
-export function modelSnapshotProvider(client: IScopedClusterClient) {
-  const { asInternalUser } = client;
-  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(client);
+export function modelSnapshotProvider(mlClient: MlClient) {
+  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
 
   async function revertModelSnapshot(
     jobId: string,
@@ -33,12 +33,12 @@ export function modelSnapshotProvider(client: IScopedClusterClient) {
   ) {
     let datafeedId = `datafeed-${jobId}`;
     // ensure job exists
-    await asInternalUser.ml.getJobs({ job_id: jobId });
+    await mlClient.getJobs({ job_id: jobId });
 
     try {
       // ensure the datafeed exists
       // the datafeed is probably called datafeed-<jobId>
-      await asInternalUser.ml.getDatafeeds({
+      await mlClient.getDatafeeds({
         datafeed_id: datafeedId,
       });
     } catch (e) {
@@ -52,7 +52,7 @@ export function modelSnapshotProvider(client: IScopedClusterClient) {
     }
 
     // ensure the snapshot exists
-    const { body: snapshot } = await asInternalUser.ml.getModelSnapshots<ModelSnapshotsResponse>({
+    const { body: snapshot } = await mlClient.getModelSnapshots<ModelSnapshotsResponse>({
       job_id: jobId,
       snapshot_id: snapshotId,
     });
@@ -60,7 +60,7 @@ export function modelSnapshotProvider(client: IScopedClusterClient) {
     // apply the snapshot revert
     const {
       body: { model },
-    } = await asInternalUser.ml.revertModelSnapshot<RevertModelSnapshotResponse>({
+    } = await mlClient.revertModelSnapshot<RevertModelSnapshotResponse>({
       job_id: jobId,
       snapshot_id: snapshotId,
       body: {
@@ -87,7 +87,7 @@ export function modelSnapshotProvider(client: IScopedClusterClient) {
             end_time: s.end,
           })),
         };
-        const cm = new CalendarManager(client);
+        const cm = new CalendarManager(mlClient);
         await cm.newCalendar(calendar);
       }
 

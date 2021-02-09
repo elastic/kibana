@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -269,12 +270,13 @@ describe('TaskStore', () => {
       opts = {},
       hits = generateFakeTasks(1),
       claimingOpts,
+      versionConflicts = 2,
     }: {
       opts: Partial<StoreOpts>;
       hits?: unknown[];
       claimingOpts: OwnershipClaimingOpts;
+      versionConflicts?: number;
     }) {
-      const versionConflicts = 2;
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.search.mockResolvedValue(asApiResponse({ hits: { hits } }));
       esClient.updateByQuery.mockResolvedValue(
@@ -367,7 +369,7 @@ describe('TaskStore', () => {
 
       const {
         args: {
-          updateByQuery: { body: { query } = {} },
+          updateByQuery: { body: { query, sort } = {} },
         },
       } = await testClaimAvailableTasks({
         opts: {
@@ -415,41 +417,6 @@ describe('TaskStore', () => {
                             ],
                           },
                         },
-                        {
-                          bool: {
-                            should: [
-                              { exists: { field: 'task.schedule' } },
-                              {
-                                bool: {
-                                  must: [
-                                    { term: { 'task.taskType': 'foo' } },
-                                    {
-                                      range: {
-                                        'task.attempts': {
-                                          lt: maxAttempts,
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              {
-                                bool: {
-                                  must: [
-                                    { term: { 'task.taskType': 'bar' } },
-                                    {
-                                      range: {
-                                        'task.attempts': {
-                                          lt: customMaxAttempts,
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        },
                       ],
                     },
                   },
@@ -476,12 +443,36 @@ describe('TaskStore', () => {
           ],
         },
       });
+      expect(sort).toMatchObject([
+        {
+          _script: {
+            type: 'number',
+            order: 'asc',
+            script: {
+              lang: 'painless',
+              source: `
+if (doc['task.retryAt'].size()!=0) {
+  return doc['task.retryAt'].value.toInstant().toEpochMilli();
+}
+if (doc['task.runAt'].size()!=0) {
+  return doc['task.runAt'].value.toInstant().toEpochMilli();
+}
+    `,
+            },
+          },
+        },
+      ]);
     });
 
     test('it supports claiming specific tasks by id', async () => {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
       const definitions = new TaskTypeDictionary(mockLogger());
+      const taskManagerId = uuid.v1();
+      const fieldUpdates = {
+        ownerId: taskManagerId,
+        retryAt: new Date(Date.now()),
+      };
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
@@ -495,10 +486,11 @@ describe('TaskStore', () => {
       });
       const {
         args: {
-          updateByQuery: { body: { query, sort } = {} },
+          updateByQuery: { body: { query, script, sort } = {} },
         },
       } = await testClaimAvailableTasks({
         opts: {
+          taskManagerId,
           maxAttempts,
           definitions,
         },
@@ -557,41 +549,6 @@ describe('TaskStore', () => {
                                 ],
                               },
                             },
-                            {
-                              bool: {
-                                should: [
-                                  { exists: { field: 'task.schedule' } },
-                                  {
-                                    bool: {
-                                      must: [
-                                        { term: { 'task.taskType': 'foo' } },
-                                        {
-                                          range: {
-                                            'task.attempts': {
-                                              lt: maxAttempts,
-                                            },
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                  {
-                                    bool: {
-                                      must: [
-                                        { term: { 'task.taskType': 'bar' } },
-                                        {
-                                          range: {
-                                            'task.attempts': {
-                                              lt: customMaxAttempts,
-                                            },
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                ],
-                              },
-                            },
                           ],
                         },
                       },
@@ -621,6 +578,35 @@ describe('TaskStore', () => {
         },
       });
 
+      expect(script).toMatchObject({
+        source: `
+  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
+    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+        .join(' ')}
+    } else {
+      ctx._source.task.status = "failed";
+    }
+  } else {
+    ctx._source.task.status = "unrecognized";
+  }
+  `,
+        lang: 'painless',
+        params: {
+          fieldUpdates,
+          claimTasksById: [
+            'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+            'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+          ],
+          registeredTaskTypes: ['foo', 'bar'],
+          taskMaxAttempts: {
+            bar: customMaxAttempts,
+            foo: maxAttempts,
+          },
+        },
+      });
+
       expect(sort).toMatchObject([
         '_score',
         {
@@ -646,6 +632,10 @@ if (doc['task.runAt'].size()!=0) {
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
+      const fieldUpdates = {
+        ownerId: taskManagerId,
+        retryAt: claimOwnershipUntil,
+      };
       const {
         args: {
           updateByQuery: { body: { script } = {} },
@@ -660,12 +650,29 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
       expect(script).toMatchObject({
-        source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+        source: `
+  if (params.registeredTaskTypes.contains(ctx._source.task.taskType)) {
+    if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+      ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+        .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+        .join(' ')}
+    } else {
+      ctx._source.task.status = "failed";
+    }
+  } else {
+    ctx._source.task.status = "unrecognized";
+  }
+  `,
         lang: 'painless',
         params: {
-          ownerId: taskManagerId,
-          retryAt: claimOwnershipUntil,
-          status: 'claiming',
+          fieldUpdates,
+          claimTasksById: [],
+          registeredTaskTypes: ['report', 'dernstraight', 'yawn'],
+          taskMaxAttempts: {
+            dernstraight: 2,
+            report: 2,
+            yawn: 2,
+          },
         },
       });
     });
@@ -966,6 +973,77 @@ if (doc['task.runAt'].size()!=0) {
       ]);
     });
 
+    test('it returns version_conflicts that do not include conflicts that were proceeded against', async () => {
+      const taskManagerId = uuid.v1();
+      const claimOwnershipUntil = new Date(Date.now());
+      const runAt = new Date();
+      const tasks = [
+        {
+          _id: 'task:aaa',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'foo',
+              schedule: undefined,
+              attempts: 0,
+              status: 'claiming',
+              params: '{ "hello": "world" }',
+              state: '{ "baby": "Henhen" }',
+              user: 'jimbo',
+              scope: ['reporting'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 1,
+          _primary_term: 2,
+          sort: ['a', 1],
+        },
+        {
+          _id: 'task:bbb',
+          _source: {
+            type: 'task',
+            task: {
+              runAt,
+              taskType: 'bar',
+              schedule: { interval: '5m' },
+              attempts: 2,
+              status: 'claiming',
+              params: '{ "shazm": 1 }',
+              state: '{ "henry": "The 8th" }',
+              user: 'dabo',
+              scope: ['reporting', 'ceo'],
+              ownerId: taskManagerId,
+            },
+          },
+          _seq_no: 3,
+          _primary_term: 4,
+          sort: ['b', 2],
+        },
+      ];
+      const maxDocs = 10;
+      const {
+        result: { stats: { tasksUpdated, tasksConflicted, tasksClaimed } = {} } = {},
+      } = await testClaimAvailableTasks({
+        opts: {
+          taskManagerId,
+        },
+        claimingOpts: {
+          claimOwnershipUntil,
+          size: maxDocs,
+        },
+        hits: tasks,
+        // assume there were 20 version conflists, but thanks to `conflicts="proceed"`
+        // we proceeded to claim tasks
+        versionConflicts: 20,
+      });
+
+      expect(tasksUpdated).toEqual(2);
+      // ensure we only count conflicts that *may* have counted against max_docs, no more than that
+      expect(tasksConflicted).toEqual(10 - tasksUpdated!);
+      expect(tasksClaimed).toEqual(2);
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const store = new TaskStore({
@@ -1223,7 +1301,7 @@ if (doc['task.runAt'].size()!=0) {
 
   describe('getLifecycle', () => {
     test('returns the task status if the task exists ', async () => {
-      expect.assertions(4);
+      expect.assertions(5);
       return Promise.all(
         Object.values(TaskStatus).map(async (status) => {
           const task = {

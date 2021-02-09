@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios from 'axios';
@@ -24,7 +25,7 @@ import {
 
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
-import { ProxySettings } from '../../types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 
@@ -93,7 +94,7 @@ export const formatUpdateRequest = ({
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
-  proxySettings?: ProxySettings
+  configurationUtilities: ActionsConfigurationUtilities
 ): ExternalService => {
   const { apiUrl: url, orgId } = config as ResilientPublicConfigurationType;
   const { apiKeyId, apiKeySecret } = secrets as ResilientSecretConfigurationType;
@@ -130,7 +131,7 @@ export const createExternalService = (
         params: {
           text_content_output_format: 'objects_convert',
         },
-        proxySettings,
+        configurationUtilities,
       });
 
       return { ...res.data, description: res.data.description?.content ?? '' };
@@ -178,7 +179,7 @@ export const createExternalService = (
         method: 'post',
         logger,
         data,
-        proxySettings,
+        configurationUtilities,
       });
 
       return {
@@ -208,7 +209,7 @@ export const createExternalService = (
         url: `${incidentUrl}/${incidentId}`,
         logger,
         data,
-        proxySettings,
+        configurationUtilities,
       });
 
       if (!res.data.success) {
@@ -241,7 +242,7 @@ export const createExternalService = (
         url: getCommentsURL(incidentId),
         logger,
         data: { text: { format: 'text', content: comment.comment } },
-        proxySettings,
+        configurationUtilities,
       });
 
       return {
@@ -266,7 +267,7 @@ export const createExternalService = (
         method: 'get',
         url: incidentTypesUrl,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       const incidentTypes = res.data?.values ?? [];
@@ -288,7 +289,7 @@ export const createExternalService = (
         method: 'get',
         url: severityUrl,
         logger,
-        proxySettings,
+        configurationUtilities,
       });
 
       const incidentTypes = res.data?.values ?? [];
@@ -303,12 +304,27 @@ export const createExternalService = (
     }
   };
 
+  const getFields = async () => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: incidentFieldsUrl,
+        logger,
+        configurationUtilities,
+      });
+      return res.data ?? [];
+    } catch (error) {
+      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}.`));
+    }
+  };
+
   return {
-    getIncident,
-    createIncident,
-    updateIncident,
     createComment,
+    createIncident,
+    getFields,
+    getIncident,
     getIncidentTypes,
     getSeverity,
+    updateIncident,
   };
 };

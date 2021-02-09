@@ -1,45 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { SavedObject } from '../../../plugins/saved_objects/public';
 import {
   AggConfigOptions,
+  IAggConfigs,
   SearchSourceFields,
   TimefilterContract,
 } from '../../../plugins/data/public';
-import { SerializedVis, Vis, VisParams } from './vis';
-import { ExprVis } from './expressions/vis';
+import { ExpressionAstExpression } from '../../expressions/public';
+
+import { SerializedVis, Vis } from './vis';
+import { PersistedState } from './persisted_state';
+import { VisParams } from '../common';
 
 export { Vis, SerializedVis, VisParams };
-
-export interface VisualizationController {
-  render(visData: any, visParams: any): Promise<void>;
-  destroy(): void;
-  isLoaded?(): Promise<void> | void;
-}
-
-export type VisualizationControllerConstructor = new (
-  el: HTMLElement,
-  vis: ExprVis
-) => VisualizationController;
-
 export interface SavedVisState {
   title: string;
   type: string;
@@ -60,13 +40,6 @@ export interface ISavedVis {
 
 export interface VisSavedObject extends SavedObject, ISavedVis {}
 
-export interface VisResponseValue {
-  visType: string;
-  visData: object;
-  visConfig: object;
-  params?: object;
-}
-
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;
   timeRange?: any;
@@ -76,4 +49,16 @@ export interface VisToExpressionAstParams {
 export type VisToExpressionAst<TVisParams = VisParams> = (
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
-) => ExpressionAstExpression;
+) => Promise<ExpressionAstExpression> | ExpressionAstExpression;
+
+export interface VisEditorOptionsProps<VisParamType = unknown> {
+  aggs: IAggConfigs;
+  hasHistogramAgg: boolean;
+  isTabSelected: boolean;
+  stateParams: VisParamType;
+  vis: Vis;
+  uiState: PersistedState;
+  setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
+  setValidity(isValid: boolean): void;
+  setTouched(isTouched: boolean): void;
+}

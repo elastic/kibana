@@ -45,6 +45,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
       <EuiCard
         data-test-subj="wizard1"
         description="mock wizard without icon"
+        isDisabled={false}
         onClick={[Function]}
         title="wizard 1"
         titleSize="xs"
@@ -62,6 +63,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
             type="logoObservability"
           />
         }
+        isDisabled={false}
         onClick={[Function]}
         title="wizard 2"
         titleSize="xs"

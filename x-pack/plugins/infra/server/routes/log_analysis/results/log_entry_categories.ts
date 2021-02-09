@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   getLogEntryCategoriesRequestPayloadRT,
   getLogEntryCategoriesSuccessReponsePayloadRT,
@@ -33,6 +34,7 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
           sourceId,
           timeRange: { startTime, endTime },
           datasets,
+          sort,
         },
       } = request.body;
 
@@ -51,7 +53,8 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
             endTime: histogram.timeRange.endTime,
             id: histogram.id,
             startTime: histogram.timeRange.startTime,
-          }))
+          })),
+          sort
         );
 
         return response.ok({

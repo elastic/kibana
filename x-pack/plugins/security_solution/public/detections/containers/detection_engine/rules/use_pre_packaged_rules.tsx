@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
@@ -20,7 +21,7 @@ import {
   getPrePackagedTimelineStatus,
 } from '../../../pages/detection_engine/rules/helpers';
 
-type Func = () => void;
+type Func = () => Promise<void>;
 export type CreatePreBuiltRules = () => Promise<boolean>;
 
 interface ReturnPrePackagedTimelines {
@@ -114,6 +115,27 @@ export const usePrePackagedRules = ({
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
   const [loading, setLoading] = useState(true);
   const [, dispatchToaster] = useStateToaster();
+  const getSuccessToastMessage = (result: {
+    rules_installed: number;
+    rules_updated: number;
+    timelines_installed: number;
+    timelines_updated: number;
+  }) => {
+    const {
+      rules_installed: rulesInstalled,
+      rules_updated: rulesUpdated,
+      timelines_installed: timelinesInstalled,
+      timelines_updated: timelinesUpdated,
+    } = result;
+    if (rulesInstalled === 0 && (timelinesInstalled > 0 || timelinesUpdated > 0)) {
+      return i18n.TIMELINE_PREPACKAGED_SUCCESS;
+    } else if ((rulesInstalled > 0 || rulesUpdated > 0) && timelinesInstalled === 0) {
+      return i18n.RULE_PREPACKAGED_SUCCESS;
+    } else {
+      return i18n.RULE_AND_TIMELINE_PREPACKAGED_SUCCESS;
+    }
+  };
+
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -170,7 +192,7 @@ export const usePrePackagedRules = ({
             isSignalIndexExists
           ) {
             setLoadingCreatePrePackagedRules(true);
-            await createPrepackagedRules({
+            const result = await createPrepackagedRules({
               signal: abortCtrl.signal,
             });
 
@@ -209,11 +231,7 @@ export const usePrePackagedRules = ({
                       timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
                       timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
                     });
-
-                    displaySuccessToast(
-                      i18n.RULE_AND_TIMELINE_PREPACKAGED_SUCCESS,
-                      dispatchToaster
-                    );
+                    displaySuccessToast(getSuccessToastMessage(result), dispatchToaster);
                     stopTimeOut();
                     resolve(true);
                   } else {
@@ -245,8 +263,14 @@ export const usePrePackagedRules = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canUserCRUD, hasIndexWrite, isAuthenticated, hasEncryptionKey, isSignalIndexExists]);
+  }, [
+    canUserCRUD,
+    hasIndexWrite,
+    isAuthenticated,
+    hasEncryptionKey,
+    isSignalIndexExists,
+    dispatchToaster,
+  ]);
 
   const prePackagedRuleStatus = useMemo(
     () =>
@@ -277,8 +301,9 @@ export const usePrePackagedRules = ({
   );
   const getLoadPrebuiltRulesAndTemplatesButton = useCallback(
     ({ isDisabled, onClick, fill, 'data-test-subj': dataTestSubj = 'loadPrebuiltRulesBtn' }) => {
-      return prePackagedRuleStatus === 'ruleNotInstalled' ||
-        prePackagedTimelineStatus === 'timelinesNotInstalled' ? (
+      return (prePackagedRuleStatus === 'ruleNotInstalled' ||
+        prePackagedTimelineStatus === 'timelinesNotInstalled') &&
+        prePackagedRuleStatus !== 'someRuleUninstall' ? (
         <EuiButton
           fill={fill}
           iconType="indexOpen"

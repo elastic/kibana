@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -26,6 +27,7 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import {
   defaultSearchQuery,
   DataFrameAnalyticsConfig,
+  INDEX_STATUS,
   SEARCH_SIZE,
   getAnalysisType,
 } from '../../../../common';
@@ -54,11 +56,12 @@ const showingFirstDocs = i18n.translate(
 
 const getResultsSectionHeaderItems = (
   columnsWithCharts: EuiDataGridColumn[],
+  status: INDEX_STATUS,
   tableItems: Array<Record<string, any>>,
   rowCount: number,
   colorRange?: ReturnType<typeof useColorRange>
 ): ExpandableSectionProps['headerItems'] => {
-  return columnsWithCharts.length > 0 && tableItems.length > 0
+  return columnsWithCharts.length > 0 && (tableItems.length > 0 || status === INDEX_STATUS.LOADED)
     ? [
         {
           id: 'explorationTableTotalDocs',
@@ -109,11 +112,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   needsDestIndexPattern,
   searchQuery,
 }) => {
-  const { columnsWithCharts, tableItems } = indexData;
+  const { columnsWithCharts, status, tableItems } = indexData;
 
   // Results section header items and content
   const resultsSectionHeaderItems = getResultsSectionHeaderItems(
     columnsWithCharts,
+    status,
     tableItems,
     indexData.rowCount,
     colorRange
@@ -137,14 +141,15 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            {columnsWithCharts.length > 0 && tableItems.length > 0 && (
-              <DataGrid
-                {...indexData}
-                analysisType={analysisType}
-                dataTestSubj="mlExplorationDataGrid"
-                toastNotifications={getToastNotifications()}
-              />
-            )}
+            {columnsWithCharts.length > 0 &&
+              (tableItems.length > 0 || status === INDEX_STATUS.LOADED) && (
+                <DataGrid
+                  {...indexData}
+                  analysisType={analysisType}
+                  dataTestSubj="mlExplorationDataGrid"
+                  toastNotifications={getToastNotifications()}
+                />
+              )}
           </>
         )}
     </>
@@ -153,6 +158,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   return (
     <>
       <ExpandableSection
+        urlStateKey={'results'}
         dataTestId="results"
         content={resultsSectionContent}
         headerItems={resultsSectionHeaderItems}

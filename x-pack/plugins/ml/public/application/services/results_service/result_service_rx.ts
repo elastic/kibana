@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Queries Elasticsearch to obtain metric aggregation results.
@@ -16,10 +17,13 @@ import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../../common/constants/index_patterns';
 import { CriteriaField } from './index';
+import { findAggField } from '../../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 interface ResultResponse {
   success: boolean;
@@ -31,13 +35,13 @@ export interface MetricData extends ResultResponse {
 
 export interface FieldDefinition {
   /**
-   * Partition field name.
+   * Field name.
    */
   name: string | number;
   /**
-   * Partitions field distinct values.
+   * Field distinct values.
    */
-  values: any[];
+  values: Array<{ value: any; maxRecordScore?: number }>;
 }
 
 type FieldTypes = 'partition_field' | 'over_field' | 'by_field';
@@ -66,11 +70,16 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       query: object | undefined,
       metricFunction: string, // ES aggregation name
       metricFieldName: string,
+      summaryCountFieldName: string | undefined,
       timeFieldName: string,
       earliestMs: number,
       latestMs: number,
-      intervalMs: number
+      intervalMs: number,
+      datafeedConfig?: Datafeed
     ): Observable<MetricData> {
+      const scriptFields = datafeedConfig?.script_fields;
+      const aggFields = getDatafeedAggregations(datafeedConfig);
+
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
       // plus any additional supplied query.
@@ -147,21 +156,56 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         body.query.bool.minimum_should_match = shouldCriteria.length / 2;
       }
 
-      if (metricFieldName !== undefined && metricFieldName !== '') {
-        body.aggs.byTime.aggs = {};
+      body.aggs.byTime.aggs = {};
 
+      if (metricFieldName !== undefined && metricFieldName !== '' && metricFunction) {
         const metricAgg: any = {
-          [metricFunction]: {
-            field: metricFieldName,
-          },
+          [metricFunction]: {},
         };
+        if (scriptFields !== undefined && scriptFields[metricFieldName] !== undefined) {
+          metricAgg[metricFunction].script = scriptFields[metricFieldName].script;
+        } else {
+          metricAgg[metricFunction].field = metricFieldName;
+        }
 
         if (metricFunction === 'percentiles') {
           metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
         }
-        body.aggs.byTime.aggs.metric = metricAgg;
-      }
 
+        // when the field is an aggregation field, because the field doesn't actually exist in the indices
+        // we need to pass all the sub aggs from the original datafeed config
+        // so that we can access the aggregated field
+        if (typeof aggFields === 'object' && Object.keys(aggFields).length > 0) {
+          // first item under aggregations can be any name, not necessarily 'buckets'
+          const accessor = Object.keys(aggFields)[0];
+          const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
+          const foundValue = findAggField(tempAggs, metricFieldName);
+
+          if (foundValue !== undefined) {
+            tempAggs.metric = foundValue;
+            delete tempAggs[metricFieldName];
+          }
+          body.aggs.byTime.aggs = tempAggs;
+        } else {
+          body.aggs.byTime.aggs.metric = metricAgg;
+        }
+      } else {
+        // if metricFieldName is not defined, it's probably a variation of the non zero count function
+        // refer to buildConfigFromDetector
+        if (summaryCountFieldName !== undefined && metricFunction === ES_AGGREGATION.CARDINALITY) {
+          // if so, check if summaryCountFieldName is an aggregation field
+          if (typeof aggFields === 'object' && Object.keys(aggFields).length > 0) {
+            // first item under aggregations can be any name, not necessarily 'buckets'
+            const accessor = Object.keys(aggFields)[0];
+            const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
+            const foundCardinalityField = findAggField(tempAggs, summaryCountFieldName);
+            if (foundCardinalityField !== undefined) {
+              tempAggs.metric = foundCardinalityField;
+            }
+            body.aggs.byTime.aggs = tempAggs;
+          }
+        }
+      }
       return mlApiServices.esSearch$({ index, body }).pipe(
         map((resp: any) => {
           const obj: MetricData = { success: true, results: {} };
@@ -263,57 +307,59 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       ];
 
       return mlApiServices.results
-        .anomalySearch$({
-          index: ML_RESULTS_INDEX_PATTERN,
-          size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    query_string: {
-                      query: 'result_type:model_plot',
-                      analyze_wildcard: true,
+        .anomalySearch$(
+          {
+            size: 0,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:model_plot',
+                        analyze_wildcard: true,
+                      },
                     },
-                  },
-                  {
-                    bool: {
-                      must: mustCriteria,
-                      should: shouldCriteria,
-                      minimum_should_match: 1,
+                    {
+                      bool: {
+                        must: mustCriteria,
+                        should: shouldCriteria,
+                        minimum_should_match: 1,
+                      },
                     },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              times: {
-                date_histogram: {
-                  field: 'timestamp',
-                  fixed_interval: `${intervalMs}ms`,
-                  min_doc_count: 0,
+                  ],
                 },
-                aggs: {
-                  actual: {
-                    avg: {
-                      field: 'actual',
-                    },
+              },
+              aggs: {
+                times: {
+                  date_histogram: {
+                    field: 'timestamp',
+                    fixed_interval: `${intervalMs}ms`,
+                    min_doc_count: 0,
                   },
-                  modelUpper: {
-                    [modelAggs.max]: {
-                      field: 'model_upper',
+                  aggs: {
+                    actual: {
+                      avg: {
+                        field: 'actual',
+                      },
                     },
-                  },
-                  modelLower: {
-                    [modelAggs.min]: {
-                      field: 'model_lower',
+                    modelUpper: {
+                      [modelAggs.max]: {
+                        field: 'model_upper',
+                      },
+                    },
+                    modelLower: {
+                      [modelAggs.min]: {
+                        field: 'model_lower',
+                      },
                     },
                   },
                 },
               },
             },
           },
-        })
+          [jobId]
+        )
         .pipe(
           map((resp) => {
             const aggregationsByTime = get(resp, ['aggregations', 'times', 'buckets'], []);
@@ -343,12 +389,13 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     // 'fieldValue' properties.
     // Pass an empty array or ['*'] to search over all job IDs.
     getRecordsForCriteria(
-      jobIds: string[] | undefined,
+      jobIds: string[],
       criteriaFields: CriteriaField[],
       threshold: any,
-      earliestMs: number,
-      latestMs: number,
-      maxResults: number | undefined
+      earliestMs: number | null,
+      latestMs: number | null,
+      maxResults: number | undefined,
+      functionDescription?: string
     ): Observable<RecordsForCriteria> {
       const obj: RecordsForCriteria = { success: true, records: [] };
 
@@ -399,31 +446,46 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         });
       });
 
-      return mlApiServices.results
-        .anomalySearch$({
-          index: ML_RESULTS_INDEX_PATTERN,
-          size: maxResults !== undefined ? maxResults : 100,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    query_string: {
-                      query: 'result_type:record',
-                      analyze_wildcard: false,
-                    },
-                  },
-                  {
-                    bool: {
-                      must: boolCriteria,
-                    },
-                  },
-                ],
-              },
-            },
-            sort: [{ record_score: { order: 'desc' } }],
+      if (functionDescription !== undefined) {
+        const mlFunctionToPlotIfMetric =
+          functionDescription !== undefined
+            ? aggregationTypeTransform.toML(functionDescription)
+            : functionDescription;
+
+        boolCriteria.push({
+          term: {
+            function_description: mlFunctionToPlotIfMetric,
           },
-        })
+        });
+      }
+
+      return mlApiServices.results
+        .anomalySearch$(
+          {
+            size: maxResults !== undefined ? maxResults : 100,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:record',
+                        analyze_wildcard: false,
+                      },
+                    },
+                    {
+                      bool: {
+                        must: boolCriteria,
+                      },
+                    },
+                  ],
+                },
+              },
+              sort: [{ record_score: { order: 'desc' } }],
+            },
+          },
+          jobIds
+        )
         .pipe(
           map((resp) => {
             if (resp.hits.total.value > 0) {
@@ -441,7 +503,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     // Returned response contains a events property, which will only
     // contains keys for jobs which have scheduled events for the specified time range.
     getScheduledEventsByBucket(
-      jobIds: string[] | undefined,
+      jobIds: string[],
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
@@ -484,46 +546,47 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       }
 
       return mlApiServices.results
-        .anomalySearch$({
-          index: ML_RESULTS_INDEX_PATTERN,
-          size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    query_string: {
-                      query: 'result_type:bucket',
-                      analyze_wildcard: false,
+        .anomalySearch$(
+          {
+            size: 0,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      query_string: {
+                        query: 'result_type:bucket',
+                        analyze_wildcard: false,
+                      },
                     },
-                  },
-                  {
-                    bool: {
-                      must: boolCriteria,
+                    {
+                      bool: {
+                        must: boolCriteria,
+                      },
                     },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              jobs: {
-                terms: {
-                  field: 'job_id',
-                  min_doc_count: 1,
-                  size: maxJobs,
+                  ],
                 },
-                aggs: {
-                  times: {
-                    date_histogram: {
-                      field: 'timestamp',
-                      fixed_interval: `${intervalMs}ms`,
-                      min_doc_count: 1,
-                    },
-                    aggs: {
-                      events: {
-                        terms: {
-                          field: 'scheduled_events',
-                          size: maxEvents,
+              },
+              aggs: {
+                jobs: {
+                  terms: {
+                    field: 'job_id',
+                    min_doc_count: 1,
+                    size: maxJobs,
+                  },
+                  aggs: {
+                    times: {
+                      date_histogram: {
+                        field: 'timestamp',
+                        fixed_interval: `${intervalMs}ms`,
+                        min_doc_count: 1,
+                      },
+                      aggs: {
+                        events: {
+                          terms: {
+                            field: 'scheduled_events',
+                            size: maxEvents,
+                          },
                         },
                       },
                     },
@@ -532,7 +595,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
               },
             },
           },
-        })
+          jobIds
+        )
         .pipe(
           map((resp) => {
             const dataByJobId = get(resp, ['aggregations', 'jobs', 'buckets'], []);

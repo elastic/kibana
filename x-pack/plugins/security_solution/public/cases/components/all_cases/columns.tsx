@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback } from 'react';
 import {
   EuiAvatar,
@@ -16,6 +18,8 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Case } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -59,7 +63,7 @@ export const getCasesColumns = (
           ) : (
             <span>{theCase.title}</span>
           );
-          return theCase.status === 'open' ? (
+          return theCase.status !== CaseStatuses.closed ? (
             caseDetailsLinkComponent
           ) : (
             <>
@@ -82,11 +86,11 @@ export const getCasesColumns = (
             <>
               <EuiAvatar
                 className="userAction__circle"
-                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
+                name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
                 size="s"
               />
               <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
+                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
               </Spacer>
             </>
           );
@@ -127,7 +131,7 @@ export const getCasesColumns = (
           ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
           : getEmptyTagValue(),
     },
-    filterStatus === 'open'
+    filterStatus === CaseStatuses.open
       ? {
           field: 'createdAt',
           name: i18n.OPENED_ON,

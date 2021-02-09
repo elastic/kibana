@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -38,6 +39,7 @@ export const dataAnalyticsEvaluateSchema = schema.object({
     schema.object({
       regression: schema.maybe(schema.any()),
       classification: schema.maybe(schema.any()),
+      outlier_detection: schema.maybe(schema.any()),
     })
   ),
 });
@@ -63,6 +65,13 @@ export const analyticsIdSchema = schema.object({
   analyticsId: schema.string(),
 });
 
+export const analyticsQuerySchema = schema.object({
+  /**
+   * Analytics Query
+   */
+  excludeGenerated: schema.maybe(schema.boolean()),
+});
+
 export const deleteDataFrameAnalyticsJobSchema = schema.object({
   /**
    * Analytics Destination Index
@@ -81,3 +90,12 @@ export const dataAnalyticsJobUpdateSchema = schema.object({
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
+
+export const jobsExistSchema = schema.object({
+  analyticsIds: schema.arrayOf(schema.string()),
+  allSpaces: schema.maybe(schema.boolean()),
+});
+
+export const analyticsMapQuerySchema = schema.maybe(
+  schema.object({ treatAsRoot: schema.maybe(schema.any()), type: schema.maybe(schema.string()) })
+);

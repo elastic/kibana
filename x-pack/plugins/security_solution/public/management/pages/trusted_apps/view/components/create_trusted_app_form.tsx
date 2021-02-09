@@ -1,44 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ChangeEventHandler, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
-import { TRUSTED_APPS_SUPPORTED_OS_TYPES } from '../../../../../../common/endpoint/constants';
-import { LogicalConditionBuilder } from './logical_condition';
 import {
   MacosLinuxConditionEntry,
   NewTrustedApp,
-  TrustedApp,
+  OperatingSystem,
 } from '../../../../../../common/endpoint/types';
-import { LogicalConditionBuilderProps } from './logical_condition/logical_condition_builder';
-import { OS_TITLES } from '../translations';
 import {
   isMacosLinuxTrustedAppCondition,
-  isTrustedAppSupportedOs,
-  isWindowsTrustedApp,
   isWindowsTrustedAppCondition,
 } from '../../state/type_guards';
+import { defaultConditionEntry, defaultNewTrustedApp } from '../../store/builders';
+import { OS_TITLES } from '../translations';
+import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
 
-const generateNewEntry = (): NewTrustedApp['entries'][0] => {
-  return {
-    field: 'process.hash.*',
-    operator: 'included',
-    type: 'match',
-    value: '',
-  };
-};
+const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
+  OperatingSystem.MAC,
+  OperatingSystem.WINDOWS,
+  OperatingSystem.LINUX,
+];
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -160,21 +155,12 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
   ({ fullWidth, onChange, ...formProps }) => {
     const dataTestSubj = formProps['data-test-subj'];
 
-    const osOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-      return TRUSTED_APPS_SUPPORTED_OS_TYPES.map((os) => {
-        return {
-          value: os,
-          inputDisplay: OS_TITLES[os as TrustedApp['os']],
-        };
-      });
-    }, []);
+    const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
+      () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
+      []
+    );
 
-    const [formValues, setFormValues] = useState<NewTrustedApp>({
-      name: '',
-      os: 'windows',
-      entries: [generateNewEntry()],
-      description: '',
-    });
+    const [formValues, setFormValues] = useState<NewTrustedApp>(defaultNewTrustedApp());
 
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateFormValues(formValues)
@@ -200,20 +186,20 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     const handleAndClick = useCallback(() => {
       setFormValues(
         (prevState): NewTrustedApp => {
-          if (isWindowsTrustedApp(prevState)) {
+          if (prevState.os === OperatingSystem.WINDOWS) {
             return {
               ...prevState,
-              entries: [...prevState.entries, generateNewEntry()].filter((entry) =>
-                isWindowsTrustedAppCondition(entry)
+              entries: [...prevState.entries, defaultConditionEntry()].filter(
+                isWindowsTrustedAppCondition
               ),
             };
           } else {
             return {
               ...prevState,
               entries: [
-                ...prevState.entries.filter((entry) => isMacosLinuxTrustedAppCondition(entry)),
-                generateNewEntry(),
-              ] as MacosLinuxConditionEntry[],
+                ...prevState.entries.filter(isMacosLinuxTrustedAppCondition),
+                defaultConditionEntry(),
+              ],
             };
           }
         }
@@ -245,30 +231,27 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       []
     );
 
-    const handleOsChange = useCallback<(v: string) => void>((newOsValue) => {
+    const handleOsChange = useCallback<(v: OperatingSystem) => void>((newOsValue) => {
       setFormValues(
         (prevState): NewTrustedApp => {
-          if (isTrustedAppSupportedOs(newOsValue)) {
-            const updatedState: NewTrustedApp = {
-              ...prevState,
-              entries: [],
-              os: newOsValue,
-            };
-            if (!isWindowsTrustedApp(updatedState)) {
-              updatedState.entries.push(
-                ...(prevState.entries.filter((entry) =>
-                  isMacosLinuxTrustedAppCondition(entry)
-                ) as MacosLinuxConditionEntry[])
-              );
-              if (updatedState.entries.length === 0) {
-                updatedState.entries.push(generateNewEntry() as MacosLinuxConditionEntry);
-              }
-            } else {
-              updatedState.entries.push(...prevState.entries);
+          const updatedState: NewTrustedApp = {
+            ...prevState,
+            entries: [],
+            os: newOsValue,
+          };
+          if (updatedState.os !== OperatingSystem.WINDOWS) {
+            updatedState.entries.push(
+              ...(prevState.entries.filter((entry) =>
+                isMacosLinuxTrustedAppCondition(entry)
+              ) as MacosLinuxConditionEntry[])
+            );
+            if (updatedState.entries.length === 0) {
+              updatedState.entries.push(defaultConditionEntry());
             }
-            return updatedState;
+          } else {
+            updatedState.entries.push(...prevState.entries);
           }
-          return prevState;
+          return updatedState;
         }
       );
       setWasVisited((prevState) => {
@@ -294,7 +277,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
       (newEntry, oldEntry) => {
         setFormValues(
           (prevState): NewTrustedApp => {
-            if (isWindowsTrustedApp(prevState)) {
+            if (prevState.os === OperatingSystem.WINDOWS) {
               return {
                 ...prevState,
                 entries: prevState.entries.map((item) => {

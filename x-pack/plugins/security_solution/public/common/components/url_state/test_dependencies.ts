@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionCreator } from 'typescript-fsa';
@@ -17,6 +18,7 @@ import { Query } from '../../../../../../../src/plugins/data/public';
 import { networkModel } from '../../../network/store';
 import { hostsModel } from '../../../hosts/store';
 import { HostsTableType } from '../../../hosts/store/model';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -114,6 +116,7 @@ export const defaultProps: UrlStateContainerPropTypes = {
     [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
     [CONSTANTS.filters]: [],
     [CONSTANTS.timeline]: {
+      activeTab: TimelineTabs.query,
       id: '',
       isOpen: false,
     },
@@ -278,15 +281,9 @@ export const getMockPropsObj = ({
 
 // silly that this needs to be an array and not an object
 // https://jestjs.io/docs/en/api#testeachtable-name-fn-timeout
-export const testCases: Array<[
-  LocationTypes,
-  string,
-  string,
-  string,
-  string | null,
-  string,
-  undefined | string
-]> = [
+export const testCases: Array<
+  [LocationTypes, string, string, string, string | null, string, undefined | string]
+> = [
   [
     /* page */ CONSTANTS.networkPage,
     /* namespaceLower */ 'network',

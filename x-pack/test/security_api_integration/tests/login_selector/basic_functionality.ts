@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import request, { Cookie } from 'request';
@@ -10,11 +11,12 @@ import { resolve } from 'path';
 import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
-import { getStateAndNonce } from '../../../oidc_api_integration/fixtures/oidc_tools';
+import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
+import { getStateAndNonce } from '../../fixtures/oidc/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
-} from '../../../kerberos_api_integration/fixtures/kerberos_tools';
+} from '../../fixtures/kerberos/kerberos_tools';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -22,20 +24,19 @@ export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
+  const security = getService('security');
 
   const kibanaServerConfig = config.get('servers.kibana');
   const validUsername = kibanaServerConfig.username;
   const validPassword = kibanaServerConfig.password;
 
   const CA_CERT = readFileSync(CA_CERT_PATH);
-  const CLIENT_CERT = readFileSync(
-    resolve(__dirname, '../../../pki_api_integration/fixtures/first_client.p12')
-  );
+  const CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/first_client.p12'));
 
   async function checkSessionCookie(
     sessionCookie: Cookie,
     username: string,
-    providerName: string,
+    provider: AuthenticationProvider,
     authenticationRealm: { name: string; type: string } | null,
     authenticationType: string
   ) {
@@ -66,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
     ]);
 
     expect(apiResponse.body.username).to.be(username);
-    expect(apiResponse.body.authentication_provider).to.be(providerName);
+    expect(apiResponse.body.authentication_provider).to.eql(provider);
     if (authenticationRealm) {
       expect(apiResponse.body.authentication_realm).to.eql(authenticationRealm);
     }
@@ -146,11 +147,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -182,11 +180,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -215,11 +210,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -244,7 +236,13 @@ export default function ({ getService }: FtrProviderContext) {
           )!;
           // Skip auth provider check since this comes from the reserved realm,
           // which is not available when running on ESS
-          await checkSessionCookie(basicSessionCookie, 'elastic', 'basic1', null, 'realm');
+          await checkSessionCookie(
+            basicSessionCookie,
+            'elastic',
+            { type: 'basic', name: 'basic1' },
+            null,
+            'realm'
+          );
 
           const authenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -267,11 +265,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -293,11 +288,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml1SessionCookie,
           'a@b.c',
-          'saml1',
-          {
-            name: 'saml1',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml1' },
+          { name: 'saml1', type: 'saml' },
           'token'
         );
 
@@ -321,11 +313,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml2SessionCookie,
           'a@b.c',
-          'saml2',
-          {
-            name: 'saml2',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml2' },
+          { name: 'saml2', type: 'saml' },
           'token'
         );
       });
@@ -346,11 +335,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml1SessionCookie,
           'a@b.c',
-          'saml1',
-          {
-            name: 'saml1',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml1' },
+          { name: 'saml1', type: 'saml' },
           'token'
         );
 
@@ -376,11 +362,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml2SessionCookie,
           'a@b.c',
-          'saml2',
-          {
-            name: 'saml2',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml2' },
+          { name: 'saml2', type: 'saml' },
           'token'
         );
       });
@@ -466,11 +449,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -537,11 +517,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml2SessionCookie,
           'a@b.c',
-          'saml2',
-          {
-            name: 'saml2',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml2' },
+          { name: 'saml2', type: 'saml' },
           'token'
         );
       });
@@ -586,11 +563,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'tester@TEST.ELASTIC.CO',
-          'kerberos1',
-          {
-            name: 'kerb1',
-            type: 'kerberos',
-          },
+          { type: 'kerberos', name: 'kerberos1' },
+          { name: 'kerb1', type: 'kerberos' },
           'token'
         );
       });
@@ -635,11 +609,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'tester@TEST.ELASTIC.CO',
-          'kerberos1',
-          {
-            name: 'kerb1',
-            type: 'kerberos',
-          },
+          { type: 'kerberos', name: 'kerberos1' },
+          { name: 'kerb1', type: 'kerberos' },
           'token'
         );
       });
@@ -677,11 +648,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'user2',
-          'oidc1',
-          {
-            name: 'oidc1',
-            type: 'oidc',
-          },
+          { type: 'oidc', name: 'oidc1' },
+          { name: 'oidc1', type: 'oidc' },
           'token'
         );
       });
@@ -737,11 +705,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'user1',
-          'oidc1',
-          {
-            name: 'oidc1',
-            type: 'oidc',
-          },
+          { type: 'oidc', name: 'oidc1' },
+          { name: 'oidc1', type: 'oidc' },
           'token'
         );
       });
@@ -779,12 +744,72 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'first_client',
-          'pki1',
-          {
-            name: 'pki1',
-            type: 'pki',
-          },
+          { type: 'pki', name: 'pki1' },
+          { name: 'pki1', type: 'pki' },
           'token'
+        );
+      });
+    });
+
+    describe('Anonymous', () => {
+      before(async () => {
+        await security.user.create('anonymous_user', {
+          password: 'changeme',
+          roles: [],
+          full_name: 'Guest',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete('anonymous_user');
+      });
+
+      it('should be able to log in from Login Selector', async () => {
+        const authenticationResponse = await supertest
+          .post('/internal/security/login')
+          .ca(CA_CERT)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'anonymous',
+            providerName: 'anonymous1',
+            currentURL: 'https://kibana.com/login?next=/abc/xyz/handshake?one=two%20three#/workpad',
+          })
+          .expect(200);
+
+        const cookies = authenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'anonymous_user',
+          { type: 'anonymous', name: 'anonymous1' },
+          { name: 'native1', type: 'native' },
+          'realm'
+        );
+      });
+
+      it('should be able to log in from Login Selector even if client provides certificate and PKI is enabled', async () => {
+        const authenticationResponse = await supertest
+          .post('/internal/security/login')
+          .ca(CA_CERT)
+          .pfx(CLIENT_CERT)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'anonymous',
+            providerName: 'anonymous1',
+            currentURL: 'https://kibana.com/login?next=/abc/xyz/handshake?one=two%20three#/workpad',
+          })
+          .expect(200);
+
+        const cookies = authenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        await checkSessionCookie(
+          request.cookie(cookies[0])!,
+          'anonymous_user',
+          { type: 'anonymous', name: 'anonymous1' },
+          { name: 'native1', type: 'native' },
+          'realm'
         );
       });
     });

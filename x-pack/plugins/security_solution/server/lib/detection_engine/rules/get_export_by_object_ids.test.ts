@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getExportByObjectIds, getRulesFromObjects, RulesErrors } from './get_export_by_object_ids';
@@ -13,6 +14,7 @@ import {
 import * as readRules from './read_rules';
 import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 
 describe('get_export_by_object_ids', () => {
   beforeEach(() => {
@@ -63,23 +65,7 @@ describe('get_export_by_object_ids', () => {
           tags: [],
           to: 'now',
           type: 'query',
-          threat: [
-            {
-              framework: 'MITRE ATT&CK',
-              tactic: {
-                id: 'TA0040',
-                name: 'impact',
-                reference: 'https://attack.mitre.org/tactics/TA0040/',
-              },
-              technique: [
-                {
-                  id: 'T1499',
-                  name: 'endpoint denial of service',
-                  reference: 'https://attack.mitre.org/techniques/T1499/',
-                },
-              ],
-            },
-          ],
+          threat: getThreatMock(),
           throttle: 'no_actions',
           note: '# Investigative notes',
           version: 1,
@@ -164,23 +150,7 @@ describe('get_export_by_object_ids', () => {
             tags: [],
             to: 'now',
             type: 'query',
-            threat: [
-              {
-                framework: 'MITRE ATT&CK',
-                tactic: {
-                  id: 'TA0040',
-                  name: 'impact',
-                  reference: 'https://attack.mitre.org/tactics/TA0040/',
-                },
-                technique: [
-                  {
-                    id: 'T1499',
-                    name: 'endpoint denial of service',
-                    reference: 'https://attack.mitre.org/techniques/T1499/',
-                  },
-                ],
-              },
-            ],
+            threat: getThreatMock(),
             throttle: 'no_actions',
             note: '# Investigative notes',
             version: 1,

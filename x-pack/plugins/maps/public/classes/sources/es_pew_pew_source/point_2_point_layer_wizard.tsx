@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -23,7 +24,7 @@ import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
-import { Point2PointLayerIcon } from './point_2_point_layer_icon';
+import { Point2PointLayerIcon } from '../../layers/icons/point_2_point_layer_icon';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

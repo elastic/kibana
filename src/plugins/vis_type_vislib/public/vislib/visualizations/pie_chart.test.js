@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import d3 from 'd3';
@@ -24,7 +13,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../test_utils/public';
+} from '@kbn/test/jest';
 import { getMockUiState } from '../../fixtures/mocks';
 import { getVis } from './_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
@@ -40,7 +29,7 @@ let mockedSVGElementGetBBox;
 let mockedSVGElementGetComputedTextLength;
 
 describe('No global chart settings', function () {
-  const visLibParams1 = {
+  const vislibParams1 = {
     el: '<div class=chart1></div>',
     type: 'pie',
     addLegend: true,
@@ -58,7 +47,7 @@ describe('No global chart settings', function () {
   });
 
   beforeEach(() => {
-    chart1 = getVis(visLibParams1);
+    chart1 = getVis(vislibParams1);
     mockUiState = getMockUiState();
   });
 
@@ -153,7 +142,7 @@ describe('Vislib PieChart Class Test Suite', function () {
     describe('Vislib PieChart Class Test Suite for ' + names[i] + ' data', function () {
       const mockPieData = pieChartMockData[aggItem];
 
-      const visLibParams = {
+      const vislibParams = {
         type: 'pie',
         addLegend: true,
         addTooltip: true,
@@ -161,7 +150,7 @@ describe('Vislib PieChart Class Test Suite', function () {
       let vis;
 
       beforeEach(async () => {
-        vis = getVis(visLibParams);
+        vis = getVis(vislibParams);
         const mockUiState = getMockUiState();
         vis.render(mockPieData, mockUiState);
       });

@@ -3,12 +3,11 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "spaces"],
-  "requiredPlugins": ["features", "licensing"],
+  "requiredPlugins": ["features", "licensing", "spacesOss"],
   "optionalPlugins": [
     "advancedSettings",
     "home",
     "management",
-    "security",
     "usageCollection",
     "savedObjectsManagement"
   ],

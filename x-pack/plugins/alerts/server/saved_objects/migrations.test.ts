@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 import { getMigrations } from './migrations';
 import { RawAlert } from '../types';
@@ -261,8 +263,76 @@ describe('7.10.0 migrates with failure', () => {
   });
 });
 
+describe('7.11.0', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    encryptedSavedObjectsSetup.createMigration.mockImplementation(
+      (shouldMigrateWhenPredicate, migration) => migration
+    );
+  });
+
+  test('add updatedAt field to alert - set to SavedObject updated_at attribute', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const alert = getMockData({}, true);
+    expect(migration711(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        updatedAt: alert.updated_at,
+        notifyWhen: 'onActiveAlert',
+      },
+    });
+  });
+
+  test('add updatedAt field to alert - set to createdAt when SavedObject updated_at is not defined', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const alert = getMockData({});
+    expect(migration711(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        updatedAt: alert.attributes.createdAt,
+        notifyWhen: 'onActiveAlert',
+      },
+    });
+  });
+
+  test('add notifyWhen=onActiveAlert when throttle is null', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const alert = getMockData({});
+    expect(migration711(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        updatedAt: alert.attributes.createdAt,
+        notifyWhen: 'onActiveAlert',
+      },
+    });
+  });
+
+  test('add notifyWhen=onActiveAlert when throttle is set', () => {
+    const migration711 = getMigrations(encryptedSavedObjectsSetup)['7.11.0'];
+    const alert = getMockData({ throttle: '5m' });
+    expect(migration711(alert, { log })).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        updatedAt: alert.attributes.createdAt,
+        notifyWhen: 'onThrottleInterval',
+      },
+    });
+  });
+});
+
+function getUpdatedAt(): string {
+  const updatedAt = new Date();
+  updatedAt.setHours(updatedAt.getHours() + 2);
+  return updatedAt.toISOString();
+}
+
 function getMockData(
-  overwrites: Record<string, unknown> = {}
+  overwrites: Record<string, unknown> = {},
+  withSavedObjectUpdatedAt: boolean = false
 ): SavedObjectUnsanitizedDoc<Partial<RawAlert>> {
   return {
     attributes: {
@@ -295,6 +365,7 @@ function getMockData(
       ],
       ...overwrites,
     },
+    updated_at: withSavedObjectUpdatedAt ? getUpdatedAt() : undefined,
     id: uuid.v4(),
     type: 'alert',
   };

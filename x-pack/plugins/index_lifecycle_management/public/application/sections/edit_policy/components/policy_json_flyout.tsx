@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -26,17 +26,27 @@ import { SerializedPolicy } from '../../../../../common/types';
 
 import { useFormContext, useFormData } from '../../../../shared_imports';
 
+import { FormInternal } from '../types';
+
 interface Props {
-  legacyPolicy: SerializedPolicy;
   close: () => void;
   policyName: string;
 }
 
-export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
-  policyName,
-  close,
-  legacyPolicy,
-}) => {
+/**
+ * Ensure that the JSON we get from the from has phases in the correct order.
+ */
+const prettifyFormJson = (policy: SerializedPolicy): SerializedPolicy => ({
+  ...policy,
+  phases: {
+    hot: policy.phases.hot,
+    warm: policy.phases.warm,
+    cold: policy.phases.cold,
+    delete: policy.phases.delete,
+  },
+});
+
+export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid
@@ -44,27 +54,21 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
    */
   const [policy, setPolicy] = useState<undefined | null | SerializedPolicy>(undefined);
 
-  const form = useFormContext();
-  const [formData, getFormData] = useFormData();
+  const { validate: validateForm } = useFormContext();
+  const [, getFormData] = useFormData<FormInternal>();
+
+  const updatePolicy = useCallback(async () => {
+    setPolicy(undefined);
+    if (await validateForm()) {
+      setPolicy(prettifyFormJson(getFormData()));
+    } else {
+      setPolicy(null);
+    }
+  }, [setPolicy, getFormData, validateForm]);
 
   useEffect(() => {
-    (async function checkPolicy() {
-      setPolicy(undefined);
-      if (await form.validate()) {
-        const p = getFormData() as SerializedPolicy;
-        setPolicy({
-          ...legacyPolicy,
-          phases: {
-            ...legacyPolicy.phases,
-            hot: p.phases.hot,
-          },
-        });
-      } else {
-        setPolicy(null);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, legacyPolicy, formData]);
+    updatePolicy();
+  }, [updatePolicy]);
 
   let content: React.ReactNode;
   switch (policy) {

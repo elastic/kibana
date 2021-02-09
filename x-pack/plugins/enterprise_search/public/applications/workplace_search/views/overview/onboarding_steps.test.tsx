@@ -1,22 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { mockTelemetryActions } from '../../../__mocks__';
+
 import './__mocks__/overview_logic.mock';
-import { setMockValues } from './__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { ORG_SOURCES_PATH, USERS_PATH } from '../../routes';
+import { SOURCES_PATH, USERS_PATH } from '../../routes';
 
-jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
-import { sendTelemetry } from '../../../shared/telemetry';
-
-import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
+import { setMockValues } from './__mocks__';
 import { OnboardingCard } from './onboarding_card';
+import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 
 const account = {
   id: '1',
@@ -34,7 +35,7 @@ describe('OnboardingSteps', () => {
       const wrapper = shallow(<OnboardingSteps />);
 
       expect(wrapper.find(OnboardingCard)).toHaveLength(1);
-      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(ORG_SOURCES_PATH);
+      expect(wrapper.find(OnboardingCard).prop('actionPath')).toBe(SOURCES_PATH);
       expect(wrapper.find(OnboardingCard).prop('description')).toBe(
         'Add shared sources for your organization to start searching.'
       );
@@ -117,7 +118,7 @@ describe('OnboardingSteps', () => {
         .find('[data-test-subj="orgNameChangeButton"]');
 
       button.simulate('click');
-      expect(sendTelemetry).toHaveBeenCalled();
+      expect(mockTelemetryActions.sendWorkplaceSearchTelemetry).toHaveBeenCalled();
     });
 
     it('hides card when name has been changed', () => {

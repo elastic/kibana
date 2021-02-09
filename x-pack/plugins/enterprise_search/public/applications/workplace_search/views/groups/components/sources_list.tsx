@@ -1,25 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { EuiFilterSelectItem } from '@elastic/eui';
 
-import { IContentSource } from '../../../types';
+import { ContentSource } from '../../../types';
 
 import { SourceOptionItem } from './source_option_item';
 
-interface ISourcesListProps {
-  contentSources: IContentSource[];
+interface SourcesListProps {
+  contentSources: ContentSource[];
   filteredSources: string[];
   addFilteredSource(sourceId: string): void;
   removeFilteredSource(sourceId: string): void;
 }
 
-export const SourcesList: React.FC<ISourcesListProps> = ({
+export const SourcesList: React.FC<SourcesListProps> = ({
   contentSources,
   filteredSources,
   addFilteredSource,

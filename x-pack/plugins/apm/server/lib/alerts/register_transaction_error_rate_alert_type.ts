@@ -1,30 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { isEmpty } from 'lodash';
-import { asDecimalOrInteger } from '../../../common/utils/formatters';
-import { ProcessorEvent } from '../../../common/processor_event';
-import { EventOutcome } from '../../../common/event_outcome';
+import { APMConfig } from '../..';
+import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
+  EVENT_OUTCOME,
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  EVENT_OUTCOME,
-  SERVICE_ENVIRONMENT,
 } from '../../../common/elasticsearch_fieldnames';
-import { AlertingPlugin } from '../../../../alerts/server';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { APMConfig } from '../..';
+import { EventOutcome } from '../../../common/event_outcome';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { asDecimalOrInteger } from '../../../common/utils/formatters';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
+import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -65,12 +66,14 @@ export function registerTransactionErrorRateAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params: alertParams }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const indices = await getApmIndices({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -105,7 +108,7 @@ export function registerTransactionErrorRateAlertType({
             },
           },
           aggs: {
-            erroneous_transactions: {
+            failed_transactions: {
               filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
             },
             services: {
@@ -120,6 +123,7 @@ export function registerTransactionErrorRateAlertType({
                     environments: {
                       terms: {
                         field: SERVICE_ENVIRONMENT,
+                        size: maxServiceEnvironments,
                       },
                     },
                   },
@@ -130,20 +134,16 @@ export function registerTransactionErrorRateAlertType({
         },
       };
 
-      const response: ESSearchResponse<
-        unknown,
-        typeof searchParams
-      > = await services.callCluster('search', searchParams);
-
+      const response = await alertingEsClient(services, searchParams);
       if (!response.aggregations) {
         return;
       }
 
-      const errornousTransactionsCount =
-        response.aggregations.erroneous_transactions.doc_count;
+      const failedTransactionCount =
+        response.aggregations.failed_transactions.doc_count;
       const totalTransactionCount = response.hits.total.value;
       const transactionErrorRate =
-        (errornousTransactionsCount / totalTransactionCount) * 100;
+        (failedTransactionCount / totalTransactionCount) * 100;
 
       if (transactionErrorRate > alertParams.threshold) {
         function scheduleAction({

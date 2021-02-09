@@ -3,21 +3,15 @@
   "main": "./target/index.js",
   "types": "./target/index.d.ts",
   "version": "1.0.0",
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@elastic/safer-lodash-set": "0.0.0",
-    "@kbn/utils": "1.0.0",
-    "js-yaml": "^3.14.0",
-    "lodash": "^4.17.20"
-  },
-  "devDependencies": {
-    "typescript": "4.0.2",
-    "tsd": "^0.13.1"
+    "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
+    "@kbn/utils": "link:../kbn-utils"
   }
 }

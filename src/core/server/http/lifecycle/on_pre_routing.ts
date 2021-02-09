@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
@@ -113,7 +102,25 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
         appState.rewrittenUrl = appState.rewrittenUrl ?? request.url;
 
         const { url } = result;
-        request.setUrl(url);
+
+        // TODO: Remove once we upgrade to Node.js 12!
+        //
+        // Warning: The following for-loop took 10 days to write, and is a hack
+        // to force V8 to make a copy of the string in memory.
+        //
+        // The reason why we need this is because of what appears to be a bug
+        // in V8 that caused some URL paths to not be routed correctly once
+        // `request.setUrl` was called with the path.
+        //
+        // The details can be seen in this discussion on Twitter:
+        // https://twitter.com/wa7son/status/1319992632366518277
+        let urlCopy = '';
+        for (let i = 0; i < url.length; i++) {
+          urlCopy += url[i];
+        }
+
+        request.setUrl(urlCopy);
+
         // We should update raw request as well since it can be proxied to the old platform
         request.raw.req.url = url;
         return responseToolkit.continue;

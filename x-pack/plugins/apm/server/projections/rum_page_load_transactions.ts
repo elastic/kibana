@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
@@ -17,9 +18,11 @@ import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 export function getRumPageLoadTransactionsProjection({
   setup,
   urlQuery,
+  checkFetchStartFieldExists = true,
 }: {
   setup: Setup & SetupTimeRange;
   urlQuery?: string;
+  checkFetchStartFieldExists?: boolean;
 }) {
   const { start, end, esFilter } = setup;
 
@@ -27,13 +30,17 @@ export function getRumPageLoadTransactionsProjection({
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-      {
-        // Adding this filter to cater for some inconsistent rum data
-        // not available on aggregated transactions
-        exists: {
-          field: 'transaction.marks.navigationTiming.fetchStart',
-        },
-      },
+      ...(checkFetchStartFieldExists
+        ? [
+            {
+              // Adding this filter to cater for some inconsistent rum data
+              // not available on aggregated transactions
+              exists: {
+                field: 'transaction.marks.navigationTiming.fetchStart',
+              },
+            },
+          ]
+        : []),
       ...(urlQuery
         ? [
             {
@@ -74,7 +81,6 @@ export function getRumErrorsProjection({
     filter: [
       { range: rangeFilter(start, end) },
       { term: { [AGENT_NAME]: 'rum-js' } },
-      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
       {
         term: {
           [SERVICE_LANGUAGE_NAME]: 'javascript',

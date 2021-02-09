@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -41,8 +42,10 @@ export function IngestManagerCreatePackagePolicy({
     /**
      * Finds and returns the save button on the sticky bottom bar
      */
-    async findDSaveButton() {
-      return await testSubjects.find('createPackagePolicySaveButton');
+    async findSaveButton(forEditPage: boolean = false) {
+      return await testSubjects.find(
+        forEditPage ? 'saveIntegration' : 'createPackagePolicySaveButton'
+      );
     },
 
     /**
@@ -80,11 +83,22 @@ export function IngestManagerCreatePackagePolicy({
       await testSubjects.setValue('packagePolicyNameInput', name);
     },
 
+    async getPackagePolicyDescriptionValue() {
+      return await testSubjects.getAttribute('packagePolicyDescriptionInput', 'value');
+    },
+
+    async setPackagePolicyDescription(desc: string) {
+      await this.scrollToCenterOfWindow('packagePolicyDescriptionInput');
+      await testSubjects.setValue('packagePolicyDescriptionInput', desc);
+    },
+
     /**
      * Waits for the save Notification toast to be visible
      */
-    async waitForSaveSuccessNotification() {
-      await testSubjects.existOrFail('packagePolicyCreateSuccessToast');
+    async waitForSaveSuccessNotification(forEditPage: boolean = false) {
+      await testSubjects.existOrFail(
+        forEditPage ? 'policyUpdateSuccessToast' : 'packagePolicyCreateSuccessToast'
+      );
     },
 
     /**
@@ -98,7 +112,7 @@ export function IngestManagerCreatePackagePolicy({
      * Navigates to the Ingest Agent configuration Edit Package Policy page
      */
     async navigateToAgentPolicyEditPackagePolicy(agentPolicyId: string, packagePolicyId: string) {
-      await pageObjects.common.navigateToApp('ingestManager', {
+      await pageObjects.common.navigateToApp('fleet', {
         hash: `/policies/${agentPolicyId}/edit-integration/${packagePolicyId}`,
       });
       await this.ensureOnEditPageOrFail();
@@ -115,11 +129,13 @@ export function IngestManagerCreatePackagePolicy({
 
     /**
      * Center a given Element on the Window viewport
-     * @param element
+     * @param element   if defined as a string, it should be the test subject to find
      */
-    async scrollToCenterOfWindow(element: WebElementWrapper) {
+    async scrollToCenterOfWindow(element: WebElementWrapper | string) {
+      const ele = typeof element === 'string' ? await testSubjects.find(element) : element;
+
       const [elementPosition, windowSize] = await Promise.all([
-        element.getPosition(),
+        ele.getPosition(),
         browser.getWindowSize(),
       ]);
       await browser.execute(

@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { HttpLogic } from '../../../shared/http';
 
-import { IFeedActivity } from './recent_activity';
+import { FeedActivity } from './recent_activity';
 
-export interface IOverviewServerData {
+interface OverviewServerData {
   hasUsers: boolean;
   hasOrgSources: boolean;
   canCreateContentSources: boolean;
@@ -18,19 +20,19 @@ export interface IOverviewServerData {
   pendingInvitationsCount: number;
   accountsCount: number;
   personalSourcesCount: number;
-  activityFeed: IFeedActivity[];
+  activityFeed: FeedActivity[];
 }
 
-export interface IOverviewActions {
-  setServerData(serverData: IOverviewServerData): IOverviewServerData;
+interface OverviewActions {
+  setServerData(serverData: OverviewServerData): OverviewServerData;
   initializeOverview(): void;
 }
 
-export interface IOverviewValues extends IOverviewServerData {
+interface OverviewValues extends OverviewServerData {
   dataLoading: boolean;
 }
 
-export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions>>({
+export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>({
   path: ['enterprise_search', 'workplace_search', 'overview_logic'],
   actions: {
     setServerData: (serverData) => serverData,

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import moment from 'moment';
 import { EuiLink } from '@elastic/eui';
@@ -11,7 +13,7 @@ import {
   AlertMessageTimeToken,
   AlertMessageLinkToken,
   AlertMessageDocLinkToken,
-} from '../../../server/alerts/types';
+} from '../../../common/types/alerts';
 // @ts-ignore
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
@@ -77,6 +79,7 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     }
 
     const url = linkToken.partialUrl
+      .replace('{basePath}', Legacy.shims.getBasePath())
       .replace('{elasticWebsiteUrl}', Legacy.shims.docLinks.ELASTIC_WEBSITE_URL)
       .replace('{docLinkVersion}', Legacy.shims.docLinks.DOC_LINK_VERSION);
     const index = text.indexOf(linkPart[0]);

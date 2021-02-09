@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
-import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
@@ -44,16 +32,16 @@ import {
   IExpressionLoaderParams,
   ExpressionsStart,
   ExpressionRenderError,
+  ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
-import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
+import { toExpressionAst } from './to_ast';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -72,6 +60,9 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -100,13 +91,14 @@ export class VisualizeEmbeddable
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  private searchSessionId?: string;
+  private syncColors?: boolean;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
-  private expression: string = '';
+  private expression?: ExpressionAstExpression;
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
@@ -144,19 +136,19 @@ export class VisualizeEmbeddable
     );
     this.deps = deps;
     this.timefilter = timefilter;
+    this.syncColors = this.input.syncColors;
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
 
-    this.autoRefreshFetchSubscription = timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.updateHandler.bind(this));
-
     this.subscriptions.push(
-      Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-        this.handleChanges();
+      this.getUpdated$().subscribe(() => {
+        const isDirty = this.handleChanges();
+        if (isDirty && this.handler) {
+          this.updateHandler();
+        }
       })
     );
 
@@ -220,7 +212,7 @@ export class VisualizeEmbeddable
     }
   }
 
-  public async handleChanges() {
+  private handleChanges(): boolean {
     this.transferCustomizationsToUiState();
 
     let dirty = false;
@@ -243,13 +235,21 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    if (this.searchSessionId !== this.input.searchSessionId) {
+      this.searchSessionId = this.input.searchSessionId;
+      dirty = true;
+    }
+
+    if (this.syncColors !== this.input.syncColors) {
+      this.syncColors = this.input.syncColors;
+      dirty = true;
+    }
+
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
 
-    if (this.handler && dirty) {
-      this.updateHandler();
-    }
+    return dirty;
   }
 
   // this is a hack to make editor still work, will be removed once we clean up editor
@@ -360,7 +360,6 @@ export class VisualizeEmbeddable
       this.handler.destroy();
       this.handler.getElement().remove();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {
@@ -374,6 +373,8 @@ export class VisualizeEmbeddable
         query: this.input.query,
         filters: this.input.filters,
       },
+      searchSessionId: this.input.searchSessionId,
+      syncColors: this.input.syncColors,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };
@@ -382,7 +383,7 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
-    this.expression = await buildPipeline(this.vis, {
+    this.expression = await toExpressionAst(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
@@ -394,6 +395,7 @@ export class VisualizeEmbeddable
   }
 
   private handleVisUpdate = async () => {
+    this.handleChanges();
     this.updateHandler();
   };
 
@@ -403,7 +405,7 @@ export class VisualizeEmbeddable
     });
   };
 
-  public supportedTriggers(): TriggerId[] {
+  public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 

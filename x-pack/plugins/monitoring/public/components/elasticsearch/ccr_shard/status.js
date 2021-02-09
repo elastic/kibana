@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
+import { AlertsStatus } from '../../../alerts/status';
 
-export function Status({ stat, formattedLeader, oldestStat }) {
+export function Status({ stat, formattedLeader, oldestStat, alerts = {} }) {
   const {
     follower_index: followerIndex,
     shard_id: shardId,
@@ -23,6 +25,12 @@ export function Status({ stat, formattedLeader, oldestStat }) {
   } = oldestStat;
 
   const metrics = [
+    {
+      label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.alerts', {
+        defaultMessage: 'Alerts',
+      }),
+      value: <AlertsStatus alerts={alerts} showOnlyCount={true} />,
+    },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.ccrShard.status.followerIndexLabel', {
         defaultMessage: 'Follower Index',

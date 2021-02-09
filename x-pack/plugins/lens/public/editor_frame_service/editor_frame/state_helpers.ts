@@ -1,12 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
-import { Datasource, DatasourcePublicAPI, Visualization } from '../../types';
+import {
+  Datasource,
+  DatasourcePublicAPI,
+  FramePublicAPI,
+  InitializationOptions,
+  Visualization,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
@@ -15,14 +23,20 @@ export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext
+  initialContext?: VisualizeFieldContext,
+  options?: InitializationOptions
 ) {
   const states: Record<string, { isLoading: boolean; state: unknown }> = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {
         return datasource
-          .initialize(datasourceStates[datasourceId].state || undefined, references, initialContext)
+          .initialize(
+            datasourceStates[datasourceId].state || undefined,
+            references,
+            initialContext,
+            options
+          )
           .then((datasourceState) => {
             states[datasourceId] = { isLoading: false, state: datasourceState };
           });
@@ -76,7 +90,9 @@ export async function persistedStateToExpression(
         { isLoading: false, state },
       ])
     ),
-    references
+    references,
+    undefined,
+    { isFullEditor: false }
   );
 
   const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);
@@ -91,3 +107,45 @@ export async function persistedStateToExpression(
     datasourceLayers,
   });
 }
+
+export const validateDatasourceAndVisualization = (
+  currentDataSource: Datasource | null,
+  currentDatasourceState: unknown | null,
+  currentVisualization: Visualization | null,
+  currentVisualizationState: unknown | undefined,
+  frameAPI: FramePublicAPI
+):
+  | Array<{
+      shortMessage: string;
+      longMessage: string;
+    }>
+  | undefined => {
+  const layersGroups = currentVisualizationState
+    ? currentVisualization
+        ?.getLayerIds(currentVisualizationState)
+        .reduce<Record<string, VisualizationDimensionGroupConfig[]>>((memo, layerId) => {
+          const groups = currentVisualization?.getConfiguration({
+            frame: frameAPI,
+            layerId,
+            state: currentVisualizationState,
+          }).groups;
+          if (groups) {
+            memo[layerId] = groups;
+          }
+          return memo;
+        }, {})
+    : undefined;
+
+  const datasourceValidationErrors = currentDatasourceState
+    ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
+    : undefined;
+
+  const visualizationValidationErrors = currentVisualizationState
+    ? currentVisualization?.getErrorMessages(currentVisualizationState, frameAPI)
+    : undefined;
+
+  if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {
+    return [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])];
+  }
+  return undefined;
+};

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -14,6 +15,7 @@ import {
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
+  DEFAULT_PERCENTILE,
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
@@ -59,9 +61,18 @@ export function createAggDescriptor(
   });
   const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
 
-  return aggType && metricFieldName && (!isHeatmap(mapType) || isMetricCountable(aggType))
-    ? { type: aggType, field: metricFieldName }
-    : { type: AGG_TYPE.COUNT };
+  if (
+    !aggType ||
+    aggType === AGG_TYPE.COUNT ||
+    !metricFieldName ||
+    (isHeatmap(mapType) && !isMetricCountable(aggType))
+  ) {
+    return { type: AGG_TYPE.COUNT };
+  }
+
+  return aggType === AGG_TYPE.PERCENTILE
+    ? { type: aggType, field: metricFieldName, percentile: DEFAULT_PERCENTILE }
+    : { type: aggType, field: metricFieldName };
 }
 
 export function createTileMapLayerDescriptor({
@@ -103,7 +114,7 @@ export function createTileMapLayerDescriptor({
 
   const metricSourceKey = getSourceAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field,
+    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
   });
   const metricStyleField = {
     name: metricSourceKey,
@@ -113,16 +124,16 @@ export function createTileMapLayerDescriptor({
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
-  const styleProperties: VectorStylePropertiesDescriptor = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.FILL_COLOR]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+        ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
         field: metricStyleField,
         color: colorPallette ? colorPallette.value : 'Yellow to Red',
         type: COLOR_MAP_TYPE.ORDINAL,
         fieldMetaOptions: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions)
+          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
             .fieldMetaOptions,
           isEnabled: false,
         },
@@ -139,11 +150,11 @@ export function createTileMapLayerDescriptor({
     styleProperties[VECTOR_STYLES.ICON_SIZE] = {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
         maxSize: 18,
         field: metricStyleField,
         fieldMetaOptions: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions)
+          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions)
             .fieldMetaOptions,
           isEnabled: false,
         },

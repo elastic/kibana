@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   CreateAgentPolicyRequest,
@@ -15,9 +17,12 @@ import {
   GetPackagePoliciesResponse,
   GetFullAgentPolicyResponse,
   GetPackagesResponse,
-} from '../../../plugins/ingest_manager/common';
-import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
+} from '../../../plugins/fleet/common';
+import { policyFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
+
+// NOTE: import path below should be the deep path to the actual module - else we get CI errors
+import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/applications/fleet/services/pkg_key_from_package_info';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
@@ -107,6 +112,14 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
 
   return {
     /**
+     * Returns the endpoint package key for the currently installed package. This `pkgkey` can then
+     * be used to build URLs for Fleet pages or APIs
+     */
+    async getEndpointPkgKey() {
+      return pkgKeyFromPackageInfo((await retrieveEndpointPackageInfo())!);
+    },
+
+    /**
      * Retrieves the full Agent policy, which mirrors what the Elastic Agent would get
      * once they checkin.
      */
@@ -167,7 +180,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               streams: [],
               config: {
                 policy: {
-                  value: policyConfigFactory(),
+                  value: policyFactory(),
                 },
               },
             },

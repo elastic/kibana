@@ -1,33 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import uuid from 'uuid';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
+  ViewMode,
+  PanelState,
+  IEmbeddable,
   PanelNotFoundError,
   EmbeddableInput,
   isReferenceOrValueEmbeddable,
-} from '../../../../embeddable/public';
+  isErrorEmbeddable,
+} from '../../services/embeddable';
 import { NotificationsStart } from '../../../../../core/public';
+import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
@@ -36,7 +27,7 @@ export interface UnlinkFromLibraryActionContext {
   embeddable: IEmbeddable;
 }
 
-export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLINK_FROM_LIBRARY> {
+export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
@@ -47,9 +38,7 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboard.panel.unlinkFromLibrary', {
-      defaultMessage: 'Unlink from library',
-    });
+    return dashboardUnlinkFromLibraryAction.getDisplayName();
   }
 
   public getIconType({ embeddable }: UnlinkFromLibraryActionContext) {
@@ -61,7 +50,8 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
   public async isCompatible({ embeddable }: UnlinkFromLibraryActionContext) {
     return Boolean(
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      !isErrorEmbeddable(embeddable) &&
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
@@ -86,18 +76,13 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput, id: uuid.v4() },
+      explicitInput: { ...newInput },
     };
-    dashboard.replacePanel(panelToReplace, newPanel);
+    dashboard.replacePanel(panelToReplace, newPanel, true);
 
-    const title = embeddable.getTitle()
-      ? i18n.translate('dashboard.panel.unlinkFromLibrary.successMessageWithTitle', {
-          defaultMessage: `Panel '{panelTitle}' is no longer connected to the visualize library`,
-          values: { panelTitle: embeddable.getTitle() },
-        })
-      : i18n.translate('dashboard.panel.unlinkFromLibrary.successMessage', {
-          defaultMessage: `Panel is no longer connected to the visualize library`,
-        });
+    const title = dashboardUnlinkFromLibraryAction.getSuccessMessage(
+      embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
+    );
     this.deps.toasts.addSuccess({
       title,
       'data-test-subj': 'unlinkPanelSuccess',

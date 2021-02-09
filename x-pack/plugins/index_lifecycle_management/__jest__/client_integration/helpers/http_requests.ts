@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fakeServer, SinonFakeServer } from 'sinon';
 import { API_BASE_PATH } from '../../../common/constants';
+import { ListNodesRouteResponse, ListSnapshotReposResponse } from '../../../common/types';
 
 export const init = () => {
   const server = fakeServer.create();
@@ -38,8 +40,26 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setListNodes = (body: ListNodesRouteResponse) => {
+    server.respondWith('GET', `${API_BASE_PATH}/nodes/list`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setListSnapshotRepos = (body: ListSnapshotReposResponse) => {
+    server.respondWith('GET', `${API_BASE_PATH}/snapshot_repositories`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   return {
     setLoadPolicies,
     setLoadSnapshotPolicies,
+    setListNodes,
+    setListSnapshotRepos,
   };
 };

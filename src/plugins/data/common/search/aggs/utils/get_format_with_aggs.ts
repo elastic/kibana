@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -56,15 +45,35 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
             id: nestedFormatter.id,
             params: nestedFormatter.params,
           });
+
           const gte = '\u2265';
           const lt = '\u003c';
+          let fromValue = format.convert(range.gte);
+          let toValue = format.convert(range.lt);
+          // In case of identity formatter and a specific flag, replace Infinity values by specific strings
+          if (params.replaceInfinity && nestedFormatter.id == null) {
+            const FROM_PLACEHOLDER = '\u2212\u221E';
+            const TO_PLACEHOLDER = '+\u221E';
+            fromValue = isFinite(range.gte) ? fromValue : FROM_PLACEHOLDER;
+            toValue = isFinite(range.lt) ? toValue : TO_PLACEHOLDER;
+          }
+
+          if (params.template === 'arrow_right') {
+            return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageArrowRight', {
+              defaultMessage: '{from} → {to}',
+              values: {
+                from: fromValue,
+                to: toValue,
+              },
+            });
+          }
           return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
             defaultMessage: '{gte} {from} and {lt} {to}',
             values: {
               gte,
-              from: format.convert(range.gte),
+              from: fromValue,
               lt,
-              to: format.convert(range.lt),
+              to: toValue,
             },
           });
         });

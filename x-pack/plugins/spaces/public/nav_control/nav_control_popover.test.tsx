@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as Rx from 'rxjs';
@@ -12,7 +13,8 @@ import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SpacesManager } from '../spaces_manager';
 import { NavControlPopover } from './nav_control_popover';
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
+import { waitFor } from '@testing-library/react';
 
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
@@ -64,10 +66,9 @@ describe('NavControlPopover', () => {
     wrapper.find(EuiHeaderSectionItemButton).simulate('click');
 
     // Wait for `getSpaces` promise to resolve
-    await Promise.resolve();
-    await Promise.resolve();
-    wrapper.update();
-
-    expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(SpaceAvatar)).toHaveLength(3);
+    });
   });
 });

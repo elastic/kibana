@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './datapanel.scss';
-import { uniq, keyBy, groupBy } from 'lodash';
+import { uniq, groupBy } from 'lodash';
 import React, { useState, memo, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
@@ -18,10 +19,12 @@ import {
   EuiSpacer,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginStart, EsQueryConfig, Query, Filter } from 'src/plugins/data/public';
+import { htmlIdGenerator } from '@elastic/eui';
 import { DatasourceDataPanelProps, DataType, StateSetter } from '../types';
 import { ChildDragDropProvider, DragContextState } from '../drag_drop';
 import {
@@ -98,6 +101,8 @@ export function IndexPatternDataPanel({
   changeIndexPattern,
   charts,
   showNoDataPopover,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -191,6 +196,8 @@ export function IndexPatternDataPanel({
           onChangeIndexPattern={onChangeIndexPattern}
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
+          dropOntoWorkspace={dropOntoWorkspace}
+          hasSuggestionForField={hasSuggestionForField}
         />
       )}
     </>
@@ -222,6 +229,9 @@ const fieldFiltersLabel = i18n.translate('xpack.lens.indexPatterns.fieldFiltersL
   defaultMessage: 'Field filters',
 });
 
+const htmlId = htmlIdGenerator('datapanel');
+const fieldSearchDescriptionId = htmlId();
+
 export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   currentIndexPatternId,
   indexPatternRefs,
@@ -236,6 +246,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   data,
   existingFields,
   charts,
+  dropOntoWorkspace,
+  hasSuggestionForField,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
@@ -266,9 +278,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   const fieldInfoUnavailable = existenceFetchFailed || currentIndexPattern.hasRestrictions;
 
   const unfilteredFieldGroups: FieldGroups = useMemo(() => {
-    const fieldByName = keyBy(allFields, 'name');
     const containsData = (field: IndexPatternField) => {
-      const overallField = fieldByName[field.name];
+      const overallField = currentIndexPattern.getFieldByName(field.name);
 
       return (
         overallField && fieldExists(existingFields, currentIndexPattern.title, overallField.name)
@@ -331,7 +342,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
               defaultMessage: 'Available fields',
             }),
-
+        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+          defaultMessage:
+            'Available fields have data in the first 500 documents that match your filters. To view all fields, expand Empty fields. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+        }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         hideDetails: fieldInfoUnavailable,
@@ -352,6 +366,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noEmptyDataLabel', {
           defaultMessage: `There are no empty fields.`,
+        }),
+        helpText: i18n.translate('xpack.lens.indexPattern.emptyFieldsLabelHelp', {
+          defaultMessage:
+            'Empty fields did not contain any values in the first 500 documents based on your filters.',
         }),
       },
       MetaFields: {
@@ -408,6 +426,23 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       ])
     );
   }, [unfilteredFieldGroups, localState.nameFilter, localState.typeFilter]);
+
+  const checkFieldExists = useCallback(
+    (field) =>
+      field.type === 'document' ||
+      fieldExists(existingFields, currentIndexPattern.title, field.name),
+    [existingFields, currentIndexPattern.title]
+  );
+
+  const { nameFilter, typeFilter } = localState;
+
+  const filter = useMemo(
+    () => ({
+      nameFilter,
+      typeFilter,
+    }),
+    [nameFilter, typeFilter]
+  );
 
   const fieldProps = useMemo(
     () => ({
@@ -487,9 +522,11 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               onChange={(e) => {
                 setLocalState({ ...localState, nameFilter: e.target.value });
               }}
-              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameAriaLabel', {
-                defaultMessage: 'Search fields',
+              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
+                defaultMessage: 'Search field names',
+                description: 'Search the list of fields in the index pattern for the provided text',
               })}
+              aria-describedby={fieldSearchDescriptionId}
             />
           </EuiFormControlLayout>
 
@@ -551,22 +588,32 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             </EuiPopover>
           </EuiFilterGroup>
         </EuiFlexItem>
+        <EuiScreenReaderOnly>
+          <div aria-live="polite" id={fieldSearchDescriptionId}>
+            {i18n.translate('xpack.lens.indexPatterns.fieldSearchLiveRegion', {
+              defaultMessage:
+                '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
+              values: {
+                availableFields: fieldGroups.AvailableFields.fields.length,
+                // empty fields can be undefined if there is no existence information to be fetched
+                emptyFields: fieldGroups.EmptyFields?.fields.length || 0,
+                metaFields: fieldGroups.MetaFields.fields.length,
+              },
+            })}
+          </div>
+        </EuiScreenReaderOnly>
         <EuiFlexItem>
           <FieldList
-            exists={(field) =>
-              field.type === 'document' ||
-              fieldExists(existingFields, currentIndexPattern.title, field.name)
-            }
+            exists={checkFieldExists}
             fieldProps={fieldProps}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={!!hasSyncedExistingFields}
-            filter={{
-              nameFilter: localState.nameFilter,
-              typeFilter: localState.typeFilter,
-            }}
+            filter={filter}
             currentIndexPatternId={currentIndexPatternId}
             existenceFetchFailed={existenceFetchFailed}
             existFieldsInIndex={!!allFields.length}
+            dropOntoWorkspace={dropOntoWorkspace}
+            hasSuggestionForField={hasSuggestionForField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,7 +12,7 @@ import { FormattedFieldValue } from '../../../timelines/components/timeline/body
 export const SOURCE_IP_FIELD_NAME = 'source.ip';
 export const DESTINATION_IP_FIELD_NAME = 'destination.ip';
 
-const IP_FIELD_TYPE = 'ip';
+export const IP_FIELD_TYPE = 'ip';
 
 /**
  * Renders text containing a draggable IP address (e.g. `source.ip`,

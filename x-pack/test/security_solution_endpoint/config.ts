@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { resolve } from 'path';
@@ -30,7 +31,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ['securitySolutionManagement']: {
         pathname: '/app/security/administration',
       },
-      ...xpackFunctionalConfig.get('apps'),
       ['security']: {
         pathname: '/app/security',
       },
@@ -43,6 +43,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // if you return an empty string here the kibana server will not start properly but an empty array works
         ...getRegistryUrlAsArray(),
       ],
+    },
+    layout: {
+      fixedHeaderHeight: 200,
     },
   };
 }

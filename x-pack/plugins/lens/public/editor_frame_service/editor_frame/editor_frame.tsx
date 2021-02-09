@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState, useCallback } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
 import { Datasource, FramePublicAPI, Visualization } from '../../types';
 import { reducer, getInitialState } from './state_management';
@@ -15,14 +17,19 @@ import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { Document } from '../../persistence/saved_object_store';
-import { RootDragDropProvider } from '../../drag_drop';
+import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
-import { applyVisualizeFieldSuggestions } from './suggestion_helpers';
+import {
+  applyVisualizeFieldSuggestions,
+  getTopSuggestionForField,
+  switchToSuggestion,
+} from './suggestion_helpers';
+import { trackUiEvent } from '../../lens_ui_telemetry';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -31,6 +38,7 @@ export interface EditorFrameProps {
   initialDatasourceId: string | null;
   initialVisualizationId: string | null;
   ExpressionRenderer: ReactExpressionRendererType;
+  palettes: PaletteRegistry;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;
   plugins: EditorFrameStartPlugins;
@@ -41,6 +49,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  searchSessionId: string;
   onChange: (arg: {
     filterableIndexPatterns: string[];
     doc: Document;
@@ -73,7 +82,8 @@ export function EditorFrame(props: EditorFrameProps) {
           props.datasourceMap,
           state.datasourceStates,
           props.doc?.references,
-          visualizeTriggerFieldContext
+          visualizeTriggerFieldContext,
+          { isFullEditor: true }
         )
           .then((result) => {
             if (!isUnmounted) {
@@ -99,9 +109,12 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
+    activeData: state.activeData,
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
+    searchSessionId: props.searchSessionId,
+    availablePalettes: props.palettes,
 
     addNewLayer() {
       const newLayerId = generateId();
@@ -121,7 +134,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: layerIds.reduce(
+          updater: layerIds.reduce(
             (acc, layerId) =>
               activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
             state.visualization.state
@@ -182,7 +195,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: initialVisualizationState,
+          updater: initialVisualizationState,
         });
       }
     },
@@ -239,12 +252,59 @@ export function EditorFrame(props: EditorFrameProps) {
       activeVisualization,
       state.datasourceStates,
       state.visualization,
+      state.activeData,
       props.query,
-      props.dateRange,
       props.filters,
       props.savedQuery,
       state.title,
     ]
+  );
+
+  const getSuggestionForField = React.useCallback(
+    (field: DragDropIdentifier) => {
+      const { activeDatasourceId, datasourceStates } = state;
+      const activeVisualizationId = state.visualization.activeId;
+      const visualizationState = state.visualization.state;
+      const { visualizationMap, datasourceMap } = props;
+
+      if (!field || !activeDatasourceId) {
+        return;
+      }
+
+      return getTopSuggestionForField(
+        datasourceLayers,
+        activeVisualizationId,
+        visualizationMap,
+        visualizationState,
+        datasourceMap[activeDatasourceId],
+        datasourceStates,
+        field
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      state.visualization.state,
+      props.datasourceMap,
+      props.visualizationMap,
+      state.activeDatasourceId,
+      state.datasourceStates,
+    ]
+  );
+
+  const hasSuggestionForField = useCallback(
+    (field: DragDropIdentifier) => getSuggestionForField(field) !== undefined,
+    [getSuggestionForField]
+  );
+
+  const dropOntoWorkspace = useCallback(
+    (field) => {
+      const suggestion = getSuggestionForField(field);
+      if (suggestion) {
+        trackUiEvent('drop_onto_workspace');
+        switchToSuggestion(dispatch, suggestion, 'SWITCH_VISUALIZATION');
+      }
+    },
+    [getSuggestionForField]
   );
 
   return (
@@ -270,6 +330,8 @@ export function EditorFrame(props: EditorFrameProps) {
             dateRange={props.dateRange}
             filters={props.filters}
             showNoDataPopover={props.showNoDataPopover}
+            dropOntoWorkspace={dropOntoWorkspace}
+            hasSuggestionForField={hasSuggestionForField}
           />
         }
         configPanel={
@@ -303,6 +365,7 @@ export function EditorFrame(props: EditorFrameProps) {
               core={props.core}
               plugins={props.plugins}
               visualizeTriggerFieldContext={visualizeTriggerFieldContext}
+              getSuggestionForField={getSuggestionForField}
             />
           )
         }

@@ -1,14 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
-
+import React, { FC, useEffect, useState } from 'react';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
-import { EuiButtonGroupIdToSelectedMap } from '@elastic/eui/src/components/button/button_group/button_group';
-
 import { i18n } from '@kbn/i18n';
 
 import { Dictionary } from '../../../../../../../common/types/common';
@@ -20,21 +18,27 @@ import {
   QueryStringInput,
 } from '../../../../../../../../../../src/plugins/data/public';
 
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
-
-import { SavedSearchQuery } from '../../../../../contexts/ml';
+import {
+  SEARCH_QUERY_LANGUAGE,
+  SearchQueryLanguage,
+} from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
+import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 interface ErrorMessage {
   query: string;
   message: string;
 }
 
-interface ExplorationQueryBarProps {
+export interface ExplorationQueryBarProps {
   indexPattern: IIndexPattern;
-  setSearchQuery: Dispatch<SetStateAction<SavedSearchQuery>>;
+  setSearchQuery: (update: {
+    queryString: string;
+    query?: SavedSearchQuery;
+    language: SearchQueryLanguage;
+  }) => void;
   includeQueryString?: boolean;
-  defaultQueryString?: string;
+  query: Query;
   filters?: {
     options: Array<{ id: string; label: string }>;
     columnId: string;
@@ -45,57 +49,62 @@ interface ExplorationQueryBarProps {
 export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   indexPattern,
   setSearchQuery,
-  includeQueryString = false,
-  defaultQueryString,
   filters,
+  query,
 }) => {
   // The internal state of the input query bar updated on every key stroke.
-  const [searchInput, setSearchInput] = useState<Query>({
-    query: '',
-    language: SEARCH_QUERY_LANGUAGE.KUERY,
-  });
-  const [idToSelectedMap, setIdToSelectedMap] = useState<EuiButtonGroupIdToSelectedMap>({});
-
+  const [searchInput, setSearchInput] = useState<Query>(query);
+  const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
-  useEffect(() => {
-    if (defaultQueryString !== undefined) {
-      setSearchInput({ query: defaultQueryString, language: SEARCH_QUERY_LANGUAGE.KUERY });
-    }
-  }, [defaultQueryString !== undefined]);
+  const searchChangeHandler = (q: Query) => setSearchInput(q);
 
-  const searchChangeHandler = (query: Query) => setSearchInput(query);
-  const searchSubmitHandler = (query: Query, filtering?: boolean) => {
+  /**
+   * Component is responsible for parsing the query string,
+   * hence it should sync submitted query string.
+   */
+  useEffect(() => {
+    try {
+      let convertedQuery;
+      switch (query.language) {
+        case SEARCH_QUERY_LANGUAGE.KUERY:
+          convertedQuery = esKuery.toElasticsearchQuery(
+            esKuery.fromKueryExpression(query.query as string),
+            indexPattern
+          );
+          break;
+        case SEARCH_QUERY_LANGUAGE.LUCENE:
+          convertedQuery = esQuery.luceneStringToDsl(query.query as string);
+          break;
+        default:
+          setErrorMessage({
+            query: query.query as string,
+            message: i18n.translate('xpack.ml.queryBar.queryLanguageNotSupported', {
+              defaultMessage: 'Query language is not supported',
+            }),
+          });
+          return;
+      }
+      setSearchQuery({
+        queryString: query.query as string,
+        query: convertedQuery,
+        language: query.language,
+      });
+    } catch (e) {
+      setErrorMessage({ query: query.query as string, message: e.message });
+    }
+  }, [query.query]);
+
+  const searchSubmitHandler = (q: Query, filtering?: boolean) => {
     // If moved to querying manually, clear filter selection.
     if (filtering === undefined) {
       setIdToSelectedMap({});
     }
 
-    try {
-      switch (query.language) {
-        case SEARCH_QUERY_LANGUAGE.KUERY:
-          const convertedKQuery = esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
-            indexPattern
-          );
-          setSearchQuery(
-            includeQueryString
-              ? { queryString: query.query, query: convertedKQuery }
-              : convertedKQuery
-          );
-          return;
-        case SEARCH_QUERY_LANGUAGE.LUCENE:
-          const convertedLQuery = esQuery.luceneStringToDsl(query.query as string);
-          setSearchQuery(
-            includeQueryString
-              ? { queryString: query.query, query: convertedLQuery }
-              : convertedLQuery
-          );
-          return;
-      }
-    } catch (e) {
-      setErrorMessage({ query: query.query as string, message: e.message });
-    }
+    setSearchQuery({
+      queryString: q.query as string,
+      language: q.language as SearchQueryLanguage,
+    });
   };
 
   const handleFilterUpdate = (optionId: string, currentIdToSelectedMap: any) => {
@@ -174,11 +183,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                     defaultMessage: 'Analytics query bar filter buttons',
                   }
                 )}
-                name="analyticsQueryBarFilterButtons"
                 options={filters.options}
                 type="multi"
                 idToSelectedMap={idToSelectedMap}
-                onChange={(optionId) => {
+                onChange={(optionId: string) => {
                   const newIdToSelectedMap = { [optionId]: !idToSelectedMap[optionId] };
                   setIdToSelectedMap(newIdToSelectedMap);
                   handleFilterUpdate(optionId, newIdToSelectedMap);

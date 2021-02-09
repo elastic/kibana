@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { isValidElement, cloneElement, FunctionComponent, Children, useMemo } from 'react';
@@ -23,7 +24,6 @@ export const SubSection: FunctionComponent<SubSectionProps> = ({
   isLiveStreaming,
   stopLiveStreaming,
 }) => {
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const metric = useMemo(() => metrics?.find((m) => m.id === id), [id, metrics]);
 
   if (!children || !metric) {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
@@ -55,6 +56,7 @@ export interface State {
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    earlyStoppingEnabled: undefined | boolean;
     eta: undefined | number;
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
@@ -93,6 +95,7 @@ export interface State {
     sourceIndexFieldsCheckFailed: boolean;
     standardizationEnabled: undefined | string;
     trainingPercent: number;
+    useEstimatedMml: boolean;
   };
   disabled: boolean;
   indexPatternsMap: SourceIndexMap;
@@ -123,6 +126,7 @@ export const getInitialState = (): State => ({
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    earlyStoppingEnabled: undefined,
     eta: undefined,
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
@@ -161,6 +165,7 @@ export const getInitialState = (): State => ({
     sourceIndexFieldsCheckFailed: false,
     standardizationEnabled: 'true',
     trainingPercent: 80,
+    useEstimatedMml: true,
   },
   jobConfig: {},
   disabled:
@@ -236,7 +241,10 @@ export const getJobConfigFromFormState = (
       formState.gamma && { gamma: formState.gamma },
       formState.lambda && { lambda: formState.lambda },
       formState.maxTrees && { max_trees: formState.maxTrees },
-      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed }
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed },
+      formState.earlyStoppingEnabled !== undefined && {
+        early_stopping_enabled: formState.earlyStoppingEnabled,
+      }
     );
 
     jobConfig.analysis = {

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -28,9 +17,10 @@ export async function runFpm(
   log: ToolingLog,
   build: Build,
   type: 'rpm' | 'deb',
+  architecture: 'arm64' | 'x64',
   pkgSpecificFlags: string[]
 ) {
-  const linux = config.getPlatform('linux', 'x64');
+  const linux = config.getPlatform('linux', architecture);
   const version = config.getBuildVersion();
 
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
@@ -44,6 +34,8 @@ export async function runFpm(
       return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
     }
   };
+
+  const envFolder = type === 'rpm' ? 'sysconfig' : 'default';
 
   const args = [
     // Force output even if it will overwrite an existing file
@@ -92,6 +84,8 @@ export async function runFpm(
     resolve(__dirname, 'package_scripts/pre_remove.sh'),
     '--after-remove',
     resolve(__dirname, 'package_scripts/post_remove.sh'),
+    '--rpm-posttrans',
+    resolve(__dirname, 'package_scripts/post_trans.sh'),
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
@@ -109,7 +103,12 @@ export async function runFpm(
     `pluginsDir=/usr/share/kibana/plugins`,
     '--template-value',
     `dataDir=/var/lib/kibana`,
-
+    '--template-value',
+    `logDir=/var/log/kibana`,
+    '--template-value',
+    `pidDir=/run/kibana`,
+    '--template-value',
+    `envFile=/etc/default/kibana`,
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
     // /usr/share/kibana/config. PATHS MUST BE RELATIVE, so drop the leading slash
@@ -117,6 +116,8 @@ export async function runFpm(
     `usr/share/kibana/config`,
     '--exclude',
     `usr/share/kibana/data`,
+    '--exclude',
+    'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,
@@ -132,8 +133,12 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
 
     // copy package configurations
-    `${resolveWithTrailingSlash(__dirname, 'service_templates/sysv/')}=/`,
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,
+
+    `${resolveWithTrailingSlash(
+      __dirname,
+      'service_templates/env/kibana'
+    )}=/etc/${envFolder}/kibana`,
   ];
 
   log.debug('calling fpm with args:', args);

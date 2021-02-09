@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiCheckboxProps } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { ManageSpacePage } from './manage_space_page';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
@@ -57,7 +59,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -69,7 +70,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
 
     const nameInput = wrapper.find('input[name="name"]');
     const descriptionInput = wrapper.find('textarea[name="description"]');
@@ -116,7 +120,6 @@ describe('ManageSpacePage', () => {
         onLoadSpace={onLoadSpace}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -128,9 +131,11 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
+    });
 
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('existing-space');
     expect(onLoadSpace).toHaveBeenCalledWith({
       ...spaceToUpdate,
     });
@@ -167,7 +172,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={() => Promise.reject(error)}
         notifications={notifications}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -179,10 +183,11 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Error loading available features',
+    await waitFor(() => {
+      wrapper.update();
+      expect(notifications.toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Error loading available features',
+      });
     });
   });
 
@@ -204,7 +209,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -216,9 +220,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    });
 
     await Promise.resolve();
 
@@ -265,7 +270,6 @@ describe('ManageSpacePage', () => {
         spacesManager={(spacesManager as unknown) as SpacesManager}
         getFeatures={featuresStart.getFeatures}
         notifications={notificationServiceMock.createStartContract()}
-        securityEnabled={true}
         getUrlForApp={getUrlForApp}
         history={history}
         capabilities={{
@@ -277,9 +281,10 @@ describe('ManageSpacePage', () => {
       />
     );
 
-    await waitForDataLoad(wrapper);
-
-    expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    await waitFor(() => {
+      wrapper.update();
+      expect(spacesManager.getSpace).toHaveBeenCalledWith('my-space');
+    });
 
     await Promise.resolve();
 
@@ -325,11 +330,5 @@ async function clickSaveButton(wrapper: ReactWrapper<any, any>) {
 
   await Promise.resolve();
 
-  wrapper.update();
-}
-
-async function waitForDataLoad(wrapper: ReactWrapper<any, any>) {
-  await Promise.resolve();
-  await Promise.resolve();
   wrapper.update();
 }

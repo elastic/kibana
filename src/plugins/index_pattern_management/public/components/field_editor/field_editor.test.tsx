@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -23,6 +12,7 @@ import {
   FieldFormatInstanceType,
   IndexPatternsService,
 } from 'src/plugins/data/public';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -37,6 +27,7 @@ jest.mock('@elastic/eui', () => ({
   EuiButtonEmpty: 'eui-button-empty',
   EuiCallOut: 'eui-call-out',
   EuiCode: 'eui-code',
+  EuiCodeEditor: 'eui-code-editor',
   EuiConfirmModal: 'eui-confirm-modal',
   EuiFieldNumber: 'eui-field-number',
   EuiFieldText: 'eui-field-text',
@@ -171,6 +162,60 @@ describe('FieldEditor', () => {
     await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
+  });
+
+  it('should display and update a custom label correctly', async () => {
+    let testField = ({
+      name: 'test',
+      format: new Format(),
+      lang: undefined,
+      type: 'string',
+      customLabel: 'Test',
+    } as unknown) as IndexPatternField;
+    fieldList.push(testField);
+    indexPattern.fields.getByName = (name) => {
+      const flds = {
+        [testField.name]: testField,
+      };
+      return flds[name];
+    };
+    indexPattern.fields = {
+      ...indexPattern.fields,
+      ...{
+        update: (fld) => {
+          testField = (fld as unknown) as IndexPatternField;
+        },
+        add: jest.fn(),
+      },
+    };
+    indexPattern.fieldFormatMap = { test: field };
+    (indexPattern.deleteFieldFormat as any) = jest.fn();
+
+    const component = createComponentWithContext<FieldEdiorProps>(
+      FieldEditor,
+      {
+        indexPattern,
+        spec: (testField as unknown) as IndexPatternField,
+        services: {
+          redirectAway: () => {},
+          indexPatternService: ({
+            updateSavedObject: jest.fn(() => Promise.resolve()),
+          } as unknown) as IndexPatternsService,
+        },
+      },
+      mockContext
+    );
+
+    await new Promise((resolve) => process.nextTick(resolve));
+    component.update();
+    const input = findTestSubject(component, 'editorFieldCustomLabel');
+    expect(input.props().value).toBe('Test');
+    input.simulate('change', { target: { value: 'new Test' } });
+    const saveBtn = findTestSubject(component, 'fieldSaveButton');
+
+    await saveBtn.simulate('click');
+    await new Promise((resolve) => process.nextTick(resolve));
+    expect(testField.customLabel).toEqual('new Test');
   });
 
   it('should show deprecated lang warning', async () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -115,20 +116,19 @@ export const CREATE_CASE = i18n.translate('xpack.securitySolution.case.caseView.
   defaultMessage: 'Create case',
 });
 
-export const CLOSED_CASE = i18n.translate('xpack.securitySolution.case.caseView.closedCase', {
-  defaultMessage: 'Closed case',
-});
-
 export const CLOSE_CASE = i18n.translate('xpack.securitySolution.case.caseView.closeCase', {
   defaultMessage: 'Close case',
 });
 
+export const MARK_CASE_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.case.caseView.markInProgress',
+  {
+    defaultMessage: 'Mark in progress',
+  }
+);
+
 export const REOPEN_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenCase', {
   defaultMessage: 'Reopen case',
-});
-
-export const REOPENED_CASE = i18n.translate('xpack.securitySolution.case.caseView.reopenedCase', {
-  defaultMessage: 'Reopened case',
 });
 
 export const CASE_NAME = i18n.translate('xpack.securitySolution.case.caseView.caseName', {
@@ -224,7 +224,7 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
 );
 
 export const CONNECTORS = i18n.translate('xpack.securitySolution.case.caseView.connectors', {
-  defaultMessage: 'External incident management system',
+  defaultMessage: 'External Incident Management System',
 });
 
 export const EDIT_CONNECTOR = i18n.translate('xpack.securitySolution.case.caseView.editConnector', {
@@ -234,3 +234,59 @@ export const EDIT_CONNECTOR = i18n.translate('xpack.securitySolution.case.caseVi
 export const NO_CONNECTOR = i18n.translate('xpack.securitySolution.case.common.noConnector', {
   defaultMessage: 'No connector selected',
 });
+
+export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unknown', {
+  defaultMessage: 'Unknown',
+});
+
+export const MARKED_CASE_AS = i18n.translate('xpack.securitySolution.case.caseView.markedCaseAs', {
+  defaultMessage: 'marked case as',
+});
+
+export const OPEN_CASES = i18n.translate('xpack.securitySolution.case.caseTable.openCases', {
+  defaultMessage: 'Open cases',
+});
+
+export const CLOSED_CASES = i18n.translate('xpack.securitySolution.case.caseTable.closedCases', {
+  defaultMessage: 'Closed cases',
+});
+
+export const IN_PROGRESS_CASES = i18n.translate(
+  'xpack.securitySolution.case.caseTable.inProgressCases',
+  {
+    defaultMessage: 'In progress cases',
+  }
+);
+
+export const SYNC_ALERTS_SWITCH_LABEL_ON = i18n.translate(
+  'xpack.securitySolution.case.settings.syncAlertsSwitchLabelOn',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
+  'xpack.securitySolution.case.settings.syncAlertsSwitchLabelOff',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const SYNC_ALERTS_HELP = i18n.translate(
+  'xpack.securitySolution.components.create.syncAlertHelpText',
+  {
+    defaultMessage:
+      'Enabling this option will sync the status of alerts in this case with the case status.',
+  }
+);
+
+export const ALERT = i18n.translate('xpack.securitySolution.common.alertLabel', {
+  defaultMessage: 'Alert',
+});
+
+export const ALERT_ADDED_TO_CASE = i18n.translate(
+  'xpack.securitySolution.common.alertAddedToCase',
+  {
+    defaultMessage: 'added to case',
+  }
+);

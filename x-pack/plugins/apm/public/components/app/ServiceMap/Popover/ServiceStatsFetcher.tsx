@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,8 +16,8 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import { ServiceNodeStats } from '../../../../../common/service_map';
 import { ServiceStatsList } from './ServiceStatsList';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { AnomalyDetection } from './AnomalyDetection';
 import { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 
@@ -42,7 +43,7 @@ export function ServiceStatsFetcher({
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          pathname: '/api/apm/service-map/service/{serviceName}',
+          endpoint: 'GET /api/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
             query: { start, end, uiFilters: JSON.stringify(uiFilters) },
@@ -56,8 +57,7 @@ export function ServiceStatsFetcher({
     }
   );
 
-  const isLoading =
-    status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   if (isLoading) {
     return <LoadingSpinner />;

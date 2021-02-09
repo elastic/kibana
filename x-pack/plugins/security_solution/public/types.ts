@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AppFrontendLibs } from './common/lib/lib';
@@ -15,7 +16,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { TelemetryManagementSectionPluginSetup } from '../../../../src/plugins/telemetry_management_section/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { IngestManagerStart } from '../../ingest_manager/public';
+import { FleetStart } from '../../fleet/public';
 import { PluginStart as ListsPluginStart } from '../../lists/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
@@ -33,6 +34,7 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
+import { LicensingPluginStart } from '../../licensing/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -47,8 +49,9 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
-  ingestManager?: IngestManagerStart;
+  fleet?: FleetStart;
   lists?: ListsPluginStart;
+  licensing: LicensingPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,11 +10,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import moment from 'moment';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { InfraLoadingPanel } from '../../loading';
@@ -26,10 +26,11 @@ import { MeasurableItemView } from './measurable_item_view';
 import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
-import { LogEntry } from '../../../../common/http_api';
+import { LogEntry } from '../../../../common/log_entry';
+import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 interface ScrollableLogTextStreamViewProps {
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   items: StreamItem[];
   scale: TextScale;
   wrap: boolean;
@@ -51,8 +52,7 @@ interface ScrollableLogTextStreamViewProps {
   }) => any;
   loadNewerItems: () => void;
   reloadItems: () => void;
-  setFlyoutItem?: (id: string) => void;
-  setFlyoutVisibility?: (visible: boolean) => void;
+  onOpenLogEntryFlyout?: (logEntryId?: string) => void;
   setContextEntry?: (entry: LogEntry) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
@@ -143,15 +143,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       lastLoadedTime,
       updateDateRange,
       startLiveStreaming,
-      setFlyoutItem,
-      setFlyoutVisibility,
+      onOpenLogEntryFlyout,
       setContextEntry,
     } = this.props;
     const hideScrollbar = this.props.hideScrollbar ?? true;
 
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
-    const hasFlyoutAction = !!(setFlyoutItem && setFlyoutVisibility);
+    const hasFlyoutAction = !!onOpenLogEntryFlyout;
     const hasContextAction = !!setContextEntry;
 
     return (
@@ -305,12 +304,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   }
 
   private handleOpenFlyout = (id: string) => {
-    const { setFlyoutItem, setFlyoutVisibility } = this.props;
-
-    if (setFlyoutItem && setFlyoutVisibility) {
-      setFlyoutItem(id);
-      setFlyoutVisibility(true);
-    }
+    this.props.onOpenLogEntryFlyout?.(id);
   };
 
   private handleOpenViewLogInContext = (entry: LogEntry) => {
@@ -379,7 +373,7 @@ const WithColumnWidths: React.FunctionComponent<{
     columnWidths: LogEntryColumnWidths;
     CharacterDimensionsProbe: React.ComponentType;
   }) => React.ReactElement<any> | null;
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {
   const childParams = useColumnWidths({ columnConfigurations, scale });

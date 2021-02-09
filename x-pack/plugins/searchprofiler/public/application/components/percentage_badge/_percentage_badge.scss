@@ -1,0 +1,51 @@
+@mixin prfDevToolProgress($color: tintOrShade($euiColorPrimary, 60%, 60%)) {
+  border: none;
+  display: block;
+  background-image:
+    linear-gradient(
+      to left,
+      $color 0%,
+      $color var(--prfDevToolProgressPercentage, auto),
+      $euiColorLightestShade var(--prfDevToolProgressPercentage, auto),
+      $euiColorLightestShade 100%
+    );
+
+  .prfDevTool__progress--percent-ie {
+    display: none;
+  }
+
+  @include internetExplorerOnly {
+    position: relative;
+    overflow: hidden;
+
+    .prfDevTool__progress--percent-ie {
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background: $color;
+      z-index: 1;
+    }
+
+    .prfDevTool__progressText {
+      position: relative;
+      z-index: 2;
+    }
+  }
+}
+
+.prfDevTool__percentBadge {
+  &__progress--percent {
+    @include prfDevToolProgress;
+    width: $badgeSize;
+  }
+
+  &__progress--time {
+    @include prfDevToolProgress(#FFAFAF);
+    background-color: #F5F5F5; // Must be light at all times
+    // Width of 3 badges, with the last child not having padding on the left
+    width: ($badgeSize * 3) - ($euiSizeXS * .75);
+    // Force text to always be dark on top of white -> pink color
+  }
+}

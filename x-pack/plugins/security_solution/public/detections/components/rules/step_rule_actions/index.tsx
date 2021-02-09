@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -16,7 +17,7 @@ import {
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
 
-import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
+import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
 import {
   RuleStep,
   RuleStepProps,
@@ -38,7 +39,7 @@ import { APP_ID } from '../../../../../common/constants';
 
 interface StepRuleActionsProps extends RuleStepProps {
   defaultValues?: ActionsStepRule | null;
-  actionMessageParams: ActionVariable[];
+  actionMessageParams: ActionVariables;
 }
 
 const stepActionsDefaultValue: ActionsStepRule = {

@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle, EuiText, EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiSpacer, EuiTitle, EuiText, EuiButton, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { SetupGuideLayout, SETUP_GUIDE_TITLE } from '../../../shared/setup_guide';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { DOCS_PREFIX } from '../../routes';
+
 import GettingStarted from './assets/getting_started.png';
 
-const GETTING_STARTED_LINK_URL =
-  'https://www.elastic.co/guide/en/workplace-search/current/workplace-search-getting-started.html';
+const GETTING_STARTED_LINK_URL = `${DOCS_PREFIX}/workplace-search-getting-started.html`;
 
 export const SetupGuide: React.FC = () => {
   return (
@@ -26,16 +29,10 @@ export const SetupGuide: React.FC = () => {
       standardAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#standard"
       elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
     >
-      <SetPageChrome
-        trail={[
-          i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-            defaultMessage: 'Setup Guide',
-          }),
-        ]}
-      />
+      <SetPageChrome trail={[SETUP_GUIDE_TITLE]} />
       <SendTelemetry action="viewed" metric="setup_guide" />
 
-      <a href={GETTING_STARTED_LINK_URL} target="_blank" rel="noopener noreferrer">
+      <EuiLink href={GETTING_STARTED_LINK_URL} target="_blank">
         <img
           className="setupGuide__thumbnail"
           src={GettingStarted}
@@ -46,7 +43,7 @@ export const SetupGuide: React.FC = () => {
           width="1280"
           height-="720"
         />
-      </a>
+      </EuiLink>
 
       <EuiTitle size="s">
         <p>

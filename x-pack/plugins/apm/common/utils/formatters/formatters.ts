@@ -1,35 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
 
-export function asDecimal(value: number) {
+import numeral from '@elastic/numeral';
+import { Maybe } from '../../../typings/common';
+import { NOT_AVAILABLE_LABEL } from '../../i18n';
+import { isFiniteNumber } from '../is_finite_number';
+
+export function asDecimal(value?: number | null) {
+  if (!isFiniteNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
   return numeral(value).format('0,0.0');
 }
 
-export function asInteger(value: number) {
+export function asInteger(value?: number | null) {
+  if (!isFiniteNumber(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
   return numeral(value).format('0,0');
 }
 
-export function tpmUnit(type?: string) {
-  return type === 'request'
-    ? i18n.translate('xpack.apm.formatters.requestsPerMinLabel', {
-        defaultMessage: 'rpm',
-      })
-    : i18n.translate('xpack.apm.formatters.transactionsPerMinLabel', {
-        defaultMessage: 'tpm',
-      });
-}
-
 export function asPercent(
-  numerator: number,
+  numerator: Maybe<number>,
   denominator: number | undefined,
-  fallbackResult = ''
+  fallbackResult = NOT_AVAILABLE_LABEL
 ) {
-  if (!denominator || isNaN(numerator)) {
+  if (!denominator || !isFiniteNumber(numerator)) {
     return fallbackResult;
   }
 

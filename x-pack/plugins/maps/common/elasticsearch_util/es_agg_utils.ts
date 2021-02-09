@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
-import { TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
+import { AGG_TYPE, JOIN_FIELD_NAME_PREFIX, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
-export function getField(indexPattern: IndexPattern, fieldName: string) {
+export type BucketProperties = Record<string | number, unknown>;
+export type PropertiesMap = Map<string, BucketProperties>;
+
+export function getField(indexPattern: IndexPattern, fieldName: string): IFieldType {
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     throw new Error(
@@ -33,15 +38,17 @@ export function addFieldToDSL(dsl: object, field: IFieldType) {
       };
 }
 
-export type BucketProperties = Record<string | number, unknown>;
-
-export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = []) {
+export function extractPropertiesFromBucket(
+  bucket: any,
+  ignoreKeys: string[] = []
+): BucketProperties {
   const properties: BucketProperties = {};
   for (const key in bucket) {
     if (ignoreKeys.includes(key) || !bucket.hasOwnProperty(key)) {
       continue;
     }
 
+    // todo: push these implementations in the IAggFields
     if (_.has(bucket[key], 'value')) {
       properties[key] = bucket[key].value;
     } else if (_.has(bucket[key], 'buckets')) {
@@ -59,7 +66,20 @@ export function extractPropertiesFromBucket(bucket: any, ignoreKeys: string[] = 
         );
       }
     } else {
-      properties[key] = bucket[key];
+      if (
+        key.startsWith(AGG_TYPE.PERCENTILE) ||
+        key.startsWith(JOIN_FIELD_NAME_PREFIX + AGG_TYPE.PERCENTILE)
+      ) {
+        const values = bucket[key].values;
+        for (const k in values) {
+          if (values.hasOwnProperty(k)) {
+            properties[key] = values[k];
+            break;
+          }
+        }
+      } else {
+        properties[key] = bucket[key];
+      }
     }
   }
   return properties;

@@ -1,36 +1,25 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
-import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { MetricVisOptions } from './components/metric_vis_options';
-import { ColorSchemas, colorSchemas, ColorModes } from '../../charts/public';
+import { ColorSchemas, ColorMode } from '../../charts/public';
+import { VisTypeDefinition } from '../../visualizations/public';
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { toExpressionAst } from './to_ast';
+import { VisParams } from './types';
 
-export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
+export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
   description: i18n.translate('visTypeMetric.metricDescription', {
-    defaultMessage: 'Display a calculation as a single number',
+    defaultMessage: 'Show a calculation as a single number.',
   }),
   toExpressionAst,
   visConfig: {
@@ -42,7 +31,7 @@ export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
         percentageMode: false,
         useRanges: false,
         colorSchema: ColorSchemas.GreenToRed,
-        metricColorMode: ColorModes.NONE,
+        metricColorMode: ColorMode.None,
         colorsRange: [{ from: 0, to: 10000 }],
         labels: {
           show: true,
@@ -59,31 +48,8 @@ export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
     },
   },
   editorConfig: {
-    collections: {
-      metricColorMode: [
-        {
-          id: ColorModes.NONE,
-          label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
-            defaultMessage: 'None',
-          }),
-        },
-        {
-          id: ColorModes.LABELS,
-          label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
-            defaultMessage: 'Labels',
-          }),
-        },
-        {
-          id: ColorModes.BACKGROUND,
-          label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
-            defaultMessage: 'Background',
-          }),
-        },
-      ],
-      colorSchemas,
-    },
     optionsTemplate: MetricVisOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -120,6 +86,7 @@ export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
+  requiresSearch: true,
 });

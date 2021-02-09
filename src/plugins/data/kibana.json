@@ -4,11 +4,14 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
+    "bfetch",
     "expressions",
-    "uiActions"
+    "uiActions",
+    "share",
+    "inspector"
   ],
   "optionalPlugins": ["usageCollection"],
-  "extraPublicDirs": ["common", "common/utils/abort_utils"],
+  "extraPublicDirs": ["common"],
   "requiredBundles": [
     "usageCollection",
     "kibanaUtils",

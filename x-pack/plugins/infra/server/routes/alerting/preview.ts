@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { PreviewResult } from '../../lib/alerting/common/types';
 import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -64,29 +66,9 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               alertOnNoData,
             });
 
-            const numberOfGroups = previewResult.length;
-            const resultTotals = previewResult.reduce(
-              (totals, [firedResult, noDataResult, errorResult, notifications]) => {
-                return {
-                  ...totals,
-                  fired: totals.fired + firedResult,
-                  noData: totals.noData + noDataResult,
-                  error: totals.error + errorResult,
-                  notifications: totals.notifications + notifications,
-                };
-              },
-              {
-                fired: 0,
-                noData: 0,
-                error: 0,
-                notifications: 0,
-              }
-            );
+            const payload = processPreviewResults(previewResult);
             return response.ok({
-              body: alertPreviewSuccessResponsePayloadRT.encode({
-                numberOfGroups,
-                resultTotals,
-              }),
+              body: alertPreviewSuccessResponsePayloadRT.encode(payload),
             });
           }
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
@@ -101,30 +83,10 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               alertOnNoData,
             });
 
-            const numberOfGroups = previewResult.length;
-            const resultTotals = previewResult.reduce(
-              (totals, [firedResult, noDataResult, errorResult, notifications]) => {
-                return {
-                  ...totals,
-                  fired: totals.fired + firedResult,
-                  noData: totals.noData + noDataResult,
-                  error: totals.error + errorResult,
-                  notifications: totals.notifications + notifications,
-                };
-              },
-              {
-                fired: 0,
-                noData: 0,
-                error: 0,
-                notifications: 0,
-              }
-            );
+            const payload = processPreviewResults(previewResult);
 
             return response.ok({
-              body: alertPreviewSuccessResponsePayloadRT.encode({
-                numberOfGroups,
-                resultTotals,
-              }),
+              body: alertPreviewSuccessResponsePayloadRT.encode(payload),
             });
           }
           default:
@@ -148,4 +110,28 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
       }
     })
   );
+};
+
+const processPreviewResults = (previewResult: PreviewResult[]) => {
+  const numberOfGroups = previewResult.length;
+  const resultTotals = previewResult.reduce(
+    (totals, { fired, warning, noData, error, notifications }) => {
+      return {
+        ...totals,
+        fired: totals.fired + fired,
+        warning: totals.warning + warning,
+        noData: totals.noData + noData,
+        error: totals.error + error,
+        notifications: totals.notifications + notifications,
+      };
+    },
+    {
+      fired: 0,
+      warning: 0,
+      noData: 0,
+      error: 0,
+      notifications: 0,
+    }
+  );
+  return { numberOfGroups, resultTotals };
 };

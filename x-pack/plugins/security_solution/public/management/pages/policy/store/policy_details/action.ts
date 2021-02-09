@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { GetAgentStatusResponse } from '../../../../../../../ingest_manager/common/types/rest_spec';
+import { ILicense } from '../../../../../../../licensing/common/types';
+import { GetAgentStatusResponse } from '../../../../../../../fleet/common/types/rest_spec';
 import { PolicyData, UIPolicyConfig } from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
 import { PolicyDetailsState } from '../../types';
@@ -28,6 +30,13 @@ interface UserChangedPolicyConfig {
   type: 'userChangedPolicyConfig';
   payload: {
     policyConfig: UIPolicyConfig;
+  };
+}
+
+interface UserChangedAntivirusRegistration {
+  type: 'userChangedAntivirusRegistration';
+  payload: {
+    enabled: boolean;
   };
 }
 
@@ -55,6 +64,11 @@ interface UserClickedPolicyDetailsSaveButton {
   type: 'userClickedPolicyDetailsSaveButton';
 }
 
+interface LicenseChanged {
+  type: 'licenseChanged';
+  payload: ILicense;
+}
+
 export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsData
   | UserClickedPolicyDetailsSaveButton
@@ -62,4 +76,6 @@ export type PolicyDetailsAction =
   | ServerReturnedPolicyDetailsUpdateFailure
   | ServerReturnedUpdatedPolicyDetailsData
   | ServerFailedToReturnPolicyDetailsData
-  | UserChangedPolicyConfig;
+  | UserChangedPolicyConfig
+  | UserChangedAntivirusRegistration
+  | LicenseChanged;

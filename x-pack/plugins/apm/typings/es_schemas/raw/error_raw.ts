@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { APMBaseDoc } from './apm_base_doc';
@@ -13,9 +14,9 @@ import { Page } from './fields/page';
 import { Process } from './fields/process';
 import { Service } from './fields/service';
 import { Stackframe } from './fields/stackframe';
+import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
 import { User } from './fields/user';
-import { Observer } from './fields/observer';
 
 interface Processor {
   name: 'error';
@@ -41,6 +42,7 @@ interface Log {
 
 export interface ErrorRaw extends APMBaseDoc {
   processor: Processor;
+  timestamp: TimestampUs;
   transaction?: {
     id: string;
     sampled?: boolean;
@@ -66,5 +68,4 @@ export interface ErrorRaw extends APMBaseDoc {
   service: Service;
   url?: Url;
   user?: User;
-  observer?: Observer;
 }

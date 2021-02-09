@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,6 +15,7 @@ import { CertMonitors } from './cert_monitors';
 import * as labels from './translations';
 import { Cert, CertMonitor } from '../../../common/runtime_types';
 import { FingerprintCol } from './fingerprint_col';
+import { NO_CERTS_AVAILABLE } from './translations';
 
 interface Page {
   index: number;
@@ -109,6 +111,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
           direction: sort.direction,
         },
       }}
+      noItemsMessage={<span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>}
     />
   );
 };

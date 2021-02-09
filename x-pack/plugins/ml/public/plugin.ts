@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,11 +22,11 @@ import type {
   SharePluginStart,
   UrlGeneratorContract,
 } from 'src/plugins/share/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
-import type { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -44,18 +45,23 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
+import type { MapsStartApi } from '../../maps/public';
+import { LensPublicStart } from '../../lens/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   share: SharePluginStart;
   kibanaLegacy: KibanaLegacyStart;
   uiActions: UiActionsStart;
+  spaces?: SpacesPluginStart;
+  embeddable: EmbeddableStart;
+  maps?: MapsStartApi;
+  lens?: LensPublicStart;
 }
 export interface MlSetupDependencies {
   security?: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
-  usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
@@ -68,7 +74,7 @@ export interface MlSetupDependencies {
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
-  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -83,7 +89,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       euiIconType: PLUGIN_ICON_SOLUTION,
       appRoute: '/app/ml',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      updater$: this.appUpdater,
+      updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const kibanaVersion = this.initializerContext.env.packageInfo.version;
@@ -97,11 +103,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
             management: pluginsSetup.management,
-            usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
-            embeddable: pluginsSetup.embeddable,
+            embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+            maps: pluginsStart.maps,
             uiActions: pluginsStart.uiActions,
+            lens: pluginsStart.lens,
             kibanaVersion,
           },
           params
@@ -131,23 +138,34 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         });
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater.next(() => ({
+        this.appUpdater$.next(() => ({
           status: AppStatus.inaccessible,
         }));
       }
 
       // register various ML plugin features which require a full license
-      const { registerEmbeddables, registerManagementSection, registerMlUiActions } = await import(
-        './register_helper'
-      );
+      // note including registerFeature in register_helper would cause the page bundle size to increase significantly
+      const {
+        registerEmbeddables,
+        registerManagementSection,
+        registerMlUiActions,
+        registerSearchLinks,
+      } = await import('./register_helper');
 
-      if (isMlEnabled(license) && isFullLicense(license)) {
-        const canManageMLJobs = capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
-        if (canManageMLJobs && pluginsSetup.management !== undefined) {
-          registerManagementSection(pluginsSetup.management, core).enable();
+      const mlEnabled = isMlEnabled(license);
+      const fullLicense = isFullLicense(license);
+      if (mlEnabled) {
+        registerSearchLinks(this.appUpdater$, fullLicense);
+
+        if (fullLicense) {
+          const canManageMLJobs =
+            capabilities.management?.insightsAndAlerting?.jobsListLink ?? false;
+          if (canManageMLJobs && pluginsSetup.management !== undefined) {
+            registerManagementSection(pluginsSetup.management, core).enable();
+          }
+          registerEmbeddables(pluginsSetup.embeddable, core);
+          registerMlUiActions(pluginsSetup.uiActions, core);
         }
-        registerEmbeddables(pluginsSetup.embeddable, core);
-        registerMlUiActions(pluginsSetup.uiActions, core);
       }
     });
 

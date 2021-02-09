@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { uniq } from 'lodash';
@@ -21,10 +22,12 @@ const mockActions = {
 const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockClusterClient = (response: any) => {
-  const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-  mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(response);
+  const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+    body: response,
+  } as any);
 
-  const mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
+  const mockClusterClient = elasticsearchServiceMock.createClusterClient();
   mockClusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
 
   return { mockClusterClient, mockScopedClusterClient };
@@ -45,7 +48,7 @@ describe('#atSpace', () => {
     );
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
       mockActions,
-      mockClusterClient,
+      () => Promise.resolve(mockClusterClient),
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -70,7 +73,7 @@ describe('#atSpace', () => {
     }));
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
@@ -313,7 +316,7 @@ describe('#atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because ["saved_object:bar-type/get" is not allowed]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:bar-type/get]: definition for this key is missing]`
       );
     });
 
@@ -335,7 +338,7 @@ describe('#atSpace', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because [child "saved_object:foo-type/get" fails because ["saved_object:foo-type/get" is required]]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:foo-type/get]: expected value of type [boolean] but got [undefined]]`
       );
     });
   });
@@ -891,7 +894,7 @@ describe('#atSpaces', () => {
     );
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
       mockActions,
-      mockClusterClient,
+      () => Promise.resolve(mockClusterClient),
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -916,7 +919,7 @@ describe('#atSpaces', () => {
     }));
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
@@ -1089,7 +1092,7 @@ describe('#atSpaces', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_1" fails because [child "mock-action:version" fails because ["mock-action:version" is required]]]]]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [mock-action:version]: expected value of type [boolean] but got [undefined]]`
     );
   });
 
@@ -1376,7 +1379,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1404,7 +1407,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1437,7 +1440,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because ["space:space_3" is not allowed]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
 
@@ -1460,7 +1463,7 @@ describe('#atSpaces', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "space:space_2" fails because ["space:space_2" is required]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: Payload did not match expected resources]`
       );
     });
   });
@@ -2095,7 +2098,7 @@ describe('#globally', () => {
     );
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
       mockActions,
-      mockClusterClient,
+      () => Promise.resolve(mockClusterClient),
       application
     );
     const request = httpServerMock.createKibanaRequest();
@@ -2120,7 +2123,7 @@ describe('#globally', () => {
     }));
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
-    expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.hasPrivileges', {
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
       body: {
         cluster: options.elasticsearchPrivileges?.cluster,
         index: expectedIndexPrivilegePayload,
@@ -2263,7 +2266,7 @@ describe('#globally', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(
-      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because [child "mock-action:version" fails because ["mock-action:version" is required]]]]]`
+      `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [mock-action:version]: expected value of type [boolean] but got [undefined]]`
     );
   });
 
@@ -2381,7 +2384,7 @@ describe('#globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because ["saved_object:bar-type/get" is not allowed]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:bar-type/get]: definition for this key is missing]`
       );
     });
 
@@ -2402,7 +2405,7 @@ describe('#globally', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(
-        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. ValidationError: child "application" fails because [child "kibana-our_application" fails because [child "*" fails because [child "saved_object:foo-type/get" fails because ["saved_object:foo-type/get" is required]]]]]`
+        `[Error: Invalid response received from Elasticsearch has_privilege endpoint. Error: [application.kibana-our_application]: [saved_object:foo-type/get]: expected value of type [boolean] but got [undefined]]`
       );
     });
   });

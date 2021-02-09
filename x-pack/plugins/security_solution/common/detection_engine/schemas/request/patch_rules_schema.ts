@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -31,7 +32,7 @@ import {
   from,
   enabled,
   tags,
-  threat,
+  threats,
   threshold,
   throttle,
   references,
@@ -50,6 +51,8 @@ import {
 } from '../common/schemas';
 import {
   threat_index,
+  concurrent_searches,
+  items_per_search,
   threat_query,
   threat_filters,
   threat_mapping,
@@ -96,7 +99,7 @@ export const patchRulesSchema = t.exact(
     severity_mapping,
     tags,
     to,
-    threat,
+    threat: threats,
     threshold,
     throttle,
     timestamp_override,
@@ -109,6 +112,8 @@ export const patchRulesSchema = t.exact(
     threat_filters,
     threat_mapping,
     threat_language,
+    concurrent_searches,
+    items_per_search,
   })
 );
 

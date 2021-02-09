@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -86,7 +87,7 @@ describe('entriesNested', () => {
           value: ['some host name'],
         },
       ],
-      field: 'host.name',
+      field: 'parent.field',
       type: 'nested',
     });
   });
@@ -105,7 +106,7 @@ describe('entriesNested', () => {
           type: 'exists',
         },
       ],
-      field: 'host.name',
+      field: 'parent.field',
       type: 'nested',
     });
   });

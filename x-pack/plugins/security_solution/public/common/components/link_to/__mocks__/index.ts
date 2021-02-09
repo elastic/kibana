@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SecurityPageName } from '../../../../app/types';
@@ -10,7 +11,7 @@ export { getDetectionEngineUrl } from '../redirect_to_detection_engine';
 export { getAppOverviewUrl } from '../redirect_to_overview';
 export { getHostDetailsUrl, getHostsUrl } from '../redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from '../redirect_to_network';
-export { getTimelinesUrl, getTimelineTabsUrl } from '../redirect_to_timelines';
+export { getTimelinesUrl, getTimelineTabsUrl, getTimelineUrl } from '../redirect_to_timelines';
 export {
   getCaseDetailsUrl,
   getCaseUrl,

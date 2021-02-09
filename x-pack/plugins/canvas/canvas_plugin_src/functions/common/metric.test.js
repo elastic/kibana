@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { fontStyle } from './__tests__/fixtures/test_styles';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { fontStyle } from './__fixtures__/test_styles';
 import { metric } from './metric';
 
 describe('metric', () => {

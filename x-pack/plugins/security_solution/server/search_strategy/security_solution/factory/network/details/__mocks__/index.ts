@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
@@ -139,7 +140,44 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
     aggregations: {
       host: {
         doc_count: 0,
-        results: { hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] } },
+        results: {
+          hits: {
+            total: { value: 1, relation: 'eq' },
+            max_score: null,
+            hits: [
+              {
+                _index: 'auditbeat-7.8.0-2020.11.23-000004',
+                _id: 'wRCuOnYB7WTwW_GluxL8',
+                _score: null,
+                _source: {
+                  host: {
+                    hostname: 'internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773',
+                    os: {
+                      kernel: '5.4.0-1030-gcp',
+                      codename: 'focal',
+                      name: 'Ubuntu',
+                      family: 'debian',
+                      version: '20.04.1 LTS (Focal Fossa)',
+                      platform: 'ubuntu',
+                    },
+                    containerized: false,
+                    ip: [
+                      '10.224.0.219',
+                      'fe80::4001:aff:fee0:db',
+                      '172.17.0.1',
+                      'fe80::42:3fff:fe35:46f8',
+                    ],
+                    name: 'internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773',
+                    id: 'a4b4839036f2d1161a21f12ea786a596',
+                    mac: ['42:01:0a:e0:00:db', '02:42:3f:35:46:f8'],
+                    architecture: 'x86_64',
+                  },
+                },
+                sort: [1607302298617],
+              },
+            ],
+          },
+        },
       },
       destination: {
         meta: {},
@@ -263,7 +301,101 @@ export const formattedSearchStrategyResponse = {
   ...mockSearchStrategyResponse,
   inspect: {
     dsl: [
-      '{\n  "allowNoIndices": true,\n  "index": [\n    "apm-*-transaction*",\n    "auditbeat-*",\n    "endgame-*",\n    "filebeat-*",\n    "logs-*",\n    "packetbeat-*",\n    "winlogbeat-*"\n  ],\n  "ignoreUnavailable": true,\n  "body": {\n    "aggs": {\n      "source": {\n        "filter": {\n          "term": {\n            "source.ip": "35.196.65.164"\n          }\n        },\n        "aggs": {\n          "firstSeen": {\n            "min": {\n              "field": "@timestamp"\n            }\n          },\n          "lastSeen": {\n            "max": {\n              "field": "@timestamp"\n            }\n          },\n          "as": {\n            "filter": {\n              "exists": {\n                "field": "source.as"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "source.as"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          },\n          "geo": {\n            "filter": {\n              "exists": {\n                "field": "source.geo"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "source.geo"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          }\n        }\n      },\n      "destination": {\n        "filter": {\n          "term": {\n            "destination.ip": "35.196.65.164"\n          }\n        },\n        "aggs": {\n          "firstSeen": {\n            "min": {\n              "field": "@timestamp"\n            }\n          },\n          "lastSeen": {\n            "max": {\n              "field": "@timestamp"\n            }\n          },\n          "as": {\n            "filter": {\n              "exists": {\n                "field": "destination.as"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "destination.as"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          },\n          "geo": {\n            "filter": {\n              "exists": {\n                "field": "destination.geo"\n              }\n            },\n            "aggs": {\n              "results": {\n                "top_hits": {\n                  "size": 1,\n                  "_source": [\n                    "destination.geo"\n                  ],\n                  "sort": [\n                    {\n                      "@timestamp": "desc"\n                    }\n                  ]\n                }\n              }\n            }\n          }\n        }\n      },\n      "host": {\n        "filter": {\n          "term": {\n            "host.ip": "35.196.65.164"\n          }\n        },\n        "aggs": {\n          "results": {\n            "top_hits": {\n              "size": 1,\n              "_source": [\n                "host"\n              ],\n              "sort": [\n                {\n                  "@timestamp": "desc"\n                }\n              ]\n            }\n          }\n        }\n      }\n    },\n    "query": {\n      "bool": {\n        "should": []\n      }\n    },\n    "size": 0,\n    "track_total_hits": false\n  }\n}',
+      JSON.stringify(
+        {
+          allowNoIndices: true,
+          index: [
+            'apm-*-transaction*',
+            'auditbeat-*',
+            'endgame-*',
+            'filebeat-*',
+            'logs-*',
+            'packetbeat-*',
+            'winlogbeat-*',
+          ],
+          ignoreUnavailable: true,
+          body: {
+            docvalue_fields: mockOptions.docValueFields,
+            aggs: {
+              source: {
+                filter: { term: { 'source.ip': '35.196.65.164' } },
+                aggs: {
+                  firstSeen: { min: { field: '@timestamp' } },
+                  lastSeen: { max: { field: '@timestamp' } },
+                  as: {
+                    filter: { exists: { field: 'source.as' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['source.as'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                  geo: {
+                    filter: { exists: { field: 'source.geo' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['source.geo'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              destination: {
+                filter: { term: { 'destination.ip': '35.196.65.164' } },
+                aggs: {
+                  firstSeen: { min: { field: '@timestamp' } },
+                  lastSeen: { max: { field: '@timestamp' } },
+                  as: {
+                    filter: { exists: { field: 'destination.as' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['destination.as'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                  geo: {
+                    filter: { exists: { field: 'destination.geo' } },
+                    aggs: {
+                      results: {
+                        top_hits: {
+                          size: 1,
+                          _source: ['destination.geo'],
+                          sort: [{ '@timestamp': 'desc' }],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              host: {
+                filter: { term: { 'host.ip': '35.196.65.164' } },
+                aggs: {
+                  results: {
+                    top_hits: { size: 1, _source: ['host'], sort: [{ '@timestamp': 'desc' }] },
+                  },
+                },
+              },
+            },
+            query: { bool: { should: [] } },
+            size: 0,
+            track_total_hits: false,
+          },
+        },
+        null,
+        2
+      ),
     ],
   },
   networkDetails: {
@@ -291,7 +423,23 @@ export const formattedSearchStrategyResponse = {
         location: { lon: -77.2481, lat: 38.6583 },
       },
     },
-    host: {},
+    host: {
+      architecture: ['x86_64'],
+      containerized: ['false'],
+      hostname: ['internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773'],
+      id: ['a4b4839036f2d1161a21f12ea786a596'],
+      ip: ['10.224.0.219', 'fe80::4001:aff:fee0:db', '172.17.0.1', 'fe80::42:3fff:fe35:46f8'],
+      mac: ['42:01:0a:e0:00:db', '02:42:3f:35:46:f8'],
+      name: ['internal-ci-immutable-rm-ubuntu-2004-big2-1607296224012102773'],
+      os: {
+        codename: ['focal'],
+        family: ['debian'],
+        kernel: ['5.4.0-1030-gcp'],
+        name: ['Ubuntu'],
+        platform: ['ubuntu'],
+        version: ['20.04.1 LTS (Focal Fossa)'],
+      },
+    },
   },
 };
 
@@ -370,6 +518,7 @@ export const expectedDsl = {
         },
       },
     },
+    docvalue_fields: mockOptions.docValueFields,
     query: { bool: { should: [] } },
     size: 0,
     track_total_hits: false,

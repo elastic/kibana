@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -11,7 +12,7 @@ import {
   sampleIdGuid,
   sampleDocWithAncestors,
   sampleRuleSO,
-  sampleDocNoSortIdNoVersion,
+  sampleWrappedSignalHit,
 } from './__mocks__/es_results';
 import {
   buildBulkBody,
@@ -20,8 +21,9 @@ import {
   objectPairIntersection,
   objectArrayIntersection,
 } from './build_bulk_body';
-import { SignalHit } from './types';
+import { SignalHit, SignalSourceHit } from './types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
 
 describe('buildBulkBody', () => {
   beforeEach(() => {
@@ -56,6 +58,9 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         parent: {
           id: sampleIdGuid,
           type: 'event',
@@ -123,6 +128,118 @@ describe('buildBulkBody', () => {
     expect(fakeSignalSourceHit).toEqual(expected);
   });
 
+  test('bulk body builds well-defined body with threshold results', () => {
+    const sampleParams = sampleRuleAlertParams();
+    const baseDoc = sampleDocNoSortId();
+    const doc: SignalSourceHit = {
+      ...baseDoc,
+      _source: {
+        ...baseDoc._source,
+        threshold_result: {
+          count: 5,
+          value: 'abcd',
+        },
+      },
+    };
+    delete doc._source.source;
+    const fakeSignalSourceHit = buildBulkBody({
+      doc,
+      ruleParams: sampleParams,
+      id: sampleRuleGuid,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+    });
+    // Timestamp will potentially always be different so remove it for the test
+    // @ts-expect-error
+    delete fakeSignalSourceHit['@timestamp'];
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
+      someKey: 'someValue',
+      event: {
+        kind: 'signal',
+      },
+      signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
+        parents: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        original_time: '2020-04-20T21:27:45+0000',
+        status: 'open',
+        rule: {
+          actions: [],
+          author: ['Elastic'],
+          building_block_type: 'default',
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          rule_id: 'rule-1',
+          false_positives: [],
+          max_signals: 10000,
+          risk_score: 50,
+          risk_score_mapping: [],
+          output_index: '.siem-signals',
+          description: 'Detecting root and admin users',
+          from: 'now-6m',
+          immutable: false,
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          language: 'kuery',
+          license: 'Elastic License',
+          name: 'rule-name',
+          query: 'user.name: root or user.name: admin',
+          references: ['http://google.com'],
+          severity: 'high',
+          severity_mapping: [],
+          tags: ['some fake tag 1', 'some fake tag 2'],
+          threat: [],
+          throttle: 'no_actions',
+          type: 'query',
+          to: 'now',
+          note: '',
+          enabled: true,
+          created_by: 'elastic',
+          updated_by: 'elastic',
+          version: 1,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          exceptions_list: getListArrayMock(),
+        },
+        threshold_result: {
+          count: 5,
+          value: 'abcd',
+        },
+        depth: 1,
+      },
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
+  });
+
   test('bulk body builds original_event if it exists on the event to begin with', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
@@ -160,6 +277,9 @@ describe('buildBulkBody', () => {
         module: 'system',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_event: {
           action: 'socket_opened',
           dataset: 'socket',
@@ -269,6 +389,9 @@ describe('buildBulkBody', () => {
         module: 'system',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_event: {
           action: 'socket_opened',
           dataset: 'socket',
@@ -372,9 +495,218 @@ describe('buildBulkBody', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_event: {
           kind: 'event',
         },
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
+        parents: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        original_time: '2020-04-20T21:27:45+0000',
+        status: 'open',
+        rule: {
+          actions: [],
+          author: ['Elastic'],
+          building_block_type: 'default',
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          rule_id: 'rule-1',
+          false_positives: [],
+          max_signals: 10000,
+          risk_score: 50,
+          risk_score_mapping: [],
+          output_index: '.siem-signals',
+          description: 'Detecting root and admin users',
+          from: 'now-6m',
+          immutable: false,
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          language: 'kuery',
+          license: 'Elastic License',
+          name: 'rule-name',
+          query: 'user.name: root or user.name: admin',
+          references: ['http://google.com'],
+          severity: 'high',
+          severity_mapping: [],
+          tags: ['some fake tag 1', 'some fake tag 2'],
+          threat: [],
+          type: 'query',
+          to: 'now',
+          note: '',
+          enabled: true,
+          created_by: 'elastic',
+          updated_by: 'elastic',
+          version: 1,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          throttle: 'no_actions',
+          exceptions_list: getListArrayMock(),
+        },
+        depth: 1,
+      },
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
+  });
+
+  test('bulk body builds "original_signal" if it exists already as a numeric', () => {
+    const sampleParams = sampleRuleAlertParams();
+    const sampleDoc = sampleDocNoSortId();
+    delete sampleDoc._source.source;
+    const doc = ({
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        signal: 123,
+      },
+    } as unknown) as SignalSourceHit;
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody({
+      doc,
+      ruleParams: sampleParams,
+      id: sampleRuleGuid,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+    });
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
+      someKey: 'someValue',
+      event: {
+        kind: 'signal',
+      },
+      signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
+        original_signal: 123,
+        parent: {
+          id: sampleIdGuid,
+          type: 'event',
+          index: 'myFakeSignalIndex',
+          depth: 0,
+        },
+        parents: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        ancestors: [
+          {
+            id: sampleIdGuid,
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+        ],
+        original_time: '2020-04-20T21:27:45+0000',
+        status: 'open',
+        rule: {
+          actions: [],
+          author: ['Elastic'],
+          building_block_type: 'default',
+          id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+          rule_id: 'rule-1',
+          false_positives: [],
+          max_signals: 10000,
+          risk_score: 50,
+          risk_score_mapping: [],
+          output_index: '.siem-signals',
+          description: 'Detecting root and admin users',
+          from: 'now-6m',
+          immutable: false,
+          index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          interval: '5m',
+          language: 'kuery',
+          license: 'Elastic License',
+          name: 'rule-name',
+          query: 'user.name: root or user.name: admin',
+          references: ['http://google.com'],
+          severity: 'high',
+          severity_mapping: [],
+          tags: ['some fake tag 1', 'some fake tag 2'],
+          threat: [],
+          type: 'query',
+          to: 'now',
+          note: '',
+          enabled: true,
+          created_by: 'elastic',
+          updated_by: 'elastic',
+          version: 1,
+          updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
+          created_at: fakeSignalSourceHit.signal.rule?.created_at,
+          throttle: 'no_actions',
+          exceptions_list: getListArrayMock(),
+        },
+        depth: 1,
+      },
+    };
+    expect(fakeSignalSourceHit).toEqual(expected);
+  });
+
+  test('bulk body builds "original_signal" if it exists already as an object', () => {
+    const sampleParams = sampleRuleAlertParams();
+    const sampleDoc = sampleDocNoSortId();
+    delete sampleDoc._source.source;
+    const doc = ({
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        signal: { child_1: { child_2: 'nested data' } },
+      },
+    } as unknown) as SignalSourceHit;
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody({
+      doc,
+      ruleParams: sampleParams,
+      id: sampleRuleGuid,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+    });
+    const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
+      someKey: 'someValue',
+      event: {
+        kind: 'signal',
+      },
+      signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
+        original_signal: { child_1: { child_2: 'nested data' } },
         parent: {
           id: sampleIdGuid,
           type: 'event',
@@ -445,10 +777,10 @@ describe('buildBulkBody', () => {
 
 describe('buildSignalFromSequence', () => {
   test('builds a basic signal from a sequence of building blocks', () => {
-    const block1 = sampleDocWithAncestors().hits.hits[0];
+    const block1 = sampleWrappedSignalHit();
     block1._source.new_key = 'new_key_value';
     block1._source.new_key2 = 'new_key2_value';
-    const block2 = sampleDocWithAncestors().hits.hits[0];
+    const block2 = sampleWrappedSignalHit();
     block2._source.new_key = 'new_key_value';
     const blocks = [block1, block2];
     const ruleSO = sampleRuleSO();
@@ -456,24 +788,26 @@ describe('buildSignalFromSequence', () => {
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete signal['@timestamp'];
-    const expected: Omit<SignalHit, '@timestamp'> & { someKey: string; new_key: string } = {
-      someKey: 'someValue',
+    const expected: Omit<SignalHit, '@timestamp'> & { new_key: string } = {
       new_key: 'new_key_value',
       event: {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         parents: [
           {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
           },
           {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
@@ -487,8 +821,14 @@ describe('buildSignalFromSequence', () => {
             depth: 0,
           },
           {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
@@ -500,8 +840,14 @@ describe('buildSignalFromSequence', () => {
             depth: 0,
           },
           {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
             id: sampleIdGuid,
-            rule: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
             type: 'signal',
             index: 'myFakeSignalIndex',
             depth: 1,
@@ -555,8 +901,8 @@ describe('buildSignalFromSequence', () => {
   });
 
   test('builds a basic signal if there is no overlap between source events', () => {
-    const block1 = sampleDocNoSortIdNoVersion();
-    const block2 = sampleDocNoSortIdNoVersion();
+    const block1 = sampleWrappedSignalHit();
+    const block2 = sampleWrappedSignalHit();
     block2._source['@timestamp'] = '2021-05-20T22:28:46+0000';
     block2._source.someKey = 'someOtherValue';
     const ruleSO = sampleRuleSO();
@@ -569,32 +915,63 @@ describe('buildSignalFromSequence', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         parents: [
           {
             id: sampleIdGuid,
-            type: 'event',
+            type: 'signal',
             index: 'myFakeSignalIndex',
-            depth: 0,
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
           },
           {
             id: sampleIdGuid,
-            type: 'event',
+            type: 'signal',
             index: 'myFakeSignalIndex',
-            depth: 0,
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
           },
         ],
         ancestors: [
           {
-            id: sampleIdGuid,
+            id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
             type: 'event',
             index: 'myFakeSignalIndex',
             depth: 0,
           },
           {
             id: sampleIdGuid,
+            type: 'signal',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+          },
+          {
+            id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
             type: 'event',
             index: 'myFakeSignalIndex',
             depth: 0,
+          },
+          {
+            id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+            type: 'event',
+            index: 'myFakeSignalIndex',
+            depth: 0,
+          },
+          {
+            id: sampleIdGuid,
+            type: 'signal',
+            index: 'myFakeSignalIndex',
+            depth: 1,
+            rule: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
           },
         ],
         status: 'open',
@@ -635,7 +1012,7 @@ describe('buildSignalFromSequence', () => {
           throttle: 'no_actions',
           exceptions_list: getListArrayMock(),
         },
-        depth: 1,
+        depth: 2,
         group: {
           id: '269c1f5754bff92fb8040283b687258e99b03e8b2ab1262cc20c82442e5de5ea',
         },
@@ -660,6 +1037,9 @@ describe('buildSignalFromEvent', () => {
         kind: 'signal',
       },
       signal: {
+        _meta: {
+          version: SIGNALS_TEMPLATE_VERSION,
+        },
         original_time: '2020-04-20T21:27:45+0000',
         parent: {
           id: sampleIdGuid,

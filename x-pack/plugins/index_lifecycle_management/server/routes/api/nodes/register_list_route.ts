@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ListNodesRouteResponse, NodeDataRole } from '../../../../common/types';
+import { ListNodesRouteResponse, DataTierRole } from '../../../../common/types';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -39,10 +40,10 @@ export function convertSettingsIntoLists(
         }
       }
 
-      const dataRoles = nodeSettings.roles.filter((r) => r.startsWith('data')) as NodeDataRole[];
+      const dataRoles = nodeSettings.roles.filter((r) => r.startsWith('data')) as DataTierRole[];
       for (const role of dataRoles) {
-        accum.nodesByRoles[role as NodeDataRole] = accum.nodesByRoles[role] ?? [];
-        accum.nodesByRoles[role as NodeDataRole]!.push(nodeId);
+        accum.nodesByRoles[role as DataTierRole] = accum.nodesByRoles[role] ?? [];
+        accum.nodesByRoles[role as DataTierRole]!.push(nodeId);
       }
 
       // If we detect a single node using legacy "data:true" setting we know we are not using data roles for

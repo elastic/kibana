@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { first, map } from 'rxjs/operators';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
@@ -13,12 +14,11 @@ import {
   CoreStart,
   KibanaRequest,
   Logger,
-  SharedGlobalConfig,
-  RequestHandler,
   IContextProvider,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   SavedObjectsClientContract,
+  SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
 
 import {
@@ -27,8 +27,7 @@ import {
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { LICENSE_TYPE } from '../../licensing/common/types';
-import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
+import { SpacesPluginStart } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 
@@ -46,6 +45,7 @@ import {
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
+  ActionsRequestHandlerContext,
 } from './types';
 
 import { getActionsConfigurationUtilities } from './actions_config';
@@ -75,6 +75,8 @@ import {
   getAuthorizationModeBySource,
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
+import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
+import { renderMustacheObject } from './lib/mustache_renderer';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -86,9 +88,10 @@ export interface PluginSetupContract {
   registerType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-    Params extends ActionTypeParams = ActionTypeParams
+    Params extends ActionTypeParams = ActionTypeParams,
+    ExecutorResultData = void
   >(
-    actionType: ActionType<Config, Secrets, Params>
+    actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
 }
 
@@ -102,13 +105,17 @@ export interface PluginStartContract {
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
   preconfiguredActions: PreConfiguredAction[];
+  renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+    actionTypeId: string,
+    params: Params,
+    variables: Record<string, unknown>
+  ): Params;
 }
 
 export interface ActionsPluginsSetup {
   taskManager: TaskManagerSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
-  spaces?: SpacesPluginSetup;
   eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
@@ -118,6 +125,7 @@ export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
   licensing: LicensingPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 const includedHiddenTypes = [
@@ -126,51 +134,40 @@ const includedHiddenTypes = [
   ALERT_SAVED_OBJECT_TYPE,
 ];
 
-export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, PluginStartContract> {
-  private readonly kibanaIndex: Promise<string>;
-  private readonly config: Promise<ActionsConfig>;
-
+export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartContract> {
   private readonly logger: Logger;
-  private actionsConfig?: ActionsConfig;
-  private serverBasePath?: string;
+  private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
-  private spaces?: SpacesServiceSetup;
   private security?: SecurityPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly kibanaIndexConfig: { kibana: { index: string } };
 
   constructor(initContext: PluginInitializerContext) {
-    this.config = initContext.config.create<ActionsConfig>().pipe(first()).toPromise();
-
-    this.kibanaIndex = initContext.config.legacy.globalConfig$
-      .pipe(
-        first(),
-        map((config: SharedGlobalConfig) => config.kibana.index)
-      )
-      .toPromise();
-
+    this.actionsConfig = initContext.config.get<ActionsConfig>();
     this.logger = initContext.logger.get('actions');
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
+    this.kibanaIndexConfig = initContext.config.legacy.get();
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup<ActionsPluginsStart>,
     plugins: ActionsPluginsSetup
-  ): Promise<PluginSetupContract> {
+  ): PluginSetupContract {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
     if (this.isESOUsingEphemeralEncryptionKey) {
       this.logger.warn(
-        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
 
@@ -189,7 +186,6 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     // get executions count
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
-    this.actionsConfig = (await this.config) as ActionsConfig;
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
@@ -210,38 +206,39 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
-    this.serverBasePath = core.http.basePath.serverBasePath;
     this.actionExecutor = actionExecutor;
-    this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
 
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
       actionsConfigUtils,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
 
     const usageCollection = plugins.usageCollection;
+    if (usageCollection) {
+      registerActionsUsageCollector(
+        usageCollection,
+        core.getStartServices().then(([_, { taskManager }]) => taskManager)
+      );
+    }
+
+    core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
+      'actions',
+      this.createRouteHandlerContext(core, this.kibanaIndexConfig.kibana.index)
+    );
     if (usageCollection) {
       initializeActionsTelemetry(
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        await this.kibanaIndex
+        this.kibanaIndexConfig.kibana.index
       );
-
-      core.getStartServices().then(async ([, startPlugins]) => {
-        registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
-      });
     }
 
-    core.http.registerRouteHandlerContext(
-      'actions',
-      this.createRouteHandlerContext(core, await this.kibanaIndex)
-    );
-
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<ActionsRequestHandlerContext>();
     createActionRoute(router, this.licenseState);
     deleteActionRoute(router, this.licenseState);
     getActionRoute(router, this.licenseState);
@@ -254,18 +251,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-        Params extends ActionTypeParams = ActionTypeParams
+        Params extends ActionTypeParams = ActionTypeParams,
+        ExecutorResultData = void
       >(
-        actionType: ActionType<Config, Secrets, Params>
+        actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
-        if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
-          throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
-        }
-        if (LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold) {
-          throw new Error(
-            `Third party action type "${actionType.id}" can only set minimumLicenseRequired to a gold license or higher`
-          );
-        }
+        ensureSufficientLicense(actionType);
         actionTypeRegistry.register(actionType);
       },
     };
@@ -278,7 +269,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
-      kibanaIndex,
+      kibanaIndexConfig,
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
       instantiateAuthorization,
@@ -297,7 +288,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     ) => {
       if (isESOUsingEphemeralEncryptionKey === true) {
         throw new Error(
-          `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+          `Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
 
@@ -306,10 +297,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         request
       );
 
+      const kibanaIndex = kibanaIndexConfig.kibana.index;
+
       return new ActionsClient({
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
-        defaultKibanaIndex: await kibanaIndex,
+        defaultKibanaIndex: kibanaIndex,
         scopedClusterClient: core.elasticsearch.legacy.client.asScoped(request),
         preconfiguredActions,
         request,
@@ -324,6 +317,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
           preconfiguredActions,
         }),
+        auditLogger: this.security?.audit.asScoped(request),
       });
     };
 
@@ -335,7 +329,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {
       const client = secureGetActionsClientWithRequest(request);
-      return async (type: string, id: string) => (await client).get({ id });
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(
+              objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
+            )
+          : Promise.resolve([]);
     });
 
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
@@ -344,7 +343,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
-      spaces: this.spaces,
+      spaces: plugins.spaces?.spacesService,
       getActionsClientWithRequest,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
@@ -353,23 +352,20 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
-      proxySettings:
-        this.actionsConfig && this.actionsConfig.proxyUrl
-          ? {
-              proxyUrl: this.actionsConfig.proxyUrl,
-              proxyHeaders: this.actionsConfig.proxyHeaders,
-              proxyRejectUnauthorizedCertificates: this.actionsConfig
-                .proxyRejectUnauthorizedCertificates,
-            }
-          : undefined,
     });
+
+    const spaceIdToNamespace = (spaceId?: string) => {
+      return plugins.spaces && spaceId
+        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
+        : undefined;
+    };
 
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
-      getBasePath: this.getBasePath,
-      spaceIdToNamespace: this.spaceIdToNamespace,
+      basePathService: core.http.basePath,
+      spaceIdToNamespace,
       getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
     });
@@ -392,6 +388,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       preconfiguredActions,
+      renderActionParameterTemplates: (...args) =>
+        renderActionParameterTemplates(actionTypeRegistry, ...args),
     };
   }
 
@@ -436,13 +434,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private createRouteHandlerContext = (
     core: CoreSetup<ActionsPluginsStart>,
     defaultKibanaIndex: string
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
+  ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
       actionExecutor,
       instantiateAuthorization,
+      security,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
@@ -451,7 +450,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         getActionsClient: () => {
           if (isESOUsingEphemeralEncryptionKey === true) {
             throw new Error(
-              `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+              `Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
             );
           }
           return new ActionsClient({
@@ -472,6 +471,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
               isESOUsingEphemeralEncryptionKey: isESOUsingEphemeralEncryptionKey!,
               preconfiguredActions,
             }),
+            auditLogger: security?.audit.asScoped(request),
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
@@ -479,17 +479,23 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     };
   };
 
-  private spaceIdToNamespace = (spaceId?: string): string | undefined => {
-    return this.spaces && spaceId ? this.spaces.spaceIdToNamespace(spaceId) : undefined;
-  };
-
-  private getBasePath = (spaceId?: string): string => {
-    return this.spaces && spaceId ? this.spaces.getBasePath(spaceId) : this.serverBasePath!;
-  };
-
   public stop() {
     if (this.licenseState) {
       this.licenseState.clean();
     }
+  }
+}
+
+export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+  actionTypeRegistry: ActionTypeRegistry | undefined,
+  actionTypeId: string,
+  params: Params,
+  variables: Record<string, unknown>
+): Params {
+  const actionType = actionTypeRegistry?.get(actionTypeId);
+  if (actionType?.renderParameterTemplates) {
+    return actionType.renderParameterTemplates(params, variables) as Params;
+  } else {
+    return renderMustacheObject(params, variables);
   }
 }

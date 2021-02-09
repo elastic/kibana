@@ -1,23 +1,10 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import { PersistedState } from 'src/plugins/visualizations/public';
 
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**
@@ -61,6 +48,18 @@ export interface ExpressionRenderDefinition<Config = unknown> {
 
 export type AnyExpressionRenderDefinition = ExpressionRenderDefinition<any>;
 
+/**
+ * Mode of the expression render environment.
+ * This value can be set from a consumer embedding an expression renderer and is accessible
+ * from within the active render function as part of the handlers.
+ * The following modes are supported:
+ * * display (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)
+ * * preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline
+ * * edit: The chart is rendered within an editor and configuration elements within the chart should be displayed
+ * * noInteractivity: The chart is rendered in a non-interactive environment and should not provide any affordances for interaction like brushing
+ */
+export type RenderMode = 'noInteractivity' | 'edit' | 'preview' | 'display';
+
 export interface IInterpreterRenderHandlers {
   /**
    * Done increments the number of rendering successes
@@ -70,5 +69,13 @@ export interface IInterpreterRenderHandlers {
   reload: () => void;
   update: (params: any) => void;
   event: (event: any) => void;
-  uiState?: PersistedState;
+  hasCompatibleActions?: (event: any) => Promise<boolean>;
+  getRenderMode: () => RenderMode;
+  isSyncColorsEnabled: () => boolean;
+  /**
+   * This uiState interface is actually `PersistedState` from the visualizations plugin,
+   * but expressions cannot know about vis or it creates a mess of circular dependencies.
+   * Downstream consumers of the uiState handler will need to cast for now.
+   */
+  uiState?: unknown;
 }

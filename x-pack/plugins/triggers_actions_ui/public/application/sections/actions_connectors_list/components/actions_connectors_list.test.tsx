@@ -1,35 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
 import { ActionsConnectorsList } from './actions_connectors_list';
-import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { AppContextProvider } from '../../../app_context';
-import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
+import { useKibana } from '../../../../common/lib/kibana';
+
+jest.mock('../../../../common/lib/kibana');
+import {
+  ActionConnector,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../../types';
+import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
-
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const mocks = coreMock.createSetup();
+const { loadAllActions, loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
 
 describe('actions_connectors_list component empty', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAllActions, loadActionTypes } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
@@ -41,44 +47,26 @@ describe('actions_connectors_list component empty', () => {
         name: 'Test2',
       },
     ]);
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          show: true,
-          save: true,
-          delete: true,
-        },
-      },
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: {} as any,
-    };
     actionTypeRegistry.has.mockReturnValue(true);
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsList />
-      </AppContextProvider>
-    );
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        delete: true,
+        save: true,
+        show: true,
+      },
+    };
+    wrapper = mountWithIntl(<ActionsConnectorsList />);
 
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -89,7 +77,9 @@ describe('actions_connectors_list component empty', () => {
 
   it('renders empty prompt', async () => {
     await setup();
-    expect(wrapper.find('EuiEmptyPrompt')).toHaveLength(1);
+    expect(
+      wrapper.find('[data-test-subj="createFirstConnectorEmptyPrompt"]').find('EuiEmptyPrompt')
+    ).toHaveLength(1);
     expect(
       wrapper.find('[data-test-subj="createFirstActionButton"]').find('EuiButton')
     ).toHaveLength(1);
@@ -105,36 +95,43 @@ describe('actions_connectors_list component empty', () => {
 describe('actions_connectors_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
-  async function setup() {
-    const { loadAllActions, loadActionTypes } = jest.requireMock(
-      '../../../lib/action_connector_api'
+  async function setup(actionConnectors?: ActionConnector[]) {
+    loadAllActions.mockResolvedValueOnce(
+      actionConnectors ?? [
+        {
+          id: '1',
+          actionTypeId: 'test',
+          description: 'My test',
+          isPreconfigured: false,
+          referencedByCount: 1,
+          config: {},
+        },
+        {
+          id: '2',
+          actionTypeId: 'test2',
+          description: 'My test 2',
+          referencedByCount: 1,
+          isPreconfigured: false,
+          config: {},
+        },
+        {
+          id: '3',
+          actionTypeId: 'test2',
+          description: 'My preconfigured test 2',
+          referencedByCount: 1,
+          isPreconfigured: true,
+          config: {},
+        },
+        {
+          id: '4',
+          actionTypeId: 'nonexistent',
+          description: 'My invalid connector type',
+          referencedByCount: 1,
+          isPreconfigured: false,
+          config: {},
+        },
+      ]
     );
-    loadAllActions.mockResolvedValueOnce([
-      {
-        id: '1',
-        actionTypeId: 'test',
-        description: 'My test',
-        isPreconfigured: false,
-        referencedByCount: 1,
-        config: {},
-      },
-      {
-        id: '2',
-        actionTypeId: 'test2',
-        description: 'My test 2',
-        referencedByCount: 1,
-        isPreconfigured: false,
-        config: {},
-      },
-      {
-        id: '3',
-        actionTypeId: 'test2',
-        description: 'My preconfigured test 2',
-        referencedByCount: 1,
-        isPreconfigured: true,
-        config: {},
-      },
-    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -148,47 +145,44 @@ describe('actions_connectors_list component with items', () => {
       },
     ]);
 
-    const mockes = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
+        application: { capabilities },
       },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          show: true,
-          save: true,
-          delete: true,
-        },
-      },
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: {
-        get() {
-          return null;
-        },
-      } as any,
-      alertTypeRegistry: {} as any,
-    };
+    ] = await mocks.getStartServices();
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsList />
-      </AppContextProvider>
-    );
+    const mockedActionParamsFields = React.lazy(async () => ({
+      default() {
+        return <React.Fragment />;
+      },
+    }));
+
+    actionTypeRegistry.get.mockReturnValue({
+      id: 'test',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
+      },
+      validateParams: (): GenericValidationResult<unknown> => {
+        const validationResult = { errors: {} };
+        return validationResult;
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+    });
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        delete: true,
+        save: true,
+        show: true,
+      },
+    };
+    wrapper = mountWithIntl(<ActionsConnectorsList />);
 
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -202,12 +196,53 @@ describe('actions_connectors_list component with items', () => {
   it('renders table of connectors', async () => {
     await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(3);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(4);
   });
 
   it('renders table with preconfigured connectors', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+  });
+
+  it('renders unknown connector type as disabled', async () => {
+    await setup();
+    expect(wrapper.find('button[data-test-subj="edit4"]').getDOMNode()).toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="deleteConnector"]').last().getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="runConnector"]').last().getDOMNode()
+    ).toBeDisabled();
+  });
+
+  it('supports pagination', async () => {
+    await setup(
+      times(15, (index) => ({
+        id: `connector${index}`,
+        actionTypeId: 'test',
+        name: `My test ${index}`,
+        secrets: {},
+        description: `My test ${index}`,
+        isPreconfigured: false,
+        referencedByCount: 1,
+        config: {},
+      }))
+    );
+    expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
+      .toMatchInlineSnapshot(`
+      Object {
+        "initialPageIndex": 0,
+        "pageIndex": 0,
+      }
+    `);
+    wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="actionsTable"]').first().prop('pagination'))
+      .toMatchInlineSnapshot(`
+      Object {
+        "initialPageIndex": 0,
+        "pageIndex": 1,
+      }
+    `);
   });
 
   test('if select item for edit should render ConnectorEditFlyout', async () => {
@@ -222,9 +257,6 @@ describe('actions_connectors_list component empty with show only capability', ()
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAllActions, loadActionTypes } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
@@ -236,47 +268,24 @@ describe('actions_connectors_list component empty with show only capability', ()
         name: 'Test2',
       },
     ]);
-    const mockes = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
+        application: { capabilities },
       },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          show: true,
-          save: false,
-          delete: false,
-        },
-      },
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: {
-        get() {
-          return null;
-        },
-      } as any,
-      alertTypeRegistry: {} as any,
-    };
+    ] = await mocks.getStartServices();
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: false,
+        delete: false,
+      },
+    };
+    wrapper = mountWithIntl(<ActionsConnectorsList />);
 
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -296,9 +305,6 @@ describe('actions_connectors_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAllActions, loadActionTypes } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAllActions.mockResolvedValueOnce([
       {
         id: '1',
@@ -325,47 +331,24 @@ describe('actions_connectors_list with show only capability', () => {
         name: 'Test2',
       },
     ]);
-    const mockes = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
+        application: { capabilities },
       },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          show: true,
-          save: false,
-          delete: false,
-        },
-      },
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: {
-        get() {
-          return null;
-        },
-      } as any,
-      alertTypeRegistry: {} as any,
-    };
+    ] = await mocks.getStartServices();
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: false,
+        delete: false,
+      },
+    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<ActionsConnectorsList />);
 
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {
@@ -390,9 +373,6 @@ describe('actions_connectors_list component with disabled items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAllActions, loadActionTypes } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAllActions.mockResolvedValueOnce([
       {
         id: '1',
@@ -426,47 +406,24 @@ describe('actions_connectors_list component with disabled items', () => {
       },
     ]);
 
-    const mockes = coreMock.createSetup();
     const [
       {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
+        application: { capabilities },
       },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      injectedMetadata: mockes.injectedMetadata,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          show: true,
-          save: true,
-          delete: true,
-        },
-      },
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: {
-        get() {
-          return null;
-        },
-      } as any,
-      alertTypeRegistry: {} as any,
-    };
+    ] = await mocks.getStartServices();
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: true,
+        delete: true,
+      },
+    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<ActionsConnectorsList />);
 
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {

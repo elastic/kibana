@@ -6,16 +6,9 @@
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
-    "kbn": "node ../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
-  },
-  "devDependencies": {
-    "@elastic/eui": "29.5.0",
-    "@kbn/plugin-helpers": "1.0.0",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "typescript": "4.0.2"
+    "kbn": "node ./../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
   }
 }

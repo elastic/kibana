@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart } from '../../../../src/core/public';
@@ -12,7 +13,7 @@ import {
   LensByValueInput,
   LensByReferenceInput,
 } from './editor_frame_service/embeddable/embeddable';
-import { SavedObjectIndexStore } from './persistence';
+import { SavedObjectIndexStore, Document } from './persistence';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common';
 
@@ -21,6 +22,12 @@ export type LensAttributeService = AttributeService<
   LensByValueInput,
   LensByReferenceInput
 >;
+
+function documentToAttributes(doc: Document): LensSavedObjectAttributes {
+  delete doc.savedObjectId;
+  delete doc.type;
+  return { ...doc };
+}
 
 export function getLensAttributeService(
   core: CoreStart,
@@ -32,11 +39,7 @@ export function getLensAttributeService(
     LensByValueInput,
     LensByReferenceInput
   >(DOC_TYPE, {
-    saveMethod: async (
-      type: string,
-      attributes: LensSavedObjectAttributes,
-      savedObjectId?: string
-    ) => {
+    saveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
       const savedDoc = await savedObjectStore.save({
         ...attributes,
         savedObjectId,
@@ -45,14 +48,8 @@ export function getLensAttributeService(
       return { id: savedDoc.savedObjectId };
     },
     unwrapMethod: async (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
-      const savedObject = await core.savedObjects.client.get<LensSavedObjectAttributes>(
-        DOC_TYPE,
-        savedObjectId
-      );
-      return {
-        ...savedObject.attributes,
-        references: savedObject.references,
-      };
+      const attributes = documentToAttributes(await savedObjectStore.load(savedObjectId));
+      return attributes;
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       const savedObjectsClient = core.savedObjects.client;

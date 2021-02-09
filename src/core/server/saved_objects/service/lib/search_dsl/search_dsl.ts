@@ -1,26 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { IndexMapping } from '../../../mappings';
-import { getQueryParams } from './query_params';
+import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
 import { getSortingParams } from './sorting_params';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
@@ -29,17 +18,15 @@ type KueryNode = any;
 interface GetSearchDslOptions {
   type: string | string[];
   search?: string;
-  defaultSearchOperator?: string;
+  defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
   typeToNamespacesMap?: Map<string, string[] | undefined>;
-  hasReference?: {
-    type: string;
-    id: string;
-  };
+  hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
+  hasReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }
 
@@ -59,6 +46,7 @@ export function getSearchDsl(
     namespaces,
     typeToNamespacesMap,
     hasReference,
+    hasReferenceOperator,
     kueryNode,
   } = options;
 
@@ -72,7 +60,6 @@ export function getSearchDsl(
 
   return {
     ...getQueryParams({
-      mappings,
       registry,
       namespaces,
       type,
@@ -82,6 +69,7 @@ export function getSearchDsl(
       rootSearchFields,
       defaultSearchOperator,
       hasReference,
+      hasReferenceOperator,
       kueryNode,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
 
 function getResponse(
@@ -75,63 +77,6 @@ describe('fetchMissingMonitoringData', () => {
                   timestamp: 2,
                 },
               ]),
-              kibana_uuids: getResponse('.monitoring-kibana-*', [
-                {
-                  uuid: 'kibanaUuid1',
-                  nameSource: {
-                    kibana_stats: {
-                      kibana: {
-                        name: 'kibanaName1',
-                      },
-                    },
-                  },
-                  timestamp: 4,
-                },
-              ]),
-              logstash_uuids: getResponse('.monitoring-logstash-*', [
-                {
-                  uuid: 'logstashUuid1',
-                  nameSource: {
-                    logstash_stats: {
-                      logstash: {
-                        host: 'logstashName1',
-                      },
-                    },
-                  },
-                  timestamp: 2,
-                },
-              ]),
-              beats: {
-                beats_uuids: getResponse('.monitoring-beats-*', [
-                  {
-                    uuid: 'beatUuid1',
-                    nameSource: {
-                      beats_stats: {
-                        beat: {
-                          name: 'beatName1',
-                        },
-                      },
-                    },
-                    timestamp: 0,
-                  },
-                ]),
-              },
-              apms: {
-                apm_uuids: getResponse('.monitoring-beats-*', [
-                  {
-                    uuid: 'apmUuid1',
-                    nameSource: {
-                      beats_stats: {
-                        beat: {
-                          name: 'apmName1',
-                          type: 'apm-server',
-                        },
-                      },
-                    },
-                    timestamp: 1,
-                  },
-                ]),
-              },
             })),
           },
         },
@@ -147,51 +92,17 @@ describe('fetchMissingMonitoringData', () => {
     );
     expect(result).toEqual([
       {
-        stackProduct: 'elasticsearch',
-        stackProductUuid: 'nodeUuid1',
-        stackProductName: 'nodeName1',
+        nodeId: 'nodeUuid1',
+        nodeName: 'nodeName1',
         clusterUuid: 'clusterUuid1',
         gapDuration: 1,
         ccs: null,
       },
       {
-        stackProduct: 'elasticsearch',
-        stackProductUuid: 'nodeUuid2',
-        stackProductName: 'nodeName2',
+        nodeId: 'nodeUuid2',
+        nodeName: 'nodeName2',
         clusterUuid: 'clusterUuid1',
         gapDuration: 8,
-        ccs: null,
-      },
-      {
-        stackProduct: 'kibana',
-        stackProductUuid: 'kibanaUuid1',
-        stackProductName: 'kibanaName1',
-        clusterUuid: 'clusterUuid1',
-        gapDuration: 6,
-        ccs: null,
-      },
-      {
-        stackProduct: 'logstash',
-        stackProductUuid: 'logstashUuid1',
-        stackProductName: 'logstashName1',
-        clusterUuid: 'clusterUuid1',
-        gapDuration: 8,
-        ccs: null,
-      },
-      {
-        stackProduct: 'beats',
-        stackProductUuid: 'beatUuid1',
-        stackProductName: 'beatName1',
-        clusterUuid: 'clusterUuid1',
-        gapDuration: 10,
-        ccs: null,
-      },
-      {
-        stackProduct: 'apm',
-        stackProductUuid: 'apmUuid1',
-        stackProductName: 'apmName1',
-        clusterUuid: 'clusterUuid1',
-        gapDuration: 9,
         ccs: null,
       },
     ]);
@@ -237,9 +148,8 @@ describe('fetchMissingMonitoringData', () => {
     );
     expect(result).toEqual([
       {
-        stackProduct: 'elasticsearch',
-        stackProductUuid: 'nodeUuid1',
-        stackProductName: 'nodeName1',
+        nodeId: 'nodeUuid1',
+        nodeName: 'nodeName1',
         clusterUuid: 'clusterUuid1',
         gapDuration: 1,
         ccs: 'Monitoring',

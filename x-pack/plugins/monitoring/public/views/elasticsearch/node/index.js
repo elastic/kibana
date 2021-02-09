@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -14,6 +15,7 @@ import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
+import { SetupModeRenderer } from '../../../components/renderers';
 import { Node } from '../../../components/elasticsearch/node/node';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
@@ -21,10 +23,14 @@ import { MonitoringViewBaseController } from '../../base_controller';
 import {
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../../../common/constants';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -60,6 +66,8 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
             alertTypeIds: [
               ALERT_CPU_USAGE,
               ALERT_DISK_USAGE,
+              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+              ALERT_THREAD_POOL_WRITE_REJECTIONS,
               ALERT_MEMORY_USAGE,
               ALERT_MISSING_MONITORING_DATA,
             ],
@@ -118,14 +126,26 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           $scope.labels = labels.node;
 
           this.renderReact(
-            <Node
+            <SetupModeRenderer
               scope={$scope}
-              alerts={this.alerts}
-              nodeId={this.nodeName}
-              clusterUuid={$scope.cluster.cluster_uuid}
-              onBrush={this.onBrush}
-              zoomInfo={this.zoomInfo}
-              {...data}
+              injector={$injector}
+              productName={ELASTICSEARCH_SYSTEM_ID}
+              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+                  {flyoutComponent}
+                  <Node
+                    scope={$scope}
+                    setupMode={setupMode}
+                    alerts={this.alerts}
+                    nodeId={this.nodeName}
+                    clusterUuid={$scope.cluster.cluster_uuid}
+                    onBrush={this.onBrush}
+                    zoomInfo={this.zoomInfo}
+                    {...data}
+                  />
+                  {bottomBarComponent}
+                </SetupModeContext.Provider>
+              )}
             />
           );
         }

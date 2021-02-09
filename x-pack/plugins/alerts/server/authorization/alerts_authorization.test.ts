@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { KibanaRequest } from 'kibana/server';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   PluginStartContract as FeaturesStartContract,
   KibanaFeature,
@@ -16,6 +17,8 @@ import { AlertsAuthorization, WriteOperations, ReadOperations } from './alerts_a
 import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
+import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertType } from '../alert_type_registry';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -172,6 +175,8 @@ beforeEach(() => {
     name: 'My Alert Type',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'myApp',
   }));
@@ -240,9 +245,9 @@ describe('AlertsAuthorization', () => {
 
     test('ensures the user has privileges to execute the specified type, operation and consumer', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertsAuthorization({
         request,
@@ -283,9 +288,9 @@ describe('AlertsAuthorization', () => {
 
     test('ensures the user has privileges to execute the specified type and operation without consumer when consumer is alerts', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertsAuthorization({
         request,
@@ -326,9 +331,9 @@ describe('AlertsAuthorization', () => {
 
     test('ensures the user has privileges to execute the specified type, operation and producer when producer is different from consumer', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -377,9 +382,9 @@ describe('AlertsAuthorization', () => {
 
     test('throws if user lacks the required privieleges for the consumer', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertsAuthorization({
         request,
@@ -428,9 +433,9 @@ describe('AlertsAuthorization', () => {
 
     test('throws if user lacks the required privieleges for the producer', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertsAuthorization({
         request,
@@ -479,9 +484,9 @@ describe('AlertsAuthorization', () => {
 
     test('throws if user lacks the required privieleges for both consumer and producer', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       const alertAuthorization = new AlertsAuthorization({
         request,
@@ -530,29 +535,38 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('getFindAuthorizationFilter', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
-    const mySecondAppAlertType = {
+    const mySecondAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 
@@ -594,9 +608,9 @@ describe('AlertsAuthorization', () => {
 
     test('creates a filter based on the privileged types', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -614,20 +628,26 @@ describe('AlertsAuthorization', () => {
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
-        esKuery.fromKueryExpression(
-          `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-        )
-      );
+      // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
+      // resolved, we can start using this code again, instead of toMatchSnapshot():
+      //
+      // expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
+      //   esKuery.fromKueryExpression(
+      //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+      //   )
+      // );
+
+      // This code is the replacement code for above
+      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchSnapshot();
 
       expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
     });
 
     test('creates an `ensureAlertTypeIsAuthorized` function which throws if type is unauthorized', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -686,9 +706,9 @@ describe('AlertsAuthorization', () => {
 
     test('creates an `ensureAlertTypeIsAuthorized` function which is no-op if type is authorized', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -736,9 +756,9 @@ describe('AlertsAuthorization', () => {
 
     test('creates an `logSuccessfulAuthorization` function which logs every authorized type', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -820,21 +840,27 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('filterByAlertTypeAuthorization', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
@@ -877,9 +903,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -903,9 +935,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -913,9 +951,9 @@ describe('AlertsAuthorization', () => {
 
     test('augments a list of types with consumers under which the operation is authorized', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -969,9 +1007,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -991,9 +1035,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1001,9 +1051,9 @@ describe('AlertsAuthorization', () => {
 
     test('authorizes user under the Alerts consumer when they are authorized by the producer', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -1052,9 +1102,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1062,9 +1118,9 @@ describe('AlertsAuthorization', () => {
 
     test('augments a list of types with consumers under which multiple operations are authorized', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -1142,9 +1198,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
                 Object {
                   "actionGroups": Array [],
@@ -1164,9 +1226,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);
@@ -1174,9 +1242,9 @@ describe('AlertsAuthorization', () => {
 
     test('omits types which have no consumers under which the operation is authorized', async () => {
       const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<ReturnType<
-        typeof authorization.checkPrivilegesDynamicallyWithRequest
-      >> = jest.fn();
+      const checkPrivileges: jest.MockedFunction<
+        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+      > = jest.fn();
       authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
@@ -1238,9 +1306,15 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
+                  "recoveryActionGroup": Object {
+                    "id": "recovered",
+                    "name": "Recovered",
+                  },
                 },
               }
             `);

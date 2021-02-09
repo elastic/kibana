@@ -1,23 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import '../../../../__mocks__/kea.mock';
 
 import { setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { IUser } from '../../../types';
+import { EuiTable, EuiTablePagination } from '@elastic/eui';
+
+import { TableHeader } from '../../../../shared/table_header';
+import { User } from '../../../types';
 
 import { GroupUsersTable } from './group_users_table';
-import { TableHeader } from '../../../../shared/table_header';
-
-import { EuiTable, EuiTablePagination } from '@elastic/eui';
 
 const group = groups[0];
 
@@ -38,7 +38,7 @@ describe('GroupUsersTable', () => {
   });
 
   it('renders pagination', () => {
-    const users = [] as IUser[];
+    const users = [] as User[];
     const NUM_TOTAL_USERS = 20;
 
     [...Array(NUM_TOTAL_USERS)].forEach((_, i) => {

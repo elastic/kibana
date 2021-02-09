@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -102,26 +103,46 @@ const metricBeatData = [
   '_id',
   '_index',
   'agent.ephemeral_id',
+  'agent.ephemeral_id.keyword',
   'agent.hostname',
+  'agent.hostname.keyword',
   'agent.id',
+  'agent.id.keyword',
   'agent.type',
+  'agent.type.keyword',
   'agent.version',
+  'agent.version.keyword',
   'ecs.version',
+  'ecs.version.keyword',
   'event.dataset',
+  'event.dataset.keyword',
   'event.duration',
   'event.module',
+  'event.module.keyword',
   'host.architecture',
+  'host.architecture.keyword',
   'host.hostname',
+  'host.hostname.keyword',
   'host.id',
+  'host.id.keyword',
   'host.name',
+  'host.name.keyword',
   'host.os.build',
+  'host.os.build.keyword',
   'host.os.family',
+  'host.os.family.keyword',
   'host.os.kernel',
+  'host.os.kernel.keyword',
   'host.os.name',
+  'host.os.name.keyword',
   'host.os.platform',
+  'host.os.platform.keyword',
   'host.os.version',
+  'host.os.version.keyword',
   'metricset.name',
+  'metricset.name.keyword',
   'service.type',
+  'service.type.keyword',
   'system.cpu.cores',
   'system.cpu.idle.pct',
   'system.cpu.iowait.pct',

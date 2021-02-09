@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { deepObjectEntries } from './deep_object_entries';
 
 describe('deepObjectEntries', () => {
-  const valuesAndExpected: Array<[
-    objectValue: object,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expected: Array<[path: Array<keyof any>, fieldValue: unknown]>
-  ]> = [
+  const valuesAndExpected: Array<
+    [
+      objectValue: object,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expected: Array<[path: Array<keyof any>, fieldValue: unknown]>
+    ]
+  > = [
     [{}, []], // No 'field' values found
     [{ a: {} }, []], // No 'field' values found
     [{ a: { b: undefined } }, []], // No 'field' values found

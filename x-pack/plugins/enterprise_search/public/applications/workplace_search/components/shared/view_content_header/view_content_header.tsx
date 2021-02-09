@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiSpacer } from '@elastic/eui';
-
 import { FlexGroupAlignItems } from '@elastic/eui/src/components/flex/flex_group';
 
-interface IViewContentHeaderProps {
+interface ViewContentHeaderProps {
   title: React.ReactNode;
   description?: React.ReactNode;
   action?: React.ReactNode;
@@ -18,7 +18,7 @@ interface IViewContentHeaderProps {
   titleSize?: 's' | 'm' | 'l';
 }
 
-export const ViewContentHeader: React.FC<IViewContentHeaderProps> = ({
+export const ViewContentHeader: React.FC<ViewContentHeaderProps> = ({
   title,
   titleSize = 'm',
   description,
@@ -44,6 +44,7 @@ export const ViewContentHeader: React.FC<IViewContentHeaderProps> = ({
       <EuiFlexGroup alignItems={alignItems} justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiTitle size={titleSize}>{titleElement}</EuiTitle>
+          <EuiSpacer size="s" />
           {description && (
             <EuiText grow={false} color="subdued">
               <p>{description}</p>

@@ -7,12 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient): Promise<{
-    maxConcurrentShardRequests: number | undefined;
-    ignoreThrottled: boolean;
-    ignoreUnavailable: boolean;
-    trackTotalHits: boolean;
-}>;
+export declare function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient): Promise<Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>>;
 ```
 
 ## Parameters
@@ -23,10 +18,5 @@ export declare function getDefaultSearchParams(uiSettingsClient: IUiSettingsClie
 
 <b>Returns:</b>
 
-`Promise<{
-    maxConcurrentShardRequests: number | undefined;
-    ignoreThrottled: boolean;
-    ignoreUnavailable: boolean;
-    trackTotalHits: boolean;
-}>`
+`Promise<Pick<Search, 'max_concurrent_shard_requests' | 'ignore_unavailable' | 'track_total_hits'>>`
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useRef, useState } from 'react';
@@ -25,7 +26,7 @@ import {
 
 import { useServices, useToastNotifications } from '../app_context';
 import { documentationLinksService } from '../services/documentation';
-import { CronEditor } from '../../shared_imports';
+import { Frequency, CronEditor } from '../../shared_imports';
 import { DEFAULT_RETENTION_SCHEDULE, DEFAULT_RETENTION_FREQUENCY } from '../constants';
 import { updateRetentionSchedule } from '../services/http';
 
@@ -57,7 +58,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
 
   const [simpleCron, setSimpleCron] = useState<{
     expression: string;
-    frequency: string;
+    frequency: Frequency;
   }>({
     expression: DEFAULT_RETENTION_SCHEDULE,
     frequency: DEFAULT_RETENTION_FREQUENCY,
@@ -234,10 +235,6 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                     cronExpression: expression,
                     frequency,
                     fieldToPreferredValueMap: newFieldToPreferredValueMap,
-                  }: {
-                    cronExpression: string;
-                    frequency: string;
-                    fieldToPreferredValueMap: any;
                   }) => {
                     setSimpleCron({
                       expression,

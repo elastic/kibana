@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -24,13 +25,14 @@ export const createRuleActionsSavedObject = async ({
   actions = [],
   throttle,
 }: CreateRuleActionsSavedObject): Promise<RulesActionsSavedObject> => {
-  const ruleActionsSavedObject = await savedObjectsClient.create<
-    IRuleActionsAttributesSavedObjectAttributes
-  >(ruleActionsSavedObjectType, {
-    ruleAlertId,
-    actions,
-    ...getThrottleOptions(throttle),
-  });
+  const ruleActionsSavedObject = await savedObjectsClient.create<IRuleActionsAttributesSavedObjectAttributes>(
+    ruleActionsSavedObjectType,
+    {
+      ruleAlertId,
+      actions,
+      ...getThrottleOptions(throttle),
+    }
+  );
 
   return getRuleActionsFromSavedObject(ruleActionsSavedObject);
 };

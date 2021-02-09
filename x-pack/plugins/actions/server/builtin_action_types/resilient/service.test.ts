@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios from 'axios';
@@ -11,7 +12,8 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { incidentTypes, severity } from './mocks';
+import { incidentTypes, resilientFields, severity } from './mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -28,6 +30,7 @@ axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const now = Date.now;
 const TIMESTAMP = 1589391874472;
+const configurationUtilities = actionsConfigMock.create();
 
 // Incident update makes three calls to the API.
 // The function below mocks this calls.
@@ -81,10 +84,13 @@ describe('IBM Resilient service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://resilient.elastic.co/', orgId: '201' },
         secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
       },
-      logger
+      logger,
+      configurationUtilities
     );
   });
 
@@ -153,7 +159,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: null, orgId: '201' },
             secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -165,7 +172,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: null },
             secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -177,7 +185,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: '201' },
             secrets: { apiKeyId: '', apiKeySecret: 'secret' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -189,7 +198,8 @@ describe('IBM Resilient service', () => {
             config: { apiUrl: 'test.com', orgId: '201' },
             secrets: { apiKeyId: '', apiKeySecret: undefined },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -224,6 +234,7 @@ describe('IBM Resilient service', () => {
         params: {
           text_content_output_format: 'objects_convert',
         },
+        configurationUtilities,
       });
     });
 
@@ -231,7 +242,7 @@ describe('IBM Resilient service', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      expect(service.getIncident('1')).rejects.toThrow(
+      await expect(service.getIncident('1')).rejects.toThrow(
         'Unable to get incident with id 1. Error: An error has occurred'
       );
     });
@@ -292,6 +303,7 @@ describe('IBM Resilient service', () => {
           'https://resilient.elastic.co/rest/orgs/201/incidents?text_content_output_format=objects_convert',
         logger,
         method: 'post',
+        configurationUtilities,
         data: {
           name: 'title',
           description: {
@@ -310,7 +322,7 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.createIncident({
           incident: {
             name: 'title',
@@ -365,6 +377,7 @@ describe('IBM Resilient service', () => {
         axios,
         logger,
         method: 'patch',
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
         data: {
           changes: [
@@ -418,7 +431,7 @@ describe('IBM Resilient service', () => {
     test('it should throw an error', async () => {
       mockIncidentUpdate(true);
 
-      expect(
+      await expect(
         service.updateIncident({
           incidentId: '1',
           incident: {
@@ -448,10 +461,6 @@ describe('IBM Resilient service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -475,10 +484,6 @@ describe('IBM Resilient service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -486,7 +491,7 @@ describe('IBM Resilient service', () => {
         axios,
         logger,
         method: 'post',
-        proxySettings: undefined,
+        configurationUtilities,
         url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1/comments',
         data: {
           text: {
@@ -502,16 +507,12 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.createComment({
           incidentId: '1',
           comment: {
             comment: 'comment',
             commentId: 'comment-1',
-            createdBy: null,
-            createdAt: null,
-            updatedAt: null,
-            updatedBy: null,
           },
         })
       ).rejects.toThrow(
@@ -541,7 +542,7 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(service.getIncidentTypes()).rejects.toThrow(
+      await expect(service.getIncidentTypes()).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
       );
     });
@@ -578,8 +579,40 @@ describe('IBM Resilient service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(service.getIncidentTypes()).rejects.toThrow(
+      await expect(service.getIncidentTypes()).rejects.toThrow(
         '[Action][IBM Resilient]: Unable to get incident types. Error: An error has occurred.'
+      );
+    });
+  });
+
+  describe('getFields', () => {
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data: resilientFields,
+      }));
+      await service.getFields();
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        configurationUtilities,
+        url: 'https://resilient.elastic.co/rest/orgs/201/types/incident/fields',
+      });
+    });
+    test('it returns common fields correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data: resilientFields,
+      }));
+      const res = await service.getFields();
+      expect(res).toEqual(resilientFields);
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+      await expect(service.getFields()).rejects.toThrow(
+        'Unable to get fields. Error: An error has occurred'
       );
     });
   });

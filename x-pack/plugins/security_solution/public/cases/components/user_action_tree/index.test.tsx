@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -18,6 +19,8 @@ import { TestProviders } from '../../../common/mock';
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
 const updateCase = jest.fn();
+const onShowAlertDetails = jest.fn();
+
 const defaultProps = {
   caseServices: {},
   caseUserActions: [],
@@ -29,6 +32,8 @@ const defaultProps = {
   onUpdateField,
   updateCase,
   userCanCrud: true,
+  alerts: {},
+  onShowAlertDetails,
 };
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 jest.mock('../../containers/use_update_comment');

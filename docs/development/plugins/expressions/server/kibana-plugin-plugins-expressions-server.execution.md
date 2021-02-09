@@ -7,25 +7,25 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class Execution<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown, InspectorAdapters extends Adapters = ExtraContext['inspectorAdapters'] extends object ? ExtraContext['inspectorAdapters'] : DefaultInspectorAdapters> 
+export declare class Execution<Input = unknown, Output = unknown, InspectorAdapters extends Adapters = ExpressionExecutionParams['inspectorAdapters'] extends object ? ExpressionExecutionParams['inspectorAdapters'] : DefaultInspectorAdapters> 
 ```
 
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(params)](./kibana-plugin-plugins-expressions-server.execution._constructor_.md) |  | Constructs a new instance of the <code>Execution</code> class |
+|  [(constructor)(execution)](./kibana-plugin-plugins-expressions-server.execution._constructor_.md) |  | Constructs a new instance of the <code>Execution</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [context](./kibana-plugin-plugins-expressions-server.execution.context.md) |  | <code>ExecutionContext&lt;Input, InspectorAdapters&gt; &amp; ExtraContext</code> | Execution context - object that allows to do side-effects. Context is passed to every function. |
-|  [contract](./kibana-plugin-plugins-expressions-server.execution.contract.md) |  | <code>ExecutionContract&lt;ExtraContext, Input, Output, InspectorAdapters&gt;</code> | Contract is a public representation of <code>Execution</code> instances. Contract we can return to other plugins for their consumption. |
+|  [context](./kibana-plugin-plugins-expressions-server.execution.context.md) |  | <code>ExecutionContext&lt;InspectorAdapters&gt;</code> | Execution context - object that allows to do side-effects. Context is passed to every function. |
+|  [contract](./kibana-plugin-plugins-expressions-server.execution.contract.md) |  | <code>ExecutionContract&lt;Input, Output, InspectorAdapters&gt;</code> | Contract is a public representation of <code>Execution</code> instances. Contract we can return to other plugins for their consumption. |
+|  [execution](./kibana-plugin-plugins-expressions-server.execution.execution.md) |  | <code>ExecutionParams</code> |  |
 |  [expression](./kibana-plugin-plugins-expressions-server.execution.expression.md) |  | <code>string</code> |  |
 |  [input](./kibana-plugin-plugins-expressions-server.execution.input.md) |  | <code>Input</code> | Initial input of the execution.<!-- -->N.B. It is initialized to <code>null</code> rather than <code>undefined</code> for legacy reasons, because in legacy interpreter it was set to <code>null</code> by default. |
 |  [inspectorAdapters](./kibana-plugin-plugins-expressions-server.execution.inspectoradapters.md) |  | <code>InspectorAdapters</code> |  |
-|  [params](./kibana-plugin-plugins-expressions-server.execution.params.md) |  | <code>ExecutionParams&lt;ExtraContext&gt;</code> |  |
 |  [result](./kibana-plugin-plugins-expressions-server.execution.result.md) |  | <code>Promise&lt;Output &#124; ExpressionValueError&gt;</code> |  |
 |  [state](./kibana-plugin-plugins-expressions-server.execution.state.md) |  | <code>ExecutionContainer&lt;Output &#124; ExpressionValueError&gt;</code> | Dynamic state of the execution. |
 
@@ -35,7 +35,7 @@ export declare class Execution<ExtraContext extends Record<string, unknown> = Re
 |  --- | --- | --- |
 |  [cancel()](./kibana-plugin-plugins-expressions-server.execution.cancel.md) |  | Stop execution of expression. |
 |  [cast(value, toTypeNames)](./kibana-plugin-plugins-expressions-server.execution.cast.md) |  |  |
-|  [interpret(ast, input, options)](./kibana-plugin-plugins-expressions-server.execution.interpret.md) |  |  |
+|  [interpret(ast, input)](./kibana-plugin-plugins-expressions-server.execution.interpret.md) |  |  |
 |  [invokeChain(chainArr, input)](./kibana-plugin-plugins-expressions-server.execution.invokechain.md) |  |  |
 |  [invokeFunction(fn, input, args)](./kibana-plugin-plugins-expressions-server.execution.invokefunction.md) |  |  |
 |  [resolveArgs(fnDef, input, argAsts)](./kibana-plugin-plugins-expressions-server.execution.resolveargs.md) |  |  |

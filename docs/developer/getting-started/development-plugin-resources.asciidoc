@@ -14,8 +14,8 @@ You can use the <<automatic-plugin-generator>> to get a basic structure for a ne
 {kib} repo should be developed inside the `plugins` folder.  If you are building a new plugin to check in to the {kib} repo,
 you will choose between a few locations:
 
- - {kib-repo}tree/{branch}/x-pack/plugins[x-pack/plugins] for commercially licensed plugins
- - {kib-repo}tree/{branch}/src/plugins[src/plugins] for open source licensed plugins
+ - {kib-repo}tree/{branch}/x-pack/plugins[x-pack/plugins] for plugins related to subscription features
+ - {kib-repo}tree/{branch}/src/plugins[src/plugins] for plugins related to free features
  - {kib-repo}tree/{branch}/examples[examples] for developer example plugins (these will not be included in the distributables)
 
 [discrete]
@@ -51,8 +51,9 @@ but not in the distributable version of {kib}. If you use the
 [discrete]
 === {kib} platform migration guide
 
-{kib-repo}blob/{branch}/src/core/MIGRATION.md#migrating-legacy-plugins-to-the-new-platform[This guide]
-provides an action plan for moving a legacy plugin to the new platform. 
+<<migrating-legacy-plugins, This guide>>
+provides an action plan for moving a legacy plugin to the new platform.
+<<migrating-legacy-plugins-examples, Provides>> migration examples for the legacy core services.
 
 [discrete]
 === Externally developed plugins

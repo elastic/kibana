@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
@@ -11,7 +12,7 @@ import {
   DASHBOARD_APP_URL_GENERATOR,
   DashboardUrlGenerator,
   SavedDashboardPanel,
-  SavedObjectDashboard,
+  DashboardSavedObject,
 } from '../../../../../../src/plugins/dashboard/public';
 import { useMlKibana } from '../contexts/kibana';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
@@ -32,7 +33,7 @@ export function dashboardServiceProvider(
      * Fetches dashboards
      */
     async fetchDashboards(query?: string) {
-      return await savedObjectClient.find<SavedObjectDashboard>({
+      return await savedObjectClient.find<DashboardSavedObject>({
         type: 'dashboard',
         perPage: 1000,
         search: query ? `${query}*` : '',
@@ -60,7 +61,7 @@ export function dashboardServiceProvider(
      */
     async attachPanels(
       dashboardId: string,
-      dashboardAttributes: SavedObjectDashboard,
+      dashboardAttributes: DashboardSavedObject,
       panelsData: Array<Pick<SavedDashboardPanel, 'title' | 'type' | 'embeddableConfig'>>
     ) {
       const panels = JSON.parse(dashboardAttributes.panelsJSON) as SavedDashboardPanel[];

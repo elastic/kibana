@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import Joi from 'joi';
+import { errors } from '@elastic/elasticsearch';
 import { has, snakeCase } from 'lodash/fp';
 import { SanitizedAlert } from '../../../../../alerts/common';
 
@@ -17,14 +19,14 @@ import {
 } from '../../../../../../../src/core/server';
 import { AlertsClient } from '../../../../../alerts/server';
 import { BadRequestError } from '../errors/bad_request_error';
-import { RuleStatusResponse, IRuleStatusAttributes } from '../rules/types';
+import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 export interface OutputError {
   message: string;
   statusCode: number;
 }
 
-export const transformError = (err: Error & { statusCode?: number }): OutputError => {
+export const transformError = (err: Error & Partial<errors.ResponseError>): OutputError => {
   if (Boom.isBoom(err)) {
     return {
       message: err.output.payload.message,
@@ -32,10 +34,17 @@ export const transformError = (err: Error & { statusCode?: number }): OutputErro
     };
   } else {
     if (err.statusCode != null) {
-      return {
-        message: err.message,
-        statusCode: err.statusCode,
-      };
+      if (err.body?.error != null) {
+        return {
+          statusCode: err.statusCode,
+          message: `${err.body.error.type}: ${err.body.error.reason}`,
+        };
+      } else {
+        return {
+          statusCode: err.statusCode,
+          message: err.message,
+        };
+      }
     } else if (err instanceof BadRequestError) {
       // allows us to throw request validation errors in the absence of Boom
       return {
@@ -294,39 +303,53 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
   }, {});
 };
 
+/**
+ *
+ * @param id rule id
+ * @param currentStatusAndFailures array of rule statuses where the 0th status is the current status and 1-5 positions are the historical failures
+ * @param acc accumulated rule id : statuses
+ */
 export const mergeStatuses = (
   id: string,
-  failures: Array<SavedObjectsFindResult<IRuleStatusAttributes>>,
+  currentStatusAndFailures: Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>,
   acc: RuleStatusResponse
-) => {
-  if (failures.length === 0) {
+): RuleStatusResponse => {
+  if (currentStatusAndFailures.length === 0) {
     return {
       ...acc,
     };
   }
-  const convertedCurrentStatus = convertToSnakeCase<IRuleStatusAttributes>(failures[0].attributes);
+  const convertedCurrentStatus = convertToSnakeCase<IRuleStatusSOAttributes>(
+    currentStatusAndFailures[0].attributes
+  );
   return {
     ...acc,
     [id]: {
       current_status: convertedCurrentStatus,
-      failures: failures.map((errorItem) =>
-        convertToSnakeCase<IRuleStatusAttributes>(errorItem.attributes)
-      ),
+      failures: currentStatusAndFailures
+        .slice(1)
+        .map((errorItem) => convertToSnakeCase<IRuleStatusSOAttributes>(errorItem.attributes)),
     },
   } as RuleStatusResponse;
 };
 
-export const getFailingRules = (ids: string[], alertsClient: AlertsClient) =>
-  Promise.all(
-    ids.map(async (id) =>
-      alertsClient.get({
-        id,
-      })
-    )
-  )
-    .then((rules) => rules.filter((rule) => rule.executionStatus.status === 'error'))
-    .then((rules) =>
-      rules.reduce((acc, failingRule) => {
+export type GetFailingRulesResult = Record<string, SanitizedAlert>;
+
+export const getFailingRules = async (
+  ids: string[],
+  alertsClient: AlertsClient
+): Promise<GetFailingRulesResult> => {
+  try {
+    const errorRules = await Promise.all(
+      ids.map(async (id) =>
+        alertsClient.get({
+          id,
+        })
+      )
+    );
+    return errorRules
+      .filter((rule) => rule.executionStatus.status === 'error')
+      .reduce<GetFailingRulesResult>((acc, failingRule) => {
         const accum = acc;
         const theRule = failingRule;
         return {
@@ -335,5 +358,8 @@ export const getFailingRules = (ids: string[], alertsClient: AlertsClient) =>
           },
           ...accum,
         };
-      }, {} as Record<string, SanitizedAlert>)
-    );
+      }, {});
+  } catch (exc) {
+    throw new Error(`Failed to get executionStatus with AlertsClient: ${exc.message}`);
+  }
+};

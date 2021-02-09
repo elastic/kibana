@@ -2,7 +2,7 @@
 [[profiler-getting-started]]
 === Getting Started
 
-The {searchprofiler} is automatically enabled in {kib}. From the menu, go to *Dev Tools*, then click *Search Profiler*
+The {searchprofiler} is automatically enabled in {kib}. Open the main menu, click *Dev Tools*, then click *Search Profiler*
 to get started.
 
 {searchprofiler} displays the names of the indices searched, the shards in each index,

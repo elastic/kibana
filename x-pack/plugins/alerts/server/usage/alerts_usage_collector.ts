@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -44,11 +45,14 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
 
 export function createAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   return usageCollection.makeUsageCollector<AlertsUsage>({
     type: 'alerts',
-    isReady: () => true,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
     fetch: async () => {
       try {
         const doc = await getLatestTaskState(await taskManager);
@@ -129,7 +133,7 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 
 export function registerAlertsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  taskManager: TaskManagerStartContract
+  taskManager: Promise<TaskManagerStartContract>
 ) {
   const collector = createAlertsUsageCollector(usageCollection, taskManager);
   usageCollection.registerCollector(collector);

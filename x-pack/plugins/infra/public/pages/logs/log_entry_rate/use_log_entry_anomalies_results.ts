@@ -1,29 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
+import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api/log_analysis';
 import {
-  Sort,
+  AnomaliesSort,
   Pagination,
   PaginationCursor,
-  GetLogEntryAnomaliesDatasetsSuccessResponsePayload,
   LogEntryAnomaly,
-} from '../../../../common/http_api/log_analysis';
+} from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export type SortOptions = Sort;
+export type SortOptions = AnomaliesSort;
 export type PaginationOptions = Pick<Pagination, 'pageSize'>;
 export type Page = number;
 export type FetchNextPage = () => void;
 export type FetchPreviousPage = () => void;
-export type ChangeSortOptions = (sortOptions: Sort) => void;
+export type ChangeSortOptions = (sortOptions: AnomaliesSort) => void;
 export type ChangePaginationOptions = (paginationOptions: PaginationOptions) => void;
 export type LogEntryAnomalies = LogEntryAnomaly[];
 type LogEntryAnomaliesDatasets = GetLogEntryAnomaliesDatasetsSuccessResponsePayload['data']['datasets'];
@@ -38,7 +39,7 @@ interface ReducerState {
   paginationCursor: Pagination['cursor'] | undefined;
   hasNextPage: boolean;
   paginationOptions: PaginationOptions;
-  sortOptions: Sort;
+  sortOptions: AnomaliesSort;
   timeRange: {
     start: number;
     end: number;
@@ -53,7 +54,7 @@ type ReducerStateDefaults = Pick<
 
 type ReducerAction =
   | { type: 'changePaginationOptions'; payload: { paginationOptions: PaginationOptions } }
-  | { type: 'changeSortOptions'; payload: { sortOptions: Sort } }
+  | { type: 'changeSortOptions'; payload: { sortOptions: AnomaliesSort } }
   | { type: 'fetchNextPage' }
   | { type: 'fetchPreviousPage' }
   | { type: 'changeHasNextPage'; payload: { hasNextPage: boolean } }
@@ -144,7 +145,7 @@ export const useLogEntryAnomaliesResults = ({
   endTime: number;
   startTime: number;
   sourceId: string;
-  defaultSortOptions: Sort;
+  defaultSortOptions: AnomaliesSort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
   filteredDatasets?: string[];
@@ -225,7 +226,7 @@ export const useLogEntryAnomaliesResults = ({
   );
 
   const changeSortOptions = useCallback(
-    (nextSortOptions: Sort) => {
+    (nextSortOptions: AnomaliesSort) => {
       dispatch({ type: 'changeSortOptions', payload: { sortOptions: nextSortOptions } });
     },
     [dispatch]
@@ -284,9 +285,10 @@ export const useLogEntryAnomaliesResults = ({
   );
 
   // Anomalies datasets
-  const [logEntryAnomaliesDatasets, setLogEntryAnomaliesDatasets] = useState<
-    LogEntryAnomaliesDatasets
-  >([]);
+  const [
+    logEntryAnomaliesDatasets,
+    setLogEntryAnomaliesDatasets,
+  ] = useState<LogEntryAnomaliesDatasets>([]);
 
   const [getLogEntryAnomaliesDatasetsRequest, getLogEntryAnomaliesDatasets] = useTrackedPromise(
     {

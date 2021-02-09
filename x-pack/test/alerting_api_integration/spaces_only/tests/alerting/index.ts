@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -13,6 +14,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     before(async () => buildUp(getService));
     after(async () => tearDown(getService));
 
+    loadTestFile(require.resolve('./aggregate'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./disable'));
@@ -33,6 +35,8 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./alerts_space1'));
     loadTestFile(require.resolve('./alerts_default_space'));
     loadTestFile(require.resolve('./builtin_alert_types'));
+    loadTestFile(require.resolve('./mustache_templates.ts'));
+    loadTestFile(require.resolve('./notify_when'));
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));

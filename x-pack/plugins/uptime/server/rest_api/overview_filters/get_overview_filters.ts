@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -26,9 +27,10 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       schemes: arrayOrStringType,
       ports: arrayOrStringType,
       tags: arrayOrStringType,
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, request, response) => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;
 
     let parsedSearch: Record<string, any> | undefined;
@@ -40,9 +42,8 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       }
     }
 
-    const filtersResponse = await libs.requests.getFilterBar({
-      callES,
-      dynamicSettings,
+    return await libs.requests.getFilterBar({
+      uptimeEsClient,
       dateRangeStart,
       dateRangeEnd,
       search: parsedSearch,
@@ -53,7 +54,5 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
         tags,
       }),
     });
-
-    return response.ok({ body: { ...filtersResponse } });
   },
 });

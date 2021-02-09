@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
@@ -35,10 +36,9 @@ export function prependDatasourceExpression(
   if (datasourceExpressions.length === 0 || visualizationExpression === null) {
     return null;
   }
-  const parsedDatasourceExpressions: Array<[
-    string,
-    Ast
-  ]> = datasourceExpressions.map(([layerId, expr]) => [
+  const parsedDatasourceExpressions: Array<
+    [string, Ast]
+  > = datasourceExpressions.map(([layerId, expr]) => [
     layerId,
     typeof expr === 'string' ? fromExpression(expr) : expr,
   ]);

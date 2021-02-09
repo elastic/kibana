@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './_classification_exploration.scss';
@@ -29,7 +30,7 @@ import {
   DataFrameAnalyticsConfig,
 } from '../../../../common';
 import { isKeywordAndTextType } from '../../../../common/fields';
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
+import { DataFrameTaskStateType } from '../../../analytics_management/components/analytics_list/common';
 import {
   isResultsSearchBoolQuery,
   isClassificationEvaluateResponse,
@@ -49,7 +50,7 @@ import {
 
 export interface EvaluatePanelProps {
   jobConfig: DataFrameAnalyticsConfig;
-  jobStatus?: DATA_FRAME_TASK_STATE;
+  jobStatus?: DataFrameTaskStateType;
   searchQuery: ResultsSearchQuery;
 }
 
@@ -272,7 +273,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     return <span>{columnId === ACTUAL_CLASS_ID ? cellValue : accuracy}</span>;
   };
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.classificationEvaluation;
 
   const showTrailingColumns = columnsData.length > MAX_COLUMNS;
   const extraColumns = columnsData.length - MAX_COLUMNS;
@@ -286,6 +287,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   return (
     <>
       <ExpandableSection
+        urlStateKey={'evaluation'}
         dataTestId="ClassificationEvaluation"
         title={
           <FormattedMessage
@@ -299,7 +301,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
             iconType="help"
             iconSide="left"
             color="primary"
-            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-classification`}
+            href={docLink}
           >
             {i18n.translate(
               'xpack.ml.dataframe.analytics.classificationExploration.classificationDocsLink',

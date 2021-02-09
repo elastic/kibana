@@ -2,11 +2,10 @@
 [[alerting-getting-started]]
 = Alerting and Actions
 
-beta[]
 
 --
 
-Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> for you to use.
+Alerting allows you to detect complex conditions within different {kib} apps and trigger actions when those conditions are met. Alerting is integrated with <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, <<xpack-siem,*Security*>>, <<uptime-app,*Uptime*>>, can be centrally managed from the <<management,*Management*>> UI, and provides a set of built-in <<action-types, actions>> and <<alert-types, alerts>> (known as stack alerts) for you to use.
 
 image::images/alerting-overview.png[Alerts and actions UI]
 
@@ -58,7 +57,7 @@ Alert schedules are defined as an interval between subsequent checks, and can ra
 
 [IMPORTANT]
 ==============================================
-The intervals of alert checks in {kib} are approximate, their timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-scale-performance>> for more information. 
+The intervals of alert checks in {kib} are approximate, their timing of their execution is affected by factors such as the frequency at which tasks are claimed and the task load on the system. See <<alerting-production-considerations>> for more information. 
 ==============================================
 
 [float]
@@ -124,14 +123,15 @@ image::images/alert-concepts-connectors.svg[Connectors provide a central place t
 [float]
 === Summary
 
-An _alert_ consists of conditions, _actions_, and a schedule. When conditions are met, _alert instances_ are created that render _actions_ and invoke them. To make action setup and update easier, actions refer to _connectors_ that centralize the information used to connect with {kib} services and third-party integrations.
+An _alert_ consists of conditions, _actions_, and a schedule. When conditions are met, _alert instances_ are created that render _actions_ and invoke them. To make action setup and update easier, actions refer to _connectors_ that centralize the information used to connect with {kib} services and third-party integrations. The following example ties these concepts together: 
 
 image::images/alert-concepts-summary.svg[Alerts, actions, alert instances and connectors work together to convert detection into action]
 
-* *Alert*: a specification of the conditions to be detected, the schedule for detection, and the response when detection occurs. 
-* *Action*: the response to a detected condition defined in the alert. Typically actions specify a service or third party integration along with alert details that will be sent to it. 
-* *Alert instance*: state tracked by {kib} for every occurrence of a detected condition. Actions as well as controls like muting and re-notification are controlled at the instance level. 
-* *Connector*: centralized configurations for services and third party integration that are referenced by actions. 
+. Anytime an *alert*'s conditions are met, an *alert instance* is created.  This example checks for servers with average CPU > 0.9. Three servers meet the condition, so three instances are created. 
+. Instances create *actions* as long as they are not muted or throttled. When actions are created, the template that was setup in the alert is filled with actual values.  In this example three actions are created, and the template string {{server}} is replaced with the server name for each instance. 
+. {kib} invokes the actions, sending them to a 3rd party *integration* like an email service.
+. If the 3rd party integration has connection parameters or credentials, {kib} will fetch these from the *connector* referenced in the action. 
+
 
 [float]
 [[alerting-concepts-differences]]
@@ -169,12 +169,15 @@ If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-w
 
 To access alerting in a space, a user must have access to one of the following features:
 
+* Alerting
 * <<xpack-apm,*APM*>>
+* <<logs-app,*Logs*>>
 * <<metrics-app,*Metrics*>>
 * <<xpack-siem,*Security*>>
 * <<uptime-app,*Uptime*>>
 
-See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features. 
+See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features.
+Also note that a user will need +read+ privileges for the *Actions and Connectors* feature to attach actions to an alert or to edit an alert that has an action attached to it.
 
 [float]
 [[alerting-spaces]]

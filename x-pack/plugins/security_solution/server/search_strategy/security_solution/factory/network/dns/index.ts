@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr } from 'lodash/fp';
@@ -33,11 +34,10 @@ export const networkDns: SecuritySolutionFactory<NetworkQueries.dns> = {
     options: NetworkDnsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkDnsStrategyResponse> => {
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const { activePage, fakePossibleCount } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response.rawResponse);
-    const networkDnsEdges: NetworkDnsEdges[] = getDnsEdges(response);
+    const edges: NetworkDnsEdges[] = getDnsEdges(response);
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
-    const edges = networkDnsEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildDnsQuery(options))],
     };

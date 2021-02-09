@@ -1,14 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    rollup?: RollupContext;
-  }
-}
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -18,34 +13,28 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  ILegacyScopedClusterClient,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { ReqFacade } from '../../../../src/plugins/vis_type_timeseries/server';
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies } from './types';
+import { Dependencies, RollupHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
-import { registerRollupSearchStrategy } from './lib/search_strategies';
 import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
 import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
-import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
+import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
 
-interface RollupContext {
-  client: ILegacyScopedClusterClient;
-}
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
   // Extend the elasticsearchJs client with additional endpoints.
   const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+
   return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
 }
 
@@ -93,12 +82,15 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext('rollup', async (context, request) => {
-      this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.rollupEsClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<RollupHandlerContext, 'rollup'>(
+      'rollup',
+      async (context, request) => {
+        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.rollupEsClient.asScoped(request),
+        };
+      }
+    );
 
     registerApiRoutes({
       router: http.createRouter(),
@@ -107,7 +99,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         isEsError,
         formatEsError,
         getCapabilitiesForRollupIndices,
-        mergeCapabilitiesWithFields,
       },
       sharedImports: {
         IndexPatternsFetcher,
@@ -129,15 +120,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         schema: schema.boolean(),
       },
     });
-
-    if (visTypeTimeseries) {
-      const getRollupService = async (request: ReqFacade) => {
-        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-        return this.rollupEsClient.asScoped(request);
-      };
-      const { addSearchStrategy } = visTypeTimeseries;
-      registerRollupSearchStrategy(addSearchStrategy, getRollupService);
-    }
 
     if (usageCollection) {
       this.globalConfig$

@@ -1,80 +1,81 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypesStart, VisType } from '../vis_types';
-import { NewVisModal } from './new_vis_modal';
-import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
+import { mountWithIntl } from '@kbn/test/jest';
+import { TypesStart, VisGroups } from '../vis_types';
+import NewVisModal from './new_vis_modal';
+import { ApplicationStart, SavedObjectsStart, DocLinksStart } from '../../../../core/public';
 import { embeddablePluginMock } from '../../../embeddable/public/mocks';
+import { BaseVisType } from '../vis_types';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
     hidden: false,
-    visualization: class Controller {
-      public render = jest.fn();
-      public destroy = jest.fn();
-    },
     requiresSearch: false,
-    requestHandler: 'none',
-    responseHandler: 'none',
   };
   const _visTypes = [
-    { name: 'vis', title: 'Vis Type 1', stage: 'production', ...defaultVisTypeParams },
-    { name: 'visExp', title: 'Experimental Vis', stage: 'experimental', ...defaultVisTypeParams },
     {
-      name: 'visWithSearch',
-      title: 'Vis with search',
+      name: 'vis',
+      title: 'Vis Type 1',
       stage: 'production',
+      group: VisGroups.PROMOTED,
+      ...defaultVisTypeParams,
+    },
+    {
+      name: 'vis2',
+      title: 'Vis Type 2',
+      group: VisGroups.PROMOTED,
+      stage: 'production',
+      ...defaultVisTypeParams,
+    },
+    {
+      name: 'vis3',
+      title: 'Vis3',
+      stage: 'production',
+      group: VisGroups.TOOLS,
       ...defaultVisTypeParams,
     },
     {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
       stage: 'production',
+      group: VisGroups.PROMOTED,
       aliasApp: 'otherApp',
       aliasPath: '#/aliasUrl',
     },
     {
-      name: 'visAliasWithPromotion',
-      title: 'Vis alias with promotion',
+      name: 'visWithSearch',
+      title: 'Vis with search',
+      group: VisGroups.AGGBASED,
       stage: 'production',
-      aliasApp: 'anotherApp',
-      aliasPath: '#/anotherUrl',
-      promotion: {
-        description: 'promotion description',
-        buttonText: 'another app',
-      },
+      ...defaultVisTypeParams,
     },
-  ];
+  ] as BaseVisType[];
   const visTypes: TypesStart = {
-    get<T>(id: string): VisType<T> {
-      return (_visTypes.find((vis) => vis.name === id) as unknown) as VisType<T>;
+    get<T>(id: string): BaseVisType<T> {
+      return (_visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
     },
-    all: () => {
-      return (_visTypes as unknown) as VisType[];
-    },
+    all: () => _visTypes,
     getAliases: () => [],
+    unRegisterAlias: () => [],
+    getByGroup: (group: VisGroups) => _visTypes.filter((type) => type.group === group),
   };
   const addBasePath = (url: string) => `testbasepath${url}`;
   const settingsGet = jest.fn();
   const uiSettings: any = { get: settingsGet };
+  const docLinks = {
+    links: {
+      dashboard: {
+        guide: 'test',
+      },
+    },
+  };
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -88,7 +89,7 @@ describe('NewVisModal', () => {
     jest.clearAllMocks();
   });
 
-  it('should render as expected', () => {
+  it('should show the aggbased group but not the visualization assigned to this group', () => {
     const wrapper = mountWithIntl(
       <NewVisModal
         isOpen={true}
@@ -97,13 +98,15 @@ describe('NewVisModal', () => {
         addBasePath={addBasePath}
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
+        docLinks={docLinks as DocLinksStart}
         savedObjects={{} as SavedObjectsStart}
       />
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(false);
   });
 
-  it('should show a button for regular visualizations', () => {
+  it('should show the tools group', () => {
     const wrapper = mountWithIntl(
       <NewVisModal
         isOpen={true}
@@ -112,13 +115,14 @@ describe('NewVisModal', () => {
         addBasePath={addBasePath}
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
+        docLinks={docLinks as DocLinksStart}
         savedObjects={{} as SavedObjectsStart}
       />
     );
-    expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
   });
 
-  it('should sort promoted visualizations first', () => {
+  it('should display the visualizations of the other group', () => {
     const wrapper = mountWithIntl(
       <NewVisModal
         isOpen={true}
@@ -127,19 +131,11 @@ describe('NewVisModal', () => {
         addBasePath={addBasePath}
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
+        docLinks={docLinks as DocLinksStart}
         savedObjects={{} as SavedObjectsStart}
       />
     );
-    expect(
-      wrapper
-        .find('button[data-test-subj^="visType-"]')
-        .map((button) => button.prop('data-test-subj'))
-    ).toEqual([
-      'visType-visAliasWithPromotion',
-      'visType-vis',
-      'visType-visWithAliasUrl',
-      'visType-visWithSearch',
-    ]);
+    expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
   });
 
   describe('open editor', () => {
@@ -152,11 +148,12 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
+          docLinks={docLinks as DocLinksStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
-      visButton.simulate('click');
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
+      visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
     });
 
@@ -170,11 +167,12 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
+          docLinks={docLinks as DocLinksStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
-      visButton.simulate('click');
+      const visCard = wrapper.find('[data-test-subj="visType-vis"]').at(0);
+      visCard.simulate('click');
       expect(window.location.assign).toBeCalledWith(
         'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
       );
@@ -194,12 +192,13 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={({ navigateToApp } as unknown) as ApplicationStart}
+          docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
-      visButton.simulate('click');
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
+      visCard.simulate('click');
       expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
         path: '#/aliasUrl',
         state: { originatingApp: 'coolJestTestApp' },
@@ -219,17 +218,18 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={({ navigateToApp } as unknown) as ApplicationStart}
+          docLinks={docLinks as DocLinksStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
-      visButton.simulate('click');
+      const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').at(0);
+      visCard.simulate('click');
       expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();
     });
   });
 
-  describe('filter for visualization types', () => {
+  describe('aggBased visualizations', () => {
     it('should render as expected', () => {
       const wrapper = mountWithIntl(
         <NewVisModal
@@ -239,46 +239,15 @@ describe('NewVisModal', () => {
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
+          docLinks={docLinks as DocLinksStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
-      const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
-      searchBox.simulate('change', { target: { value: 'with' } });
-      expect(wrapper).toMatchSnapshot();
-    });
-  });
-
-  describe('experimental visualizations', () => {
-    it('should not show experimental visualizations if visualize:enableLabs is false', () => {
-      settingsGet.mockReturnValue(false);
-      const wrapper = mountWithIntl(
-        <NewVisModal
-          isOpen={true}
-          onClose={() => null}
-          visTypesRegistry={visTypes}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{} as ApplicationStart}
-          savedObjects={{} as SavedObjectsStart}
-        />
-      );
-      expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(false);
-    });
-
-    it('should show experimental visualizations if visualize:enableLabs is true', () => {
-      settingsGet.mockReturnValue(true);
-      const wrapper = mountWithIntl(
-        <NewVisModal
-          isOpen={true}
-          onClose={() => null}
-          visTypesRegistry={visTypes}
-          addBasePath={addBasePath}
-          uiSettings={uiSettings}
-          application={{} as ApplicationStart}
-          savedObjects={{} as SavedObjectsStart}
-        />
-      );
-      expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(true);
+      const aggBasedGroupCard = wrapper
+        .find('[data-test-subj="visGroupAggBasedExploreLink"]')
+        .at(0);
+      aggBasedGroupCard.simulate('click');
+      expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);
     });
   });
 });

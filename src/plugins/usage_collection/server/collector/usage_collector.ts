@@ -1,37 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { KIBANA_STATS_TYPE } from '../../common/constants';
-import { Collector } from './collector';
+import { Logger } from 'src/core/server';
+import { Collector, CollectorOptions } from './collector';
 
-export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> extends Collector<
-  T,
-  U
+// Enforce the `schema` property for UsageCollectors
+export type UsageCollectorOptions<
+  TFetchReturn = unknown,
+  WithKibanaRequest extends boolean = false,
+  ExtraOptions extends object = {}
+> = CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions> &
+  Required<Pick<CollectorOptions<TFetchReturn, boolean>, 'schema'>>;
+
+export class UsageCollector<TFetchReturn, ExtraOptions extends object = {}> extends Collector<
+  TFetchReturn,
+  ExtraOptions
 > {
-  protected defaultFormatterForBulkUpload(result: T) {
-    return {
-      type: KIBANA_STATS_TYPE,
-      payload: ({
-        usage: {
-          [this.type]: result,
-        },
-      } as unknown) as U,
-    };
+  constructor(
+    log: Logger,
+    collectorOptions: UsageCollectorOptions<TFetchReturn, any, ExtraOptions>
+  ) {
+    super(log, collectorOptions);
   }
 }

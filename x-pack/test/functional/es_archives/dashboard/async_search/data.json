@@ -194,4 +194,52 @@
   }
 }
 
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:a41c6790-075d-11eb-be70-0bd5e8b57d03",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+        },
+        "optionsJSON": "{\"useMargins\":true,\"hidePanelTitles\":false}",
+        "panelsJSON": "[{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"ec585931-ce8e-43fd-aa94-a1a9612d24ba\"},\"panelIndex\":\"ec585931-ce8e-43fd-aa94-a1a9612d24ba\",\"embeddableConfig\":{},\"panelRefName\":\"panel_0\"},{\"version\":\"8.0.0\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"c7b18010-462b-4e55-a974-fdec2ae64b06\"},\"panelIndex\":\"c7b18010-462b-4e55-a974-fdec2ae64b06\",\"embeddableConfig\":{},\"panelRefName\":\"panel_1\"},{\"version\":\"8.0.0\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"e67704f7-20b7-4ade-8dee-972a9d187107\"},\"panelIndex\":\"e67704f7-20b7-4ade-8dee-972a9d187107\",\"embeddableConfig\":{},\"panelRefName\":\"panel_2\"},{\"version\":\"8.0.0\",\"gridData\":{\"x\":24,\"y\":15,\"w\":24,\"h\":15,\"i\":\"f0b03592-10f1-41cd-9929-0cb4163bcd16\"},\"panelIndex\":\"f0b03592-10f1-41cd-9929-0cb4163bcd16\",\"embeddableConfig\":{},\"panelRefName\":\"panel_3\"}]",
+        "refreshInterval": { "pause": true, "value": 0 },
+        "timeFrom": "2015-09-19T17:34:10.297Z",
+        "timeRestore": true,
+        "timeTo": "2015-09-23T00:09:17.180Z",
+        "title": "Multiple delayed",
+        "version": 1
+      },
+      "references": [
+        {
+          "id": "14501a50-01e3-11eb-9b63-176d7b28a352",
+          "name": "panel_0",
+          "type": "visualization"
+        },
+        {
+          "id": "50a67010-075d-11eb-be70-0bd5e8b57d02",
+          "name": "panel_1",
+          "type": "visualization"
+        },
+        {
+          "id": "6c9f3830-01e3-11eb-9b63-176d7b28a352",
+          "name": "panel_2",
+          "type": "visualization"
+        },
+        {
+          "id": "50a67010-075d-11eb-be70-0bd5e8b57d02",
+          "name": "panel_3",
+          "type": "visualization"
+        }
+      ],
+      "type": "dashboard",
+      "updated_at": "2020-03-19T11:59:53.701Z"
+    }
+  }
+}
 

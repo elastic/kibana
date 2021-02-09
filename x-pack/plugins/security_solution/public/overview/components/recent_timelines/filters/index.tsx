@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonGroup, EuiButtonGroupOption } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import React from 'react';
 
 import { FilterMode } from '../types';
 
 import * as i18n from '../translations';
 
-const toggleButtonIcons: EuiButtonGroupOption[] = [
+const toggleButtonIcons: EuiButtonGroupOptionProps[] = [
   {
     id: 'favorites',
     label: i18n.FAVORITES,
@@ -35,6 +36,7 @@ export const Filters = React.memo<{
       setFilterBy(f as FilterMode);
     }}
     isIconOnly
+    legend={i18n.TIMELINES_FILTER_CONTROL}
   />
 ));
 

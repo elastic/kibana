@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import '../../../../__mocks__/kea.mock';
 
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { IUser } from '../../../types';
-
-import { GroupUsers } from './group_users';
-import { GroupRowUsersDropdown } from './group_row_users_dropdown';
-
 import { UserIcon } from '../../../components/shared/user_icon';
+import { User } from '../../../types';
+
+import { GroupRowUsersDropdown } from './group_row_users_dropdown';
+import { GroupUsers } from './group_users';
 
 const props = {
   groupUsers: users,
@@ -32,7 +31,7 @@ describe('GroupUsers', () => {
   });
 
   it('handles hidden users when count is higher than 20', () => {
-    const _users = [] as IUser[];
+    const _users = [] as User[];
     const NUM_TOTAL_USERS = 20;
 
     [...Array(NUM_TOTAL_USERS)].forEach((_, i) => {

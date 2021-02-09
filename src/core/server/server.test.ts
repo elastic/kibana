@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -31,6 +20,7 @@ import {
   mockMetricsService,
   mockStatusService,
   mockLoggingService,
+  mockI18nService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -49,6 +39,7 @@ beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -70,6 +61,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -83,6 +75,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).toHaveBeenCalledTimes(1);
   expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -96,6 +89,7 @@ test('injects legacy dependency to context#setup()', async () => {
   ]);
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 
@@ -180,11 +174,13 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
   expect(mockUiSettingsService.setup).not.toHaveBeenCalled();
   expect(mockRenderingService.setup).not.toHaveBeenCalled();
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't setup core services if legacy config validation fails`, async () => {
@@ -207,12 +203,13 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
-test(`doesn't validate config if env.isDevClusterMaster is true`, async () => {
+test(`doesn't validate config if env.isDevCliParent is true`, async () => {
   const devParentEnv = Env.createDefault(REPO_ROOT, {
     ...getEnvOptions(),
-    isDevClusterMaster: true,
+    isDevCliParent: true,
   });
 
   const server = new Server(rawConfigService, devParentEnv, logger);

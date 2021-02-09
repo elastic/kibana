@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as fs from 'fs';
@@ -10,10 +11,10 @@ import { DocEntry, extractDocumentation } from './schema_extractor';
 import { ApiParameter, Block } from './types';
 
 export function postProcess(parsedFiles: any[]): void {
-  const schemasDirPath = `${__dirname}${path.sep}..${path.sep}..${path.sep}schemas${path.sep}`;
+  const schemasDirPath = path.resolve(__dirname, '..', '..', 'schemas');
   const schemaFiles = fs
     .readdirSync(schemasDirPath)
-    .map((filename) => path.resolve(schemasDirPath + filename));
+    .map((filename) => path.resolve(schemasDirPath, filename));
 
   const schemaDocs = extractDocumentation(schemaFiles);
 

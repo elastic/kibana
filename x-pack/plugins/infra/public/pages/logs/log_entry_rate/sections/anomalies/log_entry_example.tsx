@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useMemo, useCallback, useState, useContext } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import moment from 'moment';
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import {
   LogEntryColumn,
@@ -25,10 +26,10 @@ import {
   LogColumnHeader,
 } from '../../../../../components/logging/log_text_stream/column_headers';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
+import { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results/analyze_in_ml_button';
-import { LogEntryExample } from '../../../../../../common/http_api/log_analysis/results';
+import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';
 import {
   LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
@@ -36,8 +37,8 @@ import {
   isMessageLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
-import { LogEntryAnomaly } from '../../../../../../common/http_api';
-import { LogFlyout } from '../../../../../containers/logs/log_flyout';
+import { LogEntryAnomaly } from '../../../../../../common/log_analysis';
+import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;
@@ -88,7 +89,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   const setItemIsHovered = useCallback(() => setIsHovered(true), []);
   const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
 
-  const { setFlyoutVisibility, setFlyoutId } = useContext(LogFlyout.Context);
+  const { openFlyout: openLogEntryFlyout } = useLogEntryFlyoutContext();
 
   // handle special cases for the dataset value
   const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
@@ -116,7 +117,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   const viewAnomalyInMachineLearningLinkProps = useLinkProps(
     getEntitySpecificSingleMetricViewerLink(anomaly.jobId, timeRange, {
       [partitionField]: dataset,
-      ...(anomaly.categoryId ? { mlcategory: anomaly.categoryId } : {}),
+      ...(isCategoryAnomaly(anomaly) ? { mlcategory: anomaly.categoryId } : {}),
     })
   );
 
@@ -129,8 +130,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       {
         label: VIEW_DETAILS_LABEL,
         onClick: () => {
-          setFlyoutId(id);
-          setFlyoutVisibility(true);
+          openLogEntryFlyout(id);
         },
       },
       {
@@ -144,13 +144,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
         href: viewAnomalyInMachineLearningLinkProps.href,
       },
     ];
-  }, [
-    id,
-    setFlyoutId,
-    setFlyoutVisibility,
-    viewInStreamLinkProps,
-    viewAnomalyInMachineLearningLinkProps,
-  ]);
+  }, [id, openLogEntryFlyout, viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
 
   return (
     <LogEntryRowWrapper
@@ -165,7 +159,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
         <LogEntryMessageColumn
           columnValue={{
             columnId: messageColumnId,
-            message: [{ field: 'message', value: message, highlights: [] }],
+            message: [{ field: 'message', value: [message], highlights: [] }],
           }}
           highlights={noHighlights}
           isActiveHighlight={false}
@@ -177,7 +171,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
           columnValue={{
             columnId: datasetColumnId,
             field: 'event.dataset',
-            value: humanFriendlyDataset,
+            value: [humanFriendlyDataset],
             highlights: [],
           }}
           highlights={noHighlights}

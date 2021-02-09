@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { mount } from 'enzyme';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
 import { getLabelTitle, getPushedServiceLabelTitle, getConnectorLabelTitle } from './helpers';
-import * as i18n from '../case_view/translations';
-import { mount } from 'enzyme';
 import { connectorsMock } from '../../containers/configure/mock';
+import * as i18n from './translations';
 
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
@@ -55,23 +58,51 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for update status to open', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: 'open' };
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.open };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',
     });
 
-    expect(result).toEqual(`${i18n.REOPENED_CASE.toLowerCase()} ${i18n.CASE}`);
+    const wrapper = mount(<>{result}</>);
+    expect(wrapper.find(`[data-test-subj="status-badge-open"]`).first().text()).toEqual('Open');
+  });
+
+  it('label title generated for update status to in-progress', () => {
+    const action = {
+      ...getUserAction(['status'], 'update'),
+      newValue: CaseStatuses['in-progress'],
+    };
+    const result: string | JSX.Element = getLabelTitle({
+      action,
+      field: 'status',
+    });
+
+    const wrapper = mount(<>{result}</>);
+    expect(wrapper.find(`[data-test-subj="status-badge-in-progress"]`).first().text()).toEqual(
+      'In progress'
+    );
   });
 
   it('label title generated for update status to closed', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: 'closed' };
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',
     });
 
-    expect(result).toEqual(`${i18n.CLOSED_CASE.toLowerCase()} ${i18n.CASE}`);
+    const wrapper = mount(<>{result}</>);
+    expect(wrapper.find(`[data-test-subj="status-badge-closed"]`).first().text()).toEqual('Closed');
+  });
+
+  it('label title is empty when status is not valid', () => {
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
+    const result: string | JSX.Element = getLabelTitle({
+      action: { ...action, newValue: 'not-exist' },
+      field: 'status',
+    });
+
+    expect(result).toEqual('');
   });
 
   it('label title generated for update comment', () => {

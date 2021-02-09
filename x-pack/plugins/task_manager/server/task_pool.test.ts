@@ -1,22 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
 import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
-import { mockLogger, resolvable, sleep } from './test_utils';
+import { resolvable, sleep } from './test_utils';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
+import { Logger } from '../../../../src/core/server';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
+import uuid from 'uuid';
 
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
     const pool = new TaskPool({
       maxWorkers$: of(200),
-      logger: mockLogger(),
+      logger: loggingSystemMock.create().get(),
     });
 
     const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
@@ -28,7 +32,7 @@ describe('TaskPool', () => {
   test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
     const pool = new TaskPool({
       maxWorkers$: of(10),
-      logger: mockLogger(),
+      logger: loggingSystemMock.create().get(),
     });
 
     const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
@@ -41,7 +45,7 @@ describe('TaskPool', () => {
     const maxWorkers$ = new Subject<number>();
     const pool = new TaskPool({
       maxWorkers$,
-      logger: mockLogger(),
+      logger: loggingSystemMock.create().get(),
     });
 
     expect(pool.availableWorkers).toEqual(0);
@@ -52,7 +56,7 @@ describe('TaskPool', () => {
   test('does not run tasks that are beyond its available capacity', async () => {
     const pool = new TaskPool({
       maxWorkers$: of(2),
-      logger: mockLogger(),
+      logger: loggingSystemMock.create().get(),
     });
 
     const shouldRun = mockRun();
@@ -71,7 +75,7 @@ describe('TaskPool', () => {
   });
 
   test('should log when marking a Task as running fails', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       maxWorkers$: of(2),
       logger,
@@ -84,17 +88,17 @@ describe('TaskPool', () => {
 
     const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
 
-    expect(logger.error.mock.calls[0]).toMatchInlineSnapshot(`
+    expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "Failed to mark Task TaskType \\"shooooo\\" as running: Mark Task as running has failed miserably",
       ]
     `);
 
-    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
   });
 
   test('should log when running a Task fails', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       maxWorkers$: of(3),
       logger,
@@ -107,7 +111,7 @@ describe('TaskPool', () => {
 
     const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
-    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "Task TaskType \\"shooooo\\" failed in attempt to run: Run Task has failed miserably",
       ]
@@ -117,7 +121,7 @@ describe('TaskPool', () => {
   });
 
   test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       maxWorkers$: of(3),
       logger,
@@ -131,7 +135,7 @@ describe('TaskPool', () => {
     const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
     expect(logger.debug).toHaveBeenCalledWith(
-      'Task TaskType "shooooo" failed in attempt to run: Saved object [task/foo] not found'
+      `Task TaskType "shooooo" failed in attempt to run: Saved object [task/${taskFailedToRun.id}] not found`
     );
     expect(logger.warn).not.toHaveBeenCalled();
 
@@ -139,7 +143,7 @@ describe('TaskPool', () => {
   });
 
   test('Running a task which fails still takes up capacity', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       maxWorkers$: of(1),
       logger,
@@ -159,7 +163,7 @@ describe('TaskPool', () => {
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
       maxWorkers$: of(1),
-      logger: mockLogger(),
+      logger: loggingSystemMock.create().get(),
     });
 
     const firstWork = resolvable();
@@ -202,23 +206,27 @@ describe('TaskPool', () => {
   });
 
   test('run cancels expired tasks prior to running new tasks', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       maxWorkers$: of(2),
       logger,
     });
 
-    const expired = resolvable();
+    const haltUntilWeAfterFirstRun = resolvable();
+    const taskHasExpired = resolvable();
+    const haltTaskSoThatItCanBeCanceled = resolvable();
+
     const shouldRun = sinon.spy(() => Promise.resolve());
     const shouldNotRun = sinon.spy(() => Promise.resolve());
     const now = new Date();
     const result = await pool.run([
       {
-        ...mockTask(),
+        ...mockTask({ id: '1' }),
         async run() {
+          await haltUntilWeAfterFirstRun;
           this.isExpired = true;
-          expired.resolve();
-          await sleep(10);
+          taskHasExpired.resolve();
+          await haltTaskSoThatItCanBeCanceled;
           return asOk({ state: {} });
         },
         get expiration() {
@@ -231,35 +239,88 @@ describe('TaskPool', () => {
         cancel: shouldRun,
       },
       {
-        ...mockTask(),
+        ...mockTask({ id: '2' }),
         async run() {
-          await sleep(10);
+          // halt here so that we can verify that this task is counted in `occupiedWorkers`
+          await haltUntilWeAfterFirstRun;
           return asOk({ state: {} });
         },
         cancel: shouldNotRun,
       },
     ]);
 
-    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
     expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
 
-    await expired;
+    // release first stage in task so that it has time to expire, but not complete
+    haltUntilWeAfterFirstRun.resolve();
+    await taskHasExpired;
 
-    expect(await pool.run([{ ...mockTask() }])).toBeTruthy();
+    expect(await pool.run([{ ...mockTask({ id: '3' }) }])).toBeTruthy();
+
     sinon.assert.calledOnce(shouldRun);
     sinon.assert.notCalled(shouldNotRun);
 
-    expect(pool.occupiedWorkers).toEqual(2);
-    expect(pool.availableWorkers).toEqual(0);
+    expect(pool.occupiedWorkers).toEqual(1);
+    expect(pool.availableWorkers).toEqual(1);
+
+    haltTaskSoThatItCanBeCanceled.resolve();
 
     expect(logger.warn).toHaveBeenCalledWith(
       `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 05m 30s (with timeout set at 5m).`
     );
   });
 
+  test('calls to availableWorkers ensures we cancel expired tasks', async () => {
+    const pool = new TaskPool({
+      maxWorkers$: of(1),
+      logger: loggingSystemMock.create().get(),
+    });
+
+    const taskIsRunning = resolvable();
+    const taskHasExpired = resolvable();
+    const cancel = sinon.spy(() => Promise.resolve());
+    const now = new Date();
+    expect(
+      await pool.run([
+        {
+          ...mockTask(),
+          async run() {
+            await sleep(10);
+            this.isExpired = true;
+            taskIsRunning.resolve();
+            await taskHasExpired;
+            return asOk({ state: {} });
+          },
+          get expiration() {
+            return new Date(now.getTime() + 10);
+          },
+          get startedAt() {
+            return now;
+          },
+          cancel,
+        },
+      ])
+    ).toEqual(TaskPoolRunResult.RunningAtCapacity);
+
+    await taskIsRunning;
+
+    sinon.assert.notCalled(cancel);
+    expect(pool.occupiedWorkers).toEqual(1);
+    // The call to `availableWorkers` will clear the expired task so it's 1 instead of 0
+    expect(pool.availableWorkers).toEqual(1);
+    sinon.assert.calledOnce(cancel);
+
+    expect(pool.occupiedWorkers).toEqual(0);
+    expect(pool.availableWorkers).toEqual(1);
+    // ensure cancel isn't called twice
+    sinon.assert.calledOnce(cancel);
+    taskHasExpired.resolve();
+  });
+
   test('logs if cancellation errors', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       logger,
       maxWorkers$: of(20),
@@ -290,7 +351,7 @@ describe('TaskPool', () => {
     // Allow the task to cancel...
     await cancelled;
 
-    expect(logger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+    expect((logger as jest.Mocked<Logger>).error.mock.calls[0][0]).toMatchInlineSnapshot(
       `"Failed to cancel task \\"shooooo!\\": Error: Dern!"`
     );
   });
@@ -302,10 +363,10 @@ describe('TaskPool', () => {
     });
   }
 
-  function mockTask() {
+  function mockTask(overrides = {}) {
     return {
       isExpired: false,
-      id: 'foo',
+      id: uuid.v4(),
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
@@ -324,6 +385,7 @@ describe('TaskPool', () => {
           createTaskRunner: jest.fn(),
         };
       },
+      ...overrides,
     };
   }
 });

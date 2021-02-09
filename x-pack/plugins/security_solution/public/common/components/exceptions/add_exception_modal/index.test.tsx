@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -43,12 +44,12 @@ jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_asy
 
 describe('When the add exception modal is opened', () => {
   const ruleName = 'test rule';
-  let defaultEndpointItems: jest.SpyInstance<ReturnType<
-    typeof helpers.defaultEndpointExceptionItems
-  >>;
-  let ExceptionBuilderComponent: jest.SpyInstance<ReturnType<
-    typeof builder.ExceptionBuilderComponent
-  >>;
+  let defaultEndpointItems: jest.SpyInstance<
+    ReturnType<typeof helpers.defaultEndpointExceptionItems>
+  >;
+  let ExceptionBuilderComponent: jest.SpyInstance<
+    ReturnType<typeof builder.ExceptionBuilderComponent>
+  >;
   beforeEach(() => {
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
     ExceptionBuilderComponent = jest

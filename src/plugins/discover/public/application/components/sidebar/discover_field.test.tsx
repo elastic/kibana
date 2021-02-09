@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
@@ -43,8 +32,6 @@ jest.mock('../../../kibana_services', () => ({
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
           return 5;
-        } else if (key === 'shortDots:enable') {
-          return false;
         }
       },
     },
@@ -54,12 +41,10 @@ jest.mock('../../../kibana_services', () => ({
 function getComponent({
   selected = false,
   showDetails = false,
-  useShortDots = false,
   field,
 }: {
   selected?: boolean;
   showDetails?: boolean;
-  useShortDots?: boolean;
   field?: IndexPatternField;
 }) {
   const indexPattern = getStubIndexPattern(
@@ -72,30 +57,26 @@ function getComponent({
 
   const finalField =
     field ??
-    new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    new IndexPatternField({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
 
   const props = {
     indexPattern,
     field: finalField,
-    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: true, columns: [] })),
+    getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     showDetails,
     selected,
-    useShortDots,
   };
   const comp = mountWithIntl(<DiscoverField {...props} />);
   return { comp, props };
@@ -118,17 +99,14 @@ describe('discover sidebar field', function () {
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
   it('should not allow clicking on _source', function () {
-    const field = new IndexPatternField(
-      {
-        name: '_source',
-        type: '_source',
-        esTypes: ['_source'],
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      '_source'
-    );
+    const field = new IndexPatternField({
+      name: '_source',
+      type: '_source',
+      esTypes: ['_source'],
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
     const { comp, props } = getComponent({
       selected: true,
       field,

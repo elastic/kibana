@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useValues } from 'kea';
+
+import { useValues, useActions } from 'kea';
 
 import {
   EuiSpacer,
@@ -21,18 +21,18 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
-import sharedSourcesIcon from '../../components/shared/assets/share_circle.svg';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
-import { ORG_SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
-
-import { ContentSection } from '../../components/shared/content_section';
-
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
-import { OverviewLogic } from './overview_logic';
+import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
+import { ContentSection } from '../../components/shared/content_section';
+import { SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
+import { OverviewLogic } from './overview_logic';
 
 const SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.title',
@@ -76,7 +76,7 @@ export const OnboardingSteps: React.FC = () => {
 
   const accountsPath =
     !isFederatedAuth && (canCreateInvitations || isCurated) ? USERS_PATH : undefined;
-  const sourcesPath = canCreateContentSources || isCurated ? ORG_SOURCES_PATH : undefined;
+  const sourcesPath = canCreateContentSources || isCurated ? SOURCES_PATH : undefined;
 
   const SOURCES_CARD_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sourcesOnboardingCard.description',
@@ -136,12 +136,10 @@ export const OnboardingSteps: React.FC = () => {
 };
 
 export const OrgNameOnboarding: React.FC = () => {
-  const { http } = useValues(HttpLogic);
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'org_name_change_button',
     });

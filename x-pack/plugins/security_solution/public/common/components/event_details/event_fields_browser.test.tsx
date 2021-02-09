@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,30 +10,47 @@ import React from 'react';
 import '../../mock/match_media';
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
-
+import { timelineActions } from '../../../timelines/store/timeline';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { TimelineTabs } from '../../../../common/types/timeline';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 jest.mock('../link_to');
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('EventFieldsBrowser', () => {
   const mount = useMountAppended();
 
   describe('column headers', () => {
-    ['Field', 'Value', 'Description'].forEach((header) => {
+    ['Field', 'Value'].forEach((header) => {
       test(`it renders the ${header} column header`, () => {
         const wrapper = mount(
           <TestProviders>
             <EventFieldsBrowser
               browserFields={mockBrowserFields}
-              columnHeaders={defaultHeaders}
               data={mockDetailItemData}
               eventId={mockDetailItemDataId}
-              onUpdateColumns={jest.fn()}
               timelineId="test"
-              toggleColumn={jest.fn()}
+              timelineTabType={TimelineTabs.query}
             />
           </TestProviders>
         );
@@ -48,12 +66,10 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -74,12 +90,10 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -96,12 +110,10 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -113,18 +125,15 @@ describe('EventFieldsBrowser', () => {
 
     test('it invokes toggleColumn when the checkbox is clicked', () => {
       const field = '@timestamp';
-      const toggleColumn = jest.fn();
 
       const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={eventId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={toggleColumn}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -138,11 +147,12 @@ describe('EventFieldsBrowser', () => {
         });
       wrapper.update();
 
-      expect(toggleColumn).toBeCalledWith({
-        columnHeaderType: 'not-filtered',
-        id: '@timestamp',
-        width: 180,
-      });
+      expect(mockDispatch).toBeCalledWith(
+        timelineActions.removeColumn({
+          columnId: '@timestamp',
+          id: 'test',
+        })
+      );
     });
   });
 
@@ -152,12 +162,10 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -179,16 +187,37 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="field-name"]').at(0).text()).toEqual('@timestamp');
+    });
+
+    test('it renders the expected icon for description', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EventFieldsBrowser
+            browserFields={mockBrowserFields}
+            data={mockDetailItemData}
+            eventId={mockDetailItemDataId}
+            timelineId="test"
+            timelineTabType={TimelineTabs.query}
+          />
+        </TestProviders>
+      );
+      expect(
+        wrapper
+          .find('.euiTableRow')
+          .find('.euiTableRowCell')
+          .at(1)
+          .find('[data-euiicon-type]')
+          .last()
+          .prop('data-euiicon-type')
+      ).toEqual('iInCircle');
     });
   });
 
@@ -198,12 +227,10 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
@@ -219,18 +246,23 @@ describe('EventFieldsBrowser', () => {
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
-            columnHeaders={defaultHeaders}
             data={mockDetailItemData}
             eventId={mockDetailItemDataId}
-            onUpdateColumns={jest.fn()}
             timelineId="test"
-            toggleColumn={jest.fn()}
+            timelineTabType={TimelineTabs.query}
           />
         </TestProviders>
       );
 
-      expect(wrapper.find('.euiTableRow').find('.euiTableRowCell').at(3).text()).toContain(
-        'DescriptionDate/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
+      expect(
+        wrapper
+          .find('.euiTableRow')
+          .find('.euiTableRowCell')
+          .at(1)
+          .find('EuiIconTip')
+          .prop('content')
+      ).toContain(
+        'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
       );
     });
   });

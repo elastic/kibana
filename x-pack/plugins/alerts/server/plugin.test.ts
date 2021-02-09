@@ -1,140 +1,187 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AlertingPlugin, AlertingPluginsSetup, AlertingPluginsStart } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
+import { AlertingPlugin, AlertingPluginsSetup, PluginSetupContract } from './plugin';
+import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
-import { KibanaRequest, CoreSetup } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { KibanaFeature } from '../../features/server';
+import { AlertsConfig } from './config';
+import { AlertType } from './types';
+import { eventLogMock } from '../../event_log/server/mocks';
+import { actionsMock } from '../../actions/server/mocks';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
+    let plugin: AlertingPlugin;
+    let coreSetup: ReturnType<typeof coreMock.createSetup>;
+    let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
+
     it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
-      const context = coreMock.createPluginInitializerContext();
-      const plugin = new AlertingPlugin(context);
+      const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+        healthCheck: {
+          interval: '5m',
+        },
+        invalidateApiKeysTask: {
+          interval: '5m',
+          removalDelay: '1h',
+        },
+      });
+      plugin = new AlertingPlugin(context);
 
-      const coreSetup = coreMock.createSetup();
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
-      await plugin.setup(
-        ({
-          ...coreSetup,
-          http: {
-            ...coreSetup.http,
-            route: jest.fn(),
-          },
-        } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
-        ({
-          licensing: licensingMock.createSetup(),
-          encryptedSavedObjects: encryptedSavedObjectsSetup,
-          taskManager: taskManagerMock.createSetup(),
-          eventLog: eventLogServiceMock.create(),
-        } as unknown) as AlertingPluginsSetup
-      );
 
+      const setupMocks = coreMock.createSetup();
+      // need await to test number of calls of setupMocks.status.set, becuase it is under async function which awaiting core.getStartServices()
+      await plugin.setup(setupMocks, {
+        licensing: licensingMock.createSetup(),
+        encryptedSavedObjects: encryptedSavedObjectsSetup,
+        taskManager: taskManagerMock.createSetup(),
+        eventLog: eventLogServiceMock.create(),
+        actions: actionsMock.createSetup(),
+        statusService: statusServiceMock.createSetupContract(),
+      });
+
+      expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
       expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
+    });
+
+    describe('registerType()', () => {
+      let setup: PluginSetupContract;
+      const sampleAlertType: AlertType<never, never, never, never, 'default'> = {
+        id: 'test',
+        name: 'test',
+        minimumLicenseRequired: 'basic',
+        actionGroups: [],
+        defaultActionGroupId: 'default',
+        producer: 'test',
+        async executor() {},
+      };
+
+      beforeEach(async () => {
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          actions: actionsMock.createSetup(),
+          statusService: statusServiceMock.createSetupContract(),
+        };
+        setup = plugin.setup(coreSetup, pluginsSetup);
+      });
+
+      it('should throw error when license type is invalid', async () => {
+        expect(() =>
+          setup.registerType({
+            ...sampleAlertType,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            minimumLicenseRequired: 'foo' as any,
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
+      });
+
+      it('should not throw when license type is gold', async () => {
+        setup.registerType({
+          ...sampleAlertType,
+          minimumLicenseRequired: 'gold',
+        });
+      });
+
+      it('should not throw when license type is basic', async () => {
+        setup.registerType({
+          ...sampleAlertType,
+          minimumLicenseRequired: 'basic',
+        });
+      });
     });
   });
 
   describe('start()', () => {
-    /**
-     * HACK: This test has put together to ensuire the function "getAlertsClientWithRequest"
-     * throws when needed. There's a lot of blockers for writing a proper test like
-     * misisng plugin start/setup mocks for taskManager and actions plugin, core.http.route
-     * is actually not a function in Kibana Platform, etc. This test contains what is needed
-     * to get to the necessary function within start().
-     */
     describe('getAlertsClientWithRequest()', () => {
       it('throws error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to true', async () => {
-        const context = coreMock.createPluginInitializerContext();
+        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+          healthCheck: {
+            interval: '5m',
+          },
+          invalidateApiKeysTask: {
+            interval: '5m',
+            removalDelay: '1h',
+          },
+        });
         const plugin = new AlertingPlugin(context);
 
-        const coreSetup = coreMock.createSetup();
         const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
-        await plugin.setup(
-          ({
-            ...coreSetup,
-            http: {
-              ...coreSetup.http,
-              route: jest.fn(),
-            },
-          } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
-          ({
-            licensing: licensingMock.createSetup(),
-            encryptedSavedObjects: encryptedSavedObjectsSetup,
-            taskManager: taskManagerMock.createSetup(),
-            eventLog: eventLogServiceMock.create(),
-          } as unknown) as AlertingPluginsSetup
-        );
+        plugin.setup(coreMock.createSetup(), {
+          licensing: licensingMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsSetup,
+          taskManager: taskManagerMock.createSetup(),
+          eventLog: eventLogServiceMock.create(),
+          actions: actionsMock.createSetup(),
+          statusService: statusServiceMock.createSetupContract(),
+        });
 
-        const startContract = plugin.start(
-          coreMock.createStart() as ReturnType<typeof coreMock.createStart>,
-          ({
-            actions: {
-              execute: jest.fn(),
-              getActionsClientWithRequest: jest.fn(),
-              getActionsAuthorizationWithRequest: jest.fn(),
-            },
-            encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
-            features: mockFeatures(),
-          } as unknown) as AlertingPluginsStart
-        );
+        const startContract = plugin.start(coreMock.createStart(), {
+          actions: actionsMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          features: mockFeatures(),
+          licensing: licensingMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+        });
 
         expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
         expect(() =>
           startContract.getAlertsClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+          `"Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
 
       it(`doesn't throw error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to false`, async () => {
-        const context = coreMock.createPluginInitializerContext();
+        const context = coreMock.createPluginInitializerContext<AlertsConfig>({
+          healthCheck: {
+            interval: '5m',
+          },
+          invalidateApiKeysTask: {
+            interval: '5m',
+            removalDelay: '1h',
+          },
+        });
         const plugin = new AlertingPlugin(context);
 
-        const coreSetup = coreMock.createSetup();
         const encryptedSavedObjectsSetup = {
           ...encryptedSavedObjectsMock.createSetup(),
           usingEphemeralEncryptionKey: false,
         };
-        await plugin.setup(
-          ({
-            ...coreSetup,
-            http: {
-              ...coreSetup.http,
-              route: jest.fn(),
-            },
-          } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
-          ({
-            licensing: licensingMock.createSetup(),
-            encryptedSavedObjects: encryptedSavedObjectsSetup,
-            taskManager: taskManagerMock.createSetup(),
-            eventLog: eventLogServiceMock.create(),
-          } as unknown) as AlertingPluginsSetup
-        );
+        plugin.setup(coreMock.createSetup(), {
+          licensing: licensingMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsSetup,
+          taskManager: taskManagerMock.createSetup(),
+          eventLog: eventLogServiceMock.create(),
+          actions: actionsMock.createSetup(),
+          statusService: statusServiceMock.createSetupContract(),
+        });
 
-        const startContract = plugin.start(
-          coreMock.createStart() as ReturnType<typeof coreMock.createStart>,
-          ({
-            actions: {
-              execute: jest.fn(),
-              getActionsClientWithRequest: jest.fn(),
-              getActionsAuthorizationWithRequest: jest.fn(),
-            },
-            spaces: () => null,
-            encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
-            features: mockFeatures(),
-          } as unknown) as AlertingPluginsStart
-        );
+        const startContract = plugin.start(coreMock.createStart(), {
+          actions: actionsMock.createStart(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+          features: mockFeatures(),
+          licensing: licensingMock.createStart(),
+          eventLog: eventLogMock.createStart(),
+          taskManager: taskManagerMock.createStart(),
+        });
 
         const fakeRequest = ({
           headers: {},
@@ -151,7 +198,7 @@ describe('Alerting Plugin', () => {
           },
           getSavedObjectsClient: jest.fn(),
         } as unknown) as KibanaRequest;
-        await startContract.getAlertsClientWithRequest(fakeRequest);
+        startContract.getAlertsClientWithRequest(fakeRequest);
       });
     });
   });

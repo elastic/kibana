@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,13 +11,13 @@ import { useActions } from 'kea';
 
 import { EuiFilterGroup, EuiPopover } from '@elastic/eui';
 
-import { IUser } from '../../../types';
-
+import { User } from '../../../types';
 import { GroupsLogic } from '../groups_logic';
+
 import { FilterableUsersList } from './filterable_users_list';
 
-interface IIFilterableUsersPopoverProps {
-  users: IUser[];
+interface FilterableUsersPopoverProps {
+  users: User[];
   selectedOptions?: string[];
   itemsClickable?: boolean;
   isPopoverOpen: boolean;
@@ -26,7 +27,7 @@ interface IIFilterableUsersPopoverProps {
   closePopover(): void;
 }
 
-export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = ({
+export const FilterableUsersPopover: React.FC<FilterableUsersPopoverProps> = ({
   users,
   selectedOptions = [],
   itemsClickable,
@@ -40,12 +41,11 @@ export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = (
   return (
     <EuiFilterGroup className={className}>
       <EuiPopover
-        ownFocus={true}
+        ownFocus
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        withTitle={true}
       >
         <FilterableUsersList
           users={users}
@@ -54,7 +54,7 @@ export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = (
           addFilteredUser={addFilteredUser}
           allGroupUsersLoading={allGroupUsersLoading}
           removeFilteredUser={removeFilteredUser}
-          isPopover={true}
+          isPopover
         />
       </EuiPopover>
     </EuiFilterGroup>

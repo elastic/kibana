@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment-timezone';
@@ -57,37 +58,43 @@ function getDateFormat(dateUnit: DateUnit) {
   }
 }
 
-export const getDateDifference = (
-  start: moment.Moment,
-  end: moment.Moment,
-  unitOfTime: DateUnit | TimeUnit
-) => end.diff(start, unitOfTime);
+export const getDateDifference = ({
+  start,
+  end,
+  unitOfTime,
+  precise,
+}: {
+  start: moment.Moment;
+  end: moment.Moment;
+  unitOfTime: DateUnit | TimeUnit;
+  precise?: boolean;
+}) => end.diff(start, unitOfTime, precise);
 
 function getFormatsAccordingToDateDifference(
   start: moment.Moment,
   end: moment.Moment
 ) {
-  if (getDateDifference(start, end, 'years') >= 5) {
+  if (getDateDifference({ start, end, unitOfTime: 'years' }) >= 5) {
     return { dateFormat: getDateFormat('years') };
   }
 
-  if (getDateDifference(start, end, 'months') >= 5) {
+  if (getDateDifference({ start, end, unitOfTime: 'months' }) >= 5) {
     return { dateFormat: getDateFormat('months') };
   }
 
   const dateFormatWithDays = getDateFormat('days');
-  if (getDateDifference(start, end, 'days') > 1) {
+  if (getDateDifference({ start, end, unitOfTime: 'days' }) > 1) {
     return { dateFormat: dateFormatWithDays };
   }
 
-  if (getDateDifference(start, end, 'hours') >= 5) {
+  if (getDateDifference({ start, end, unitOfTime: 'minutes' }) >= 1) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('minutes'),
     };
   }
 
-  if (getDateDifference(start, end, 'minutes') >= 5) {
+  if (getDateDifference({ start, end, unitOfTime: 'seconds' }) >= 10) {
     return {
       dateFormat: dateFormatWithDays,
       timeFormat: getTimeFormat('seconds'),
@@ -121,8 +128,8 @@ export function asAbsoluteDateTime(
  * | >= 5 years     | YYYY - YYYY                                    |
  * | >= 5 months    | MMM YYYY - MMM YYYY                            |
  * | > 1 day        | MMM D, YYYY - MMM D, YYYY                      |
- * | >= 5 hours     | MMM D, YYYY, HH:mm - HH:mm (UTC)               |
- * | >= 5 minutes   | MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)         |
+ * | >= 1 minute    | MMM D, YYYY, HH:mm - HH:mm (UTC)               |
+ * | >= 10 seconds  | MMM D, YYYY, HH:mm:ss - HH:mm:ss (UTC)         |
  * | default        | MMM D, YYYY, HH:mm:ss.SSS - HH:mm:ss.SSS (UTC) |
  *
  * @param start timestamp

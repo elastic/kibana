@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -10,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import { fromNullable, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useAppDependencies } from '../../../app_context';
 
 import {
   AlertNavigation,
@@ -18,6 +18,7 @@ import {
   AlertUrlNavigation,
 } from '../../../../../../alerts/common';
 import { Alert } from '../../../../types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ViewInAppProps {
   alert: Alert;
@@ -28,7 +29,10 @@ const NO_NAVIGATION = false;
 type AlertNavigationLoadingState = AlertNavigation | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) => {
-  const { navigateToApp, alerts: maybeAlerting } = useAppDependencies();
+  const {
+    application: { navigateToApp },
+    alerts: maybeAlerting,
+  } = useKibana().services;
 
   const [alertNavigation, setAlertNavigation] = useState<AlertNavigationLoadingState>(null);
   useEffect(() => {

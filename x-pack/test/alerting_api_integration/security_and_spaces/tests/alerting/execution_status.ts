@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { AlertExecutionStatusErrorReasons } from '../../../../../plugins/alerts/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function executionStatusAlertTests({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const spaceId = Spaces[0].id;
 
@@ -36,20 +39,22 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       let executionStatus = await waitForStatus(alertId, new Set(['ok']), 10000);
 
-      // break AAD
-      await supertest
-        .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          attributes: {
-            name: 'bar',
-          },
-        })
-        .expect(200);
+      await retry.try(async () => {
+        // break AAD
+        await supertest
+          .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${alertId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
+          .expect(200);
+      });
 
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
-      expect(executionStatus.error.reason).to.be('decrypt');
+      expect(executionStatus.error.reason).to.be(AlertExecutionStatusErrorReasons.Decrypt);
       expect(executionStatus.error.message).to.be('Unable to decrypt attribute "apiKey"');
     });
   });

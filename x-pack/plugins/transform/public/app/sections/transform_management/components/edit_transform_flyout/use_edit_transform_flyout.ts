@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -12,7 +13,7 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
 // This custom hook uses nested reducers to provide a generic framework to manage form state
@@ -167,7 +168,7 @@ const validate = {
 export const initializeField = (
   formFieldName: string,
   configFieldName: string,
-  config: TransformPivotConfig,
+  config: TransformConfigUnion,
   overloads?: Partial<FormField>
 ): FormField => {
   const defaultValue = overloads?.defaultValue !== undefined ? overloads.defaultValue : '';
@@ -207,7 +208,7 @@ interface Action {
 // Considers options like if a value is nullable or optional.
 const getUpdateValue = (
   attribute: keyof EditTransformFlyoutFieldsState,
-  config: TransformPivotConfig,
+  config: TransformConfigUnion,
   formState: EditTransformFlyoutFieldsState,
   enforceFormValue = false
 ) => {
@@ -245,7 +246,7 @@ const getUpdateValue = (
 // request object suitable to be sent to the
 // transform update API endpoint.
 export const applyFormFieldsToTransformConfig = (
-  config: TransformPivotConfig,
+  config: TransformConfigUnion,
   formState: EditTransformFlyoutFieldsState
 ): PostTransformsUpdateRequestSchema =>
   // Iterates over all form fields and only if necessary applies them to
@@ -257,7 +258,7 @@ export const applyFormFieldsToTransformConfig = (
 
 // Takes in a transform configuration and returns
 // the default state to populate the form.
-export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyoutState => ({
+export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyoutState => ({
   formFields: {
     // top level attributes
     description: initializeField('description', 'description', config),
@@ -319,7 +320,7 @@ const formFieldReducer = (state: FormField, value: string): FormField => {
 // - `formFieldReducer` to update the actions field
 // - compares the most recent state against the original one to update `isFormTouched`
 // - sets `isFormValid` to have a flag if any of the form fields contains an error.
-export const formReducerFactory = (config: TransformPivotConfig) => {
+export const formReducerFactory = (config: TransformConfigUnion) => {
   const defaultState = getDefaultState(config);
   const defaultFieldValues = Object.values(defaultState.formFields).map((f) => f.value);
 
@@ -341,7 +342,7 @@ export const formReducerFactory = (config: TransformPivotConfig) => {
   };
 };
 
-export const useEditTransformFlyout = (config: TransformPivotConfig) => {
+export const useEditTransformFlyout = (config: TransformConfigUnion) => {
   return useReducer(formReducerFactory(config), getDefaultState(config));
 };
 

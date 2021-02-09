@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
@@ -32,8 +33,7 @@ export const validateEql = async ({
   const { rawResponse: response } = await data.search
     .search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
       {
-        // @ts-expect-error allow_no_indices is missing on EqlSearch
-        params: { allow_no_indices: true, index: index.join(), body: { query, size: 0 } },
+        params: { index: index.join(), body: { query, size: 0 } },
         options: { ignore: [400] },
       },
       {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -32,10 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.networkDetails!.source!.geo!.continent_name).to.be('North America');
         expect(body.networkDetails!.source!.geo!.location!.lat!).to.be(37.751);
-        expect(body.networkDetails!.host.os!.platform!).to.be('raspbian');
-        expect(body.networkDetails!.destination!.geo!.continent_name).to.be('North America');
-        expect(body.networkDetails!.destination!.geo!.location!.lat!).to.be(37.751);
-        expect(body.networkDetails!.host.os!.platform!).to.be('raspbian');
+        expect(body.networkDetails!.host.os!.platform!).to.eql(['raspbian']);
       });
     });
 
@@ -56,9 +54,9 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(body.networkDetails!.host.id!).to.be('2ce8b1e7d69e4a1d9c6bcddc473da9d9');
-        expect(body.networkDetails!.host.name!).to.be('zeek-sensor-amsterdam');
-        expect(body.networkDetails!.host.os!.platform!).to.be('ubuntu');
+        expect(body.networkDetails!.host.id!).to.eql(['2ce8b1e7d69e4a1d9c6bcddc473da9d9']);
+        expect(body.networkDetails!.host.name!).to.eql(['zeek-sensor-amsterdam']);
+        expect(body.networkDetails!.host.os!.platform!).to.eql(['ubuntu']);
       });
     });
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TRANSACTION_DURATION } from '../../../common/elasticsearch_fieldnames';
@@ -13,6 +14,17 @@ export const MICRO_TO_SEC = 1000000;
 
 export function microToSec(val: number) {
   return Math.round((val / MICRO_TO_SEC + Number.EPSILON) * 100) / 100;
+}
+
+export function removeZeroesFromTail(
+  distData: Array<{ x: number; y: number }>
+) {
+  if (distData.length > 0) {
+    while (distData[distData.length - 1].y === 0) {
+      distData.pop();
+    }
+  }
+  return distData;
 }
 
 export const getPLDChartSteps = ({
@@ -132,18 +144,14 @@ export async function getPageLoadDistribution({
   }
 
   // calculate the diff to get actual page load on specific duration value
-  const pageDist = pageDistVals.map(({ key, value }, index: number, arr) => {
+  let pageDist = pageDistVals.map(({ key, value }, index: number, arr) => {
     return {
       x: microToSec(key),
       y: index === 0 ? value : value - arr[index - 1].value,
     };
   });
 
-  if (pageDist.length > 0) {
-    while (pageDist[pageDist.length - 1].y === 0) {
-      pageDist.pop();
-    }
-  }
+  pageDist = removeZeroesFromTail(pageDist);
 
   Object.entries(durPercentiles?.values ?? {}).forEach(([key, val]) => {
     if (durPercentiles?.values?.[key]) {

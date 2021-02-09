@@ -7,16 +7,14 @@
   "browser": "target/web/index.js",
   "types": "target/types/index.d.ts",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
-  "license": "Apache-2.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --source-maps",
     "kbn:watch": "node scripts/build --source-maps --watch"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.5",
-    "@kbn/dev-utils": "1.0.0",
-    "@kbn/babel-preset": "1.0.0",
-    "typescript": "4.0.2"
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/babel-preset": "link:../kbn-babel-preset"
   }
 }

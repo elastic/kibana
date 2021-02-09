@@ -1,25 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
 
-import {
-  mockIndexNames,
-  mockIndexPattern,
-  mockTimelineData,
-  TestProviders,
-} from '../../../common/mock';
+import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common/mock';
 
-import { StatefulTimeline, OwnProps as StatefulTimelineOwnProps } from './index';
+import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -40,7 +38,6 @@ jest.mock('react-router-dom', () => {
     useHistory: jest.fn(),
   };
 });
-jest.mock('../flyout/header_with_close_button');
 jest.mock('../../../common/containers/sourcerer', () => {
   const originalModule = jest.requireActual('../../../common/containers/sourcerer');
 
@@ -51,19 +48,28 @@ jest.mock('../../../common/containers/sourcerer', () => {
       docValueFields: mockDocValueFields,
       loading: false,
       indexPattern: mockIndexPattern,
+      pageInfo: { activePage: 0, querySize: 0 },
       selectedPatterns: mockIndexNames,
     }),
   };
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    id: 'id',
-    onClose: jest.fn(),
-    usersViewing: [],
+    timelineId: 'timeline-test',
   };
 
   beforeEach(() => {
-    (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
+    (useTimelineEvents as jest.Mock).mockReturnValue([
+      false,
+      {
+        events: [],
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+          querySize: 0,
+        },
+      },
+    ]);
   });
 
   test('renders ', () => {
@@ -73,5 +79,21 @@ describe('StatefulTimeline', () => {
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();
+  });
+
+  test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <StatefulTimeline {...props} />
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+    expect(
+      wrapper
+        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .first()
+        .exists()
+    ).toEqual(true);
   });
 });

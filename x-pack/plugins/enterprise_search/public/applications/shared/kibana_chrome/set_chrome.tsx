@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
+
 import { useValues } from 'kea';
 
 import { KibanaLogic } from '../kibana';
@@ -14,7 +16,7 @@ import {
   useEnterpriseSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
-  TBreadcrumbTrail,
+  BreadcrumbTrail,
 } from './generate_breadcrumbs';
 import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
@@ -33,11 +35,11 @@ import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './g
  * Title output: Workplace Search - Elastic
  */
 
-interface ISetChromeProps {
-  trail?: TBreadcrumbTrail;
+interface SetChromeProps {
+  trail?: BreadcrumbTrail;
 }
 
-export const SetEnterpriseSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
+export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -54,7 +56,7 @@ export const SetEnterpriseSearchChrome: React.FC<ISetChromeProps> = ({ trail = [
   return null;
 };
 
-export const SetAppSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
+export const SetAppSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -71,7 +73,7 @@ export const SetAppSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) =>
   return null;
 };
 
-export const SetWorkplaceSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
+export const SetWorkplaceSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);

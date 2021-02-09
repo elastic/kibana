@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
-  ExternalServiceParams,
   PushToServiceApiHandlerArgs,
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
@@ -13,25 +13,18 @@ import {
   Incident,
   GetIncidentTypesHandlerArgs,
   GetSeverityHandlerArgs,
-  PushToServiceApiParams,
   PushToServiceResponse,
+  GetCommonFieldsHandlerArgs,
 } from './types';
 
-// TODO: to remove, need to support Case
-import { transformFields, prepareFieldsForTransformation, transformComments } from '../case/utils';
+const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
 
-const handshakeHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: HandshakeApiHandlerArgs) => {};
+const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {};
 
-const getIncidentHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: GetIncidentApiHandlerArgs) => {};
-
+const getFieldsHandler = async ({ externalService }: GetCommonFieldsHandlerArgs) => {
+  const res = await externalService.getFields();
+  return res;
+};
 const getIncidentTypesHandler = async ({ externalService }: GetIncidentTypesHandlerArgs) => {
   const res = await externalService.getIncidentTypes();
   return res;
@@ -44,56 +37,12 @@ const getSeverityHandler = async ({ externalService }: GetSeverityHandlerArgs) =
 
 const pushToServiceHandler = async ({
   externalService,
-  mapping,
   params,
-  logger,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const { externalId, comments } = params;
-  const updateIncident = externalId ? true : false;
-  const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
-  let currentIncident: ExternalServiceParams | undefined;
+  const { comments } = params;
   let res: PushToServiceResponse;
-
-  if (externalId) {
-    try {
-      currentIncident = await externalService.getIncident(externalId);
-    } catch (ex) {
-      logger.debug(
-        `Retrieving Incident by id ${externalId} from IBM Resilient was failed with exception: ${ex}`
-      );
-    }
-  }
-
-  let incident: Incident;
-  // TODO: should be removed later but currently keep it for the Case implementation support
-  if (mapping) {
-    const fields = prepareFieldsForTransformation({
-      externalCase: params.externalObject,
-      mapping,
-      defaultPipes,
-    });
-
-    const transformedFields = transformFields<
-      PushToServiceApiParams,
-      ExternalServiceParams,
-      Incident
-    >({
-      params,
-      fields,
-      currentIncident,
-    });
-
-    const { incidentTypes, severityCode } = params;
-    incident = {
-      name: transformedFields.name,
-      description: transformedFields.description,
-      incidentTypes,
-      severityCode,
-    };
-  } else {
-    const { title, description, incidentTypes, severityCode } = params;
-    incident = { name: title, description, incidentTypes, severityCode };
-  }
+  const { externalId, ...rest } = params.incident;
+  const incident: Incident = rest;
 
   if (externalId != null) {
     res = await externalService.updateIncident({
@@ -102,22 +51,13 @@ const pushToServiceHandler = async ({
     });
   } else {
     res = await externalService.createIncident({
-      incident: {
-        ...incident,
-      },
+      incident,
     });
   }
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    if (mapping && mapping.get('comments')?.actionType === 'nothing') {
-      return res;
-    }
-    const commentsTransformed = mapping
-      ? transformComments(comments, ['informationAdded'])
-      : comments;
-
     res.comments = [];
-    for (const currentComment of commentsTransformed) {
+    for (const currentComment of comments) {
       const comment = await externalService.createComment({
         incidentId: res.id,
         comment: currentComment,
@@ -136,9 +76,10 @@ const pushToServiceHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
-  handshake: handshakeHandler,
-  pushToService: pushToServiceHandler,
+  getFields: getFieldsHandler,
   getIncident: getIncidentHandler,
+  handshake: handshakeHandler,
   incidentTypes: getIncidentTypesHandler,
+  pushToService: pushToServiceHandler,
   severity: getSeverityHandler,
 };

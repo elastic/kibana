@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -27,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await ml.securityUI.logout();
         });
 
-        it('should not allow to access the ML app', async () => {
+        it('should not allow access to the ML app', async () => {
           await ml.testExecution.logTestStep('should not load the ML overview page');
           await PageObjects.common.navigateToUrl('ml', '', {
             shouldLoginIfPrompted: false,
@@ -53,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await ml.navigation.assertKibanaNavMLEntryNotExists();
         });
 
-        it('should not allow to access the Stack Management ML page', async () => {
+        it('should not allow access to the Stack Management ML page', async () => {
           await ml.testExecution.logTestStep(
             'should load the stack management with the ML menu item being absent'
           );

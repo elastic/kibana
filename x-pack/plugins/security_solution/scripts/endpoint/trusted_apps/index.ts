@@ -1,40 +1,70 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { v4 as generateUUID } from 'uuid';
+
 // @ts-ignore
 import minimist from 'minimist';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../lists/common/constants';
-import { TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
-import { ExceptionListItemSchema } from '../../../../lists/common/schemas/response';
+import bluebird from 'bluebird';
+import { basename } from 'path';
+import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
+import { NewTrustedApp, OperatingSystem, TrustedApp } from '../../../common/endpoint/types';
 
-interface RunOptions {
-  count?: number;
-}
-
-const logger = new ToolingLog({ level: 'info', writeTo: process.stdout });
+const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout });
 const separator = '----------------------------------------';
 
 export const cli = async () => {
-  const options: RunOptions = minimist(process.argv.slice(2), {
+  const cliDefaults = {
+    string: ['kibana'],
     default: {
       count: 10,
+      kibana: 'http://elastic:changeme@localhost:5601',
     },
-  });
-  logger.write(`${separator}
+  };
+  const options: RunOptions = minimist<RunOptions>(process.argv.slice(2), cliDefaults);
+
+  if ('help' in options) {
+    defaultLogger.write(`
+node ${basename(process.argv[1])} [options]
+
+Options:${Object.keys(cliDefaults.default).reduce((out, option) => {
+      // @ts-ignore
+      return `${out}\n  --${option}=${cliDefaults.default[option]}`;
+    }, '')}
+`);
+    return;
+  }
+
+  const runLogger = createRunLogger();
+
+  defaultLogger.write(`${separator}
 Loading ${options.count} Trusted App Entries`);
-  await run(options);
-  logger.write(`Done!
+  await run({
+    ...options,
+    logger: runLogger,
+  });
+  defaultLogger.write(`
+Done!
 ${separator}`);
 };
 
-export const run: (options?: RunOptions) => Promise<ExceptionListItemSchema[]> = async ({
+interface RunOptions {
+  count?: number;
+  kibana?: string;
+  logger?: ToolingLog;
+}
+export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
   count = 10,
+  kibana = 'http://elastic:changeme@localhost:5601',
+  logger = defaultLogger,
 }: RunOptions = {}) => {
-  const kbnClient = new KbnClient(logger, { url: 'http://elastic:changeme@localhost:5601' });
+  const kbnClient = new KbnClient({
+    log: logger,
+    url: kibana,
+  });
 
   // touch the Trusted Apps List so it can be created
   await kbnClient.request({
@@ -42,50 +72,119 @@ export const run: (options?: RunOptions) => Promise<ExceptionListItemSchema[]> =
     path: TRUSTED_APPS_LIST_API,
   });
 
-  return Promise.all(
-    Array.from({ length: count }, () => {
-      return kbnClient
-        .request({
+  return bluebird.map(
+    Array.from({ length: count }),
+    () =>
+      kbnClient
+        .request<TrustedApp>({
           method: 'POST',
-          path: '/api/exception_lists/items',
+          path: TRUSTED_APPS_CREATE_API,
           body: generateTrustedAppEntry(),
         })
-        .then<ExceptionListItemSchema>((item) => (item as unknown) as ExceptionListItemSchema);
-    })
+        .then(({ data }) => {
+          logger.write(data.id);
+          return data;
+        }),
+    { concurrency: 10 }
   );
 };
 
 interface GenerateTrustedAppEntryOptions {
-  os?: 'windows' | 'macos' | 'linux';
+  os?: OperatingSystem;
   name?: string;
 }
-
 const generateTrustedAppEntry: (options?: GenerateTrustedAppEntryOptions) => object = ({
-  os = 'windows',
-  name = `Sample Endpoint Trusted App Entry ${Date.now()}`,
-} = {}) => {
+  os = randomOperatingSystem(),
+  name = randomName(),
+} = {}): NewTrustedApp => {
   return {
-    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-    item_id: `generator_endpoint_trusted_apps_${generateUUID()}`,
-    os_types: [os],
-    tags: ['user added string for a tag', 'malware'],
-    type: 'simple',
-    description: 'This is a sample agnostic endpoint trusted app entry',
+    description: `Generator says we trust ${name}`,
     name,
-    namespace_type: 'agnostic',
+    os,
     entries: [
       {
-        field: 'actingProcess.file.signer',
+        // @ts-ignore
+        field: 'process.hash.*',
         operator: 'included',
         type: 'match',
-        value: 'Elastic, N.V.',
+        value: '1234234659af249ddf3e40864e9fb241',
       },
       {
-        field: 'actingProcess.file.path',
+        // @ts-ignore
+        field: 'process.executable.caseless',
         operator: 'included',
         type: 'match',
         value: '/one/two/three',
       },
     ],
   };
+};
+
+const randomN = (max: number): number => Math.floor(Math.random() * max);
+
+const randomName = (() => {
+  const names = [
+    'Symantec Endpoint Security',
+    'Bitdefender GravityZone',
+    'Malwarebytes',
+    'Sophos Intercept X',
+    'Webroot Business Endpoint Protection',
+    'ESET Endpoint Security',
+    'FortiClient',
+    'Kaspersky Endpoint Security',
+    'Trend Micro Apex One',
+    'CylancePROTECT',
+    'VIPRE',
+    'Norton',
+    'McAfee Endpoint Security',
+    'AVG AntiVirus',
+    'CrowdStrike Falcon',
+    'Avast Business Antivirus',
+    'Avira Antivirus',
+    'Cisco AMP for Endpoints',
+    'Eset Endpoint Antivirus',
+    'VMware Carbon Black',
+    'Palo Alto Networks Traps',
+    'Trend Micro',
+    'SentinelOne',
+    'Panda Security for Desktops',
+    'Microsoft Defender ATP',
+  ];
+  const count = names.length;
+
+  return () => names[randomN(count)];
+})();
+
+const randomOperatingSystem = (() => {
+  const osKeys = Object.keys(OperatingSystem) as Array<keyof typeof OperatingSystem>;
+  const count = osKeys.length;
+
+  return () => OperatingSystem[osKeys[randomN(count)]];
+})();
+
+const createRunLogger = () => {
+  let groupCount = 1;
+  let itemCount = 0;
+
+  return new ToolingLog({
+    level: 'info',
+    writeTo: {
+      write: (msg: string) => {
+        process.stdout.write('.');
+        itemCount++;
+
+        if (itemCount === 5) {
+          itemCount = 0;
+
+          if (groupCount === 5) {
+            process.stdout.write('\n');
+            groupCount = 1;
+          } else {
+            process.stdout.write('  ');
+            groupCount++;
+          }
+        }
+      },
+    },
+  });
 };

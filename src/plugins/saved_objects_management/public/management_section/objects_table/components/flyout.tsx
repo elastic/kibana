@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
@@ -42,7 +31,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { OverlayStart, HttpStart } from 'src/core/public';
+import { OverlayStart, HttpStart, IBasePath } from 'src/core/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -80,6 +69,7 @@ export interface FlyoutProps {
   indexPatterns: IndexPatternsContract;
   overlays: OverlayStart;
   http: HttpStart;
+  basePath: IBasePath;
   search: DataPublicPluginStart['search'];
 }
 
@@ -88,9 +78,11 @@ export interface FlyoutState {
   conflictedSavedObjectsLinkedToSavedSearches?: any[];
   conflictedSearchDocs?: any[];
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
+  unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
   successfulImports?: ProcessedImportResponse['successfulImports'];
   conflictingRecord?: ConflictingRecord;
+  importWarnings?: ProcessedImportResponse['importWarnings'];
   error?: string;
   file?: File;
   importCount: number;
@@ -106,6 +98,17 @@ interface ConflictingRecord {
   done: (result: [boolean, string | undefined]) => void;
 }
 
+const getErrorMessage = (e: any) => {
+  const errorMessage =
+    e.body?.error && e.body?.message ? `${e.body.error}: ${e.body.message}` : e.message;
+  return i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
+    defaultMessage: 'The file could not be processed due to error: "{error}"',
+    values: {
+      error: errorMessage,
+    },
+  });
+};
+
 export class Flyout extends Component<FlyoutProps, FlyoutState> {
   constructor(props: FlyoutProps) {
     super(props);
@@ -115,6 +118,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
       unmatchedReferences: undefined,
+      unmatchedReferencesTablePagination: {
+        pageIndex: 0,
+        pageSize: 5,
+      },
       conflictingRecord: undefined,
       error: undefined,
       file: undefined,
@@ -178,9 +185,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate('savedObjectsManagement.objectsTable.flyout.importFileErrorMessage', {
-          defaultMessage: 'The file could not be processed.',
-        }),
+        error: getErrorMessage(e),
       });
       return;
     }
@@ -236,10 +241,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     } catch (e) {
       this.setState({
         status: 'error',
-        error: i18n.translate(
-          'savedObjectsManagement.objectsTable.flyout.resolveImportErrorsFileErrorMessage',
-          { defaultMessage: 'The file could not be processed.' }
-        ),
+        error: getErrorMessage(e),
       });
     }
   };
@@ -432,8 +434,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         );
       } catch (e) {
         this.setState({
-          error: e.message,
           status: 'error',
+          error: getErrorMessage(e),
           loadingMessage: undefined,
         });
         return;
@@ -467,7 +469,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   renderUnmatchedReferences() {
-    const { unmatchedReferences } = this.state;
+    const { unmatchedReferences, unmatchedReferencesTablePagination: tablePagination } = this.state;
 
     if (!unmatchedReferences) {
       return null;
@@ -527,22 +529,28 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           { defaultMessage: 'New index pattern' }
         ),
         render: (id: string) => {
-          const options = this.state.indexPatterns!.map(
-            (indexPattern) =>
-              ({
-                text: indexPattern.title,
-                value: indexPattern.id,
-                'data-test-subj': `indexPatternOption-${indexPattern.title}`,
-              } as { text: string; value: string; 'data-test-subj'?: string })
-          );
+          const options = [
+            {
+              text: '-- Skip Import --',
+              value: '',
+            },
+            ...this.state.indexPatterns!.map(
+              (indexPattern) =>
+                ({
+                  text: indexPattern.title,
+                  value: indexPattern.id,
+                  'data-test-subj': `indexPatternOption-${indexPattern.title}`,
+                } as { text: string; value: string; 'data-test-subj'?: string })
+            ),
+          ];
 
-          options.unshift({
-            text: '-- Skip Import --',
-            value: '',
-          });
+          const selectedValue =
+            unmatchedReferences?.find((unmatchedRef) => unmatchedRef.existingIndexPatternId === id)
+              ?.newIndexPatternId ?? '';
 
           return (
             <EuiSelect
+              value={selectedValue}
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
@@ -553,6 +561,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     ];
 
     const pagination = {
+      ...tablePagination,
       pageSizeOptions: [5, 10, 25],
     };
 
@@ -561,6 +570,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         items={unmatchedReferences as any[]}
         columns={columns}
         pagination={pagination}
+        onTableChange={({ page }) => {
+          if (page) {
+            this.setState({
+              unmatchedReferencesTablePagination: {
+                pageSize: page.size,
+                pageIndex: page.index,
+              },
+            });
+          }
+        }}
       />
     );
   }
@@ -583,7 +602,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           }
           color="danger"
         >
-          <p>{error}</p>
+          <p data-test-subj="importSavedObjectsErrorText">{error}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </Fragment>
@@ -599,6 +618,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       successfulImports = [],
       isLegacyFile,
       importMode,
+      importWarnings,
     } = this.state;
 
     if (status === 'loading') {
@@ -615,8 +635,15 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       );
     }
 
-    if (isLegacyFile === false && status === 'success') {
-      return <ImportSummary failedImports={failedImports} successfulImports={successfulImports} />;
+    if (!isLegacyFile && status === 'success') {
+      return (
+        <ImportSummary
+          basePath={this.props.http.basePath}
+          failedImports={failedImports}
+          successfulImports={successfulImports}
+          importWarnings={importWarnings ?? []}
+        />
+      );
     }
 
     // Import summary for failed legacy import
@@ -730,13 +757,18 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         <EuiFormRow
           fullWidth
           label={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-              defaultMessage="Select a file to import"
-            />
+            <EuiTitle size="xs">
+              <span>
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
+                  defaultMessage="Select a file to import"
+                />
+              </span>
+            </EuiTitle>
           }
         >
           <EuiFilePicker
+            accept=".ndjson, .json"
             fullWidth
             initialPromptText={
               <FormattedMessage

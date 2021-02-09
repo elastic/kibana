@@ -1,25 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import reactCSS from 'reactcss';
 
 import { startsWith, get, cloneDeep, map } from 'lodash';
 import { htmlIdGenerator } from '@elastic/eui';
@@ -35,24 +23,19 @@ import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 
-export class TimeseriesVisualization extends Component {
+class TimeseriesVisualization extends Component {
   static propTypes = {
     model: PropTypes.object,
     onBrush: PropTypes.func,
     visData: PropTypes.object,
-    dateFormat: PropTypes.string,
     getConfig: PropTypes.func,
   };
 
+  scaledDataFormat = this.props.getConfig('dateFormat:scaled');
+  dateFormat = this.props.getConfig('dateFormat');
+
   xAxisFormatter = (interval) => (val) => {
-    const { scaledDataFormat, dateFormat } = this.props.visData;
-
-    if (!scaledDataFormat || !dateFormat) {
-      return val;
-    }
-
-    const formatter = createXaxisFormatter(interval, scaledDataFormat, dateFormat);
-
+    const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
     return formatter(val);
   };
 
@@ -150,13 +133,6 @@ export class TimeseriesVisualization extends Component {
 
   render() {
     const { model, visData, onBrush } = this.props;
-    const styles = reactCSS({
-      default: {
-        tvbVis: {
-          borderColor: get(model, 'background_color'),
-        },
-      },
-    });
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -168,6 +144,10 @@ export class TimeseriesVisualization extends Component {
     const mainAxisDomain = TimeseriesVisualization.getYAxisDomain(model);
     const yAxis = [];
     let mainDomainAdded = false;
+
+    const allSeriesHaveSameFormatters = seriesModel.every(
+      (seriesGroup) => seriesGroup.formatter === seriesModel[0].formatter
+    );
 
     this.showToastNotification = null;
 
@@ -202,7 +182,6 @@ export class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
-          seriesDataRow.useDefaultGroupDomain = !isCustomDomain;
         });
 
       if (isCustomDomain) {
@@ -219,7 +198,7 @@ export class TimeseriesVisualization extends Component {
         });
       } else if (!mainDomainAdded) {
         TimeseriesVisualization.addYAxis(yAxis, {
-          tickFormatter: series.length === 1 ? undefined : (val) => val,
+          tickFormatter: allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
           position: model.axis_position,
@@ -231,7 +210,7 @@ export class TimeseriesVisualization extends Component {
     });
 
     return (
-      <div className="tvbVis" style={styles.tvbVis}>
+      <div className="tvbVis">
         <TimeSeries
           series={series}
           yAxis={yAxis}
@@ -249,3 +228,7 @@ export class TimeseriesVisualization extends Component {
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TimeseriesVisualization as default };

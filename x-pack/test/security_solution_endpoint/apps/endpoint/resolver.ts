@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,22 +13,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const queryBar = getService('queryBar');
 
-  describe('Endpoint Event Resolver', function () {
+  /**
+   * Navigating to the hosts page must be done after data is loaded into ES otherwise
+   * the hosts page will display the empty default page and if we load data after that
+   * we'd have to set the source filter on the page.
+   */
+  const navigateToHostsAndSetDate = async () => {
+    await pageObjects.hosts.navigateToSecurityHostsPage();
+    await pageObjects.common.dismissBanner();
+    const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
+    const toTime = 'now';
+    await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+  };
+
+  describe.skip('Endpoint Event Resolver', function () {
     before(async () => {
-      await pageObjects.hosts.navigateToSecurityHostsPage();
-      await pageObjects.common.dismissBanner();
-      const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
-      const toTime = 'now';
-      await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await browser.setWindowSize(1800, 1200);
     });
+    after(async () => {
+      await pageObjects.hosts.deleteDataStreams();
+    });
+
     describe('Endpoint Resolver Tree', function () {
       before(async () => {
         await esArchiver.load('empty_kibana');
         await esArchiver.load('endpoint/resolver_tree/functions', { useCreate: true });
-        await pageObjects.hosts.navigateToEventsPanel();
+        await navigateToHostsAndSetDate();
         await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.events.file');
       });
       after(async () => {
@@ -193,81 +205,75 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
         await (await testSubjects.find('resolver:graph-controls:zoom-in')).click();
       });
-
-      it('Check Related Events for event.file Node', async () => {
-        const expectedData = [
-          '17 authentication',
-          '1 registry',
-          '17 session',
-          '8 file',
-          '1 registry',
-        ];
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
     });
 
-    describe('Resolver Tree events', function () {
-      const expectedData = [
-        '17 authentication',
-        '1 registry',
-        '17 session',
-        '80 registry',
-        '8 network',
-        '60 registry',
-      ];
+    describe('node related event pills', function () {
+      /**
+       * Verifies that the pills of a node have the correct text.
+       *
+       * @param id the node ID to verify the pills for.
+       * @param expectedPills a map of expected pills for all nodes
+       */
+      const verifyPills = async (id: string, expectedPills: Set<string>) => {
+        const relatedEventPills = await pageObjects.hosts.findNodePills(id);
+        expect(relatedEventPills.length).to.equal(expectedPills.size);
+        for (const pill of relatedEventPills) {
+          const pillText = await pill._webElement.getText();
+          // check that we have the pill text in our expected map
+          expect(expectedPills.has(pillText)).to.equal(true);
+        }
+      };
+
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await esArchiver.load('endpoint/resolver_tree/events', { useCreate: true });
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
+        await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
+        await navigateToHostsAndSetDate();
       });
       after(async () => {
         await pageObjects.hosts.deleteDataStreams();
       });
 
-      it('Check Related Events for event.process Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.process'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
+      describe('endpoint.alerts filter', () => {
+        before(async () => {
+          await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
+          await pageObjects.hosts.clickZoomOut();
+          await browser.setWindowSize(2100, 1500);
+        });
 
-      it('Check Related Events for event.security Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.security'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
+        it('has the correct pill text', async () => {
+          const expectedData: Map<string, Set<string>> = new Map([
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTc2MzYtMTMyNDc2MTQ0NDIuOTU5MTE2NjAw',
+              new Set(['1 library']),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTMxMTYtMTMyNDcyNDk0MjQuOTg4ODI4NjAw',
+              new Set(['157 file', '520 registry']),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTUwODQtMTMyNDc2MTQ0NDIuOTcyODQ3MjAw',
+              new Set(),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTg2OTYtMTMyNDc2MTQ0MjEuNjc1MzY0OTAw',
+              new Set(['3 file']),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTcyNjAtMTMyNDc2MTQ0MjIuMjQwNDI2MTAw',
+              new Set(),
+            ],
+            [
+              'MTk0YzBmOTgtNjA4My1jNWE4LTYzNjYtZjVkNzI2YWU2YmIyLTczMDAtMTMyNDc2MTQ0MjEuNjg2NzI4NTAw',
+              new Set(),
+            ],
+          ]);
 
-      it('Check Related Events for event.registry Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.registry'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
-
-      it('Check Related Events for event.network Node', async () => {
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.network'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedData);
-      });
-
-      it('Check Related Events for event.library Node', async () => {
-        await esArchiver.load('empty_kibana');
-        await esArchiver.load('endpoint/resolver_tree/library_events', { useCreate: true });
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-        const expectedLibraryData = ['329 network', '1 library', '1 library'];
-        await pageObjects.hosts.navigateToEventsPanel();
-        await pageObjects.hosts.executeQueryAndOpenResolver(
-          'event.dataset : endpoint.events.library'
-        );
-        await pageObjects.hosts.runNodeEvents(expectedLibraryData);
+          for (const [id, expectedPills] of expectedData.entries()) {
+            // center the node in the view
+            await pageObjects.hosts.clickNodeLinkInPanel(id);
+            await verifyPills(id, expectedPills);
+          }
+        });
       });
     });
   });

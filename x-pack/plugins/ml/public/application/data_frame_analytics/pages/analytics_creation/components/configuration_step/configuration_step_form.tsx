@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useRef, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
+  EuiPanel,
   EuiRange,
   EuiSpacer,
   EuiText,
@@ -26,6 +28,7 @@ import {
   TRAINING_PERCENT_MAX,
   FieldSelectionItem,
 } from '../../../../common/analytics';
+import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import {
@@ -45,6 +48,11 @@ import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch } from './use_saved_search';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
+import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
+
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -91,12 +99,28 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     requiredFieldsError,
     sourceIndex,
     trainingPercent,
+    useEstimatedMml,
   } = form;
+  const [query, setQuery] = useState<Query>({
+    query: jobConfigQueryString ?? '',
+    language: SEARCH_QUERY_LANGUAGE.KUERY,
+  });
+
+  const scatterplotFieldOptions = useMemo(
+    () =>
+      includesTableItems
+        .filter((d) => d.feature_type === 'numerical' && d.is_included)
+        .map((d) => d.name),
+    [includesTableItems]
+  );
 
   const toastNotifications = getToastNotifications();
 
-  const setJobConfigQuery = ({ query, queryString }: { query: any; queryString: string }) => {
-    setFormState({ jobConfigQuery: query, jobConfigQueryString: queryString });
+  const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
+    if (update.query) {
+      setFormState({ jobConfigQuery: update.query, jobConfigQueryString: update.queryString });
+    }
+    setQuery({ query: update.queryString, language: update.language });
   };
 
   const indexData = useIndexData(
@@ -164,7 +188,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedGetExplainData = debounce(async () => {
     const jobTypeChanged = previousJobType !== jobType;
-    const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    const shouldUpdateModelMemoryLimit =
+      (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
     const shouldUpdateEstimatedMml =
       !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
 
@@ -303,10 +328,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         >
           <ExplorationQueryBar
             indexPattern={currentIndexPattern}
-            // @ts-ignore
             setSearchQuery={setJobConfigQuery}
-            includeQueryString
-            defaultQueryString={jobConfigQueryString}
+            query={query}
           />
         </EuiFormRow>
       )}
@@ -433,6 +456,44 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
+      {scatterplotFieldOptions.length > 1 && (
+        <>
+          <EuiFormRow
+            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.scatterplotMatrixLabel', {
+              defaultMessage: 'Scatterplot matrix',
+            })}
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
+              {
+                defaultMessage:
+                  'Visualizes the relationships between pairs of selected included fields',
+              }
+            )}
+            fullWidth
+          >
+            <Fragment />
+          </EuiFormRow>
+          <EuiPanel
+            paddingSize="m"
+            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixPanel"
+          >
+            <ScatterplotMatrix
+              fields={scatterplotFieldOptions}
+              index={currentIndexPattern.title}
+              color={
+                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+                jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+                  ? dependentVariable
+                  : undefined
+              }
+              legendType={getScatterplotMatrixLegendType(jobType)}
+              searchQuery={jobConfigQuery}
+            />
+          </EuiPanel>
+          <EuiSpacer />
+        </>
+      )}
       {isJobTypeWithDepVar && (
         <EuiFormRow
           fullWidth

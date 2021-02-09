@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -70,14 +59,19 @@
  */
 
 import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
+import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'lodash';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { defer, from } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
-import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../..';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
-import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
+import { ISearchGeneric, ISearchOptions } from '../..';
+import type {
+  ISearchSource,
+  SearchFieldValue,
+  SearchSourceOptions,
+  SearchSourceFields,
+} from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
@@ -102,15 +96,7 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
-  // Types are nearly identical to ISearchGeneric, except we are making
-  // search options required here and returning a promise instead of observable.
-  search: <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-  >(
-    request: SearchStrategyRequest,
-    options: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
+  search: ISearchGeneric;
 }
 
 /** @public **/
@@ -144,16 +130,24 @@ export class SearchSource {
   }
 
   /**
-   * sets value to a single search source feild
+   * sets value to a single search source field
    * @param field: field name
    * @param value: value for the field
    */
   setField<K extends keyof SearchSourceFields>(field: K, value: SearchSourceFields[K]) {
     if (value == null) {
-      delete this.fields[field];
-    } else {
-      this.fields[field] = value;
+      return this.removeField(field);
     }
+    this.fields[field] = value;
+    return this;
+  }
+
+  /**
+   * remove field
+   * @param field: field name
+   */
+  removeField<K extends keyof SearchSourceFields>(field: K) {
+    delete this.fields[field];
     return this;
   }
 
@@ -178,7 +172,49 @@ export class SearchSource {
   /**
    * returns all search source fields
    */
-  getFields() {
+  getFields(recurse = false): SearchSourceFields {
+    let thisFilter = this.fields.filter; // type is single value, array, or function
+    if (thisFilter) {
+      if (typeof thisFilter === 'function') {
+        thisFilter = thisFilter() || []; // type is single value or array
+      }
+
+      if (Array.isArray(thisFilter)) {
+        thisFilter = [...thisFilter];
+      } else {
+        thisFilter = [thisFilter];
+      }
+    } else {
+      thisFilter = [];
+    }
+
+    if (recurse) {
+      const parent = this.getParent();
+      if (parent) {
+        const parentFields = parent.getFields(recurse);
+
+        let parentFilter = parentFields.filter; // type is single value, array, or function
+        if (parentFilter) {
+          if (typeof parentFilter === 'function') {
+            parentFilter = parentFilter() || []; // type is single value or array
+          }
+
+          if (Array.isArray(parentFilter)) {
+            thisFilter.push(...parentFilter);
+          } else {
+            thisFilter.push(parentFilter);
+          }
+        }
+
+        // add combined filters to the fields
+        const thisFields = {
+          ...this.fields,
+          filter: thisFilter,
+        };
+
+        return { ...parentFields, ...thisFields };
+      }
+    }
     return { ...this.fields };
   }
 
@@ -251,30 +287,35 @@ export class SearchSource {
   }
 
   /**
-   * Fetch this source and reject the returned Promise on error
-   *
-   * @async
+   * Fetch this source from Elasticsearch, returning an observable over the response(s)
+   * @param options
    */
-  async fetch(options: ISearchOptions = {}) {
+  fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
-    await this.requestIsStarting(options);
+    return defer(() => this.requestIsStarting(options)).pipe(
+      switchMap(() => {
+        const searchRequest = this.flatten();
+        this.history = [searchRequest];
 
-    const searchRequest = await this.flatten();
-    this.history = [searchRequest];
+        return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
+          ? from(this.legacyFetch(searchRequest, options))
+          : this.fetchSearch$(searchRequest, options);
+      }),
+      tap((response) => {
+        // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+        if ((response as any).error) {
+          throw new RequestFailure(null, response);
+        }
+      })
+    );
+  }
 
-    let response;
-    if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
-      response = await this.legacyFetch(searchRequest, options);
-    } else {
-      response = await this.fetchSearch(searchRequest, options);
-    }
-
-    // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-    if ((response as any).error) {
-      throw new RequestFailure(null, response);
-    }
-
-    return response;
+  /**
+   * Fetch this source and reject the returned Promise on error
+   * @deprecated Use fetch$ instead
+   */
+  fetch(options: ISearchOptions = {}) {
+    return this.fetch$(options).toPromise();
   }
 
   /**
@@ -312,15 +353,15 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
-  private fetchSearch(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).then(({ rawResponse }) =>
-      onResponse(searchRequest, rawResponse)
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
     );
   }
 
@@ -404,7 +445,16 @@ export class SearchSource {
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        const fields = uniq((data[key] || []).concat(val));
+        // This will pass the passed in parameters to the new fields API.
+        // Also if will only return scripted fields that are part of the specified
+        // array of fields. If you specify the wildcard `*` as an array element
+        // the fields API will return all fields, and all scripted fields will be returned.
+        // NOTE: While the fields API supports wildcards within names, e.g. `user.*`
+        //       scripted fields won't be considered for this.
+        return addToBody('fields', val);
+      case 'fieldsFromSource':
+        // preserves legacy behavior
+        const fields = [...new Set((data[key] || []).concat(val))];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -451,49 +501,136 @@ export class SearchSource {
   }
 
   private flatten() {
+    const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
 
     searchRequest.body = searchRequest.body || {};
-    const { body, index, fields, query, filters, highlightAll } = searchRequest;
+    const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
 
-    const computedFields = index ? index.getComputedFields() : {};
+    // get some special field types from the index pattern
+    const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
+      ? index.getComputedFields()
+      : {
+          docvalueFields: [],
+          scriptFields: {},
+          storedFields: ['*'],
+          runtimeFields: {},
+        };
 
-    body.stored_fields = computedFields.storedFields;
-    body.script_fields = body.script_fields || {};
-    extend(body.script_fields, computedFields.scriptFields);
+    const fieldListProvided = !!body.fields;
+    const getFieldName = (fld: string | Record<string, any>): string =>
+      typeof fld === 'string' ? fld : fld.field;
 
-    const defaultDocValueFields = computedFields.docvalueFields
-      ? computedFields.docvalueFields
-      : [];
-    body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
+    // set defaults
+    let fieldsFromSource = searchRequest.fieldsFromSource || [];
+    body.fields = body.fields || [];
+    body.script_fields = {
+      ...body.script_fields,
+      ...scriptFields,
+    };
+    body.stored_fields = storedFields;
+    body.runtime_mappings = runtimeFields || {};
 
-    if (!body.hasOwnProperty('_source') && index) {
-      body._source = index.getSourceFiltering();
+    // apply source filters from index pattern if specified by the user
+    let filteredDocvalueFields = docvalueFields;
+    if (index) {
+      const sourceFilters = index.getSourceFiltering();
+      if (!body.hasOwnProperty('_source')) {
+        body._source = sourceFilters;
+      }
+      if (body._source.excludes) {
+        const filter = fieldWildcardFilter(
+          body._source.excludes,
+          getConfig(UI_SETTINGS.META_FIELDS)
+        );
+        // also apply filters to provided fields & default docvalueFields
+        body.fields = body.fields.filter((fld: SearchFieldValue) => filter(getFieldName(fld)));
+        fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
+          filter(getFieldName(fld))
+        );
+        filteredDocvalueFields = filteredDocvalueFields.filter((fld: SearchFieldValue) =>
+          filter(getFieldName(fld))
+        );
+      }
     }
 
-    const { getConfig } = this.dependencies;
-
-    if (body._source) {
-      // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
-      body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
-        filter(docvalueField.field)
+    // specific fields were provided, so we need to exclude any others
+    if (fieldListProvided || fieldsFromSource.length) {
+      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
+        getFieldName(field)
       );
-    }
+      const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
-    // if we only want to search for certain fields
-    if (fields) {
-      // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
-      body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fields);
-      body.script_fields = pick(body.script_fields, fields);
+      if (!uniqFieldNames.includes('*')) {
+        // filter down script_fields to only include items specified
+        body.script_fields = pick(
+          body.script_fields,
+          Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
+        );
+        body.runtime_mappings = pick(
+          body.runtime_mappings,
+          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
+        );
+      }
 
-      // request the remaining fields from both stored_fields and _source
-      const remainingFields = difference(fields, keys(body.script_fields));
-      body.stored_fields = remainingFields;
-      setWith(body, '_source.includes', remainingFields, (nsValue) =>
-        isObject(nsValue) ? {} : nsValue
-      );
+      // request the remaining fields from stored_fields just in case, since the
+      // fields API does not handle stored fields
+      const remainingFields = difference(uniqFieldNames, [
+        ...Object.keys(body.script_fields),
+        ...Object.keys(body.runtime_mappings),
+      ]).filter(Boolean);
+
+      // only include unique values
+      body.stored_fields = [...new Set(remainingFields)];
+
+      if (fieldsFromSource.length) {
+        // include remaining fields in _source
+        setWith(body, '_source.includes', remainingFields, (nsValue) =>
+          isObject(nsValue) ? {} : nsValue
+        );
+
+        // if items that are in the docvalueFields are provided, we should
+        // make sure those are added to the fields API unless they are
+        // already set in docvalue_fields
+        body.fields = [
+          ...body.fields,
+          ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
+            return (
+              fieldsFromSource.includes(getFieldName(fld)) &&
+              !(body.docvalue_fields || [])
+                .map((d: string | Record<string, any>) => getFieldName(d))
+                .includes(getFieldName(fld))
+            );
+          }),
+        ];
+
+        // delete fields array if it is still set to the empty default
+        if (!fieldListProvided && body.fields.length === 0) delete body.fields;
+      } else {
+        // remove _source, since everything's coming from fields API, scripted, or stored fields
+        body._source = false;
+
+        // if items that are in the docvalueFields are provided, we should
+        // inject the format from the computed fields if one isn't given
+        const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+        body.fields = body.fields.map((fld: SearchFieldValue) => {
+          const fieldName = getFieldName(fld);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            return typeof fld === 'string'
+              ? docvaluesIndex[fld]
+              : {
+                  ...docvaluesIndex[fieldName],
+                  ...fld,
+                };
+          }
+          return fld;
+        });
+      }
+    } else {
+      body.fields = filteredDocvalueFields;
     }
 
     const esQueryConfigs = getEsQueryConfig({ get: getConfig });
@@ -510,9 +647,8 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields() {
-    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
-      'sort',
+  public getSerializedFields(recurse = false) {
+    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(recurse), [
       'size',
     ]);
     let serializedSearchSourceFields: SearchSourceFields = {

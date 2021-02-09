@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -25,7 +14,6 @@ import { createBrowserHistory, History } from 'history';
 import { MountPoint } from '../types';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
-import { ContextSetup, IContextContainer } from '../context';
 import { PluginOpaqueId } from '../plugins';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
@@ -33,7 +21,6 @@ import {
   App,
   AppLeaveHandler,
   AppMount,
-  AppMountDeprecated,
   AppNavLinkStatus,
   AppStatus,
   AppUpdatableFields,
@@ -47,7 +34,6 @@ import { getLeaveAction, isConfirmAction } from './application_leave';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
 
 interface SetupDeps {
-  context: ContextSetup;
   http: HttpSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
@@ -59,9 +45,6 @@ interface StartDeps {
   overlays: OverlayStart;
 }
 
-// Mount functions with two arguments are assumed to expect deprecated `context` object.
-const isAppMountDeprecated = (mount: (...args: any[]) => any): mount is AppMountDeprecated =>
-  mount.length === 2;
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
   return new Map(
     [...m].filter(
@@ -107,12 +90,10 @@ export class ApplicationService {
   private stop$ = new Subject();
   private registrationClosed = false;
   private history?: History<any>;
-  private mountContext?: IContextContainer<AppMountDeprecated>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private redirectTo?: (url: string) => void;
 
   public setup({
-    context,
     http: { basePath },
     redirectTo = (path: string) => {
       window.location.assign(path);
@@ -128,7 +109,6 @@ export class ApplicationService {
     };
 
     this.redirectTo = redirectTo;
-    this.mountContext = context.createContextContainer();
 
     const registerStatusUpdater = (application: string, updater$: Observable<AppUpdater>) => {
       const updaterId = Symbol();
@@ -144,26 +124,13 @@ export class ApplicationService {
     };
 
     const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
-      let handler: AppMount;
-      if (isAppMountDeprecated(app.mount)) {
-        handler = this.mountContext!.createHandler(plugin, app.mount);
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
-          );
-        }
-      } else {
-        handler = app.mount;
-      }
       return async (params) => {
         this.currentAppId$.next(app.id);
-        return handler(params);
+        return app.mount(params);
       };
     };
 
     return {
-      registerMountContext: this.mountContext!.registerContext,
       register: (plugin, app: App<any>) => {
         app = { appRoute: `/app/${app.id}`, ...app };
 
@@ -202,7 +169,7 @@ export class ApplicationService {
   }
 
   public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
-    if (!this.mountContext) {
+    if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
@@ -244,7 +211,9 @@ export class ApplicationService {
     ) => {
       const currentAppId = this.currentAppId$.value;
       const navigatingToSameApp = currentAppId === appId;
-      const shouldNavigate = navigatingToSameApp ? true : await this.shouldNavigate(overlays);
+      const shouldNavigate = navigatingToSameApp
+        ? true
+        : await this.shouldNavigate(overlays, appId);
 
       if (shouldNavigate) {
         if (path === undefined) {
@@ -276,7 +245,6 @@ export class ApplicationService {
         takeUntil(this.stop$)
       ),
       history: this.history!,
-      registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (
         appId,
         { path, absolute = false }: { path?: string; absolute?: boolean } = {}
@@ -332,18 +300,24 @@ export class ApplicationService {
     this.currentActionMenu$.next(currentActionMenu);
   };
 
-  private async shouldNavigate(overlays: OverlayStart): Promise<boolean> {
+  private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
       return true;
     }
-    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
+    const action = getLeaveAction(
+      this.appInternalStates.get(currentAppId)?.leaveHandler,
+      nextAppId
+    );
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
         'data-test-subj': 'appLeaveConfirmModal',
       });
       if (!confirmed) {
+        if (action.callback) {
+          setTimeout(action.callback, 0);
+        }
         return false;
       }
     }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useState } from 'react';
@@ -27,6 +28,7 @@ import { ChartEmptyState } from './chart_empty_state';
 import { DurationAnomaliesBar } from './duration_line_bar_list';
 import { AnomalyRecords } from '../../../state/actions';
 import { UptimeThemeContext } from '../../../contexts';
+import { MONITOR_CHART_HEIGHT } from '../../monitor';
 
 interface DurationChartProps {
   /**
@@ -86,7 +88,7 @@ export const DurationChartComponent = ({
   };
 
   return (
-    <ChartWrapper height="400px" loading={loading}>
+    <ChartWrapper height={MONITOR_CHART_HEIGHT} loading={loading}>
       {hasLines ? (
         <Chart>
           <Settings

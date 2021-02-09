@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -9,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { handleError } from '../../../../lib/errors';
 import { RouteDependencies } from '../../../../types';
 import { fetchStatus } from '../../../../lib/alerts/fetch_status';
-import { CommonAlertFilter } from '../../../../../common/types';
+import { CommonAlertFilter } from '../../../../../common/types/alerts';
 
 export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
   npRoute.router.post(
@@ -32,11 +33,7 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
     async (context, request, response) => {
       try {
         const { clusterUuid } = request.params;
-        const {
-          alertTypeIds,
-          timeRange: { min, max },
-          filters,
-        } = request.body;
+        const { alertTypeIds, filters } = request.body;
         const alertsClient = context.alerting?.getAlertsClient();
         if (!alertsClient) {
           return response.ok({ body: undefined });
@@ -47,8 +44,6 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
           npRoute.licenseService,
           alertTypeIds,
           clusterUuid,
-          min,
-          max,
           filters as CommonAlertFilter[]
         );
         return response.ok({ body: status });

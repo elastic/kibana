@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
 import { Query } from 'src/plugins/data/public';
+import { SortDirection } from 'src/plugins/data/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
   RENDER_AS,
-  SORT_ORDER,
   SCALING_TYPES,
   MVT_FIELD_TYPE,
+  SOURCE_TYPES,
 } from '../constants';
 
 export type AttributionDescriptor = {
@@ -24,7 +27,6 @@ export type AttributionDescriptor = {
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
-  applyGlobalQuery?: boolean;
 };
 
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
@@ -40,33 +42,66 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
 
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
+  id: string;
   indexPatternId: string;
   geoField?: string;
+  applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
 };
 
-export type AggDescriptor = {
-  field?: string; // count aggregation does not require field. All other aggregation types do
-  label?: string;
+type AbstractAggDescriptor = {
   type: AGG_TYPE;
+  label?: string;
 };
+
+export type CountAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.COUNT;
+};
+
+export type FieldedAggDescriptor = AbstractAggDescriptor & {
+  type:
+    | AGG_TYPE.UNIQUE_COUNT
+    | AGG_TYPE.MAX
+    | AGG_TYPE.MIN
+    | AGG_TYPE.SUM
+    | AGG_TYPE.AVG
+    | AGG_TYPE.TERMS;
+  field?: string;
+};
+
+export type PercentileAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.PERCENTILE;
+  field?: string;
+  percentile?: number;
+};
+
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
 };
 
 export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
-  requestType?: RENDER_AS;
-  resolution?: GRID_RESOLUTION;
+  geoField: string;
+  requestType: RENDER_AS;
+  resolution: GRID_RESOLUTION;
+};
+
+export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
+  geoField: string;
+  splitField: string;
+  sortField: string;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
+  geoField: string;
   filterByMapBounds?: boolean;
   tooltipProperties?: string[];
-  sortField?: string;
-  sortOrder?: SORT_ORDER;
+  sortField: string;
+  sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
-  topHitsSplitField?: string;
-  topHitsSize?: number;
+  topHitsSplitField: string;
+  topHitsSize: number;
 };
 
 export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
@@ -76,8 +111,10 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle?: string;
-  term?: string; // term field name
+  term: string; // term field name
   whereQuery?: Query;
+  size?: number;
+  type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
@@ -129,8 +166,24 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
     tooltipProperties: string[];
   };
 
+export type InlineFieldDescriptor = {
+  name: string;
+  type: 'string' | 'number';
+};
+
 export type GeojsonFileSourceDescriptor = {
+  __fields?: InlineFieldDescriptor[];
   __featureCollection: FeatureCollection;
   name: string;
   type: string;
 };
+
+export type TableSourceDescriptor = {
+  id: string;
+  type: SOURCE_TYPES.TABLE_SOURCE;
+  __rows: Array<{ [key: string]: string | number }>;
+  __columns: InlineFieldDescriptor[];
+  term: string;
+};
+
+export type TermJoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;

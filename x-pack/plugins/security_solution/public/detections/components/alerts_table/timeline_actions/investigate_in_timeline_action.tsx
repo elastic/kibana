@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
@@ -23,11 +24,13 @@ import {
 } from '../translations';
 
 interface InvestigateInTimelineActionProps {
+  ariaLabel?: string;
   ecsRowData: Ecs;
   nonEcsRowData: TimelineNonEcsData[];
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
+  ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
   ecsRowData,
   nonEcsRowData,
 }) => {
@@ -85,11 +88,10 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
 
   return (
     <ActionIconItem
-      ariaLabel={ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL}
+      ariaLabel={ariaLabel}
       content={ACTION_INVESTIGATE_IN_TIMELINE}
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"
-      id="sendAlertToTimeline"
       onClick={investigateInTimelineAlertClick}
       isDisabled={false}
     />

@@ -1,36 +1,37 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
-  TRANSACTION_REQUEST,
-  TRANSACTION_PAGE_LOAD,
-} from '../../../common/transaction_types';
-import {
-  SERVICE_NAME,
+  METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-  METRIC_CGROUP_MEMORY_USAGE_BYTES,
+  SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_REQUEST,
+} from '../../../common/transaction_types';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { ESFilter } from '../../../typings/elasticsearch';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+  getTransactionDurationFieldForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../metrics/by_agent/shared/memory';
-import {
-  getProcessorEventForAggregatedTransactions,
-  getTransactionDurationFieldForAggregatedTransactions,
-  getDocumentTypeFilterForAggregatedTransactions,
-} from '../helpers/aggregated_transactions';
 import { getErrorRate } from '../transaction_groups/get_error_rate';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 interface Options {
   setup: Setup & SetupTimeRange;
@@ -162,19 +163,12 @@ async function getTransactionStats({
             ),
           },
         },
-        count: {
-          value_count: {
-            field: getTransactionDurationFieldForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-          },
-        },
       },
     },
   };
   const response = await apmEventClient.search(params);
 
-  const totalRequests = response.aggregations?.count.value ?? 0;
+  const totalRequests = response.hits.total.value;
 
   return {
     avgTransactionDuration: response.aggregations?.duration.value ?? null,

@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
-import angular from 'angular';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies } from './types';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -60,8 +60,9 @@ export interface IShims {
     kfetchOptions?: KFetchKibanaOptions | undefined
   ) => Promise<any>;
   isCloud: boolean;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
+  kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
 }
 
 export class Legacy {
@@ -124,6 +125,10 @@ export class Legacy {
       isCloud,
       triggersActionsUi,
       usageCollection,
+      kibanaServices: {
+        ...core,
+        usageCollection,
+      },
     };
   }
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEvent, IEventLogger, IEventLogService } from './index';
@@ -59,7 +60,8 @@ describe('EventLogger', () => {
     eventLogger.logEvent({});
     await waitForLogEvent(systemLogger);
     delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit longer since event logging is async
-    expect(esContext.esAdapter.indexDocument).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.indexDocument).toHaveBeenCalled();
+    expect(esContext.esAdapter.indexDocuments).not.toHaveBeenCalled();
   });
 
   test('method logEvent() writes expected default values', async () => {
@@ -102,16 +104,16 @@ describe('EventLogger', () => {
       event: { provider: 'test-provider', action: 'a' },
     });
 
-    const ignoredTimestamp = '1999-01-01T00:00:00Z';
+    const respectedTimestamp = '2999-01-01T00:00:00.000Z';
     eventLogger.logEvent({
-      '@timestamp': ignoredTimestamp,
+      '@timestamp': respectedTimestamp,
       event: {
         action: 'b',
       },
     });
     const event = await waitForLogEvent(systemLogger);
 
-    expect(event!['@timestamp']).not.toEqual(ignoredTimestamp);
+    expect(event!['@timestamp']).toEqual(respectedTimestamp);
     expect(event?.event?.action).toEqual('b');
   });
 

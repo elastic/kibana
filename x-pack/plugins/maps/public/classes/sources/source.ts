@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
@@ -9,6 +10,7 @@
 import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
+import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/util';
 
 import { IField } from '../fields/field';
@@ -59,10 +61,11 @@ export interface ISource {
   cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
+  getApplyGlobalTime(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  getPreIndexedShape(): Promise<PreIndexedShape | null>;
+  getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -72,7 +75,7 @@ export interface ISource {
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  readonly _inspectorAdapters?: Adapters | undefined;
+  private readonly _inspectorAdapters?: Adapters;
 
   constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;
@@ -134,7 +137,11 @@ export class AbstractSource implements ISource {
   }
 
   getApplyGlobalQuery(): boolean {
-    return !!this._descriptor.applyGlobalQuery;
+    return false;
+  }
+
+  getApplyGlobalTime(): boolean {
+    return false;
   }
 
   getIndexPatternIds(): string[] {
@@ -153,7 +160,7 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  getJoinsDisabledReason() {
+  getJoinsDisabledReason(): string | null {
     return null;
   }
 
@@ -162,7 +169,7 @@ export class AbstractSource implements ISource {
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async getPreIndexedShape(/* properties */): Promise<PreIndexedShape | null> {
+  async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
     return null;
   }
 
@@ -183,11 +190,11 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  getMinZoom() {
+  getMinZoom(): number {
     return MIN_ZOOM;
   }
 
-  getMaxZoom() {
+  getMaxZoom(): number {
     return MAX_ZOOM;
   }
 

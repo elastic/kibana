@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import fs from 'fs';
+import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
@@ -30,12 +19,7 @@ import {
   isLinkDependency,
   readPackageJson,
 } from './package_json';
-import {
-  installInDir,
-  runScriptInPackage,
-  runScriptInPackageStreaming,
-  yarnWorkspacesInfo,
-} from './scripts';
+import { installInDir, runScriptInPackage, runScriptInPackageStreaming } from './scripts';
 
 interface BuildConfig {
   skip?: boolean;
@@ -73,9 +57,10 @@ export class Project {
   public readonly devDependencies: IPackageDependencies;
   /** scripts defined in the package.json file for the project [name => body] */
   public readonly scripts: IPackageScripts;
+  /** states if this project is a Bazel package */
+  public readonly bazelPackage: boolean;
 
-  public isWorkspaceRoot = false;
-  public isWorkspaceProject = false;
+  public isSinglePackageJsonProject = false;
 
   constructor(packageJson: IPackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
@@ -92,47 +77,54 @@ export class Project {
       ...this.devDependencies,
       ...this.productionDependencies,
     };
-    this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
+    this.isSinglePackageJsonProject = this.json.name === 'kibana';
 
     this.scripts = this.json.scripts || {};
+
+    this.bazelPackage =
+      !this.isSinglePackageJsonProject && Fs.existsSync(Path.resolve(this.path, 'BUILD.bazel'));
   }
 
   public get name(): string {
     return this.json.name;
   }
 
-  public ensureValidProjectDependency(project: Project, dependentProjectIsInWorkspace: boolean) {
+  public ensureValidProjectDependency(project: Project) {
+    const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
+    const relativePathToProjectIfBazelPkg = normalizePath(
+      Path.relative(this.path, `bazel/bin/packages/${Path.basename(project.path)}`)
+    );
+
     const versionInPackageJson = this.allDependencies[project.name];
+    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`;
 
-    let expectedVersionInPackageJson;
-    if (dependentProjectIsInWorkspace) {
-      expectedVersionInPackageJson = project.json.version;
-    } else {
-      const relativePathToProject = normalizePath(Path.relative(this.path, project.path));
-      expectedVersionInPackageJson = `link:${relativePathToProject}`;
-    }
-
-    // No issues!
-    if (versionInPackageJson === expectedVersionInPackageJson) {
+    // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
+    //  do not allow child projects to hold dependencies
+    if (
+      versionInPackageJson === expectedVersionInPackageJson ||
+      versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg
+    ) {
       return;
     }
 
-    let problemMsg;
-    if (isLinkDependency(versionInPackageJson) && dependentProjectIsInWorkspace) {
-      problemMsg = `but should be using a workspace`;
-    } else if (isLinkDependency(versionInPackageJson)) {
-      problemMsg = `using 'link:', but the path is wrong`;
-    } else {
-      problemMsg = `but it's not using the local package`;
+    const updateMsg = 'Update its package.json to the expected value below.';
+    const meta = {
+      actual: `"${project.name}": "${versionInPackageJson}"`,
+      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
+      package: `${this.name} (${this.packageJsonLocation})`,
+    };
+
+    if (isLinkDependency(versionInPackageJson)) {
+      throw new CliError(
+        `[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`,
+        meta
+      );
     }
 
     throw new CliError(
-      `[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`,
-      {
-        actual: `"${project.name}": "${versionInPackageJson}"`,
-        expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-        package: `${this.name} (${this.packageJsonLocation})`,
-      }
+      `[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`,
+      meta
     );
   }
 
@@ -151,6 +143,10 @@ export class Project {
 
   public getCleanConfig(): CleanConfig {
     return (this.json.kibana && this.json.kibana.clean) || {};
+  }
+
+  public isBazelPackage() {
+    return this.bazelPackage;
   }
 
   public isFlaggedAsDevOnly() {
@@ -213,47 +209,16 @@ export class Project {
     return Object.keys(this.allDependencies).length > 0;
   }
 
-  public async installDependencies({ extraArgs }: { extraArgs: string[] }) {
+  public isEveryDependencyLocal() {
+    return Object.values(this.allDependencies).every((dep) => isLinkDependency(dep));
+  }
+
+  public async installDependencies(options: { extraArgs?: string[] } = {}) {
     log.info(`[${this.name}] running yarn`);
 
     log.write('');
-    await installInDir(this.path, extraArgs);
+    await installInDir(this.path, options?.extraArgs);
     log.write('');
-
-    await this.removeExtraneousNodeModules();
-  }
-
-  /**
-   * Yarn workspaces symlinks workspace projects to the root node_modules, even
-   * when there is no depenency on the project. This results in unnecicary, and
-   * often duplicated code in the build archives.
-   */
-  public async removeExtraneousNodeModules() {
-    // this is only relevant for the root workspace
-    if (!this.isWorkspaceRoot) {
-      return;
-    }
-
-    const workspacesInfo = await yarnWorkspacesInfo(this.path);
-    const unusedWorkspaces = new Set(Object.keys(workspacesInfo));
-
-    // check for any cross-project dependency
-    for (const name of Object.keys(workspacesInfo)) {
-      const workspace = workspacesInfo[name];
-      workspace.workspaceDependencies.forEach((w) => unusedWorkspaces.delete(w));
-    }
-
-    unusedWorkspaces.forEach((name) => {
-      const { dependencies, devDependencies } = this.json;
-      const nodeModulesPath = Path.resolve(this.nodeModulesLocation, name);
-      const isDependency = dependencies && dependencies.hasOwnProperty(name);
-      const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
-
-      if (!isDependency && !isDevDependency && fs.existsSync(nodeModulesPath)) {
-        log.debug(`No dependency on ${name}, removing link in node_modules`);
-        fs.unlinkSync(nodeModulesPath);
-      }
-    });
   }
 }
 

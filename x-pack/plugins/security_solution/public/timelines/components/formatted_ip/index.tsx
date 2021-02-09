@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
+import deepEqual from 'fast-deep-equal';
 
 import {
   DragEffects,
@@ -203,7 +205,15 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   return <>{content}</>;
 };
 
-const AddressLinks = React.memo(AddressLinksComponent);
+const AddressLinks = React.memo(
+  AddressLinksComponent,
+  (prevProps, nextProps) =>
+    prevProps.contextId === nextProps.contextId &&
+    prevProps.eventId === nextProps.eventId &&
+    prevProps.fieldName === nextProps.fieldName &&
+    prevProps.truncate === nextProps.truncate &&
+    deepEqual(prevProps.addresses, nextProps.addresses)
+);
 
 const FormattedIpComponent: React.FC<{
   contextId: string;
@@ -253,4 +263,12 @@ const FormattedIpComponent: React.FC<{
   }
 };
 
-export const FormattedIp = React.memo(FormattedIpComponent);
+export const FormattedIp = React.memo(
+  FormattedIpComponent,
+  (prevProps, nextProps) =>
+    prevProps.contextId === nextProps.contextId &&
+    prevProps.eventId === nextProps.eventId &&
+    prevProps.fieldName === nextProps.fieldName &&
+    prevProps.truncate === nextProps.truncate &&
+    deepEqual(prevProps.value, nextProps.value)
+);

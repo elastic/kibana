@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -63,6 +52,9 @@ export class ExpressionLoader {
 
     this.renderHandler = new ExpressionRenderHandler(element, {
       onRenderError: params && params.onRenderError,
+      renderMode: params?.renderMode,
+      syncColors: params?.syncColors,
+      hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;
@@ -145,18 +137,14 @@ export class ExpressionLoader {
       this.execution.cancel();
     }
     this.setParams(params);
-    this.execution = getExpressionsService().execute(
-      expression,
-      params.context,
-      {
-        search: params.searchContext,
-        variables: params.variables || {},
-        inspectorAdapters: params.inspectorAdapters,
-      },
-      {
-        debug: params.debug,
-      }
-    );
+    this.execution = getExpressionsService().execute(expression, params.context, {
+      searchContext: params.searchContext,
+      variables: params.variables || {},
+      inspectorAdapters: params.inspectorAdapters,
+      searchSessionId: params.searchSessionId,
+      debug: params.debug,
+      syncColors: params.syncColors,
+    });
 
     const prevDataHandler = this.execution;
     const data = await prevDataHandler.getData();
@@ -188,6 +176,10 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+    if (params.searchSessionId && this.params) {
+      this.params.searchSessionId = params.searchSessionId;
+    }
+    this.params.syncColors = params.syncColors;
     this.params.debug = Boolean(params.debug);
 
     this.params.inspectorAdapters = (params.inspectorAdapters ||

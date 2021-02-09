@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiPopoverProps, EuiCode } from '@elastic/eui';
@@ -16,6 +17,7 @@ import { createUptimeLink } from '../../lib/create_uptime_link';
 import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   Section,
   SectionLinkProps,
@@ -24,8 +26,6 @@ import {
   SectionSubtitle,
   SectionLinks,
   SectionLink,
-  withTheme,
-  EuiTheme,
 } from '../../../../../../../observability/public';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
 
@@ -37,6 +37,7 @@ interface Props {
   isPopoverOpen: boolean;
   closePopover: () => void;
   popoverPosition: EuiPopoverProps['anchorPosition'];
+  openNewOverlay?: () => void;
 }
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
@@ -50,6 +51,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     nodeType,
     popoverPosition,
     theme,
+    openNewOverlay,
   }) => {
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);

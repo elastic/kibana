@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -10,9 +11,9 @@ import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_dat
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 
-export const metricsChartsRoute = createRoute(() => ({
-  path: `/api/apm/services/{serviceName}/metrics/charts`,
-  params: {
+export const metricsChartsRoute = createRoute({
+  endpoint: `GET /api/apm/services/{serviceName}/metrics/charts`,
+  params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
@@ -26,7 +27,8 @@ export const metricsChartsRoute = createRoute(() => ({
       uiFiltersRt,
       rangeRt,
     ]),
-  },
+  }),
+  options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { params } = context;
@@ -39,4 +41,4 @@ export const metricsChartsRoute = createRoute(() => ({
       serviceNodeName,
     });
   },
-}));
+});

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
-import { useDebounce } from 'react-use';
 import { i18n } from '@kbn/i18n';
 import { EuiRange } from '@elastic/eui';
+import { useDebounceWithOptions } from '../helpers';
 
 export const ValuesRangeInput = ({
   value,
@@ -20,7 +21,8 @@ export const ValuesRangeInput = ({
   const MAX_NUMBER_OF_VALUES = 100;
 
   const [inputValue, setInputValue] = useState(String(value));
-  useDebounce(
+
+  useDebounceWithOptions(
     () => {
       if (inputValue === '') {
         return;
@@ -28,6 +30,7 @@ export const ValuesRangeInput = ({
       const inputNumber = Number(inputValue);
       onChange(Math.min(MAX_NUMBER_OF_VALUES, Math.max(inputNumber, MIN_NUMBER_OF_VALUES)));
     },
+    { skipFirstRender: true },
     256,
     [inputValue]
   );

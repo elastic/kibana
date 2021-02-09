@@ -17,17 +17,19 @@ RUN {{packageManager}} install -y findutils tar gzip
 
 {{#usePublicArtifact}}
 RUN cd /opt && \
-  curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/{{artifactTarball}} && \
+  curl --retry 8 -s -L \
+    --output kibana.tar.gz \
+     https://artifacts.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
 {{/usePublicArtifact}}
 
 {{^usePublicArtifact}}
-COPY {{artifactTarball}} /opt
+COPY {{artifactTarball}} /opt/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar --strip-components=1 -zxf /opt/{{artifactTarball}}
+RUN tar --strip-components=1 -zxf /opt/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -43,19 +45,39 @@ RUN chmod -R g=u /usr/share/kibana
 FROM {{{baseOSImage}}}
 EXPOSE 5601
 
+{{#ubi}}
+  # https://github.com/rpm-software-management/microdnf/issues/50
+  RUN mkdir -p /run/user/$(id -u)
+{{/ubi}}
+
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \
+        fontconfig freetype shadow-utils nss {{#ubi}}findutils{{/ubi}} && \
       {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)
 
 # Add an init process, check the checksum to make sure it's a match
-RUN curl -L -o /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64
-RUN echo "37f2c1f0372a45554f1b89924fbb134fc24c3756efaedf11e07f599494e0eff9  /usr/local/bin/dumb-init" | sha256sum -c -
-RUN chmod +x /usr/local/bin/dumb-init
+RUN set -e ; \
+    TINI_BIN="" ; \
+    case "$(arch)" in \
+        aarch64) \
+            TINI_BIN='tini-arm64' ; \
+            ;; \
+        x86_64) \
+            TINI_BIN='tini-amd64' ; \
+            ;; \
+        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
+    esac ; \
+  TINI_VERSION='v0.19.0' ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
+  sha256sum -c "${TINI_BIN}.sha256sum" ; \
+  rm "${TINI_BIN}.sha256sum" ; \
+  mv "${TINI_BIN}" /bin/tini ; \
+  chmod +x /bin/tini
 
 RUN mkdir /usr/share/fonts/local
 RUN curl -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
@@ -86,7 +108,7 @@ RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
 # Provide a non-root user to run the process.
 RUN groupadd --gid 1000 kibana && \
-    useradd --uid 1000 --gid 1000 \
+    useradd --uid 1000 --gid 1000 -G 0 \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
 
@@ -125,6 +147,6 @@ RUN mkdir /licenses && \
 
 USER kibana
 
-ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+ENTRYPOINT ["/bin/tini", "--"]
 
 CMD ["/usr/local/bin/kibana-docker"]

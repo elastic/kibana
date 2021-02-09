@@ -1,23 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isString, isEmpty } from 'lodash/fp';
+import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-import {
-  getOrEmptyTagFromValue,
-  getEmptyTagValue,
-} from '../../../../../common/components/empty_value';
+import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../../components/formatted_ip';
-import { HostDetailsLink } from '../../../../../common/components/links';
 
 import { Port, PORT_NAMES } from '../../../../../network/components/port';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -31,8 +28,12 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   EVENT_URL_FIELD_NAME,
+  SIGNAL_STATUS_FIELD_NAME,
+  GEO_FIELD_TYPE,
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
+import { RuleStatus } from './rule_status';
+import { HostName } from './host_name';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -57,6 +58,8 @@ const FormattedFieldValueComponent: React.FC<{
         truncate={truncate}
       />
     );
+  } else if (fieldType === GEO_FIELD_TYPE) {
+    return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
     return (
       <DefaultDraggable
@@ -77,22 +80,7 @@ const FormattedFieldValueComponent: React.FC<{
       <Duration contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
     );
   } else if (fieldName === HOST_NAME_FIELD_NAME) {
-    const hostname = `${value}`;
-
-    return isString(value) && hostname.length > 0 ? (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        tooltipContent={value}
-        value={value}
-      >
-        <HostDetailsLink data-test-subj="host-details-link" hostName={hostname}>
-          <TruncatableText data-test-subj="draggable-truncatable-content">{value}</TruncatableText>
-        </HostDetailsLink>
-      </DefaultDraggable>
-    ) : (
-      getEmptyTagValue()
-    );
+    return <HostName contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />;
   } else if (fieldFormat === BYTES_FORMAT) {
     return (
       <Bytes contextId={contextId} eventId={eventId} fieldName={fieldName} value={`${value}`} />
@@ -110,6 +98,10 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
     return renderEventModule({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (fieldName === SIGNAL_STATUS_FIELD_NAME) {
+    return (
+      <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
+    );
   } else if (
     [RULE_REFERENCE_FIELD_NAME, REFERENCE_URL_FIELD_NAME, EVENT_URL_FIELD_NAME].includes(fieldName)
   ) {
@@ -139,7 +131,6 @@ const FormattedFieldValueComponent: React.FC<{
   } else {
     const contentValue = getOrEmptyTagFromValue(value);
     const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
-
     return (
       <DefaultDraggable
         field={fieldName}

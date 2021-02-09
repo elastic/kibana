@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useCallback, useContext } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -17,7 +19,6 @@ import {
   MetricsExplorerTimeOptions,
   MetricsExplorerOptions,
 } from './use_metrics_explorer_options';
-import { SourceQuery } from '../../../../graphql/types';
 
 export interface MetricExplorerViewState {
   chartOptions: MetricsExplorerChartOptions;
@@ -26,7 +27,7 @@ export interface MetricExplorerViewState {
 }
 
 export const useMetricsExplorerState = (
-  source: SourceQuery.Query['source']['configuration'],
+  source: InfraSourceConfiguration,
   derivedIndexPattern: IIndexPattern,
   shouldLoadImmediately = true
 ) => {
@@ -48,7 +49,6 @@ export const useMetricsExplorerState = (
     currentTimerange,
     afterKey,
     refreshSignal,
-    undefined,
     shouldLoadImmediately
   );
 

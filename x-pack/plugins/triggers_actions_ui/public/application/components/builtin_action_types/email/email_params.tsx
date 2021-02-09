@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
@@ -27,12 +29,21 @@ export const EmailParamsFields = ({
   const [addCC, setAddCC] = useState<boolean>(false);
   const [addBCC, setAddBCC] = useState<boolean>(false);
 
+  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
+    [boolean, string | undefined]
+  >([false, defaultMessage]);
   useEffect(() => {
-    if (!message && defaultMessage && defaultMessage.length > 0) {
+    if (
+      !actionParams?.message ||
+      (isUsingDefault &&
+        actionParams?.message === defaultMessageUsed &&
+        defaultMessageUsed !== defaultMessage)
+    ) {
+      setDefaultMessageUsage([true, defaultMessage]);
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultMessage]);
 
   return (
     <Fragment>

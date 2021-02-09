@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -37,6 +38,11 @@ export const forceStartDatafeedSchema = schema.object({
   datafeedIds: schema.arrayOf(schema.maybe(schema.string())),
   start: schema.maybe(schema.number()),
   end: schema.maybe(schema.number()),
+});
+
+export const jobIdSchema = schema.object({
+  /** Optional list of job IDs. */
+  jobIds: schema.maybe(schema.string()),
 });
 
 export const jobIdsSchema = schema.object({
@@ -82,4 +88,9 @@ export const revertModelSnapshotSchema = schema.object({
       })
     )
   ),
+});
+
+export const jobsExistSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  allSpaces: schema.maybe(schema.boolean()),
 });

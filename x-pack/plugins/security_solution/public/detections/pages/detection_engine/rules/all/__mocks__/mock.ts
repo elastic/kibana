@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
@@ -9,6 +10,7 @@ import { Rule, RuleError } from '../../../../../containers/detection_engine/rule
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
+import { getThreatMock } from '../../../../../../../common/detection_engine/schemas/types/threat.mock';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {
@@ -137,23 +139,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   tags: ['tag1', 'tag2'],
   to: 'now',
   type: 'saved_query',
-  threat: [
-    {
-      framework: 'mockFramework',
-      tactic: {
-        id: '1234',
-        name: 'tactic1',
-        reference: 'reference1',
-      },
-      technique: [
-        {
-          id: '456',
-          name: 'technique1',
-          reference: 'technique reference',
-        },
-      ],
-    },
-  ],
+  threat: getThreatMock(),
   threshold: {
     field: 'host.name',
     value: 50,
@@ -179,23 +165,7 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   references: ['www.test.co'],
   falsePositives: ['test'],
   tags: ['tag1', 'tag2'],
-  threat: [
-    {
-      framework: 'mockFramework',
-      tactic: {
-        id: '1234',
-        name: 'tactic1',
-        reference: 'reference1',
-      },
-      technique: [
-        {
-          id: '456',
-          name: 'technique1',
-          reference: 'technique reference',
-        },
-      ],
-    },
-  ],
+  threat: getThreatMock(),
   note: '# this is some markdown documentation',
 });
 

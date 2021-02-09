@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../common/constants';
@@ -48,7 +49,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
-      return obj.attributes;
+      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return DYNAMIC_SETTINGS_DEFAULTS;

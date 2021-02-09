@@ -1,28 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // TODO: Remove EuiPage & EuiPageBody before exposing full app
 
 import React, { useEffect } from 'react';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { useActions, useValues } from 'kea';
 
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { Loading } from '../../../shared/loading';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
 import { AppLogic } from '../../app_logic';
-import { OverviewLogic } from './overview_logic';
-
-import { Loading } from '../../components/shared/loading';
 import { ProductButton } from '../../components/shared/product_button';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
+import { OverviewLogic } from './overview_logic';
 import { RecentActivity } from './recent_activity';
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
@@ -56,7 +57,14 @@ export const Overview: React.FC = () => {
     initializeOverview();
   }, [initializeOverview]);
 
-  if (dataLoading) return <Loading />;
+  // TODO: Remove div wrapper once the Overview page is using the full Layout
+  if (dataLoading) {
+    return (
+      <div style={{ height: '90vh' }}>
+        <Loading />
+      </div>
+    );
+  }
 
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
 

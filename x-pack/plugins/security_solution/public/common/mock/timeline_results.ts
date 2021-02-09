@@ -1,11 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
@@ -14,6 +21,7 @@ import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_quer
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+
 export interface MockedProvidedQuery {
   request: {
     query: GetAllTimeline.Query;
@@ -2053,6 +2061,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
 ];
 
 export const mockTimelineModel: TimelineModel = {
+  activeTab: TimelineTabs.query,
   columns: [
     {
       columnHeaderType: 'not-filtered',
@@ -2100,6 +2109,7 @@ export const mockTimelineModel: TimelineModel = {
   eventIdToNoteIds: {},
   eventType: 'all',
   excludedRowRendererIds: [],
+  expandedEvent: {},
   filters: [
     {
       $state: {
@@ -2128,7 +2138,6 @@ export const mockTimelineModel: TimelineModel = {
   kqlMode: 'filter',
   kqlQuery: {
     filterQuery: null,
-    filterQueryDraft: null,
   },
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
@@ -2140,17 +2149,19 @@ export const mockTimelineModel: TimelineModel = {
   selectedEventIds: {},
   show: false,
   showCheckboxes: false,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'number',
+      sortDirection: Direction.desc,
+    },
+  ],
   status: TimelineStatus.active,
   title: 'Test rule',
   timelineType: TimelineType.default,
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
-  width: 1100,
 };
 
 export const mockTimelineResult: TimelineResult = {
@@ -2176,7 +2187,7 @@ export const mockTimelineResult: TimelineResult = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   savedQueryId: null,
-  sort: { columnId: '@timestamp', sortDirection: 'desc' },
+  sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: 'desc' }],
   version: '1',
 };
 
@@ -2192,8 +2203,9 @@ export const mockTimelineApolloResult = {
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
+    activeTab: TimelineTabs.query,
     columns: [
-      { columnHeaderType: 'not-filtered', id: '@timestamp', width: 190 },
+      { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', width: 190 },
       { columnHeaderType: 'not-filtered', id: 'message', width: 180 },
       { columnHeaderType: 'not-filtered', id: 'event.category', width: 180 },
       { columnHeaderType: 'not-filtered', id: 'event.action', width: 180 },
@@ -2220,6 +2232,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     eventIdToNoteIds: {},
     eventType: 'all',
     excludedRowRendererIds: [],
+    expandedEvent: {},
     filters: [],
     highlightedDropAndProviderId: '',
     historyIds: [],
@@ -2235,7 +2248,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     kqlMode: 'filter',
     kqlQuery: {
       filterQuery: { kuery: { expression: '', kind: 'kuery' }, serializedQuery: '' },
-      filterQueryDraft: { expression: '', kind: 'kuery' },
     },
     loadingEventIds: [],
     noteIds: [],
@@ -2245,14 +2257,13 @@ export const defaultTimelineProps: CreateTimelineProps = {
     selectedEventIds: {},
     show: false,
     showCheckboxes: false,
-    sort: { columnId: '@timestamp', sortDirection: Direction.desc },
+    sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
     status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
-    width: 1100,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

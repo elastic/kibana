@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import {
   IRouter,
   KibanaRequest,
   RequestHandlerContext,
   RouteValidatorConfig,
 } from 'src/core/server';
+import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 
 /**
  * Test helper that mocks Kibana's router and DRYs out various helper (callRoute, schema validation)
@@ -19,36 +20,37 @@ import {
 type MethodType = 'get' | 'post' | 'put' | 'patch' | 'delete';
 type PayloadType = 'params' | 'query' | 'body';
 
-interface IMockRouterProps {
+interface IMockRouter {
   method: MethodType;
-  payload?: PayloadType;
+  path: string;
 }
 interface IMockRouterRequest {
   body?: object;
   query?: object;
   params?: object;
 }
-type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
+type MockRouterRequest = KibanaRequest | IMockRouterRequest;
 
 export class MockRouter {
   public router!: jest.Mocked<IRouter>;
   public method: MethodType;
+  public path: string;
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, payload }: IMockRouterProps) {
+  constructor({ method, path }: IMockRouter) {
     this.createRouter();
     this.method = method;
-    this.payload = payload;
+    this.path = path;
   }
 
   public createRouter = () => {
     this.router = httpServiceMock.createRouter();
   };
 
-  public callRoute = async (request: TMockRouterRequest) => {
-    const [, handler] = this.router[this.method].mock.calls[0];
-
+  public callRoute = async (request: MockRouterRequest) => {
+    const route = this.findRouteRegistration();
+    const [, handler] = route;
     const context = {} as jest.Mocked<RequestHandlerContext>;
     await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
   };
@@ -57,31 +59,46 @@ export class MockRouter {
    * Schema validation helpers
    */
 
-  public validateRoute = (request: TMockRouterRequest) => {
-    if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
-
-    const [config] = this.router[this.method].mock.calls[0];
+  public validateRoute = (request: MockRouterRequest) => {
+    const route = this.findRouteRegistration();
+    const [config] = route;
     const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
+    const payloads = Object.keys(request) as PayloadType[];
 
-    const payloadValidation = validate[this.payload] as { validate(request: KibanaRequest): void };
-    const payloadRequest = request[this.payload] as KibanaRequest;
+    payloads.forEach((payload: PayloadType) => {
+      const payloadValidation = validate[payload] as { validate(request: KibanaRequest): void };
+      const payloadRequest = request[payload] as KibanaRequest;
 
-    payloadValidation.validate(payloadRequest);
+      payloadValidation.validate(payloadRequest);
+    });
   };
 
-  public shouldValidate = (request: TMockRouterRequest) => {
+  public shouldValidate = (request: MockRouterRequest) => {
     expect(() => this.validateRoute(request)).not.toThrow();
   };
 
-  public shouldThrow = (request: TMockRouterRequest) => {
+  public shouldThrow = (request: MockRouterRequest) => {
     expect(() => this.validateRoute(request)).toThrow();
+  };
+
+  private findRouteRegistration = () => {
+    const routerCalls = this.router[this.method].mock.calls as any[];
+    if (!routerCalls.length) throw new Error('No routes registered.');
+
+    const route = routerCalls.find(([router]: any) => router.path === this.path);
+    if (!route) throw new Error('No matching registered routes found - check method/path keys');
+
+    return route;
   };
 }
 
 /**
  * Example usage:
  */
-// const mockRouter = new MockRouter({ method: 'get', payload: 'body' });
+// const mockRouter = new MockRouter({
+//   method: 'get',
+//   path: '/api/app_search/test',
+// });
 //
 // beforeEach(() => {
 //   jest.clearAllMocks();

@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import '../../../../__mocks__/kea.mock';
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { AddGroupModal } from './add_group_modal';
-
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+
+import { AddGroupModal } from './add_group_modal';
 
 describe('AddGroupModal', () => {
   const closeNewGroupModal = jest.fn();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, PureComponent } from 'react';
@@ -25,6 +26,7 @@ import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export class CcrShard extends PureComponent {
   renderCharts() {
@@ -123,13 +125,22 @@ export class CcrShard extends PureComponent {
   }
 
   render() {
-    const { stat, oldestStat, formattedLeader } = this.props;
+    const { stat, oldestStat, formattedLeader, alerts } = this.props;
 
     return (
       <EuiPage style={{ backgroundColor: 'white' }}>
         <EuiPageBody>
-          <Status stat={stat} formattedLeader={formattedLeader} oldestStat={oldestStat} />
-          <EuiSpacer size="s" />
+          <EuiPanel>
+            <Status
+              stat={stat}
+              formattedLeader={formattedLeader}
+              oldestStat={oldestStat}
+              alerts={alerts}
+            />
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <AlertsCallout alerts={alerts} />
+          <EuiSpacer size="m" />
           {this.renderErrors()}
           <EuiFlexGroup wrap>{this.renderCharts()}</EuiFlexGroup>
           <EuiHorizontalRule />

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
@@ -45,8 +47,8 @@ export const Map: React.FC<Props> = ({
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
   return (
-    <AutoSizer content>
-      {({ measureRef, content: { width = 0, height = 0 } }) => {
+    <AutoSizer bounds>
+      {({ measureRef, bounds: { width = 0, height = 0 } }) => {
         const groupsWithLayout = applyWaffleMapLayout(map, width, height);
         return (
           <WaffleMapOuterContainer

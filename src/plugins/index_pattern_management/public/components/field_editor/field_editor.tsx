@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent, Fragment } from 'react';
@@ -126,6 +115,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
+  customLabel: string;
 }
 
 export interface FieldEdiorProps {
@@ -166,6 +156,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
+      customLabel: '',
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -209,6 +200,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         data.fieldFormats
       ),
       fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
+      customLabel: spec.customLabel || '',
       fieldFormatParams: format.params(),
     });
   }
@@ -405,6 +397,33 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           data-test-subj="editorFieldType"
           onChange={(e) => {
             this.onTypeChange(e.target.value as KBN_FIELD_TYPES);
+          }}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  renderCustomLabel() {
+    const { customLabel, spec } = this.state;
+
+    return (
+      <EuiFormRow
+        label={i18n.translate('indexPatternManagement.customLabel', {
+          defaultMessage: 'Custom label',
+        })}
+        helpText={
+          <FormattedMessage
+            id="indexPatternManagement.labelHelpText"
+            defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          />
+        }
+      >
+        <EuiFieldText
+          value={customLabel || ''}
+          placeholder={spec.name}
+          data-test-subj="editorFieldCustomLabel"
+          onChange={(e) => {
+            this.setState({ customLabel: e.target.value });
           }}
         />
       </EuiFormRow>
@@ -772,7 +791,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId, fieldFormatParams } = this.state;
+    const { fieldFormatId, fieldFormatParams, customLabel } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -811,6 +830,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
     } else {
       indexPattern.deleteFieldFormat(field.name);
+    }
+
+    if (field.customLabel !== customLabel) {
+      field.customLabel = customLabel;
+      indexPattern.fields.update(field);
     }
 
     return indexPatternService
@@ -873,6 +897,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
+          {this.renderCustomLabel()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

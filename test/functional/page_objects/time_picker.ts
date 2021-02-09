@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import moment from 'moment';
@@ -35,12 +24,18 @@ export type CommonlyUsed =
 
 export function TimePickerProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
-  const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const { header } = getPageObjects(['header']);
   const kibanaServer = getService('kibanaServer');
+  const MenuToggle = getService('MenuToggle');
+
+  const quickSelectTimeMenuToggle = new MenuToggle({
+    name: 'QuickSelectTime Menu',
+    menuTestSubject: 'superDatePickerQuickMenu',
+    toggleButtonTestSubject: 'superDatePickerToggleQuickMenuButton',
+  });
 
   class TimePicker {
     defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
@@ -93,7 +88,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
     }
 
-    private async inputValue(dataTestSubj: string, value: string) {
+    public async inputValue(dataTestSubj: string, value: string) {
       if (browser.isFirefox) {
         const input = await testSubjects.find(dataTestSubj);
         await input.clearValue();
@@ -158,34 +153,8 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       return await find.existsByCssSelector('.euiDatePickerRange--readOnly');
     }
 
-    public async isQuickSelectMenuOpen() {
-      return await testSubjects.exists('superDatePickerQuickMenu');
-    }
-
-    public async openQuickSelectTimeMenu() {
-      log.debug('openQuickSelectTimeMenu');
-      const isMenuOpen = await this.isQuickSelectMenuOpen();
-      if (!isMenuOpen) {
-        log.debug('opening quick select menu');
-        await retry.try(async () => {
-          await testSubjects.click('superDatePickerToggleQuickMenuButton');
-        });
-      }
-    }
-
-    public async closeQuickSelectTimeMenu() {
-      log.debug('closeQuickSelectTimeMenu');
-      const isMenuOpen = await this.isQuickSelectMenuOpen();
-      if (isMenuOpen) {
-        log.debug('closing quick select menu');
-        await retry.try(async () => {
-          await testSubjects.click('superDatePickerToggleQuickMenuButton');
-        });
-      }
-    }
-
     public async getRefreshConfig(keepQuickSelectOpen = false) {
-      await this.openQuickSelectTimeMenu();
+      await quickSelectTimeMenuToggle.open();
       const interval = await testSubjects.getAttribute(
         'superDatePickerRefreshIntervalInput',
         'value'
@@ -207,7 +176,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
         'superDatePickerToggleRefreshButton'
       );
       if (!keepQuickSelectOpen) {
-        await this.closeQuickSelectTimeMenu();
+        await quickSelectTimeMenuToggle.close();
       }
 
       return {
@@ -270,26 +239,26 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async startAutoRefresh(intervalS = 3) {
-      await this.openQuickSelectTimeMenu();
+      await quickSelectTimeMenuToggle.open();
       await this.inputValue('superDatePickerRefreshIntervalInput', intervalS.toString());
       const refreshConfig = await this.getRefreshConfig(true);
       if (refreshConfig.isPaused) {
         log.debug('start auto refresh');
         await testSubjects.click('superDatePickerToggleRefreshButton');
       }
-      await this.closeQuickSelectTimeMenu();
+      await quickSelectTimeMenuToggle.close();
     }
 
     public async pauseAutoRefresh() {
       log.debug('pauseAutoRefresh');
       const refreshConfig = await this.getRefreshConfig(true);
+
       if (!refreshConfig.isPaused) {
         log.debug('pause auto refresh');
         await testSubjects.click('superDatePickerToggleRefreshButton');
-        await this.closeQuickSelectTimeMenu();
       }
 
-      await this.closeQuickSelectTimeMenu();
+      await quickSelectTimeMenuToggle.close();
     }
 
     public async resumeAutoRefresh() {
@@ -300,7 +269,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
         await testSubjects.click('superDatePickerToggleRefreshButton');
       }
 
-      await this.closeQuickSelectTimeMenu();
+      await quickSelectTimeMenuToggle.close();
     }
 
     public async setHistoricalDataRange() {

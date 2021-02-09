@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, FC } from 'react';
@@ -24,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { isPostTransformsUpdateResponseSchema } from '../../../../../../common/api_schemas/type_guards';
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
@@ -42,7 +43,7 @@ import {
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
-  config: TransformPivotConfig;
+  config: TransformConfigUnion;
 }
 
 export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout, config }) => {

@@ -10,8 +10,8 @@
     "data",
     "cloud",
     "features",
+    "fileUpload",
     "licensing",
-    "usageCollection",
     "share",
     "embeddable",
     "uiActions",
@@ -24,7 +24,9 @@
     "security",
     "spaces",
     "management",
-    "licenseManagement"
+    "licenseManagement",
+    "maps",
+    "lens"
   ],
   "server": true,
   "ui": true,
@@ -34,7 +36,9 @@
     "kibanaReact",
     "dashboard",
     "savedObjects",
-    "home"
+    "home",
+    "spaces",
+    "maps"
   ],
   "extraPublicDirs": [
     "common"

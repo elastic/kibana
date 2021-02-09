@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -46,11 +47,11 @@ import { useUiSettings } from '../contexts/kibana';
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
-const RESIZE_IGNORED_DIFF_PX = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const Y_AXIS_HEIGHT = 24;
+export const SWIM_LANE_LABEL_WIDTH = 200;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
@@ -167,12 +168,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      const labelWidth = 200;
-      const resultNewWidth = e.width - labelWidth;
-      if (Math.abs(resultNewWidth - chartWidth) > RESIZE_IGNORED_DIFF_PX) {
-        setChartWidth(resultNewWidth);
-        onResize(resultNewWidth);
-      }
+      const resultNewWidth = e.width - SWIM_LANE_LABEL_WIDTH;
+      setChartWidth(resultNewWidth);
+      onResize(resultNewWidth);
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
   );
@@ -183,6 +181,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     if (!swimlaneData?.points) {
       return [];
     }
+
+    const sortedLaneValues = swimlaneData.laneLabels;
 
     return swimlaneData.points
       .map((v) => {
@@ -195,8 +195,15 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         }
         return formatted;
       })
+      .sort((a, b) => {
+        let aIndex = sortedLaneValues.indexOf(a.laneLabel);
+        let bIndex = sortedLaneValues.indexOf(b.laneLabel);
+        aIndex = aIndex > -1 ? aIndex : sortedLaneValues.length;
+        bIndex = bIndex > -1 ? bIndex : sortedLaneValues.length;
+        return aIndex - bIndex;
+      })
       .filter((v) => v.value > 0);
-  }, [swimlaneData?.points, filterActive, swimlaneType]);
+  }, [swimlaneData?.points, filterActive, swimlaneType, swimlaneData?.laneLabels]);
 
   const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimLanePoints.length > 0;
 
@@ -246,7 +253,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onBrushEnd: (e: HeatmapBrushEvent) => {
         onCellsSelection({
           lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000),
+          times: e.x.map((v) => (v as number) / 1000) as [number, number],
           type: swimlaneType,
           viewByFieldName: swimlaneData.fieldName,
         });
@@ -317,7 +324,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
         lanes: [String(cell.datum.y)],
-        times: [startTime, startTime + swimlaneData.interval],
+        times: [startTime, startTime + swimlaneData.interval] as [number, number],
         type: swimlaneType,
         viewByFieldName: swimlaneData.fieldName,
       };

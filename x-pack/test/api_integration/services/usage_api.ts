@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -39,8 +40,7 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
      */
     async getTelemetryStats(payload: {
       unencrypted?: boolean;
-      timeRange: { min: Date; max: Date };
-    }): Promise<TelemetryCollectionManagerPlugin['getStats']> {
+    }): Promise<ReturnType<TelemetryCollectionManagerPlugin['getStats']>> {
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')

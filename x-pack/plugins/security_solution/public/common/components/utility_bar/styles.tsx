@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import styled, { css } from 'styled-components';
@@ -115,7 +116,7 @@ export const BarText = styled.p.attrs({
   className: 'siemUtilityBar__text',
 })`
   ${({ theme }) => css`
-    color: ${theme.eui.textColors.subdued};
+    color: ${theme.eui.euiTextSubduedColor};
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
     white-space: nowrap;

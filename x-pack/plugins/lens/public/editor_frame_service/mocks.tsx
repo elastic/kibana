@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { PaletteDefinition } from 'src/plugins/charts/public';
 import {
   ReactExpressionRendererProps,
   ExpressionsSetup,
@@ -15,6 +17,7 @@ import { expressionsPluginMock } from '../../../../../src/plugins/expressions/pu
 import { DatasourcePublicAPI, FramePublicAPI, Datasource, Visualization } from '../types';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -51,6 +54,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
+    getErrorMessages: jest.fn((_state, _frame) => undefined),
   };
 }
 
@@ -81,21 +85,43 @@ export function createMockDatasource(id: string): DatasourceMock {
     removeLayer: jest.fn((_state, _layerId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
-
+    uniqueLabels: jest.fn((_state) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
-    canHandleDrop: jest.fn(),
+    getDropTypes: jest.fn(),
     onDrop: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
+    getErrorMessages: jest.fn((_state) => undefined),
   };
 }
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 
+export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
+  return {
+    getColors: jest.fn((_) => ['#ff0000', '#00ff00']),
+    title: 'Mock Palette',
+    id: 'default',
+    renderEditor: jest.fn(),
+    toExpression: jest.fn(() => ({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'mock_palette',
+          arguments: {},
+        },
+      ],
+    })),
+    getColor: jest.fn().mockReturnValue('#ff0000'),
+  };
+}
+
 export function createMockFramePublicAPI(): FrameMock {
+  const palette = createMockPaletteDefinition();
   return {
     datasourceLayers: {},
     addNewLayer: jest.fn(() => ''),
@@ -103,6 +129,11 @@ export function createMockFramePublicAPI(): FrameMock {
     dateRange: { fromDate: 'now-7d', toDate: 'now' },
     query: { query: '', language: 'lucene' },
     filters: [],
+    availablePalettes: {
+      get: () => palette,
+      getAll: () => [palette],
+    },
+    searchSessionId: 'sessionId',
   };
 }
 
@@ -128,6 +159,7 @@ export function createMockSetupDependencies() {
     data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
+    charts: chartPluginMock.createSetupContract(),
   } as unknown) as MockedSetupDependencies;
 }
 
@@ -136,5 +168,6 @@ export function createMockStartDependencies() {
     data: dataPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
+    charts: chartPluginMock.createStartContract(),
   } as unknown) as MockedStartDependencies;
 }

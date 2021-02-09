@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Okta network zones can be configured to limit or restrict access to a network based on IP addresses or geolocations. An adversary may attempt to modify, delete, or deactivate an Okta network zone in order to remove or weaken an organization's security controls.",
+  "description": "Detects attempts to modify an Okta network zone. Okta network zones can be configured to limit or restrict access to a network based on IP addresses or geolocations. An adversary may attempt to modify, delete, or deactivate an Okta network zone in order to remove or weaken an organization's security controls.",
   "false_positives": [
     "Consider adding exceptions to this rule to filter false positives if Oyour organization's Okta network zones are regularly modified."
   ],
@@ -12,10 +12,11 @@
   ],
   "language": "kuery",
   "license": "Elastic License",
-  "name": "Attempt to Modify Okta Network Zone",
-  "note": "The Okta Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:okta.system and event.action:(zone.update or zone.deactivate or zone.delete or network_zone.rule.disabled or zone.remove_blacklist)",
+  "name": "Attempt to Modify an Okta Network Zone",
+  "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
+  "query": "event.dataset:okta.system and event.action:(zone.update or network_zone.rule.disabled or zone.remove_blacklist)",
   "references": [
+    "https://help.okta.com/en/prod/Content/Topics/Security/network/network-zones.htm",
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
   ],
@@ -24,11 +25,12 @@
   "severity": "medium",
   "tags": [
     "Elastic",
+    "Identity",
     "Okta",
+    "Continuous Monitoring",
     "SecOps",
-    "Network",
-    "Continuous Monitoring"
+    "Network Security"
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

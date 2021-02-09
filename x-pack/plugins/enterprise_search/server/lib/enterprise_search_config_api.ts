@@ -1,26 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { ConfigType } from '../';
-import { IAccess } from './check_access';
 
-import { IInitialAppData } from '../../common/types';
 import { stripTrailingSlash } from '../../common/strip_slashes';
+import { InitialAppData } from '../../common/types';
+import { ConfigType } from '../index';
 
-interface IParams {
+import { Access } from './check_access';
+
+interface Params {
   request: KibanaRequest;
   config: ConfigType;
   log: Logger;
 }
-interface IReturn extends IInitialAppData {
-  access?: IAccess;
+interface Return extends InitialAppData {
+  access?: Access;
   publicUrl?: string;
 }
 
@@ -35,10 +37,10 @@ export const callEnterpriseSearchConfigAPI = async ({
   config,
   log,
   request,
-}: IParams): Promise<IReturn> => {
+}: Params): Promise<Return> => {
   if (!config.host) return {};
 
-  const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is respondingly normally and not adversely impacting Kibana load speeds.`;
+  const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.`;
   const TIMEOUT_MESSAGE = `Exceeded ${config.accessCheckTimeout}ms timeout while checking ${config.host}. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses.`;
   const CONNECTION_ERROR = 'Could not perform access check to Enterprise Search';
 

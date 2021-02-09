@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -9,7 +10,8 @@ import { Subject, of, BehaviorSubject } from 'rxjs';
 import { Option, none, some } from 'fp-ts/lib/Option';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
-import { sleep, resolvable, Resolvable, mockLogger } from '../test_utils';
+import { sleep, resolvable, Resolvable } from '../test_utils';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
 
 describe('TaskPoller', () => {
@@ -24,8 +26,9 @@ describe('TaskPoller', () => {
 
       const work = jest.fn(async () => true);
       createTaskPoller<void, boolean>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         getCapacity: () => 1,
         work,
@@ -59,8 +62,9 @@ describe('TaskPoller', () => {
 
       const work = jest.fn(async () => true);
       createTaskPoller<void, boolean>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$,
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         getCapacity: () => 1,
         work,
@@ -101,8 +105,9 @@ describe('TaskPoller', () => {
 
       let hasCapacity = true;
       createTaskPoller<void, boolean>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -160,8 +165,9 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<void>>();
       createTaskPoller<void, boolean>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -206,8 +212,9 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<void>>();
       createTaskPoller<void, boolean>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -251,8 +258,9 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => true);
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, boolean>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -288,8 +296,9 @@ describe('TaskPoller', () => {
       const handler = jest.fn();
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, string[]>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work: async (...args) => {
           await worker;
@@ -339,8 +348,9 @@ describe('TaskPoller', () => {
       type ResolvableTupple = [string, PromiseLike<void> & Resolvable];
       const pollRequests$ = new Subject<Option<ResolvableTupple>>();
       createTaskPoller<[string, Resolvable], string[]>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work: async (...resolvables) => {
           await Promise.all(resolvables.map(([, future]) => future));
@@ -399,8 +409,9 @@ describe('TaskPoller', () => {
       const handler = jest.fn();
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, string[]>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work: async (...args) => {
           throw new Error('failed to work');
@@ -440,8 +451,9 @@ describe('TaskPoller', () => {
         return callCount;
       });
       createTaskPoller<string, number>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
@@ -483,8 +495,9 @@ describe('TaskPoller', () => {
       const work = jest.fn(async () => {});
       const pollRequests$ = new Subject<Option<string>>();
       createTaskPoller<string, void>({
-        logger: mockLogger(),
+        logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
+        pollIntervalDelay$: of(0),
         bufferCapacity,
         work,
         workTimeout: pollInterval * 5,

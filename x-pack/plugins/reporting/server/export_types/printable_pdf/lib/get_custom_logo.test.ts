@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ReportingConfig, ReportingCore } from '../../../';
@@ -31,7 +32,7 @@ test(`gets logo from uiSettings`, async () => {
   };
 
   const mockGet = jest.fn();
-  mockGet.mockImplementationOnce((...args: any[]) => {
+  mockGet.mockImplementationOnce((...args: string[]) => {
     if (args[0] === 'xpackReporting:customPdfLogo') {
       return 'purple pony';
     }

@@ -14,7 +14,7 @@ export declare class ExpressionRenderHandler
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(element, { onRenderError })](./kibana-plugin-plugins-expressions-public.expressionrenderhandler._constructor_.md) |  | Constructs a new instance of the <code>ExpressionRenderHandler</code> class |
+|  [(constructor)(element, { onRenderError, renderMode, syncColors, hasCompatibleActions, })](./kibana-plugin-plugins-expressions-public.expressionrenderhandler._constructor_.md) |  | Constructs a new instance of the <code>ExpressionRenderHandler</code> class |
 
 ## Properties
 
@@ -24,7 +24,7 @@ export declare class ExpressionRenderHandler
 |  [events$](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.events_.md) |  | <code>Observable&lt;ExpressionRendererEvent&gt;</code> |  |
 |  [getElement](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.getelement.md) |  | <code>() =&gt; HTMLElement</code> |  |
 |  [handleRenderError](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.handlerendererror.md) |  | <code>(error: ExpressionRenderError) =&gt; void</code> |  |
-|  [render](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.render.md) |  | <code>(data: any, uiState?: any) =&gt; Promise&lt;void&gt;</code> |  |
+|  [render](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.render.md) |  | <code>(value: any, uiState?: any) =&gt; Promise&lt;void&gt;</code> |  |
 |  [render$](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.render_.md) |  | <code>Observable&lt;number&gt;</code> |  |
 |  [update$](./kibana-plugin-plugins-expressions-public.expressionrenderhandler.update_.md) |  | <code>Observable&lt;UpdateValue &#124; null&gt;</code> |  |
 

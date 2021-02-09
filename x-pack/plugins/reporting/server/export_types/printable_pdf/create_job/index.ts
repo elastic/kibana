@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PDF_JOB_TYPE } from '../../../../constants';
+import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
 import { JobParamsPDF, TaskPayloadPDF } from '../types';
 
-export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsPDF,
-  TaskPayloadPDF
->> = function createJobFactoryFn(reporting, parentLogger) {
+export const createJobFnFactory: CreateJobFnFactory<
+  CreateJobFn<JobParamsPDF, TaskPayloadPDF>
+> = function createJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'create-job']);

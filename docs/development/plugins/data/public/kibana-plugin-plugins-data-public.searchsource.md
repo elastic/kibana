@@ -33,16 +33,18 @@ export declare class SearchSource
 |  [createCopy()](./kibana-plugin-plugins-data-public.searchsource.createcopy.md) |  | creates a copy of this search source (without its children) |
 |  [destroy()](./kibana-plugin-plugins-data-public.searchsource.destroy.md) |  | Completely destroy the SearchSource.  {<!-- -->undefined<!-- -->} |
 |  [fetch(options)](./kibana-plugin-plugins-data-public.searchsource.fetch.md) |  | Fetch this source and reject the returned Promise on error |
+|  [fetch$(options)](./kibana-plugin-plugins-data-public.searchsource.fetch_.md) |  | Fetch this source from Elasticsearch, returning an observable over the response(s) |
 |  [getField(field, recurse)](./kibana-plugin-plugins-data-public.searchsource.getfield.md) |  | Gets a single field from the fields |
-|  [getFields()](./kibana-plugin-plugins-data-public.searchsource.getfields.md) |  | returns all search source fields |
+|  [getFields(recurse)](./kibana-plugin-plugins-data-public.searchsource.getfields.md) |  | returns all search source fields |
 |  [getId()](./kibana-plugin-plugins-data-public.searchsource.getid.md) |  | returns search source id |
 |  [getOwnField(field)](./kibana-plugin-plugins-data-public.searchsource.getownfield.md) |  | Get the field from our own fields, don't traverse up the chain |
 |  [getParent()](./kibana-plugin-plugins-data-public.searchsource.getparent.md) |  | Get the parent of this SearchSource  {<!-- -->undefined\|searchSource<!-- -->} |
 |  [getSearchRequestBody()](./kibana-plugin-plugins-data-public.searchsource.getsearchrequestbody.md) |  | Returns body contents of the search request, often referred as query DSL. |
-|  [getSerializedFields()](./kibana-plugin-plugins-data-public.searchsource.getserializedfields.md) |  | serializes search source fields (which can later be passed to [ISearchStartSearchSource](./kibana-plugin-plugins-data-public.isearchstartsearchsource.md)<!-- -->) |
+|  [getSerializedFields(recurse)](./kibana-plugin-plugins-data-public.searchsource.getserializedfields.md) |  | serializes search source fields (which can later be passed to [ISearchStartSearchSource](./kibana-plugin-plugins-data-public.isearchstartsearchsource.md)<!-- -->) |
 |  [onRequestStart(handler)](./kibana-plugin-plugins-data-public.searchsource.onrequeststart.md) |  | Add a handler that will be notified whenever requests start |
+|  [removeField(field)](./kibana-plugin-plugins-data-public.searchsource.removefield.md) |  | remove field |
 |  [serialize()](./kibana-plugin-plugins-data-public.searchsource.serialize.md) |  | Serializes the instance to a JSON string and a set of referenced objects. Use this method to get a representation of the search source which can be stored in a saved object.<!-- -->The references returned by this function can be mixed with other references in the same object, however make sure there are no name-collisions. The references will be named <code>kibanaSavedObjectMeta.searchSourceJSON.index</code> and <code>kibanaSavedObjectMeta.searchSourceJSON.filter[&lt;number&gt;].meta.index</code>.<!-- -->Using <code>createSearchSource</code>, the instance can be re-created. |
-|  [setField(field, value)](./kibana-plugin-plugins-data-public.searchsource.setfield.md) |  | sets value to a single search source feild |
+|  [setField(field, value)](./kibana-plugin-plugins-data-public.searchsource.setfield.md) |  | sets value to a single search source field |
 |  [setFields(newFields)](./kibana-plugin-plugins-data-public.searchsource.setfields.md) |  | Internal, do not use. Overrides all search source fields with the new field array. |
 |  [setParent(parent, options)](./kibana-plugin-plugins-data-public.searchsource.setparent.md) |  | Set a searchSource that this source should inherit from |
 |  [setPreferredSearchStrategyId(searchStrategyId)](./kibana-plugin-plugins-data-public.searchsource.setpreferredsearchstrategyid.md) |  | internal, dont use |

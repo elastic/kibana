@@ -2,4 +2,5 @@
 
 source src/dev/ci_setup/setup_env.sh
 
-yarn run grunt run:checkDocApiChanges
+checks-reporter-with-killswitch "Check Doc API Changes" \
+  node scripts/check_published_api_changes

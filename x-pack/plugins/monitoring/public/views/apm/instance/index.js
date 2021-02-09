@@ -1,13 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -18,11 +13,7 @@ import { routeInitProvider } from '../../../lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
-import {
-  CODE_PATH_APM,
-  ALERT_MISSING_MONITORING_DATA,
-  APM_SYSTEM_ID,
-} from '../../../../common/constants';
+import { CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
@@ -54,17 +45,6 @@ uiRoutes.when('/apm/instances/:uuid', {
         reactNodeId: 'apmInstanceReact',
         $scope,
         $injector,
-        alerts: {
-          shouldFetch: true,
-          options: {
-            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
-            filters: [
-              {
-                stackProduct: APM_SYSTEM_ID,
-              },
-            ],
-          },
-        },
       });
 
       $scope.$watch(
@@ -84,7 +64,6 @@ uiRoutes.when('/apm/instances/:uuid', {
               summary={data.apmSummary || {}}
               metrics={data.metrics || {}}
               onBrush={this.onBrush}
-              alerts={this.alerts}
               zoomInfo={this.zoomInfo}
             />
           );

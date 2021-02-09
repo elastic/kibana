@@ -1,35 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import Boom from 'boom';
-import { errors } from 'elasticsearch';
+import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { securityMock } from '../../mocks';
 import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
 
-import {
-  LegacyElasticsearchErrorHelpers,
-  ILegacyClusterClient,
-  ScopeableRequest,
-} from '../../../../../../src/core/server';
+import { ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { TokenAuthenticationProvider } from './token';
 
 function expectAuthenticateCall(
-  mockClusterClient: jest.Mocked<ILegacyClusterClient>,
+  mockClusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>,
   scopeableRequest: ScopeableRequest
 ) {
   expect(mockClusterClient.asScoped).toHaveBeenCalledTimes(1);
   expect(mockClusterClient.asScoped).toHaveBeenCalledWith(scopeableRequest);
 
   const mockScopedClusterClient = mockClusterClient.asScoped.mock.results[0].value;
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(1);
-  expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
+  expect(mockScopedClusterClient.asCurrentUser.security.authenticate).toHaveBeenCalledTimes(1);
 }
 
 describe('TokenAuthenticationProvider', () => {
@@ -37,6 +34,8 @@ describe('TokenAuthenticationProvider', () => {
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'token' });
+    mockOptions.urls.loggedOut.mockReturnValue('/some-logged-out-page');
+
     provider = new TokenAuthenticationProvider(mockOptions);
   });
 
@@ -49,26 +48,26 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        access_token: tokenPair.accessToken,
-        refresh_token: tokenPair.refreshToken,
-      });
+      mockOptions.client.asInternalUser.security.getToken.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: {
+            access_token: tokenPair.accessToken,
+            refresh_token: tokenPair.refreshToken,
+            authentication: user,
+          },
+        })
+      );
 
       await expect(provider.login(request, credentials)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'token' },
+          { ...user, authentication_provider: { type: 'token', name: 'token' } },
           { authHeaders: { authorization }, state: tokenPair }
         )
       );
 
-      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
         body: { grant_type: 'password', ...credentials },
       });
     });
@@ -77,47 +76,18 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const credentials = { username: 'user', password: 'password' };
 
-      const authenticationError = new Error('Invalid credentials');
-      mockOptions.client.callAsInternalUser.mockRejectedValue(authenticationError);
+      const authenticationError = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 500, body: {} })
+      );
+      mockOptions.client.asInternalUser.security.getToken.mockRejectedValue(authenticationError);
 
       await expect(provider.login(request, credentials)).resolves.toEqual(
         AuthenticationResult.failed(authenticationError)
       );
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
-        body: { grant_type: 'password', ...credentials },
-      });
-
-      expect(request.headers).not.toHaveProperty('authorization');
-    });
-
-    it('fails if user cannot be retrieved during login attempt', async () => {
-      const request = httpServerMock.createKibanaRequest({ headers: {} });
-      const credentials = { username: 'user', password: 'password' };
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-      const authorization = `Bearer ${tokenPair.accessToken}`;
-
-      mockOptions.client.callAsInternalUser.mockResolvedValue({
-        access_token: tokenPair.accessToken,
-        refresh_token: tokenPair.refreshToken,
-      });
-
-      const authenticationError = new Error('Some error');
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
-      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-
-      await expect(provider.login(request, credentials)).resolves.toEqual(
-        AuthenticationResult.failed(authenticationError)
-      );
-
-      expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
+      expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
         body: { grant_type: 'password', ...credentials },
       });
 
@@ -173,13 +143,13 @@ describe('TokenAuthenticationProvider', () => {
       await expect(
         provider.authenticate(
           httpServerMock.createKibanaRequest({
-            path: '/s/foo/some-path # that needs to be encoded',
+            path: '/s/foo/some path that needs to be encoded',
           }),
           null
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome%2520path%2520that%2520needs%2520to%2520be%2520encoded'
         )
       );
     });
@@ -190,13 +160,15 @@ describe('TokenAuthenticationProvider', () => {
       const user = mockAuthenticatedUser();
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockResolvedValue(
+        securityMock.createApiResponse({ body: user })
+      );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'token' },
+          { ...user, authentication_provider: { type: 'token', name: 'token' } },
           { authHeaders: { authorization } }
         )
       );
@@ -211,32 +183,21 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
-      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
-        if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-            LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
-          );
-          return mockScopedClusterClient;
-        }
-
-        if (scopeableRequest?.headers.authorization === 'Bearer newfoo') {
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-          return mockScopedClusterClient;
-        }
-
-        throw new Error('Unexpected call');
-      });
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       mockOptions.tokens.refresh.mockResolvedValue({
         accessToken: 'newfoo',
         refreshToken: 'newbar',
+        authenticationInfo: user,
       });
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'token' },
+          { ...user, authentication_provider: { type: 'token', name: 'token' } },
           {
             authHeaders: { authorization: 'Bearer newfoo' },
             state: { accessToken: 'newfoo', refreshToken: 'newbar' },
@@ -255,9 +216,13 @@ describe('TokenAuthenticationProvider', () => {
       const request = httpServerMock.createKibanaRequest({ headers: {} });
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const authenticationError = new errors.InternalServerError('something went wrong');
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
+      const authenticationError = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 500, body: {} })
+      );
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        authenticationError
+      );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
@@ -274,13 +239,15 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      const refreshError = new errors.InternalServerError('failed to refresh token');
+      const refreshError = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 500, body: {} })
+      );
       mockOptions.tokens.refresh.mockRejectedValue(refreshError);
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
@@ -300,9 +267,9 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -331,9 +298,9 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -362,9 +329,9 @@ describe('TokenAuthenticationProvider', () => {
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(
+        new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -381,44 +348,6 @@ describe('TokenAuthenticationProvider', () => {
 
       expect(request.headers).not.toHaveProperty('authorization');
     });
-
-    it('fails if new access token is rejected after successful refresh', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-
-      const authenticationError = new errors.AuthenticationException('Some error');
-      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
-        if (scopeableRequest?.headers.authorization === `Bearer ${tokenPair.accessToken}`) {
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
-            LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
-          );
-          return mockScopedClusterClient;
-        }
-
-        if (scopeableRequest?.headers.authorization === 'Bearer newfoo') {
-          const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(authenticationError);
-          return mockScopedClusterClient;
-        }
-
-        throw new Error('Unexpected call');
-      });
-
-      mockOptions.tokens.refresh.mockResolvedValue({
-        accessToken: 'newfoo',
-        refreshToken: 'newbar',
-      });
-
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.failed(authenticationError)
-      );
-
-      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
-      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
-
-      expect(request.headers).not.toHaveProperty('authorization');
-    });
   });
 
   describe('`logout` method', () => {
@@ -430,11 +359,9 @@ describe('TokenAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
     });
 
-    it('redirects to login view if state is `null`.', async () => {
-      const request = httpServerMock.createKibanaRequest();
-
-      await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
+    it('redirects to the logged out URL if state is `null`.', async () => {
+      await expect(provider.logout(httpServerMock.createKibanaRequest(), null)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
@@ -455,28 +382,14 @@ describe('TokenAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
     });
 
-    it('redirects to /login if tokens are invalidated successfully', async () => {
+    it('redirects to the logged out URL if tokens are invalidated successfully.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
 
       mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
       await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
-      );
-
-      expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
-      expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith(tokenPair);
-    });
-
-    it('redirects to /login with optional search parameters if tokens are invalidated successfully', async () => {
-      const request = httpServerMock.createKibanaRequest({ query: { yep: 'nope' } });
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-
-      mockOptions.tokens.invalidate.mockResolvedValue(undefined);
-
-      await expect(provider.logout(request, tokenPair)).resolves.toEqual(
-        DeauthenticationResult.redirectTo('/mock-server-basepath/login?yep=nope')
+        DeauthenticationResult.redirectTo('/some-logged-out-page')
       );
 
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);

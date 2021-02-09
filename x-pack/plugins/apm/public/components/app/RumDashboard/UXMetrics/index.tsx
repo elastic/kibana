@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,18 +16,25 @@ import {
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './KeyUXMetrics';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
-import { CoreVitals } from '../../../../../../observability/public';
+import { getCoreVitalsComponent } from '../../../../../../observability/public';
+import { CsmSharedContext } from '../CsmSharedContext';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { getPercentileLabel } from './translations';
 
 export function UXMetrics() {
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
+
   const uxQuery = useUxQuery();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/web-core-vitals',
+          endpoint: 'GET /api/apm/rum-client/web-core-vitals',
           params: {
             query: uxQuery,
           },
@@ -37,12 +45,30 @@ export function UXMetrics() {
     [uxQuery]
   );
 
+  const {
+    sharedData: { totalPageViews },
+  } = useContext(CsmSharedContext);
+
+  const CoreVitals = useMemo(
+    () =>
+      getCoreVitalsComponent({
+        data,
+        totalPageViews,
+        loading: status !== 'success',
+        displayTrafficMetric: true,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [status]
+  );
+
   return (
     <EuiPanel>
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
-          <EuiTitle size="s">
-            <h2>{I18LABELS.userExperienceMetrics}</h2>
+          <EuiTitle size="xs">
+            <h3>
+              {I18LABELS.metrics} ({getPercentileLabel(percentile!)})
+            </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
           <KeyUXMetrics data={data} loading={status !== 'success'} />
@@ -54,7 +80,7 @@ export function UXMetrics() {
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={1} data-cy={`client-metrics`}>
           <EuiSpacer size="s" />
-          <CoreVitals data={data} loading={status !== 'success'} />
+          {CoreVitals}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

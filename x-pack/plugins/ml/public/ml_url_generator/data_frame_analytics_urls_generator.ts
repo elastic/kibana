@@ -1,21 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
  * Creates URL to the DataFrameAnalytics page
  */
+import { isEmpty } from 'lodash';
 import {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
-  DataFrameAnalyticsQueryState,
   DataFrameAnalyticsUrlState,
+  ExplorationPageUrlState,
+  MlGenericUrlState,
   MlCommonGlobalState,
 } from '../../common/types/ml_url_generator';
+import { createGenericMlUrl } from './common';
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
+import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
+import { AppPageState, ListingPageUrlState } from '../../common/types/common';
 
 export function createDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
@@ -26,13 +32,23 @@ export function createDataFrameAnalyticsJobManagementUrl(
   if (mlUrlGeneratorState) {
     const { jobId, groupIds, globalState } = mlUrlGeneratorState;
     if (jobId || groupIds) {
-      const queryState: Partial<DataFrameAnalyticsQueryState> = {
-        jobId,
-        groupIds,
+      const queryTextArr = [];
+      if (jobId) {
+        queryTextArr.push(getJobQueryText(jobId));
+      }
+      if (groupIds) {
+        queryTextArr.push(getGroupQueryText(groupIds));
+      }
+      const jobsListState: Partial<ListingPageUrlState> = {
+        ...(queryTextArr.length > 0 ? { queryText: queryTextArr.join(' ') } : {}),
       };
 
-      url = setStateToKbnUrl<Partial<DataFrameAnalyticsQueryState>>(
-        'mlManagement',
+      const queryState: AppPageState<ListingPageUrlState> = {
+        [ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE]: jobsListState,
+      };
+
+      url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(
+        '_a',
         queryState,
         { useHash: false, storeInHashQuery: false },
         url
@@ -61,16 +77,87 @@ export function createDataFrameAnalyticsExplorationUrl(
   let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`;
 
   if (mlUrlGeneratorState) {
-    const { jobId, analysisType, defaultIsTraining, globalState } = mlUrlGeneratorState;
+    const { jobId, analysisType, queryText, globalState } = mlUrlGeneratorState;
 
     const queryState: DataFrameAnalyticsExplorationQueryState = {
       ml: {
         jobId,
         analysisType,
-        defaultIsTraining,
       },
       ...globalState,
     };
+
+    const appState = {
+      [ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION]: {
+        ...(queryText ? { queryText } : {}),
+      },
+    };
+
+    if (!isEmpty(appState[ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION])) {
+      url = setStateToKbnUrl<AppPageState<ExplorationPageUrlState>>(
+        '_a',
+        appState,
+        { useHash: false, storeInHashQuery: false },
+        url
+      );
+    }
+
+    url = setStateToKbnUrl<DataFrameAnalyticsExplorationQueryState>(
+      '_g',
+      queryState,
+      { useHash: false, storeInHashQuery: false },
+      url
+    );
+  }
+
+  return url;
+}
+
+/**
+ * Creates URL to the DataFrameAnalytics creation wizard
+ */
+export function createDataFrameAnalyticsCreateJobUrl(
+  appBasePath: string,
+  pageState: MlGenericUrlState['pageState']
+): string {
+  return createGenericMlUrl(appBasePath, ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB, pageState);
+}
+
+/**
+ * Creates URL to the DataFrameAnalytics Map page
+ */
+export function createDataFrameAnalyticsMapUrl(
+  appBasePath: string,
+  mlUrlGeneratorState: DataFrameAnalyticsExplorationUrlState['pageState']
+): string {
+  let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`;
+
+  if (mlUrlGeneratorState) {
+    const { jobId, modelId, analysisType, globalState, queryText } = mlUrlGeneratorState;
+
+    const queryState: DataFrameAnalyticsExplorationQueryState = {
+      ml: {
+        jobId,
+        modelId,
+        analysisType,
+      },
+      ...globalState,
+    };
+
+    const appState = {
+      [ML_PAGES.DATA_FRAME_ANALYTICS_MAP]: {
+        ...(queryText ? { queryText } : {}),
+      },
+    };
+
+    if (!isEmpty(appState[ML_PAGES.DATA_FRAME_ANALYTICS_MAP])) {
+      url = setStateToKbnUrl<AppPageState<ExplorationPageUrlState>>(
+        '_a',
+        appState,
+        { useHash: false, storeInHashQuery: false },
+        url
+      );
+    }
 
     url = setStateToKbnUrl<DataFrameAnalyticsExplorationQueryState>(
       '_g',

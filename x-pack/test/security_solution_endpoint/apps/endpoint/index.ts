@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/ingest_manager/server';
+
+import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/fleet/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isRegistryEnabled,
@@ -33,5 +35,6 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./trusted_apps_list'));
+    loadTestFile(require.resolve('./fleet_integrations'));
   });
 }

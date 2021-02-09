@@ -11,3 +11,10 @@ The interface that the adapters used to open an inspector have to fullfill.
 ```typescript
 export interface Adapters 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [requests](./kibana-plugin-plugins-embeddable-public.adapters.requests.md) | <code>RequestAdapter</code> |  |
+

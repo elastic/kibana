@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
 import { ActionTypeModel } from '../../../../types';
@@ -44,11 +46,17 @@ describe('jira connector validation', () => {
     } as JiraActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        email: [],
-        apiToken: [],
-        projectKey: [],
+      config: {
+        errors: {
+          apiUrl: [],
+          projectKey: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: [],
+          email: [],
+        },
       },
     });
   });
@@ -65,11 +73,17 @@ describe('jira connector validation', () => {
     } as unknown) as JiraActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        email: [],
-        apiToken: ['API token or Password is required'],
-        projectKey: ['Project key is required'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          projectKey: ['Project key is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiToken: ['API token or password is required'],
+          email: [],
+        },
       },
     });
   });
@@ -78,22 +92,39 @@ describe('jira connector validation', () => {
 describe('jira action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      subActionParams: { title: 'some title {{test}}' },
+      subActionParams: { incident: { summary: 'some title {{test}}' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { title: [] },
+      errors: { 'subActionParams.incident.summary': [], 'subActionParams.incident.labels': [] },
     });
   });
 
   test('params validation fails when body is not valid', () => {
     const actionParams = {
-      subActionParams: { title: '' },
+      subActionParams: { incident: { summary: '' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        'subActionParams.incident.summary': ['Summary is required.'],
+        'subActionParams.incident.labels': [],
+      },
+    });
+  });
+
+  test('params validation fails when labels contain spaces', () => {
+    const actionParams = {
+      subActionParams: {
+        incident: { summary: 'some title', labels: ['label with spaces'] },
+        comments: [],
+      },
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': ['Labels cannot contain spaces.'],
       },
     });
   });

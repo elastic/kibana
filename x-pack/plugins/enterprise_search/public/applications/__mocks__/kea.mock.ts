@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -10,10 +11,11 @@
  * NOTE: These variable names MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
+import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
+import { mockHttpValues } from './http_logic.mock';
 import { mockKibanaValues } from './kibana_logic.mock';
 import { mockLicensingValues } from './licensing_logic.mock';
-import { mockHttpValues } from './http_logic.mock';
-import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
+import { mockTelemetryActions } from './telemetry_logic.mock';
 
 export const mockAllValues = {
   ...mockKibanaValues,
@@ -22,6 +24,7 @@ export const mockAllValues = {
   ...mockFlashMessagesValues,
 };
 export const mockAllActions = {
+  ...mockTelemetryActions,
   ...mockFlashMessagesActions,
 };
 
@@ -38,14 +41,18 @@ jest.mock('kea', () => ({
 }));
 
 /**
- * Call this function to override a specific set of Kea values while retaining all other defaults
- * Example usage within a component test:
+ * React component helpers
  *
- * import '../../../__mocks__/kea';
- * import { setMockValues } from ''../../../__mocks__';
+ * Call this function to override a specific set of Kea values while retaining all other defaults
+ *
+ * Example usage:
+ *
+ * import { setMockValues } from '../../../__mocks__/kea.mock';
+ * import { SomeComponent } from './';
  *
  * it('some test', () => {
  *   setMockValues({ someValue: 'hello' });
+ *   shallow(<SomeComponent />);
  * });
  */
 import { useValues, useActions } from 'kea';
@@ -56,3 +63,87 @@ export const setMockValues = (values: object) => {
 export const setMockActions = (actions: object) => {
   (useActions as jest.Mock).mockImplementation(() => ({ ...mockAllActions, ...actions }));
 };
+
+/**
+ * Kea logic helpers
+ *
+ * Call this function to mount a logic file and optionally override default values.
+ * Automatically DRYs out a lot of cruft for us, such as resetting context, creating the
+ * nested defaults path obj (see https://kea.js.org/docs/api/context#resetcontext), and
+ * returning an unmount function
+ *
+ * Example usage:
+ *
+ * import { LogicMounter } from '../../../__mocks__/kea.mock';
+ * import { SomeLogic } from './';
+ *
+ * const { mount, unmount } = new LogicMounter(SomeLogic);
+ *
+ * it('some test', () => {
+ *   mount({ someValue: 'hello' });
+ *   unmount();
+ * });
+ */
+import { resetContext, Logic, LogicInput } from 'kea';
+
+interface LogicFile {
+  inputs: Array<LogicInput<Logic>>;
+  mount(): Function;
+}
+export class LogicMounter {
+  private logicFile: LogicFile;
+  private unmountFn!: Function;
+
+  constructor(logicFile: LogicFile) {
+    this.logicFile = logicFile;
+  }
+
+  // Reset context with optional default value overrides
+  public resetContext = (values?: object) => {
+    if (!values) {
+      resetContext({});
+    } else {
+      const path = this.logicFile.inputs[0].path as string[]; // example: ['x', 'y', 'z']
+      const defaults = path.reduceRight((value: object, key: string) => ({ [key]: value }), values); // example: { x: { y: { z: values } } }
+      resetContext({ defaults });
+    }
+  };
+
+  // Automatically reset context & mount the logic file
+  public mount = (values?: object) => {
+    this.resetContext(values);
+    const unmount = this.logicFile.mount();
+    this.unmountFn = unmount;
+    return unmount; // Keep Kea behavior of returning an unmount fn from mount
+  };
+
+  // Also add unmount as a class method that can be destructured on init without becoming stale later
+  public unmount = () => {
+    this.unmountFn();
+  };
+
+  /**
+   * Some tests (e.g. async tests, tests that expect thrown errors) need to access
+   * listener functions directly instead of calling `SomeLogic.actions.someListener`,
+   * due to how Kea invokes/wraps action fns by design.
+   *
+   * Example usage:
+   *
+   * const { mount, getListeners } = new LogicMounter(SomeLogic);
+   *
+   * it('some test', async () => {
+   *   mount();
+   *   const { someListener } = getListeners({ values: { someMockValue: false } });
+   *
+   *   const mockBreakpoint = jest.fn();
+   *   await someListener({ someMockArgument: true }, mockBreakpoint);
+   * });
+   */
+  public getListeners = (listenersArgs: object = {}) => {
+    const { listeners } = this.logicFile.inputs[0];
+
+    return typeof listeners === 'function'
+      ? (listeners as Function)(listenersArgs) // e.g., listeners({ values, actions, props }) => ({ ... })
+      : listeners; // handles simpler logic files that just define listeners: { ... }
+  };
+}

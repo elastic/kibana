@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -976,9 +978,11 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()).toEqual(
-      '9987'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
+      )
+    ).toEqual('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and both destinationIp and destinationPort are populated', () => {
@@ -1028,7 +1032,9 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      )
     ).toEqual('80');
   });
 
@@ -1078,9 +1084,11 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()).toEqual(
-      '9987'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
+      )
+    ).toEqual('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and only destinationPort is populated', () => {
@@ -1131,7 +1139,9 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      )
     ).toEqual('80');
   });
 

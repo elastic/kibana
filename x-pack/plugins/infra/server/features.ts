@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -68,6 +69,9 @@ export const LOGS_FEATURE = {
   category: DEFAULT_APP_CATEGORIES.observability,
   app: ['infra', 'logs', 'kibana'],
   catalogue: ['infralogging', 'logs'],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   alerting: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
   privileges: {
     all: {
@@ -81,6 +85,9 @@ export const LOGS_FEATURE = {
       alerting: {
         all: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
       },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
@@ -89,6 +96,9 @@ export const LOGS_FEATURE = {
       api: ['infra'],
       alerting: {
         read: [LOG_DOCUMENT_COUNT_ALERT_TYPE_ID],
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
       },
       savedObject: {
         all: [],

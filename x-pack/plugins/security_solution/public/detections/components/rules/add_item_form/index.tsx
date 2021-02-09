@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -38,9 +39,9 @@ const MyEuiFormRow = styled(EuiFormRow)`
 `;
 
 export const MyAddItemButton = styled(EuiButtonEmpty)`
-  margin-top: 4px;
+  margin: 4px 0px;
 
-  &.euiButtonEmpty--xSmall {
+  &.euiButtonEmpty--small {
     font-size: 12px;
   }
 
@@ -53,7 +54,7 @@ export const MyAddItemButton = styled(EuiButtonEmpty)`
 MyAddItemButton.defaultProps = {
   flush: 'left',
   iconType: 'plusInCircle',
-  size: 'xs',
+  size: 's',
 };
 
 export const AddItem = ({

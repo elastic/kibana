@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from './../../../../ingest_manager/common/types/models/agent';
+import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
-} from '../../../../ingest_manager/common/constants/agent';
-import { Agent } from '../../../../ingest_manager/common';
+} from '../../../../fleet/common/constants/agent';
+import { Agent } from '../../../../fleet/common';
 import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 
 const testAgentId = 'testAgentId';

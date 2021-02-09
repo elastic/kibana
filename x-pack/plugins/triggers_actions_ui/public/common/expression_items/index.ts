@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export { WhenExpression } from './when';
@@ -9,3 +10,4 @@ export { OfExpression } from './of';
 export { GroupByExpression } from './group_by_over';
 export { ThresholdExpression } from './threshold';
 export { ForLastExpression } from './for_the_last';
+export { ValueExpression } from './value';
