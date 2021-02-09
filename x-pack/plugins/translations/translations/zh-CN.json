@@ -13348,7 +13348,6 @@
     "xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage": "{successesJobsCount, plural, one{{successJob}} other{# 个作业}}{actionTextPT}已成功",
     "xpack.ml.jobsList.actionFailedNotificationMessage": "{failureId} 未能{actionText}",
     "xpack.ml.jobsList.actionsLabel": "操作",
-    "xpack.ml.jobsList.analyticsSpacesLabel": "工作区",
     "xpack.ml.jobsList.auditMessageColumn.screenReaderDescription": "过去 24 小时里该作业有错误或警告时，此列显示图标",
     "xpack.ml.jobsList.breadcrumb": "作业",
     "xpack.ml.jobsList.cannotSelectRowForJobMessage": "无法选择作业 ID {jobId}",
