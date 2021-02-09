@@ -49,9 +49,10 @@ describe('RollingFileAppender', () => {
 
   afterEach(async () => {
     try {
-      await rmdir(testDir);
+      await rmdir(testDir, { recursive: true });
     } catch (e) {
-      /* trap */
+      // eslint-disable-next-line no-console
+      console.error(e);
     }
     if (root) {
       await root.shutdown();
