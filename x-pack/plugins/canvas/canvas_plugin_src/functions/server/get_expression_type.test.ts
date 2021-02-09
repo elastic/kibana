@@ -11,7 +11,7 @@ import { getExpressionType } from './pointseries/lib/get_expression_type';
 describe('getExpressionType', () => {
   it('returns the result type of an evaluated math expression', () => {
     expect(getExpressionType(testTable.columns, '2')).toBe('number');
-    expect(getExpressionType(testTable.colunns, '2 + 3')).toBe('number');
+    expect(getExpressionType(testTable.columns, '2 + 3')).toBe('number');
     expect(getExpressionType(testTable.columns, 'name')).toBe('string');
     expect(getExpressionType(testTable.columns, 'time')).toBe('date');
     expect(getExpressionType(testTable.columns, 'price')).toBe('number');
