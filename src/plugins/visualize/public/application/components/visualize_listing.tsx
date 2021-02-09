@@ -40,6 +40,7 @@ export const VisualizeListing = () => {
       savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
+      dashboardCapabilities,
       kbnUrlStateStorage,
     },
   } = useKibana<VisualizeServices>();
@@ -64,7 +65,7 @@ export const VisualizeListing = () => {
 
   useMount(() => {
     // Reset editor state if the visualize listing page is loaded.
-    stateTransferService.clearEditorState();
+    stateTransferService.clearEditorState(VisualizeConstants.APP_ID);
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
@@ -172,11 +173,12 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
-        <div className="visListingCallout">
-          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-        </div>
-      )}
+      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
+        dashboardCapabilities.createNew && (
+          <div className="visListingCallout">
+            <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+          </div>
+        )}
       <TableListView
         headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them

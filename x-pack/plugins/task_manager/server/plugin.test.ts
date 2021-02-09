@@ -39,7 +39,7 @@ describe('TaskManagerPlugin', () => {
       pluginInitializerContext.env.instanceUuid = '';
 
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      expect(taskManagerPlugin.setup(coreMock.createSetup())).rejects.toEqual(
+      expect(() => taskManagerPlugin.setup(coreMock.createSetup())).toThrow(
         new Error(`TaskManager is unable to start as Kibana has no valid UUID assigned to it.`)
       );
     });

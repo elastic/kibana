@@ -57,7 +57,7 @@ export const SchemaFieldsTable: React.FC = () => {
                 disabled={fieldName === 'id'}
                 key={fieldName}
                 fieldName={fieldName}
-                hideName={true}
+                hideName
                 fieldType={filteredSchemaFields[fieldName]}
                 updateExistingFieldType={updateExistingFieldType}
               />
