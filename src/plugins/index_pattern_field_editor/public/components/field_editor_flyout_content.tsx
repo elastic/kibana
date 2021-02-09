@@ -110,6 +110,7 @@ const FieldEditorFlyoutContentComponent = ({
   );
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
+  const { fields } = indexPattern;
   const isSaveButtonDisabled = isFormValid === false || painlessSyntaxError !== null;
 
   const clearSyntaxError = useCallback(() => setPainlessSyntaxError(null), []);
@@ -140,11 +141,21 @@ const FieldEditorFlyoutContentComponent = ({
     }
   }, [onSave, submit, runtimeFieldValidator]);
 
-  const namesNotAllowed = indexPattern.fields.map((fld) => fld.name);
-  const existingConcreteFields = indexPattern.fields.map((fld) => ({
-    name: fld.name,
-    type: (fld.esTypes && fld.esTypes[0]) || '',
-  }));
+  const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
+
+  const existingConcreteFields = useMemo(
+    () =>
+      fields
+        .map((fld) => ({
+          name: fld.name,
+          type: (fld.esTypes && fld.esTypes[0]) || '',
+        }))
+        .filter((fld) => {
+          // Filter out the current field being edited
+          return field?.name === fld.name ? false : true;
+        }),
+    [fields, field]
+  );
 
   return (
     <>
