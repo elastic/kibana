@@ -321,6 +321,8 @@ const DragInner = memo(function DragInner({
               }
             } else if (key === keys.ESCAPE) {
               if (isDragging) {
+                e.stopPropagation();
+                e.preventDefault();
                 dragEnd();
               }
             }
