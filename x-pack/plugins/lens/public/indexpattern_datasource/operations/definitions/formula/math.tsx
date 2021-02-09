@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type { TinymathAST, TinymathFunction } from '@kbn/tinymath';
-import { i18n } from '@kbn/i18n';
-import { isObject } from 'lodash';
+import type { TinymathAST } from '@kbn/tinymath';
 import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
-import { groupArgsByType } from './util';
-import { validateMathNodes } from './validation';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
