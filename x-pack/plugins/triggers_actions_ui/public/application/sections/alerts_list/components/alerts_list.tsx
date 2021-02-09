@@ -99,7 +99,10 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
   const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
-  const [manageLicenseMessage, setManageLicenseMessage] = useState<string | undefined>(undefined);
+  const [manageLicenseModalOpts, setManageLicenseModalOpts] = useState<{
+    licenseType: string;
+    alertTypeId: string;
+  } | null>(null);
   const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>(
     AlertExecutionStatusValues.reduce(
       (prev: Record<string, number>, status: string) =>
@@ -240,7 +243,10 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
-  const renderAlertExecutionStatus = (executionStatus: AlertExecutionStatus) => {
+  const renderAlertExecutionStatus = (
+    executionStatus: AlertExecutionStatus,
+    item: AlertTableItem
+  ) => {
     const healthColor = getHealthColor(executionStatus.status);
     const tooltipMessage =
       executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
@@ -276,7 +282,12 @@ export const AlertsList: React.FunctionComponent = () => {
             <EuiButtonEmpty
               size="xs"
               data-test-subj="alertStatus-error-license-fix"
-              onClick={() => setManageLicenseMessage(executionStatus?.error?.message)}
+              onClick={() =>
+                setManageLicenseModalOpts({
+                  licenseType: alertTypesState.data.get(item.alertTypeId)?.minimumLicenseRequired!,
+                  alertTypeId: item.alertTypeId,
+                })
+              }
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.alertsList.fixLicenseLink"
@@ -323,8 +334,8 @@ export const AlertsList: React.FunctionComponent = () => {
       truncateText: false,
       width: '150px',
       'data-test-subj': 'alertsTableCell-status',
-      render: (executionStatus: AlertExecutionStatus) => {
-        return renderAlertExecutionStatus(executionStatus);
+      render: (executionStatus: AlertExecutionStatus, item: AlertTableItem) => {
+        return renderAlertExecutionStatus(executionStatus, item);
       },
     },
     {
@@ -673,14 +684,15 @@ export const AlertsList: React.FunctionComponent = () => {
           setPage(changedPage);
         }}
       />
-      {manageLicenseMessage !== undefined && (
+      {manageLicenseModalOpts && (
         <ManageLicenseModal
-          message={manageLicenseMessage}
+          licenseType={manageLicenseModalOpts.licenseType}
+          alertTypeId={manageLicenseModalOpts.alertTypeId}
           onConfirm={() => {
             window.open(`${http.basePath.get()}/app/management/stack/license_management`, '_blank');
-            setManageLicenseMessage(undefined);
+            setManageLicenseModalOpts(null);
           }}
-          onCancel={() => setManageLicenseMessage(undefined)}
+          onCancel={() => setManageLicenseModalOpts(null)}
         />
       )}
     </Fragment>

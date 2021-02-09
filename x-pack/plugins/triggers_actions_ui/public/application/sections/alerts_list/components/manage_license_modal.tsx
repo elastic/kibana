@@ -7,20 +7,30 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
+import { capitalize } from 'lodash';
 
 interface Props {
-  message?: string;
+  licenseType: string;
+  alertTypeId: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-export const ManageLicenseModal: React.FC<Props> = ({ message, onConfirm, onCancel }) => {
+export const ManageLicenseModal: React.FC<Props> = ({
+  licenseType,
+  alertTypeId,
+  onConfirm,
+  onCancel,
+}) => {
+  const licenseRequired = capitalize(licenseType);
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
         title={i18n.translate('xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle', {
-          defaultMessage: 'Upgrade license?',
+          defaultMessage: '{licenseRequired} license required',
+          values: { licenseRequired },
         })}
         onCancel={onCancel}
         onConfirm={onConfirm}
@@ -39,7 +49,13 @@ export const ManageLicenseModal: React.FC<Props> = ({ message, onConfirm, onCanc
         defaultFocusedButton="confirm"
         data-test-subj="manageLicenseModal"
       >
-        <p>{message}</p>
+        <p>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage"
+            defaultMessage="Alert {alertTypeId} is disabled because it requires a {licenseRequired} license. Continue to License Management to view upgrade options."
+            values={{ alertTypeId, licenseRequired }}
+          />
+        </p>
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
