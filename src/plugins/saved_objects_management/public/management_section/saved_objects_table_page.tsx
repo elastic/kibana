@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createElement, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
 import { Query } from '@elastic/eui';
@@ -23,8 +23,7 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
-const EmptyFunctionComponent: React.FC = ({ children }) =>
-  createElement('EmptyFunctionComponent', { children });
+const EmptyFunctionComponent: React.FC = ({ children }) => <>{children}</>;
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -71,7 +70,10 @@ const SavedObjectsTablePage = ({
     ]);
   }, [setBreadcrumbs]);
 
-  const ContextWrapper = spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent;
+  const ContextWrapper = useMemo(
+    () => spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent,
+    [spacesApi]
+  );
 
   return (
     <ContextWrapper>

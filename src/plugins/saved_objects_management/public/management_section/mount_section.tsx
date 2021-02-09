@@ -61,7 +61,7 @@ export const mountManagementSection = async ({
     return children! as React.ReactElement;
   };
 
-  const spacesApi = (spacesOss?.isSpacesAvailable && spacesOss) || undefined;
+  const spacesApi = spacesOss?.isSpacesAvailable ? spacesOss : undefined;
 
   ReactDOM.render(
     <I18nProvider>

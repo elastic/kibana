@@ -6,7 +6,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { createElement, Component } from 'react';
+import React, { Component } from 'react';
 
 import { sortBy } from 'lodash';
 import moment from 'moment';
@@ -26,8 +26,7 @@ import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-const EmptyFunctionComponent = ({ children }) =>
-  createElement('EmptyFunctionComponent', { children });
+const EmptyFunctionComponent = ({ children }) => <>{children}</>;
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
