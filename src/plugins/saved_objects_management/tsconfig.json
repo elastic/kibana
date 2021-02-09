@@ -13,7 +13,7 @@
     "server/**/*",
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../dashboard/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },

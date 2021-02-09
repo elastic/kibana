@@ -11,7 +11,7 @@
     "public/**/*"
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../visualize/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },

@@ -9,7 +9,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" }
   ]

@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 
 // @ts-expect-error js file to remove TS dependency on cli
 import { CliDevMode as MockCliDevMode } from './cli_dev_mode';
+// import KbnServer from 'kibana/src/legacy/server/kbn_server';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { BasePathProxyServer } from '../http';

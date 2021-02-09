@@ -12,7 +12,7 @@
     "public/**/*",
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
   ]
 }

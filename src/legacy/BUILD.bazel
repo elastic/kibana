@@ -1,4 +1,4 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("@build_bazel_rules_nodejs//:index.bzl", "copy_to_bin", "js_library")
 
 SRCS = glob(
   [
@@ -7,9 +7,13 @@ SRCS = glob(
   ],
 )
 
+copy_to_bin(
+    name = "srcs",
+    srcs = SRCS
+)
+
 js_library(
     name = "legacy",
     srcs = SRCS,
-    deps = [],
     visibility = ["//visibility:public"],
 )

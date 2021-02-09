@@ -13,7 +13,7 @@
     "*.ts"
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },

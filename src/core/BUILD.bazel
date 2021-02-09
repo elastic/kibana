@@ -15,6 +15,7 @@ SRCS = glob(
 )
 
 NPM_DEPS = [
+  "//src/legacy",
   "@npm//@elastic/apm-rum",
   "@npm//@elastic/eui",
   "@npm//@elastic/elasticsearch",
@@ -80,7 +81,6 @@ NPM_DEPS = [
   "@npm//react-use",
   "@npm//rxjs",
   "@npm//strip-ansi",
-  "//src/legacy",
 ]
 
 ts_config(
@@ -100,8 +100,7 @@ ts_project(
   incremental = True,
   tsconfig = "tsconfig",
   srcs = SRCS,
-  deps = NPM_DEPS,
-  out_dir = "target_types",
+  deps = NPM_DEPS
 )
 
 copy_to_bin(

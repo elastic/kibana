@@ -9,7 +9,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "./index.ts"],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
   ]

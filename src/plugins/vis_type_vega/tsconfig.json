@@ -15,7 +15,7 @@
     "public/test_utils/vega_map_test.json"
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../visualizations/tsconfig.json" },
     { "path": "../maps_legacy/tsconfig.json" },

@@ -1,3 +1,5 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "copy_to_bin")
+
 # Expose those targets as they are required as part of
 # other packages builds and need to be included as inputs
 exports_files(
@@ -9,10 +11,18 @@ exports_files(
   visibility = ["//visibility:public"]
 )
 
+copy_to_bin(
+  name = "copy_tsconfig_base",
+  srcs = [
+      "tsconfig.base.json"
+  ]
+)
+
 
 filegroup(
   name = "build_ts_refs",
   srcs = [
+      ":copy_tsconfig_base",
       "//src/core:build_ts_refs"
   ],
 )

@@ -6,8 +6,17 @@
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
+//      "kibana/src/legacy/*": [
+//        "src/legacy/*",
+//        "bazel-out/darwin-fastbuild/bin/src/legacy/*"
+//      ],
       "fixtures/*": ["src/fixtures/*"]
     },
+    "rootDirs": [
+      "./bazel-out/darwin-fastbuild/bin",
+      ".",
+      "./bazel/bin"
+    ],
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
     // Enables all strict type checking options.
@@ -54,10 +63,6 @@
       "flot",
       "jest-styled-components",
       "@testing-library/jest-dom"
-    ],
-    "rootDirs": [
-      ".",
-      "./bazel/bin"
     ]
   }
 }

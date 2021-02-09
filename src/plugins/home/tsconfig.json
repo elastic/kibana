@@ -14,7 +14,7 @@
     "config.ts",
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },

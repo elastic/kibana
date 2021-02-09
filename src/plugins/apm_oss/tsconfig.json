@@ -14,5 +14,5 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/tutorial/index_pattern.json"
   ],
-  "references": [{ "path": "../../core/tsconfig.json" }, { "path": "../home/tsconfig.json" }]
+  "references": [{ "path": "../../../bazel/bin/src/core/tsconfig.json" }, { "path": "../home/tsconfig.json" }]
 }

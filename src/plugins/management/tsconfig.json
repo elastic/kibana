@@ -14,7 +14,7 @@
     "../../../typings/**/*"
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../home/tsconfig.json"},
     { "path": "../kibana_react/tsconfig.json"},
     { "path": "../kibana_utils/tsconfig.json"}

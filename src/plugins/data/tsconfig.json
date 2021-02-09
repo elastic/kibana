@@ -9,7 +9,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", "common/**/*.json"],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../bfetch/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../share/tsconfig.json" },

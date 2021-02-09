@@ -12,7 +12,7 @@
     "common/**/*",
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../../plugins/navigation/tsconfig.json" },
     { "path": "../../plugins/data/tsconfig.json" },
     { "path": "../../plugins/home/tsconfig.json" },

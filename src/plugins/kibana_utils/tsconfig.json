@@ -16,6 +16,6 @@
     "../../../typings/**/*"
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" }
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" }
   ]
 }

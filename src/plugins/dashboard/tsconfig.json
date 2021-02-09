@@ -15,7 +15,7 @@
     "server/**/*",
   ],
   "references": [
-    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../bazel/bin/src/core/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
     { "path": "../kibana_legacy/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
