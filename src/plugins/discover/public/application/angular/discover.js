@@ -319,6 +319,8 @@ function discoverController($route, $scope, Promise) {
     setAppState,
     data,
     stateContainer,
+    searchSessionManager,
+    refetch$,
   };
 
   const inspectorAdapters = ($scope.opts.inspectorAdapters = {
@@ -569,13 +571,6 @@ function discoverController($route, $scope, Promise) {
 
         data.search.showError(error);
       });
-  };
-
-  $scope.handleRefresh = function (_payload, isUpdate) {
-    if (isUpdate === false) {
-      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-      refetch$.next();
-    }
   };
 
   function getDimensions(aggs, timeRange) {

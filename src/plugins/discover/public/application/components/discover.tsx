@@ -66,7 +66,6 @@ export function Discover({
   searchSource,
   state,
   timeRange,
-  updateQuery,
   unmappedFieldsConfig,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
@@ -92,6 +91,15 @@ export function Discover({
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
+  const updateQuery = useCallback(
+    (_payload, isUpdate?: boolean) => {
+      if (isUpdate === false) {
+        opts.searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+        opts.refetch$.next();
+      }
+    },
+    [opts]
+  );
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
     () =>
@@ -195,7 +203,8 @@ export function Discover({
           indexPattern={indexPattern}
           opts={opts}
           onOpenInspector={onOpenInspector}
-          state={state}
+          query={state.query}
+          savedQuery={state.savedQuery}
           updateQuery={updateQuery}
         />
         <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
