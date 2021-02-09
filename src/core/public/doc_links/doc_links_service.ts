@@ -381,7 +381,7 @@ export interface DocLinksStart {
       openIndex: string;
       putComponentTemplate: string;
       painlessExecute: string;
-      painlessExecuteAPIContexts: srting;
+      painlessExecuteAPIContexts: string;
       putComponentTemplateMetadata: string;
       putWatch: string;
       updateTransform: string;
