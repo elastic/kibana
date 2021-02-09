@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin } from '@kbn/dev-utils';
-import { findPlugins } from '../plugin_discovery';
+import { findPlugins } from './find_plugins';
 import { getPluginForPath, getServiceForPath } from './utils';
 
 it('test getPluginForPath', () => {
-  const plugins: KibanaPlatformPlugin[] = Array.from(
-    findPlugins({
-      oss: false,
-      examples: false,
-      extraPluginScanDirs: [],
-    }).values()
-  );
+  const plugins = findPlugins();
   expect(
     getPluginForPath('/Users/auser/kibana/src/plugins/embeddable/public/service/file.ts', plugins)
   ).toBeDefined();

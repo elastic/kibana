@@ -8,5 +8,5 @@ we determine the value of such a system and what kind of maintenance burder it w
 To generate the docs run 
 
 ```
-yarn build:apidocs
+node scripts/build_api_docs
 ```

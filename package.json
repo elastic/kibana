@@ -373,7 +373,7 @@
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
     "@kbn/pm": "link:packages/kbn-pm",
-    "@kbn/release-notes": "link:packages/kbn-release-notes",
+    "@kbn/docs-utils": "link:packages/kbn-docs-utils",
     "@kbn/storybook": "link:packages/kbn-storybook",
     "@kbn/telemetry-tools": "link:packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",

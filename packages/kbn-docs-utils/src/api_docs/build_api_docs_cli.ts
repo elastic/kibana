@@ -6,21 +6,69 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
+import Fs from 'fs';
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { ToolingLog } from '@kbn/dev-utils';
+
+import { REPO_ROOT, run } from '@kbn/dev-utils';
 import { Project } from 'ts-morph';
+
 import { getPluginApi } from './get_plugin_api';
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { findPlugins } from '../plugin_discovery';
 import { ApiDeclaration, PluginApi } from './types';
 import { mergeScopeApi } from './utils';
+import { findPlugins } from './find_plugins';
 
-const log = new ToolingLog({
-  level: 'debug',
-  writeTo: process.stdout,
-});
+export function runBuildApiDocsCli() {
+  run(
+    async ({ log }) => {
+      const project = getTsProject(REPO_ROOT);
+
+      const plugins = findPlugins();
+
+      const pluginInfos: Array<{
+        apiCount: number;
+        apiCountMissingComments: number;
+        plugin: string;
+      }> = [];
+
+      const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
+      if (!Fs.existsSync(outputFolder)) {
+        Fs.mkdirSync(outputFolder);
+      } else {
+        // Delete all files except the README that warns about the auto-generated nature of
+        // the folder.
+        const files = Fs.readdirSync(outputFolder);
+        files.forEach((file) => {
+          if (file.indexOf('README.md') < 0) {
+            Fs.rmSync(Path.resolve(outputFolder, file));
+          }
+        });
+      }
+
+      plugins.forEach((plugin) => {
+        const doc = getPluginApi(project, plugin, plugins, log);
+        const info = {
+          plugin: plugin.manifest.id,
+          apiCount: countApiForPlugin(doc),
+          apiCountMissingComments: countMissingCommentsApiForPlugin(doc),
+        };
+
+        if (info.apiCount > 0) {
+          writePluginDocs(outputFolder, doc, log);
+          pluginInfos.push(info);
+        }
+      });
+
+      // eslint-disable-next-line no-console
+      console.table(pluginInfos);
+    },
+    {
+      log: {
+        defaultLevel: 'debug',
+      },
+    }
+  );
+}
 
 function getTsProject(repoPath: string) {
   const xpackTsConfig = `${repoPath}/x-pack/tsconfig.json`;
@@ -32,56 +80,6 @@ function getTsProject(repoPath: string) {
   project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
   project.resolveSourceFileDependencies();
   return project;
-}
-
-export function buildApiDocs() {
-  const project = getTsProject(REPO_ROOT);
-
-  const plugins = Array.from(
-    findPlugins({
-      oss: false,
-      examples: false,
-      // Use this to capture "core" as a plugin.
-      extraPluginScanDirs: [Path.resolve(REPO_ROOT, 'src')],
-    }).values()
-  );
-
-  const pluginInfos: Array<{
-    apiCount: number;
-    apiCountMissingComments: number;
-    plugin: string;
-  }> = [];
-
-  const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
-  if (!fs.existsSync(outputFolder)) {
-    fs.mkdirSync(outputFolder);
-  } else {
-    // Delete all files except the README that warns about the auto-generated nature of
-    // the folder.
-    const files = fs.readdirSync(outputFolder);
-    files.forEach((file) => {
-      if (file.indexOf('README.md') < 0) {
-        fs.rmSync(Path.resolve(outputFolder, file));
-      }
-    });
-  }
-
-  plugins.forEach((plugin) => {
-    const doc = getPluginApi(project, plugin, plugins, log);
-    const info = {
-      plugin: plugin.manifest.id,
-      apiCount: countApiForPlugin(doc),
-      apiCountMissingComments: countMissingCommentsApiForPlugin(doc),
-    };
-
-    if (info.apiCount > 0) {
-      writePluginDocs(outputFolder, doc, log);
-      pluginInfos.push(info);
-    }
-  });
-
-  // eslint-disable-next-line no-console
-  console.table(pluginInfos);
 }
 
 function countMissingCommentsApiForPlugin(doc: PluginApi) {

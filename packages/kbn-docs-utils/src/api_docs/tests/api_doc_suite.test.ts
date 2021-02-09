@@ -8,8 +8,8 @@
 
 import fs from 'fs';
 import Path from 'path';
+
 import { Project } from 'ts-morph';
-import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
@@ -75,15 +75,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
 }
 
 beforeAll(() => {
-  const tsConfigFilePath = Path.resolve(
-    REPO_ROOT,
-    'src',
-    'dev',
-    'build_api_docs',
-    'tests',
-    'src',
-    'tsconfig.json'
-  );
+  const tsConfigFilePath = Path.resolve(__dirname, '__fixtures__/src/tsconfig.json');
   const project = new Project({
     tsConfigFilePath,
   });
@@ -95,7 +87,7 @@ beforeAll(() => {
   const plugins: KibanaPlatformPlugin[] = [pluginA];
 
   doc = getPluginApi(project, plugins[0], plugins, log);
-  mdxOutputFolder = Path.resolve(REPO_ROOT, 'src', 'dev', 'build_api_docs', 'tests', 'snapshots');
+  mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
   writePluginDocs(mdxOutputFolder, doc, log);
 });
 
@@ -131,8 +123,8 @@ it('const exported from common folder is correct', () => {
   const fooConst = doc.common.misc.find((c) => c.label === 'commonFoo');
   expect(fooConst).toBeDefined();
 
-  expect(fooConst!.source.path.indexOf('src/plugin_a/common/foo/index.ts')).toBeGreaterThanOrEqual(
-    0
+  expect(fooConst!.source.path.replace(Path.sep, '/')).toContain(
+    'src/plugin_a/common/foo/index.ts'
   );
   expect(fooConst!.signature![0]).toBe('"COMMON VAR!"');
 });
