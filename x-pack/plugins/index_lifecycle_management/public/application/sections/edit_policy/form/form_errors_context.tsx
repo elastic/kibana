@@ -74,16 +74,19 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
         setErrors((previousErrors) => {
           const {
             [phase]: { [fieldPath]: fieldErrorToOmit, ...restOfPhaseErrors },
+            hasErrors,
             ...otherPhases
           } = previousErrors;
 
-          const hasErrors =
+          const nextHasErrors =
             Object.keys(restOfPhaseErrors).length === 0 &&
-            Object.keys(otherPhases).some((phaseErrors) => !!Object.keys(phaseErrors).length);
+            Object.values(otherPhases).some((phaseErrors) => {
+              return !!Object.keys(phaseErrors).length;
+            });
 
           return {
             ...previousErrors,
-            hasErrors,
+            hasErrors: nextHasErrors,
             [phase]: restOfPhaseErrors,
           };
         });
