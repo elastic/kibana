@@ -101,7 +101,7 @@ const geti18nTexts = () => ({
       defaultMessage: 'Set value',
     }),
     description: i18n.translate('indexPatternFieldEditor.editor.form.valueDescription', {
-      defaultMessage: `Set a value for the field instead of retrieving it from _source.`,
+      defaultMessage: `Set a value for the field instead of retrieving it from the field with the same name in _source.`,
     }),
   },
   format: {

@@ -217,7 +217,7 @@ export function Tabs({
               {getFilterSection(type)}
               <EuiSpacer size="m" />
               <DeleteRuntimeFieldProvider indexPattern={indexPattern} onDelete={refreshFields}>
-                {(deleteFields) => (
+                {(deleteField) => (
                   <IndexedFieldsTable
                     fields={fields}
                     indexPattern={indexPattern}
@@ -226,7 +226,7 @@ export function Tabs({
                     indexedFieldTypeFilter={indexedFieldTypeFilter}
                     helpers={{
                       editField: openFieldEditor,
-                      deleteField: (fieldName) => deleteFields(fieldName),
+                      deleteField,
                       getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                     }}
                   />

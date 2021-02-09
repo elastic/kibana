@@ -129,7 +129,7 @@ export const ScriptField = React.memo(({ existingConcreteFields = [], links }: P
                       {i18n.translate(
                         'indexPatternFieldEditor.editor.form.script.learnMoreLinkText',
                         {
-                          defaultMessage: 'Learn script syntax.',
+                          defaultMessage: 'Learn about script syntax.',
                         }
                       )}
                     </EuiLink>
