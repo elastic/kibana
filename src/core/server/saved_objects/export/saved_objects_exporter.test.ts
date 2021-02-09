@@ -114,7 +114,7 @@ describe('getSortedObjectsForExport()', () => {
                 "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
-                  "keepAlive": "1m",
+                  "keepAlive": "2m",
                 },
                 "search": undefined,
                 "sortField": "updated_at",
@@ -197,6 +197,7 @@ describe('getSortedObjectsForExport()', () => {
             saved_objects: mockHits,
             per_page: 10000,
             page: 0,
+            pit_id: 'abc123',
           });
 
           const exportStream = await exporter.exportByTypes({
@@ -230,7 +231,7 @@ describe('getSortedObjectsForExport()', () => {
 
           expect(savedObjectsClient.find).toHaveBeenCalledWith(
             expect.objectContaining({
-              pit: expect.objectContaining({ id: 'abc123', keepAlive: '1m' }),
+              pit: expect.objectContaining({ id: 'abc123', keepAlive: '2m' }),
               sortField: 'updated_at',
               sortOrder: 'desc',
               type: ['index-pattern'],
@@ -280,12 +281,14 @@ describe('getSortedObjectsForExport()', () => {
             saved_objects: firstMockHits,
             per_page: 10000,
             page: 0,
+            pit_id: 'abc123',
           });
           savedObjectsClient.find.mockResolvedValueOnce({
             total: 15000,
             saved_objects: secondMockHits,
             per_page: 5000,
             page: 1,
+            pit_id: 'abc123',
           });
 
           const exportStream = await exporter.exportByTypes({
@@ -455,7 +458,7 @@ describe('getSortedObjectsForExport()', () => {
                 "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
-                  "keepAlive": "1m",
+                  "keepAlive": "2m",
                 },
                 "search": undefined,
                 "sortField": "updated_at",
@@ -611,7 +614,7 @@ describe('getSortedObjectsForExport()', () => {
                 "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
-                  "keepAlive": "1m",
+                  "keepAlive": "2m",
                 },
                 "search": "foo",
                 "sortField": "updated_at",
@@ -704,7 +707,7 @@ describe('getSortedObjectsForExport()', () => {
                 "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
-                  "keepAlive": "1m",
+                  "keepAlive": "2m",
                 },
                 "search": undefined,
                 "sortField": "updated_at",
@@ -802,7 +805,7 @@ describe('getSortedObjectsForExport()', () => {
                 "perPage": 10000,
                 "pit": Object {
                   "id": "some_pit_id",
-                  "keepAlive": "1m",
+                  "keepAlive": "2m",
                 },
                 "search": undefined,
                 "sortField": "updated_at",

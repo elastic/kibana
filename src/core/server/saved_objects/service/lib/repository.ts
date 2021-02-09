@@ -1792,7 +1792,7 @@ export class SavedObjectsRepository {
    *
    * const { id } = await repository.openPointInTimeForType(
    *   type: 'index-pattern',
-   *   { keepAlive: '1m' },
+   *   { keepAlive: '2m' },
    * );
    *
    * const response = await repository.find({
@@ -1802,7 +1802,7 @@ export class SavedObjectsRepository {
    *   sortOrder: 'desc',
    *   pit: {
    *     id: 'abc123',
-   *     keepAlive: '1m',
+   *     keepAlive: '2m',
    *   },
    *   searchAfter: [1234, 'abcd'],
    * });
@@ -1863,7 +1863,7 @@ export class SavedObjectsRepository {
    *
    * const { id } = await repository.openPointInTimeForType(
    *   type: 'index-pattern',
-   *   { keepAlive: '1m' },
+   *   { keepAlive: '2m' },
    * );
    *
    * const response = await repository.find({
@@ -1873,7 +1873,7 @@ export class SavedObjectsRepository {
    *   sortOrder: 'desc',
    *   pit: {
    *     id: 'abc123',
-   *     keepAlive: '1m',
+   *     keepAlive: '2m',
    *   },
    *   searchAfter: [1234, 'abcd'],
    * });

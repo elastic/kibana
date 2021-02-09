@@ -240,7 +240,7 @@ describe('GET /api/saved_objects/_find', () => {
   });
 
   it('accepts the optional query parameter pit', async () => {
-    const pitValues = querystring.escape(JSON.stringify({ id: 'abc', keep_alive: '1m' }));
+    const pitValues = querystring.escape(JSON.stringify({ id: 'abc', keep_alive: '2m' }));
     await supertest(httpSetup.server.listener)
       .get(`/api/saved_objects/_find?type=foo&pit=${pitValues}`)
       .expect(200);
@@ -252,7 +252,7 @@ describe('GET /api/saved_objects/_find', () => {
       expect.objectContaining({
         pit: {
           id: 'abc',
-          keepAlive: '1m',
+          keepAlive: '2m',
         },
       })
     );

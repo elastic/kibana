@@ -18,10 +18,10 @@ describe('searchDsl/getPitParams', () => {
   });
 
   it('includes keepAlive if provided and rewrites to snake case', () => {
-    expect(getPitParams({ id: 'abc123', keepAlive: '1m' })).toEqual({
+    expect(getPitParams({ id: 'abc123', keepAlive: '2m' })).toEqual({
       pit: {
         id: 'abc123',
-        keep_alive: '1m',
+        keep_alive: '2m',
       },
     });
   });

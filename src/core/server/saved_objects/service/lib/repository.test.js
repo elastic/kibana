@@ -2989,13 +2989,13 @@ describe('SavedObjectsRepository', () => {
       it(`accepts pit`, async () => {
         const relevantOpts = {
           ...commonOptions,
-          pit: { id: 'abc123', keepAlive: '1m' },
+          pit: { id: 'abc123', keepAlive: '2m' },
         };
 
         await findSuccess(relevantOpts, namespace);
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
-          pit: { id: 'abc123', keepAlive: '1m' },
+          pit: { id: 'abc123', keepAlive: '2m' },
         });
       });
 
@@ -4450,10 +4450,10 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`accepts keepAlive`, async () => {
-        await successResponse(type, { keepAlive: '1m' });
+        await successResponse(type, { keepAlive: '2m' });
         expect(client.openPointInTime).toHaveBeenCalledWith(
           expect.objectContaining({
-            keep_alive: '1m',
+            keep_alive: '2m',
           }),
           expect.anything()
         );

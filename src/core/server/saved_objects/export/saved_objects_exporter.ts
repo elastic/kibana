@@ -10,7 +10,7 @@ import { createListStream } from '@kbn/utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '../../logging';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindOptions } from '../types';
-import { SavedObjectsFindResult, SavedObjectsFindResponse } from '../service';
+import { SavedObjectsFindResult } from '../service';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
@@ -23,6 +23,7 @@ import {
 } from './types';
 import { SavedObjectsExportError } from './errors';
 import { applyExportTransforms } from './apply_export_transforms';
+import { findWithPointInTime } from './find_with_point_in_time';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
@@ -161,108 +162,17 @@ export class SavedObjectsExporter {
     return bulkGetResult.saved_objects;
   }
 
-  /**
-   * Generator which wraps calls to `SavedObjects.find` and iterates over
-   * multiple pages of results using `_pit` and `search_after`. This will
-   * open a new PIT, continue paging until a set of results is received
-   * that's smaller than the designated `perPage`, and then close the PIT.
-   *
-   * @example
-   * ```ts
-   * const finder = findWithPointInTime({
-   *   type: 'index-pattern',
-   *   search: 'foo*',
-   *   perPage: 100,
-   * });
-   *
-   * const responses: SavedObjectFindResponse[] = [];
-   * for await (const response of finder) {
-   *   responses.push(...response);
-   * }
-   * ```
-   */
-  private async *findWithPointInTime(findOptions: SavedObjectsFindOptions) {
-    const getLastHitSortValue = (res: SavedObjectsFindResponse) =>
-      res.saved_objects.length && res.saved_objects[res.saved_objects.length - 1].sort;
-
-    const findWithPit = async ({ id, searchAfter }: { id?: string; searchAfter?: unknown[] }) => {
-      try {
-        return await this.#savedObjectsClient.find({
-          // Sort fields are required to use searchAfter, so we set some defaults here
-          sortField: 'updated_at',
-          sortOrder: 'desc',
-          // Bump keep_alive by 1m on every new request
-          ...(id ? { pit: { keepAlive: '1m', ...findOptions.pit, id } } : {}),
-          ...(searchAfter ? { searchAfter } : {}),
-          ...findOptions,
-        });
-      } catch (e) {
-        if (id) {
-          // Clean up PIT on any errors.
-          this.#log.debug(`Closing PIT for types [${findOptions.type}]`);
-          await this.#savedObjectsClient.closePointInTime(id);
-        }
-        throw e;
-      }
-    };
-
-    // Open PIT and request our first page of hits
-    let pitId: string | undefined;
-    try {
-      const { id } = await this.#savedObjectsClient.openPointInTimeForType(findOptions.type);
-      pitId = id;
-    } catch (e) {
-      // Since `find` swallows 404s, it is expected that exporter will do the same,
-      // so we only rethrow non-404 errors here.
-      if (e.output.statusCode !== 404) {
-        throw e;
-      }
-      this.#log.debug(`Unable to open PIT for types [${findOptions.type}]: 404 ${e}`);
-    }
-
-    let results = await findWithPit({ id: pitId });
-    let lastResultsCount = results.saved_objects.length;
-    let lastHitSortValue = getLastHitSortValue(results);
-    pitId = results.pit_id;
-
-    this.#log.debug(`Collected [${lastResultsCount}] saved objects for export.`);
-
-    // Close PIT if this was our last page
-    if (pitId && lastResultsCount < findOptions.perPage!) {
-      this.#log.debug(`Closing PIT for types [${findOptions.type}]`);
-      await this.#savedObjectsClient.closePointInTime(pitId);
-    }
-
-    yield results;
-
-    // We've reached the end when there are fewer hits than our perPage size
-    while (lastHitSortValue && lastResultsCount === findOptions.perPage) {
-      results = await findWithPit({
-        id: pitId,
-        searchAfter: lastHitSortValue,
-      });
-
-      lastResultsCount = results.saved_objects.length;
-      lastHitSortValue = getLastHitSortValue(results);
-      pitId = results.pit_id;
-
-      this.#log.debug(`Collected [${lastResultsCount}] more saved objects for export.`);
-
-      if (pitId && lastResultsCount < findOptions.perPage) {
-        this.#log.debug(`Closing PIT for types [${findOptions.type}]`);
-        await this.#savedObjectsClient.closePointInTime(pitId);
-      }
-
-      yield results;
-    }
-  }
-
   private async fetchByTypes({
     types,
     namespace,
     hasReference,
     search,
   }: SavedObjectsExportByTypeOptions) {
+    const finder = findWithPointInTime({
+      logger: this.#log,
+      savedObjectsClient: this.#savedObjectsClient,
+    });
+
     const options: SavedObjectsFindOptions = {
       type: types,
       hasReference,
@@ -274,10 +184,9 @@ export class SavedObjectsExporter {
       // case we will use PIT to "scroll" through pages of hits, 10k at a time.
       perPage: 10000,
     };
-    const finder = this.findWithPointInTime(options);
 
     const hits: SavedObjectsFindResult[] = [];
-    for await (const result of finder) {
+    for await (const result of finder.find(options)) {
       hits.push(...result.saved_objects);
       if (hits.length > this.#exportSizeLimit) {
         throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
