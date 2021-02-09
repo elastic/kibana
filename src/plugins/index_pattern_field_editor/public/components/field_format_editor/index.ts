@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FormatSelectEditor } from './field_format_editor';
+export { FormatSelectEditor, FormatSelectEditorProps } from './field_format_editor';
 export * from './editors';

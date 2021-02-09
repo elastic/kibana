@@ -6,15 +6,21 @@
  * Side Public License, v 1.
  */
 
-export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
+export {
+  IndexPattern,
+  IndexPatternField,
+  DataPublicPluginStart,
+  FieldFormat,
+} from '../../data/public';
 
-export { RuntimeType } from '../../data/common';
+export { RuntimeType, RuntimeField, KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
 
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
 export {
   useForm,
   useFormData,
+  useFormContext,
   Form,
   FormSchema,
   UseField,

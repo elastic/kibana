@@ -10,7 +10,7 @@ import { registerTestBed, TestBed, noop, docLinks } from '../test_utils';
 import { Field } from '../types';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
 
-const setup = (props?: Props) =>
+const setup = (props: Props = defaultProps) =>
   registerTestBed(FieldEditorFlyoutContent, {
     memoryRouter: { wrapComponent: false },
   })(props) as TestBed;
@@ -20,6 +20,10 @@ const defaultProps: Props = {
   onCancel: noop,
   docLinks,
   FieldEditor: null,
+  indexPattern: { fields: [] } as any,
+  uiSettings: {} as any,
+  fieldFormats: {} as any,
+  fieldFormatEditors: {} as any,
   fieldTypeToProcess: 'runtime',
 };
 
@@ -27,7 +31,7 @@ describe('<FieldEditorFlyoutContent />', () => {
   test('should have the correct title', () => {
     const { exists, find } = setup();
     expect(exists('flyoutTitle')).toBe(true);
-    expect(find('flyoutTitle').text()).toBe('Create new field');
+    expect(find('flyoutTitle').text()).toBe('Create field');
   });
 
   test('should allow a runtime field to be provided', () => {

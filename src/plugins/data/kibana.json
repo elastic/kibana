@@ -8,8 +8,7 @@
     "expressions",
     "uiActions",
     "share",
-    "inspector",
-    "indexPatternFieldEditor"
+    "inspector"
   ],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],

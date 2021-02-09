@@ -21,11 +21,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart, CoreStart } from 'src/core/public';
 
-import { Field, InternalFieldType } from '../types';
+import { Field, InternalFieldType, PluginStart } from '../types';
 import { getLinks } from '../lib';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
+import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 
 const geti18nTexts = (field?: Field) => {
   return {
@@ -37,7 +38,7 @@ const geti18nTexts = (field?: Field) => {
           },
         })
       : i18n.translate('indexPatternFieldEditor.editor.flyoutDefaultTitle', {
-          defaultMessage: 'Create new field',
+          defaultMessage: 'Create field',
         }),
     closeButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCloseButtonLabel', {
       defaultMessage: 'Close',
@@ -72,6 +73,11 @@ export interface Props {
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to process */
   field?: Field;
+
+  indexPattern: IndexPattern;
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  uiSettings: CoreStart['uiSettings'];
 }
 
 const FieldEditorFlyoutContentComponent = ({
@@ -80,6 +86,10 @@ const FieldEditorFlyoutContentComponent = ({
   onCancel,
   FieldEditor,
   docLinks,
+  indexPattern,
+  fieldFormatEditors,
+  fieldFormats,
+  uiSettings,
   fieldTypeToProcess,
 }: Props) => {
   const i18nTexts = geti18nTexts(field);
@@ -101,6 +111,12 @@ const FieldEditorFlyoutContentComponent = ({
     }
   }, [onSave, submit]);
 
+  const namesNotAllowed = indexPattern.fields.map((fld) => fld.name);
+  const existingConcreteFields = indexPattern.fields.map((fld) => ({
+    name: fld.name,
+    type: (fld.esTypes && fld.esTypes[0]) || '',
+  }));
+
   return (
     <>
       <EuiFlyoutHeader>
@@ -112,10 +128,14 @@ const FieldEditorFlyoutContentComponent = ({
       <EuiFlyoutBody>
         {FieldEditor && (
           <FieldEditor
+            indexPattern={indexPattern}
+            fieldFormatEditors={fieldFormatEditors}
+            fieldFormats={fieldFormats}
+            uiSettings={uiSettings}
             links={getLinks(docLinks)}
             field={field}
             onChange={setFormState}
-            ctx={{ fieldTypeToProcess }}
+            ctx={{ fieldTypeToProcess, namesNotAllowed, existingConcreteFields }}
           />
         )}
       </EuiFlyoutBody>
@@ -123,7 +143,7 @@ const FieldEditorFlyoutContentComponent = ({
       <EuiFlyoutFooter>
         {FieldEditor && (
           <>
-            {isSubmitted && !isFormValid && (
+            {isSubmitted && isFormValid === false && (
               <>
                 <EuiCallOut
                   title={i18nTexts.formErrorsCalloutTitle}
@@ -150,7 +170,7 @@ const FieldEditorFlyoutContentComponent = ({
                 <EuiButton
                   color="primary"
                   onClick={onClickSave}
-                  data-test-subj="saveFieldButton"
+                  data-test-subj="fieldSaveButton"
                   fill
                 >
                   {i18nTexts.saveButtonLabel}

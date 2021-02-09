@@ -11,5 +11,11 @@ import React from 'react';
 import { UseField, NumericField } from '../../../shared_imports';
 
 export const PopularityField = () => {
-  return <UseField path="popularity" component={NumericField} />;
+  return (
+    <UseField
+      path="popularity"
+      component={NumericField}
+      componentProps={{ euiFieldProps: { 'data-test-subj': 'editorFieldCount' } }}
+    />
+  );
 };

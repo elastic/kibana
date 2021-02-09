@@ -7,11 +7,17 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField, IndexPattern } from '../shared_imports';
-import { Field, InternalFieldType } from '../types';
-import { deserializeField, serializeField } from '../lib';
+import {
+  IndexPatternField,
+  IndexPattern,
+  DataPublicPluginStart,
+  RuntimeType,
+} from '../shared_imports';
+import { Field, PluginStart, InternalFieldType } from '../types';
+import { deserializeField } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
@@ -45,6 +51,14 @@ export interface Props {
    * Optional field to edit
    */
   field?: IndexPatternField;
+  /**
+   * Services
+   */
+  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  notifications: NotificationsStart;
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  uiSettings: CoreStart['uiSettings'];
 }
 
 /**
@@ -53,23 +67,71 @@ export interface Props {
  * The <FieldEditorFlyoutContent /> component is the presentational component that won't know
  * anything about where a field comes from and where it should be persisted.
  */
+
 export const FieldEditorFlyoutContentContainer = ({
   field,
   onSave,
   onCancel,
   docLinks,
+  indexPatternService,
   ctx: { indexPattern, fieldTypeToProcess },
+  notifications,
+  fieldFormatEditors,
+  fieldFormats,
+  uiSettings,
 }: Props) => {
-  const fieldToEdit = deserializeField(field);
+  const fieldToEdit = deserializeField(indexPattern, field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
 
   const saveField = useCallback(
     async (updatedField: Field) => {
-      const indexPatternField = serializeField(updatedField);
-      // TODO: here we will put the logic to update the Kibana saved object
-      onSave(indexPatternField);
+      const { script } = updatedField;
+
+      if (fieldTypeToProcess === 'runtime') {
+        // rename an existing runtime field
+        if (field?.name && field.name !== updatedField.name) {
+          indexPattern.removeRuntimeField(field.name);
+        }
+
+        indexPattern.addRuntimeField(updatedField.name, {
+          type: updatedField.type as RuntimeType,
+          script,
+        });
+      }
+
+      const editedField = indexPattern.getFieldByName(updatedField.name);
+
+      try {
+        if (!editedField) {
+          throw new Error(
+            `Unable to find field named '${updatedField.name}' on index pattern '${indexPattern.title}'`
+          );
+        }
+
+        indexPattern.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+        editedField.count = updatedField.popularity || 0;
+        if (updatedField.format) {
+          indexPattern.setFieldFormat(updatedField.name, updatedField.format);
+        } else {
+          indexPattern.deleteFieldFormat(updatedField.name);
+        }
+
+        indexPatternService.updateSavedObject(indexPattern).then(() => {
+          const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+            defaultMessage: "Saved '{fieldName}'",
+            values: { fieldName: updatedField.name },
+          });
+          notifications.toasts.addSuccess(message);
+          onSave(editedField);
+        });
+      } catch (e) {
+        const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
+          defaultMessage: 'Failed to save field changes',
+        });
+        notifications.toasts.addError(e, { title });
+      }
     },
-    [onSave]
+    [onSave, indexPattern, indexPatternService, notifications, fieldTypeToProcess, field?.name]
   );
 
   const loadEditor = useCallback(async () => {
@@ -90,6 +152,10 @@ export const FieldEditorFlyoutContentContainer = ({
       docLinks={docLinks}
       field={fieldToEdit}
       FieldEditor={Editor}
+      fieldFormatEditors={fieldFormatEditors}
+      fieldFormats={fieldFormats}
+      uiSettings={uiSettings}
+      indexPattern={indexPattern}
       fieldTypeToProcess={fieldTypeToProcess}
     />
   );

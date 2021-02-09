@@ -29,9 +29,9 @@ This is the only required option. You need to provide the context in which the e
 
 You can provide an optional `onSave` handler to be notified when the field has being created/updated. This handler is called after the field has been persisted to the saved object.
 
-`field: IndexPatternField` (optional)
+`fieldName: string` (optional)
 
-You can optionally create a field to edit.
+You can optionally pass the name of a field to edit. Leave empty to create a new runtime field based field.
 
 ### `userPermissions.editIndexPattern(): boolean`
 

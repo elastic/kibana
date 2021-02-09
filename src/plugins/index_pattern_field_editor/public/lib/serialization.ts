@@ -6,25 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternField } from '../shared_imports';
+import { IndexPatternField, IndexPattern } from '../shared_imports';
 import { Field } from '../types';
 
-export const deserializeField = (field?: IndexPatternField): Field | undefined => {
+export const deserializeField = (
+  indexPattern: IndexPattern,
+  field?: IndexPatternField
+): Field | undefined => {
   if (field === undefined) {
     return undefined;
   }
 
   return {
     name: field.name,
-    type: field.type,
+    type: field?.esTypes ? field.esTypes[0] : undefined,
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,
-    format: undefined, // TODO: set correct value
+    format: indexPattern.getFormatterForFieldNoDefault(field.name)?.toJSON(),
   };
-};
-
-export const serializeField = (field: Field): IndexPatternField => {
-  // TODO: Put here the logic to serialize a field to the index pattern field
-  return {} as any;
 };

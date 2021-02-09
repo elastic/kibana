@@ -3,7 +3,7 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": [],
+  "requiredPlugins": ["data"],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact", "data", "esUiShared"]
+  "requiredBundles": ["kibanaReact", "esUiShared"]
 }

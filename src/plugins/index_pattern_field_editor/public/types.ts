@@ -7,9 +7,9 @@
  */
 
 import { FunctionComponent } from 'react';
+import { DataPublicPluginStart, RuntimeField } from './shared_imports';
 
 import { OpenFieldEditorOptions } from './open_editor';
-import { RuntimeType } from './shared_imports';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 import { DeleteProviderProps } from './components/delete_field_provider';
 
@@ -29,18 +29,22 @@ export interface PluginStart {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupPlugins {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartPlugins {}
+export interface StartPlugins {
+  data: DataPublicPluginStart;
+}
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
 export interface Field {
   name: string;
-  type: RuntimeType | string;
-  script?: {
-    source: string;
-  };
+  type?: RuntimeField['type'] | string;
+  script?: RuntimeField['script'];
   customLabel?: string;
   popularity?: number;
-  format?: Record<string, any>; // TODO set correct interface
+  format?: FieldFormatConfig;
+}
+
+export interface FieldFormatConfig {
+  id: string;
+  params?: { [key: string]: any };
 }

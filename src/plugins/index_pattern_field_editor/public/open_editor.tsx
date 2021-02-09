@@ -8,41 +8,43 @@
 
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
 
 import {
   createKibanaReactContext,
   toMountPoint,
   IndexPatternField,
+  DataPublicPluginStart,
   IndexPattern,
 } from './shared_imports';
+
 import { InternalFieldType } from './types';
-import {
-  FieldEditorFlyoutContentContainer,
-  Props as FieldEditorFlyoutContentContainerProps,
-} from './components/field_editor_flyout_content_container';
+import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
+
+import { PluginStart } from './types';
 
 export interface OpenFieldEditorOptions {
   ctx: {
     indexPattern: IndexPattern;
   };
   onSave?: (field: IndexPatternField) => void;
-  field?: FieldEditorFlyoutContentContainerProps['field'];
+  fieldName?: string;
 }
 
 type CloseEditor = () => void;
 
-export const getFieldEditorOpener = (coreStart: CoreStart) => (
-  options: OpenFieldEditorOptions
-): CloseEditor => {
-  const { uiSettings, overlays, docLinks } = coreStart;
+export const getFieldEditorOpener = (
+  coreStart: CoreStart,
+  indexPatternService: DataPublicPluginStart['indexPatterns'],
+  fieldFormats: DataPublicPluginStart['fieldFormats'],
+  fieldFormatEditors: PluginStart['fieldFormatEditors']
+) => (options: OpenFieldEditorOptions): CloseEditor => {
+  const { uiSettings, overlays, docLinks, notifications } = coreStart;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
 
   let overlayRef: OverlayRef | null = null;
 
-  const openEditor = ({ onSave, field, ctx }: OpenFieldEditorOptions): CloseEditor => {
-    // TODO (Matt): here will come the logic to define the internal field type (concrete|runtime)
-    const fieldTypeToProcess: InternalFieldType = 'runtime';
-
+  const openEditor = ({ onSave, fieldName, ctx }: OpenFieldEditorOptions): CloseEditor => {
     const closeEditor = () => {
       if (overlayRef) {
         overlayRef.close();
@@ -58,6 +60,21 @@ export const getFieldEditorOpener = (coreStart: CoreStart) => (
       }
     };
 
+    const field = fieldName ? ctx.indexPattern.getFieldByName(fieldName) : undefined;
+    if (fieldName && !field) {
+      const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
+        defaultMessage: "Field named '{fieldName}' not found on index pattern",
+        values: { fieldName },
+      });
+      notifications.toasts.addDanger(err);
+      return closeEditor;
+    }
+
+    const isNewRuntimeField = !fieldName;
+    const isExistingRuntimeField = field && field.runtimeField && !field.isMapped;
+    const fieldTypeToProcess: InternalFieldType =
+      isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
+
     overlayRef = overlays.openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
@@ -67,6 +84,11 @@ export const getFieldEditorOpener = (coreStart: CoreStart) => (
             docLinks={docLinks}
             field={field}
             ctx={{ ...ctx, fieldTypeToProcess }}
+            indexPatternService={indexPatternService}
+            notifications={notifications}
+            fieldFormatEditors={fieldFormatEditors}
+            fieldFormats={fieldFormats}
+            uiSettings={uiSettings}
           />
         </KibanaReactContextProvider>
       )

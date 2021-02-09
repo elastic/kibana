@@ -40,6 +40,7 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
   fields: IndexPatternField[];
   saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  refreshFields: () => void;
 }
 
 const searchAriaLabel = i18n.translate(
@@ -70,7 +71,14 @@ const addFieldButtonLabel = i18n.translate(
   }
 );
 
-export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
+export function Tabs({
+  indexPattern,
+  saveIndexPattern,
+  fields,
+  history,
+  location,
+  refreshFields,
+}: TabsProps) {
   const {
     uiSettings,
     indexPatternManagementStart,
@@ -86,6 +94,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
   const closeEditorHandler = useRef<() => void | undefined>();
+  const { DeleteRuntimeFieldProvider } = indexPatternFieldEditor;
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -96,7 +105,9 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           tempScriptedFieldLanguages.push(field.lang);
         }
       } else {
-        tempIndexedFieldTypes.push(field.type);
+        if (field.esTypes) {
+          tempIndexedFieldTypes.push(field.esTypes?.join(', '));
+        }
       }
     });
 
@@ -112,13 +123,18 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     }
   }, []);
 
-  const openFieldEditor = useCallback(() => {
-    closeEditorHandler.current = indexPatternFieldEditor.openEditor({
-      ctx: {
-        indexPattern,
-      },
-    });
-  }, [indexPatternFieldEditor, indexPattern]);
+  const openFieldEditor = useCallback(
+    (fieldName?: string) => {
+      closeEditorHandler.current = indexPatternFieldEditor.openEditor({
+        ctx: {
+          indexPattern,
+        },
+        onSave: refreshFields,
+        fieldName,
+      });
+    },
+    [indexPatternFieldEditor, indexPattern, refreshFields]
+  );
 
   useEffect(() => {
     refreshFilters();
@@ -162,7 +178,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={openFieldEditor}>
+                <EuiButton fill onClick={() => openFieldEditor()}>
                   {addFieldButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
@@ -200,19 +216,22 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
               <EuiSpacer size="m" />
               {getFilterSection(type)}
               <EuiSpacer size="m" />
-              <IndexedFieldsTable
-                fields={fields}
-                indexPattern={indexPattern}
-                fieldFilter={fieldFilter}
-                fieldWildcardMatcher={fieldWildcardMatcherDecorated}
-                indexedFieldTypeFilter={indexedFieldTypeFilter}
-                helpers={{
-                  redirectToRoute: (field: IndexPatternField) => {
-                    history.push(getPath(field, indexPattern));
-                  },
-                  getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
-                }}
-              />
+              <DeleteRuntimeFieldProvider indexPattern={indexPattern} onDelete={refreshFields}>
+                {(deleteField) => (
+                  <IndexedFieldsTable
+                    fields={fields}
+                    indexPattern={indexPattern}
+                    fieldFilter={fieldFilter}
+                    fieldWildcardMatcher={fieldWildcardMatcherDecorated}
+                    indexedFieldTypeFilter={indexedFieldTypeFilter}
+                    helpers={{
+                      editField: openFieldEditor,
+                      deleteField,
+                      getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
+                    }}
+                  />
+                )}
+              </DeleteRuntimeFieldProvider>
             </Fragment>
           );
         case TAB_SCRIPTED_FIELDS:
@@ -266,6 +285,9 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
+      openFieldEditor,
+      DeleteRuntimeFieldProvider,
+      refreshFields,
     ]
   );
 

@@ -12,7 +12,6 @@ import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
-  IndexPatternField,
   FieldFormatInstanceType,
   IndexPattern,
   KBN_FIELD_TYPES,
@@ -21,17 +20,20 @@ import {
   FieldFormat,
 } from 'src/plugins/data/public';
 import { CoreStart } from 'src/core/public';
+import { castEsToKbnFieldTypeName } from '../../../../data/public';
 import { FormatEditor } from './format_editor';
 import { FormatEditorServiceStart } from '../../service';
+import { FieldFormatConfig } from '../../types';
 
 export interface FormatSelectEditorProps {
-  spec: IndexPatternField['spec'];
+  esTypes: ES_FIELD_TYPES[];
   indexPattern: IndexPattern;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
-  onChange: (change: { id: string; params: { [key: string]: any } } | undefined) => void;
+  onChange: (change?: FieldFormatConfig) => void;
   onError: (error?: string) => void;
+  value?: FieldFormatConfig;
 }
 
 interface FieldTypeFormat {
@@ -42,8 +44,9 @@ interface FieldTypeFormat {
 export interface FormatSelectEditorState {
   fieldTypeFormats: FieldTypeFormat[];
   fieldFormatId?: string;
-  fieldFormatParams: { [key: string]: unknown };
+  fieldFormatParams?: { [key: string]: unknown };
   format: FieldFormat;
+  kbnType: KBN_FIELD_TYPES;
 }
 
 interface InitialFieldTypeFormat extends FieldTypeFormat {
@@ -51,16 +54,14 @@ interface InitialFieldTypeFormat extends FieldTypeFormat {
 }
 
 const getFieldTypeFormatsList = (
-  field: IndexPatternField['spec'],
+  fieldType: KBN_FIELD_TYPES,
   defaultFieldFormat: FieldFormatInstanceType,
   fieldFormats: DataPublicPluginStart['fieldFormats']
 ) => {
-  const formatsByType = fieldFormats
-    .getByFieldType(field.type as KBN_FIELD_TYPES)
-    .map(({ id, title }) => ({
-      id,
-      title,
-    }));
+  const formatsByType = fieldFormats.getByFieldType(fieldType).map(({ id, title }) => ({
+    id,
+    title,
+  }));
 
   return [
     {
@@ -80,22 +81,24 @@ export class FormatSelectEditor extends PureComponent<
 > {
   constructor(props: FormatSelectEditorProps) {
     super(props);
-    const { spec, indexPattern, fieldFormats } = props;
+    const { fieldFormats, esTypes, value } = props;
+    const kbnType = castEsToKbnFieldTypeName(esTypes[0] || 'keyword');
 
-    const format = indexPattern.getFormatterForField(spec);
-    const DefaultFieldFormat = fieldFormats.getDefaultType(
-      spec.type as KBN_FIELD_TYPES,
-      spec.esTypes as ES_FIELD_TYPES[]
-    );
+    // get current formatter for field, provides default if none exists
+    const format = value?.id
+      ? fieldFormats.getInstance(value?.id, value?.params)
+      : fieldFormats.getDefaultInstance(kbnType, esTypes);
+
     this.state = {
       fieldTypeFormats: getFieldTypeFormatsList(
-        spec,
-        DefaultFieldFormat as FieldFormatInstanceType,
+        kbnType,
+        fieldFormats.getDefaultType(kbnType, esTypes) as FieldFormatInstanceType,
         fieldFormats
       ),
-      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
-      fieldFormatParams: format.params(),
       format,
+      fieldFormatId: value?.id,
+      fieldFormatParams: value?.params,
+      kbnType,
     };
   }
   onFormatChange = (formatId: string, params?: any) => {
@@ -108,11 +111,23 @@ export class FormatSelectEditor extends PureComponent<
 
     const newFormat = new FieldFormatClass(params, (key: string) => uiSettings.get(key));
 
-    this.setState({
-      fieldFormatId: formatId,
-      fieldFormatParams: params,
-      format: newFormat,
-    });
+    this.setState(
+      {
+        fieldFormatId: formatId,
+        fieldFormatParams: params,
+        format: newFormat,
+      },
+      () => {
+        this.props.onChange(
+          formatId
+            ? {
+                id: formatId,
+                params: params || {},
+              }
+            : undefined
+        );
+      }
+    );
   };
   onFormatParamsChange = (newParams: { fieldType: string; [key: string]: any }) => {
     const { fieldFormatId } = this.state;
@@ -120,7 +135,8 @@ export class FormatSelectEditor extends PureComponent<
   };
 
   render() {
-    const { spec, fieldFormatEditors, onChange, onError } = this.props;
+    const { fieldFormatEditors, onError } = this.props;
+    const { kbnType } = this.state;
 
     const { fieldTypeFormats, format, fieldFormatId, fieldFormatParams } = this.state;
 
@@ -139,16 +155,7 @@ export class FormatSelectEditor extends PureComponent<
     );
     return (
       <>
-        <EuiFormRow
-          label={label}
-          helpText={
-            <FormattedMessage
-              id="indexPatternFieldEditor.formatLabel"
-              defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
-          completely changed and prevent highlighting in Discover from working."
-            />
-          }
-        >
+        <EuiFormRow label={label}>
           <EuiSelect
             value={fieldFormatId}
             options={fieldTypeFormats.map((fmt) => {
@@ -162,18 +169,12 @@ export class FormatSelectEditor extends PureComponent<
         </EuiFormRow>
         {fieldFormatId ? (
           <FormatEditor
-            fieldType={spec.type}
+            fieldType={kbnType}
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams || {}}
             fieldFormatEditors={fieldFormatEditors}
             onChange={(params) => {
-              onChange(
-                params && {
-                  id: fieldFormatId,
-                  params,
-                }
-              );
               this.onFormatChange(fieldFormatId, params);
             }}
             onError={onError}

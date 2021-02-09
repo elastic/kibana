@@ -10,27 +10,30 @@ import React, { useCallback } from 'react';
 
 import { IndexPattern } from '../../shared_imports';
 import { DeleteRuntimeFieldProvider, Props as DeleteProviderProps } from './delete_field_provider';
+import { DataPublicPluginStart } from '../../../../data/public';
 
 export interface Props extends Omit<DeleteProviderProps, 'onConfirmDelete'> {
   indexPattern: IndexPattern;
   onDelete?: (fieldNames: string[]) => void;
 }
 
-export const getDeleteProvider = (/* Dependencies will come here*/): React.FunctionComponent<Props> => {
+export const getDeleteProvider = (
+  indexPatternService: DataPublicPluginStart['indexPatterns']
+): React.FunctionComponent<Props> => {
   return React.memo(({ indexPattern, children, onDelete }: Props) => {
     const deleteFields = useCallback(
-      (fieldNames: string[]) => {
-        // TODO: Add logic here to delete the field
+      async (fieldNames: string[]) => {
+        fieldNames.forEach((fieldName) => {
+          indexPattern.removeRuntimeField(fieldName);
+        });
+
+        await indexPatternService.updateSavedObject(indexPattern);
 
         if (onDelete) {
           onDelete(fieldNames);
         }
-
-        // Temp code as we need to return a Promise
-        // Remove once delete logic is implemented.
-        return Promise.resolve();
       },
-      [onDelete]
+      [onDelete, indexPattern]
     );
 
     return <DeleteRuntimeFieldProvider children={children} onConfirmDelete={deleteFields} />;
