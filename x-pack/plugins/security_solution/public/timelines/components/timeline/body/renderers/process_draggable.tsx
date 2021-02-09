@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
@@ -43,51 +44,61 @@ export const ProcessDraggable = React.memo<Props>(
     }
 
     return (
-      <div>
+      <EuiFlexGroup alignItems="center" gutterSize="none">
         {!isNillEmptyOrNotFinite(processName) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.name"
-            value={processName}
-            iconType="console"
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.name"
+              value={processName}
+              iconType="console"
+            />
+          </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(processExecutable) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.executable"
-            value={processExecutable}
-            iconType="console"
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.executable"
+              value={processExecutable}
+              iconType="console"
+            />
+          </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameProcessName) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="endgame.process_name"
-            value={endgameProcessName}
-            iconType="console"
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="endgame.process_name"
+              value={endgameProcessName}
+              iconType="console"
+            />
+          </EuiFlexItem>
         ) : null}
 
         {!isNillEmptyOrNotFinite(processPid) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="process.pid"
-            queryValue={String(processPid)}
-            value={`(${String(processPid)})`}
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="process.pid"
+              queryValue={String(processPid)}
+              value={`(${String(processPid)})`}
+            />
+          </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(endgamePid) ? (
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="endgame.pid"
-            queryValue={String(endgamePid)}
-            value={`(${String(endgamePid)})`}
-          />
+          <EuiFlexItem grow={false}>
+            <DraggableBadge
+              contextId={contextId}
+              eventId={eventId}
+              field="endgame.pid"
+              queryValue={String(endgamePid)}
+              value={`(${String(endgamePid)})`}
+            />
+          </EuiFlexItem>
         ) : null}
-      </div>
+      </EuiFlexGroup>
     );
   }
 );

@@ -1,5 +1,5 @@
 [[release-notes]]
-= Release Notes
+= Release notes
 
 [partintro]
 --
@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.11.0>>
 * <<release-notes-7.10.2>>
 * <<release-notes-7.10.1>>
 * <<release-notes-7.10.0>>
@@ -45,7 +46,422 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha2>>
 * <<release-notes-7.0.0-alpha1>>
 
+////
+// To add a release, copy and paste the following text,  uncomment the relevant	// To add a release, copy and paste the following text,  uncomment the relevant
+// sections, and add a link to the new section in the list of releases at the	// sections, and add a link to the new section in the list of releases at the
+// top of the page. Note that release subheads must be floated and sections	// top of the page. Note that release subheadings must be floated and sections
+// cannot be empty.	// cannot be empty.
+// TEMPLATE:
+
+[[release-notes-n.n.n]]
+== {kib} n.n.n 
+
+coming::[n.n.n]
+
+For detailed information about the n.n.n release, review the following sections.
+
+<<breaking-n.n.n,Breaking changes>> | <<deprecation-n.n.n,Deprecations>> | <<enhancement-n.n.n,Enhancements>> | <<bug-n.n.n,Bug fixes>> | <<regression-n.n.n,Regressions | <<known-issue-n.n.n,Known issues
+
+//[float]
+//[[breaking-n.n.n]]
+//=== Breaking changes
+
+//[float]
+//[[deprecation-n.n.n]]
+//=== Deprecations
+
+//[float]
+//[[enhancement-n.n.n]]
+//=== Enhancements
+
+//[float]
+//[[bug-n.n.n]]
+//=== Bug fixes
+
+//[float]
+//[[regression-n.n.n]]
+//=== Regressions
+
+//[float]
+//[[known-issue-n.n.n]]
+//=== Known issues
+////
+
 --
+
+[[release-notes-7.11.0]]
+== {kib} 7.11.0 
+
+coming::[7.11.0]
+
+For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
+
+//For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
+
+[float]
+[[deprecation-v7.11.0]]
+=== Deprecations
+Lens and visualizations::
+* Deprecates `visualization:colorMapping` advanced setting {kibana-pull}83372[#83372]
+Management::
+* Deprecates `kibana.index` setting {kibana-pull}83988[#83988]
+* Deprecates `reporting.index` setting {kibana-pull}84005[#84005]
+* Deprecates `xpack.task_manager.index` setting {kibana-pull}84155[#84155]
+Security::
+* Deprecates disabling the spaces plugin {kibana-pull}83984[#83984]
+* Deprecates disabling the security plugin {kibana-pull}85159[#85159]
+
+[float]
+[[enhancement-v7.11.0]]
+=== Enhancements
+Alerting::
+* Updates alert type selection layout to rows instead of grid {kibana-pull}73665[#73665]
+* Back Button on Add Connector Flyout {kibana-pull}80160[#80160]
+* Disables "Save" button for Alerts with broken Connectors {kibana-pull}80579[#80579]
+* Adds UI notifier to indicate secret fields and to remember / reenter values {kibana-pull}80657[#80657]
+* Adds `defaultActionMessage` to index threshold alert UI type definition {kibana-pull}80936[#80936]
+* Don't wait for health check before showing Create Alert flyout {kibana-pull}80996[#80996]
+* Adds `hasAuth` to Webhook Configuration to avoid confusing UX {kibana-pull}81390[#81390]
+* Grouped list of alert types using producers in Types filter of Alerts tab {kibana-pull}81876[#81876]
+* Adds Alerts & Actions to the app directory {kibana-pull}81902[#81902]
+* Adds a link to documentation in the alerts and actions management UI {kibana-pull}81909[#81909]
+* Adds an Run When field in the alert flyout to assign the action to an Action Group {kibana-pull}82472[#82472]
+* Displays Action Group in Alert Details {kibana-pull}82645[#82645]
+* Removes placeholders and updates validation messages on connector forms {kibana-pull}82734[#82734]
+* Notify only on action group change {kibana-pull}82969[#82969]
+* Adds ability to assign alert actions to resolved action group in UI {kibana-pull}83139[#83139]
+* Microsoft Teams connector {kibana-pull}83169[#83169]
+* Adds action group and date to mustache template variables for actions {kibana-pull}83195[#83195]
+* Updates widths on columns in Alert Detail view {kibana-pull}83823[#83823]
+* Escaping is now off for most action parameters, except those that need per-action escaping, including the Slack, Email, and Webhook action parameters {kibana-pull}83919[#83919]
+* Adds ECS audit events for alerts and actions plugins {kibana-pull}84113[#84113]
+* Adds footer to all emails sent by Kibana email connector with a link to open Kibana or to the alert details page {kibana-pull}84371[#84371]
+* Adds default dedupKey value as an {{alertInstanceId}} to provide grouping functionality for PagerDuty incidents {kibana-pull}84598[#84598]
+APM::
+* Transition to Elastic charts for all relevant APM charts {kibana-pull}80298[#80298]
+* APM Experiments settings {kibana-pull}81554[#81554]
+* APM index settings import/export in saved-object management {kibana-pull}82784[#82784]
+* Service overview: Dependencies table {kibana-pull}83416[#83416]
+* Service overview: Transactions table {kibana-pull}83429[#83429]
+* Latency chart for overview {kibana-pull}84634[#84634]
+* Add APM agent config options {kibana-pull}84678[#84678]
+* Updates header icons {kibana-pull}84760[#84760]
+* Adds log_level/sanitize_field_names config options to Python Agent {kibana-pull}84810[#84810]
+* Adds `ignore_unavailable` to avoid querying closed indices {kibana-pull}84813[#84813]
+* Adds sanitize_field_names and transaction_ignore_urls config options to Ruby agent {kibana-pull}85646[#85646]
+* Adds transaction_ignore_urls as central config  {kibana-pull}85734[#85734]
+* Service overview: Instances table {kibana-pull}85770[#85770]
+* APM Alerts Preview charts {kibana-pull}85868[#85868]
+Canvas::
+* Layout option for generating full-page Canvas reports {kibana-pull}84959[#84959]
+Dashboard::
+* Library Notification Popover {kibana-pull}79581[#79581]
+* Url Drilldown basic template helpers {kibana-pull}80500[#80500]
+* Edit Panel Title On Click {kibana-pull}81076[#81076]
+* Dashboards connected via drilldowns are now exported or copied to a different space together {kibana-pull}82602[#82602]
+* Panel toolbar {kibana-pull}83342[#83342]
+* Export CSV action for Lens embeddables in dashboard {kibana-pull}83654[#83654]
+* ExternalUrl service was integrated with URL Drilldown {kibana-pull}85779[#85779]
+Discover::
+* Adds new responsive layout {kibana-pull}83633[#83633]
+Elastic Security Solution::
+For the Elastic Security Solution 7.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Agent logs UI {kibana-pull}83356[#83356]
+Lens and visualizations::
+* Adds categorical color palettes in Lens {kibana-pull}75309[#75309]
+* Adds color for dimension trigger in Lens {kibana-pull}76871[#76871]
+* Adds median operation in Lens {kibana-pull}79453[#79453]
+* Improves the range formatter {kibana-pull}80132[#80132]
+* Adds drag support within dimension group to reorder in Lens {kibana-pull}80547[#80547]
+* Renames X/Y axis to horizontal/vertical in Lens {kibana-pull}80991[#80991]
+* Adds value labels in Lens bar charts {kibana-pull}81776[#81776]
+* Enables "Other" bucket for top values operation in Lens {kibana-pull}82704[#82704]
+* Adds CSV Export for Lens {kibana-pull}83430[#83430]
+* Adds "Last value" operation to Lens {kibana-pull}83437[#83437]
+* Adds sorting to Lens data tables {kibana-pull}84435[#84435]
+* Adds in-product help to Lens fields list {kibana-pull}85544[#85544]
+* Adds toggle to height data table export button {kibana-pull}70801[#70801]
+* Adds support for HDR percentiles in TSVB visualizations {kibana-pull}78306[#78306]
+* Displays epoch on a more human readable format for TSVB {kibana-pull}79110[#79110]
+* Adds *Ignore global filters* to series options in TSVB {kibana-pull}79337[#79337]
+* Updates *New visualization* window {kibana-pull}79627[#79627]
+* Adds `textTruncate` option for tooltips {kibana-pull}80524[#80524]
+* Renames 'positive rate' to 'counter rate' {kibana-pull}80939[#80939]
+* Use "histogram:maxBars" and "histogram:barTarget" advanced settings in TSVB {kibana-pull}83628[#83628]
+* Fixes Graph saved object references {kibana-pull}85295[#85295]
+* Allow sorting by median {kibana-pull}79839[#79839]
+Logs::
+* Syncs logs timerange with wider Kibana {kibana-pull}79444[#79444]
+* Displays progress for asynchronous loading of the log entry fly-out content and cancels pending requests when closing the fly-out {kibana-pull}83906[#83906]
+Machine Learning::
+* Data frame analytics: Scatterplot matrix for outlier detection {kibana-pull}73419[#73419]
+* Adds space aware jobs {kibana-pull}77916[#77916]
+* Adds probability values in decision path visualization for classification data frame analytics {kibana-pull}80229[#80229]
+* DFAnalytics Creation: update form to handle `num_top_classes` setting for all classes {kibana-pull}80751[#80751]
+* DF Analytics wizard: ensure user can set mml manually or select to use given estimate {kibana-pull}81078[#81078]
+* Adds annotation markers to time series brush area to indicate annotations exist outside of selected range {kibana-pull}81490[#81490]
+* Configure sorting for partition values on Single Metric Viewer {kibana-pull}81510[#81510]
+* Adds option for anomaly charts for metric detector should plot min, mean or max as appropriate {kibana-pull}81662[#81662]
+* Data frame analytics: Adds map view {kibana-pull}81666[#81666]
+* Improves support for script and aggregation fields in anomaly detection jobs {kibana-pull}81923[#81923]
+* Adds space aware jobs (#77916) {kibana-pull}82446[#82446]
+* Job saved objects initialization {kibana-pull}82639[#82639]
+* Adds non-space aware checks for existing jobs {kibana-pull}82814[#82814]
+* Additional job spaces initialization {kibana-pull}83127[#83127]
+* Persisted URL state for the "Anomaly detection jobs" page {kibana-pull}83149[#83149]
+* Performance improvements to annotations editing in Single Metric Viewer & buttons placement {kibana-pull}83216[#83216]
+* Space management UI {kibana-pull}83320[#83320]
+* Persisted URL state for the Data frame analytics jobs and models pages {kibana-pull}83439[#83439]
+* Improves browser history navigation  {kibana-pull}83792[#83792]
+* Persisted URL state for Anomalies table {kibana-pull}84314[#84314]
+* Persisted URL state for Data Frame Analytics Exploration page {kibana-pull}84499[#84499]
+* Improves messaging and support for datafeed using aggregated and scripted fields {kibana-pull}84594[#84594]
+* Adds security_linux and security_windows Modules {kibana-pull}85065[#85065]
+* Data Frame Analytics: check space permissions before deleting jobs {kibana-pull}85495[#85495]
+* Redesign index-based Data Visualizer {kibana-pull}85726[#85726]
+* Adds runtime_mappings to job wizards {kibana-pull}85817[#85817]
+Management::
+* Allows custom name for fields via index pattern field management {kibana-pull}70039[#70039]
+* Painless Lab in DevTools now supports autocompletion for keywords, and class and class members for the Painless language based on a given context {kibana-pull}80577[#80577]
+* Transforms: Remove index field limitation for custom query {kibana-pull}81467[#81467]
+* In the Index Management app, you can now click a data stream index lifecycle policy and view it in the Index Lifecycle Policies app {kibana-pull}82165[#82165]
+* Use monacco editor in the inspector request panel {kibana-pull}82272[#82272]
+* In the Index Management app, you can now click a data stream index template and view it on the Index Templates tab {kibana-pull}82592[#82592]
+* In the Index Management app, data streams managed by Fleet can now be identified by a 'Managed' label {kibana-pull}83049[#83049]
+* In the Index Management app, buttons to delete a data stream are now controlled by user privileges {kibana-pull}83573[#83573]
+* Index Patterns service now has public HTTP API, which third parties can use to manage index patterns, index pattern field metadata, and scripted fields {kibana-pull}83576[#83576]
+* The ILM policy UI now supports configuring searchable snapshot in the cold and hot phases {kibana-pull}83783[#83783]
+* Adds shrink field to hot phase {kibana-pull}84087[#84087]
+* Index and component templates can now be configured with runtime fields in their mappings {kibana-pull}84184[#84184]
+* The Ingest Node Pipelines UI now supports autocompletion for the Painless language when defining a condition for a processor, ane when defining a source for a script processor {kibana-pull}84554[#84554]
+* In the Index Management app, hidden data streams are now displayed and indicated by a label {kibana-pull}85028[#85028]
+* Aligns form fields in ILM with ESUI standards {kibana-pull}85143[#85143]
+* Moves error and loading notices for data allocation {kibana-pull}85154[#85154]
+* Index Lifecycle Management app now includes readonly action {kibana-pull}85419[#85419]
+* Adds support for latest function {kibana-pull}85784[#85784]
+* Updates logstash pipeline management to use system index APIs {kibana-pull}80405[#80405]
+* Reintroduce "Add support for runtime field types to mappings editor" {kibana-pull}79940[#79940]
+* Form UI {kibana-pull}81766[#81766]
+Maps::
+* Geo line source {kibana-pull}76572[#76572]
+* Supports envelope {kibana-pull}80614[#80614]
+* Adds query bar inputs to geo threshold alerts tracked points & boundaries {kibana-pull}80871[#80871]
+* Support by value saved objects {kibana-pull}82486[#82486]
+* Show icon when layer is filtered by time and allow layers to ignore global time range {kibana-pull}83006[#83006]
+* Saved object tagging {kibana-pull}83197[#83197]
+* Updates style when metrics change {kibana-pull}83586[#83586]
+* Support URL drilldowns {kibana-pull}83732[#83732]
+* Background color map setting {kibana-pull}83822[#83822]
+* Adds geo containment tracking alert type {kibana-pull}84151[#84151]
+* Style by percentiles {kibana-pull}84291[#84291]
+* Use index-pattern field display name in UX {kibana-pull}84945[#84945]
+* Adds percentile {kibana-pull}85367[#85367]
+* Adds on-prem EMS config {kibana-pull}82525[#82525]
+Metrics::
+* Adds endpoint for Metrics API {kibana-pull}81693[#81693]
+* Adds full custom metric UI to inventory alerts {kibana-pull}81929[#81929]
+* Adds basic interaction and shell for node details overlay {kibana-pull}82013[#82013]
+* Adds metrics to node details {kibana-pull}83357[#83357]
+* Don't show loading screen during auto-reload {kibana-pull}83376[#83376]
+* Adds logs to node details {kibana-pull}83433[#83433]
+* Adds Process tab to Enhanced Node Details {kibana-pull}83477[#83477]
+* Implements Resolved action group in Metrics alerts {kibana-pull}83687[#83687]
+* Adds metadata tab to node details flyout {kibana-pull}84454[#84454]
+* Fixes double loading of inventory page when there's a default view {kibana-pull}84843[#84843]
+* Synch time for metrics ui Kibana time {kibana-pull}85502[#85502]
+Monitoring::
+* Thread pool rejections alert {kibana-pull}79433[#79433]
+* Improves Collector `fetch` API {kibana-pull}79595[#79595]
+* Usage collection add saved objects client to collector fetch context {kibana-pull}80554[#80554]
+* Some progress on making alerts better in the UI {kibana-pull}81569[#81569]
+* CCR read exceptions alert {kibana-pull}85908[#85908]
+Operations::
+* Starting in 8.0, deb and rpm packages will restart on upgrade by default {kibana-pull}82049[#82049]
+* Adds a new CLI for generating encryption keys used by Kibana {kibana-pull}82838[#82838]
+* Adds deb and rpm packages for ARM64 {kibana-pull}84364[#84364]
+* Upgrades the major Node.js version used by and shipped with Kibana from v12 to v14 {kibana-pull}83425[#83425]
+* Adds experimental support for configuring CORS policy {kibana-pull}84316[#84316]
+Platform::
+* Apply back pressure in Task Manager whenever Elasticsearch responds with a 429 {kibana-pull}75666[#75666]
+* Adds basic observability into Task Manager's runtime operations {kibana-pull}77868[#77868]
+* Custom labels for ranges {kibana-pull}79628[#79628]
+* Adds cumulative sum expression function {kibana-pull}80129[#80129]
+* Adds a row click trigger to Lens embeddable for datatable expression renderer {kibana-pull}83167[#83167]
+* Adds search request batching using bfetch {kibana-pull}83418[#83418] and {kibana-pull}84043[#84043]
+* Normalize values by time unit {kibana-pull}83904[#83904]
+* Navigation search now includes deep links into various applications, allowing you to quickly navigate directly to the screens you need most {kibana-pull}83380[#83380]
+* Adds tags UI to search results {kibana-pull}85084[#85084]
+Querying & Filtering::
+* Use new Search API for rollup search {kibana-pull}83275[#83275]
+Security::
+* Adds audit logging events and event filtering{kibana-pull}74640[#74640]
+* Allow the default space to be accessed via `/s/default` {kibana-pull}77109[#77109]
+* Omit runtime fields from FLS suggestions {kibana-pull}78330[#78330]
+* Adds the ability to log in to Kibana anonymously without using any 3rd-party reverse proxy workarounds {kibana-pull}79985[#79985]
+* Adds the ability to specify session timeout settings for every provider separately {kibana-pull}82583[#82583]
+* Adds cloud links to user menu {kibana-pull}82803[#82803]
+* Users are now redirected back to the original URL after they log in again {kibana-pull}84229[#84229]
+Uptime::
+* Upgrades the major Node.js version used by and shipped with Kibana from v10 to v12 {kibana-pull}61587[#61587]
+* Persist date range between uptime and other apps {kibana-pull}79418[#79418]
+* Prompt for confirmation when saving alert with no action {kibana-pull}79892[#79892]
+* Applies the active timefilter onto the autocomplete requests to fix performance issues {kibana-pull}81515[#81515]
+* Adds description and documentation link in alert flyout {kibana-pull}81526[#81526]
+* Put APM links into header action menu {kibana-pull}82292[#82292]
+* Displays response headers for a ping {kibana-pull}82332[#82332]
+* APM header changes {kibana-pull}82870[#82870]
+* Uptime overview overhaul {kibana-pull}83406[#83406]
+* Waterfall view {kibana-pull}84821[#84821]
+* Display tags in monitor list and details page {kibana-pull}85168[#85168]
+
+[float]
+[[bug-v7.11.0]]
+=== Bug fixes
+Alerting::
+* Don't change previousStartedAt when alert execution fails {kibana-pull}81388[#81388]
+* Enables the EventLog Client to query across ILM versions of the `.event-log` index {kibana-pull}81920[#81920]
+* Used SO for saving the API key IDs that should be deleted {kibana-pull}82211[#82211]
+* Fixes pagination in connectors list {kibana-pull}83638[#83638]
+* Prevents errors in Action and Alert Type UIs from cascading through Alerts Management {kibana-pull}83925[#83925]
+* Fixes buggy default message behaviour {kibana-pull}84202[#84202]
+* Revert the Revert of "[Alerting] renames Resolved action group to Recovered (#84123)"  {kibana-pull}84662[#84662]
+* Fixes bug where severity is auto selected but not applied to the action in PagerDuty {kibana-pull}84891[#84891]
+* Fixes bug when switching between threshold comparators  {kibana-pull}85844[#85844]
+* Set refresh: false when partially updating the alert's execution status {kibana-pull}86316[#86316]
+* Sort action type filters in alerts list and hide case action type {kibana-pull}86360[#86360]
+* Fixes webhook errror messages to be more specific {kibana-pull}87044[#87044]
+* Shift polling interval by random amount when Task Manager experiences consistent claim version conflicts {kibana-pull}88020[#88020]
+APM::
+* Fixes link to upgrade assistant {kibana-pull}82138[#82138]
+* Filtering by "Type" on error overview sometimes causes an error {kibana-pull}82750[#82750]
+* Fixes broken link to ML when time range is not set {kibana-pull}85976[#85976]
+* Set default for agent icons {kibana-pull}86023[#86023]
+* Adds range query to service map trace walk {kibana-pull}86631[#86631]
+* Filter out service nodes if there are no metrics {kibana-pull}86639[#86639]
+* Truncate long service names in Trace overview {kibana-pull}86759[#86759]
+* "View job" link from latency charts leads to a malfunctioning page {kibana-pull}86788[#86788]
+* `transactionType` should be required on service-specific endpoints {kibana-pull}86893[#86893]
+* Custom links can still be created with a read only user. {kibana-pull}87089[#87089]
+* Toggle action and service icon menus {kibana-pull}87220[#87220]
+* Blank page when selecting a future time range {kibana-pull}87298[#87298]
+* Fixes alert creation items being available for readonly users {kibana-pull}87343[#87343]
+* Fixes missing datepicker when service maps has no data {kibana-pull}87393[#87393]
+* Explicitly set environment for cross-service links {kibana-pull}87481[#87481]
+* Optimize anomaly data loading strategy {kibana-pull}87522[#87522]
+* Fixes a bug that would sometimes cause the Kibana process to crash with Error: Failed to run task "apm-telemetry-task" as it is currently running {kibana-pull}87645[#87645]
+* Fixes stale custom links list after creating new link {kibana-pull}87932[#87932]
+* Fixes alerting expression popovers positions on scroll {kibana-pull}88085[#88085]
+* Hide “Create configuration” for users without write access {kibana-pull}88149[#88149]
+* Hide `recording` setting from from RUM agents {kibana-pull}88152[#88152]
+* Reset time range if either value changes {kibana-pull}88186[#88186]
+Dashboard::
+* Fixes cloning panels reactive issue {kibana-pull}74253[#74253]
+* Fixes dashboard "snapshot share" is not sharing panel state in view mode {kibana-pull}79837[#79837]
+* Deangularize Dashboard {kibana-pull}82909[#82909]
+* Fixes Unlink Action via Rollback of ReplacePanel {kibana-pull}83873[#83873]
+* Transition Embeddable State Transfer to Session Storage {kibana-pull}85688[#85688]
+* Fixes Add From Library Flyout Staying Open {kibana-pull}86698[#86698]
+Discover::
+* Fixes double fetching of saved search embeddable  {kibana-pull}84060[#84060]
+* Fixes navigating back when changing index pattern {kibana-pull}84061[#84061]
+Elastic Security Solution::
+For the Elastic Security Solution 7.11.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes duplicate ingest pipeline refs {kibana-pull}82078[#82078]
+Lens and visualizations::
+* Do not reset formatting when switching between custom ranges and auto histogram {kibana-pull}82694[#82694]
+* Makes incomplete switches possible {kibana-pull}83519[#83519]
+* Fixes bug causing bar charts to render bars at the wrong width {kibana-pull}83545[#83545]
+* Fixes label input debouncing {kibana-pull}84121[#84121]
+* Fixes Treemap outer labels with transparent background {kibana-pull}84245[#84245]
+* Line Visualization improper scaling can result in gaps {kibana-pull}80135[#80135]
+* Handle correctly {{key}} placeholder on series name {kibana-pull}81748[#81748]
+* Fixes "other bucket" for fields containing dashes {kibana-pull}81981[#81981]
+* Disable using top_hits in pipeline aggregations {kibana-pull}82278[#82278]
+* Fixes Moving Avg help link in Vis Editor {kibana-pull}82423[#82423]
+* TSVB doesn't communicate it's index-patterns to dashboard {kibana-pull}82964[#82964]
+* Offset option doesn't work properly for some values {kibana-pull}83051[#83051]
+* Remove extra column in split mode {kibana-pull}83193[#83193]
+* Table tab not working with rollup indexes {kibana-pull}83635[#83635]
+* Filter bar in Vega is not usable with non default index pattern. {kibana-pull}84090[#84090]
+* TSVB field list performance issue on using annotations {kibana-pull}84407[#84407]
+* Gauge visualization can no longer be clicked to filter on values since Kibana 7.10.0 {kibana-pull}84768[#84768]
+* Wrong x-axis formatting if "dateFormat" configuration property is not specified {kibana-pull}84899[#84899]
+* Date histogram timestamps on daily are getting displayed as epoch times {kibana-pull}85565[#85565]
+* Fixes request with disabled aggregation {kibana-pull}85696[#85696]
+* Visualize charts flicker on each change {kibana-pull}86888[#86888]
+Logs::
+* Fixes selection of suggested field names in the logs stream query bar {kibana-pull}85973[#85973]
+* Fixes initial selection of log threshold alert condition field if missing from mapping {kibana-pull}86488[#86488]
+Machine Learning::
+* Fixes exclude frequent in advanced wizard (#81121) {kibana-pull}81154[#81154]
+* Updating analysis config schema (#82703) {kibana-pull}82714[#82714]
+* Data Frame Analytics Classification results view: fix 'Actual' label {kibana-pull}86060[#86060]
+* Anomaly Detection: Fix validation error when no data in index. {kibana-pull}86114[#86114]
+* DFA results view: ensure results not stuck in loading state when no docs returned from text search {kibana-pull}86178[#86178]
+* Fix sort order of data recognizer module cards {kibana-pull}86250[#86250]
+* Fixes displaying of setup errors in recognizer wizard {kibana-pull}86430[#86430]
+* Fixes alignment of values in data frame analytics results view badges {kibana-pull}86621[#86621]
+* Fixes cloning of partition field in per-partition categorization jobs {kibana-pull}86635[#86635]
+* Fix Single Metric Viewer y domain extending beyond the visible focus area {kibana-pull}86655[#86655]
+* Ensure job group badge fonts are same color {kibana-pull}86674[#86674]
+* Anomaly Detection jobs list: fix edit groups popup {kibana-pull}86836[#86836]
+Management::
+* Fixes issues in Index Management and ILM when resources have special characters in names {kibana-pull}80835[#80835]
+* Fixes ilm navigation {kibana-pull}81664[#81664]
+* Fixes a bug in the Watcher UI where the search input cleared after 1 minute of inactivity, causing a user to lose the filtered results {kibana-pull}82651[#82651]
+* Fixes a bug in the Index Templates UI where editing an index template with a deprecated type defined and no mapped fields could remove the type on save {kibana-pull}82987[#82987]
+* Grokdebugger correctly passes Elasticsearch errors to the Kibana UI {kibana-pull}83036[#83036]
+* Fixes an issue in the Snapshot and Restore UI, where editing a Snapshot Lifecycle Management policy may fail if it contains a previous snapshot failure with a large payload content {kibana-pull}83928[#83928]
+* Reset to default for empty strings {kibana-pull}85137[#85137]
+* Fixes esaggs missing default time field scenario in Lens {kibana-pull}85754[#85754]
+* Transforms: Support for missing_bucket in transform advanced pivot editor {kibana-pull}85758[#85758]
+* Documentation links in the Index Lifecycle Management UI have been updated {kibana-pull}87216[#87216]
+* Fixes a bug causing the index pattern override selection to be cleared when switching page while performing a legacy format saved object import {kibana-pull}81621[#81621]
+* Fixes a UI error when attempting to copy a saved object when a user only has Read access to the Default space {kibana-pull}81828[#81828]
+* Fixes index pattern recreation when removing experimental packages {kibana-pull}81940[#81940]
+* Fixes logstash central pipeline management test {kibana-pull}83281[#83281]
+Maps::
+* Fixes feature tooltip remains open when zoom level change hides layer {kibana-pull}81373[#81373]
+* Fixes geojson upload diacritic handling {kibana-pull}83122[#83122]
+* Always initialize routes on server-startup {kibana-pull}84806[#84806]
+* Fixes multi-select query from Controls visualization not always getting applied to map in dashboard {kibana-pull}87310[#87310]
+* Fixes zooming while drawing shape filter logs errors in console {kibana-pull}88413[#88413]
+Metrics::
+* Refactor Observability Overview for Performance {kibana-pull}84955[#84955]
+* Hide drawer on inventory {kibana-pull}85503[#85503]
+Monitoring::
+* Iterate over saved object & index patterns pages to collect telemetry results {kibana-pull}73077[#73077]
+* Fixes bug in logs UI link {kibana-pull}80943[#80943]
+* Uses asCurrentUser in getClusterUuid {kibana-pull}82908[#82908]
+* Uses fetchClustersRange {kibana-pull}87882[#87882]
+* Change cloud messaging on no data page {kibana-pull}88375[#88375]
+Operations::
+* Fixes the logging destination for systemd installations and and updates the sysv filename to be consistent with other stack products {kibana-pull}74896[#74896]
+* Create keystore after installation {kibana-pull}76465[#76465]
+* Wrap blocked paths in quotes {kibana-pull}83560[#83560]
+Platform::
+* Adds loading indicator during debounce time {kibana-pull}80158[#80158]
+* Mark task as failed if maxAttempts has been met. {kibana-pull}80681[#80681]
+* Reactively disable Task Manager lifecycle when core services become unavailable {kibana-pull}81779[#81779]
+* Schedule retry based on schedule on recurring tasks {kibana-pull}83682[#83682]
+Querying & Filtering::
+* KQL autocomplete suggestions for field values will now have backslashes properly escaped {kibana-pull}85457[#85457]
+Security::
+* Prevent Kerberos and PKI providers from initiating a new session for unauthenticated XHR/API requests {kibana-pull}82817[#82817]
+* Fixes incomplete client cert chain when using PKI authentication with the login selector {kibana-pull}88229[#88229]
+Uptime::
+* Monitor status alert use url as instance {kibana-pull}81736[#81736]
+* Removes Connector flyouts after usage {kibana-pull}82126[#82126]
+* User experience display low values {kibana-pull}86026[#86026]
+* Simple monitor status alert fix for page duty and other connectors {kibana-pull}87460[#87460]
+* Fixes kuery bar dark theme {kibana-pull}87827[#87827]
+* Clear ping state when PingList component in unmounted {kibana-pull}88321[#88321]
+* UX use replace history instead of push on first load {kibana-pull}88586[#88586]
+* Fixes impacted page load errors {kibana-pull}88597[#88597]
+
+
 [[release-notes-7.10.2]]
 == {kib} 7.10.2
 

@@ -206,20 +206,6 @@ describe('DocumentMigrator', () => {
       );
     });
 
-    it('coerces the current Kibana version if it has a hyphen', () => {
-      const validDefinition = {
-        kibanaVersion: '3.2.0-SNAPSHOT',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.2.0',
-          namespaceType: 'multiple',
-        }),
-        minimumConvertVersion: '0.0.0',
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(validDefinition)).not.toThrowError();
-    });
-
     it('validates convertToMultiNamespaceTypeVersion is not used on a patch version', () => {
       const invalidDefinition = {
         kibanaVersion: '3.2.3',

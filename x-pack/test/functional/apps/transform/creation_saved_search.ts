@@ -292,10 +292,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep(
             'displays the transform preview in the expanded row'
           );
-          await transform.table.assertTransformsExpandedRowPreviewColumnValues(
-            testData.expected.transformPreview.column,
-            testData.expected.transformPreview.values
-          );
+          // cell virtualization means the last column is cutoff in the functional tests
+          // https://github.com/elastic/eui/issues/4470
+          // await transform.table.assertTransformsExpandedRowPreviewColumnValues(
+          //   testData.expected.transformPreview.column,
+          //   testData.expected.transformPreview.values
+          // );
         });
       });
     }

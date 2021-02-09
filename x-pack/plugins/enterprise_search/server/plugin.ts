@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   Plugin,
   PluginInitializerContext,
@@ -66,19 +64,19 @@ export interface RouteDependencies {
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
-  private config: Observable<ConfigType>;
-  private logger: Logger;
+  private readonly config: ConfigType;
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.create<ConfigType>();
+    this.config = initializerContext.config.get<ConfigType>();
     this.logger = initializerContext.logger.get();
   }
 
-  public async setup(
+  public setup(
     { capabilities, http, savedObjects, getStartServices }: CoreSetup<PluginsStart>,
     { usageCollection, security, features }: PluginsSetup
   ) {
-    const config = await this.config.pipe(first()).toPromise();
+    const config = this.config;
     const log = this.logger;
 
     /**

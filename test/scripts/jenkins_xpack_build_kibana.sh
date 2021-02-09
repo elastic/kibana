@@ -30,6 +30,10 @@ node scripts/functional_tests --assert-none-excluded \
 echo " -> building and extracting default Kibana distributable for use in functional tests"
 cd "$KIBANA_DIR"
 node scripts/build --debug --no-oss
+
+echo " -> shipping metrics from build to ci-stats"
+node scripts/ship_ci_stats --metrics target/optimizer_bundle_metrics.json
+
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
