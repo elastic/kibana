@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+source test/scripts/jenkins_test_setup.sh
+
 # Lint
 ./test/scripts/lint/eslint.sh
 ./test/scripts/lint/stylelint.sh
