@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+/**
+ * @internal
+ */
 export enum SEARCH_EVENT_TYPE {
   /**
    * A search reached the timeout configured in UI setting search:timeout
@@ -19,6 +22,10 @@ export enum SEARCH_EVENT_TYPE {
    * The session indicator was automatically brought up because of a restored session
    */
   SESSION_INDICATOR_TOUR_RESTORED = 'sessionIndicatorTourRestored',
+  /**
+   * The session indicator was disabled because of a completion timeout
+   */
+  SESSION_INDICATOR_TOUR_DISABLED = 'sessionIndicatorTourDisabled',
   /**
    * The user clicked to continue a session in the background (prior to results completing)
    */
@@ -48,15 +55,23 @@ export enum SEARCH_EVENT_TYPE {
    */
   SESSION_CANCELLED = 'sessionCancelled',
   /**
+   * The user clicked to delete a session
+   */
+  SESSION_DELETED = 'sessionDeleted',
+  /**
    * The user clicked a link to view the list of sessions
    */
   SESSION_VIEW_LIST = 'sessionViewList',
 }
 
+/**
+ * @internal
+ */
 export interface SearchUsageCollector {
   trackQueryTimedOut: () => Promise<void>;
   trackSessionIndicatorTourLoading: () => Promise<void>;
   trackSessionIndicatorTourRestored: () => Promise<void>;
+  trackSessionIndicatorTourDisabled: () => Promise<void>;
   trackSessionSentToBackground: () => Promise<void>;
   trackSessionSavedResults: () => Promise<void>;
   trackSessionViewRestored: () => Promise<void>;
@@ -64,5 +79,6 @@ export interface SearchUsageCollector {
   trackSessionReloaded: () => Promise<void>;
   trackSessionExtended: () => Promise<void>;
   trackSessionCancelled: () => Promise<void>;
+  trackSessionDeleted: () => Promise<void>;
   trackViewSessionsList: () => Promise<void>;
 }

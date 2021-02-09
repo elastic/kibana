@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { debounce, distinctUntilChanged, map, mapTo, switchMap } from 'rxjs/operators';
+import { debounce, distinctUntilChanged, map, mapTo, switchMap, tap } from 'rxjs/operators';
 import { merge, of, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +58,10 @@ export const createConnectedSearchSessionIndicator = ({
         ? merge(of(false), timer(disableSaveAfterSessionCompletesTimeout).pipe(mapTo(true)))
         : of(false)
     ),
-    distinctUntilChanged()
+    distinctUntilChanged(),
+    tap((value) => {
+      if (value) usageCollector?.trackSessionIndicatorTourDisabled();
+    })
   );
 
   return () => {
@@ -138,13 +141,13 @@ export const createConnectedSearchSessionIndicator = ({
     }, [saveDisabled]);
 
     const onCancel = useCallback(() => {
-      // Should this be a separate action than the "cancel" action from the management UI?
       usageCollector?.trackSessionCancelled();
       sessionService.cancel();
     }, []);
 
     const onViewSearchSessions = useCallback(() => {
       usageCollector?.trackViewSessionsList();
+      application.navigateToUrl('management/kibana/search_sessions');
     }, []);
 
     if (!sessionService.isSessionStorageReady()) return null;

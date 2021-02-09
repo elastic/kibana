@@ -162,7 +162,7 @@ export class SearchSessionsMgmtAPI {
 
   // Cancel and expire
   public async sendCancel(id: string): Promise<void> {
-    this.deps.usageCollector?.trackSessionCancelled();
+    this.deps.usageCollector?.trackSessionDeleted();
     try {
       await this.sessionsClient.delete(id);
 

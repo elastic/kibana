@@ -1660,6 +1660,8 @@ export interface ISearchSetup {
     aggs: AggsSetup;
     session: ISessionService;
     sessionsClient: ISessionsClient;
+    // Warning: (ae-incompatible-release-tags) The symbol "usageCollector" is marked as @public, but its signature references "SearchUsageCollector" which is marked as @internal
+    //
     // (undocumented)
     usageCollector?: SearchUsageCollector;
 }
@@ -2321,6 +2323,8 @@ export interface SearchInterceptorDeps {
     toasts: ToastsSetup;
     // (undocumented)
     uiSettings: CoreSetup_2['uiSettings'];
+    // Warning: (ae-incompatible-release-tags) The symbol "usageCollector" is marked as @public, but its signature references "SearchUsageCollector" which is marked as @internal
+    //
     // (undocumented)
     usageCollector?: SearchUsageCollector;
 }
@@ -2445,9 +2449,7 @@ export class SearchTimeoutError extends KbnError {
     mode: TimeoutErrorMode;
     }
 
-// Warning: (ae-missing-release-tag) "SearchUsageCollector" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
+// @internal (undocumented)
 export interface SearchUsageCollector {
     // (undocumented)
     trackQueryTimedOut: () => Promise<void>;

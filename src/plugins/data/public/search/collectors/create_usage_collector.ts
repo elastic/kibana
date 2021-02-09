@@ -38,6 +38,10 @@ export const createUsageCollector = (
       METRIC_TYPE.LOADED,
       SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_RESTORED
     ),
+    trackSessionIndicatorTourDisabled: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_DISABLED
+    ),
     trackSessionSentToBackground: getCollector(
       METRIC_TYPE.CLICK,
       SEARCH_EVENT_TYPE.SESSION_SENT_TO_BACKGROUND
@@ -54,6 +58,7 @@ export const createUsageCollector = (
     trackSessionReloaded: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_RELOADED),
     trackSessionExtended: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_EXTENDED),
     trackSessionCancelled: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_CANCELLED),
+    trackSessionDeleted: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_DELETED),
     trackViewSessionsList: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_VIEW_LIST),
   };
 };
