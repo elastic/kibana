@@ -896,7 +896,6 @@
     "data.noDataPopover.subtitle": "ヒント",
     "data.noDataPopover.title": "空のデータセット",
     "data.painlessError.buttonTxt": "スクリプトを編集",
-    "data.painlessError.painlessScriptedFieldErrorMessage": "Painlessスクリプトの実行エラー：「{script}」。",
     "data.parseEsInterval.invalidEsCalendarIntervalErrorMessage": "無効なカレンダー間隔：{interval}、1よりも大きな値が必要です",
     "data.parseEsInterval.invalidEsIntervalFormatErrorMessage": "無効な間隔形式：{interval}",
     "data.query.queryBar.comboboxAriaLabel": "{pageType} ページの検索とフィルタリング",

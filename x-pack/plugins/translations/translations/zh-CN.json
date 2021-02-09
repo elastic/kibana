@@ -896,7 +896,6 @@
     "data.noDataPopover.subtitle": "提示",
     "data.noDataPopover.title": "空数据集",
     "data.painlessError.buttonTxt": "编辑脚本",
-    "data.painlessError.painlessScriptedFieldErrorMessage": "执行 Painless 脚本时出错：“{script}”。",
     "data.parseEsInterval.invalidEsCalendarIntervalErrorMessage": "无效的日历时间间隔：{interval}，值必须为 1",
     "data.parseEsInterval.invalidEsIntervalFormatErrorMessage": "时间间隔格式无效：{interval}",
     "data.query.queryBar.comboboxAriaLabel": "搜索并筛选 {pageType} 页面",
