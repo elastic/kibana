@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '..',
-  projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
-};
+import { ReactNode } from 'react';
+
+export interface IFlashMessage {
+  type: 'success' | 'info' | 'warning' | 'error';
+  message: ReactNode;
+  description?: ReactNode;
+}
