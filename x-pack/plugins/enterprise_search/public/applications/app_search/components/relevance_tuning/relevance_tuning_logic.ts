@@ -8,8 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
-import { i18n } from '@kbn/i18n';
-
 import { NUMBER } from '../../../shared/constants/field_types';
 import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
@@ -19,6 +17,13 @@ import { Result } from '../result/types';
 import { EngineLogic } from '../engine';
 
 import { BaseBoost, Boost, BoostType, SearchSettings } from './types';
+import {
+  UPDATE_SUCCESS_MESSAGE,
+  RESET_CONFIRMATION_MESSAGE,
+  DELETE_SUCCESS_MESSAGE,
+  DELETE_CONFIRMATION_MESSAGE,
+} from './constants';
+
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
@@ -99,32 +104,6 @@ interface RelevanceTuningValues {
   searchResults: Result[] | null;
   resultsLoading: boolean;
 }
-
-const UPDATE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.updateSuccess',
-  {
-    defaultMessage: 'Relevance successfully tuned. The changes will impact your results shortly.',
-  }
-);
-const DELETE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.deleteSuccess',
-  {
-    defaultMessage:
-      'Relevance has been reset to default values. The change will impact your results shortly.',
-  }
-);
-const RESET_CONFIRMATION_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.resetConfirmation',
-  {
-    defaultMessage: 'Are you sure you want to restore relevance defaults?',
-  }
-);
-const DELETE_CONFIRMATION_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.relevanceTuning.messages.deleteConfirmation',
-  {
-    defaultMessage: 'Are you sure you want to delete this boost?',
-  }
-);
 
 // If the user hasn't entered a filter, then we can skip filtering the array entirely
 const filterIfTerm = (array: string[], filterTerm: string): string[] => {
