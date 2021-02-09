@@ -24,7 +24,7 @@ export const useLogAnalysisModule = <JobType extends string>({
   const { spaceId, sourceId, timestampField } = sourceConfiguration;
   const [moduleStatus, dispatchModuleStatus] = useModuleStatus(moduleDescriptor.jobTypes);
 
-  const uiTracker = useUiTracker({ app: 'infra_logs' });
+  const trackMetric = useUiTracker({ app: 'infra_logs' });
 
   const [, fetchJobStatus] = useTrackedPromise(
     {
@@ -91,9 +91,9 @@ export const useLogAnalysisModule = <JobType extends string>({
           if (
             reasons.filter((reason) => reason.includes('because it has no mappings')).length > 0
           ) {
-            uiTracker({ metric: 'logs_ml_setup_error_bad_indices_or_mappings' });
+            trackMetric({ metric: 'logs_ml_setup_error_bad_indices_or_mappings' });
           } else {
-            uiTracker({ metric: 'logs_ml_setup_error_unknown_cause' });
+            trackMetric({ metric: 'logs_ml_setup_error_unknown_cause' });
           }
         }
 
@@ -109,7 +109,7 @@ export const useLogAnalysisModule = <JobType extends string>({
       onReject: (e: any) => {
         dispatchModuleStatus({ type: 'failedSetup' });
         if (e?.body?.statusCode === 403) {
-          uiTracker({ metric: 'logs_ml_setup_error_lack_of_privileges' });
+          trackMetric({ metric: 'logs_ml_setup_error_lack_of_privileges' });
         }
       },
     },
