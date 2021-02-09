@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { TOTAL_QUERIES, TOTAL_DOCUMENTS, TOTAL_CLICKS } from '../../analytics/constants';
 import { AnalyticsCards } from '../../analytics';
-
-import { EngineOverviewLogic } from '../';
+import { TOTAL_QUERIES, TOTAL_DOCUMENTS, TOTAL_CLICKS } from '../../analytics/constants';
+import { EngineOverviewLogic } from '../index';
 
 export const TotalStats: React.FC = () => {
   const { totalQueries, documentCount, totalClicks } = useValues(EngineOverviewLogic);

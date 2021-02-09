@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '..',
-  projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
-};
+export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
