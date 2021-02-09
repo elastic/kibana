@@ -29,6 +29,7 @@ import {
 } from './routes';
 import { SourcesRouter } from './views/content_sources';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
+import { PrivateSourcesLayout } from './views/content_sources/private_sources_layout';
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
@@ -81,10 +82,9 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
-        {/* TODO: replace Layout with PrivateSourcesLayout (needs to be created) */}
-        <Layout navigation={<></>} restrictWidth readOnlyMode={readOnlyMode}>
+        <PrivateSourcesLayout navigation={<></>} restrictWidth readOnlyMode={readOnlyMode}>
           <SourcesRouter />
-        </Layout>
+        </PrivateSourcesLayout>
       </Route>
       <Route path={SOURCES_PATH}>
         <Layout
