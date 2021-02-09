@@ -36,7 +36,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     apps: functionalConfig.get('apps'),
     esArchiver: {
       directory: path.resolve(__dirname, '../es_archives'),

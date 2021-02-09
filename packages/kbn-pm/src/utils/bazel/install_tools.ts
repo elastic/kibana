@@ -52,6 +52,29 @@ async function isBazeliskInstalled(bazeliskVersion: string) {
   }
 }
 
+async function tryRemoveBazeliskFromYarnGlobal() {
+  try {
+    // Check if Bazelisk is installed on the yarn global scope
+    const { stdout: bazeliskPkgInstallStdout } = await spawn('yarn', ['global', 'list'], {
+      stdio: 'pipe',
+    });
+
+    // Bazelisk was found on yarn global scope so lets remove it
+    if (bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@`)) {
+      await spawn('yarn', ['global', 'remove', `@bazel/bazelisk`], {
+        stdio: 'pipe',
+      });
+
+      log.info(`[bazel_tools] bazelisk was installed on Yarn global packages and is now removed`);
+      return true;
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export async function installBazelTools(repoRootPath: string) {
   log.debug(`[bazel_tools] reading bazel tools versions from version files`);
   const bazeliskVersion = await readBazelToolsVersionFile(repoRootPath, '.bazeliskversion');
@@ -65,6 +88,9 @@ export async function installBazelTools(repoRootPath: string) {
 
   // Test if bazel bin is available
   const isBazelBinAlreadyAvailable = await isBazelBinAvailable();
+
+  // Check if we need to remove bazelisk from yarn
+  await tryRemoveBazeliskFromYarnGlobal();
 
   // Install bazelisk if not installed
   if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {

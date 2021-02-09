@@ -6,9 +6,9 @@
  */
 
 import { omit } from 'lodash/fp';
-import { KibanaRequest } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest, kibanaResponseFactory } from '../../../../../src/core/server/http';
 import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { actionsClientMock } from '../../../actions/server/mocks';
 import {
   AlertServiceContract,
   CaseConfigureService,
@@ -17,17 +17,20 @@ import {
   ConnectorMappingsService,
 } from '../services';
 import { CaseClient } from './types';
-import { authenticationMock } from '../routes/api/__fixtures__';
+import { authenticationMock, createActionsClient } from '../routes/api/__fixtures__';
 import { createCaseClient } from '.';
-import { getActions } from '../routes/api/__mocks__/request_responses';
 import type { CasesRequestHandlerContext } from '../types';
 
 export type CaseClientMock = jest.Mocked<CaseClient>;
 export const createCaseClientMock = (): CaseClientMock => ({
   addComment: jest.fn(),
   create: jest.fn(),
+  get: jest.fn(),
+  push: jest.fn(),
+  getAlerts: jest.fn(),
   getFields: jest.fn(),
   getMappings: jest.fn(),
+  getUserActions: jest.fn(),
   update: jest.fn(),
   updateAlertsStatus: jest.fn(),
 });
@@ -47,10 +50,10 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     alertsService: jest.Mocked<AlertServiceContract>;
   };
 }> => {
-  const actionsMock = actionsClientMock.create();
-  actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
+  const actionsMock = createActionsClient();
   const log = loggingSystemMock.create().get('case');
   const request = {} as KibanaRequest;
+  const response = kibanaResponseFactory;
 
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
@@ -63,11 +66,15 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
 
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const userActionService = {
-    postUserActions: jest.fn(),
     getUserActions: jest.fn(),
+    postUserActions: jest.fn(),
   };
 
-  const alertsService = { initialize: jest.fn(), updateAlertsStatus: jest.fn() };
+  const alertsService = {
+    initialize: jest.fn(),
+    updateAlertsStatus: jest.fn(),
+    getAlerts: jest.fn(),
+  };
 
   const context = {
     core: {
@@ -89,6 +96,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   const caseClient = createCaseClient({
     savedObjectsClient,
     request,
+    response,
     caseService,
     caseConfigureService,
     connectorMappingsService,
