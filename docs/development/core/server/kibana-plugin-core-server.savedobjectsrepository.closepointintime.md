@@ -37,7 +37,7 @@ const repository = coreStart.savedObjects.createInternalRepository();
 
 const { id } = await repository.openPointInTimeForType(
   type: 'index-pattern',
-  { keepAlive: '1m' },
+  { keepAlive: '2m' },
 );
 
 const response = await repository.find({
@@ -47,7 +47,7 @@ const response = await repository.find({
   sortOrder: 'desc',
   pit: {
     id: 'abc123',
-    keepAlive: '1m',
+    keepAlive: '2m',
   },
   searchAfter: [1234, 'abcd'],
 });
