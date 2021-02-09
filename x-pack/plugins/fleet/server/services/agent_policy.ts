@@ -36,7 +36,7 @@ import {
   FleetServerPolicy,
   AGENT_POLICY_INDEX,
 } from '../../common';
-import { AgentPolicyNameExistsError } from '../errors';
+import { AgentPolicyNameExistsError, AgentPolicyDeletionError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -448,6 +448,10 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
+    if (agentPolicy.is_managed) {
+      throw new AgentPolicyDeletionError(`Cannot delete managed policy ${id}`);
+    }
+
     const {
       defaultAgentPolicy: { id: defaultAgentPolicyId },
     } = await this.ensureDefaultAgentPolicy(soClient, esClient);
@@ -488,17 +492,17 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     agentPolicyId: string
   ) {
-    return appContextService.getConfig()?.agents.fleetServerEnabled
-      ? this.createFleetPolicyChangeFleetServer(
-          soClient,
-          appContextService.getInternalUserESClient(),
-          agentPolicyId
-        )
-      : this.createFleetPolicyChangeActionSO(soClient, agentPolicyId);
+    const esClient = appContextService.getInternalUserESClient();
+    if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+      await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
+    }
+
+    return this.createFleetPolicyChangeActionSO(soClient, esClient, agentPolicyId);
   }
 
   public async createFleetPolicyChangeActionSO(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     agentPolicyId: string
   ) {
     // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
@@ -518,7 +522,7 @@ class AgentPolicyService {
       return acc;
     }, []);
 
-    await createAgentPolicyAction(soClient, {
+    await createAgentPolicyAction(soClient, esClient, {
       type: 'POLICY_CHANGE',
       data: { policy },
       ack_data: { packages },
