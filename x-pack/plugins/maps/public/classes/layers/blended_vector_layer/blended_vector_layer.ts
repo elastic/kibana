@@ -169,6 +169,7 @@ function getClusterStyleDescriptor(
 }
 
 export interface BlendedVectorLayerArguments {
+  chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
 }
@@ -205,7 +206,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       this._documentStyle,
       this._clusterSource
     );
-    this._clusterStyle = new VectorStyle(clusterStyleDescriptor, this._clusterSource, this);
+    this._clusterStyle = new VectorStyle(
+      clusterStyleDescriptor,
+      this._clusterSource,
+      this,
+      options.chartsPaletteServiceGetColor
+    );
 
     let isClustered = false;
     const countDataRequest = this.getDataRequest(ACTIVE_COUNT_DATA_ID);
