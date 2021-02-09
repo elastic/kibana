@@ -7,13 +7,13 @@
 
 import { NodesChangedAlert } from './nodes_changed_alert';
 import { ALERT_NODES_CHANGED } from '../../common/constants';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 
 const RealDate = Date;
 
-jest.mock('../lib/alerts/fetch_legacy_alerts', () => ({
-  fetchLegacyAlerts: jest.fn(),
+jest.mock('../lib/alerts/fetch_nodes_from_cluster_stats', () => ({
+  fetchNodesFromClusterStats: jest.fn(),
 }));
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
@@ -73,23 +73,33 @@ describe('NodesChangedAlert', () => {
     function FakeDate() {}
     FakeDate.prototype.valueOf = () => 1;
 
+    const nodeUuid = 'myNodeUuid';
+    const nodeEphemeralId = 'myEphemeralId';
+    const nodeEphemeralIdChanged = 'myEphemeralIdChanged';
+    const nodeName = 'test';
+    const ccs = undefined;
     const clusterUuid = 'abc123';
     const clusterName = 'testCluster';
-    const legacyAlert = {
-      prefix: 'Elasticsearch cluster nodes have changed!',
-      message: 'Node was restarted [1]: [test].',
-      metadata: {
-        severity: 1000,
-        cluster_uuid: clusterUuid,
+    const nodes = [
+      {
+        recentNodes: [
+          {
+            nodeUuid,
+            nodeEphemeralId: nodeEphemeralIdChanged,
+            nodeName,
+          },
+        ],
+        priorNodes: [
+          {
+            nodeUuid,
+            nodeEphemeralId,
+            nodeName,
+          },
+        ],
+        clusterUuid,
+        ccs,
       },
-      nodes: {
-        added: {},
-        removed: {},
-        restarted: {
-          test: 'test',
-        },
-      },
-    };
+    ];
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
@@ -111,8 +121,8 @@ describe('NodesChangedAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [legacyAlert];
+      (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
+        return nodes;
       });
       (fetchClusters as jest.Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
@@ -138,8 +148,28 @@ describe('NodesChangedAlert', () => {
         alertStates: [
           {
             cluster: { clusterUuid, clusterName },
-            ccs: undefined,
-            nodeName: 'Elasticsearch nodes alert',
+            ccs,
+            itemLabel: undefined,
+            nodeId: undefined,
+            nodeName: undefined,
+            meta: {
+              ccs,
+              clusterUuid,
+              recentNodes: [
+                {
+                  nodeUuid,
+                  nodeEphemeralId: nodeEphemeralIdChanged,
+                  nodeName,
+                },
+              ],
+              priorNodes: [
+                {
+                  nodeUuid,
+                  nodeEphemeralId,
+                  nodeName,
+                },
+              ],
+            },
             ui: {
               isFiring: true,
               message: {
@@ -167,9 +197,28 @@ describe('NodesChangedAlert', () => {
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [];
+    it('should not fire actions if no nodes have changed', async () => {
+      (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            recentNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId,
+                nodeName,
+              },
+            ],
+            priorNodes: [
+              {
+                nodeUuid,
+                nodeEphemeralId,
+                nodeName,
+              },
+            ],
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new NodesChangedAlert();
       const type = alert.getAlertType();

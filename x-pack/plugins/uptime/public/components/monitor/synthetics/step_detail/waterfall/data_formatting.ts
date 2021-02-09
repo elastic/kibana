@@ -55,8 +55,28 @@ const getFriendlyTooltipValue = ({
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
+export const isHighlightedItem = (
+  item: NetworkItem,
+  query?: string,
+  activeFilters: string[] = []
+) => {
+  if (!query && activeFilters?.length === 0) {
+    return true;
+  }
 
-export const getSeriesAndDomain = (items: NetworkItems) => {
+  const matchQuery = query ? item.url?.includes(query) : true;
+  const matchFilters =
+    activeFilters.length > 0 ? activeFilters.includes(MimeTypesMap[item.mimeType!]) : true;
+
+  return !!(matchQuery && matchFilters);
+};
+
+export const getSeriesAndDomain = (
+  items: NetworkItems,
+  onlyHighlighted = false,
+  query?: string,
+  activeFilters?: string[]
+) => {
   const getValueForOffset = (item: NetworkItem) => {
     return item.requestSentTime;
   };
@@ -78,13 +98,21 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     }
   };
 
+  let totalHighlightedRequests = 0;
+
   const series = items.reduce<WaterfallData>((acc, item, index) => {
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    if (isHighlighted) {
+      totalHighlightedRequests++;
+    }
+
     if (!item.timings) {
       acc.push({
         x: index,
         y0: 0,
         y: 0,
         config: {
+          isHighlighted,
           showTooltip: false,
         },
       });
@@ -96,10 +124,13 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
 
     let currentOffset = offsetValue - zeroOffset;
 
+    let timingValueFound = false;
+
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
-      const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
       if (value && value >= 0) {
+        timingValueFound = true;
+        const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
         const y = currentOffset + value;
 
         acc.push({
@@ -108,6 +139,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
           y,
           config: {
             colour,
+            isHighlighted,
             showTooltip: true,
             tooltipProps: {
               value: getFriendlyTooltipValue({
@@ -126,7 +158,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     /* if no specific timing values are found, use the total time
      * if total time is not available use 0, set showTooltip to false,
      * and omit tooltip props */
-    if (!acc.find((entry) => entry.x === index)) {
+    if (!timingValueFound) {
       const total = item.timings.total;
       const hasTotal = total !== -1;
       acc.push({
@@ -134,6 +166,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         y0: hasTotal ? currentOffset : 0,
         y: hasTotal ? currentOffset + item.timings.total : 0,
         config: {
+          isHighlighted,
           colour: hasTotal ? mimeTypeColour : '',
           showTooltip: hasTotal,
           tooltipProps: hasTotal
@@ -154,14 +187,31 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
 
   const yValues = series.map((serie) => serie.y);
   const domain = { min: 0, max: Math.max(...yValues) };
-  return { series, domain };
+
+  let filteredSeries = series;
+  if (onlyHighlighted) {
+    filteredSeries = series.filter((item) => item.config.isHighlighted);
+  }
+
+  return { series: filteredSeries, domain, totalHighlightedRequests };
 };
 
-export const getSidebarItems = (items: NetworkItems): SidebarItems => {
-  return items.map((item) => {
+export const getSidebarItems = (
+  items: NetworkItems,
+  onlyHighlighted: boolean,
+  query: string,
+  activeFilters: string[]
+): SidebarItems => {
+  const sideBarItems = items.map((item, index) => {
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    const offsetIndex = index + 1;
     const { url, status, method } = item;
-    return { url, status, method };
+    return { url, status, method, isHighlighted, offsetIndex };
   });
+  if (onlyHighlighted) {
+    return sideBarItems.filter((item) => item.isHighlighted);
+  }
+  return sideBarItems;
 };
 
 export const getLegendItems = (): LegendItems => {
@@ -184,6 +234,7 @@ export const getLegendItems = (): LegendItems => {
       { name: FriendlyMimetypeLabels[mimeType], colour: MIME_TYPE_PALETTE[mimeType] },
     ];
   });
+
   return [...timingItems, ...mimeTypeItems];
 };
 

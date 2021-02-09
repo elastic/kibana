@@ -109,7 +109,7 @@ String
 
   
 Argument
- = name:[a-zA-Z_-]+ _ '=' _ value:(Number / String) _ {
+ = name:[a-zA-Z_]+ _ '=' _ value:(Number / String) _ {
   return {
     type: 'namedArgument',
     name: name.join(''),

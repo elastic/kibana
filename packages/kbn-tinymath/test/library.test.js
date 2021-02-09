@@ -149,10 +149,10 @@ describe('Parser', () => {
     });
 
     it('multiple named', () => {
-      expect(parse('foo(q_param="bar", offset-type="1d")')).toEqual(
+      expect(parse('foo(q_param="bar", offset="1d")')).toEqual(
         functionEqual('foo', [
           namedArgumentEqual('q_param', 'bar'),
-          namedArgumentEqual('offset-type', '1d'),
+          namedArgumentEqual('offset', '1d'),
         ])
       );
     });
@@ -177,6 +177,10 @@ describe('Parser', () => {
     it('incomplete named', () => {
       expect(() => parse('foo(a=)')).toThrow('but "(" found');
       expect(() => parse('foo(=a)')).toThrow('but "(" found');
+    });
+
+    it('invalid named', () => {
+      expect(() => parse('foo(offset-type="1d")')).toThrow('but "(" found');
     });
   });
 

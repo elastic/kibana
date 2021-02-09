@@ -30,6 +30,10 @@ export function analyzeWithAxe(context, options, callback) {
               id: 'aria-roles',
               selector: '[data-test-subj="comboBoxSearchInput"] *',
             },
+            {
+              id: 'aria-required-parent',
+              selector: '[class=*"euiDataGridRowCell"][role="gridcell"] ',
+            },
           ],
         });
         return window.axe.run(context, options);
