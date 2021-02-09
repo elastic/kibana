@@ -35,7 +35,6 @@ import {
   REMOVE_BUTTON,
 } from '../../../constants';
 import { SourceDataItem } from '../../../types';
-import { AddSourceLogic } from '../components/add_source/add_source_logic';
 import {
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
@@ -48,6 +47,8 @@ import {
 } from '../constants';
 import { staticSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
+
+import { AddSourceLogic } from './add_source/add_source_logic';
 
 export const SourceSettings: React.FC = () => {
   const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
