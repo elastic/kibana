@@ -19,7 +19,7 @@ async function readStreamToCompletion(stream: Readable): Promise<Array<SavedObje
   return createPromiseFromStreams([stream, createConcatStream([])]);
 }
 
-const exportSizeLimit = 20000;
+const exportSizeLimit = 10000;
 const request = httpServerMock.createKibanaRequest();
 
 describe('getSortedObjectsForExport()', () => {
@@ -66,7 +66,7 @@ describe('getSortedObjectsForExport()', () => {
             references: [],
           },
         ],
-        per_page: 1,
+        per_page: 1000,
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
@@ -111,7 +111,7 @@ describe('getSortedObjectsForExport()', () => {
                 "hasReference": undefined,
                 "hasReferenceOperator": undefined,
                 "namespaces": undefined,
-                "perPage": 10000,
+                "perPage": 1000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "2m",
@@ -163,14 +163,14 @@ describe('getSortedObjectsForExport()', () => {
         return hits;
       }
 
-      describe('<10k hits', () => {
+      describe('<1k hits', () => {
         const mockHits = generateHits(20);
 
         test('requests a single page', async () => {
           savedObjectsClient.find.mockResolvedValueOnce({
             total: 20,
             saved_objects: mockHits,
-            per_page: 10000,
+            per_page: 1000,
             page: 0,
           });
 
@@ -195,7 +195,7 @@ describe('getSortedObjectsForExport()', () => {
           savedObjectsClient.find.mockResolvedValueOnce({
             total: 20,
             saved_objects: mockHits,
-            per_page: 10000,
+            per_page: 1000,
             page: 0,
             pit_id: 'abc123',
           });
@@ -218,7 +218,7 @@ describe('getSortedObjectsForExport()', () => {
           savedObjectsClient.find.mockResolvedValueOnce({
             total: 20,
             saved_objects: mockHits,
-            per_page: 10000,
+            per_page: 1000,
             page: 0,
           });
 
@@ -240,21 +240,21 @@ describe('getSortedObjectsForExport()', () => {
         });
       });
 
-      describe('>10k hits', () => {
-        const firstMockHits = generateHits(10000, { sort: ['a', 'b'] });
-        const secondMockHits = generateHits(5000);
+      describe('>1k hits', () => {
+        const firstMockHits = generateHits(1000, { sort: ['a', 'b'] });
+        const secondMockHits = generateHits(500);
 
         test('requests multiple pages', async () => {
           savedObjectsClient.find.mockResolvedValueOnce({
-            total: 15000,
+            total: 1500,
             saved_objects: firstMockHits,
-            per_page: 10000,
+            per_page: 1000,
             page: 0,
           });
           savedObjectsClient.find.mockResolvedValueOnce({
-            total: 15000,
+            total: 1500,
             saved_objects: secondMockHits,
-            per_page: 5000,
+            per_page: 500,
             page: 1,
           });
 
@@ -268,7 +268,7 @@ describe('getSortedObjectsForExport()', () => {
           expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
           expect(response[response.length - 1]).toMatchInlineSnapshot(`
             Object {
-              "exportedCount": 15000,
+              "exportedCount": 1500,
               "missingRefCount": 0,
               "missingReferences": Array [],
             }
@@ -277,16 +277,16 @@ describe('getSortedObjectsForExport()', () => {
 
         test('opens and closes PIT', async () => {
           savedObjectsClient.find.mockResolvedValueOnce({
-            total: 15000,
+            total: 1500,
             saved_objects: firstMockHits,
-            per_page: 10000,
+            per_page: 1000,
             page: 0,
             pit_id: 'abc123',
           });
           savedObjectsClient.find.mockResolvedValueOnce({
-            total: 15000,
+            total: 1500,
             saved_objects: secondMockHits,
-            per_page: 5000,
+            per_page: 500,
             page: 1,
             pit_id: 'abc123',
           });
@@ -304,15 +304,15 @@ describe('getSortedObjectsForExport()', () => {
 
         test('passes sort values to searchAfter', async () => {
           savedObjectsClient.find.mockResolvedValueOnce({
-            total: 15000,
+            total: 1500,
             saved_objects: firstMockHits,
-            per_page: 10000,
+            per_page: 1000,
             page: 0,
           });
           savedObjectsClient.find.mockResolvedValueOnce({
-            total: 15000,
+            total: 1500,
             saved_objects: secondMockHits,
-            per_page: 5000,
+            per_page: 500,
             page: 1,
           });
 
@@ -455,7 +455,7 @@ describe('getSortedObjectsForExport()', () => {
                 "hasReference": undefined,
                 "hasReferenceOperator": undefined,
                 "namespaces": undefined,
-                "perPage": 10000,
+                "perPage": 1000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "2m",
@@ -611,7 +611,7 @@ describe('getSortedObjectsForExport()', () => {
                 "hasReference": undefined,
                 "hasReferenceOperator": undefined,
                 "namespaces": undefined,
-                "perPage": 10000,
+                "perPage": 1000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "2m",
@@ -704,7 +704,7 @@ describe('getSortedObjectsForExport()', () => {
                 ],
                 "hasReferenceOperator": "OR",
                 "namespaces": undefined,
-                "perPage": 10000,
+                "perPage": 1000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "2m",
@@ -754,7 +754,7 @@ describe('getSortedObjectsForExport()', () => {
             references: [],
           },
         ],
-        per_page: 1,
+        per_page: 1000,
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
@@ -802,7 +802,7 @@ describe('getSortedObjectsForExport()', () => {
                 "namespaces": Array [
                   "foo",
                 ],
-                "perPage": 10000,
+                "perPage": 1000,
                 "pit": Object {
                   "id": "some_pit_id",
                   "keepAlive": "2m",
@@ -873,7 +873,7 @@ describe('getSortedObjectsForExport()', () => {
     test('sorts objects within type', async () => {
       savedObjectsClient.find.mockResolvedValueOnce({
         total: 3,
-        per_page: 10000,
+        per_page: 1000,
         page: 1,
         saved_objects: [
           {

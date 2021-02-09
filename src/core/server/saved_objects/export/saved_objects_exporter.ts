@@ -179,10 +179,6 @@ export class SavedObjectsExporter {
       hasReferenceOperator: hasReference ? 'OR' : undefined,
       search,
       namespaces: namespace ? [namespace] : undefined,
-      // We aren't using `exportSizeLimit` here because a user may opt to set it
-      // higher than the 10k ES default for `index.max_result_window`, in which
-      // case we will use PIT to "scroll" through pages of hits, 10k at a time.
-      perPage: 10000,
     };
 
     const hits: SavedObjectsFindResult[] = [];

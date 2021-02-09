@@ -77,12 +77,18 @@ export class FindWithPointInTime {
     this.#savedObjectsClient = savedObjectsClient;
   }
 
-  async *find(findOptions: SavedObjectsFindOptions) {
+  async *find(options: SavedObjectsFindOptions) {
     this.#open = true;
-    this.#type = findOptions.type;
+    this.#type = options.type;
     // Default to 1000 items per page as a tradeoff between
     // speed and memory consumption.
-    this.#perPage = findOptions.perPage ?? 1000;
+    this.#perPage = options.perPage ?? 1000;
+
+    const findOptions: SavedObjectsFindOptions = {
+      ...options,
+      perPage: this.#perPage,
+      type: this.#type,
+    };
 
     // Open PIT and request our first page of hits
     await this.open();
