@@ -7,7 +7,12 @@
  */
 
 import React from 'react';
-import { DocViewRenderProps } from '../../doc_views/doc_views_types';
-import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
+import { shallow } from 'enzyme';
+import { JsonCodeEditor } from './json_code_editor';
 
-export const JsonCodeBlock = ({ hit }: DocViewRenderProps) => <JsonCodeEditor value={hit} />;
+it('returns the `JsonCodeEditor` component', () => {
+  const value = {
+    hit: { _index: 'test', _type: 'doc', _id: 'foo', _score: 1, _source: { test: 123 } },
+  };
+  expect(shallow(<JsonCodeEditor value={value} />)).toMatchSnapshot();
+});
