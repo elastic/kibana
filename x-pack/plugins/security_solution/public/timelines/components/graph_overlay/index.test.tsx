@@ -42,12 +42,11 @@ describe('GraphOverlay', () => {
 
   describe('when used in an events viewer (i.e. in the Detections view, or the Host > Events view)', () => {
     const isEventViewer = true;
-    const timelineId = 'used-as-an-events-viewer';
 
     test('it has 100% width when isEventViewer is true and NOT in full screen mode', async () => {
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
@@ -69,7 +68,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} isEventViewer={isEventViewer} />
+          <GraphOverlay timelineId={TimelineId.test} isEventViewer={isEventViewer} />
         </TestProviders>
       );
 
