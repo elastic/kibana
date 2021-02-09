@@ -298,6 +298,18 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             <EuiSpacer size="l" />
+            <CommonUseField
+              path="threatIndicatorPath"
+              componentProps={{
+                idAria: 'detectionEngineStepAboutThreatIndicatorPath',
+                'data-test-subj': 'detectionEngineStepAboutThreatIndicatorPath',
+                euiFieldProps: {
+                  fullWidth: true,
+                  disabled: isLoading,
+                  placeholder: 'threat.indicator',
+                },
+              }}
+            />
             <UseField
               path="ruleNameOverride"
               component={AutocompleteField}

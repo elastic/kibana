@@ -52,6 +52,7 @@ export const signalSchema = schema.object({
   exceptionsList: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatFilters: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatIndex: schema.maybe(schema.arrayOf(schema.string())),
+  threatIndicatorPath: schema.maybe(schema.string()),
   threatQuery: schema.maybe(schema.string()),
   threatMapping: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatLanguage: schema.maybe(schema.string()),

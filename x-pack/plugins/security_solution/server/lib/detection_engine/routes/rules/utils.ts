@@ -150,6 +150,7 @@ export const transformAlertToRule = (
     threshold: alert.params.threshold,
     threat_filters: alert.params.threatFilters,
     threat_index: alert.params.threatIndex,
+    threat_indicator_path: alert.params.threatIndicatorPath,
     threat_query: alert.params.threatQuery,
     threat_mapping: alert.params.threatMapping,
     threat_language: alert.params.threatLanguage,
