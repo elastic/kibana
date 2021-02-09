@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { Markdown } from '../../../../../src/plugins/kibana_react/public';
 import { BannerConfiguration } from '../../common';
 
 interface BannerProps {
@@ -25,7 +26,9 @@ export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
         color: textColor,
       }}
     >
-      <div>{textContent}</div>
+      <div data-test-subj="bannerInnerWrapper">
+        <Markdown markdown={textContent} />
+      </div>
     </div>
   );
 };

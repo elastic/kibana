@@ -16,7 +16,7 @@ The placement of the banner. The allowed values are:
 
 - `textContent`
 
-The (plain) text content that will be displayed inside the banner
+The text content that will be displayed inside the banner, either plain text or markdown
 
 - `textColor`
 
@@ -32,7 +32,7 @@ The color for the banner's background. Must be a valid hex color
 ```yaml
 xpack.banners:
   placement: 'header'
-  textContent: 'Production environment - Proceed with special levels of caution'
+  textContent: 'Production environment - Proceed with **special levels** of caution'
   textColor: '#FF0000'
   backgroundColor: '#CC2211'
 ```
