@@ -56,7 +56,7 @@ export const useLogAnalysisResultsUrlState = () => {
     };
   }, [start, end]);
 
-  const [timeRange, _setTimeRange] = useUrlState({
+  const [urlTimeRange, setUrlTimeRange] = useUrlState({
     defaultState: defaultTimeRangeState,
     decodeUrlState: decodeTimeRangeUrlState,
     encodeUrlState: urlTimeRangeRT.encode,
