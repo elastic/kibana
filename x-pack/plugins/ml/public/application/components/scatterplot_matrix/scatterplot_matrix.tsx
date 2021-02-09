@@ -126,6 +126,12 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   const { euiTheme } = useCurrentEuiTheme();
 
   useEffect(() => {
+    if (fields.length === 0) {
+      setSplom(undefined);
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchSplom(options: { didCancel: boolean }) {
       setIsLoading(true);
       try {
