@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid } from '@elastic/eui';
+
 import { useValues } from 'kea';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AppLogic } from '../../app_logic';
 import { ContentSection } from '../../components/shared/content_section';
 import { SOURCES_PATH, USERS_PATH } from '../../routes';
 
-import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
-
 import { StatisticCard } from './statistic_card';
 
 export const OrganizationStats: React.FC = () => {
