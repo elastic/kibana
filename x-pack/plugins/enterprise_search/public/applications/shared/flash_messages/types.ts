@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import { ReactNode } from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-
-import './loading.scss';
-
-export const Loading: React.FC = () => (
-  <div className="enterpriseSearchLoading">
-    <EuiLoadingSpinner size="xl" />
-  </div>
-);
+export interface IFlashMessage {
+  type: 'success' | 'info' | 'warning' | 'error';
+  message: ReactNode;
+  description?: ReactNode;
+}
