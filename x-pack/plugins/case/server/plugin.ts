@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
+import {
+  IContextProvider,
+  KibanaRequest,
+  KibanaResponseFactory,
+  Logger,
+  PluginInitializerContext,
+} from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -123,11 +129,13 @@ export class CasePlugin {
 
     const getCaseClientWithRequestAndContext = async (
       context: CasesRequestHandlerContext,
-      request: KibanaRequest
+      request: KibanaRequest,
+      response: KibanaResponseFactory
     ) => {
       return createCaseClient({
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
+        response,
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
         connectorMappingsService: this.connectorMappingsService!,
@@ -161,7 +169,7 @@ export class CasePlugin {
     userActionService: CaseUserActionServiceSetup;
     alertsService: AlertServiceContract;
   }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
-    return async (context, request) => {
+    return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getCaseClient: () => {
@@ -172,8 +180,9 @@ export class CasePlugin {
             connectorMappingsService,
             userActionService,
             alertsService,
-            request,
             context,
+            request,
+            response,
           });
         },
       };

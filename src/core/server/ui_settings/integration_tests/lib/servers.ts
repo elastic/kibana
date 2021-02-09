@@ -37,6 +37,9 @@ export async function startServers() {
     adjustTimeout: (t) => jest.setTimeout(t),
     settings: {
       kbn: {
+        migrations: {
+          enableV2: false,
+        },
         uiSettings: {
           overrides: {
             foo: 'bar',
