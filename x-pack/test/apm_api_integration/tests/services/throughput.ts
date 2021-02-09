@@ -9,13 +9,17 @@ import expect from '@kbn/expect';
 import qs from 'querystring';
 import { first, last } from 'lodash';
 import moment from 'moment';
+import { Coordinate } from '../../../../plugins/apm/typings/timeseries';
+import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
-function removeInvalidYAxis({ y }: { y: number | null }) {
+function removeInvalidYAxis({ y }: Coordinate) {
   return y !== null;
 }
+
+type ThroughputReturn = APIReturnType<'GET /api/apm/services/{serviceName}/throughput'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -39,11 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  type Throuput = Array<{ x: number; y: number | null }>;
-  let throughputResponse: {
-    currentPeriod: { throughput: Throuput };
-    previousPeriod: { throughput: Throuput };
-  };
+  let throughputResponse: ThroughputReturn;
   registry.when(
     'Throughput when data is loaded',
     { config: 'basic', archives: [archiveName] },

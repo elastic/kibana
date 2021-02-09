@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
-import { dateAsTimestampRt } from '../../common/runtime_types/date_as_timestamp_rt';
+import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -213,7 +213,7 @@ export const serviceAnnotationsCreateRoute = createRoute({
     }),
     body: t.intersection([
       t.type({
-        '@timestamp': dateAsTimestampRt,
+        '@timestamp': isoToEpochRt,
         service: t.intersection([
           t.type({
             version: t.string,

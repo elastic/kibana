@@ -6,16 +6,16 @@
  */
 
 import * as t from 'io-ts';
-import { dateAsTimestampRt } from '../../common/runtime_types/date_as_timestamp_rt';
+import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
 
 export const rangeRt = t.type({
-  start: dateAsTimestampRt,
-  end: dateAsTimestampRt,
+  start: isoToEpochRt,
+  end: isoToEpochRt,
 });
 
 export const comparisonRangeRt = t.partial({
-  comparisonStart: dateAsTimestampRt,
-  comparisonEnd: dateAsTimestampRt,
+  comparisonStart: isoToEpochRt,
+  comparisonEnd: isoToEpochRt,
 });
 
 export const uiFiltersRt = t.type({ uiFilters: t.string });

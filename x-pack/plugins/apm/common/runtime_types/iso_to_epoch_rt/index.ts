@@ -11,15 +11,15 @@ import { either } from 'fp-ts/lib/Either';
 // Checks whether a string is a valid ISO timestamp,
 // and returns its timestamp value
 
-export const dateAsTimestampRt = new t.Type<any, string, unknown>(
-  'DateAsString',
+export const isoToEpochRt = new t.Type<any, string, unknown>(
+  'isoToEpochRt',
   t.string.is,
   (input, context) =>
     either.chain(t.string.validate(input, context), (str) => {
-      const date = new Date(str);
-      return isNaN(date.getTime())
+      const epochDate = new Date(str).getTime();
+      return isNaN(epochDate)
         ? t.failure(input, context)
-        : t.success(date.valueOf());
+        : t.success(epochDate);
     }),
   (a) => {
     const d = new Date(a);
