@@ -172,9 +172,6 @@ export class SearchSessionsMgmtAPI {
         }),
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
       this.deps.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.data.mgmt.searchSessions.api.deletedError', {
           defaultMessage: 'Failed to delete the search session!',
@@ -184,12 +181,22 @@ export class SearchSessionsMgmtAPI {
   }
 
   // Extend
-  public async sendExtend(id: string, ttl: string): Promise<void> {
+  public async sendExtend(id: string, expires: string): Promise<void> {
     this.deps.usageCollector?.trackSessionExtended();
-    this.deps.notifications.toasts.addError(new Error('Not implemented'), {
-      title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
-        defaultMessage: 'Failed to extend the session expiration!',
-      }),
-    });
+    try {
+      await this.sessionsClient.extend(id, expires);
+
+      this.deps.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extended', {
+          defaultMessage: 'The search session was extended.',
+        }),
+      });
+    } catch (err) {
+      this.deps.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
+          defaultMessage: 'Failed to extend the search session!',
+        }),
+      });
+    }
   }
 }
