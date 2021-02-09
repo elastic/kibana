@@ -93,40 +93,29 @@ export class FindWithPointInTime {
     // Open PIT and request our first page of hits
     await this.open();
 
-    let results = await this.findNext({ findOptions, id: this.#pitId });
-    this.#pitId = results.pit_id;
-    let lastResultsCount = results.saved_objects.length;
-    let lastHitSortValue = this.getLastHitSortValue(results);
-
-    this.#log.debug(`Collected [${lastResultsCount}] saved objects for export.`);
-
-    // Close PIT if this was our last page
-    if (this.#pitId && lastResultsCount < this.#perPage!) {
-      await this.close();
-    }
-
-    yield results;
-
-    // We've reached the end when there are fewer hits than our perPage size
-    while (this.#open && lastHitSortValue && lastResultsCount === this.#perPage) {
-      results = await this.findNext({
+    let lastResultsCount: number;
+    let lastHitSortValue: unknown[] | undefined;
+    do {
+      const results = await this.findNext({
         findOptions,
         id: this.#pitId,
-        searchAfter: lastHitSortValue,
+        ...(lastHitSortValue ? { searchAfter: lastHitSortValue } : {}),
       });
-
+      this.#pitId = results.pit_id;
       lastResultsCount = results.saved_objects.length;
       lastHitSortValue = this.getLastHitSortValue(results);
-      this.#pitId = results.pit_id;
 
-      this.#log.debug(`Collected [${lastResultsCount}] more saved objects for export.`);
+      this.#log.debug(`Collected [${lastResultsCount}] saved objects for export.`);
 
+      // Close PIT if this was our last page
       if (this.#pitId && lastResultsCount < this.#perPage) {
         await this.close();
       }
 
       yield results;
-    }
+      // We've reached the end when there are fewer hits than our perPage size,
+      // or when `close()` has been called.
+    } while (this.#open && lastHitSortValue && lastResultsCount >= this.#perPage);
 
     return;
   }
@@ -189,7 +178,10 @@ export class FindWithPointInTime {
     }
   }
 
-  private getLastHitSortValue(res: SavedObjectsFindResponse) {
-    return res.saved_objects.length && res.saved_objects[res.saved_objects.length - 1].sort;
+  private getLastHitSortValue(res: SavedObjectsFindResponse): unknown[] | undefined {
+    if (res.saved_objects.length < 1) {
+      return undefined;
+    }
+    return res.saved_objects[res.saved_objects.length - 1].sort;
   }
 }
