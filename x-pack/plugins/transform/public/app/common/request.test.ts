@@ -27,6 +27,7 @@ import {
   PivotQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
+import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
@@ -168,6 +169,9 @@ describe('Transform: Common', () => {
       validationStatus: {
         isValid: true,
       },
+      runtimeMappings: undefined,
+      runtimeMappingsUpdated: false,
+      isRuntimeMappingsEditorEnabled: false,
     };
     const transformDetailsState: StepDetailsExposedState = {
       continuousModeDateField: 'the-continuous-mode-date-field',
@@ -205,6 +209,82 @@ describe('Transform: Common', () => {
       source: {
         index: ['the-index-pattern-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+      },
+    });
+  });
+
+  test('getCreateTransformRequestBody() with runtime mappings', () => {
+    const runtimeMappings = {
+      rt_bytes_bigger: {
+        type: 'double',
+        script: {
+          source: "emit(doc['bytes'].value * 2.0)",
+        },
+      } as RuntimeField,
+    };
+
+    const pivotState: StepDefineExposedState = {
+      aggList: { 'the-agg-name': aggsAvg },
+      groupByList: { 'the-group-by-name': groupByTerms },
+      isAdvancedPivotEditorEnabled: false,
+      isAdvancedSourceEditorEnabled: false,
+      sourceConfigUpdated: false,
+      searchLanguage: 'kuery',
+      searchString: 'the-query',
+      searchQuery: 'the-search-query',
+      valid: true,
+      transformFunction: 'pivot',
+      latestConfig: {} as LatestFunctionConfigUI,
+      previewRequest: {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      },
+      validationStatus: {
+        isValid: true,
+      },
+      runtimeMappings,
+      runtimeMappingsUpdated: false,
+      isRuntimeMappingsEditorEnabled: false,
+    };
+    const transformDetailsState: StepDetailsExposedState = {
+      continuousModeDateField: 'the-continuous-mode-date-field',
+      continuousModeDelay: 'the-continuous-mode-delay',
+      createIndexPattern: false,
+      isContinuousModeEnabled: false,
+      transformId: 'the-transform-id',
+      transformDescription: 'the-transform-description',
+      transformFrequency: '1m',
+      transformSettingsMaxPageSearchSize: 100,
+      transformSettingsDocsPerSecond: 400,
+      destinationIndex: 'the-destination-index',
+      touched: true,
+      valid: true,
+    };
+
+    const request = getCreateTransformRequestBody(
+      'the-index-pattern-title',
+      pivotState,
+      transformDetailsState
+    );
+
+    expect(request).toEqual({
+      description: 'the-transform-description',
+      dest: { index: 'the-destination-index' },
+      frequency: '1m',
+      pivot: {
+        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+      },
+      settings: {
+        max_page_search_size: 100,
+        docs_per_second: 400,
+      },
+      source: {
+        index: ['the-index-pattern-title'],
+        query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+        runtime_mappings: runtimeMappings,
       },
     });
   });

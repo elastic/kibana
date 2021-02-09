@@ -44,10 +44,7 @@ export const useIndexData = (
     },
   } = useAppDependencies();
 
-  const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
-    indexPattern,
-    getFieldsFromKibanaIndexPattern,
-  ]);
+  const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     let result: Array<{ id: string; schema: string | undefined }> = [];
@@ -168,9 +165,14 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     indexPattern.title,
-    indexPatternFields,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
+    JSON.stringify([
+      query,
+      pagination,
+      sortingColumns,
+      indexPatternFields,
+      combinedRuntimeMappings,
+    ]),
   ]);
 
   useEffect(() => {
