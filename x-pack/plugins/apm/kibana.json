@@ -29,7 +29,6 @@
   "extraPublicDirs": ["public/style/variables"],
   "requiredBundles": [
     "home",
-    "index_pattern_management",
     "kibanaReact",
     "kibanaUtils",
     "maps",
