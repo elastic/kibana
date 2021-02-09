@@ -39,12 +39,14 @@ const FirstChunk = styled.span`
   white-space: nowrap;
   overflow: hidden;
   line-height: ${FIXED_AXIS_HEIGHT}px;
-`;
+  text-align: left;
+`; // safari doesn't auto align text left in some cases
 
 const LastChunk = styled.span`
   flex-shrink: 0;
   line-height: ${FIXED_AXIS_HEIGHT}px;
-`;
+  text-align: left;
+`; // safari doesn't auto align text left in some cases
 
 const StyledButton = styled(EuiButtonEmpty)`
   &&& {
