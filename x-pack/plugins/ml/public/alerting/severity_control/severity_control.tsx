@@ -59,28 +59,26 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
         />
       }
     >
-      <>
-        <EuiRange
-          className={'mlSeverityControl'}
-          fullWidth
-          min={ANOMALY_THRESHOLD.LOW}
-          max={MAX_ANOMALY_SCORE}
-          value={value ?? ANOMALY_THRESHOLD.LOW}
-          onChange={(e) => {
-            // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-            onChange(e.target.value);
-          }}
-          showLabels
-          showValue
-          aria-label={i18n.translate('xpack.ml.severitySelector.formControlLabel', {
-            defaultMessage: 'Select severity threshold',
-          })}
-          showTicks
-          ticks={toggleButtons}
-          levels={levels}
-          data-test-subj={'mlAnomalyAlertScoreSelection'}
-        />
-      </>
+      <EuiRange
+        className={'mlSeverityControl'}
+        fullWidth
+        min={ANOMALY_THRESHOLD.LOW}
+        max={MAX_ANOMALY_SCORE}
+        value={value ?? ANOMALY_THRESHOLD.LOW}
+        onChange={(e) => {
+          // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
+          onChange(e.target.value);
+        }}
+        showLabels
+        showValue
+        aria-label={i18n.translate('xpack.ml.severitySelector.formControlLabel', {
+          defaultMessage: 'Select severity threshold',
+        })}
+        showTicks
+        ticks={toggleButtons}
+        levels={levels}
+        data-test-subj={'mlAnomalyAlertScoreSelection'}
+      />
     </EuiFormRow>
   );
 });
