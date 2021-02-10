@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export type OnActionComplete = () => void;
-
-export enum ACTION {
-  INSPECT = 'inspect',
-  EXTEND = 'extend',
-  DELETE = 'delete',
-}
+export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
