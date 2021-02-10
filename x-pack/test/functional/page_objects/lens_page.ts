@@ -17,7 +17,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize', 'dashboard']);
+
+  const PageObjects = getPageObjects([
+    'header',
+    'timePicker',
+    'common',
+    'visualize',
+    'dashboard',
+    'timeToVisualize',
+  ]);
 
   return logWrapper('lensPage', log, {
     /**
@@ -341,16 +349,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title: string,
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
-      addToDashboard?: boolean,
+      addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
-      await PageObjects.visualize.setSaveModalValues(title, {
+      await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
         redirectToOrigin,
-        addToDashboard,
+        addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
       });
 
