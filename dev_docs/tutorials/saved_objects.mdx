@@ -119,7 +119,7 @@ SQL index. Only specify field mappings for the fields you wish to search on or q
  in any level of your mappings, Elasticsearch will accept and store any other fields even if they are not specified in your mappings.
 
 Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the 
-fields they add to the mappings. Similarly, Saved Object types should never use dynamic: true as this can cause an arbitrary
+fields they add to the mappings. Similarly, Saved Object types should never use `dynamic: true` as this can cause an arbitrary
  amount of fields to be added to the .kibana index.
 
  ## References
