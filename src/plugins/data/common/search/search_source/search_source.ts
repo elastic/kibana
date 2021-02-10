@@ -65,7 +65,7 @@ import { defer, from } from 'rxjs';
 import { isObject } from 'rxjs/internal-compatibility';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
 import { ISearchGeneric, ISearchOptions } from '../..';
 import type {
   ISearchSource,
@@ -99,6 +99,8 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   search: ISearchGeneric;
 }
+
+const META_FIELDS = ['_type', '_source'];
 
 /** @public **/
 export class SearchSource {
@@ -501,6 +503,60 @@ export class SearchSource {
     }
   }
 
+  private checkMatch(sourceFilters: string[], field: string) {
+    return sourceFilters.some((sourceFilter) => field.match(sourceFilter));
+  }
+
+  private getFieldsWithoutSourceFilters(
+    index: IndexPattern | undefined,
+    bodyFields: SearchFieldValue[]
+  ) {
+    if (!index) {
+      return bodyFields;
+    }
+    const { fields } = index;
+    const sourceFilters = index.getSourceFiltering();
+    if (!sourceFilters || sourceFilters.excludes?.length === 0 || bodyFields.length === 0) {
+      return bodyFields;
+    }
+    const sourceFiltersValues = sourceFilters.excludes;
+    const wildcardField = bodyFields.find(
+      (el: SearchFieldValue) => el === '*' || (el as Record<string, string>).field === '*'
+    );
+    if (!wildcardField) {
+      // we already have an explicit list of fields, so we just remove source filters from that list
+      return bodyFields.filter((fld: SearchFieldValue) => {
+        if (typeof fld === 'string') {
+          return !this.checkMatch(sourceFiltersValues, fld) && !META_FIELDS.includes(fld);
+        }
+        if (!fld.hasOwnProperty('field')) {
+          return false;
+        }
+        const searchFieldValue = fld as Record<string, string>;
+        return (
+          !this.checkMatch(sourceFiltersValues, searchFieldValue.field) &&
+          !META_FIELDS.includes(searchFieldValue.field)
+        );
+      });
+    }
+    // we need to get the list of fields from an index pattern
+    const fieldsToInclude = fields.filter((field: IndexPatternField) => {
+      return !this.checkMatch(sourceFiltersValues, field.name) && !META_FIELDS.includes(field.name);
+    });
+    return fieldsToInclude.map((fld: IndexPatternField) => {
+      const fieldToInclude: Record<string, string> = {
+        field: fld.name,
+      };
+      if (wildcardField && wildcardField.hasOwnProperty('include_unmapped')) {
+        fieldToInclude.include_unmapped = (wildcardField as Record<
+          string,
+          string
+        >).include_unmapped;
+      }
+      return fieldToInclude;
+    });
+  }
+
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
@@ -617,6 +673,7 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields);
         body.fields = body.fields.map((fld: SearchFieldValue) => {
           const fieldName = getFieldName(fld);
           if (Object.keys(docvaluesIndex).includes(fieldName)) {

@@ -28,6 +28,7 @@ const mockSource2 = { excludes: ['bar-*'] };
 
 const indexPattern = ({
   title: 'foo',
+  fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
 } as unknown) as IndexPattern;
@@ -516,6 +517,54 @@ describe('SearchSource', () => {
 
         const request = await searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
+      });
+
+      test('request all fields except the ones specified with source filters', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['hello', 'foo']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual(['hello']);
+      });
+
+      test('request all fields from index pattern except the ones specified with source filters', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', ['*']);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([{ field: 'field1' }, { field: 'field2' }]);
+      });
+
+      test('request all fields from index pattern except the ones specified with source filters with unmapped_fields option', async () => {
+        searchSource.setField('index', ({
+          ...indexPattern,
+          getComputedFields: () => ({
+            storedFields: [],
+            scriptFields: [],
+            docvalueFields: [],
+          }),
+        } as unknown) as IndexPattern);
+        searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+
+        const request = await searchSource.getSearchRequestBody();
+        expect(request.fields).toEqual([
+          { field: 'field1', include_unmapped: 'true' },
+          { field: 'field2', include_unmapped: 'true' },
+        ]);
       });
 
       test('returns all scripted fields when one fields entry is *', async () => {
