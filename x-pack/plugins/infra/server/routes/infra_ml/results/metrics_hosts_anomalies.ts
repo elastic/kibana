@@ -34,6 +34,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       const {
         data: {
           sourceId,
+          anomalyThreshold,
           timeRange: { startTime, endTime },
           sort: sortParam,
           pagination: paginationParam,
@@ -54,6 +55,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
         } = await getMetricsHostsAnomalies(
           requestContext,
           sourceId,
+          anomalyThreshold,
           startTime,
           endTime,
           metric,

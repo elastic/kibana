@@ -13,7 +13,7 @@ export function monitoringEndpointDisableWatches(Client: any, _config: any, comp
     params: {},
     urls: [
       {
-        fmt: '_monitoring/migrate/alerts',
+        fmt: '/_monitoring/migrate/alerts',
       },
     ],
     method: 'POST',

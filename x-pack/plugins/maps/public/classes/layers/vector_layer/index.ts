@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-module.exports = {
-  rootDir: '..',
-  projects: ['<rootDir>/x-pack/plugins/*/jest.config.js'],
-  reporters: [
-    'default',
-    ['<rootDir>/packages/kbn-test/target/jest/junit_reporter', { reportName: 'X-Pack Jest Tests' }],
-  ],
-};
+export { addGeoJsonMbSource, syncVectorSource } from './utils';
+export { IVectorLayer, VectorLayer, VectorLayerArguments } from './vector_layer';
