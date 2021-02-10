@@ -1,7 +1,7 @@
 on:
   pull_request_target:
     branches:
-      - fix-autobackport-conditions
+      - master
     types:
       - labeled
       - closed
@@ -10,7 +10,7 @@ jobs:
   backport:
     name: Backport PR
     if: |
-      github.event.pull_request.merged == false
+      github.event.pull_request.merged == true
       && contains(github.event.pull_request.labels.*.name, 'auto-backport')
       && (
         (github.event.action == 'labeled' && github.event.label.name == 'auto-backport')
