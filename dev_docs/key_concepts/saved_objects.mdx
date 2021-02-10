@@ -12,7 +12,7 @@ The Saved Objects service allows Kibana plugins to use Elasticsearch like a prim
  Some examples of Saved Object types are dashboards, lens, canvas workpads, index patterns, cases, ml jobs, and advanced settings. Some Saved Object types are 
  exposed to the user in the [Saved Object management UI](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html), but not all.
 
-Developers create and manage their Saved Objects using the SavedObjectClient, while other data in elasticsearch should be accessed via the data plugin's search
+Developers create and manage their Saved Objects using the SavedObjectClient, while other data in Elasticsearch should be accessed via the data plugin's search
 services.
 
 ![image](../assets/saved_object_vs_data_indices.png)
@@ -63,5 +63,4 @@ Sometimes Saved Objects end up persisted inside another Saved Object. We call th
  library, the data ends up nested inside the dashboard Saved Object. This helps keep the visualization library smaller. It also avoids
  issues with edits propagating - since an entity can only exist in a single place.
   Note that from the end user stand point, we don’t use these terms “by reference” and “by value”.
-
 
