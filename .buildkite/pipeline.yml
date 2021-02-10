@@ -1,0 +1,2 @@
+steps:
+  - command: '.ci/buildkite/test.sh'
