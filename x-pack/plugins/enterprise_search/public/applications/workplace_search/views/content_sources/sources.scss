@@ -30,6 +30,7 @@
   width: calc(100% - #{$sideBarWidth});
 
   &__sideBar {
+    padding: 32px 40px 40px;
     width: $sideBarWidth;
     margin-left: -$sideBarWidth;
   }
