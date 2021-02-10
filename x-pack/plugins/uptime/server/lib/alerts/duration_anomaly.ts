@@ -10,7 +10,7 @@ import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ActionGroupIdsOf } from '../../../../alerts/common';
 import { updateState } from './common';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
+import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
@@ -21,7 +21,6 @@ import { getMLJobId } from '../../../common/lib';
 import { getLatestMonitor } from '../requests/get_latest_monitor';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 
-const { DURATION_ANOMALY } = ACTION_GROUP_DEFINITIONS;
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
 export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {

@@ -16,6 +16,7 @@ import {
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
+import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
 
 const typeToInfraIndexType = (value: string | undefined) => {
   switch (value) {
@@ -135,6 +136,15 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
+        }
+
+        if (error instanceof AnomalyThresholdRangeError) {
+          return response.customError({
+            statusCode: 400,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({

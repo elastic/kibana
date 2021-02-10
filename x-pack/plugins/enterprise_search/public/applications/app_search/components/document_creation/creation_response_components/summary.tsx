@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
   EuiTitle,
@@ -19,10 +19,11 @@ import {
   EuiFlexItem,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { DocumentCreationLogic } from '../';
 import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CLOSE_BUTTON, DOCUMENT_CREATION_ERRORS } from '../constants';
 import { DocumentCreationStep } from '../types';
-import { DocumentCreationLogic } from '../';
 
 import {
   InvalidDocumentsSummary,
