@@ -102,17 +102,13 @@ export function alertingServiceProvider(mlClient: MlClient) {
   const getResultTypeAggRequest = (resultType: AnomalyResultType, severity: number) => {
     return {
       influencer_results: {
-        ...(resultType === ANOMALY_RESULT_TYPE.INFLUENCER
-          ? {
-              filter: {
-                range: {
-                  influencer_score: {
-                    gte: severity,
-                  },
-                },
-              },
-            }
-          : {}),
+        filter: {
+          range: {
+            influencer_score: {
+              gte: resultType === ANOMALY_RESULT_TYPE.INFLUENCER ? severity : 0,
+            },
+          },
+        },
         aggs: {
           top_influencer_hits: {
             top_hits: {
@@ -156,17 +152,13 @@ export function alertingServiceProvider(mlClient: MlClient) {
         },
       },
       record_results: {
-        ...(resultType === ANOMALY_RESULT_TYPE.RECORD
-          ? {
-              filter: {
-                range: {
-                  record_score: {
-                    gte: severity,
-                  },
-                },
-              },
-            }
-          : {}),
+        filter: {
+          range: {
+            record_score: {
+              gte: resultType === ANOMALY_RESULT_TYPE.RECORD ? severity : 0,
+            },
+          },
+        },
         aggs: {
           top_record_hits: {
             top_hits: {
