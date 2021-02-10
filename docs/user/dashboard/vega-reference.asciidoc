@@ -288,8 +288,7 @@ Additionally, you can use `latitude`, `longitude`, and `zoom` signals.
 These signals can be used in the graph, or can be updated to modify the
 position of the map.
 
-experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[data] element to access https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] 
-vector shapes of administrative boundaries in your Vega map by setting `url.data` to `emsFile`:
+experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[data] element to access https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] vector shapes of administrative boundaries in your Vega map by setting `url.data` to `emsFile`:
 
 [source,yaml]
 ----
