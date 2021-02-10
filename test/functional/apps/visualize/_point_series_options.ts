@@ -279,14 +279,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show round labels in different timezone', async function () {
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
           ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'],
-          [
-            '2015-09-19 18:00',
-            '2015-09-20 06:00',
-            '2015-09-20 18:00',
-            '2015-09-21 06:00',
-            '2015-09-21 18:00',
-            '2015-09-22 06:00',
-          ]
+          ['2015-09-19 18:00', '2015-09-20 12:00', '2015-09-21 06:00', '2015-09-22 00:00']
         );
 
         await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'America/Phoenix' });
