@@ -13,6 +13,7 @@ import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType, SignalSearchResponse } from '../types';
 import { combineConcurrentResults } from './utils';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
+import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
   threatMapping,
@@ -91,37 +92,17 @@ export const createThreatSignals = async ({
     perPage,
   });
 
-  const getMatchedThreats: GetMatchedThreats = async (ids) => {
-    const matchedThreatsFilter = {
-      query: {
-        bool: {
-          filter: {
-            ids: { values: ids },
-          },
-        },
-      },
-    };
-    const threatResponse = await getThreatList({
-      callCluster: services.callCluster,
-      exceptionItems,
-      threatFilters: [...threatFilters, matchedThreatsFilter],
-      query: threatQuery,
-      language: threatLanguage,
-      index: threatIndex,
-      listClient,
-      searchAfter: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
-      logger,
-      buildRuleMessage,
-      perPage: undefined,
-    });
-
-    return threatResponse.hits.hits;
-  };
-
-  const threatEnrichment = (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
-    enrichSignalThreatMatches(signals, getMatchedThreats);
+  const threatEnrichment = buildThreatEnrichment({
+    buildRuleMessage,
+    exceptionItems,
+    listClient,
+    logger,
+    services,
+    threatFilters,
+    threatIndex,
+    threatLanguage,
+    threatQuery,
+  });
 
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);

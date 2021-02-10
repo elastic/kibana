@@ -205,3 +205,15 @@ export interface ThreatMatchNamedQuery {
 }
 
 export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
+
+export interface BuildThreatEnrichmentOptions {
+  buildRuleMessage: BuildRuleMessage;
+  exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
+  logger: Logger;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  threatFilters: PartialFilter[];
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatQuery: ThreatQuery;
+}
