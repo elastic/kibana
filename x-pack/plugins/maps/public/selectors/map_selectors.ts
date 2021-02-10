@@ -12,10 +12,9 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
-import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer';
 import { VectorStyle } from '../classes/styles/vector/vector_style';
-// @ts-ignore
-import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
+import { HeatmapLayer } from '../classes/layers/heatmap_layer';
 import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
 import {
@@ -41,6 +40,7 @@ import {
   DataRequestDescriptor,
   DrawState,
   Goto,
+  HeatmapLayerDescriptor,
   LayerDescriptor,
   MapCenter,
   MapExtent,
@@ -54,6 +54,7 @@ import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
+import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { ILayer } from '../classes/layers/layer';
 
 export function createLayerInstance(
@@ -84,7 +85,10 @@ export function createLayerInstance(
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
     case HeatmapLayer.type:
-      return new HeatmapLayer({ layerDescriptor, source });
+      return new HeatmapLayer({
+        layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
+        source: source as ESGeoGridSource,
+      });
     case BlendedVectorLayer.type:
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
