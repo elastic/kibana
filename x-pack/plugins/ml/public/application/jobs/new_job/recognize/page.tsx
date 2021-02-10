@@ -43,6 +43,7 @@ import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 import { TIME_FORMAT } from '../../../../../common/constants/time_format';
+import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -84,6 +85,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [saveState, setSaveState] = useState<SAVE_STATE>(SAVE_STATE.NOT_SAVED);
   const [resultsUrl, setResultsUrl] = useState<string>('');
   const [existingGroups, setExistingGroups] = useState(existingGroupIds);
+  const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
   const {
@@ -204,9 +206,19 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       });
 
       setResultsUrl(url);
-      const failedJobsCount = jobsResponse.reduce((count, { success }) => {
-        return success ? count : count + 1;
-      }, 0);
+      const failedJobsCount = jobsResponse.reduce(
+        (count, { success }) => (success ? count : count + 1),
+        0
+      );
+
+      const lazyJobsCount = datafeedsResponse.reduce(
+        (count, { awaitingMlNodeAllocation }) =>
+          awaitingMlNodeAllocation === true ? count + 1 : count,
+        0
+      );
+
+      setJobsAwaitingNodeCount(lazyJobsCount);
+
       setSaveState(
         failedJobsCount === 0
           ? SAVE_STATE.SAVED
@@ -290,6 +302,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             <EuiSpacer size="l" />
           </>
         )}
+
+        {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
 
         <EuiFlexGroup wrap={true} gutterSize="m">
           <EuiFlexItem grow={1}>

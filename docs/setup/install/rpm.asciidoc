@@ -149,6 +149,7 @@ locations for an RPM-based system:
 | config
   | Configuration files including `kibana.yml`
   | /etc/kibana
+  | <<settings,KBN_PATH_CONF>>
  d|
 
 | data
