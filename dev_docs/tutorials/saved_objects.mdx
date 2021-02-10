@@ -115,7 +115,7 @@ Will result in the following mappings being applied to the .kibana index:
 }
 ```
 Do not use field mappings like you would use data types for the columns of a SQL database. Instead, field mappings are analogous to a 
-SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying dynamic: false
+SQL index. Only specify field mappings for the fields you wish to search on or query. By specifying `dynamic: false`
  in any level of your mappings, Elasticsearch will accept and store any other fields even if they are not specified in your mappings.
 
 Since Elasticsearch has a default limit of 1000 fields per index, plugins should carefully consider the 
