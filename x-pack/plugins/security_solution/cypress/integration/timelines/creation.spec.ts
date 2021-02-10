@@ -13,6 +13,7 @@ import {
   NOTES_TEXT,
   PIN_EVENT,
   TIMELINE_FILTER,
+  TIMELINE_PANEL,
 } from '../../screens/timeline';
 
 import { cleanKibana } from '../../tasks/common';
