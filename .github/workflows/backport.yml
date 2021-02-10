@@ -10,7 +10,7 @@ jobs:
   backport:
     name: Backport PR
     if: |
-      github.event.pull_request.merged == true
+      github.event.pull_request.merged == false
       && contains(github.event.pull_request.labels.*.name, 'auto-backport')
       && (
         (github.event.action == 'labeled' && github.event.label.name == 'auto-backport')
