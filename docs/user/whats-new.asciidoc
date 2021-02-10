@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[7.11.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check out the <<release-notes>> and

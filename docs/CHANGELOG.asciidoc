@@ -92,11 +92,8 @@ For detailed information about the n.n.n release, review the following sections.
 [[release-notes-7.11.0]]
 == {kib} 7.11.0 
 
-coming::[7.11.0]
-
-For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
-
-//For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
+For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>. 
+For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
 
 [float]
 [[deprecation-v7.11.0]]
