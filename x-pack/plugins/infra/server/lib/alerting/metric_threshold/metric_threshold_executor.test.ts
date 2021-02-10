@@ -60,56 +60,42 @@ describe('The metric threshold alert type', () => {
     test('alerts as expected with the > comparator', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.GT, [1.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts as expected with the < comparator', async () => {
       await execute(Comparator.LT, [1.5]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.LT, [0.75]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts as expected with the >= comparator', async () => {
       await execute(Comparator.GT_OR_EQ, [0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.GT_OR_EQ, [1.0]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.GT_OR_EQ, [1.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts as expected with the <= comparator', async () => {
       await execute(Comparator.LT_OR_EQ, [1.5]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.LT_OR_EQ, [1.0]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.LT_OR_EQ, [0.75]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts as expected with the between comparator', async () => {
       await execute(Comparator.BETWEEN, [0, 1.5]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.BETWEEN, [0, 0.75]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts as expected with the outside range comparator', async () => {
       await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('reports expected values to the action context', async () => {
       const now = 1577858400000;
@@ -144,23 +130,17 @@ describe('The metric threshold alert type', () => {
     test('sends an alert when all groups pass the threshold', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceIdA).alertState).toBe(AlertStates.ALERT);
       expect(mostRecentAction(instanceIdB).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceIdB).alertState).toBe(AlertStates.ALERT);
     });
     test('sends an alert when only some groups pass the threshold', async () => {
       await execute(Comparator.LT, [1.5]);
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceIdA).alertState).toBe(AlertStates.ALERT);
       expect(mostRecentAction(instanceIdB)).toBe(undefined);
-      expect(getState(instanceIdB).alertState).toBe(AlertStates.OK);
     });
     test('sends no alert when no groups pass the threshold', async () => {
       await execute(Comparator.GT, [5]);
       expect(mostRecentAction(instanceIdA)).toBe(undefined);
-      expect(getState(instanceIdA).alertState).toBe(AlertStates.OK);
       expect(mostRecentAction(instanceIdB)).toBe(undefined);
-      expect(getState(instanceIdB).alertState).toBe(AlertStates.OK);
     });
     test('reports group values to the action context', async () => {
       await execute(Comparator.GT, [0.75]);
@@ -200,22 +180,18 @@ describe('The metric threshold alert type', () => {
       const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
       const instanceID = '*';
       await execute(Comparator.LT_OR_EQ, [1.0], [3.0]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
       const instanceIdA = 'a';
       const instanceIdB = 'b';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'something');
       expect(mostRecentAction(instanceIdA).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceIdA).alertState).toBe(AlertStates.ALERT);
       expect(mostRecentAction(instanceIdB)).toBe(undefined);
-      expect(getState(instanceIdB).alertState).toBe(AlertStates.OK);
     });
     test('sends all criteria to the action context', async () => {
       const instanceID = '*';
@@ -252,10 +228,8 @@ describe('The metric threshold alert type', () => {
     test('alerts based on the doc_count value instead of the aggregatedValue', async () => {
       await execute(Comparator.GT, [2]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.LT, [1.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
   describe('querying with the p99 aggregator', () => {
@@ -279,10 +253,8 @@ describe('The metric threshold alert type', () => {
     test('alerts based on the p99 values', async () => {
       await execute(Comparator.GT, [1]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.LT, [1]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
   describe('querying with the p95 aggregator', () => {
@@ -306,10 +278,8 @@ describe('The metric threshold alert type', () => {
     test('alerts based on the p95 values', async () => {
       await execute(Comparator.GT, [0.25]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.LT, [0.95]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
   describe("querying a metric that hasn't reported data", () => {
@@ -333,12 +303,10 @@ describe('The metric threshold alert type', () => {
     test('sends a No Data alert when configured to do so', async () => {
       await execute(true);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       await execute(false);
       expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
     });
   });
 
@@ -364,7 +332,6 @@ describe('The metric threshold alert type', () => {
     test('sends a No Data alert', async () => {
       await execute();
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
     });
   });
 
@@ -516,9 +483,6 @@ services.alertInstanceFactory.mockImplementation((instanceID: string) => {
     : newAlertInstance;
   alertInstances.set(instanceID, alertInstance);
 
-  alertInstance.instance.getState.mockImplementation(() => {
-    return alertInstance.state;
-  });
   alertInstance.instance.replaceState.mockImplementation((newState: any) => {
     alertInstance.state = newState;
     return alertInstance.instance;
@@ -532,10 +496,6 @@ services.alertInstanceFactory.mockImplementation((instanceID: string) => {
 
 function mostRecentAction(id: string) {
   return alertInstances.get(id)!.actionQueue.pop();
-}
-
-function getState(id: string) {
-  return alertInstances.get(id)!.state;
 }
 
 const baseCriterion = {
