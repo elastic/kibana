@@ -17,7 +17,7 @@ a flight that arrived or departed from `Warsaw` or `Venice` when the weather was
 . Click the header for the `_score` column and sort it  by descending scores.
 +
 The results are currently sorted by first `Time`, and then by `_score`.
- to remove sorting by `Time`.
+. To sort only by `_score`, remove the `Time` field.
 * As a result you've got a table of documents starting with the best matches.
 [role="screenshot"]
 image::images/discover-search-for-relevance.png["Example of a search for relevance"]
