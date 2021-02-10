@@ -88,6 +88,7 @@
     { "path": "./x-pack/plugins/maps/tsconfig.json" },
     { "path": "./x-pack/plugins/ml/tsconfig.json" },
     { "path": "./x-pack/plugins/observability/tsconfig.json" },
+    { "path": "./x-pack/plugins/osquery/tsconfig.json" },
     { "path": "./x-pack/plugins/painless_lab/tsconfig.json" },
     { "path": "./x-pack/plugins/reporting/tsconfig.json" },
     { "path": "./x-pack/plugins/saved_objects_tagging/tsconfig.json" },
