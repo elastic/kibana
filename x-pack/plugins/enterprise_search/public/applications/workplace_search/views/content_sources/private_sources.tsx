@@ -57,6 +57,8 @@ export const PrivateSources: React.FC = () => {
 
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
   const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
+  const hasPrivateSources = privateContentSources?.length > 0;
+  const hasSharedSources = contentSources.length > 0;
 
   const headerAction = (
     <EuiButtonTo
@@ -112,7 +114,6 @@ export const PrivateSources: React.FC = () => {
     </ContentSection>
   );
 
-  const hasPrivateSources = privateContentSources?.length > 0;
   const privateSources = hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState;
 
   const groupsSentence =
@@ -151,7 +152,7 @@ export const PrivateSources: React.FC = () => {
     <SourcesView>
       {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
       {canCreatePersonalSources && privateSources}
-      {contentSources.length > 0 ? sharedSources : sharedSourcesEmptyState}
+      {hasSharedSources ? sharedSources : sharedSourcesEmptyState}
     </SourcesView>
   );
 };
