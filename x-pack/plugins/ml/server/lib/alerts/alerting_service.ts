@@ -198,8 +198,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
                 unique_key: {
                   script: {
                     lang: 'painless',
-                    source:
-                      'doc["timestamp"].value + "_" + doc["function"].value + "_" + doc["field_name"].value',
+                    source: 'doc["timestamp"].value + "_" + doc["function"].value',
                   },
                 },
               },
@@ -293,6 +292,8 @@ export function alertingServiceProvider(mlClient: MlClient) {
               range: {
                 timestamp: {
                   gte: `now-${previewTimeInterval ?? lookBackTimeInterval}`,
+                  // Restricts data points to the current moment for preview
+                  ...(previewTimeInterval ? { lte: 'now' } : {}),
                 },
               },
             },
@@ -427,16 +428,21 @@ export function alertingServiceProvider(mlClient: MlClient) {
               },
             }
           : {}),
-        mlExplorerSwimlane: {
-          selectedLanes: [
-            isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
-          ],
-          selectedTimes: [r.timestampEpoch],
-          selectedType: isInfluencerResult ? 'viewBy' : 'overall',
-          ...(isInfluencerResult
-            ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
-            : {}),
-        },
+        // Don't highlight selection for record resutls
+        ...(type !== ANOMALY_RESULT_TYPE.RECORD
+          ? {
+              mlExplorerSwimlane: {
+                selectedLanes: [
+                  isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
+                ],
+                selectedTimes: [r.timestampEpoch],
+                selectedType: isInfluencerResult ? 'viewBy' : 'overall',
+                ...(isInfluencerResult
+                  ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
+                  : {}),
+              },
+            }
+          : {}),
       },
     };
     return `/app/ml/explorer/?_g=${encodeURIComponent(
