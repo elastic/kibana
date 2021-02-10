@@ -63,6 +63,14 @@ export interface SavedObjectsFindOptionsReference {
 }
 
 /**
+ * @public
+ */
+export interface SavedObjectsPitParams {
+  id: string;
+  keepAlive?: string;
+}
+
+/**
  *
  * @public
  */
@@ -119,9 +127,9 @@ export interface SavedObjectsFindOptions {
   /** An optional ES preference value to be used for the query **/
   preference?: string;
   /**
-   * Search against a specific Point In Time (PIT) that you've opened with `savedObjects.openPointInTimeForType`.
+   * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
    */
-  pit?: { id: string; keepAlive?: string };
+  pit?: SavedObjectsPitParams;
 }
 
 /**

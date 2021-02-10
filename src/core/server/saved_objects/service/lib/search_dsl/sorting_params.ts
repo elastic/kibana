@@ -8,6 +8,7 @@
 
 import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
+import { SavedObjectsPitParams } from '../../../types';
 
 // TODO: The plan is for ES to automatically add this tiebreaker when
 // using PIT. We should remove this logic once that is resolved.
@@ -21,7 +22,7 @@ export function getSortingParams(
   type: string | string[],
   sortField?: string,
   sortOrder?: string,
-  pit?: { id: string; keepAlive?: string }
+  pit?: SavedObjectsPitParams
 ) {
   if (!sortField) {
     return {};

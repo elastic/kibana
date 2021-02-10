@@ -4,7 +4,7 @@
 
 ## SavedObjectsClient.closePointInTime() method
 
-Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the Elasticsearch client, and is included in the Saved Objects Client as a convenience for consumers who are using `openPointInTimeForType`<!-- -->.
+Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the Elasticsearch client, and is included in the Saved Objects Client as a convenience for consumers who are using [SavedObjectsClient.openPointInTimeForType()](./kibana-plugin-core-server.savedobjectsclient.openpointintimefortype.md)<!-- -->.
 
 <b>Signature:</b>
 

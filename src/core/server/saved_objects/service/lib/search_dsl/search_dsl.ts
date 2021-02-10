@@ -9,6 +9,7 @@
 import Boom from '@hapi/boom';
 
 import { IndexMapping } from '../../../mappings';
+import { SavedObjectsPitParams } from '../../../types';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
 import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
@@ -26,7 +27,7 @@ interface GetSearchDslOptions {
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
-  pit?: { id: string; keepAlive?: string };
+  pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;

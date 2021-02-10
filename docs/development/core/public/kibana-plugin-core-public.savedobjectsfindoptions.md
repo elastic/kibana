@@ -23,7 +23,7 @@ export interface SavedObjectsFindOptions
 |  [namespaces](./kibana-plugin-core-public.savedobjectsfindoptions.namespaces.md) | <code>string[]</code> |  |
 |  [page](./kibana-plugin-core-public.savedobjectsfindoptions.page.md) | <code>number</code> |  |
 |  [perPage](./kibana-plugin-core-public.savedobjectsfindoptions.perpage.md) | <code>number</code> |  |
-|  [pit](./kibana-plugin-core-public.savedobjectsfindoptions.pit.md) | <code>{</code><br/><code>        id: string;</code><br/><code>        keepAlive?: string;</code><br/><code>    }</code> | Search against a specific Point In Time (PIT) that you've opened with <code>savedObjects.openPointInTimeForType</code>. |
+|  [pit](./kibana-plugin-core-public.savedobjectsfindoptions.pit.md) | <code>SavedObjectsPitParams</code> | Search against a specific Point In Time (PIT) that you've opened with . |
 |  [preference](./kibana-plugin-core-public.savedobjectsfindoptions.preference.md) | <code>string</code> | An optional ES preference value to be used for the query \* |
 |  [rootSearchFields](./kibana-plugin-core-public.savedobjectsfindoptions.rootsearchfields.md) | <code>string[]</code> | The fields to perform the parsed query against. Unlike the <code>searchFields</code> argument, these are expected to be root fields and will not be modified. If used in conjunction with <code>searchFields</code>, both are concatenated together. |
 |  [search](./kibana-plugin-core-public.savedobjectsfindoptions.search.md) | <code>string</code> | Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String <code>query</code> argument for more information |

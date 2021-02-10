@@ -4,13 +4,10 @@
 
 ## SavedObjectsFindOptions.pit property
 
-Search against a specific Point In Time (PIT) that you've opened with `savedObjects.openPointInTimeForType`<!-- -->.
+Search against a specific Point In Time (PIT) that you've opened with .
 
 <b>Signature:</b>
 
 ```typescript
-pit?: {
-        id: string;
-        keepAlive?: string;
-    };
+pit?: SavedObjectsPitParams;
 ```

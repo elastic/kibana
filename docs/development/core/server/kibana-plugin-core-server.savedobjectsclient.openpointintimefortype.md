@@ -4,7 +4,7 @@
 
 ## SavedObjectsClient.openPointInTimeForType() method
 
-Opens a Point In Time (PIT) against the indices for the specified Saved Object types. The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+Opens a Point In Time (PIT) against the indices for the specified Saved Object types. The returned `id` can then be passed to [SavedObjectsClient.find()](./kibana-plugin-core-server.savedobjectsclient.find.md) to search against that PIT.
 
 <b>Signature:</b>
 

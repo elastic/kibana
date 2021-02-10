@@ -377,6 +377,7 @@ export {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsPitParams,
   SavedObjectsMigrationVersion,
 } from './types';
 

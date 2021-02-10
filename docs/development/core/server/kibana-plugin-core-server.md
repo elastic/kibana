@@ -191,6 +191,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-server.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsOpenPointInTimeOptions](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.md) |  |
 |  [SavedObjectsOpenPointInTimeResponse](./kibana-plugin-core-server.savedobjectsopenpointintimeresponse.md) |  |
+|  [SavedObjectsPitParams](./kibana-plugin-core-server.savedobjectspitparams.md) |  |
 |  [SavedObjectsRawDoc](./kibana-plugin-core-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
 |  [SavedObjectsRawDocParseOptions](./kibana-plugin-core-server.savedobjectsrawdocparseoptions.md) | Options that can be specified when using the saved objects serializer to parse a raw document. |
 |  [SavedObjectsRemoveReferencesToOptions](./kibana-plugin-core-server.savedobjectsremovereferencestooptions.md) |  |

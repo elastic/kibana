@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-interface SavedObjectsPitParams {
-  id: string;
-  keepAlive?: string;
-}
+import { SavedObjectsPitParams } from '../../../types';
 
 export function getPitParams(pit: SavedObjectsPitParams) {
   return {

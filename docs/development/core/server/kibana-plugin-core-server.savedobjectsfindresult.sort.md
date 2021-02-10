@@ -11,3 +11,31 @@ The Elasticsearch `sort` value of this result.
 ```typescript
 sort?: unknown[];
 ```
+
+## Remarks
+
+This can be passed directly to the `searchAfter` param in the [SavedObjectsFindOptions](./kibana-plugin-core-server.savedobjectsfindoptions.md) in order to page through large numbers of hits. It is recommended you use this alongside a Point In Time (PIT) that was opened with [SavedObjectsClient.openPointInTimeForType()](./kibana-plugin-core-server.savedobjectsclient.openpointintimefortype.md)<!-- -->.
+
+## Example
+
+
+```ts
+const { id } = await savedObjectsClient.openPointInTimeForType('visualization');
+const page1 = await savedObjectsClient.find({
+  type: 'visualization',
+  sortField: 'updated_at',
+  sortOrder: 'asc',
+  pit,
+});
+const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+const page2 = await savedObjectsClient.find({
+  type: 'visualization',
+  sortField: 'updated_at',
+  sortOrder: 'asc',
+  pit: { id: page1.pit_id },
+  searchAfter: lastHit.sort,
+});
+await savedObjectsClient.closePointInTime(page2.pit_id);
+
+```
+

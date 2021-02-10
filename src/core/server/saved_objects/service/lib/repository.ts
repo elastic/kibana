@@ -850,10 +850,10 @@ export class SavedObjectsRepository {
         (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
           ...this._rawToSavedObject(hit),
           score: (hit as any)._score,
-          ...((hit as any).sort ? { sort: (hit as any).sort } : {}),
+          ...((hit as any).sort && { sort: (hit as any).sort }),
         })
       ),
-      ...(body.pit_id ? { pit_id: body.pit_id } : {}),
+      ...(body.pit_id && { pit_id: body.pit_id }),
     } as SavedObjectsFindResponse<T>;
   }
 
@@ -1794,18 +1794,23 @@ export class SavedObjectsRepository {
    *   type: 'index-pattern',
    *   { keepAlive: '2m' },
    * );
-   *
-   * const response = await repository.find({
-   *   type: 'index-pattern',
-   *   search: 'foo*',
-   *   sortField: 'name',
-   *   sortOrder: 'desc',
-   *   pit: {
-   *     id: 'abc123',
-   *     keepAlive: '2m',
-   *   },
-   *   searchAfter: [1234, 'abcd'],
+   * const page1 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit,
    * });
+   *
+   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+   * const page2 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id: page1.pit_id },
+   *   searchAfter: lastHit.sort,
+   * });
+   *
+   * await savedObjectsClient.closePointInTime(page2.pit_id);
    * ```
    *
    * @param {string|Array<string>} type
@@ -1816,10 +1821,8 @@ export class SavedObjectsRepository {
    */
   async openPointInTimeForType(
     type: string | string[],
-    { keepAlive, preference }: SavedObjectsOpenPointInTimeOptions = {}
+    { keepAlive = '5m', preference }: SavedObjectsOpenPointInTimeOptions = {}
   ): Promise<SavedObjectsOpenPointInTimeResponse> {
-    const defaultKeepAlive = '5m';
-
     const types = Array.isArray(type) ? type : [type];
     const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
     if (allowedTypes.length === 0) {
@@ -1828,7 +1831,7 @@ export class SavedObjectsRepository {
 
     const esOptions = {
       index: this.getIndicesForTypes(allowedTypes),
-      keep_alive: keepAlive || defaultKeepAlive,
+      keep_alive: keepAlive,
       ...(preference ? { preference } : {}),
     };
 

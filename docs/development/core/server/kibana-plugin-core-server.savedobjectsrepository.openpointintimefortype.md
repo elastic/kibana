@@ -35,18 +35,23 @@ const { id } = await repository.openPointInTimeForType(
   type: 'index-pattern',
   { keepAlive: '2m' },
 );
-
-const response = await repository.find({
-  type: 'index-pattern',
-  search: 'foo*',
-  sortField: 'name',
-  sortOrder: 'desc',
-  pit: {
-    id: 'abc123',
-    keepAlive: '2m',
-  },
-  searchAfter: [1234, 'abcd'],
+const page1 = await savedObjectsClient.find({
+  type: 'visualization',
+  sortField: 'updated_at',
+  sortOrder: 'asc',
+  pit,
 });
+
+const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+const page2 = await savedObjectsClient.find({
+  type: 'visualization',
+  sortField: 'updated_at',
+  sortOrder: 'asc',
+  pit: { id: page1.pit_id },
+  searchAfter: lastHit.sort,
+});
+
+await savedObjectsClient.closePointInTime(page2.pit_id);
 
 ```
 

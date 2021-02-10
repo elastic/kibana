@@ -2492,10 +2492,7 @@ export interface SavedObjectsFindOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
-    pit?: {
-        id: string;
-        keepAlive?: string;
-    };
+    pit?: SavedObjectsPitParams;
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
@@ -2773,6 +2770,14 @@ export interface SavedObjectsOpenPointInTimeResponse {
     id: string;
 }
 
+// @public (undocumented)
+export interface SavedObjectsPitParams {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    keepAlive?: string;
+}
+
 // @public
 export interface SavedObjectsRawDoc {
     // (undocumented)
@@ -2987,7 +2992,7 @@ export interface SearchResponse<T = unknown> {
             highlight?: any;
             inner_hits?: any;
             matched_queries?: string[];
-            sort?: string[];
+            sort?: unknown[];
         }>;
     };
     // (undocumented)
