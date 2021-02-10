@@ -3,8 +3,8 @@
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
-check out the <<release-notes>> and
-<<breaking-changes>>.
+check out the <<release-notes, release notes>>,
+<<breaking-changes, breaking changes>>, and https://www.elastic.co/blog/whats-new-kibana-7-11-0-alerting-generally-available[release blog].
 
 Other versions: {kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
 {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
