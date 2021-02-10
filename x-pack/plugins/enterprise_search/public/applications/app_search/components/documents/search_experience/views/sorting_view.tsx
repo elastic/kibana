@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiSelectOption } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface Option {
   label: string;

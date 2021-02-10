@@ -8,13 +8,13 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
-import { shallow } from 'enzyme';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
-import { EuiModal, EuiSelect, EuiFieldText } from '@elastic/eui';
+import { shallow } from 'enzyme';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+import { EuiModal, EuiSelect, EuiFieldText } from '@elastic/eui';
 
 import { FieldEditorModal } from './field_editor_modal';
 
