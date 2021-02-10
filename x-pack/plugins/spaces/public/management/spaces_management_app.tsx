@@ -9,14 +9,12 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from 'src/core/public';
+import type { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
+import type { PluginsStart } from '../plugin';
+import type { SpacesManager } from '../spaces_manager';
+import type { Space } from '..';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
-import { PluginsStart } from '../plugin';
-import { SpacesManager } from '../spaces_manager';
-import { SpacesGridPage } from './spaces_grid';
-import { ManageSpacePage } from './edit_space';
-import { Space } from '..';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
@@ -34,10 +32,13 @@ export const spacesManagementApp = Object.freeze({
       }),
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [
-          { notifications, i18n: i18nStart, application },
-          { features },
-        ] = await getStartServices();
+        const [startServices, { SpacesGridPage }, { ManageSpacePage }] = await Promise.all([
+          getStartServices(),
+          import('./spaces_grid'),
+          import('./edit_space'),
+        ]);
+
+        const [{ notifications, i18n: i18nStart, application }, { features }] = startServices;
         const spacesBreadcrumbs = [
           {
             text: i18n.translate('xpack.spaces.management.breadcrumb', {

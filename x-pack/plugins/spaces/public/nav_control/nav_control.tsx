@@ -7,8 +7,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from 'src/core/public';
-import { SpacesManager } from '../spaces_manager';
+import type { CoreStart } from 'src/core/public';
+import type { SpacesManager } from '../spaces_manager';
 import { NavControlPopover } from './nav_control_popover';
 
 export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
