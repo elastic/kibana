@@ -11,7 +11,7 @@ a flight that arrived or departed from `Warsaw` or `Venice` when the weather was
 
 * In *Discover*, open the index pattern dropdown, and select `kibana_sample_data_flight`.
 * In the query bar, click  *KQL*, and switch to the <<lucene-query, Lucene query syntax>>.
-* Search for `Warsaw OR Venice OR Clear`.
+. Search for `Warsaw OR Venice OR Clear`.
 .  If you don't see any results, open the time filter and select a time range that contains data.
 .  From the list of *Available fields*, add `_score` to the document table.
 * Sort the table by descending scores.
