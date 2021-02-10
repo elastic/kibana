@@ -361,14 +361,6 @@ export interface ElasticsearchMetricbeatSource {
                 bytes?: number;
               };
             };
-            summary?: {
-              available?: {
-                bytes?: number;
-              };
-              total?: {
-                bytes?: number;
-              };
-            };
           };
         };
       };
