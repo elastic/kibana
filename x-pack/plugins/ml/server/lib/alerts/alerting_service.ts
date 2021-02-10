@@ -434,6 +434,9 @@ export function alertingServiceProvider(mlClient: MlClient) {
                     ],
                   },
                 },
+                queryString: `${r.topInfluencers![0].influencer_field_name}:"${
+                  r.topInfluencers![0].influencer_field_value
+                }"`,
               }
             : {}),
         },
