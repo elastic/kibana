@@ -111,7 +111,7 @@ export function createFlyoutManageDrilldowns({
     if (!drilldowns) return null;
 
     /**
-     * Needed for edit mode to prefill wizard fields with data from current edited drilldown
+     * Needed for edit mode to pre-fill wizard fields with data from current edited drilldown
      */
     function resolveInitialDrilldownWizardConfig(): DrilldownWizardConfig | undefined {
       if (route !== Routes.Edit) return undefined;
@@ -151,95 +151,91 @@ export function createFlyoutManageDrilldowns({
       };
     }
 
-    switch (route) {
-      case Routes.Create:
-      case Routes.Edit:
-        return (
-          <FlyoutDrilldownWizard
-            docsLink={docsLink}
-            triggerPickerDocsLink={triggerPickerDocsLink}
-            showWelcomeMessage={shouldShowWelcomeMessage}
-            onWelcomeHideClick={onHideWelcomeMessage}
-            drilldownActionFactories={actionFactories}
-            onClose={props.onClose}
-            mode={route === Routes.Create ? 'create' : 'edit'}
-            onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-            onSubmit={({ actionConfig, actionFactory, name, selectedTriggers }) => {
-              if (route === Routes.Create) {
-                createDrilldown(
-                  {
-                    name,
-                    config: actionConfig,
-                    factoryId: actionFactory.id,
-                  },
-                  selectedTriggers
-                );
-              } else {
-                editDrilldown(
-                  currentEditId!,
-                  {
-                    name,
-                    config: actionConfig,
-                    factoryId: actionFactory.id,
-                  },
-                  selectedTriggers
-                );
-              }
-
-              if (isCreateOnly) {
-                if (props.onClose) {
-                  props.onClose();
-                }
-              } else {
-                setRoute(Routes.Manage);
-              }
-
-              setCurrentEditId(null);
-            }}
-            onDelete={() => {
-              deleteDrilldown(currentEditId!);
-              setRoute(Routes.Manage);
-              setCurrentEditId(null);
-            }}
-            actionFactoryPlaceContext={props.placeContext}
-            initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
-            supportedTriggers={props.triggers}
-            getTrigger={getTrigger}
-          />
-        );
-
-      case Routes.Manage:
-      default:
-        // show trigger column in case if there is more then 1 possible trigger in current context
-        const showTriggerColumn =
-          intersection(
-            props.triggers,
-            actionFactories
-              .map((factory) => factory.supportedTriggers())
-              .reduce((res, next) => res.concat(next), [])
-          ).length > 1;
-        return (
-          <FlyoutListManageDrilldowns
-            docsLink={docsLink}
-            showWelcomeMessage={shouldShowWelcomeMessage}
-            onWelcomeHideClick={onHideWelcomeMessage}
-            drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
-            onDelete={(ids) => {
-              setCurrentEditId(null);
-              deleteDrilldown(ids);
-            }}
-            onEdit={(id) => {
-              setCurrentEditId(id);
-              setRoute(Routes.Edit);
-            }}
-            onCreate={() => {
-              setCurrentEditId(null);
-              setRoute(Routes.Create);
-            }}
-            onClose={props.onClose}
-            showTriggerColumn={showTriggerColumn}
-          />
-        );
+    if (route === Routes.Manage) {
+      // show trigger column in case if there is more then 1 possible trigger in current context
+      const showTriggerColumn =
+        intersection(
+          props.triggers,
+          actionFactories
+            .map((factory) => factory.supportedTriggers())
+            .reduce((res, next) => res.concat(next), [])
+        ).length > 1;
+      return (
+        <FlyoutListManageDrilldowns
+          docsLink={docsLink}
+          showWelcomeMessage={shouldShowWelcomeMessage}
+          onWelcomeHideClick={onHideWelcomeMessage}
+          drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
+          onDelete={(ids) => {
+            setCurrentEditId(null);
+            deleteDrilldown(ids);
+          }}
+          onEdit={(id) => {
+            setCurrentEditId(id);
+            setRoute(Routes.Edit);
+          }}
+          onCreate={() => {
+            setCurrentEditId(null);
+            setRoute(Routes.Create);
+          }}
+          onClose={props.onClose}
+          showTriggerColumn={showTriggerColumn}
+        />
+      );
     }
+
+    return (
+      <FlyoutDrilldownWizard
+        docsLink={docsLink}
+        triggerPickerDocsLink={triggerPickerDocsLink}
+        showWelcomeMessage={shouldShowWelcomeMessage}
+        onWelcomeHideClick={onHideWelcomeMessage}
+        drilldownActionFactories={actionFactories}
+        onClose={props.onClose}
+        mode={route === Routes.Create ? 'create' : 'edit'}
+        onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
+        onSubmit={({ actionConfig, actionFactory, name, selectedTriggers }) => {
+          if (route === Routes.Create) {
+            createDrilldown(
+              {
+                name,
+                config: actionConfig,
+                factoryId: actionFactory.id,
+              },
+              selectedTriggers
+            );
+          } else {
+            editDrilldown(
+              currentEditId!,
+              {
+                name,
+                config: actionConfig,
+                factoryId: actionFactory.id,
+              },
+              selectedTriggers
+            );
+          }
+
+          if (isCreateOnly) {
+            if (props.onClose) {
+              props.onClose();
+            }
+          } else {
+            setRoute(Routes.Manage);
+          }
+
+          setCurrentEditId(null);
+        }}
+        onDelete={() => {
+          deleteDrilldown(currentEditId!);
+          setRoute(Routes.Manage);
+          setCurrentEditId(null);
+        }}
+        actionFactoryPlaceContext={props.placeContext}
+        initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
+        supportedTriggers={props.triggers}
+        getTrigger={getTrigger}
+      />
+    );
   };
 }
