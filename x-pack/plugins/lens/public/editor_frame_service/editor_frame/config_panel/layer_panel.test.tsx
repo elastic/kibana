@@ -68,7 +68,7 @@ describe('LayerPanel', () => {
       dispatch: jest.fn(),
       core: coreMock.createStart(),
       layerIndex: 0,
-      setLayerRef: jest.fn(),
+      registerNewLayerRef: jest.fn(),
     };
   }
 
@@ -624,17 +624,26 @@ describe('LayerPanel', () => {
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
-
-      component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
+      act(() => {
+        component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
+      });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'reorder',
           droppedItem: draggingOperation,
         })
       );
+      const secondButton = component
+        .find(DragDrop)
+        .at(1)
+        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .instance();
+      const focusedEl = document.activeElement;
+      expect(focusedEl).toEqual(secondButton);
     });
 
     it('should copy when dropping on empty slot in the same group', () => {
+      (generateId as jest.Mock).mockReturnValue(`newid`);
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -662,9 +671,12 @@ describe('LayerPanel', () => {
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
-      component.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_in_group');
+      act(() => {
+        component.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_in_group');
+      });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
+          columnId: 'newid',
           dropType: 'duplicate_in_group',
           droppedItem: draggingOperation,
         })
