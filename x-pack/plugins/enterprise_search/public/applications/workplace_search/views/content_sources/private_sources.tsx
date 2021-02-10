@@ -19,7 +19,6 @@ import { AppLogic } from '../../app_logic';
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import {
@@ -70,17 +69,12 @@ export const PrivateSources: React.FC = () => {
     </EuiButtonTo>
   );
 
-  const sourcesHeader = (
-    <ViewContentHeader
-      title={PRIVATE_HEADER_TITLE}
-      action={headerAction}
-      description={PRIVATE_HEADER_DESCRIPTION}
-      alignItems="flexStart"
-    />
-  );
-
   const privateSourcesTable = (
-    <ContentSection>
+    <ContentSection
+      title={PRIVATE_HEADER_TITLE}
+      description={PRIVATE_HEADER_DESCRIPTION}
+      action={canAddSources && headerAction}
+    >
       <SourcesTable
         showDetails
         onSearchableToggle={setSourceSearchability}
@@ -90,7 +84,12 @@ export const PrivateSources: React.FC = () => {
   );
 
   const privateSourcesEmptyState = (
-    <ContentSection className="zero-state__private-sources">
+    <ContentSection
+      className="zero-state__private-sources"
+      title={PRIVATE_HEADER_TITLE}
+      description={PRIVATE_HEADER_DESCRIPTION}
+      action={canAddSources && headerAction}
+    >
       <EuiPanel className="euiPanel--inset">
         <EuiSpacer size="xxl" />
         <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
@@ -151,7 +150,6 @@ export const PrivateSources: React.FC = () => {
   return (
     <SourcesView>
       {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-      {canAddSources && sourcesHeader}
       {canCreatePersonalSources && privateSources}
       {contentSources.length > 0 ? sharedSources : sharedSourcesEmptyState}
     </SourcesView>
