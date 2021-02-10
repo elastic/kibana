@@ -37,7 +37,7 @@ interface Props {
   alertInterval: string;
   alertThrottle: string;
   alertType: PreviewableAlertTypes;
-  alertParams: { criteria?: any[]; sourceId: string } & Record<string, any>;
+  alertParams: { criteria: any[]; sourceId: string } & Record<string, any>;
   validate: (params: any) => ValidationResult;
   showNoDataResults?: boolean;
   groupByDisplayName?: string;
@@ -109,7 +109,6 @@ export const AlertPreview: React.FC<Props> = (props) => {
   }, [previewLookbackInterval, alertInterval]);
 
   const isPreviewDisabled = useMemo(() => {
-    if (!alertParams.criteria) return false;
     const validationResult = validate({ criteria: alertParams.criteria } as any);
     const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
       Object.values(result).some((arr) => Array.isArray(arr) && arr.length)

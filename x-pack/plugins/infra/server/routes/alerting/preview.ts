@@ -9,21 +9,17 @@ import { PreviewResult } from '../../lib/alerting/common/types';
 import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  METRIC_ANOMALY_ALERT_TYPE_ID,
   INFRA_ALERT_PREVIEW_PATH,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   alertPreviewRequestParamsRT,
   alertPreviewSuccessResponsePayloadRT,
   MetricThresholdAlertPreviewRequestParams,
   InventoryAlertPreviewRequestParams,
-  MetricAnomalyAlertPreviewRequestParams,
 } from '../../../common/alerting/metrics';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { previewInventoryMetricThresholdAlert } from '../../lib/alerting/inventory_metric_threshold/preview_inventory_metric_threshold_alert';
 import { previewMetricThresholdAlert } from '../../lib/alerting/metric_threshold/preview_metric_threshold_alert';
-import { previewMetricAnomalyAlert } from '../../lib/alerting/metric_anomaly/preview_metric_anomaly_alert';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { assertHasInfraMlPlugins } from '../../utils/request_context';
 
 export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) => {
   const { callWithRequest } = framework;
@@ -37,6 +33,8 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
+        criteria,
+        filterQuery,
         lookback,
         sourceId,
         alertType,
@@ -57,11 +55,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
       try {
         switch (alertType) {
           case METRIC_THRESHOLD_ALERT_TYPE_ID: {
-            const {
-              groupBy,
-              criteria,
-              filterQuery,
-            } = request.body as MetricThresholdAlertPreviewRequestParams;
+            const { groupBy } = request.body as MetricThresholdAlertPreviewRequestParams;
             const previewResult = await previewMetricThresholdAlert({
               callCluster,
               params: { criteria, filterQuery, groupBy },
@@ -78,11 +72,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
             });
           }
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
-            const {
-              nodeType,
-              criteria,
-              filterQuery,
-            } = request.body as InventoryAlertPreviewRequestParams;
+            const { nodeType } = request.body as InventoryAlertPreviewRequestParams;
             const previewResult = await previewInventoryMetricThresholdAlert({
               callCluster,
               params: { criteria, filterQuery, nodeType },
@@ -97,39 +87,6 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
 
             return response.ok({
               body: alertPreviewSuccessResponsePayloadRT.encode(payload),
-            });
-          }
-          case METRIC_ANOMALY_ALERT_TYPE_ID: {
-            assertHasInfraMlPlugins(requestContext);
-            const {
-              nodeType,
-              metric,
-              threshold,
-              influencerFilter,
-            } = request.body as MetricAnomalyAlertPreviewRequestParams;
-            const { mlAnomalyDetectors, mlSystem, spaceId } = requestContext.infra;
-
-            const previewResult = await previewMetricAnomalyAlert({
-              mlAnomalyDetectors,
-              mlSystem,
-              spaceId,
-              params: { nodeType, metric, threshold, influencerFilter },
-              lookback,
-              sourceId: source.id,
-              alertInterval,
-              alertThrottle,
-              alertOnNoData,
-            });
-
-            return response.ok({
-              body: alertPreviewSuccessResponsePayloadRT.encode({
-                numberOfGroups: 1,
-                resultTotals: {
-                  ...previewResult,
-                  error: 0,
-                  noData: 0,
-                },
-              }),
             });
           }
           default:
