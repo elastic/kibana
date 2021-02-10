@@ -245,8 +245,7 @@ describe('RelevanceTuningLogic', () => {
     });
 
     beforeAll(() => {
-      scrollToSpy = jest.spyOn(window, 'scrollTo');
-      scrollToSpy.mockImplementation(() => true);
+      scrollToSpy = jest.spyOn(window, 'scrollTo').mockImplementation(() => true);
       confirmSpy = jest.spyOn(window, 'confirm');
     });
 
