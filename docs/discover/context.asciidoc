@@ -6,7 +6,7 @@ you might want to inspect the documents that occurred
 immediately before and after the event. With the Context view,
 you can do just that for index patterns that contain time-based events.
 
-To open the Context view, click the expand icon (>) in the document table, and then click
+. In the document table, click the expand icon (>).
 *View surrounding documents.*
 
 The documents are sorted  by the time field specified in the index pattern 
