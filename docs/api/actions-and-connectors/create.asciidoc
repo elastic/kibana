@@ -1,10 +1,10 @@
 [[actions-and-connectors-api-create]]
 === Create action API
 ++++
-<titleabbrev>Create actions and connectors</titleabbrev>
+<titleabbrev>Create action API</titleabbrev>
 ++++
 
-Create {kib} actions and connectors.
+experimental[] Create {kib} actions.
 
 [[actions-and-connectors-api-create-request]]
 ==== Request
@@ -18,15 +18,15 @@ Create {kib} actions and connectors.
   (Required, string) The display name for the action.
 
 `actionTypeId`::
-  (Required, string) The action type for the action.
+  (Required, string) The action type ID for the action.
 
 `config`::
-  (Required, object) The action configuration. Expected configuration varies depending on
-  the action type. See the specific action type to determine configuration definition.
+  (Required, object) The action configuration. Configuration properties vary depending on
+  the action type. Some action types will have no configuration properties. See the specific action type to determine required fields.
 
 `secrets`::
-  (Required, object) The secrets configuration for the action. Expected configuration varies
-  depending on the action type. See the specific ation type to determine secrets definition.
+  (Required, object) The secrets configuration for the action. Secrets properties vary
+  depending on the action type. Some action types will have no secrets properties. See the specific ation type to determine required fields.
 
 [[actions-and-connectors-api-create-request-codes]]
 ==== Response code
@@ -50,3 +50,72 @@ $ curl -X POST api/actions/action  -H 'kbn-xsrf: true' -H 'Content-Type: applica
 --------------------------------------------------
 // KIBANA
 
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+  "actionTypeId": ".index",
+  "name": "my-action",
+  "config": {
+    "index": "test-index",
+    "refresh": false,
+    "executionTimeField": null
+  },
+  "isPreconfigured": false
+}
+--------------------------------------------------
+
+==== Action type configuration and secrets
+
+[options="header"]
+|===
+
+| Type | Id | Config
+
+| Email
+| `.email`
+| <<email-connector-config-properties, Email config and secrets properties>>
+
+| Index
+| `.index`
+| <<index-connector-config-properties, Index config and secrets properties>>
+
+| Jira
+| `.jira`
+| <<jira-connector-config-properties, Jira config and secrets properties>>
+
+| PagerDuty
+| `.pagerduty`
+| <<pagerduty-connector-config-properties, PagerDuty config and secrets properties>>
+
+| IBM Resilient
+| `.resilient`
+| <<resilient-connector-config-properties, IBM Resilient config and secrets properties>>
+
+| Server log
+| `.server-log`
+| <<server-log-connector-configuration, Server log config and secrets properties>>
+
+| ServiceNow ITSM
+| `.servicenow`
+| <<servicenow-connector-config-properties, ServiceNow ITSM config and secrets properties>>
+
+| ServiceNow SecOps
+| `.servicenow-sir`
+| <<servicenow-connector-config-properties, ServiceNow SIR config and secrets properties>>
+
+| Slack
+| `.slack`
+| <<slack-connector-config-properties, Slack config and secrets properties>>
+
+| Microsoft Teams
+| `.teams`
+| <<teams-connector-config-properties, Microsoft Teams config and secrets properties>>
+
+| Webhook
+| `.webhook`
+| <<webhook-connector-config-properties, Webhook config and secrets properties>>
+
+|===

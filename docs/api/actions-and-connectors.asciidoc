@@ -11,13 +11,13 @@ The following {kib} actions APIs are available:
 
 * <<actions-and-connectors-api-list, List all action types API>> to retrieve a list of all {kib} action types
 
-* <<actions-and-connectors-api-create, Create action API>> to create {kib} action
+* <<actions-and-connectors-api-create, Create action API>> to create {kib} actions
 
 * <<actions-and-connectors-api-update, Update action API>> to update the attributes for an existing {kib} action
 
 * <<actions-and-connectors-api-execute, Execute action API>> to execute a {kib} action by ID
 
-* <<actions-and-connectors-api-delete, Delete action API>> to remove {kib} action by ID
+* <<actions-and-connectors-api-delete, Delete action API>> to remove a {kib} action by ID
 
 === Action types
 

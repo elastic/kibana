@@ -1,114 +1,50 @@
 [[actions-and-connectors-api-get]]
 === Get action API
 ++++
-<titleabbrev>Get action</titleabbrev>
+<titleabbrev>Get action API</titleabbrev>
 ++++
 
-Retrieve a single {kib} action by ID.
+experimental[] Retrieve a single {kib} action by ID.
 
 [[actions-and-connectors-api-get-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/actions/action/<id>`
 
-// `GET <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
+[[actions-and-connectors-api-get-params]]
+==== Path parameters
 
-// [[saved-objects-api-get-params]]
-// ==== Path parameters
+`id`::
+  (Required, string) The ID of the action to retrieve.
 
-// `space_id`::
-//   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+[[actions-and-connectors-api-get-codes]]
+==== Response code
 
+`200`::
+    Indicates a successful call.
 
-// `type`::
-//   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
+[[actions-and-connectors-api-get-example]]
+==== Example
 
-// `id`::
-//   (Required, string) The ID of the object to retrieve.
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+--------------------------------------------------
+// KIBANA
 
-// [[saved-objects-api-get-codes]]
-// ==== Response code
+The API returns the following:
 
-// `200`::
-//     Indicates a successful call.
-
-// [[saved-objects-api-get-example]]
-// ==== Example
-
-// Retrieve the index pattern object with the `my-pattern` ID:
-
-// [source,sh]
-// --------------------------------------------------
-// $ curl -X GET api/saved_objects/index-pattern/my-pattern
-// --------------------------------------------------
-// // KIBANA
-
-// The API returns the following:
-
-// [source,sh]
-// --------------------------------------------------
-// {
-//   "id": "my-pattern",
-//   "type": "index-pattern",
-//   "version": 1,
-//   "attributes": {
-//     "title": "my-pattern-*"
-//   }
-// }
-// --------------------------------------------------
-
-// Retrieve a dashboard object in the `testspace` by ID:
-
-// [source,sh]
-// --------------------------------------------------
-// $ curl -X GET s/testspace/api/saved_objects/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d
-// --------------------------------------------------
-// // KIBANA
-
-// The API returns the following:
-
-// [source,sh]
-// --------------------------------------------------
-// {
-//   "id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
-//   "type": "dashboard",
-//   "updated_at": "2019-07-23T00:11:07.059Z",
-//   "version": "WzQ0LDFd",
-//   "attributes": {
-//     "title": "[Flights] Global Flight Dashboard",
-//     "hits": 0,
-//     "description": "Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats",
-//     "panelsJSON": "[ . . . ]",
-//     "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-//     "version": 1,
-//     "timeRestore": true,
-//     "timeTo": "now",
-//     "timeFrom": "now-24h",
-//     "refreshInterval": {
-//       "display": "15 minutes",
-//       "pause": false,
-//       "section": 2,
-//       "value": 900000
-//     },
-//     "kibanaSavedObjectMeta": {
-//       "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
-//     }
-//   },
-//   "references": [
-//     {
-//       "name": "panel_0",
-//       "type": "visualization",
-//       "id": "aeb212e0-4c84-11e8-b3d7-01146121b73d"
-//     },
-//     . . .
-//     {
-//       "name": "panel_18",
-//       "type": "visualization",
-//       "id": "ed78a660-53a0-11e8-acbd-0be0ad9d822b"
-//     }
-//   ],
-//   "migrationVersion": {
-//     "dashboard": "7.0.0"
-//   }
-// }
-// --------------------------------------------------
+[source,sh]
+--------------------------------------------------
+{
+  "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
+  "actionTypeId": ".index",
+  "name": "my-action",
+  "config": {
+    "index": "test-index",
+    "refresh": false,
+    "executionTimeField": null
+  },
+  "isPreconfigured": false
+}
+--------------------------------------------------
