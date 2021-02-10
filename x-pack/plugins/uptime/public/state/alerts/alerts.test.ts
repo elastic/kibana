@@ -5,29 +5,38 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'kibana/public';
-import { createAlertAction } from './alerts';
+import {
+  alertsReducer,
+  createAsyncLoadingAction,
+  initialState,
+  resolveAsyncLoadingAction,
+} from './alerts';
 
-describe('createAlertAction', () => {
-  it('creates actions for `get`, `success`, and `fail`', () => {
-    expect(createAlertAction.get()).toMatchInlineSnapshot(`
-      Object {
-        "type": "CREATE ALERT",
-      }
+describe('alertsReducer', () => {
+  it('handles async loading', () => {
+    const result = alertsReducer(
+      initialState,
+      createAsyncLoadingAction({ monitorId: 'test-id', monitorName: 'test-name' })
+    );
+    expect(result.pendingAlertRequests).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "monitorId": "test-id",
+          "monitorName": "test-name",
+        },
+      ]
     `);
-    expect(createAlertAction.success(null)).toMatchInlineSnapshot(`
-      Object {
-        "payload": null,
-        "type": "CREATE ALERT_SUCCESS",
-      }
-    `);
-    expect(createAlertAction.fail(new Error('test error') as IHttpFetchError))
-      .toMatchInlineSnapshot(`
-      Object {
-        "error": true,
-        "payload": [Error: test error],
-        "type": "CREATE ALERT_FAIL",
-      }
-    `);
+  });
+
+  it('handles async resolution', () => {
+    const result = alertsReducer(
+      {
+        ...initialState,
+        pendingAlertRequests: [{ monitorId: 'test-id', monitorName: 'test-name' }],
+      },
+      resolveAsyncLoadingAction({ monitorId: 'test-id' })
+    );
+    expect(Array.isArray(result.pendingAlertRequests)).toBe(true);
+    expect(result.pendingAlertRequests).toHaveLength(0);
   });
 });

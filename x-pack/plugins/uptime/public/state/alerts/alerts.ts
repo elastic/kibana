@@ -59,8 +59,10 @@ export interface AsyncLoadingPayload {
   monitorName?: string;
 }
 
-const createAsyncLoadingAction = createAction<AsyncLoadingPayload>('ASYNC_REQUEST_PENDING');
-const resolveAsyncLoadingAction = createAction<AsyncLoadingPayload>('ASYNC_REQUEST_RESOLVED');
+export const createAsyncLoadingAction = createAction<AsyncLoadingPayload>('ASYNC_REQUEST_PENDING');
+export const resolveAsyncLoadingAction = createAction<AsyncLoadingPayload>(
+  'ASYNC_REQUEST_RESOLVED'
+);
 
 export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
@@ -72,7 +74,7 @@ export interface AlertState {
   pendingAlertRequests: AsyncLoadingPayload[];
 }
 
-const initialState = {
+export const initialState = {
   connectors: asyncInitState(),
   newAlert: asyncInitState(),
   alerts: asyncInitState(),
@@ -82,7 +84,7 @@ const initialState = {
   pendingAlertRequests: [],
 };
 
-export const alertsReducer = handleActions<AlertState>(
+export const alertsReducer = handleActions<AlertState, AsyncLoadingPayload>(
   {
     ...handleAsyncAction<AlertState>('connectors', getConnectorsAction),
     ...handleAsyncAction<AlertState>('newAlert', createAlertAction),
@@ -90,7 +92,7 @@ export const alertsReducer = handleActions<AlertState>(
     ...handleAsyncAction<AlertState>('anomalyAlert', getAnomalyAlertAction),
     ...handleAsyncAction<AlertState>('alertDeletion', deleteAlertAction),
     ...handleAsyncAction<AlertState>('anomalyAlertDeletion', deleteAnomalyAlertAction),
-    [String(createAsyncLoadingAction)]: (state: any, action: any) => ({
+    [String(createAsyncLoadingAction)]: (state: any, action: Action<AsyncLoadingPayload>) => ({
       ...state,
       pendingAlertRequests: [...state.pendingAlertRequests, action.payload],
     }),
