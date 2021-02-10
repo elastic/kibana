@@ -11,23 +11,22 @@ import { groups } from '../../__mocks__/groups.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { Groups } from './groups';
+import { EuiFieldSearch, EuiLoadingSpinner } from '@elastic/eui';
 
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { Loading } from '../../../shared/loading';
+import { DEFAULT_META } from '../../../shared/constants';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { Loading } from '../../../shared/loading';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
 import { GroupsTable } from './components/groups_table';
 import { TableFilters } from './components/table_filters';
-
-import { DEFAULT_META } from '../../../shared/constants';
-
-import { EuiFieldSearch, EuiLoadingSpinner } from '@elastic/eui';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { Groups } from './groups';
 
 const getSearchResults = jest.fn();
 const openNewGroupModal = jest.fn();
