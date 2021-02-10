@@ -66,7 +66,7 @@ export class SavedObjectTaggingPlugin
 
   public start({ http, application, overlays }: CoreStart) {
     this.tagCache = new TagsCache({
-      refreshHandler: () => this.tagClient!.getAll(),
+      refreshHandler: () => this.tagClient!.getAll({ asSystemRequest: true }),
       refreshInterval: this.config.cacheRefreshInterval,
     });
     this.tagClient = new TagsClient({ http, changeListener: this.tagCache });
