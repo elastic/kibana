@@ -117,6 +117,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               optional: true,
               defaultValue: 'maximize_minimum_recall',
             },
+            early_stopping_enabled: {
+              optional: true,
+              ignore: true,
+            },
           },
         }
       : {}),
@@ -206,6 +210,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             loss_function_parameter: {
               optional: true,
+            },
+            early_stopping_enabled: {
+              optional: true,
+              ignore: true,
             },
           },
         }
