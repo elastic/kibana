@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
+import { RouteDependencies } from '../../plugin';
 
 interface EnginesResponse {
   results: object[];
@@ -56,7 +56,7 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/details`,
+      path: '/as/engines/:name/details',
     })
   );
   router.get(
@@ -69,7 +69,7 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/overview_metrics`,
+      path: '/as/engines/:name/overview_metrics',
     })
   );
 }

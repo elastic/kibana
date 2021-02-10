@@ -75,7 +75,17 @@ interface WorkspaceState {
   expandError: boolean;
 }
 
-const workspaceDropValue = { id: 'lnsWorkspace' };
+const dropProps = {
+  value: {
+    id: 'lnsWorkspace',
+    humanData: {
+      label: i18n.translate('xpack.lens.editorFrame.workspaceLabel', {
+        defaultMessage: 'Workspace',
+      }),
+    },
+  },
+  order: [1, 0, 0, 0],
+};
 
 // Exported for testing purposes only.
 export const WorkspacePanel = React.memo(function WorkspacePanel({
@@ -293,9 +303,10 @@ export const WorkspacePanel = React.memo(function WorkspacePanel({
         className="lnsWorkspacePanel__dragDrop"
         dataTestSubj="lnsWorkspace"
         draggable={false}
-        droppable={Boolean(suggestionForDraggedField)}
+        dropType={suggestionForDraggedField ? 'field_add' : undefined}
         onDrop={onDrop}
-        value={workspaceDropValue}
+        value={dropProps.value}
+        order={dropProps.order}
       >
         <div>
           {renderVisualization()}

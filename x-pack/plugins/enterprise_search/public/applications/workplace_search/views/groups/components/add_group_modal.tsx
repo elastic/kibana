@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -22,9 +21,9 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CANCEL_BUTTON } from '../../../constants';
-
 import { GroupsLogic } from '../groups_logic';
 
 const ADD_GROUP_HEADER = i18n.translate(
@@ -73,7 +72,7 @@ export const AddGroupModal: React.FC<{}> = () => {
             <EuiButton
               disabled={!newGroupName}
               onClick={saveNewGroup}
-              fill={true}
+              fill
               data-test-subj="AddGroupSubmit"
             >
               {ADD_GROUP_SUBMIT}
