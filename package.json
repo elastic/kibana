@@ -97,7 +97,7 @@
     "@babel/runtime": "^7.12.5",
     "@elastic/datemath": "link:packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary",
-    "@elastic/ems-client": "7.11.0",
+    "@elastic/ems-client": "7.12.0",
     "@elastic/eui": "31.4.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "^9.0.1-kibana3",
