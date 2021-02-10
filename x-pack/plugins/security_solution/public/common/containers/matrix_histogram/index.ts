@@ -63,6 +63,7 @@ export const useMatrixHistogram = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     matrixHistogramRequest,
@@ -96,7 +97,7 @@ export const useMatrixHistogram = ({
 
   const hostsSearch = useCallback(
     (request: MatrixHistogramRequestOptions) => {
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -108,8 +109,8 @@ export const useMatrixHistogram = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   const histogramBuckets: Buckets = getOr(
                     bucketEmpty,
                     'rawResponse.aggregations.eventActionGroup.buckets',
@@ -124,36 +125,33 @@ export const useMatrixHistogram = ({
                     totalCount: response.totalCount,
                     buckets: histogramBuckets,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_MATRIX_HISTOGRAM);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel) {
-                setLoading(false);
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addError(msg, {
+                    title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
+                  });
+                }
               }
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addError(msg, {
-                  title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
-                });
-              }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, errorMessage, notifications.toasts]
   );
@@ -196,6 +194,10 @@ export const useMatrixHistogram = ({
     if (!skip) {
       hostsSearch(matrixHistogramRequest);
     }
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [matrixHistogramRequest, hostsSearch, skip]);
 
   const runMatrixHistogramSearch = useCallback(

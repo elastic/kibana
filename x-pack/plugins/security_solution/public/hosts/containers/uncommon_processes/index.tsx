@@ -75,6 +75,7 @@ export const useUncommonProcesses = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     uncommonProcessesRequest,
@@ -123,7 +124,7 @@ export const useUncommonProcesses = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -138,8 +139,8 @@ export const useUncommonProcesses = ({
           )
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setUncommonProcessesResponse((prevResponse) => ({
                     ...prevResponse,
@@ -149,33 +150,33 @@ export const useUncommonProcesses = ({
                     refetch: refetch.current,
                     totalCount: response.totalCount,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  notifications.toasts.addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
+                  searchSubscription$.unsubscribe();
                 }
-                notifications.toasts.addWarning(i18n.ERROR_UNCOMMON_PROCESSES);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_UNCOMMON_PROCESSES,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_UNCOMMON_PROCESSES,
+                    text: msg.message,
+                  });
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -205,6 +206,10 @@ export const useUncommonProcesses = ({
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [uncommonProcessesRequest, uncommonProcessesSearch]);
 
   return [loading, uncommonProcessesResponse];

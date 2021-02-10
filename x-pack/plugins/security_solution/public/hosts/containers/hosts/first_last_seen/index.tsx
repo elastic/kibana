@@ -44,6 +44,7 @@ export const useFirstLastSeenHost = ({
 }: UseHostFirstLastSeen): [boolean, FirstLastSeenHostArgs] => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     firstLastSeenHostRequest,
@@ -66,7 +67,7 @@ export const useFirstLastSeenHost = ({
 
   const firstLastSeenHostSearch = useCallback(
     (request: HostFirstLastSeenRequestOptions) => {
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -78,8 +79,8 @@ export const useFirstLastSeenHost = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setFirstLastSeenHostResponse((prevResponse) => ({
                     ...prevResponse,
@@ -87,37 +88,37 @@ export const useFirstLastSeenHost = ({
                     firstSeen: response.firstSeen,
                     lastSeen: response.lastSeen,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_FIRST_LAST_SEEN_HOST);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_FIRST_LAST_SEEN_HOST);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                setFirstLastSeenHostResponse((prevResponse) => ({
-                  ...prevResponse,
-                  errorMessage: msg,
-                }));
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_FIRST_LAST_SEEN_HOST,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  setFirstLastSeenHostResponse((prevResponse) => ({
+                    ...prevResponse,
+                    errorMessage: msg,
+                  }));
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_FIRST_LAST_SEEN_HOST,
+                    text: msg.message,
+                  });
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts]
   );
@@ -139,6 +140,10 @@ export const useFirstLastSeenHost = ({
 
   useEffect(() => {
     firstLastSeenHostSearch(firstLastSeenHostRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [firstLastSeenHostRequest, firstLastSeenHostSearch]);
 
   return [loading, firstLastSeenHostResponse];

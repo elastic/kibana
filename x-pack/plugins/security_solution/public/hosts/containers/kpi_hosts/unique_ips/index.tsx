@@ -52,6 +52,7 @@ export const useHostsKpiUniqueIps = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     hostsKpiUniqueIpsRequest,
@@ -80,7 +81,7 @@ export const useHostsKpiUniqueIps = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -92,8 +93,8 @@ export const useHostsKpiUniqueIps = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (!response.isPartial && !response.isRunning) {
                   setLoading(false);
                   setHostsKpiUniqueIpsResponse((prevResponse) => ({
                     ...prevResponse,
@@ -104,34 +105,34 @@ export const useHostsKpiUniqueIps = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (response.isPartial && !response.isRunning) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_UNIQUE_IPS);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_UNIQUE_IPS);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_HOSTS_KPI_UNIQUE_IPS,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_HOSTS_KPI_UNIQUE_IPS,
+                    text: msg.message,
+                  });
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -158,6 +159,10 @@ export const useHostsKpiUniqueIps = ({
 
   useEffect(() => {
     hostsKpiUniqueIpsSearch(hostsKpiUniqueIpsRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [hostsKpiUniqueIpsRequest, hostsKpiUniqueIpsSearch]);
 
   return [loading, hostsKpiUniqueIpsResponse];

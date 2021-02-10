@@ -48,6 +48,7 @@ export const useTimelineLastEventTime = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     TimelineLastEventTimeRequest,
@@ -71,7 +72,7 @@ export const useTimelineLastEventTime = ({
 
   const timelineLastEventTimeSearch = useCallback(
     (request: TimelineEventsLastEventTimeRequestOptions) => {
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -86,8 +87,8 @@ export const useTimelineLastEventTime = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setTimelineLastEventTimeResponse((prevResponse) => ({
                     ...prevResponse,
@@ -95,38 +96,37 @@ export const useTimelineLastEventTime = ({
                     lastSeen: response.lastSeen,
                     refetch: refetch.current,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_LAST_EVENT_TIME);
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_LAST_EVENT_TIME);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_LAST_EVENT_TIME,
-                  text: msg.message,
-                });
-                setTimelineLastEventTimeResponse((prevResponse) => ({
-                  ...prevResponse,
-                  errorMessage: msg.message,
-                }));
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_LAST_EVENT_TIME,
+                    text: msg.message,
+                  });
+                  setTimelineLastEventTimeResponse((prevResponse) => ({
+                    ...prevResponse,
+                    errorMessage: msg.message,
+                  }));
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts]
   );
@@ -149,6 +149,10 @@ export const useTimelineLastEventTime = ({
 
   useEffect(() => {
     timelineLastEventTimeSearch(TimelineLastEventTimeRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [TimelineLastEventTimeRequest, timelineLastEventTimeSearch]);
 
   return [loading, timelineLastEventTimeResponse];

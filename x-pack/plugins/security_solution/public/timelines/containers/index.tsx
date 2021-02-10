@@ -92,6 +92,7 @@ export const useTimelineEvents = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [activePage, setActivePage] = useState(
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
@@ -151,7 +152,7 @@ export const useTimelineEvents = ({
       if (request == null || pageName === '' || skip) {
         return;
       }
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
@@ -163,48 +164,49 @@ export const useTimelineEvents = ({
           })
           .subscribe({
             next: (response) => {
-              try {
+              if (!didCancel.current) {
                 if (isCompleteResponse(response)) {
-                  if (!didCancel) {
-                    setLoading(false);
-
-                    setTimelineResponse((prevResponse) => {
-                      const newTimelineResponse = {
-                        ...prevResponse,
-                        events: getTimelineEvents(response.edges),
-                        inspect: getInspectResponse(response, prevResponse.inspect),
-                        pageInfo: response.pageInfo,
-                        totalCount: response.totalCount,
-                        updatedAt: Date.now(),
-                      };
-                      if (id === TimelineId.active) {
-                        activeTimeline.setExpandedEvent({});
-                        activeTimeline.setPageName(pageName);
-                        activeTimeline.setRequest(request);
-                        activeTimeline.setResponse(newTimelineResponse);
-                      }
-                      return newTimelineResponse;
-                    });
-                  }
+                  setLoading(false);
+                  setTimelineResponse((prevResponse) => {
+                    const newTimelineResponse = {
+                      ...prevResponse,
+                      events: getTimelineEvents(response.edges),
+                      inspect: getInspectResponse(response, prevResponse.inspect),
+                      pageInfo: response.pageInfo,
+                      totalCount: response.totalCount,
+                      updatedAt: Date.now(),
+                    };
+                    if (id === TimelineId.active) {
+                      activeTimeline.setExpandedEvent({});
+                      activeTimeline.setPageName(pageName);
+                      activeTimeline.setRequest(request);
+                      activeTimeline.setResponse(newTimelineResponse);
+                    }
+                    return newTimelineResponse;
+                  });
                   searchSubscription$.unsubscribe();
                 } else if (isErrorResponse(response)) {
-                  if (!didCancel) {
+                  if (!didCancel.current) {
                     setLoading(false);
+                    notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
                   }
-                  notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
                   searchSubscription$.unsubscribe();
                 }
-              } catch {
-                notifications.toasts.addWarning(i18n.ERROR_TIMELINE_EVENTS);
+              } else {
+                searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (msg.message !== 'Aborted') {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_TIMELINE_EVENTS,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                setLoading(false);
+                if (msg.message !== 'Aborted') {
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_TIMELINE_EVENTS,
+                    text: msg.message,
+                  });
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
@@ -238,11 +240,6 @@ export const useTimelineEvents = ({
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, id, notifications.toasts, pageName, refetchGrid, skip, wrappedLoadPage]
   );
@@ -329,6 +326,10 @@ export const useTimelineEvents = ({
     ) {
       timelineSearch(timelineRequest);
     }
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [id, prevTimelineRequest, timelineRequest, timelineSearch, timerangeKind]);
 
   /*

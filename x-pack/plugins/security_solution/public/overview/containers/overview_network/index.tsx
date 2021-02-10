@@ -52,6 +52,7 @@ export const useNetworkOverview = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     overviewNetworkRequest,
@@ -75,7 +76,7 @@ export const useNetworkOverview = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -87,8 +88,8 @@ export const useNetworkOverview = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setNetworkOverviewResponse((prevResponse) => ({
                     ...prevResponse,
@@ -96,23 +97,26 @@ export const useNetworkOverview = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_NETWORK_OVERVIEW);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_OVERVIEW);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_OVERVIEW,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_NETWORK_OVERVIEW,
+                    text: msg.message,
+                  });
+                }
               }
             },
           });
@@ -120,10 +124,6 @@ export const useNetworkOverview = ({
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts]
   );
@@ -150,6 +150,10 @@ export const useNetworkOverview = ({
 
   useEffect(() => {
     overviewNetworkSearch(overviewNetworkRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [overviewNetworkRequest, overviewNetworkSearch]);
 
   return [loading, overviewNetworkResponse];

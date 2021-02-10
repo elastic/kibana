@@ -40,6 +40,7 @@ export const useTimelineEventsDetails = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     timelineDetailsRequest,
@@ -56,7 +57,7 @@ export const useTimelineEventsDetails = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -71,38 +72,35 @@ export const useTimelineEventsDetails = ({
           )
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setTimelineDetailsResponse(response.data || []);
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning('An error has occurred');
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning('An error has occurred');
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel) {
-                setLoading(false);
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger('Failed to run search');
+                }
               }
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger('Failed to run search');
-              }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -125,6 +123,10 @@ export const useTimelineEventsDetails = ({
 
   useEffect(() => {
     timelineDetailsSearch(timelineDetailsRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

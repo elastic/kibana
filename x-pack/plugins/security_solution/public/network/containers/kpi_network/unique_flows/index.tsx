@@ -56,6 +56,7 @@ export const useNetworkKpiUniqueFlows = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     networkKpiUniqueFlowsRequest,
@@ -82,7 +83,7 @@ export const useNetworkKpiUniqueFlows = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -97,8 +98,8 @@ export const useNetworkKpiUniqueFlows = ({
           )
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setNetworkKpiUniqueFlowsResponse((prevResponse) => ({
                     ...prevResponse,
@@ -106,34 +107,34 @@ export const useNetworkKpiUniqueFlows = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_FLOWS);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_FLOWS);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_KPI_UNIQUE_FLOWS,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_NETWORK_KPI_UNIQUE_FLOWS,
+                    text: msg.message,
+                  });
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -160,6 +161,10 @@ export const useNetworkKpiUniqueFlows = ({
 
   useEffect(() => {
     networkKpiUniqueFlowsSearch(networkKpiUniqueFlowsRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [networkKpiUniqueFlowsRequest, networkKpiUniqueFlowsSearch]);
 
   return [loading, networkKpiUniqueFlowsResponse];

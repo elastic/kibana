@@ -52,6 +52,7 @@ export const useHostOverview = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [overviewHostRequest, setHostRequest] = useState<HostOverviewRequestOptions | null>(null);
 
@@ -72,7 +73,7 @@ export const useHostOverview = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -84,8 +85,8 @@ export const useHostOverview = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setHostOverviewResponse((prevResponse) => ({
                     ...prevResponse,
@@ -93,23 +94,26 @@ export const useHostOverview = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOST_OVERVIEW);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_HOST_OVERVIEW,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                setLoading(false);
+                if (!(msg instanceof AbortError)) {
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_HOST_OVERVIEW,
+                    text: msg.message,
+                  });
+                }
               }
             },
           });
@@ -117,10 +121,6 @@ export const useHostOverview = ({
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -147,6 +147,10 @@ export const useHostOverview = ({
 
   useEffect(() => {
     overviewHostSearch(overviewHostRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [overviewHostRequest, overviewHostSearch]);
 
   return [loading, overviewHostResponse];

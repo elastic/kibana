@@ -52,6 +52,7 @@ export const useHostsKpiAuthentications = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     hostsKpiAuthenticationsRequest,
@@ -81,7 +82,7 @@ export const useHostsKpiAuthentications = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -96,8 +97,8 @@ export const useHostsKpiAuthentications = ({
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (!response.isPartial && !response.isRunning) {
                   setLoading(false);
                   setHostsKpiAuthenticationsResponse((prevResponse) => ({
                     ...prevResponse,
@@ -108,34 +109,34 @@ export const useHostsKpiAuthentications = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (response.isPartial && !response.isRunning) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_AUTHENTICATIONS);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_AUTHENTICATIONS);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_HOSTS_KPI_AUTHENTICATIONS,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_HOSTS_KPI_AUTHENTICATIONS,
+                    text: msg.message,
+                  });
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -162,6 +163,10 @@ export const useHostsKpiAuthentications = ({
 
   useEffect(() => {
     hostsKpiAuthenticationsSearch(hostsKpiAuthenticationsRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [hostsKpiAuthenticationsRequest, hostsKpiAuthenticationsSearch]);
 
   return [loading, hostsKpiAuthenticationsResponse];

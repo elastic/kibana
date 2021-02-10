@@ -60,6 +60,7 @@ export const useNetworkKpiUniquePrivateIps = ({
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const [loading, setLoading] = useState(false);
   const [
     networkKpiUniquePrivateIpsRequest,
@@ -89,7 +90,7 @@ export const useNetworkKpiUniquePrivateIps = ({
         return;
       }
 
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -104,8 +105,8 @@ export const useNetworkKpiUniquePrivateIps = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   setLoading(false);
                   setNetworkKpiUniquePrivateIpsResponse((prevResponse) => ({
                     ...prevResponse,
@@ -117,34 +118,34 @@ export const useNetworkKpiUniquePrivateIps = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     refetch: refetch.current,
                   }));
-                }
-                searchSubscription$.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                if (!didCancel) {
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
                   setLoading(false);
+                  // TODO: Make response error status clearer
+                  notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_PRIVATE_IPS);
+                  searchSubscription$.unsubscribe();
                 }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_NETWORK_KPI_UNIQUE_PRIVATE_IPS);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_NETWORK_KPI_UNIQUE_PRIVATE_IPS,
-                  text: msg.message,
-                });
+              if (!didCancel.current) {
+                setLoading(false);
+                if (!(msg instanceof AbortError)) {
+                  notifications.toasts.addDanger({
+                    title: i18n.FAIL_NETWORK_KPI_UNIQUE_PRIVATE_IPS,
+                    text: msg.message,
+                  });
+                }
               }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, skip]
   );
@@ -171,6 +172,10 @@ export const useNetworkKpiUniquePrivateIps = ({
 
   useEffect(() => {
     networkKpiUniquePrivateIpsSearch(networkKpiUniquePrivateIpsRequest);
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [networkKpiUniquePrivateIpsRequest, networkKpiUniquePrivateIpsSearch]);
 
   return [loading, networkKpiUniquePrivateIpsResponse];

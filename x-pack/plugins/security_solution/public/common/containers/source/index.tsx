@@ -19,6 +19,7 @@ import {
   BrowserField,
   BrowserFields,
 } from '../../../../common/search_strategy/index_fields';
+import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
@@ -126,6 +127,7 @@ export const useFetchIndex = (
 ): [boolean, FetchIndexReturn] => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const previousIndexesName = useRef<string[]>([]);
   const [isLoading, setLoading] = useState(false);
 
@@ -139,7 +141,7 @@ export const useFetchIndex = (
 
   const indexFieldsSearch = useCallback(
     (iNames) => {
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -153,8 +155,8 @@ export const useFetchIndex = (
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   const stringifyIndices = response.indicesExist.sort().join();
                   previousIndexesName.current = response.indicesExist;
                   setLoading(false);
@@ -165,34 +167,33 @@ export const useFetchIndex = (
                     indexExists: response.indicesExist.length > 0,
                     indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
                   });
+
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
+                  setLoading(false);
+                  notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+                  searchSubscription$.unsubscribe();
                 }
-                searchSubscription$.unsubscribe();
-              } else if (!didCancel && response.isPartial && !response.isRunning) {
-                setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel) {
-                setLoading(false);
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    text: msg.message,
+                    title: i18n.FAIL_BEAT_FIELDS,
+                  });
+                }
               }
-
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  text: msg.message,
-                  title: i18n.FAIL_BEAT_FIELDS,
-                });
-              }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, notifications.toasts, onlyCheckIfIndicesExist]
   );
@@ -201,6 +202,10 @@ export const useFetchIndex = (
     if (!isEmpty(indexNames) && !isEqual(previousIndexesName.current, indexNames)) {
       indexFieldsSearch(indexNames);
     }
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [indexNames, indexFieldsSearch, previousIndexesName]);
 
   return [isLoading, state];
@@ -209,6 +214,7 @@ export const useFetchIndex = (
 export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const { data, notifications } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
+  const didCancel = useRef(false);
   const dispatch = useDispatch();
   const indexNamesSelectedSelector = useMemo(
     () => sourcererSelectors.getIndexNamesSelectedSelector(),
@@ -228,7 +234,7 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
 
   const indexFieldsSearch = useCallback(
     (indicesName) => {
-      let didCancel = false;
+      didCancel.current = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
@@ -242,8 +248,8 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
-                if (!didCancel) {
+              if (!didCancel.current) {
+                if (isCompleteResponse(response)) {
                   const stringifyIndices = response.indicesExist.sort().join();
                   dispatch(
                     sourcererActions.setSource({
@@ -259,35 +265,32 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
                       },
                     })
                   );
+                  searchSubscription$.unsubscribe();
+                } else if (isErrorResponse(response)) {
+                  setLoading(false);
+                  notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+                  searchSubscription$.unsubscribe();
                 }
-                searchSubscription$.unsubscribe();
-              } else if (!didCancel && response.isPartial && !response.isRunning) {
-                // TODO: Make response error status clearer
-                setLoading(false);
-                notifications.toasts.addWarning(i18n.ERROR_BEAT_FIELDS);
+              } else {
                 searchSubscription$.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!didCancel) {
-                setLoading(false);
+              if (!didCancel.current) {
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger({
+                    text: msg.message,
+                    title: i18n.FAIL_BEAT_FIELDS,
+                  });
+                }
               }
-
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  text: msg.message,
-                  title: i18n.FAIL_BEAT_FIELDS,
-                });
-              }
+              searchSubscription$.unsubscribe();
             },
           });
       };
       abortCtrl.current.abort();
       asyncSearch();
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
     [data.search, dispatch, notifications.toasts, setLoading, sourcererScopeName]
   );
@@ -296,5 +299,9 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
     if (!isEmpty(indexNames) && previousIndexNames !== indexNames.sort().join()) {
       indexFieldsSearch(indexNames);
     }
+    return () => {
+      didCancel.current = true;
+      abortCtrl.current.abort();
+    };
   }, [indexNames, indexFieldsSearch, previousIndexNames]);
 };

@@ -82,11 +82,13 @@ export const useTimelineKpis = ({
             },
             error: (msg) => {
               if (!didCancel.current) {
-                setLoading(false);
+                if (!(msg instanceof AbortError)) {
+                  setLoading(false);
+                  notifications.toasts.addDanger('Failed to load KPIs');
+                }
               }
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger('Failed to load KPIs');
-              }
+
+              searchSubscription$.unsubscribe();
             },
           });
       };
