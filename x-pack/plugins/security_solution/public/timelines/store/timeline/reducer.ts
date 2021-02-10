@@ -546,7 +546,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         eqlOptions: {
-          ...state.timelineById[id].eqlOptions,
+          ...(state.timelineById[id].eqlOptions ?? {}),
           [field]: value,
         },
       },

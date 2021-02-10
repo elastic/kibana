@@ -89,6 +89,11 @@ describe('Epic Timeline', () => {
         ],
         deletedEventIds: [],
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: 'event.sequence',
+          timestampField: '@timestamp',
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         expandedEvent: {},
@@ -234,6 +239,11 @@ describe('Epic Timeline', () => {
           start: '2019-10-30T21:06:27.644Z',
         },
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: 'event.sequence',
+          timestampField: '@timestamp',
+        },
         eventType: 'all',
         excludedRowRendererIds: [],
         filters: [

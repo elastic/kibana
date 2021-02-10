@@ -273,6 +273,7 @@ In other use cases the message field can be used to concatenate different values
       20,
     ]
   }
+  kindQuery="kuery"
   kqlMode="search"
   kqlQueryExpression=""
   onEventClosed={[MockFunction]}

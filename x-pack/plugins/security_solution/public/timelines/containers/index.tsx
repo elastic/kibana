@@ -78,9 +78,8 @@ export interface UseTimelineEventsProps {
   id: string;
   fields: string[];
   indexNames: string[];
-  language: KueryFilterQueryKind;
+  language?: KueryFilterQueryKind;
   limit: number;
-  searchType: string;
   sort: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
@@ -106,9 +105,8 @@ export const useTimelineEvents = ({
   indexNames,
   fields,
   filterQuery,
-  searchType,
   startDate,
-  language,
+  language = 'kuery',
   limit,
   sort = initSortDefault,
   skip = false,
@@ -335,7 +333,7 @@ export const useTimelineEvents = ({
           activePage: newActivePage,
           querySize: limit,
         },
-        searchType,
+        language,
         sort,
         timerange: {
           interval: '12h',
@@ -367,7 +365,6 @@ export const useTimelineEvents = ({
     id,
     language,
     limit,
-    searchType,
     startDate,
     sort,
     fields,

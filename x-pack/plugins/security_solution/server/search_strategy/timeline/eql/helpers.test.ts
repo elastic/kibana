@@ -702,6 +702,14 @@ describe('Search Strategy EQL helper', () => {
                   "name": Array [
                     "sshd.exe",
                   ],
+                  "parent": Object {
+                    "name": Array [
+                      "sshd.exe",
+                    ],
+                    "pid": Array [
+                      "5284",
+                    ],
+                  },
                   "pid": Array [
                     "6368",
                   ],

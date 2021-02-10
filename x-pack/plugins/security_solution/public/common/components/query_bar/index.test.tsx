@@ -76,6 +76,7 @@ describe('QueryBar ', () => {
       dateRangeFrom: 'now-24h',
       dateRangeTo: 'now',
       filters: [],
+      includeEqlLanguage: false,
       indexPatterns: [
         {
           fields: [
