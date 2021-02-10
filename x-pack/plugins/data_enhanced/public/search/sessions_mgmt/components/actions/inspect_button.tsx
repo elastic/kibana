@@ -17,28 +17,24 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { UISession } from '../../types';
-import { TableText } from '../';
+import { TableText } from '..';
 import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
-import './info_button.scss';
+import './inspect_button.scss';
 
 interface Props {
   searchSession: UISession;
 }
 
 interface State {
-  isLoading: boolean;
   isFlyoutVisible: boolean;
-  calloutTitle: string;
 }
 
-export class InfoButton extends Component<Props, State> {
+export class InspectButton extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      isLoading: false,
       isFlyoutVisible: false,
-      calloutTitle: 'Search Session Info',
     };
 
     this.closeFlyout = this.closeFlyout.bind(this);
@@ -85,7 +81,12 @@ export class InfoButton extends Component<Props, State> {
           >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
-                <h2 id="flyoutTitle">{this.state.calloutTitle}</h2>
+                <h2 id="flyoutTitle">
+                  <FormattedMessage
+                    id="xpack.data.sessions.management.flyoutTitle"
+                    defaultMessage="Inspect search session"
+                  />
+                </h2>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
@@ -94,7 +95,7 @@ export class InfoButton extends Component<Props, State> {
                   <p>
                     <FormattedMessage
                       id="xpack.data.sessions.management.flyoutText"
-                      defaultMessage="Original configuration used to create the search session:"
+                      defaultMessage="Configuration for this search session"
                     />
                   </p>
                 </EuiText>
@@ -111,9 +112,9 @@ export class InfoButton extends Component<Props, State> {
       <Fragment>
         <TableText onClick={this.showFlyout}>
           <FormattedMessage
-            id="xpack.data.mgmt.searchSessions.actionInfo"
-            aria-label="Show search session info"
-            defaultMessage="Info"
+            id="xpack.data.mgmt.searchSessions.flyoutTitle"
+            aria-label="Inspect"
+            defaultMessage="Inspect"
           />
         </TableText>
         {flyout}

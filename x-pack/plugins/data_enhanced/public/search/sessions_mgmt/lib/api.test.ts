@@ -67,7 +67,7 @@ describe('Search Sessions Management API', () => {
         Array [
           Object {
             "actions": Array [
-              "info",
+              "inspect",
               "extend",
               "delete",
             ],
