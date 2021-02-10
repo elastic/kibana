@@ -29,7 +29,6 @@
     { "path": "./plugins/lens/tsconfig.json" },
     { "path": "./plugins/license_management/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
-    { "path": "./plugins/maps_file_upload/tsconfig.json" },
     { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/maps/tsconfig.json" },
     { "path": "./plugins/ml/tsconfig.json" },
