@@ -75,7 +75,7 @@ export const SourceConfigurationSettings = ({
     source,
   ]);
 
-  const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
+  const { hasInfraMLCapabilites } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
@@ -128,7 +128,7 @@ export const SourceConfigurationSettings = ({
             />
           </EuiPanel>
           <EuiSpacer />
-          {hasInfraMLCapabilities && (
+          {hasInfraMLCapabilites && (
             <>
               <EuiPanel paddingSize="l">
                 <MLConfigurationPanel

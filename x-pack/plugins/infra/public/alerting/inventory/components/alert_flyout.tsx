@@ -8,7 +8,8 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
@@ -47,19 +48,4 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
   );
 
   return <>{visible && AddAlertFlyout}</>;
-};
-
-export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
-  const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, filterQuery } = inventoryPrefill;
-
-  return (
-    <AlertFlyout
-      options={{ metric }}
-      nodeType={nodeType}
-      filter={filterQuery}
-      visible
-      setVisible={onClose}
-    />
-  );
 };

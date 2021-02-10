@@ -68,7 +68,7 @@ export const NodeTypeExpression = ({
         <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
           <FormattedMessage
             id="xpack.infra.metrics.alertFlyout.expression.for.popoverTitle"
-            defaultMessage="Node Type"
+            defaultMessage="Inventory Type"
           />
         </ClosablePopoverTitle>
         <EuiSelect
