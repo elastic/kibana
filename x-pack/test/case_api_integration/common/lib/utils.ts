@@ -14,8 +14,8 @@ import {
 } from '../../../../plugins/case/common/api';
 
 export const getConfiguration = ({
-  id = 'connector-1',
-  name = 'Connector 1',
+  id = 'none',
+  name = 'none',
   type = ConnectorTypes.none,
   fields = null,
 }: Partial<CaseConnector> = {}): CasesConfigureRequest => {

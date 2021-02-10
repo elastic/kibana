@@ -7,9 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CaseResponseRt } from '../../../../common/api';
 import { RouteDeps } from '../types';
-import { flattenCaseSavedObject, wrapError } from '../utils';
+import { wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 
 export function initGetCaseApi({ caseConfigureService, caseService, router }: RouteDeps) {
@@ -26,44 +25,17 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
       },
     },
     async (context, request, response) => {
+      if (!context.case) {
+        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+      }
+
+      const caseClient = context.case.getCaseClient();
+      const includeComments = JSON.parse(request.query.includeComments);
+      const id = request.params.case_id;
+
       try {
-        const client = context.core.savedObjects.client;
-        const includeComments = JSON.parse(request.query.includeComments);
-
-        const [theCase] = await Promise.all([
-          caseService.getCase({
-            client,
-            caseId: request.params.case_id,
-          }),
-        ]);
-
-        if (!includeComments) {
-          return response.ok({
-            body: CaseResponseRt.encode(
-              flattenCaseSavedObject({
-                savedObject: theCase,
-              })
-            ),
-          });
-        }
-
-        const theComments = await caseService.getAllCaseComments({
-          client,
-          caseId: request.params.case_id,
-          options: {
-            sortField: 'created_at',
-            sortOrder: 'asc',
-          },
-        });
-
         return response.ok({
-          body: CaseResponseRt.encode(
-            flattenCaseSavedObject({
-              savedObject: theCase,
-              comments: theComments.saved_objects,
-              totalComment: theComments.total,
-            })
-          ),
+          body: await caseClient.get({ id, includeComments }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

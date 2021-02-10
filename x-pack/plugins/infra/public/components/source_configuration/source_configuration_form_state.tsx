@@ -27,6 +27,7 @@ export const useSourceConfigurationFormState = (configuration?: InfraSourceConfi
               podField: configuration.fields.pod,
               tiebreakerField: configuration.fields.tiebreaker,
               timestampField: configuration.fields.timestamp,
+              anomalyThreshold: configuration.anomalyThreshold,
             }
           : undefined,
       [configuration]
@@ -79,6 +80,7 @@ export const useSourceConfigurationFormState = (configuration?: InfraSourceConfi
         timestamp: indicesConfigurationFormState.formState.timestampField,
       },
       logColumns: logColumnsConfigurationFormState.formState.logColumns,
+      anomalyThreshold: indicesConfigurationFormState.formState.anomalyThreshold,
     }),
     [indicesConfigurationFormState.formState, logColumnsConfigurationFormState.formState]
   );
@@ -97,6 +99,7 @@ export const useSourceConfigurationFormState = (configuration?: InfraSourceConfi
         timestamp: indicesConfigurationFormState.formStateChanges.timestampField,
       },
       logColumns: logColumnsConfigurationFormState.formStateChanges.logColumns,
+      anomalyThreshold: indicesConfigurationFormState.formStateChanges.anomalyThreshold,
     }),
     [
       indicesConfigurationFormState.formStateChanges,
