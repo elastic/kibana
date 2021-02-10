@@ -332,7 +332,7 @@ export const retrieveListOfPoliciesIfNeeded = async (
         type: 'trustedAppsPoliciesStateChanged',
         payload: {
           type: 'FailedResourceState',
-          error: error.body,
+          error: error.body || error,
           lastLoadedState: getLastLoadedResourceState(policiesState(getState())),
         },
       });
