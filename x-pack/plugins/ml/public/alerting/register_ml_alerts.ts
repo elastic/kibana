@@ -71,6 +71,10 @@ export function registerMlAlerts(
 - Time: \\{\\{context.timestampIso8601\\}\\}
 - Anomaly score: \\{\\{context.score\\}\\}
 
+\\{\\{#context.isInterim\\}\\}
+Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.
+\\{\\{/context.isInterim\\}\\}
+
 \\{\\{! Section might be not relevant if selected jobs don't contain influencer configuration \\}\\}
 Top influencers:
 \\{\\{#context.topInfluencers\\}\\}
