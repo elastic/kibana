@@ -105,7 +105,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
     {
       id: 'visualize',
       name: i18n.translate('xpack.features.visualizeFeatureName', {
-        defaultMessage: 'Visualize',
+        defaultMessage: 'Visualize Library',
       }),
       order: 700,
       category: DEFAULT_APP_CATEGORIES.kibana,

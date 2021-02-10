@@ -69,12 +69,12 @@ export const VisualizeListing = () => {
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize',
+          defaultMessage: 'Visualize Library',
         }),
       },
     ]);
     chrome.docTitle.change(
-      i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize' })
+      i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize Library' })
     );
   });
   useUnmount(() => closeNewVisModal.current());
