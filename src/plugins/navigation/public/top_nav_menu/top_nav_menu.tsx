@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { MountPoint } from '../../../../core/public';
+import { MountPoint } from 'src/core/public';
 import { MountPointPortal } from '../../../kibana_react/public';
 import {
   StatefulSearchBarProps,

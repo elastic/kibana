@@ -12,8 +12,8 @@ import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useMount from 'react-use/lib/useMount';
 
+import { IUiSettingsClient } from 'src/core/public';
 import { Query, DataPublicPluginStart } from '../../../../data/public';
-import { IUiSettingsClient } from '../../../../../core/public';
 import { useKibana } from '../../../../kibana_react/public';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';

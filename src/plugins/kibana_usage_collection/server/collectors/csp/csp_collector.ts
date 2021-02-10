@@ -7,7 +7,7 @@
  */
 
 import { UsageCollectionSetup, UsageCollectorOptions } from 'src/plugins/usage_collection/server';
-import { HttpServiceSetup, CspConfig } from '../../../../../core/server';
+import { HttpServiceSetup, CspConfig } from 'src/core/server';
 
 interface Usage {
   strict: boolean;

@@ -8,8 +8,8 @@
 
 import { ForwardDefinition } from '../index';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { CoreStart } from '../../../../core/public';
-import { coreMock } from '../../../../core/public/mocks';
+import { CoreStart } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('migrate legacy kibana urls', () => {
   let forwardDefinitions: ForwardDefinition[];

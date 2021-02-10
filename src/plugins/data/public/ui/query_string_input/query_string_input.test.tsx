@@ -24,7 +24,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput } from './';
 import type QueryStringInputUI from './query_string_input';
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { stubIndexPatternWithFields } from '../../stubs';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';

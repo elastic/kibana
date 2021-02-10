@@ -7,9 +7,9 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 import { UiActionsSetup, UiActionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<UiActionsSetup>;
 export type Start = jest.Mocked<UiActionsStart>;

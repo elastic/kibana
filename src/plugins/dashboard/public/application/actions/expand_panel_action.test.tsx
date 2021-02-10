@@ -19,7 +19,7 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 

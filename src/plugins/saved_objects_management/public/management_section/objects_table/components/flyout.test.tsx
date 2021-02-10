@@ -18,7 +18,7 @@ import {
 
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
-import { coreMock, httpServiceMock } from '../../../../../../core/public/mocks';
+import { coreMock, httpServiceMock } from 'src/core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
 import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../../core/types/saved_objects';
+import { SavedObject } from 'src/core/types/saved_objects';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 

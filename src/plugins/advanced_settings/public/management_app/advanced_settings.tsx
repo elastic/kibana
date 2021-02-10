@@ -14,12 +14,7 @@ import { parse } from 'query-string';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
-import {
-  IUiSettingsClient,
-  DocLinksStart,
-  ToastsStart,
-  ScopedHistory,
-} from '../../../../core/public';
+import { IUiSettingsClient, DocLinksStart, ToastsStart, ScopedHistory } from 'src/core/public';
 import { url } from '../../../kibana_utils/public';
 
 import { CallOuts } from './components/call_outs';

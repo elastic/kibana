@@ -7,7 +7,7 @@
  */
 
 import { getConfigPath } from '@kbn/utils';
-import { pkg } from '../../core/server/utils';
+import { pkg } from 'src/core/server/utils';
 import { install } from './install';
 import { Logger } from '../lib/logger';
 import { parse, parseMilliseconds } from './settings';

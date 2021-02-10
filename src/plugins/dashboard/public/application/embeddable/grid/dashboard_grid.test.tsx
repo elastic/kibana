@@ -21,7 +21,7 @@ import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
 } from '../../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '../../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 

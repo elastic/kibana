@@ -7,8 +7,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from 'src/core/server';
 import apmIndexPattern from './tutorial/index_pattern.json';
-import { PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
 
 export const config = {

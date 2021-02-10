@@ -11,10 +11,10 @@ import { extname, join } from 'path';
 import Hapi from '@hapi/hapi';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
+import { fromRoot } from 'src/core/server/utils';
 import { createDynamicAssetResponse } from './dynamic_asset_response';
 import { FileHashCache } from './file_hash_cache';
 import { assertIsNpUiPluginPublicDirs, NpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
-import { fromRoot } from '../../core/server/utils';
 
 /**
  *  Creates the routes that serves files from `bundlesPath`.

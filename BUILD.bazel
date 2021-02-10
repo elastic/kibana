@@ -18,11 +18,16 @@ copy_to_bin(
   ]
 )
 
-
 filegroup(
   name = "build_ts_refs",
   srcs = [
       ":copy_tsconfig_base",
+      "//packages:build",
       "//src/core:build_ts_refs"
   ],
+)
+
+alias(
+  name = "bootstrap",
+  actual = ":build_ts_refs",
 )

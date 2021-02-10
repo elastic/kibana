@@ -12,7 +12,7 @@ import { AppUpdater } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from 'src/core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 

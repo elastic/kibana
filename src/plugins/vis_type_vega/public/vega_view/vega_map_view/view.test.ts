@@ -15,7 +15,7 @@ import { VegaParser } from '../../data_model/vega_parser';
 import { TimeCache } from '../../data_model/time_cache';
 import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { IServiceSettings } from '../../../../maps_legacy/public';
 import type { MapsLegacyConfig } from '../../../../maps_legacy/config';

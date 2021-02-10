@@ -10,7 +10,7 @@ import {
   loggingSystemMock,
   pluginInitializerContextConfigMock,
   elasticsearchServiceMock,
-} from '../../../../../core/server/mocks';
+} from 'src/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,

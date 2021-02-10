@@ -7,7 +7,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreUsageData, CoreUsageDataStart } from '../../../../../core/server';
+import { CoreUsageData, CoreUsageDataStart } from 'src/core/server';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,

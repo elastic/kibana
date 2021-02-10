@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from 'src/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,

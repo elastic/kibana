@@ -8,7 +8,7 @@
 
 import type { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
-import { setupServer } from '../../../../../core/server/test_utils';
+import { setupServer } from 'src/core/server/test_utils';
 import { AnonymousAccessService } from '../../plugin';
 import { setupAnonymousAccessCapabilitiesRoute } from '../anonymous_access_capabilities';
 

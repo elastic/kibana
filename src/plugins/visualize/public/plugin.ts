@@ -20,6 +20,7 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 
+import { DEFAULT_APP_CATEGORIES } from 'src/core/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
   Storage,
@@ -35,7 +36,6 @@ import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { VisualizeServices } from './application/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';

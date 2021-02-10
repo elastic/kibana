@@ -7,7 +7,7 @@
  */
 
 import { UiCounterMetricType } from '@kbn/analytics';
-import { CoreSetup, DocLinksStart } from '../../../core/public';
+import { CoreSetup, DocLinksStart } from 'src/core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';

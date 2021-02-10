@@ -12,9 +12,9 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
-import { CliArgs } from '../../core/server/config';
-import { LegacyConfig } from '../../core/server/legacy';
-import { BasePathProxyServer } from '../../core/server/http';
+import { CliArgs } from 'src/core/server/config';
+import { LegacyConfig } from 'src/core/server/legacy';
+import { BasePathProxyServer } from 'src/core/server/http';
 
 import { Log, CliLog } from './log';
 import { Optimizer } from './optimizer';

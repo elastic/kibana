@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from 'src/core/public/mocks';
 import { Setup as PluginSetup, Start as PluginStart } from '.';
 import { InspectorViewRegistry } from './view_registry';
 import { plugin as pluginInitializer } from '.';
-import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<PluginSetup>;
 export type Start = jest.Mocked<PluginStart>;

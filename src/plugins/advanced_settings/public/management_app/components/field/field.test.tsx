@@ -11,8 +11,8 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
-import { UiSettingsType, StringValidation } from '../../../../../../core/public';
-import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
+import { UiSettingsType, StringValidation } from 'src/core/public';
+import { notificationServiceMock, docLinksServiceMock } from 'src/core/public/mocks';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field, getEditableValue } from './field';

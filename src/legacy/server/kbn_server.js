@@ -10,7 +10,7 @@ import { constant, once, compact, flatten } from 'lodash';
 import { reconfigureLogging } from '@kbn/legacy-logging';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { fromRoot, pkg } from '../../core/server/utils';
+import { fromRoot, pkg } from 'src/core/server/utils';
 import { Config } from './config';
 import httpMixin from './http';
 import { coreMixin } from './core';

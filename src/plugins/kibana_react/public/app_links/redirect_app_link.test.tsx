@@ -8,7 +8,7 @@
 
 import React, { MouseEvent } from 'react';
 import { mount } from 'enzyme';
-import { applicationServiceMock } from '../../../../core/public/mocks';
+import { applicationServiceMock } from 'src/core/public/mocks';
 import { RedirectAppLinks } from './redirect_app_link';
 import { BehaviorSubject } from 'rxjs';
 

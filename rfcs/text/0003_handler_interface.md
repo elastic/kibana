@@ -250,13 +250,13 @@ A consuming plugin could extend the `RequestContext` to be type-safe like this:
 
 ```ts
 // my_plugin/server/index.ts
-import { RequestContext } from '../../core/server';
+import { RequestContext } from 'src/core/server';
 
 // The plugin *should* add a new property to the RequestContext interface from
 // core to represent whatever type its context provider returns. This will be
 // available to any module that imports this type and will ensure that the
 // registered context provider returns the expected type.
-declare module "../../core/server" {
+declare module "src/core/server" {
   interface RequestContext {
     myPlugin?: {  // should be optional because this plugin may be disabled.
       getFoo(): string;

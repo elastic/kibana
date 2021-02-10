@@ -8,7 +8,7 @@
 
 import Boom from '@hapi/boom';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
-import { KibanaRequest } from '../../../core/server';
+import { KibanaRequest } from 'src/core/server';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 

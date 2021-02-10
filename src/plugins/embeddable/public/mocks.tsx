@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import { coreMock } from 'src/core/public/mocks';
+import { CoreStart } from 'src/core/public';
 import {
   EmbeddableStart,
   EmbeddableSetup,
@@ -20,9 +22,7 @@ import {
   ReferenceOrValueEmbeddable,
 } from '.';
 import { EmbeddablePublicPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
 import { UiActionsService } from './lib/ui_actions';
-import { CoreStart } from '../../../core/public';
 import { Start as InspectorStart } from '../../inspector/public';
 
 import { inspectorPluginMock } from '../../inspector/public/mocks';

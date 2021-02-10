@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromRoot } from '../../core/server/utils';
+import { fromRoot } from 'src/core/server/utils';
 import { list } from './list';
 import { Logger } from '../lib/logger';
 import { logWarnings } from '../lib/log_warnings';

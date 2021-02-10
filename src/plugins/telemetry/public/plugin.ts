@@ -15,7 +15,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsBatchResponse,
   ApplicationStart,
-} from '../../../core/public';
+} from 'src/core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import {

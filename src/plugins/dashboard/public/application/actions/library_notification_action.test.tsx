@@ -9,7 +9,7 @@
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
 
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';

@@ -9,8 +9,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
-import { coreMock, overlayServiceMock } from '../../../../core/public/mocks';
-import { CoreStart } from '../../../../core/public';
+import { coreMock, overlayServiceMock } from 'src/core/public/mocks';
+import { CoreStart } from 'src/core/public';
 
 let container: HTMLDivElement | null;
 

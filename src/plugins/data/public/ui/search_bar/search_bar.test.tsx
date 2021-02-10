@@ -12,7 +12,7 @@ import SearchBar from './search_bar';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';

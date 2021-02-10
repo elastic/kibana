@@ -12,7 +12,7 @@ import 'angular-mocks';
 import expect from '@kbn/expect';
 
 import { getFieldFormatsRegistry } from '../../../../data/public/test_utils';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { initAngularBootstrap } from '../../../../kibana_legacy/public';
 import { setUiSettings } from '../../../../data/public/services';
 import { setFormatService } from '../../services';

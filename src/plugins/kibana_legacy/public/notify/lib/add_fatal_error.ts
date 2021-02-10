@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FatalErrorsSetup } from '../../../../../core/public';
+import { FatalErrorsSetup } from 'src/core/public';
 import {
   AngularHttpError,
   formatAngularHttpError,

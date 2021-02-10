@@ -17,11 +17,7 @@ import { DashboardContainer, DashboardContainerServices } from '../dashboard_con
 import { getSampleDashboardInput } from '../../test_helpers';
 import { KibanaContextProvider } from '../../../services/kibana_react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import {
-  applicationServiceMock,
-  coreMock,
-  uiSettingsServiceMock,
-} from '../../../../../../core/public/mocks';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,

@@ -10,7 +10,7 @@ import { ReplacePanelAction } from './replace_panel_action';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { isErrorEmbeddable } from '../../services/embeddable';

@@ -16,7 +16,7 @@ import { getFakeRow } from 'fixtures/fake_row';
 import $ from 'jquery';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { setScopedHistory, setServices, setDocViewsRegistry } from '../../../../kibana_services';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
 import { getInnerAngularModule } from '../../../../get_inner_angular';

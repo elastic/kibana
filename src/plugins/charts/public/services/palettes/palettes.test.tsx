@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { createColorPalette as createLegacyColorPalette } from '../../../../../../src/plugins/charts/public';
 import { PaletteDefinition } from './types';
 import { buildPalettes } from './palettes';

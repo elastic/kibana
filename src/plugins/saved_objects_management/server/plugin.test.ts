@@ -8,7 +8,7 @@
 
 import { registerRoutesMock } from './plugin.test.mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
-import { coreMock } from '../../../core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 
 describe('SavedObjectsManagementPlugin', () => {
   let plugin: SavedObjectsManagementPlugin;

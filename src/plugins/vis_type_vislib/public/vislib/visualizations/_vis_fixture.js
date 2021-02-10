@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 
 import { Vis } from '../vis';

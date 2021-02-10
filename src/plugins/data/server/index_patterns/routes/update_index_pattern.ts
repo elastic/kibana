@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor } from 'src/core/server';
 import { handleErrors } from './util/handle_errors';
 import { fieldSpecSchema, serializedFieldFormatSchema } from './util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 
 const indexPatternUpdateSchema = schema.object({

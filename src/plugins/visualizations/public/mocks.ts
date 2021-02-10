@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from 'src/core/public';
+import { coreMock, applicationServiceMock } from 'src/core/public/mocks';
 import { Schema, VisualizationsSetup, VisualizationsStart } from './';
 import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';
-import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
 import { dataPluginMock } from '../../../plugins/data/public/mocks';

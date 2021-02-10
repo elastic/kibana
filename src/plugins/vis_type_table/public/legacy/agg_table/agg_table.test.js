@@ -14,7 +14,7 @@ import sinon from 'sinon';
 import { round } from 'lodash';
 
 import { getFieldFormatsRegistry } from '../../../../data/public/test_utils';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { initAngularBootstrap } from '../../../../kibana_legacy/public';
 import { setUiSettings } from '../../../../data/public/services';
 import { UI_SETTINGS } from '../../../../data/public/';

@@ -9,7 +9,7 @@
 import { QueryStringManager } from './query_string_manager';
 import { Storage } from '../../../../kibana_utils/public/storage';
 import { StubBrowserStorage } from '@kbn/test/jest';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { Query } from '../../../common/query';
 
 describe('QueryStringManager', () => {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { loggerMock } from 'src/core/server/logging/logger.mock';
 import {
   CollectorSet,
   UsageCollectorOptions,
 } from '../../plugins/usage_collection/server/collector';
-import { loggerMock } from '../../core/server/logging/logger.mock';
 
 const collectorSet = new CollectorSet({
   logger: loggerMock.create(),

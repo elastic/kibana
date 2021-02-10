@@ -9,8 +9,8 @@
 import { Observable } from 'rxjs';
 import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import { SavedObject, SavedObjectReference } from '../../../core/types';
-import { SavedObjectsFindOptionsReference } from '../../../core/public';
+import { SavedObject, SavedObjectReference } from 'src/core/types';
+import { SavedObjectsFindOptionsReference } from 'src/core/public';
 import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
 import { TagDecoratedSavedObject } from './decorator';
 import { ITagsClient, Tag } from '../common';

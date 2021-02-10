@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
   SavedObjectAttributes,
-} from '../../../../../core/public';
+} from 'src/core/public';
 
 /**
  * Returns an object matching a given title

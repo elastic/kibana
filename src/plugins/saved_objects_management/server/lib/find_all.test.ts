@@ -8,7 +8,7 @@
 
 import { times } from 'lodash';
 import { SavedObjectsFindOptions, SavedObjectsFindResult } from 'src/core/server';
-import { savedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { findAll } from './find_all';
 
 describe('findAll', () => {

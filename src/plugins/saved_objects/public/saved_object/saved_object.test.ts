@@ -16,7 +16,7 @@ import {
 } from '../types';
 import { SavedObjectDecorator } from './decorators';
 
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { getStubIndexPattern, StubIndexPattern } from '../../../../plugins/data/public/test_utils';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';

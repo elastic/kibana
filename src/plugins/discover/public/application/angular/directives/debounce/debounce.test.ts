@@ -14,7 +14,7 @@ import 'angular-route';
 
 // @ts-ignore
 import { createDebounceProviderTimeout } from './debounce';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { initializeInnerAngularModule } from '../../../../get_inner_angular';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';

@@ -8,10 +8,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { FieldSpec } from 'src/plugins/data/common';
+import { IRouter, StartServicesAccessor } from 'src/core/server';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
 import { fieldSpecSchemaFields } from '../util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../../core/server';
 import type { DataPluginStart, DataPluginStartDependencies } from '../../../plugin';
 
 export const registerUpdateScriptedFieldRoute = (

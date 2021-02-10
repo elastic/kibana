@@ -14,7 +14,7 @@ import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { GetStateReturn } from '../../angular/discover_state';
-import { i18nServiceMock } from '../../../../../../core/public/mocks';
+import { i18nServiceMock } from 'src/core/public/mocks';
 
 test('onSaveSearch', async () => {
   const serviceMock = ({

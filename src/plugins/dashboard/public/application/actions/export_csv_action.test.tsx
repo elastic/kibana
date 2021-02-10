@@ -18,7 +18,7 @@ import {
   ContactCardExportableEmbeddableFactory,
   CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
 } from '../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { DataPublicPluginStart } from '../../../../data/public/types';

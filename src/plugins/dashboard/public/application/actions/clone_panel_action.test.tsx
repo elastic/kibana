@@ -9,7 +9,7 @@
 import { DashboardContainer, DashboardPanelState } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { ClonePanelAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';

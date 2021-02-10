@@ -26,8 +26,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
+import { DocLinksStart, ToastsStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../kibana_react/public';
-import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 import { getCategoryName } from '../../lib';
 import { Field, getEditableValue } from '../field';

@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DateRangesParamEditor } from './date_ranges';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
-import { docLinksServiceMock } from '../../../../../core/public/mocks';
+import { docLinksServiceMock } from 'src/core/public/mocks';
 
 describe('DateRangesParamEditor component', () => {
   let setValue: jest.Mock;

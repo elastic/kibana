@@ -19,7 +19,7 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchAPI } from './data_model/search_api';
 
 import { setInjectedVars, setData, setNotifications } from './services';
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 
 jest.mock('./default_spec', () => ({

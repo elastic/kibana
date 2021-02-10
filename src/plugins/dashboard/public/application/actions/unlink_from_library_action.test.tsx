@@ -19,7 +19,7 @@ import {
 import { UnlinkFromLibraryAction } from '.';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import {

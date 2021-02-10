@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { render } from '@testing-library/react';
 
 describe('TelemetryManagementSectionComponent', () => {

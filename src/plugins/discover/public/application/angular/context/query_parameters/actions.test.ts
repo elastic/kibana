@@ -9,7 +9,7 @@
 // @ts-ignore
 import { getQueryParameterActions } from './actions';
 import { FilterManager } from '../../../../../../data/public';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 const setupMock = coreMock.createSetup();
 
 let state: {

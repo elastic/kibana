@@ -39,7 +39,7 @@ export const BootstrapCommand: ICommand = {
     // And should begin from the ones with none dependencies forward.
     // That way non bazel projects could depend on bazel projects but not the other way around
     // That is only intended during the migration process while non Bazel projects are not removed at all.
-    await runBazel(['build', '//packages:build']);
+    await runBazel(['build', '//:bootstrap']);
 
     // Build configures ts project refs with Bazel
     // await runBazel(['build', '//:build_ts_refs']);

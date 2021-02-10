@@ -18,7 +18,7 @@ import {
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import React from 'react';
-import { OverlayStart } from '../../../../../core/public';
+import { OverlayStart } from 'src/core/public';
 import { createConfirmStrings, leaveConfirmStrings } from '../../dashboard_strings';
 import { toMountPoint } from '../../services/kibana_react';
 

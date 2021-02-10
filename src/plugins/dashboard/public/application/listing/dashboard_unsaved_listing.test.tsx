@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
 import { DashboardSavedObject } from '../..';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { KibanaContextProvider } from '../../services/kibana_react';
 import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardPanelStorage } from '../lib';

@@ -7,8 +7,8 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart } from '../../../../core/server';
-import { coreMock } from '../../../../core/server/mocks';
+import { CoreSetup, CoreStart } from 'src/core/server';
+import { coreMock } from 'src/core/server/mocks';
 
 import { DataPluginStart } from '../plugin';
 import { createFieldFormatsStartMock } from '../field_formats/mocks';

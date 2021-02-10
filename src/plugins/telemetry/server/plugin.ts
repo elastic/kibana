@@ -23,7 +23,7 @@ import {
   Plugin,
   Logger,
   UiSettingsServiceStart,
-} from '../../../core/server';
+} from 'src/core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {

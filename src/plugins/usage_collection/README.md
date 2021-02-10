@@ -39,7 +39,7 @@ To track a user interaction, use the API `usageCollection.reportUiCounter` as fo
 ```ts
 // public/plugin.ts
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Plugin, CoreStart } from '../../../core/public';
+import { Plugin, CoreStart } from 'src/core/public';
 
 export class MyPlugin implements Plugin {
   public start(

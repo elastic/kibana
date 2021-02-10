@@ -14,7 +14,7 @@ import 'angular-route';
 import { createBrowserHistory } from 'history';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import hits from 'fixtures/real_hits';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../navigation/public/mocks';
 import { setScopedHistory, setServices } from '../../../kibana_services';

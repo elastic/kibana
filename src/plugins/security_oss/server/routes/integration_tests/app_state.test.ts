@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../../../../../core/server/mocks';
-import { setupServer } from '../../../../../core/server/test_utils';
+import { loggingSystemMock } from 'src/core/server/mocks';
+import { setupServer } from 'src/core/server/test_utils';
 import { AnonymousAccessService } from '../../plugin';
 import { setupAppStateRoute } from '../app_state';
 import { ConfigType } from '../../config';

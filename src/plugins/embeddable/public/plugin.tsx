@@ -9,16 +9,16 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
-import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
-import { Start as InspectorStart } from '../../inspector/public';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   PublicAppInfo,
-} from '../../../core/public';
+} from 'src/core/public';
+import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
+import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+import { Start as InspectorStart } from '../../inspector/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,

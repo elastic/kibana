@@ -18,7 +18,7 @@ import { dataPluginMock } from '../../../../data/public/mocks';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
 import { uiSettingsMock as mockUiSettings } from '../../__mocks__/ui_settings';
 import { IndexPattern, IndexPatternAttributes } from '../../../../data/common/index_patterns';
-import { SavedObject } from '../../../../../core/types';
+import { SavedObject } from 'src/core/types';
 import { navigationPluginMock } from '../../../../navigation/public/mocks';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 import { calcFieldCounts } from '../helpers/calc_field_counts';

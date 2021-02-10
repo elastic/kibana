@@ -10,7 +10,7 @@ import { resolve } from 'path';
 
 import expiry from 'expiry-js';
 
-import { fromRoot } from '../../core/server/utils';
+import { fromRoot } from 'src/core/server/utils';
 
 function generateUrls({ version, plugin }) {
   return [

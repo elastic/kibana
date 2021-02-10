@@ -31,7 +31,7 @@ import {
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
-import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock } from 'src/core/public/mocks';
 
 const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();

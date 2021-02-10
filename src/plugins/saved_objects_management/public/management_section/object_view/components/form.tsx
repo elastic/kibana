@@ -19,7 +19,7 @@ import { set } from '@elastic/safer-lodash-set';
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SavedObjectsClientContract } from '../../../../../../core/public';
+import { SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectLoader } from '../../../../../saved_objects/public';
 import { Field } from './field';
 import { ObjectField, FieldState, SubmittedFormData } from '../../types';

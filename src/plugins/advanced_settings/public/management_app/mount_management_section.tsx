@@ -14,10 +14,10 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { LocationDescriptor } from 'history';
+import { StartServicesAccessor } from 'src/core/public';
 import { url } from '../../../kibana_utils/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { StartServicesAccessor } from '../../../../core/public';
 
 import { AdvancedSettings, QUERY } from './advanced_settings';
 import { ComponentRegistry } from '../types';

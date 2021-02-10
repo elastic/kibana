@@ -11,7 +11,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 import { DiscoverFieldDetailsFooter } from './discover_field_details_footer';

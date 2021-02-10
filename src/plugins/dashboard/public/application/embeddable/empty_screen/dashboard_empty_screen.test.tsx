@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 describe('DashboardEmptyScreen', () => {
   const setupMock = coreMock.createSetup();

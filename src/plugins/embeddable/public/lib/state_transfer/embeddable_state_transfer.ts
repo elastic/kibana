@@ -7,8 +7,8 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { ApplicationStart, PublicAppInfo } from 'src/core/public';
 import { Storage } from '../../../../kibana_utils/public';
-import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,

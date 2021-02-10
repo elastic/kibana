@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from '@kbn/test/jest';
-import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import { Relationships, RelationshipsProps } from './relationships';
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({

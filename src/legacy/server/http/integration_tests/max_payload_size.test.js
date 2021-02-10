@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as kbnTestServer from '../../../../core/test_helpers/kbn_server';
+import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
 let root;
 beforeAll(async () => {

@@ -8,7 +8,7 @@
 
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';

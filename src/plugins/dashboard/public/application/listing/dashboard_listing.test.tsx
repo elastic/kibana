@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   ScopedHistory,
   SimpleSavedObject,
-} from '../../../../../core/public';
+} from 'src/core/public';
 
 import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import { IndexPatternsContract, SavedQueryService } from '../../services/data';
@@ -25,7 +25,7 @@ import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { DashboardAppServices, DashboardCapabilities } from '../types';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
+import { chromeServiceMock, coreMock } from 'src/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { UrlForwardingStart } from '../../../../url_forwarding/public';

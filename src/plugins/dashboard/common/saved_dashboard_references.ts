@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
+import { SavedObjectAttributes, SavedObjectReference } from 'src/core/types';
 import {
   extractPanelsReferences,
   injectPanelsReferences,

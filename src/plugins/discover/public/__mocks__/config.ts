@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '../../../../core/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 export const configMock = ({
   get: (key: string) => {

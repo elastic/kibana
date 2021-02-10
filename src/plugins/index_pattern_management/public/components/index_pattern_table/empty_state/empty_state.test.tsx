@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
-import { docLinksServiceMock } from '../../../../../../core/public/mocks';
+import { docLinksServiceMock } from 'src/core/public/mocks';
 import { MlCardState } from '../../../types';
 
 const docLinks = docLinksServiceMock.createStartContract();

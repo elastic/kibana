@@ -17,7 +17,7 @@ import {
   AppUpdater,
   ScopedHistory,
   AppNavLinkStatus,
-} from '../../../core/public';
+} from 'src/core/public';
 import { Panel } from './panels/panel';
 import { initAngularBootstrap } from '../../kibana_legacy/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';

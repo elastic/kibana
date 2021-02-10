@@ -15,7 +15,7 @@ import {
   Plugin,
   ApplicationStart,
   SavedObjectsClientContract,
-} from '../../../core/public';
+} from 'src/core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,

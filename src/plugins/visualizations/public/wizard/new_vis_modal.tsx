@@ -17,7 +17,7 @@ import {
   IUiSettingsClient,
   SavedObjectsStart,
   DocLinksStart,
-} from '../../../../core/public';
+} from 'src/core/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';

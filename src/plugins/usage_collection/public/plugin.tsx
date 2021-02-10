@@ -9,15 +9,9 @@
 import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
 import { Subject, merge, Subscription } from 'rxjs';
 import React from 'react';
+import { PluginInitializerContext, Plugin, CoreSetup, CoreStart, HttpSetup } from 'src/core/public';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter, trackApplicationUsageChange } from './services';
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-} from '../../../core/public';
 import { ApplicationUsageContext } from './components/track_application_view';
 
 export interface PublicConfigType {

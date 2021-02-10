@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { isSavedObjectOlderThan, rollUiCounterIndices } from './rollups';
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from 'src/core/server/mocks';
 import { SavedObjectsFindResult } from 'kibana/server';
 import {
   UICounterSavedObjectAttributes,

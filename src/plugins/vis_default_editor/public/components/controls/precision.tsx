@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiRange, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 import { useKibana } from '../../../../kibana_react/public';
 import { AggParamEditorProps } from '../agg_param_props';

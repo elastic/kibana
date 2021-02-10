@@ -19,7 +19,7 @@ import {
   ContactCardEmbeddableFactory,
 } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../plugin';

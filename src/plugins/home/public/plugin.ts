@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 
+import { AppNavLinkStatus } from 'src/core/public';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
@@ -31,7 +32,6 @@ import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { AppNavLinkStatus } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 
 export interface HomePluginStartDependencies {

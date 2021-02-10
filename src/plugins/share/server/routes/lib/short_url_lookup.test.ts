@@ -9,7 +9,7 @@
 import { shortUrlLookupProvider, ShortUrlLookupService, UrlAttributes } from './short_url_lookup';
 import { SavedObjectsClientContract, SavedObject } from 'kibana/server';
 
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 
 describe('shortUrlLookupProvider', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';

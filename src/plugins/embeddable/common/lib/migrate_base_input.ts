@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectReference } from 'src/core/types';
 import { EmbeddableStateWithType } from '../types';
 import { MigrateFunctionsObject } from '../../../kibana_utils/common';
 

@@ -9,9 +9,9 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
 
+import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 import { ExpressionType, SerializableState } from '../expression_types';
 import { Adapters, RequestAdapter } from '../../../inspector/common';
-import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
 import { TablesAdapter } from '../util/tables_adapter';
 
 /**

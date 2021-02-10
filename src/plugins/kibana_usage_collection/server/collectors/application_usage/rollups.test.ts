@@ -7,9 +7,9 @@
  */
 
 import { rollDailyData, rollTotals } from './rollups';
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from 'src/core/server/mocks';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
-import { SavedObjectsErrorHelpers } from '../../../../../core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import {
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,

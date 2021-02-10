@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
-import { UiSettingsType } from '../../../../../../core/public';
+import { UiSettingsType } from 'src/core/public';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { notificationServiceMock } from '../../../../../../core/public/mocks';
+import { notificationServiceMock } from 'src/core/public/mocks';
 import { SettingsChanges } from '../../types';
 import { Form } from './form';
 

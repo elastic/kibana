@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';

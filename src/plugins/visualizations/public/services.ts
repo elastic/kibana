@@ -15,7 +15,7 @@ import {
   OverlayStart,
   SavedObjectsStart,
   DocLinksStart,
-} from '../../../core/public';
+} from 'src/core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import { DataPublicPluginStart, TimefilterContract } from '../../../plugins/data/public';

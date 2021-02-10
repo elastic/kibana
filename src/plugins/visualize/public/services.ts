@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '../../../core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import { VisEditorsRegistry } from './vis_editors_registry';
 

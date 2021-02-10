@@ -13,7 +13,7 @@ import { override } from './override';
 import createDefaultSchema from './schema';
 import { unset, deepCloneWithBuffers as clone, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { pkg } from '../../../core/server/utils';
+import { pkg } from 'src/core/server/utils';
 const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');

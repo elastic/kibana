@@ -36,15 +36,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldSetting, FieldState } from '../../types';
-import { isDefaultValue } from '../../lib';
 import {
   UiSettingsType,
   ImageValidation,
   StringValidationRegex,
   DocLinksStart,
   ToastsStart,
-} from '../../../../../../core/public';
+} from 'src/core/public';
+import { FieldSetting, FieldState } from '../../types';
+import { isDefaultValue } from '../../lib';
 
 interface FieldProps {
   setting: FieldSetting;

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CspConfig, ICspConfig } from '../../../../../core/server';
+import { CspConfig, ICspConfig } from 'src/core/server';
 import { createCspCollector } from './csp_collector';
-import { httpServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import {
   Collector,
   createCollectorFetchContextMock,

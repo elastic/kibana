@@ -9,7 +9,7 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { mountReactNode } from '../../../core/public/utils';
+import { mountReactNode } from 'src/core/public/utils';
 import { ChartsPluginSetup } from '../../charts/public';
 import type { PersistedState } from '../../visualizations/public';
 import { IInterpreterRenderHandlers } from '../../expressions/public';

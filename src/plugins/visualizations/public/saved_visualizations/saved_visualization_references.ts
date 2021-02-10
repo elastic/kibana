@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '../../../../core/public';
+import { SavedObjectAttribute, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import { VisSavedObject } from '../types';
 import {
   extractSearchSourceReferences,

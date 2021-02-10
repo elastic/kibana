@@ -11,8 +11,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
+import { IUiSettingsClient } from 'src/core/public';
 import { DataTableFormat } from './data_table';
-import { IUiSettingsClient } from '../../../../../../core/public';
 import { InspectorViewProps, Adapters } from '../../../../../inspector/public';
 import { UiActionsStart } from '../../../../../ui_actions/public';
 import { FieldFormatsStart } from '../../../field_formats';

@@ -11,7 +11,7 @@ import querystring from 'querystring';
 
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerFindRoute } from '../find';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';

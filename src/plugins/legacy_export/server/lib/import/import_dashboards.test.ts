@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
-import { SavedObject } from '../../../../../core/server';
+import { savedObjectsClientMock } from 'src/core//server/mocks';
+import { SavedObject } from 'src/core/server';
 import { importDashboards } from './import_dashboards';
 
 describe('importDashboards(req)', () => {

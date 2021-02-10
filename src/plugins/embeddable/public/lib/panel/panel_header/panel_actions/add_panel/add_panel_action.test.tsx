@@ -16,7 +16,7 @@ import {
 } from '../../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../../test_samples/embeddables/filterable_container';
-import { coreMock } from '../../../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { ContactCardEmbeddable } from '../../../../test_samples';
 import { EmbeddableStart } from '../../../../../plugin';
 import { embeddablePluginMock } from '../../../../../mocks';

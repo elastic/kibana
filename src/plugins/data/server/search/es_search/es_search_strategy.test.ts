@@ -10,8 +10,8 @@ import {
   elasticsearchClientMock,
   MockedTransportRequestPromise,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../core/server/elasticsearch/client/mocks';
-import { pluginInitializerContextConfigMock } from '../../../../../core/server/mocks';
+} from 'src/core/server/elasticsearch/client/mocks';
+import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
 import { esSearchStrategyProvider } from './es_search_strategy';
 import { SearchStrategyDependencies } from '../types';
 

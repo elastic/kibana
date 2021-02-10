@@ -16,7 +16,7 @@ import {
   NotificationsStart,
   ScopedHistory,
   HttpSetup,
-} from '../../../../../core/public';
+} from 'src/core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
 import { canViewInApp, findObject } from '../../lib';

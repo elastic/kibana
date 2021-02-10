@@ -7,7 +7,7 @@
  */
 
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '../index';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { AttributeServiceOptions } from './attribute_service';
 import { CoreStart } from 'src/core/public';
 import { AttributeService, ATTRIBUTE_SERVICE_KEY } from './index';

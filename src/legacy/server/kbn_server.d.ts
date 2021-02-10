@@ -15,12 +15,12 @@ import {
   LoggerFactory,
   PackageInfo,
   LegacyServiceSetupDeps,
-} from '../../core/server';
+} from 'src/core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig } from '../../core/server/legacy';
+import { LegacyConfig } from 'src/core/server/legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { UiPlugins } from '../../core/server/plugins';
+import { UiPlugins } from 'src/core/server/plugins';
 
 // lot of legacy code was assuming this type only had these two methods
 export type KibanaConfig = Pick<LegacyConfig, 'get' | 'has'>;

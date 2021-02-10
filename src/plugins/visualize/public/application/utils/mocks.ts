@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
 import { VisualizeServices } from '../types';

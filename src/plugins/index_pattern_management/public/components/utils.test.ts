@@ -7,7 +7,7 @@
  */
 
 import { getIndexPatterns } from './utils';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { mockManagementPlugin } from '../mocks';
 
 const { savedObjects } = coreMock.createStart();

@@ -7,7 +7,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions/public';
-import { CoreStart } from '../../../../../core/public';
+import { CoreStart } from 'src/core/public';
 import { FormatFactory } from '../../../../data/common/field_formats/utils';
 
 import { DataPublicPluginStart, exporters } from '../../services/data';

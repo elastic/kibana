@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { createClusterDataCheck } from './check_cluster_data';
 
 describe('checkClusterForUserData', () => {

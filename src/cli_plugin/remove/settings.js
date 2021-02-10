@@ -8,7 +8,7 @@
 
 import { resolve } from 'path';
 
-import { fromRoot } from '../../core/server/utils';
+import { fromRoot } from 'src/core/server/utils';
 
 export function parse(command, options) {
   const settings = {

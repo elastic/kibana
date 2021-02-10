@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { httpServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock } from 'src/core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 
 import { HistoryMock } from '../../services/history.mock';
 import { SettingsMock } from '../../services/settings.mock';

@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import { fromRoot } from '../../../core/server/utils';
+import { fromRoot } from 'src/core/server/utils';
 
 import { InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';

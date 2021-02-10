@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../core/server/mocks';
+import { coreMock } from 'src/core/server/mocks';
 import { SecurityOssPlugin } from './plugin';
 
 describe('SecurityOss Plugin', () => {

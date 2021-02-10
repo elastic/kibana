@@ -11,7 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import { shallowWithIntl } from '@kbn/test/jest';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { httpServiceMock } from '../../../../core/public/http/http_service.mock';
+import { httpServiceMock } from 'src/core/public/http/http_service.mock';
 
 const mockHttp = httpServiceMock.createStartContract();
 

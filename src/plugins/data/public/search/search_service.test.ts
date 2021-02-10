@@ -7,8 +7,8 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { coreMock } from '../../../../core/public/mocks';
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import { coreMock } from 'src/core/public/mocks';
+import { CoreSetup, CoreStart } from 'src/core/public';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 import { bfetchPluginMock } from '../../../bfetch/public/mocks';

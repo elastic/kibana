@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Vis } from 'src/plugins/visualizations/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
-import { ApplicationStart } from '../../../../../core/public';
+import { ApplicationStart } from 'src/core/public';
 import { useKibana } from '../../../../kibana_react/public';
 
 interface LinkedSearchProps {

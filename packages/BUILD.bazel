@@ -2,6 +2,7 @@
 # targets so we can build them all at once
 filegroup(
   name = "build",
+  visibility = ["//visibility:public"],
   srcs = [
       "//packages/elastic-datemath"
   ],

@@ -31,11 +31,7 @@ import {
   ContactCardEmbeddableOutput,
   createEditModeAction,
 } from '../../services/embeddable_test_samples';
-import {
-  applicationServiceMock,
-  coreMock,
-  uiSettingsServiceMock,
-} from '../../../../../core/public/mocks';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from 'src/core/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
 

@@ -7,8 +7,8 @@
  */
 
 import { ScopedHistory, Capabilities } from 'kibana/public';
+import { ChromeBreadcrumb } from 'src/core/public/';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
-import { ChromeBreadcrumb } from '../../../core/public/';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;

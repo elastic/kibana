@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IAggType, IndexPattern } from 'src/plugins/data/public';
 
-import { DocLinksStart } from '../../../../core/public';
+import { DocLinksStart } from 'src/core/public';
 import { useKibana } from '../../../kibana_react/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { AGG_TYPE_ACTION_KEYS, AggTypeAction } from './agg_params_state';

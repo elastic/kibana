@@ -14,8 +14,8 @@ import {
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerOpsStatsCollector } from './';
-import { OpsMetrics } from '../../../../../core/server';
-import { loggingSystemMock } from '../../../../../core/server/mocks';
+import { OpsMetrics } from 'src/core/server';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 const logger = loggingSystemMock.createLogger();
 

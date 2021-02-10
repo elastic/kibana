@@ -629,7 +629,7 @@ export const shortUrlLookup = {
 ```typescript
 // src/plugins/myplugin/server/lib/short_url_lookup.test.ts
 import { shortUrlLookup } from './short_url_lookup';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 describe('shortUrlLookup', () => {
   const ID = 'bf00ad16941fc51420f91a93428b27a0';
@@ -726,8 +726,8 @@ export const createSavedQueryService = (savedObjectsClient: SavedObjectsClientCo
 ```typescript
 // src/plugins/myplugin/public/saved_query_service.test.ts
 import { createSavedQueryService, SavedQueryAttributes } from './saved_query_service';
-import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
-import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
+import { savedObjectsServiceMock } from 'src/core/public/mocks';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 
 describe('saved query service', () => {
   const savedQueryAttributes: SavedQueryAttributes = {
@@ -1038,7 +1038,7 @@ dependency is missing:
 
 ```typescript
 // src/plugins/myplugin/public/plugin.test.ts
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { MyPlugin } from './plugin';
 
@@ -1070,7 +1070,7 @@ Then we should test that when optional dependency is properly used when present:
 
 ```typescript
 // src/plugins/myplugin/public/plugin.test.ts
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 

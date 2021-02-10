@@ -13,7 +13,7 @@ export {
   UiSettingsType,
   ImageValidation,
   StringValidationRegex,
-} from '../../core/types';
+} from 'src/core/types';
 
 /**
  * A function that should mount DOM content inside the provided container element

@@ -9,7 +9,7 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
-import { DocLinksStart } from '../../../../core/public';
+import { DocLinksStart } from 'src/core/public';
 
 export const TimelionDeprecation = ({ links }: DocLinksStart) => {
   const timelionDeprecationLink = links.visualize.timelionDeprecation;

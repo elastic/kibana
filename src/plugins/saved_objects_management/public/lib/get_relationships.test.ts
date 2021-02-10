@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectGetRelationshipsResponse } from '../types';
-import { httpServiceMock } from '../../../../core/public/mocks';
+import { httpServiceMock } from 'src/core/public/mocks';
 import { getRelationships } from './get_relationships';
 
 describe('getRelationships', () => {

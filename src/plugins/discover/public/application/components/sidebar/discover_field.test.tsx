@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DiscoverField } from './discover_field';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
 

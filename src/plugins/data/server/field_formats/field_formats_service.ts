@@ -7,12 +7,12 @@
  */
 
 import { has } from 'lodash';
+import { IUiSettingsClient } from 'src/core/server';
 import {
   FieldFormatsRegistry,
   FieldFormatInstanceType,
   baseFormatters,
 } from '../../common/field_formats';
-import { IUiSettingsClient } from '../../../../core/server';
 import { DateFormat, DateNanosFormat } from './converters';
 
 export class FieldFormatsService {

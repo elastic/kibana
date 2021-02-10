@@ -17,7 +17,7 @@ import { tableVisLegacyTypeDefinition } from './table_vis_legacy_type';
 import { Vis } from '../../../visualizations/public';
 import { stubFields } from '../../../data/public/stubs';
 import { tableVisLegacyResponseHandler } from './table_vis_legacy_response_handler';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { IAggConfig, search } from '../../../data/public';
 import { getStubIndexPattern } from '../../../data/public/test_utils';
 import { searchServiceMock } from '../../../data/public/search/mocks';

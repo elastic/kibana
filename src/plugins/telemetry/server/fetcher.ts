@@ -21,7 +21,7 @@ import {
   SavedObjectsClient,
   CoreStart,
   ICustomClusterClient,
-} from '../../../core/server';
+} from 'src/core/server';
 import {
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,

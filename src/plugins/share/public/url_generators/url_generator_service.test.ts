@@ -7,7 +7,7 @@
  */
 
 import { UrlGeneratorsService } from './url_generator_service';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 
 const service = new UrlGeneratorsService();
 

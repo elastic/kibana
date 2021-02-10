@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from 'src/core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
 import * as requestModule from '../../../../lib/proxy_request';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectReference } from 'src/core/types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
-import { SavedObjectReference } from '../../../../core/types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 import { SerializableState } from '../../../kibana_utils/common/persistable_state';
 

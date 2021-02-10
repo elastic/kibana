@@ -11,7 +11,7 @@ import _ from 'lodash';
 import realHits from 'fixtures/real_hits.js';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { coreMock } from '../../../../../../../core/public/mocks';
+import { coreMock } from 'src/core/public/mocks';
 import { IndexPattern } from '../../../../../../data/public';
 import { getStubIndexPattern } from '../../../../../../data/public/test_utils';
 // @ts-ignore

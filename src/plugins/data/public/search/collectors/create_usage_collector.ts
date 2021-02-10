@@ -7,7 +7,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { StartServicesAccessor } from '../../../../../core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 

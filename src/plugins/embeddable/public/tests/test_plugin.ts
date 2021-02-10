@@ -7,10 +7,10 @@
  */
 
 import { CoreSetup, CoreStart } from 'src/core/public';
+import { coreMock } from 'src/core/public/mocks';
 import { UiActionsStart } from '../../../ui_actions/public';
 import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
 import { inspectorPluginMock } from '../../../inspector/public/mocks';
-import { coreMock } from '../../../../core/public/mocks';
 import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 
 export interface TestPluginReturn {
