@@ -74,7 +74,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
   const inventoryItems = Object.keys(first(results)!);
   for (const item of inventoryItems) {
-    const alertInstance = services.alertInstanceFactory(`${item}`);
     const prevState = alertInstance.getState();
     // AND logic; all criteria must be across the threshold
     const shouldAlertFire = results.every((result) =>
@@ -109,12 +108,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           )
         )
         .join('\n');
-    } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
       /*
        * Custom recovery actions aren't yet available in the alerting framework
        * Uncomment the code below once they've been implemented
        * Reference: https://github.com/elastic/kibana/issues/87048
        */
+      // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
       // reason = results
       //   .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
       //   .join('\n');
@@ -139,6 +138,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           : nextState === AlertStates.WARNING
           ? WARNING_ACTIONS.id
           : FIRED_ACTIONS.id;
+      const alertInstance = services.alertInstanceFactory(`${item}`);
       alertInstance.scheduleActions(
         /**
          * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
@@ -158,10 +158,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         }
       );
     }
-
-    alertInstance.replaceState({
-      alertState: nextState,
-    });
   }
 };
 
