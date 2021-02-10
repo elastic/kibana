@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+
 import { HttpLogic } from '../../../shared/http';
 
 import { FeedActivity } from './recent_activity';

@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
@@ -30,6 +30,8 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
 import {
@@ -38,8 +40,6 @@ import {
   endSelector,
 } from '../../../common/components/super_date_picker/selectors';
 import * as i18n from './translations';
-import { useUiSetting$ } from '../../../common/lib/kibana';
-import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 const OverlayContainer = styled.div`
   ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
@@ -61,14 +61,14 @@ const FullScreenButtonIcon = styled(EuiButtonIcon)`
 
 interface OwnProps {
   isEventViewer: boolean;
-  timelineId: string;
+  timelineId: TimelineId;
 }
 
 interface NavigationProps {
   fullScreen: boolean;
   globalFullScreen: boolean;
   onCloseOverlay: () => void;
-  timelineId: string;
+  timelineId: TimelineId;
   timelineFullScreen: boolean;
   toggleFullScreen: () => void;
 }
@@ -169,16 +169,14 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     globalFullScreen,
   ]);
 
-  const { signalIndexName } = useSignalIndex();
-  const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const indices: string[] | null = useMemo(() => {
-    if (signalIndexName === null) {
-      return null;
-    } else {
-      return [...siemDefaultIndices, signalIndexName];
-    }
-  }, [signalIndexName, siemDefaultIndices]);
+  let sourcereScope = SourcererScopeName.default;
+  if ([TimelineId.detectionsRulesDetailsPage, TimelineId.detectionsPage].includes(timelineId)) {
+    sourcereScope = SourcererScopeName.detections;
+  } else if (timelineId === TimelineId.active) {
+    sourcereScope = SourcererScopeName.timeline;
+  }
 
+  const { selectedPatterns } = useSourcererScope(sourcereScope);
   return (
     <OverlayContainer
       data-test-subj="overlayContainer"
@@ -198,11 +196,11 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="none" />
-      {graphEventId !== undefined && indices !== null ? (
+      {graphEventId !== undefined ? (
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
-          indices={indices}
+          indices={selectedPatterns}
           shouldUpdate={shouldUpdate}
           filters={{ from, to }}
         />
