@@ -98,17 +98,19 @@ export const PrivateSources: React.FC = () => {
   );
 
   const sharedSourcesEmptyState = (
-    <ContentSection>
-      <EuiPanel>
-        <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt
-          iconType={noSharedSourcesIcon}
-          title={<h2>{SHARED_EMPTY_TITLE}</h2>}
-          body={<p>{SHARED_EMPTY_DESCRIPTION}</p>}
-        />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
-    </ContentSection>
+    <EuiPanel>
+      <EuiSpacer size="xxl" />
+      <EuiEmptyPrompt
+        iconType={noSharedSourcesIcon}
+        title={<h2>{SHARED_EMPTY_TITLE}</h2>}
+        body={<p>{SHARED_EMPTY_DESCRIPTION}</p>}
+      />
+      <EuiSpacer size="xxl" />
+    </EuiPanel>
+  );
+
+  const sharedSourcesTable = (
+    <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
   );
 
   const groupsSentence =
@@ -118,19 +120,22 @@ export const PrivateSources: React.FC = () => {
           groups.length === 2 ? '' : ','
         } ${AND} ${groups.slice(-1)}`;
 
-  const sharedSources = (
+  const sharedSourcesSection = (
     <ContentSection
       title={PRIVATE_SHARED_SOURCES_TITLE}
-      description={i18n.translate(
-        'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description',
-        {
-          defaultMessage:
-            'You have access to the following sources through the {groups, plural, one {group} other {groups}} {groupsSentence}.',
-          values: { groups: groups.length, groupsSentence },
-        }
-      )}
+      description={
+        hasSharedSources &&
+        i18n.translate(
+          'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description',
+          {
+            defaultMessage:
+              'You have access to the following sources through the {groups, plural, one {group} other {groups}} {groupsSentence}.',
+            values: { groups: groups.length, groupsSentence },
+          }
+        )
+      }
     >
-      <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
+      {hasSharedSources ? sharedSourcesTable : sharedSourcesEmptyState}
     </ContentSection>
   );
 
@@ -147,7 +152,7 @@ export const PrivateSources: React.FC = () => {
     <SourcesView>
       {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
       {canCreatePersonalSources && privateSourcesSection}
-      {hasSharedSources ? sharedSources : sharedSourcesEmptyState}
+      {sharedSourcesSection}
     </SourcesView>
   );
 };
