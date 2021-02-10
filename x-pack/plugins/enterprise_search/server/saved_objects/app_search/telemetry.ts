@@ -8,6 +8,7 @@
 /* istanbul ignore file */
 
 import { SavedObjectsType } from 'src/core/server';
+
 import { AS_TELEMETRY_NAME } from '../../collectors/app_search/telemetry';
 
 export const appSearchTelemetryType: SavedObjectsType = {
