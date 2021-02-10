@@ -96,6 +96,7 @@ export const GroupByExpression = ({
                   }
                 )
           }`}
+          data-test-subj="groupByExpression"
           value={`${groupByTypes[groupBy].text} ${
             groupByTypes[groupBy].sizeRequired
               ? `${termSize} ${termField ? `'${termField}'` : ''}`

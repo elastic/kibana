@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiText, EuiTextColor } from '@elastic/eui';

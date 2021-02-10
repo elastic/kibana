@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -15,6 +14,7 @@ import {
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DOCS_PREFIX } from '../../routes';
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
