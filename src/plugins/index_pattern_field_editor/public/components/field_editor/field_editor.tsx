@@ -17,7 +17,6 @@ import {
   FormHook,
   UseField,
   TextField,
-  useFormData,
   RuntimeType,
   IndexPattern,
   DataPublicPluginStart,
@@ -27,13 +26,13 @@ import { Field, InternalFieldType, PluginStart } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
 import { getNameFieldConfig } from './lib';
-import { ShadowingFieldWarning } from './shadowing_field_warning';
 import {
   TypeField,
   CustomLabelField,
   ScriptField,
   FormatField,
   PopularityField,
+  ScriptSyntaxError,
 } from './form_fields';
 import { FormRow } from './form_row';
 import { AdvancedParametersSection } from './advanced_parameters_section';
@@ -85,6 +84,7 @@ export interface Props {
      */
     existingConcreteFields: Array<{ name: string; type: string }>;
   };
+  syntaxError: ScriptSyntaxError;
 }
 
 const geti18nTexts = () => ({
@@ -159,6 +159,7 @@ const FieldEditorComponent = ({
   fieldFormatEditors,
   fieldFormats,
   uiSettings,
+  syntaxError,
   ctx: { fieldTypeToProcess, namesNotAllowed, existingConcreteFields },
 }: Props) => {
   const { form } = useForm<Field, FieldFormInternal>({
@@ -168,10 +169,8 @@ const FieldEditorComponent = ({
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted } = form;
-  const [{ name }] = useFormData<FieldFormInternal>({ form, watch: 'name' });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
-  const isShadowingField = existingConcreteFields.find((_field) => _field.name === name);
   const i18nTexts = geti18nTexts();
 
   useEffect(() => {
@@ -207,13 +206,6 @@ const FieldEditorComponent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isShadowingField && (
-        <>
-          <EuiSpacer />
-          <ShadowingFieldWarning />
-        </>
-      )}
-
       <EuiSpacer size="xl" />
 
       {/* Set custom label */}
@@ -234,7 +226,11 @@ const FieldEditorComponent = ({
           formFieldPath="__meta__.isValueVisible"
           withDividerRule
         >
-          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
+          <ScriptField
+            existingConcreteFields={existingConcreteFields}
+            links={links}
+            syntaxError={syntaxError}
+          />
         </FormRow>
       )}
 

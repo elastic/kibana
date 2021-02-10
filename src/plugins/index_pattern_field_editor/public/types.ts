@@ -7,8 +7,13 @@
  */
 
 import { FunctionComponent } from 'react';
-import { DataPublicPluginStart, RuntimeField, UsageCollectionStart } from './shared_imports';
 
+import {
+  DataPublicPluginStart,
+  RuntimeField,
+  RuntimeType,
+  UsageCollectionStart,
+} from './shared_imports';
 import { OpenFieldEditorOptions } from './open_editor';
 import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 import { DeleteProviderProps } from './components/delete_field_provider';
@@ -38,7 +43,7 @@ export type InternalFieldType = 'concrete' | 'runtime';
 
 export interface Field {
   name: string;
-  type?: RuntimeField['type'] | string;
+  type: RuntimeField['type'] | string;
   script?: RuntimeField['script'];
   customLabel?: string;
   popularity?: number;
@@ -48,4 +53,11 @@ export interface Field {
 export interface FieldFormatConfig {
   id: string;
   params?: { [key: string]: any };
+}
+
+export interface EsRuntimeField {
+  type: RuntimeType | string;
+  script?: {
+    source: string;
+  };
 }

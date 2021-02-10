@@ -10,11 +10,6 @@ import { registerTestBed, TestBed, noop, docLinks } from '../test_utils';
 import { Field } from '../types';
 import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
 
-const setup = (props: Props = defaultProps) =>
-  registerTestBed(FieldEditorFlyoutContent, {
-    memoryRouter: { wrapComponent: false },
-  })(props) as TestBed;
-
 const defaultProps: Props = {
   onSave: noop,
   onCancel: noop,
@@ -25,7 +20,14 @@ const defaultProps: Props = {
   fieldFormats: {} as any,
   fieldFormatEditors: {} as any,
   fieldTypeToProcess: 'runtime',
+  runtimeFieldValidator: () => Promise.resolve(null),
+  isSavingField: false,
 };
+
+const setup = (props: Props = defaultProps) =>
+  registerTestBed(FieldEditorFlyoutContent, {
+    memoryRouter: { wrapComponent: false },
+  })(props) as TestBed;
 
 describe('<FieldEditorFlyoutContent />', () => {
   test('should have the correct title', () => {

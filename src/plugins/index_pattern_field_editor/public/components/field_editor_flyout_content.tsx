@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutHeader,
@@ -23,8 +23,8 @@ import {
 
 import { DocLinksStart, CoreStart } from 'src/core/public';
 
-import { Field, InternalFieldType, PluginStart } from '../types';
-import { getLinks } from '../lib';
+import { Field, InternalFieldType, PluginStart, EsRuntimeField } from '../types';
+import { getLinks, RuntimeFieldPainlessError } from '../lib';
 import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
 
@@ -71,6 +71,8 @@ export interface Props {
   FieldEditor: React.ComponentType<FieldEditorProps> | null;
   /** The internal field type we are dealing with (concrete|runtime)*/
   fieldTypeToProcess: InternalFieldType;
+  /** Handler to validate the script  */
+  runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
 
@@ -78,6 +80,7 @@ export interface Props {
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
+  isSavingField: boolean;
 }
 
 const FieldEditorFlyoutContentComponent = ({
@@ -91,6 +94,8 @@ const FieldEditorFlyoutContentComponent = ({
   fieldFormats,
   uiSettings,
   fieldTypeToProcess,
+  runtimeFieldValidator,
+  isSavingField,
 }: Props) => {
   const i18nTexts = geti18nTexts(field);
 
@@ -101,23 +106,66 @@ const FieldEditorFlyoutContentComponent = ({
       ? async () => ({ isValid: true, data: field })
       : async () => ({ isValid: false, data: {} as Field }),
   });
+
+  const [painlessSyntaxError, setPainlessSyntaxError] = useState<RuntimeFieldPainlessError | null>(
+    null
+  );
+
+  const [isValidating, setIsValidating] = useState(false);
+
   const { submit, isValid: isFormValid, isSubmitted } = formState;
+  const { fields } = indexPattern;
+  const isSaveButtonDisabled = isFormValid === false || painlessSyntaxError !== null;
+
+  const clearSyntaxError = useCallback(() => setPainlessSyntaxError(null), []);
+
+  const syntaxError = useMemo(
+    () => ({
+      error: painlessSyntaxError,
+      clear: clearSyntaxError,
+    }),
+    [painlessSyntaxError, clearSyntaxError]
+  );
 
   const onClickSave = useCallback(async () => {
     const { isValid, data } = await submit();
 
     if (isValid) {
+      if (data.script) {
+        setIsValidating(true);
+
+        const error = await runtimeFieldValidator({
+          type: data.type,
+          script: data.script,
+        });
+
+        setIsValidating(false);
+        setPainlessSyntaxError(error);
+
+        if (error) {
+          return;
+        }
+      }
+
       onSave(data);
     }
-  }, [onSave, submit]);
+  }, [onSave, submit, runtimeFieldValidator]);
 
-  const namesNotAllowed = indexPattern.fields.map((fld) => fld.name);
-  const existingConcreteFields = indexPattern.fields
-    .filter((fld) => fld.isMapped)
-    .map((fld) => ({
-      name: fld.name,
-      type: (fld.esTypes && fld.esTypes[0]) || '',
-    }));
+  const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
+
+  const existingConcreteFields = useMemo(
+    () =>
+      fields
+        .filter((fld) => {
+          const isFieldBeingEdited = field?.name === fld.name;
+          return !isFieldBeingEdited && fld.isMapped;
+        })
+        .map((fld) => ({
+          name: fld.name,
+          type: (fld.esTypes && fld.esTypes[0]) || '',
+        })),
+    [fields, field]
+  );
 
   return (
     <>
@@ -138,6 +186,7 @@ const FieldEditorFlyoutContentComponent = ({
             field={field}
             onChange={setFormState}
             ctx={{ fieldTypeToProcess, namesNotAllowed, existingConcreteFields }}
+            syntaxError={syntaxError}
           />
         )}
       </EuiFlyoutBody>
@@ -145,7 +194,7 @@ const FieldEditorFlyoutContentComponent = ({
       <EuiFlyoutFooter>
         {FieldEditor && (
           <>
-            {isSubmitted && isFormValid === false && (
+            {isSubmitted && isSaveButtonDisabled && (
               <>
                 <EuiCallOut
                   title={i18nTexts.formErrorsCalloutTitle}
@@ -174,6 +223,8 @@ const FieldEditorFlyoutContentComponent = ({
                   onClick={onClickSave}
                   data-test-subj="fieldSaveButton"
                   fill
+                  disabled={isSaveButtonDisabled}
+                  isLoading={isSavingField || isValidating}
                 >
                   {i18nTexts.saveButtonLabel}
                 </EuiButton>

@@ -33,15 +33,25 @@ export interface OpenFieldEditorOptions {
 }
 
 type CloseEditor = () => void;
+interface Dependencies {
+  core: CoreStart;
+  /** The search service from the data plugin */
+  search: DataPublicPluginStart['search'];
+  indexPatternService: DataPublicPluginStart['indexPatterns'];
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormatEditors: PluginStart['fieldFormatEditors'];
+  usageCollection: UsageCollectionStart;
+}
 
-export const getFieldEditorOpener = (
-  coreStart: CoreStart,
-  indexPatternService: DataPublicPluginStart['indexPatterns'],
-  fieldFormats: DataPublicPluginStart['fieldFormats'],
-  fieldFormatEditors: PluginStart['fieldFormatEditors'],
-  usageCollection: UsageCollectionStart
-) => (options: OpenFieldEditorOptions): CloseEditor => {
-  const { uiSettings, overlays, docLinks, notifications } = coreStart;
+export const getFieldEditorOpener = ({
+  core,
+  indexPatternService,
+  fieldFormats,
+  fieldFormatEditors,
+  search,
+  usageCollection,
+}: Dependencies) => (options: OpenFieldEditorOptions): CloseEditor => {
+  const { uiSettings, overlays, docLinks, notifications } = core;
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
 
   let overlayRef: OverlayRef | null = null;
@@ -63,6 +73,7 @@ export const getFieldEditorOpener = (
     };
 
     const field = fieldName ? ctx.indexPattern.getFieldByName(fieldName) : undefined;
+
     if (fieldName && !field) {
       const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
         defaultMessage: "Field named '{fieldName}' not found on index pattern",
@@ -85,7 +96,7 @@ export const getFieldEditorOpener = (
             onCancel={closeEditor}
             docLinks={docLinks}
             field={field}
-            ctx={{ ...ctx, fieldTypeToProcess }}
+            ctx={{ ...ctx, fieldTypeToProcess, search }}
             indexPatternService={indexPatternService}
             notifications={notifications}
             fieldFormatEditors={fieldFormatEditors}
