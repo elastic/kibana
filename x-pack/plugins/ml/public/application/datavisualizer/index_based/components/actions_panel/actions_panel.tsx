@@ -48,8 +48,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       setRecognizerResultsCount(recognizerResults.count);
     },
   };
-  const showCreateDataFrameAnalytics =
-    isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
+  const mlAvailable = isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
   const showCreateAnomalyDetectionJob =
     isFullLicense() &&
     checkPermission('canCreateJob') &&
@@ -65,6 +64,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
     page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
     pageState: { index: indexPattern.id },
   });
+
   useEffect(() => {
     let unmounted = false;
 
@@ -108,7 +108,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
   // controls whether the recognizer section is ultimately displayed.
   return (
     <div data-test-subj="mlDataVisualizerActionsPanel">
-      {showCreateDataFrameAnalytics && (
+      {mlAvailable && (
         <>
           <EuiTitle size="s">
             <h2>
@@ -169,40 +169,37 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
           )}
         </>
       )}
-      {showCreateDataFrameAnalytics &&
-        indexPattern.id !== undefined &&
-        createDataFrameAnalyticsLink && (
-          <>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.datavisualizer.actionsPanel.createDataFrameAnalyticsDescription"
-                  defaultMessage="Use the Data Frame Analytics wizard to perform analyses of your data:"
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <LinkCard
-              href={createDataFrameAnalyticsLink}
-              icon="classificationJob"
-              description={i18n.translate(
-                'xpack.ml.datavisualizer.actionsPanel.dataframeTypesDescription',
-                {
-                  defaultMessage:
-                    'Create outlier detection, regression, or classification analytics',
-                }
-              )}
-              title={
-                <FormattedMessage
-                  id="xpack.ml.datavisualizer.actionsPanel.dataframeAnalyticsTitle"
-                  defaultMessage="Data Frame Analytics"
-                />
+      {mlAvailable && indexPattern.id !== undefined && createDataFrameAnalyticsLink && (
+        <>
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.actionsPanel.createDataFrameAnalyticsDescription"
+                defaultMessage="Use the Data Frame Analytics wizard to perform analyses of your data:"
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <LinkCard
+            href={createDataFrameAnalyticsLink}
+            icon="classificationJob"
+            description={i18n.translate(
+              'xpack.ml.datavisualizer.actionsPanel.dataframeTypesDescription',
+              {
+                defaultMessage: 'Create outlier detection, regression, or classification analytics',
               }
-              data-test-subj="mlDataVisualizerCreateDFACard"
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+            )}
+            title={
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.actionsPanel.dataframeAnalyticsTitle"
+                defaultMessage="Data Frame Analytics"
+              />
+            }
+            data-test-subj="mlDataVisualizerCreateDFACard"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {discoverLink && (
         <>
