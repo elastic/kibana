@@ -169,8 +169,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
         const gridLines = await PageObjects.visChart.getGridLines();
-        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 6);
-        expect(gridLines.length).to.be(expectedCount);
+        // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
+        // The objective here is to check whenever the grid lines are rendered, not the exact quantity
+        expect(gridLines.length).to.be.greaterThan(0);
         gridLines.forEach((gridLine) => {
           expect(gridLine.y).to.be(0);
         });
