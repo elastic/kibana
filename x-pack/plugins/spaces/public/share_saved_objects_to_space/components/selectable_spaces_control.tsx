@@ -43,27 +43,25 @@ const ROW_HEIGHT = 40;
 const APPEND_ACTIVE_SPACE = <EuiBadge color="hollow">Current</EuiBadge>;
 const APPEND_CANNOT_SELECT = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked',
-      { defaultMessage: 'You need additional privileges to select this space.' }
-    )}
+    content={i18n.translate('xpack.spaces.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked', {
+      defaultMessage: 'You need additional privileges to select this space.',
+    })}
     position="left"
     type="iInCircle"
   />
 );
 const APPEND_CANNOT_DESELECT = (
   <EuiIconTip
-    content={i18n.translate(
-      'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.checked',
-      { defaultMessage: 'You need additional privileges to deselect this space.' }
-    )}
+    content={i18n.translate('xpack.spaces.shareToSpace.partiallyAuthorizedSpaceTooltip.checked', {
+      defaultMessage: 'You need additional privileges to deselect this space.',
+    })}
     position="left"
     type="iInCircle"
   />
 );
 const APPEND_FEATURE_IS_DISABLED = (
   <EuiIconTip
-    content={i18n.translate('xpack.spaces.management.shareToSpace.featureIsDisabledTooltip', {
+    content={i18n.translate('xpack.spaces.shareToSpace.featureIsDisabledTooltip', {
       defaultMessage:
         'This feature is disabled in this space, it will have no effect unless the feature is enabled again.',
     })}
@@ -134,13 +132,13 @@ export const SelectableSpacesControl = (props: Props) => {
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.unknownSpacesLabel.text"
+            id="xpack.spaces.shareToSpace.unknownSpacesLabel.text"
             defaultMessage="To view hidden spaces, you need {additionalPrivilegesLink}."
             values={{
               additionalPrivilegesLink: (
                 <EuiLink href={kibanaPrivilegesUrl}>
                   <FormattedMessage
-                    id="xpack.spaces.management.shareToSpace.unknownSpacesLabel.additionalPrivilegesLink"
+                    id="xpack.spaces.shareToSpace.unknownSpacesLabel.additionalPrivilegesLink"
                     defaultMessage="additional privileges"
                   />
                 </EuiLink>
@@ -165,15 +163,15 @@ export const SelectableSpacesControl = (props: Props) => {
     selectedCountPad;
   const hiddenCount = selectedSpaceIds.filter((id) => id === UNKNOWN_SPACE).length;
   const selectSpacesLabel = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.selectSpacesLabel',
+    'xpack.spaces.shareToSpace.shareModeControl.selectSpacesLabel',
     { defaultMessage: 'Select spaces' }
   );
   const selectedSpacesLabel = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.selectedCountLabel',
+    'xpack.spaces.shareToSpace.shareModeControl.selectedCountLabel',
     { defaultMessage: '{selectedCount} selected', values: { selectedCount } }
   );
   const hiddenSpacesLabel = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.hiddenCountLabel',
+    'xpack.spaces.shareToSpace.shareModeControl.hiddenCountLabel',
     { defaultMessage: '+{hiddenCount} hidden', values: { hiddenCount } }
   );
   const hiddenSpaces = hiddenCount ? <EuiText size="xs">{hiddenSpacesLabel}</EuiText> : null;

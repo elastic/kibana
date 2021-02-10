@@ -16,10 +16,10 @@ export class ShareToSpaceSavedObjectsManagementColumn
 
   public euiColumn = {
     field: 'namespaces',
-    name: i18n.translate('xpack.spaces.management.shareToSpace.columnTitle', {
+    name: i18n.translate('xpack.spaces.shareToSpace.columnTitle', {
       defaultMessage: 'Shared spaces',
     }),
-    description: i18n.translate('xpack.spaces.management.shareToSpace.columnDescription', {
+    description: i18n.translate('xpack.spaces.shareToSpace.columnDescription', {
       defaultMessage: 'The other spaces that this object is currently shared to',
     }),
     render: (namespaces: string[] | undefined) => {

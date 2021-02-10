@@ -61,11 +61,11 @@ function createDefaultChangeSpacesHandler(
       const spaceTargets = isSharedToAllSpaces ? ALL_SPACES_TARGET : `${spacesToAdd.length}`;
       const toastText =
         !isSharedToAllSpaces && spacesToAdd.length === 1
-          ? i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessTextSingular', {
+          ? i18n.translate('xpack.spaces.shareToSpace.shareAddSuccessTextSingular', {
               defaultMessage: `'{object}' was added to 1 space.`,
               values: { object: title },
             })
-          : i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessTextPlural', {
+          : i18n.translate('xpack.spaces.shareToSpace.shareAddSuccessTextPlural', {
               defaultMessage: `'{object}' was added to {spaceTargets} spaces.`,
               values: { object: title, spaceTargets },
             });
@@ -77,11 +77,11 @@ function createDefaultChangeSpacesHandler(
       const spaceTargets = isUnsharedFromAllSpaces ? ALL_SPACES_TARGET : `${spacesToRemove.length}`;
       const toastText =
         !isUnsharedFromAllSpaces && spacesToRemove.length === 1
-          ? i18n.translate('xpack.spaces.management.shareToSpace.shareRemoveSuccessTextSingular', {
+          ? i18n.translate('xpack.spaces.shareToSpace.shareRemoveSuccessTextSingular', {
               defaultMessage: `'{object}' was removed from 1 space.`,
               values: { object: title },
             })
-          : i18n.translate('xpack.spaces.management.shareToSpace.shareRemoveSuccessTextPlural', {
+          : i18n.translate('xpack.spaces.shareToSpace.shareRemoveSuccessTextPlural', {
               defaultMessage: `'{object}' was removed from {spaceTargets} spaces.`,
               values: { object: title, spaceTargets },
             });
@@ -158,7 +158,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       })
       .catch((e) => {
         toastNotifications.addError(e, {
-          title: i18n.translate('xpack.spaces.management.shareToSpace.spacesLoadErrorTitle', {
+          title: i18n.translate('xpack.spaces.shareToSpace.spacesLoadErrorTitle', {
             defaultMessage: 'Error loading available spaces',
           }),
         });
@@ -323,7 +323,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
               disabled={shareInProgress}
             >
               <FormattedMessage
-                id="xpack.spaces.management.shareToSpace.cancelButton"
+                id="xpack.spaces.shareToSpace.cancelButton"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -336,7 +336,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
               disabled={isStartShareButtonDisabled}
             >
               <FormattedMessage
-                id="xpack.spaces.management.shareToSpace.shareToSpacesButton"
+                id="xpack.spaces.shareToSpace.shareToSpacesButton"
                 defaultMessage="Save &amp; close"
               />
             </EuiButton>

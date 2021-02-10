@@ -84,25 +84,21 @@ export const ShareModeControl = (props: Props) => {
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const shareToAllSpaces = {
     id: 'shareToAllSpaces',
-    title: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.title',
-      { defaultMessage: 'All spaces' }
-    ),
-    text: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.text',
-      {
-        defaultMessage: 'Make {objectNoun} available in all current and future spaces.',
-        values: { objectNoun },
-      }
-    ),
+    title: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.title', {
+      defaultMessage: 'All spaces',
+    }),
+    text: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.text', {
+      defaultMessage: 'Make {objectNoun} available in all current and future spaces.',
+      values: { objectNoun },
+    }),
     ...(!canShareToAllSpaces && {
       tooltip: isGlobalControlChecked
         ? i18n.translate(
-            'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.cannotUncheckTooltip',
+            'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotUncheckTooltip',
             { defaultMessage: 'You need additional privileges to change this option.' }
           )
         : i18n.translate(
-            'xpack.spaces.management.shareToSpace.shareModeControl.shareToAllSpaces.cannotCheckTooltip',
+            'xpack.spaces.shareToSpace.shareModeControl.shareToAllSpaces.cannotCheckTooltip',
             { defaultMessage: 'You need additional privileges to use this option.' }
           ),
     }),
@@ -111,16 +107,13 @@ export const ShareModeControl = (props: Props) => {
   const shareToExplicitSpaces = {
     id: 'shareToExplicitSpaces',
     title: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToExplicitSpaces.title',
+      'xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.title',
       { defaultMessage: 'Select spaces' }
     ),
-    text: i18n.translate(
-      'xpack.spaces.management.shareToSpace.shareModeControl.shareToExplicitSpaces.text',
-      {
-        defaultMessage: 'Make {objectNoun} available in selected spaces only.',
-        values: { objectNoun },
-      }
-    ),
+    text: i18n.translate('xpack.spaces.shareToSpace.shareModeControl.shareToExplicitSpaces.text', {
+      defaultMessage: 'Make {objectNoun} available in selected spaces only.',
+      values: { objectNoun },
+    }),
     disabled: !canShareToAllSpaces && isGlobalControlChecked,
   };
 
@@ -143,14 +136,14 @@ export const ShareModeControl = (props: Props) => {
           iconType="help"
           title={
             <FormattedMessage
-              id="xpack.spaces.management.shareToSpace.privilegeWarningTitle"
+              id="xpack.spaces.shareToSpace.privilegeWarningTitle"
               defaultMessage="Additional privileges required"
             />
           }
           color="warning"
         >
           <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.privilegeWarningBody"
+            id="xpack.spaces.shareToSpace.privilegeWarningBody"
             defaultMessage="To edit the spaces for this {objectNoun}, you need privileges to modify it in all spaces. Contact your system administrator for more information."
             values={{ objectNoun }}
           />

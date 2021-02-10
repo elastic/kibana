@@ -17,10 +17,10 @@ export class ShareToSpaceSavedObjectsManagementAction extends SavedObjectsManage
   public id: string = 'share_saved_objects_to_space';
 
   public euiAction = {
-    name: i18n.translate('xpack.spaces.management.shareToSpace.actionTitle', {
+    name: i18n.translate('xpack.spaces.shareToSpace.actionTitle', {
       defaultMessage: 'Share to space',
     }),
-    description: i18n.translate('xpack.spaces.management.shareToSpace.actionDescription', {
+    description: i18n.translate('xpack.spaces.shareToSpace.actionDescription', {
       defaultMessage: 'Share this saved object to one or more spaces',
     }),
     icon: 'share',
