@@ -97,9 +97,7 @@ export const getTrustedAppsGetOneHandler = (
         body: await getTrustedApp(exceptionListClientFromContext(context), req.params.id),
       });
     } catch (error) {
-      // FIXME:PT use generic error handlers from other PR once merged
-      logger.error(error);
-      return res.internalError({ body: error });
+      return errorHandler(logger, res, error);
     }
   };
 };

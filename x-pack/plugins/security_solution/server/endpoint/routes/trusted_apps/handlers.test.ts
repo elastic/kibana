@@ -365,8 +365,7 @@ describe('handlers', () => {
       });
     });
 
-    // FIXME:PT unskip once pending PR is merged
-    it.skip('should return 404 if trusted app does not exist', async () => {
+    it('should return 404 if trusted app does not exist', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
 
       exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
@@ -377,11 +376,10 @@ describe('handlers', () => {
         mockResponse
       );
 
-      assertResponse(mockResponse, 'notFound', expect.any(Error));
+      assertResponse(mockResponse, 'notFound', expect.any(TrustedAppNotFoundError));
     });
 
-    // FIXME:PT unskip once pending PR is merged
-    it.skip('should log errors if any are encountered', async () => {
+    it('should log errors if any are encountered', async () => {
       const mockResponse = httpServerMock.createResponseFactory();
       const error = new Error('I am an error');
       exceptionsListClient.getExceptionListItem.mockImplementation(async () => {

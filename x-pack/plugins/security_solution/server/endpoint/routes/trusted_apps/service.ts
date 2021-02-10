@@ -55,8 +55,7 @@ export const getTrustedApp = async (
   });
 
   if (!trustedAppExceptionItem) {
-    // FIXME: use specific error from current pending PR once merged
-    throw new Error('does not exist');
+    throw new TrustedAppNotFoundError(id);
   }
 
   return {

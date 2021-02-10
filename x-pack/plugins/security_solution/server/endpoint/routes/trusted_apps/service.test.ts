@@ -265,7 +265,9 @@ describe('service', () => {
 
     it('should return Trusted App Not Found Error if it does not exist', async () => {
       exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
-      await expect(getTrustedApp(exceptionsListClient, '123')).rejects.toBeInstanceOf(Error); // FIXME:PT use specific error from pending pr once merged
+      await expect(getTrustedApp(exceptionsListClient, '123')).rejects.toBeInstanceOf(
+        TrustedAppNotFoundError
+      );
     });
   });
 });
