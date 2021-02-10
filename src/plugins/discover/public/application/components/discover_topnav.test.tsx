@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DiscoverServices } from '../../build_services';
-import { AppState, GetStateReturn } from '../angular/discover_state';
+import { GetStateReturn } from '../angular/discover_state';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
@@ -20,9 +20,11 @@ import { SavedObject } from '../../../../../core/types';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { RequestAdapter } from '../../../../inspector/common/adapters/request';
 import { TopNavMenu } from '../../../../navigation/public';
+import { Query } from '../../../../data/common';
+import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
+import { Subject } from 'rxjs';
 
 function getProps(): DiscoverTopNavProps {
-  const state = ({} as unknown) as AppState;
   const services = ({
     navigation: {
       ui: { TopNavMenu },
@@ -45,15 +47,18 @@ function getProps(): DiscoverTopNavProps {
       indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
       inspectorAdapters: { requests: {} as RequestAdapter },
       navigateTo: jest.fn(),
+      refetch$: {} as Subject<undefined>,
       sampleSize: 10,
       savedSearch: savedSearchMock,
+      searchSessionManager: {} as DiscoverSearchSessionManager,
       services,
       setAppState: jest.fn(),
       setHeaderActionMenu: jest.fn(),
       stateContainer: {} as GetStateReturn,
       timefield: indexPattern.timeFieldName || '',
     },
-    state,
+    query: {} as Query,
+    savedQuery: '',
     updateQuery: jest.fn(),
     onOpenInspector: jest.fn(),
   };
