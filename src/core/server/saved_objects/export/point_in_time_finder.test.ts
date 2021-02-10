@@ -11,8 +11,7 @@ import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 import { SavedObjectsFindOptions } from '../types';
 import { SavedObjectsFindResult } from '../service';
 
-import type { FindWithPointInTime } from './find_with_point_in_time';
-import { findWithPointInTime } from './find_with_point_in_time';
+import { createPointInTimeFinder } from './point_in_time_finder';
 
 const mockHits = [
   {
@@ -39,18 +38,55 @@ const mockHits = [
   },
 ];
 
-describe('findWithPointInTime()', () => {
+describe('createPointInTimeFinder()', () => {
   let logger: MockedLogger;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let finder: FindWithPointInTime;
 
   beforeEach(() => {
     logger = loggerMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
-    finder = findWithPointInTime({ savedObjectsClient, logger });
   });
 
   describe('#find', () => {
+    test('throws if a PIT is already open', async () => {
+      savedObjectsClient.openPointInTimeForType.mockResolvedValueOnce({
+        id: 'abc123',
+      });
+      savedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: mockHits,
+        pit_id: 'abc123',
+        per_page: 1,
+        page: 0,
+      });
+      savedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: mockHits,
+        pit_id: 'abc123',
+        per_page: 1,
+        page: 1,
+      });
+
+      const findOptions: SavedObjectsFindOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+        perPage: 1,
+      };
+
+      const finder = createPointInTimeFinder({ findOptions, logger, savedObjectsClient });
+      await finder.find().next();
+
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+      savedObjectsClient.find.mockClear();
+
+      expect(async () => {
+        await finder.find().next();
+      }).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Point In Time has already been opened for this finder instance. Please call \`close()\` before calling \`find()\` again."`
+      );
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(0);
+    });
+
     test('works with a single page of results', async () => {
       savedObjectsClient.openPointInTimeForType.mockResolvedValueOnce({
         id: 'abc123',
@@ -63,13 +99,14 @@ describe('findWithPointInTime()', () => {
         page: 0,
       });
 
-      const options: SavedObjectsFindOptions = {
+      const findOptions: SavedObjectsFindOptions = {
         type: ['visualization'],
         search: 'foo*',
       };
 
+      const finder = createPointInTimeFinder({ findOptions, logger, savedObjectsClient });
       const hits: SavedObjectsFindResult[] = [];
-      for await (const result of finder.find(options)) {
+      for await (const result of finder.find()) {
         hits.push(...result.saved_objects);
       }
 
@@ -113,14 +150,15 @@ describe('findWithPointInTime()', () => {
         page: 0,
       });
 
-      const options: SavedObjectsFindOptions = {
+      const findOptions: SavedObjectsFindOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 1,
       };
 
+      const finder = createPointInTimeFinder({ findOptions, logger, savedObjectsClient });
       const hits: SavedObjectsFindResult[] = [];
-      for await (const result of finder.find(options)) {
+      for await (const result of finder.find()) {
         hits.push(...result.saved_objects);
       }
 
@@ -154,14 +192,15 @@ describe('findWithPointInTime()', () => {
         page: 0,
       });
 
-      const options: SavedObjectsFindOptions = {
+      const findOptions: SavedObjectsFindOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 2,
       };
 
+      const finder = createPointInTimeFinder({ findOptions, logger, savedObjectsClient });
       const hits: SavedObjectsFindResult[] = [];
-      for await (const result of finder.find(options)) {
+      for await (const result of finder.find()) {
         hits.push(...result.saved_objects);
         await finder.close();
       }
@@ -195,14 +234,15 @@ describe('findWithPointInTime()', () => {
         page: 0,
       });
 
-      const options: SavedObjectsFindOptions = {
+      const findOptions: SavedObjectsFindOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 1,
       };
 
+      const finder = createPointInTimeFinder({ findOptions, logger, savedObjectsClient });
       const hits: SavedObjectsFindResult[] = [];
-      for await (const result of finder.find(options)) {
+      for await (const result of finder.find()) {
         hits.push(...result.saved_objects);
         await finder.close();
       }
@@ -217,15 +257,16 @@ describe('findWithPointInTime()', () => {
       });
       savedObjectsClient.find.mockRejectedValueOnce(new Error('oops'));
 
-      const options: SavedObjectsFindOptions = {
+      const findOptions: SavedObjectsFindOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 2,
       };
 
+      const finder = createPointInTimeFinder({ findOptions, logger, savedObjectsClient });
       const hits: SavedObjectsFindResult[] = [];
       try {
-        for await (const result of finder.find(options)) {
+        for await (const result of finder.find()) {
           hits.push(...result.saved_objects);
         }
       } catch (e) {
@@ -233,6 +274,48 @@ describe('findWithPointInTime()', () => {
       }
 
       expect(savedObjectsClient.closePointInTime).toHaveBeenCalledWith('test');
+    });
+
+    test('finder can be reused after closing', async () => {
+      savedObjectsClient.openPointInTimeForType.mockResolvedValueOnce({
+        id: 'abc123',
+      });
+      savedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: mockHits,
+        pit_id: 'abc123',
+        per_page: 1,
+        page: 0,
+      });
+      savedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: mockHits,
+        pit_id: 'abc123',
+        per_page: 1,
+        page: 1,
+      });
+
+      const findOptions: SavedObjectsFindOptions = {
+        type: ['visualization'],
+        search: 'foo*',
+        perPage: 1,
+      };
+
+      const finder = createPointInTimeFinder({ findOptions, logger, savedObjectsClient });
+
+      const findA = finder.find();
+      await findA.next();
+      await finder.close();
+
+      const findB = finder.find();
+      await findB.next();
+      await finder.close();
+
+      expect((await findA.next()).done).toBe(true);
+      expect((await findB.next()).done).toBe(true);
+      expect(savedObjectsClient.openPointInTimeForType).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
+      expect(savedObjectsClient.closePointInTime).toHaveBeenCalledTimes(2);
     });
   });
 });

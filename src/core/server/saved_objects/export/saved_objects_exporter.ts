@@ -23,7 +23,7 @@ import {
 } from './types';
 import { SavedObjectsExportError } from './errors';
 import { applyExportTransforms } from './apply_export_transforms';
-import { findWithPointInTime } from './find_with_point_in_time';
+import { createPointInTimeFinder } from './point_in_time_finder';
 import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
@@ -168,12 +168,7 @@ export class SavedObjectsExporter {
     hasReference,
     search,
   }: SavedObjectsExportByTypeOptions) {
-    const finder = findWithPointInTime({
-      logger: this.#log,
-      savedObjectsClient: this.#savedObjectsClient,
-    });
-
-    const options: SavedObjectsFindOptions = {
+    const findOptions: SavedObjectsFindOptions = {
       type: types,
       hasReference,
       hasReferenceOperator: hasReference ? 'OR' : undefined,
@@ -181,10 +176,17 @@ export class SavedObjectsExporter {
       namespaces: namespace ? [namespace] : undefined,
     };
 
+    const finder = createPointInTimeFinder({
+      findOptions,
+      logger: this.#log,
+      savedObjectsClient: this.#savedObjectsClient,
+    });
+
     const hits: SavedObjectsFindResult[] = [];
-    for await (const result of finder.find(options)) {
+    for await (const result of finder.find()) {
       hits.push(...result.saved_objects);
       if (hits.length > this.#exportSizeLimit) {
+        await finder.close();
         throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
       }
     }

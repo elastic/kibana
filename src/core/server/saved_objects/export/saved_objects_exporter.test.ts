@@ -835,6 +835,15 @@ describe('getSortedObjectsForExport()', () => {
         typeRegistry,
       });
 
+      savedObjectsClient.openPointInTimeForType.mockResolvedValueOnce({
+        id: 'abc123',
+      });
+
+      savedObjectsClient.closePointInTime.mockResolvedValueOnce({
+        succeeded: true,
+        num_freed: 1,
+      });
+
       savedObjectsClient.find.mockResolvedValueOnce({
         total: 2,
         saved_objects: [
@@ -861,6 +870,7 @@ describe('getSortedObjectsForExport()', () => {
         ],
         per_page: 1,
         page: 0,
+        pit_id: 'abc123',
       });
       await expect(
         exporter.exportByTypes({
@@ -868,6 +878,7 @@ describe('getSortedObjectsForExport()', () => {
           types: ['index-pattern', 'search'],
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
+      expect(savedObjectsClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     test('sorts objects within type', async () => {

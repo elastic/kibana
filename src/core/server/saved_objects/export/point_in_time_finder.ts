@@ -25,19 +25,20 @@ import { SavedObjectsFindResponse } from '../service';
  *
  * @example
  * ```ts
- * const finder = findWithPointInTime({
- *   logger,
- *   savedObjectsClient,
- * });
- *
- * const options: SavedObjectsFindOptions = {
+ * const findOptions: SavedObjectsFindOptions = {
  *   type: 'visualization',
  *   search: 'foo*',
  *   perPage: 100,
  * };
  *
+ * const finder = createPointInTimeFinder({
+ *   logger,
+ *   savedObjectsClient,
+ *   findOptions,
+ * });
+ *
  * const responses: SavedObjectFindResponse[] = [];
- * for await (const response of finder.find(options)) {
+ * for await (const response of finder.find()) {
  *   responses.push(...response);
  *   if (doneSearching) {
  *     await finder.close();
@@ -45,50 +46,54 @@ import { SavedObjectsFindResponse } from '../service';
  * }
  * ```
  */
-export function findWithPointInTime({
+export function createPointInTimeFinder({
+  findOptions,
   logger,
   savedObjectsClient,
 }: {
+  findOptions: SavedObjectsFindOptions;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
-  return new FindWithPointInTime({ logger, savedObjectsClient });
+  return new PointInTimeFinder({ findOptions, logger, savedObjectsClient });
 }
 
 /**
  * @internal
  */
-export class FindWithPointInTime {
+export class PointInTimeFinder {
   readonly #log: Logger;
   readonly #savedObjectsClient: SavedObjectsClientContract;
-  #open?: boolean;
-  #perPage?: number;
+  readonly #findOptions: SavedObjectsFindOptions;
+  #open: boolean = false;
   #pitId?: string;
-  #type?: string | string[];
 
   constructor({
-    savedObjectsClient,
+    findOptions,
     logger,
+    savedObjectsClient,
   }: {
-    savedObjectsClient: SavedObjectsClientContract;
+    findOptions: SavedObjectsFindOptions;
     logger: Logger;
+    savedObjectsClient: SavedObjectsClientContract;
   }) {
     this.#log = logger;
     this.#savedObjectsClient = savedObjectsClient;
+    this.#findOptions = {
+      // Default to 1000 items per page as a tradeoff between
+      // speed and memory consumption.
+      perPage: 1000,
+      ...findOptions,
+    };
   }
 
-  async *find(options: SavedObjectsFindOptions) {
-    this.#open = true;
-    this.#type = options.type;
-    // Default to 1000 items per page as a tradeoff between
-    // speed and memory consumption.
-    this.#perPage = options.perPage ?? 1000;
-
-    const findOptions: SavedObjectsFindOptions = {
-      ...options,
-      perPage: this.#perPage,
-      type: this.#type,
-    };
+  async *find() {
+    if (this.#open) {
+      throw new Error(
+        'Point In Time has already been opened for this finder instance. ' +
+          'Please call `close()` before calling `find()` again.'
+      );
+    }
 
     // Open PIT and request our first page of hits
     await this.open();
@@ -97,7 +102,7 @@ export class FindWithPointInTime {
     let lastHitSortValue: unknown[] | undefined;
     do {
       const results = await this.findNext({
-        findOptions,
+        findOptions: this.#findOptions,
         id: this.#pitId,
         ...(lastHitSortValue ? { searchAfter: lastHitSortValue } : {}),
       });
@@ -108,14 +113,14 @@ export class FindWithPointInTime {
       this.#log.debug(`Collected [${lastResultsCount}] saved objects for export.`);
 
       // Close PIT if this was our last page
-      if (this.#pitId && lastResultsCount < this.#perPage) {
+      if (this.#pitId && lastResultsCount < this.#findOptions.perPage!) {
         await this.close();
       }
 
       yield results;
       // We've reached the end when there are fewer hits than our perPage size,
       // or when `close()` has been called.
-    } while (this.#open && lastHitSortValue && lastResultsCount >= this.#perPage);
+    } while (this.#open && lastHitSortValue && lastResultsCount >= this.#findOptions.perPage!);
 
     return;
   }
@@ -123,29 +128,29 @@ export class FindWithPointInTime {
   async close() {
     try {
       if (this.#pitId) {
-        this.#log.debug(`Closing PIT for types [${this.#type}]`);
+        this.#log.debug(`Closing PIT for types [${this.#findOptions.type}]`);
         await this.#savedObjectsClient.closePointInTime(this.#pitId);
         this.#pitId = undefined;
       }
-      this.#type = undefined;
       this.#open = false;
     } catch (e) {
-      this.#log.error(`Failed to close PIT for types [${this.#type}]`);
+      this.#log.error(`Failed to close PIT for types [${this.#findOptions.type}]`);
       throw e;
     }
   }
 
   private async open() {
     try {
-      const { id } = await this.#savedObjectsClient.openPointInTimeForType(this.#type!);
+      const { id } = await this.#savedObjectsClient.openPointInTimeForType(this.#findOptions.type);
       this.#pitId = id;
+      this.#open = true;
     } catch (e) {
       // Since `find` swallows 404s, it is expected that exporter will do the same,
       // so we only rethrow non-404 errors here.
       if (e.output.statusCode !== 404) {
         throw e;
       }
-      this.#log.debug(`Unable to open PIT for types [${this.#type}]: 404 ${e}`);
+      this.#log.debug(`Unable to open PIT for types [${this.#findOptions.type}]: 404 ${e}`);
     }
   }
 
