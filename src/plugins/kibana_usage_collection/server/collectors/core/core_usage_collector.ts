@@ -79,6 +79,7 @@ export function getCoreUsageCollector(
         },
 
         savedObjects: {
+          customIndex: { type: 'boolean' },
           maxImportPayloadBytes: { type: 'long' },
           maxImportExportSizeBytes: { type: 'long' },
         },
