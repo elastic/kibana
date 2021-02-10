@@ -169,7 +169,7 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('oss'),
+        license: Joi.string().default('basic'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
         serverEnvVars: Joi.object(),

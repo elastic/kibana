@@ -7,6 +7,8 @@
 
 import React, { useState, useMemo } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,7 +23,6 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useValues } from 'kea';
 
 import { EngineLogic } from '../../engine';
 
@@ -82,7 +83,7 @@ export const CustomizationModal: React.FC<Props> = ({
                   defaultMessage: 'Filter fields',
                 }
               )}
-              fullWidth={true}
+              fullWidth
               helpText={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.filterFields',
                 {
@@ -93,7 +94,7 @@ export const CustomizationModal: React.FC<Props> = ({
             >
               <EuiComboBox
                 data-test-subj="filterFieldsDropdown"
-                fullWidth={true}
+                fullWidth
                 options={selectableFilterFields}
                 selectedOptions={selectedFilterFields}
                 onChange={setSelectedFilterFields}
@@ -106,7 +107,7 @@ export const CustomizationModal: React.FC<Props> = ({
                   defaultMessage: 'Sort fields',
                 }
               )}
-              fullWidth={true}
+              fullWidth
               helpText={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.sortFields',
                 {
@@ -117,7 +118,7 @@ export const CustomizationModal: React.FC<Props> = ({
             >
               <EuiComboBox
                 data-test-subj="sortFieldsDropdown"
-                fullWidth={true}
+                fullWidth
                 options={selectableSortFields}
                 selectedOptions={selectedSortFields}
                 onChange={setSelectedSortFields}
