@@ -10,12 +10,14 @@ import { setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsCards, AnalyticsChart, QueryClicksTable } from '../components';
+
 import { QueryDetail } from './';
 
 describe('QueryDetail', () => {
