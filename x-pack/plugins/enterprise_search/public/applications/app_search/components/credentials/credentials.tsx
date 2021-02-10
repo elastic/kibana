@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { useActions, useValues } from 'kea';
 
 import {
@@ -24,14 +25,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { FlashMessages } from '../../../shared/flash_messages';
-
-import { CredentialsLogic } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
 import { CREDENTIALS_TITLE } from './constants';
-import { CredentialsList } from './credentials_list';
 import { CredentialsFlyout } from './credentials_flyout';
+import { CredentialsList } from './credentials_list';
+import { CredentialsLogic } from './credentials_logic';
 
 export const Credentials: React.FC = () => {
   const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
