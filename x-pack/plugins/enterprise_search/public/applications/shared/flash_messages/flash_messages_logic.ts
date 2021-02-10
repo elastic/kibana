@@ -6,15 +6,10 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { ReactNode } from 'react';
 
 import { KibanaLogic } from '../kibana';
 
-export interface IFlashMessage {
-  type: 'success' | 'info' | 'warning' | 'error';
-  message: ReactNode;
-  description?: ReactNode;
-}
+import { IFlashMessage } from './types';
 
 interface FlashMessagesValues {
   messages: IFlashMessage[];
