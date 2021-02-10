@@ -111,10 +111,14 @@ export class SearchSessionService
       }, {} as { [sessionId: string]: Partial<SearchSessionSavedObjectAttributes> });
 
       Object.keys(batchedSessionAttributes).forEach((sessionId) => {
-        const { deps, resolve, reject } = queue.find((s) => s.sessionId === sessionId)!;
-        this.updateOrCreate(deps, sessionId, batchedSessionAttributes[sessionId])
-          .then(resolve)
-          .catch(reject);
+        const thisSession = queue.filter((s) => s.sessionId === sessionId);
+        this.updateOrCreate(thisSession[0].deps, sessionId, batchedSessionAttributes[sessionId])
+          .then(() => {
+            thisSession.forEach((s) => s.resolve());
+          })
+          .catch((e) => {
+            thisSession.forEach((s) => s.reject(e));
+          });
       });
     },
     DEBOUNCE_UPDATE_OR_CREATE_WAIT,
