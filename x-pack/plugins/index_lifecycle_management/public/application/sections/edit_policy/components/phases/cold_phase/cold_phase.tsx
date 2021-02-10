@@ -51,7 +51,7 @@ export const ColdPhase: FunctionComponent = () => {
   const showReplicasField = get(formData, formFieldPaths.searchableSnapshot) == null;
 
   return (
-    <Phase phase="cold" childrenOutsideAccordion={<SearchableSnapshotField phase="cold" />}>
+    <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>
       {showReplicasField && <ReplicasField phase="cold" />}
 
       {/* Freeze section */}

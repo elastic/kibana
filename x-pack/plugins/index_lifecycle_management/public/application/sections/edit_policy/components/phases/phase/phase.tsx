@@ -37,10 +37,13 @@ import './phase.scss';
 
 interface Props {
   phase: PhasesExceptDelete;
-  childrenOutsideAccordion?: React.ReactNode;
+  /**
+   * Settings that should always be visible on the phase when it is enabled.
+   */
+  topLevelSettings?: React.ReactNode;
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, childrenOutsideAccordion, phase }) => {
+export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
@@ -103,10 +106,10 @@ export const Phase: FunctionComponent<Props> = ({ children, childrenOutsideAccor
 
       {enabled && (
         <>
-          {!!childrenOutsideAccordion ? (
+          {!!topLevelSettings ? (
             <>
               <EuiSpacer />
-              {childrenOutsideAccordion}
+              {topLevelSettings}
             </>
           ) : (
             <EuiSpacer size="m" />
