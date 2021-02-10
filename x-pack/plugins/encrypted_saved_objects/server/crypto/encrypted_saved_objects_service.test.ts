@@ -1079,11 +1079,12 @@ describe('#decryptAttributes', () => {
         attrThree: expect.not.stringMatching(/^three$/),
       });
 
+      const mockUser = mockAuthenticatedUser();
       await expect(() =>
         service.decryptAttributes(
           { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
           encryptedAttributes,
-          { convertToMultiNamespaceType: true }
+          { user: mockUser, convertToMultiNamespaceType: true }
         )
       ).rejects.toThrowError(EncryptionError);
       expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
@@ -1096,6 +1097,13 @@ describe('#decryptAttributes', () => {
         2, // then attempted to decrypt without the namespace in the descriptor (fail)
         expect.anything(),
         `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+
+      expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+        mockUser
       );
     });
 
@@ -1996,11 +2004,12 @@ describe('#decryptAttributesSync', () => {
         attrThree: expect.not.stringMatching(/^three$/),
       });
 
+      const mockUser = mockAuthenticatedUser();
       expect(() =>
         service.decryptAttributesSync(
           { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
           encryptedAttributes,
-          { convertToMultiNamespaceType: true }
+          { user: mockUser, convertToMultiNamespaceType: true }
         )
       ).toThrowError(EncryptionError);
       expect(mockNodeCrypto.decryptSync).toHaveBeenCalledTimes(2);
@@ -2013,6 +2022,13 @@ describe('#decryptAttributesSync', () => {
         2, // then attempted to decrypt without the namespace in the descriptor (fail)
         expect.anything(),
         `["known-type-1","object-id",{"attrOne":"one","attrTwo":"two"}]`
+      );
+
+      expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+        mockUser
       );
     });
 

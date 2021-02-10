@@ -44,7 +44,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
   private managementService?: ManagementService;
 
-  public setup(core: CoreSetup<{}, SpacesPluginStart>, plugins: PluginsSetup) {
+  public setup(core: CoreSetup<PluginsStart, SpacesPluginStart>, plugins: PluginsSetup) {
     this.spacesManager = new SpacesManager(core.http);
     this.spacesApi = {
       ui: getUiApi({
@@ -98,7 +98,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
 
     plugins.spacesOss.registerSpacesApi(this.spacesApi);
 
-    return this.spacesApi;
+    return {};
   }
 
   public start(core: CoreStart) {

@@ -11,7 +11,7 @@ import {
   SavedObjectMigrationContext,
 } from 'src/core/server';
 import { EncryptedSavedObjectTypeRegistration, EncryptedSavedObjectsService } from './crypto';
-import { normalizeNamespace } from './saved_objects/get_descriptor_namespace';
+import { normalizeNamespace } from './saved_objects';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<MigratedAttributes>,

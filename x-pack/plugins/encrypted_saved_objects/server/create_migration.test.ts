@@ -227,15 +227,15 @@ describe('createMigration()', () => {
         );
       };
 
-      it('when namespaces is an empty array', async () => {
+      it('when namespaces is an empty array', () => {
         doTest({ objectNamespace: undefined, decryptDescriptorNamespace: undefined });
       });
 
-      it('when the first namespace element is "default"', async () => {
+      it('when the first namespace element is "default"', () => {
         doTest({ objectNamespace: 'default', decryptDescriptorNamespace: undefined });
       });
 
-      it('when the first namespace element is another string', async () => {
+      it('when the first namespace element is another string', () => {
         doTest({ objectNamespace: 'foo', decryptDescriptorNamespace: 'foo' });
       });
     });

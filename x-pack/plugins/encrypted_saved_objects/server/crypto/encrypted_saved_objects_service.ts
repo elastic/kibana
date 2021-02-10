@@ -381,17 +381,18 @@ export class EncryptedSavedObjectsService {
         decrypters.length === 0
           ? new Error('Decryption is disabled because of missing decryption keys.')
           : undefined;
-      loop: for (const decrypter of decrypters) {
-        for (const encryptionAAD of encryptionAADs) {
-          try {
-            iteratorResult = iterator.next(await decrypter.decrypt(attributeValue, encryptionAAD));
-            decryptionError = undefined;
-            break loop;
-          } catch (err) {
-            // Remember the error thrown when we tried to decrypt with the primary key.
-            if (!decryptionError) {
-              decryptionError = err;
-            }
+      const decryptersPerAAD = decrypters.flatMap((decr) =>
+        encryptionAADs.map((aad) => [decr, aad] as [Crypto, string])
+      );
+      for (const [decrypter, encryptionAAD] of decryptersPerAAD) {
+        try {
+          iteratorResult = iterator.next(await decrypter.decrypt(attributeValue, encryptionAAD));
+          decryptionError = undefined;
+          break;
+        } catch (err) {
+          // Remember the error thrown when we tried to decrypt with the primary key.
+          if (!decryptionError) {
+            decryptionError = err;
           }
         }
       }
@@ -431,17 +432,18 @@ export class EncryptedSavedObjectsService {
         decrypters.length === 0
           ? new Error('Decryption is disabled because of missing decryption keys.')
           : undefined;
-      loop: for (const decrypter of decrypters) {
-        for (const encryptionAAD of encryptionAADs) {
-          try {
-            iteratorResult = iterator.next(decrypter.decryptSync(attributeValue, encryptionAAD));
-            decryptionError = undefined;
-            break loop;
-          } catch (err) {
-            // Remember the error thrown when we tried to decrypt with the primary key.
-            if (!decryptionError) {
-              decryptionError = err;
-            }
+      const decryptersPerAAD = decrypters.flatMap((decr) =>
+        encryptionAADs.map((aad) => [decr, aad] as [Crypto, string])
+      );
+      for (const [decrypter, encryptionAAD] of decryptersPerAAD) {
+        try {
+          iteratorResult = iterator.next(decrypter.decryptSync(attributeValue, encryptionAAD));
+          decryptionError = undefined;
+          break;
+        } catch (err) {
+          // Remember the error thrown when we tried to decrypt with the primary key.
+          if (!decryptionError) {
+            decryptionError = err;
           }
         }
       }

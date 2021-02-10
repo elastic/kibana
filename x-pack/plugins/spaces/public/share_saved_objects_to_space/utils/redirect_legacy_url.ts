@@ -10,21 +10,22 @@ import { firstValueFrom } from '@kbn/std';
 import type { StartServicesAccessor } from 'src/core/public';
 import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
 import type { PluginsStart } from '../../plugin';
+import { DEFAULT_OBJECT_NOUN } from '../components/constants';
 
 export function createRedirectLegacyUrl(
   getStartServices: StartServicesAccessor<PluginsStart>
 ): SpacesApiUi['redirectLegacyUrl'] {
-  return async function (path: string) {
+  return async function (path: string, objectNoun: string = DEFAULT_OBJECT_NOUN) {
     const [{ notifications, application }] = await getStartServices();
     const { currentAppId$, navigateToApp } = application;
     const appId = await firstValueFrom(currentAppId$); // retrieve the most recent value from the BehaviorSubject
 
     const title = i18n.translate('xpack.spaces.shareToSpace.redirectLegacyUrlToast.title', {
-      defaultMessage: 'Redirected from legacy URL',
+      defaultMessage: `We redirected you to a new URL`,
     });
     const text = i18n.translate('xpack.spaces.shareToSpace.redirectLegacyUrlToast.text', {
-      defaultMessage:
-        'You used a legacy URL to navigate to this page. This URL changed in Kibana 8.0, so we redirected you to the new one. You should use this new URL in the future.',
+      defaultMessage: `The {objectNoun} you're looking for has a new location. Use this URL from now on.`,
+      values: { objectNoun },
     });
     notifications.toasts.addInfo({ title, text });
     navigateToApp(appId!, { replace: true, path });

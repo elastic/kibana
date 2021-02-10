@@ -47,8 +47,10 @@ export interface SpacesApiUi {
    * The protocol, hostname, port, base path, and app path are automatically included.
    *
    * @param path The path to use for the new URL, optionally including `search` and/or `hash` URL components.
+   * @param objectNoun The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new
+   * location_. Default value is 'object'.
    */
-  redirectLegacyUrl: (path: string) => Promise<void>;
+  redirectLegacyUrl: (path: string, objectNoun?: string) => Promise<void>;
 }
 
 /**
@@ -62,7 +64,7 @@ export interface SpacesApiUiComponent {
    */
   SpacesContext: FunctionComponent<SpacesContextProps>;
   /**
-   * Displays the tags for given saved object.
+   * Displays a flyout to edit the spaces that an object is shared to.
    *
    * Note: must be rendered inside of a SpacesContext.
    */
