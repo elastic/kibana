@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 export const mlAnomalyDetectionAlertParams = schema.object({
   jobSelection: schema.object(
     {
-      jobIds: schema.maybe(schema.arrayOf(schema.string())),
-      groupIds: schema.maybe(schema.arrayOf(schema.string())),
+      jobIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      groupIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
     },
     {
       validate: (v) => {
