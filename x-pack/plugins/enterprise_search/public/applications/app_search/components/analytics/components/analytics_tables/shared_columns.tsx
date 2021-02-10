@@ -63,7 +63,7 @@ export const ACTIONS_COLUMN = {
       onClick: (item: Query | RecentQuery) => {
         const { navigateToUrl } = KibanaLogic.values;
 
-        const query = (item as Query).key || (item as RecentQuery).query_string;
+        const query = (item as Query).key || (item as RecentQuery).query_string || '""';
         navigateToUrl(generateEnginePath(ENGINE_ANALYTICS_QUERY_DETAIL_PATH, { query }));
       },
       'data-test-subj': 'AnalyticsTableViewQueryButton',
