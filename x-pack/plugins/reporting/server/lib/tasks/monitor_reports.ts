@@ -118,7 +118,7 @@ export class MonitorReportsTask implements ReportingTask {
   public getTaskDefinition() {
     return {
       type: REPORTING_MONITOR_TYPE,
-      title: 'Reporting: Find expired jobs to retry',
+      title: 'Reporting: monitor jobs',
       createTaskRunner: this.getTaskRunner(),
       maxAttempts: 1,
       // round the timeout value up to the nearest second, since Task Manager

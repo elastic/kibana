@@ -349,7 +349,8 @@ export class ExecuteReportTask implements ReportingTask {
 
     return {
       type: REPORTING_EXECUTE_TYPE,
-      title: 'Reporting: Execute reporting jobs',
+      maxConcurrency: 1,
+      title: 'Reporting: execute job',
       createTaskRunner: this.getTaskRunner(),
       maxAttempts: 1, // NOTE: not using Task Manager retries
       timeout: queueTimeout,
