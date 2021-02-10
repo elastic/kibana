@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import os from 'os';
 import { resolve } from 'path';
 import execa from 'execa';
 import shell from 'shelljs';
@@ -39,12 +38,10 @@ describe('Team Assignment', () => {
     it(`should strip the prefix and still drill down through the fs`, async () => {
       const { stdout } = await execa('grep', ['tre', teamAssignmentsPath], { cwd: ROOT_DIR });
       const lines = stdout.split('\n').filter((line) => !line.includes('/target'));
-      expect(lines).toEqual(
-        [
-          'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/index.ts kibana-tre',
-          'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/plugin.ts kibana-tre',
-        ].join(os.EOL)
-      );
+      expect(lines).toEqual([
+        'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/index.ts kibana-tre',
+        'src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin/server/plugin.ts kibana-tre',
+      ]);
     });
   });
 });
