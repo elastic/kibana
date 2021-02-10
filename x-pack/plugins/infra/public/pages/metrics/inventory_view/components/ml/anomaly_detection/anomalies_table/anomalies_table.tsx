@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { EuiTableHeader, EuiTableHeaderCell, EuiTableBody } from '@elastic/eui';
-import { EuiTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import DateMath from '@elastic/datemath';
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { EuiTableRow } from '@elastic/eui';
-import { EuiTableRowCell } from '@elastic/eui';
 import moment from 'moment';
-import { EuiButtonGroup } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiFieldSearch } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiFieldSearch,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  Criteria,
+} from '@elastic/eui';
+import { FormattedDate } from 'react-intl';
+import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
 import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';
 import {
@@ -32,7 +36,7 @@ import { useSourceContext } from '../../../../../../../containers/source';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
-type SortDir = 'desc' | 'asc';
+
 export const AnomaliesTable = () => {
   const [search, setSearch] = useState('');
   const [start, setStart] = useState('now-30d');
@@ -43,8 +47,10 @@ export const AnomaliesTable = () => {
       end,
     })
   );
-  const [sortField, setSortField] = useState<SortField>('startTime');
-  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const { sorting, setSorting } = useSorting<MetricsHostsAnomaly>({
+    field: 'startTime',
+    direction: 'desc',
+  });
   const [jobType, setJobType] = useState<JobType>('hosts');
   const { source } = useSourceContext();
   const anomalyThreshold = source?.configuration.anomalyThreshold;
@@ -62,12 +68,12 @@ export const AnomaliesTable = () => {
       startTime: timeRange.start,
       endTime: timeRange.end,
       defaultSortOptions: {
-        direction: sortDir,
-        field: sortField,
+        direction: sorting?.direction || 'desc',
+        field: (sorting?.field || 'startTime') as SortField,
       },
       defaultPaginationOptions: { pageSize: 10 },
     }),
-    [timeRange, sortField, sortDir, anomalyThreshold]
+    [timeRange, sorting?.field, sorting?.direction, anomalyThreshold]
   );
 
   const {
@@ -143,6 +149,14 @@ export const AnomaliesTable = () => {
     [hostChangeSort, k8sChangeSort, jobType]
   );
 
+  const onTableChange = (criteria: Criteria<MetricsHostsAnomaly>) => {
+    setSorting(criteria.sort);
+    changeSortOptions({
+      field: (criteria?.sort?.field || 'startTime') as SortField,
+      direction: criteria?.sort?.direction || 'desc',
+    });
+  };
+
   useEffect(() => {
     if (getAnomalies) {
       getAnomalies();
@@ -203,51 +217,13 @@ export const AnomaliesTable = () => {
 
       <EuiSpacer size={'m'} />
 
-      <EuiTable responsive={false}>
-        <EuiTableHeader>
-          {columns.map((column) => (
-            <EuiTableHeaderCell
-              key={`${String(column.field)}-header`}
-              align={'left'}
-              width={column.width}
-              onSort={
-                column.sortable
-                  ? () => {
-                      let sd: SortDir = 'desc';
-                      if (sortField === column.field) {
-                        sd = sortDir === 'asc' ? 'desc' : 'asc';
-                      }
-                      setSortDir(sd);
-                      setSortField(column.field as SortField);
-                      changeSortOptions({ field: column.field as SortField, direction: sd });
-                    }
-                  : undefined
-              }
-              isSorted={sortField === column.field}
-              isSortAscending={sortField === column.field && sortDir === 'asc'}
-            >
-              {column.name}
-            </EuiTableHeaderCell>
-          ))}
-        </EuiTableHeader>
-        <EuiTableBody>
-          {results.map((r) => (
-            <EuiTableRow>
-              {columns.map((column, i) => (
-                <EuiTableRowCell
-                  width={column.width}
-                  key={`${String(column.field)}-${i}`}
-                  header={column.name}
-                  truncateText={column.truncate || false}
-                  textOnly={column.textOnly ?? true}
-                >
-                  {column.render(r)}
-                </EuiTableRowCell>
-              ))}
-            </EuiTableRow>
-          ))}
-        </EuiTableBody>
-      </EuiTable>
+      <EuiBasicTable<MetricsHostsAnomaly>
+        columns={columns}
+        items={results}
+        sorting={{ sort: sorting }}
+        onChange={onTableChange}
+        hasActions={true}
+      />
       <EuiSpacer size="l" />
       <PaginationControls
         fetchNextPage={fetchNextPage}
@@ -276,15 +252,9 @@ const stringToNumericTimeRange = (timeRange: {
   ).valueOf(),
 });
 
-const columns: Array<{
-  field: string;
-  name: string;
-  sortable: boolean;
-  render: Function;
-  width?: string | number;
-  truncate?: boolean;
-  textOnly?: boolean;
-}> = [
+const columns: Array<
+  EuiTableFieldDataColumnType<MetricsHostsAnomaly> | EuiTableActionsColumnType<MetricsHostsAnomaly>
+> = [
   {
     field: 'startTime',
     name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnTime', {
@@ -293,17 +263,18 @@ const columns: Array<{
     width: '15%',
     sortable: true,
     textOnly: true,
-    truncate: true,
-    render: (item: MetricsHostsAnomaly) => moment(item.startTime).format(),
+    truncateText: true,
+    render: (startTime: number) => (
+      <FormattedDate value={startTime} year="numeric" month="short" day="2-digit" />
+    ),
   },
   {
     field: 'jobId',
     name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnJob', {
       defaultMessage: 'Job',
     }),
-    width: '15%',
-    sortable: false,
-    render: (item: MetricsHostsAnomaly) => item.jobId,
+    width: '25%',
+    render: (jobId: string) => jobId,
   },
   {
     field: 'anomalyScore',
@@ -312,9 +283,7 @@ const columns: Array<{
     }),
     width: '15%',
     sortable: true,
-    render: (item: MetricsHostsAnomaly) => (
-      <AnomalySeverityIndicator anomalyScore={item.anomalyScore} />
-    ),
+    render: (anomalyScore: number) => <AnomalySeverityIndicator anomalyScore={anomalyScore} />,
   },
   {
     field: 'typical',
@@ -322,19 +291,17 @@ const columns: Array<{
       defaultMessage: 'Summary',
     }),
     width: '15%',
-    sortable: false,
     textOnly: true,
-    render: (item: MetricsHostsAnomaly) => <AnomalySummary anomaly={item} />,
+    render: (typical: number, item: MetricsHostsAnomaly) => <AnomalySummary anomaly={item} />,
   },
   {
     field: 'influencers',
     name: i18n.translate('xpack.infra.ml.anomalyFlyout.columnInfluencerName', {
       defaultMessage: 'Node name',
     }),
-    width: '15%',
-    sortable: false,
+    width: '20%',
     textOnly: true,
-    truncate: true,
-    render: (item: MetricsHostsAnomaly) => item.influencers.join(','),
+    truncateText: true,
+    render: (influencers: string[]) => influencers.join(','),
   },
 ];
