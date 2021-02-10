@@ -8,7 +8,11 @@
 import React, { useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 import { intersection } from 'lodash';
-import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
+import {
+  DrilldownWizardState,
+  FlyoutDrilldownWizard,
+  FlyoutDrilldownWizardProps,
+} from '../flyout_drilldown_wizard';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
@@ -115,7 +119,7 @@ export function createFlyoutManageDrilldowns({
     /**
      * Needed for edit mode to pre-fill wizard fields with data from current edited drilldown
      */
-    function resolveInitialDrilldownWizardConfig(): DrilldownWizardConfig | undefined {
+    function resolveInitialDrilldownWizardConfig(): DrilldownWizardState | undefined {
       if (route !== Routes.Edit) return undefined;
       if (!currentEditId) return undefined;
       const drilldownToEdit = drilldowns?.find((d) => d.eventId === currentEditId);
@@ -162,6 +166,7 @@ export function createFlyoutManageDrilldowns({
             .map((factory) => factory.supportedTriggers())
             .reduce((res, next) => res.concat(next), [])
         ).length > 1;
+
       return (
         <FlyoutFrame
           title={txtDrilldowns}
@@ -192,6 +197,44 @@ export function createFlyoutManageDrilldowns({
       );
     }
 
+    const handleSubmit: FlyoutDrilldownWizardProps['onSubmit'] = ({
+      actionConfig,
+      actionFactory,
+      name,
+      selectedTriggers,
+    }) => {
+      if (route === Routes.Create) {
+        createDrilldown(
+          {
+            name,
+            config: actionConfig,
+            factoryId: actionFactory.id,
+          },
+          selectedTriggers
+        );
+      } else {
+        editDrilldown(
+          currentEditId!,
+          {
+            name,
+            config: actionConfig,
+            factoryId: actionFactory.id,
+          },
+          selectedTriggers
+        );
+      }
+
+      if (isCreateOnly) {
+        if (props.onClose) {
+          props.onClose();
+        }
+      } else {
+        setRoute(Routes.Manage);
+      }
+
+      setCurrentEditId(null);
+    };
+
     return (
       <FlyoutDrilldownWizard
         docsLink={docsLink}
@@ -202,38 +245,7 @@ export function createFlyoutManageDrilldowns({
         onClose={props.onClose}
         mode={route === Routes.Create ? 'create' : 'edit'}
         onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-        onSubmit={({ actionConfig, actionFactory, name, selectedTriggers }) => {
-          if (route === Routes.Create) {
-            createDrilldown(
-              {
-                name,
-                config: actionConfig,
-                factoryId: actionFactory.id,
-              },
-              selectedTriggers
-            );
-          } else {
-            editDrilldown(
-              currentEditId!,
-              {
-                name,
-                config: actionConfig,
-                factoryId: actionFactory.id,
-              },
-              selectedTriggers
-            );
-          }
-
-          if (isCreateOnly) {
-            if (props.onClose) {
-              props.onClose();
-            }
-          } else {
-            setRoute(Routes.Manage);
-          }
-
-          setCurrentEditId(null);
-        }}
+        onSubmit={handleSubmit}
         onDelete={() => {
           deleteDrilldown(currentEditId!);
           setRoute(Routes.Manage);

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { DrilldownWizardState } from './use_flyout_drilldown_wizard';
 export * from './flyout_drilldown_wizard';

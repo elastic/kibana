@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { FlyoutFrame } from '../flyout_frame';
@@ -24,13 +24,7 @@ import {
 } from '../../../dynamic_actions';
 import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryPlaceContext } from '../types';
-
-export interface DrilldownWizardConfig<ActionConfig extends BaseActionConfig = BaseActionConfig> {
-  name: string;
-  actionFactory?: ActionFactory;
-  actionConfig?: ActionConfig;
-  selectedTriggers?: string[];
-}
+import { DrilldownWizardState, useDrilldownWizard } from './use_flyout_drilldown_wizard';
 
 export interface FlyoutDrilldownWizardProps<
   CurrentActionConfig extends BaseActionConfig = BaseActionConfig,
@@ -38,13 +32,13 @@ export interface FlyoutDrilldownWizardProps<
 > {
   drilldownActionFactories: ActionFactory[];
 
-  onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
+  onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardState>) => void;
   onDelete?: () => void;
   onClose?: () => void;
   onBack?: () => void;
 
   mode?: 'create' | 'edit';
-  initialDrilldownWizardConfig?: DrilldownWizardConfig<CurrentActionConfig>;
+  initialDrilldownWizardConfig?: DrilldownWizardState<CurrentActionConfig>;
 
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
@@ -69,83 +63,6 @@ export interface FlyoutDrilldownWizardProps<
   supportedTriggers: string[];
 }
 
-function useWizardConfigState(
-  actionFactoryContext: BaseActionFactoryContext,
-  initialDrilldownWizardConfig?: DrilldownWizardConfig
-): [
-  DrilldownWizardConfig,
-  {
-    setName: (name: string) => void;
-    setActionConfig: (actionConfig: BaseActionConfig) => void;
-    setActionFactory: (actionFactory?: ActionFactory) => void;
-    setSelectedTriggers: (triggers?: string[]) => void;
-  }
-] {
-  const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
-    () =>
-      initialDrilldownWizardConfig ?? {
-        name: '',
-      }
-  );
-  const [actionConfigCache, setActionConfigCache] = useState<Record<string, object>>(
-    initialDrilldownWizardConfig?.actionFactory
-      ? {
-          [initialDrilldownWizardConfig.actionFactory
-            .id]: initialDrilldownWizardConfig.actionConfig!,
-        }
-      : {}
-  );
-
-  return [
-    wizardConfig,
-    {
-      setName: (name: string) => {
-        setWizardConfig({
-          ...wizardConfig,
-          name,
-        });
-      },
-      setActionConfig: (actionConfig: BaseActionConfig) => {
-        setWizardConfig({
-          ...wizardConfig,
-          actionConfig,
-        });
-      },
-      setActionFactory: (actionFactory?: ActionFactory) => {
-        if (actionFactory) {
-          const actionConfig = (actionConfigCache[actionFactory.id] ??
-            actionFactory.createConfig(actionFactoryContext)) as BaseActionConfig;
-          setWizardConfig({
-            ...wizardConfig,
-            actionFactory,
-            actionConfig,
-            selectedTriggers: [],
-          });
-        } else {
-          if (wizardConfig.actionFactory?.id) {
-            setActionConfigCache({
-              ...actionConfigCache,
-              [wizardConfig.actionFactory.id]: wizardConfig.actionConfig!,
-            });
-          }
-
-          setWizardConfig({
-            ...wizardConfig,
-            actionFactory: undefined,
-            actionConfig: undefined,
-          });
-        }
-      },
-      setSelectedTriggers: (selectedTriggers: string[] = []) => {
-        setWizardConfig({
-          ...wizardConfig,
-          selectedTriggers,
-        });
-      },
-    },
-  ];
-}
-
 export function FlyoutDrilldownWizard<
   CurrentActionConfig extends BaseActionConfig = BaseActionConfig
 >({
@@ -167,7 +84,7 @@ export function FlyoutDrilldownWizard<
   const [
     wizardConfig,
     { setActionFactory, setActionConfig, setName, setSelectedTriggers },
-  ] = useWizardConfigState(
+  ] = useDrilldownWizard(
     { ...actionFactoryPlaceContext, triggers: supportedTriggers },
     initialDrilldownWizardConfig
   );
@@ -181,8 +98,8 @@ export function FlyoutDrilldownWizard<
   );
 
   const isActionValid = (
-    config: DrilldownWizardConfig
-  ): config is Required<DrilldownWizardConfig> => {
+    config: DrilldownWizardState
+  ): config is Required<DrilldownWizardState> => {
     if (!wizardConfig.name) return false;
     if (!wizardConfig.actionFactory) return false;
     if (!wizardConfig.actionConfig) return false;
