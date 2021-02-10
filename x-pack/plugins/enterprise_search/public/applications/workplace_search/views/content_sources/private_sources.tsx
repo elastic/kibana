@@ -72,30 +72,28 @@ export const PrivateSources: React.FC = () => {
   );
 
   const privateSourcesTable = (
-    <ContentSection
-      title={PRIVATE_HEADER_TITLE}
-      description={PRIVATE_HEADER_DESCRIPTION}
-      action={canAddSources && headerAction}
-    >
-      <SourcesTable
-        showDetails
-        onSearchableToggle={setSourceSearchability}
-        sources={privateContentSources}
-      />
-    </ContentSection>
+    <SourcesTable
+      showDetails
+      onSearchableToggle={setSourceSearchability}
+      sources={privateContentSources}
+    />
   );
 
   const privateSourcesEmptyState = (
+    <EuiPanel>
+      <EuiSpacer size="xxl" />
+      <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
+      <EuiSpacer size="xxl" />
+    </EuiPanel>
+  );
+
+  const privateSourcesSection = (
     <ContentSection
       title={PRIVATE_HEADER_TITLE}
       description={PRIVATE_HEADER_DESCRIPTION}
       action={canAddSources && headerAction}
     >
-      <EuiPanel>
-        <EuiSpacer size="xxl" />
-        <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
+      {hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState}
     </ContentSection>
   );
 
@@ -112,8 +110,6 @@ export const PrivateSources: React.FC = () => {
       </EuiPanel>
     </ContentSection>
   );
-
-  const privateSources = hasPrivateSources ? privateSourcesTable : privateSourcesEmptyState;
 
   const groupsSentence =
     groups.length === 1
@@ -150,7 +146,7 @@ export const PrivateSources: React.FC = () => {
   return (
     <SourcesView>
       {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-      {canCreatePersonalSources && privateSources}
+      {canCreatePersonalSources && privateSourcesSection}
       {hasSharedSources ? sharedSources : sharedSourcesEmptyState}
     </SourcesView>
   );
