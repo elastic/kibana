@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { throttle } from 'lodash';
 import {
   CoreSetup,
   CoreStart,
@@ -76,6 +77,51 @@ export class SearchSessionService
         this.sessionConfig.trackingInterval
       );
     }
+  };
+
+  private updateOrCreateBatchQueue: Array<{
+    deps: SearchSessionDependencies;
+    sessionId: string;
+    attributes: Partial<SearchSessionSavedObjectAttributes>;
+    resolve: () => void;
+    reject: (reason?: any) => void;
+  }> = [];
+  private processUpdateOrCreateBatchQueue = throttle(() => {
+    const queue = [...this.updateOrCreateBatchQueue];
+    this.updateOrCreateBatchQueue = [];
+    if (queue.length === 0) return;
+    const batchedSessionAttributes = queue.reduce((res, next) => {
+      if (!res[next.sessionId]) {
+        res[next.sessionId] = next.attributes;
+      } else {
+        res[next.sessionId] = {
+          ...res[next.sessionId],
+          ...next.attributes,
+          idMapping: {
+            ...res[next.sessionId].idMapping,
+            ...next.attributes.idMapping,
+          },
+        };
+      }
+      return res;
+    }, {} as { [sessionId: string]: Partial<SearchSessionSavedObjectAttributes> });
+
+    Object.keys(batchedSessionAttributes).forEach((sessionId) => {
+      const { deps, resolve, reject } = queue.find((s) => s.sessionId === sessionId)!;
+      this.updateOrCreate(deps, sessionId, batchedSessionAttributes[sessionId])
+        .then(resolve)
+        .catch(reject);
+    });
+  }, 100);
+  private scheduleUpdateOrCreate = (
+    deps: SearchSessionDependencies,
+    sessionId: string,
+    attributes: Partial<SearchSessionSavedObjectAttributes>
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      this.updateOrCreateBatchQueue.push({ deps, sessionId, attributes, resolve, reject });
+      this.processUpdateOrCreateBatchQueue();
+    });
   };
 
   private updateOrCreate = async (
@@ -255,7 +301,7 @@ export class SearchSessionService
       idMapping = { [requestHash]: searchInfo };
     }
 
-    await this.updateOrCreate(deps, sessionId, { idMapping });
+    await this.scheduleUpdateOrCreate(deps, sessionId, { idMapping });
   };
 
   public async getSearchIdMapping(deps: SearchSessionDependencies, sessionId: string) {
