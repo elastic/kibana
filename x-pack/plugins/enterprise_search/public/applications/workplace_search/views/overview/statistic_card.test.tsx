@@ -8,6 +8,7 @@
 import '../../../__mocks__/enterprise_search_url.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiCard } from '@elastic/eui';
