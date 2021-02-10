@@ -19,7 +19,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
-import { Loading } from '../../../../../../applications/shared/loading';
+import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
 import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
 import { ContentSection } from '../../../../components/shared/content_section';
