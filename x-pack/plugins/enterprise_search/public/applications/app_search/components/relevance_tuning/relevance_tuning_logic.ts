@@ -8,21 +8,26 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
+import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
-import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
 
-import { Result } from '../result/types';
 import { EngineLogic } from '../engine';
+import { Result } from '../result/types';
 
-import { BaseBoost, Boost, BoostType, SearchSettings } from './types';
 import {
   UPDATE_SUCCESS_MESSAGE,
   RESET_CONFIRMATION_MESSAGE,
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
 } from './constants';
-import { filterIfTerm, parseBoostCenter, removeBoostStateProps } from './utils';
+import { BaseBoost, Boost, BoostType, SearchSettings } from './types';
+import {
+  filterIfTerm,
+  parseBoostCenter,
+  removeBoostStateProps,
+  normalizeBoostValues,
+} from './utils';
 
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
@@ -60,8 +65,8 @@ interface RelevanceTuningActions {
     name: string,
     boostIndex: number,
     valueIndex: number,
-    value: string | number
-  ): { name: string; boostIndex: number; valueIndex: number; value: string | number };
+    value: string
+  ): { name: string; boostIndex: number; valueIndex: number; value: string };
   updateBoostCenter(
     name: string,
     boostIndex: number,
@@ -252,7 +257,13 @@ export const RelevanceTuningLogic = kea<
 
       try {
         const response = await http.get(url);
-        actions.onInitializeRelevanceTuning(response);
+        actions.onInitializeRelevanceTuning({
+          ...response,
+          searchSettings: {
+            ...response.searchSettings,
+            boosts: normalizeBoostValues(response.searchSettings.boosts),
+          },
+        });
       } catch (e) {
         flashAPIErrors(e);
       }

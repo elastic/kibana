@@ -12,18 +12,19 @@ export interface BaseBoost {
   function?: string;
 }
 
-export interface Boost extends BaseBoost {
+// A boost that comes from the server, before we normalize it has a much looser schema
+export interface RawBoost extends BaseBoost {
   type: BoostType;
   newBoost?: boolean;
   center?: string | number;
-  value?: Array<string | number>;
+  value?: string | number | boolean | object | Array<string | number | boolean | object>;
   factor: number;
 }
 
-export interface BoostObject {
-  [key: string]: Boost[];
+// We normalize raw boosts to make them safer and easier to work with
+export interface Boost extends RawBoost {
+  value?: string[];
 }
-
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
   search_fields: Record<

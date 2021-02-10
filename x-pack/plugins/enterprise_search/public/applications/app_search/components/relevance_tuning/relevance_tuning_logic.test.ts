@@ -256,9 +256,25 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('initializeRelevanceTuning', () => {
-      it('should make an API call and set state based on the response', async () => {
+      it('should make an API call and set state based on the normalized response', async () => {
         mount();
-        http.get.mockReturnValueOnce(Promise.resolve(relevanceTuningProps));
+        http.get.mockReturnValueOnce(
+          Promise.resolve({
+            ...relevanceTuningProps,
+            searchSettings: {
+              ...relevanceTuningProps.searchSettings,
+              boosts: {
+                foo: [
+                  {
+                    type: 'value' as BoostType,
+                    factor: 5,
+                    value: 5,
+                  },
+                ],
+              },
+            },
+          })
+        );
         jest.spyOn(RelevanceTuningLogic.actions, 'onInitializeRelevanceTuning');
 
         RelevanceTuningLogic.actions.initializeRelevanceTuning();
@@ -267,9 +283,21 @@ describe('RelevanceTuningLogic', () => {
         expect(http.get).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings/details'
         );
-        expect(RelevanceTuningLogic.actions.onInitializeRelevanceTuning).toHaveBeenCalledWith(
-          relevanceTuningProps
-        );
+        expect(RelevanceTuningLogic.actions.onInitializeRelevanceTuning).toHaveBeenCalledWith({
+          ...relevanceTuningProps,
+          searchSettings: {
+            ...relevanceTuningProps.searchSettings,
+            boosts: {
+              foo: [
+                {
+                  type: 'value' as BoostType,
+                  factor: 5,
+                  value: ['5'],
+                },
+              ],
+            },
+          },
+        });
       });
 
       it('handles errors', async () => {
