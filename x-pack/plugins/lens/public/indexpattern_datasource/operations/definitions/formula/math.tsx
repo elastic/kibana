@@ -145,8 +145,18 @@ export function hasInvalidOperations(
   };
 }
 
-// traverse a tree and find all string leaves
-export function findVariables(node: TinymathAST): TinymathVariable[] {
+// traverse a tree and find all string leaves. some string leaves are pre-parsed as column IDs
+export function findVariables(node: TinymathAST | string): TinymathVariable[] {
+  if (typeof node === 'string') {
+    return [
+      {
+        type: 'variable',
+        value: node,
+        text: node,
+        location: { min: 0, max: 0 },
+      },
+    ];
+  }
   if (node == null) {
     return [];
   }
