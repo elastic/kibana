@@ -10,7 +10,10 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'header']);
 
-  describe('layer errors', () => {
+  // Flaky test on cloud and windows when run against a snapshot build of 7.11.
+  // https://github.com/elastic/kibana/issues/91043
+
+  describe.skip('layer errors', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('layer with errors');
     });
