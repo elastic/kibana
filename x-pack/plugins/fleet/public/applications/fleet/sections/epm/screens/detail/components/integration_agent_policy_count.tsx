@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { useGetPackageStats } from '../../../../hooks';
+import { useGetPackageStats } from '../../../../../hooks';
 
 /**
  * Displays a count of Agent Policies that are using the given integration

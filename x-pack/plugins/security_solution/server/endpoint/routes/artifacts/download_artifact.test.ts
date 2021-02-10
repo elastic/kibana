@@ -25,7 +25,7 @@ import {
   loggingSystemMock,
 } from 'src/core/server/mocks';
 import { ArtifactConstants } from '../../lib/artifacts';
-import { registerDownloadExceptionListRoute } from './download_exception_list';
+import { registerDownloadArtifactRoute } from './download_artifact';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../../mocks';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
@@ -121,7 +121,7 @@ describe('test alerts route', () => {
     );
     endpointAppContextService.start(startContract);
 
-    registerDownloadExceptionListRoute(
+    registerDownloadArtifactRoute(
       routerMock,
       {
         logFactory: loggingSystemMock.create(),
