@@ -1,11 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-      ".kibana": {
-      }
-    },
-    "index": ".kibana_1",
+    "index": ".kibana",
     "mappings": {
       "_meta": {
         "migrationMappingPropertyHashes": {
