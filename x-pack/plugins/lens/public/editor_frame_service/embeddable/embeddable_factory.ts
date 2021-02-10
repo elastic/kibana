@@ -9,6 +9,7 @@ import { Capabilities, HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter/target/common';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
   IndexPatternsContract,
   TimefilterContract,
@@ -34,8 +35,10 @@ export interface LensEmbeddableStartServices {
   indexPatternService: IndexPatternsContract;
   uiActions?: UiActionsStart;
   documentToExpression: (
-    doc: Document
+    doc: Document,
+    palettes: PaletteRegistry
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  palettes: PaletteRegistry;
 }
 
 export class EmbeddableFactory implements EmbeddableFactoryDefinition {
@@ -85,6 +88,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       coreHttp,
       attributeService,
       indexPatternService,
+      palettes,
     } = await this.getStartServices();
 
     const { Embeddable } = await import('../../async_services');
@@ -100,6 +104,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         getTrigger: uiActions?.getTrigger,
         getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
+        palettes,
       },
       input,
       parent

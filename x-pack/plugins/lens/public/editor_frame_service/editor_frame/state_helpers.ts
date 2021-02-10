@@ -7,6 +7,7 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
   Datasource,
   DatasourcePublicAPI,
@@ -74,7 +75,8 @@ export function createDatasourceLayers(
 export async function persistedStateToExpression(
   datasources: Record<string, Datasource>,
   visualizations: Record<string, Visualization>,
-  doc: Document
+  doc: Document,
+  palettes: PaletteRegistry
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
     state: { visualization: visualizationState, datasourceStates: persistedDatasourceStates },
@@ -117,7 +119,7 @@ export async function persistedStateToExpression(
     datasourceStates[datasourceId].state,
     visualization,
     visualizationState,
-    { datasourceLayers }
+    { datasourceLayers, availablePalettes: palettes }
   );
 
   return {
@@ -139,7 +141,7 @@ export const validateDatasourceAndVisualization = (
   currentDatasourceState: unknown | null,
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
-  frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
+  frameAPI: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData' | 'availablePalettes'>
 ): ErrorMessage[] | undefined => {
   const layersGroups = currentVisualizationState
     ? currentVisualization
