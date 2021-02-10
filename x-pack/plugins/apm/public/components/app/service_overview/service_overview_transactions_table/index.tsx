@@ -59,7 +59,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     urlParams: { start, end, latencyAggregationType },
   } = useUrlParams();
 
-  const { data = INITIAL_STATE, status } = useFetcher(
+  const { data = INITIAL_STATE, status, requestId } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !latencyAggregationType || !transactionType) {
         return;
@@ -130,9 +130,9 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         });
       }
     },
-    // only fetches statistics when transaction names changes
+    // only fetches statistics when transaction names or requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [transactionNames],
+    [requestId, transactionNames],
     { preservePreviousData: false }
   );
 

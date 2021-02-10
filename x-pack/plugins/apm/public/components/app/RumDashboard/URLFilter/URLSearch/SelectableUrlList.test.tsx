@@ -14,6 +14,7 @@ import { render } from '../../utils/test_helper';
 describe('SelectableUrlList', () => {
   it('it uses search term value from url', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      requestId: 'foo',
       data: {},
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),

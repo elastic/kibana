@@ -71,6 +71,7 @@ describe('TraceLink', () => {
         },
       });
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+        requestId: 'foo',
         data: { transaction: undefined },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
@@ -111,6 +112,7 @@ describe('TraceLink', () => {
         trace: { id: 123 },
       };
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+        requestId: 'foo',
         data: { transaction },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),

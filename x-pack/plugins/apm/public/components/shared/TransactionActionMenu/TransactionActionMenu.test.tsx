@@ -61,6 +61,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 describe('TransactionActionMenu component', () => {
   beforeAll(() => {
     jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      requestId: 'foo',
       data: [],
       status: hooks.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),

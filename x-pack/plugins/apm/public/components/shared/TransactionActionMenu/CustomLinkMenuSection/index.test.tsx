@@ -40,6 +40,7 @@ const transaction = ({
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      requestId: 'foo',
       data: [],
       status: useFetcher.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
@@ -58,6 +59,7 @@ describe('Custom links', () => {
 
   it('shows loading while custom links are fetched', () => {
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      requestId: 'foo',
       data: [],
       status: useFetcher.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
@@ -79,6 +81,7 @@ describe('Custom links', () => {
     ] as CustomLinkType[];
 
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      requestId: 'foo',
       data: customLinks,
       status: useFetcher.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
@@ -101,6 +104,7 @@ describe('Custom links', () => {
     ] as CustomLinkType[];
 
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+      requestId: 'foo',
       data: customLinks,
       status: useFetcher.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
@@ -125,6 +129,7 @@ describe('Custom links', () => {
   describe('create custom link buttons', () => {
     it('shows create button below empty message', () => {
       jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+        requestId: 'foo',
         data: [],
         status: useFetcher.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
@@ -148,6 +153,7 @@ describe('Custom links', () => {
       ] as CustomLinkType[];
 
       jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
+        requestId: 'foo',
         data: customLinks,
         status: useFetcher.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
