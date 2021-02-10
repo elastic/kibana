@@ -17,8 +17,8 @@ Response times for the service. You can filter the *Latency* chart to display th
 image::apm/images/latency.png[Service latency]
 
 [discrete]
-[[service-traffic-transactions]]
-=== Traffic and transactions
+[[service-throughput-transactions]]
+=== Throughput and transactions
 
 The *Throughput* chart visualizes the average number of transactions per minute for the selected service.
 
@@ -61,6 +61,9 @@ to the service at the selected time range. The table displays latency, traffic, 
 each dependency. By default, dependencies are sorted by _Impact_ to show the most used and the slowest dependency.
 If there is a particular dependency you are interested in, click *View service map* to view the related
 <<service-maps, service map>>.
+
+IMPORTANT: A known issue prevents Real User Monitoring (RUM) dependencies from being shown in the
+*Dependencies* table. We are working on a fix for this issue.
 
 [role="screenshot"]
 image::apm/images/spans-dependencies.png[Span type duration and dependencies]

@@ -1,11 +1,11 @@
 [[plugin-api-changes-7-11]]
-== Plugin API changes in {minor-version}
+== Plugin API changes in 7.11
 ++++
 <titleabbrev>7.11</titleabbrev>
 ++++
 
 This page discusses the plugin API changes that you need to be aware of when migrating
-your application to {kib} {minor-version}.
+your application to {kib} 7.11.
 
 [[breaking_plugin_v7.11.0_85234]]
 .Custom visualizations plugin need to build their own expression AST
@@ -14,12 +14,38 @@ your application to {kib} {minor-version}.
 
 In {kib} all visualizations underneath render using {kib} expressions (that you can see user facing inside Canvas expression editor).
 Right now old custom visualization plugins are all using the same `visualizations` expression function underneath.
-**We're going to remove this function in one of the upcoming minors,** meaning your custom visualization plugin will require to register
+We're going to remove this function in one of the upcoming minors, meaning your custom visualization plugin will require to register
 its own renderer and expression function and provide a `toExpressionAst` function.
 
 You can check any of the https://github.com/elastic/kibana/issues/46801[PRs for core visualizations] as a reference how those migration need to look like.
 
 *via https://github.com/elastic/kibana/pull/85234[#85234]*
+
+====
+
+[[breaking_plugin_v7.11.0_84973]]
+.`esaggs` expression function changed
+[%collapsible]
+====
+
+The `esaggs` expression function, which is the default method of requesting aggregations for visualizations,
+has had some changes to the arguments it accepts.
+
+```ts
+// old
+esaggs index="logstash-*" aggConfigs="[{ id: 1, enabled: true, type: "count", schema: "metric" }]"
+
+// new
+esaggs
+  // use indexPatternLoad and pass your ID instead of passing it as a string
+  index={indexPatternLoad id="logstash-*"}
+  // use aggType functions for each aggregation you need. the aggs argument
+  // can be passed multiple times. if you are using AggConfigs you can automatically
+  // generate the expression AST for these arguments with `aggConfig.toExpressionAst()`
+  aggs={aggCount id=1 enabled=true schema="metric"}
+```
+
+*via https://github.com/elastic/kibana/pull/84973[#84973]*
 
 ====
 
@@ -44,6 +70,29 @@ An array of field names to increment must be provided.
 
 *via https://github.com/elastic/kibana/pull/84326[#84326]*
 
+
+====
+
+[[breaking_plugin_v7.11.0_84224]]
+.UI counters introduced
+[%collapsible]
+====
+
+This change adds `incrementBy` to the config `SavedObjectsIncrementCounterOptions` for
+`SavedObjectsRepository.incrementCounter()`.
+
+The config `incrementBy` allows incrementing the counter by a custom number instead of
+a hardcoded `1`. If no value is specified, the counter is incremented by `1`.
+
+Example:
+
+```js
+await internalRepository.incrementCounter(type, id, counterFieldName, {
+  incrementBy: 5,
+});
+```
+
+*via https://github.com/elastic/kibana/pull/84224[#84224]*
 
 ====
 

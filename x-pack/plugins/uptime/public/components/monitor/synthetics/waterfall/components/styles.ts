@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
 import { euiStyled } from '../../../../../../../observability/public';
 import { FIXED_AXIS_HEIGHT } from './constants';
@@ -102,4 +103,9 @@ export const WaterfallChartTooltip = euiStyled.div`
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
   color: ${(props) => props.theme.eui.euiColorLightestShade};
   padding: ${(props) => props.theme.eui.paddingSizes.s};
+`;
+
+export const NetworkRequestsTotalStyle = euiStyled(EuiText)`
+  line-height: ${FIXED_AXIS_HEIGHT}px;
+  margin-left: ${(props) => props.theme.eui.paddingSizes.m}
 `;

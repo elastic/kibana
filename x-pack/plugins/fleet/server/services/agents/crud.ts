@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { isAgentUpgradeable } from '../../../common';
@@ -11,18 +13,35 @@ import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from 
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
 import { appContextService } from '../../services';
+import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
 
 const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
 
-function _joinFilters(filters: string[], operator = 'AND') {
-  return filters.reduce((acc: string | undefined, filter) => {
-    if (acc) {
-      return `${acc} ${operator} (${filter})`;
-    }
+function _joinFilters(filters: Array<string | undefined | KueryNode>) {
+  return filters
+    .filter((filter) => filter !== undefined)
+    .reduce((acc: KueryNode | undefined, kuery: string | KueryNode | undefined):
+      | KueryNode
+      | undefined => {
+      if (kuery === undefined) {
+        return acc;
+      }
+      const kueryNode: KueryNode =
+        typeof kuery === 'string'
+          ? esKuery.fromKueryExpression(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery))
+          : kuery;
 
-    return `(${filter})`;
-  }, undefined);
+      if (!acc) {
+        return kueryNode;
+      }
+
+      return {
+        type: 'function',
+        function: 'and',
+        arguments: [acc, kueryNode],
+      };
+    }, undefined as KueryNode | undefined);
 }
 
 export async function listAgents(
@@ -48,7 +67,7 @@ export async function listAgents(
   const filters = [];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(kuery);
   }
 
   if (showInactive === false) {
@@ -93,7 +112,7 @@ export async function listAllAgents(
   const filters = [];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(kuery);
   }
 
   if (showInactive === false) {
@@ -121,7 +140,7 @@ export async function countInactiveAgents(
   const filters = [INACTIVE_AGENT_CONDITION];
 
   if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
+    filters.push(kuery);
   }
 
   const { total } = await soClient.find<AgentSOAttributes>({

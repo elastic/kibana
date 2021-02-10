@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import http from 'http';
+import https from 'https';
 import { Plugin, CoreSetup, IRouter } from 'kibana/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
@@ -47,7 +49,13 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
 }
 
 export async function getWebhookServer(): Promise<http.Server> {
-  return await initWebhook();
+  const { httpServer } = await initWebhook();
+  return httpServer;
+}
+
+export async function getHttpsWebhookServer(): Promise<https.Server> {
+  const { httpsServer } = await initWebhook();
+  return httpsServer;
 }
 
 export async function getSlackServer(): Promise<http.Server> {

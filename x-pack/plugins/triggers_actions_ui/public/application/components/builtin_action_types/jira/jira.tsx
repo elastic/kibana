@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { lazy } from 'react';
@@ -62,6 +63,7 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
       const validationResult = { errors: {} };
       const errors = {
         summary: new Array<string>(),
+        labels: new Array<string>(),
       };
       validationResult.errors = errors;
       if (
@@ -70,6 +72,12 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
         !actionParams.subActionParams.incident.summary?.length
       ) {
         errors.summary.push(i18n.SUMMARY_REQUIRED);
+      }
+
+      if (actionParams.subActionParams?.incident?.labels?.length) {
+        // Jira do not allows empty spaces on labels. If the label includes a whitespace show an error.
+        if (actionParams.subActionParams.incident.labels.some((label) => label.match(/\s/g)))
+          errors.labels.push(i18n.LABELS_WHITE_SPACES);
       }
       return validationResult;
     },
