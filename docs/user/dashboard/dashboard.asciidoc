@@ -193,6 +193,9 @@ Open the *Lens* panel menu, then select *More > Download as CSV*.
 +
 [role="screenshot"]
 image::images/download_csv_context_menu.png[Download as CSV from panel context menu]
++
+Each layer produces a single CSV file with columns.
+When you download multiple layers, the file names combine the visualization and layer index names.
 
 All panels::
   . Open the panel menu, then select *Inspect*.

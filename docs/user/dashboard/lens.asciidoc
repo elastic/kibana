@@ -26,13 +26,23 @@ NOTE: The sum of all the *Other* fields can equal more than 100% by a small amou
 [[lens-faq]]
 ==== Frequently asked questions
 
-====== How are pie chart slices sized exactly?
+For specific information about *Lens* visualization, review to the frequently asked questions. 
 
-====== How is the percentage chart calculating its percentages?
+// [float]
+// [[how-are-pie-chart-sliced-sized]]
+// ===== How are pie chart slices sized?
 
-====== How the Horizontal axis of multiple layers are merged in a chart?
+// [float]
+// [[how-does-the-percentage-chart-calculate-percentages]]
+// ===== How does the percentage chart calculate percentages?
 
-====== Can I show value labels for my chart?
+// [float]
+// [[how-is-the-y-axis-of-multiple-layers-merged-in-a-chart]]
+// ===== How is the y-axis of multiple layers merged in a chart?
+
+[float]
+[[can-i-show-value-labels-for-my-chart]]
+===== Can I show value labels for my chart?
 
 At the moment only a subset of *Lens* visualization allows to show value labels:
 
@@ -48,47 +58,58 @@ image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels m
 [role="screenshot"]
 image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
 
-====== Can I sort by multiple columns?
+[float]
+[[can-i-sort-by-multiple-columns]]
+===== Can I sort by multiple columns?
 
-*Lens* datatable does not currently support multiple columns sorting.
-// Perhaps point to Discover for this feature?
+Multiple column sorting is unsupported in *Lens*, but is supported in *Discover*. For information on how to sort multiple columns in *Discover*, 
+refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
 
-====== How are IP addresses sorted?
+[float]
+[[how-are-ip-address-sorted]]
+===== How are IP addresses sorted?
 
-*Lens* datatable can sort IP addresses in both IPv4 and IPv6 format.
-For both formats each block of the IP address are compared and sorted, therefore it becomes easier to find addresses within the same subnet:
+The *Lens* data table sorts IP addresses in IPv4 and IPv6 formats.
+For both formats, each block of IP addresses are compared and sorted, therefore it becomes easier to find addresses within the same subnet:
 
 [role="screenshot"]
 image::images/lens_ipv4_sorting.png[Lens datatable with IPv4 sorted field]
 
-When IP addresses of both format are found as field content, then IPv4 addresses are mapped into IPv6-mapped addresses, and sorted as IPv6 addresses.
+When IP addresses of both formats are found as field content, then IPv4 addresses are mapped into IPv6-mapped addresses, and sorted as IPv6 addresses.
 
 [role="screenshot"]
 image::images/lens_ip_mixed_sorting.png[Lens datatable with IPv4 and IPv6 sorted field]
 
-Note that the `Other` entry is always at the bottom of the sorting, no matter the direction.
+NOTE: `Other` is always at the bottom of the sorting, no matter the direction.
 
-====== Is it possible to reduce or increase the number of suggestions in Lens?
+[float]
+[[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
+===== Is it possible to decrease or increase the number of suggestions?
 
 At the moment it is not possible to either increase or reduce the number of suggestions in the *Lens* editor.
 // Can we point to the hide/show issue?
 
-====== How can I include documents without the field in the operation?
+// [float]
+// [[how-can-i-include-documents-without-the-field-in-the-operation]]
+// ===== How can I include documents without the field in the operation?
 
-====== What is the "Other" category?
+// [float]
+// [[what-is-the-other-category]]
+// ===== What is the "Other" category?
 
-====== Are multiple layers exported in CSV?
-
-Yes, when downloading CSV files out of a *Lens* visualization each layer produces a single CSV file with its columns.
-The name of each file, when multiple layers are detected, is a composition of the visualization name with the layer index.
-
-====== Is it possible to inspect the Elasticsearch query in Lens?
+[float]
+[[is-it-possible-to-inspect-elasticsearch-queries]]
+===== Is it possible to inspect {es} queries?
 
 At the moment it is not possible to inspect the Elasticsearch query for a *Lens* visualization.
 
-====== Is it possible to sort dimensions in a chart?
+// [float]
+// [[is-it-possible-to-sort-dimensions-in-a-chart]]
+// ===== Is it possible to sort dimensions in a chart?
 
-====== What Elasticsearch functions are renamed in Lens?
+// [float]
+// [[what-elasticsearch-aggregations-are-renamed-as-lens-functions]]
+// ===== What {es} aggregations are renamed as Lens functions?
 
 // Show a table here like the aggregation-reference in Kibana guide
 
