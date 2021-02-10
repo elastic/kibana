@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ServerApiError } from '../../../../common/types';
@@ -16,6 +16,7 @@ import {
   getDeletionError,
   isCreationSuccessful,
   isDeletionSuccessful,
+  isEdit,
 } from '../store/selectors';
 
 import { useToasts } from '../../../../common/lib/kibana';
@@ -56,13 +57,26 @@ const getCreationSuccessMessage = (entry: Immutable<NewTrustedApp>) => {
   );
 };
 
+const getUpdateSuccessMessage = (entry: Immutable<NewTrustedApp>) => {
+  return i18n.translate(
+    'xpack.securitySolution.trustedapps.createTrustedAppFlyout.updateSuccessToastTitle',
+    {
+      defaultMessage: '"{name}" has been updated successfully',
+      values: { name: entry.name },
+    }
+  );
+};
+
 export const TrustedAppsNotifications = memo(() => {
   const deletionError = useTrustedAppsSelector(getDeletionError);
   const deletionDialogEntry = useTrustedAppsSelector(getDeletionDialogEntry);
   const deletionSuccessful = useTrustedAppsSelector(isDeletionSuccessful);
   const creationDialogNewEntry = useTrustedAppsSelector(getCreationDialogFormEntry);
   const creationSuccessful = useTrustedAppsSelector(isCreationSuccessful);
+  const editMode = useTrustedAppsSelector(isEdit);
   const toasts = useToasts();
+
+  const [wasAlreadyHandled] = useState(new WeakSet());
 
   if (deletionError && deletionDialogEntry) {
     toasts.addDanger(getDeletionErrorMessage(deletionError, deletionDialogEntry));
@@ -72,8 +86,17 @@ export const TrustedAppsNotifications = memo(() => {
     toasts.addSuccess(getDeletionSuccessMessage(deletionDialogEntry));
   }
 
-  if (creationSuccessful && creationDialogNewEntry) {
-    toasts.addSuccess(getCreationSuccessMessage(creationDialogNewEntry));
+  if (
+    creationSuccessful &&
+    creationDialogNewEntry &&
+    !wasAlreadyHandled.has(creationDialogNewEntry)
+  ) {
+    wasAlreadyHandled.add(creationDialogNewEntry);
+
+    toasts.addSuccess(
+      (editMode && getUpdateSuccessMessage(creationDialogNewEntry)) ||
+        getCreationSuccessMessage(creationDialogNewEntry)
+    );
   }
 
   return <></>;

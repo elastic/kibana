@@ -7,16 +7,19 @@
 
 import uuid from 'uuid';
 
-import { OsType } from '../../../../../lists/common/schemas/common';
+import { OsType } from '../../../../../lists/common/schemas';
 import {
   EntriesArray,
   EntryMatch,
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
-} from '../../../../../lists/common/shared_exports';
+} from '../../../../../lists/common';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
-import { CreateExceptionListItemOptions } from '../../../../../lists/server';
+import {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from '../../../../../lists/server';
 import {
   ConditionEntry,
   ConditionEntryField,
@@ -24,6 +27,7 @@ import {
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
+  UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
@@ -114,6 +118,7 @@ export const exceptionListItemToTrustedApp = (
 
     return {
       id: exceptionListItem.id,
+      version: exceptionListItem._version || '',
       name: exceptionListItem.name,
       description: exceptionListItem.description,
       effectScope: tagsToEffectScope(exceptionListItem.tags),
@@ -214,5 +219,40 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
     tags: effectScopeToTags(effectScope),
     type: 'simple',
+  };
+};
+
+/**
+ * Map UpdateTrustedApp to UpdateExceptionListItemOptions
+ *
+ * @param {ExceptionListItemSchema} currentTrustedAppExceptionItem
+ * @param {UpdateTrustedApp} updatedTrustedApp
+ */
+export const updatedTrustedAppToUpdateExceptionListItemOptions = (
+  {
+    id,
+    item_id: itemId,
+    namespace_type: namespaceType,
+    type,
+    comments,
+    meta,
+  }: ExceptionListItemSchema,
+  { os, entries, name, description = '', effectScope, version }: UpdateTrustedApp
+): UpdateExceptionListItemOptions => {
+  return {
+    _version: version,
+    name,
+    description,
+    entries: conditionEntriesToEntries(entries),
+    osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
+    tags: effectScopeToTags(effectScope),
+
+    // Copied from current trusted app exception item
+    id,
+    comments,
+    itemId,
+    meta,
+    namespaceType,
+    type,
   };
 };

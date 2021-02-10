@@ -49,6 +49,7 @@ describe('When on the Trusted Apps Page', () => {
 
   const getFakeTrustedApp = (): TrustedApp => ({
     id: '1111-2222-3333-4444',
+    version: 'abc123',
     name: 'one app',
     os: OperatingSystem.WINDOWS,
     created_at: '2021-01-04T13:55:00.561Z',
@@ -178,12 +179,36 @@ describe('When on the Trusted Apps Page', () => {
       });
 
       describe('and when Save is clicked', () => {
-        // Will be unskiped once PUT API is created
-        it.skip('should call the correct api (PUT)', () => {
+        it('should call the correct api (PUT)', () => {
           act(() => {
             fireEvent.click(renderResult.getByTestId('addTrustedAppFlyout-createButton'));
           });
-          expect(coreStart.http.put).toHaveBeenCalledWith({});
+
+          expect(coreStart.http.put).toHaveBeenCalledTimes(1);
+
+          const lastCallToPut = (coreStart.http.put.mock.calls[0] as unknown) as [
+            string,
+            HttpFetchOptions
+          ];
+
+          expect(lastCallToPut[0]).toEqual('/api/endpoint/trusted_apps/1111-2222-3333-4444');
+          expect(JSON.parse(lastCallToPut[1].body as string)).toEqual({
+            name: 'one app',
+            os: 'windows',
+            entries: [
+              {
+                field: 'process.executable.caseless',
+                value: 'one/two',
+                operator: 'included',
+                type: 'match',
+              },
+            ],
+            description: 'a good one',
+            effectScope: {
+              type: 'global',
+            },
+            version: 'abc123',
+          });
         });
       });
     });
@@ -378,6 +403,7 @@ describe('When on the Trusted Apps Page', () => {
               data: {
                 ...(JSON.parse(httpPostBody) as NewTrustedApp),
                 id: '1',
+                version: 'abc123',
                 created_at: '2020-09-16T14:09:45.484Z',
                 created_by: 'kibana',
               },
