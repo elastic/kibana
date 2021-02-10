@@ -21,12 +21,14 @@ import {
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
+type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+  'pit' | 'rootSearchFields' | 'searchAfter' | 'sortOrder' | 'typeToNamespacesMap'
 >;
 
-type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
+type SavedObjectsFindResponse = Omit<PromiseType<ReturnType<SavedObjectsApi['find']>>, 'pit_id'>;
 
 /** @public */
 export interface SavedObjectsCreateOptions {
@@ -105,7 +107,6 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
   total: number;
   perPage: number;
   page: number;
-  pit_id?: string;
 }
 
 interface BatchQueueEntry {
@@ -320,9 +321,7 @@ export class SavedObjectsClient {
       hasReferenceOperator: 'has_reference_operator',
       page: 'page',
       perPage: 'per_page',
-      pit: 'pit',
       search: 'search',
-      searchAfter: 'search_after',
       searchFields: 'search_fields',
       sortField: 'sort_field',
       type: 'type',
@@ -337,13 +336,10 @@ export class SavedObjectsClient {
       any
     >;
 
-    // `has_references` and `pit` are structured objects. We need to stringify before sending,
-    // as `fetch` is not doing it implicitly.
+    // `has_references` is a structured object. we need to stringify it before sending it, as `fetch`
+    // is not doing it implicitly.
     if (query.has_reference) {
       query.has_reference = JSON.stringify(query.has_reference);
-    }
-    if (query.pit) {
-      query.pit = JSON.stringify(renameKeys({ id: 'id', keepAlive: 'keep_alive' }, query.pit));
     }
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
@@ -351,16 +347,12 @@ export class SavedObjectsClient {
       query,
     });
     return request.then((resp) => {
-      return renameKeys<
-        PromiseType<ReturnType<SavedObjectsApi['find']>>,
-        SavedObjectsFindResponsePublic
-      >(
+      return renameKeys<SavedObjectsFindResponse, SavedObjectsFindResponsePublic>(
         {
           saved_objects: 'savedObjects',
           total: 'total',
           per_page: 'perPage',
           page: 'page',
-          pit_id: 'pit_id',
         },
         {
           ...resp,

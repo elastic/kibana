@@ -1230,8 +1230,6 @@ export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObject
     // (undocumented)
     perPage: number;
     // (undocumented)
-    pit_id?: string;
-    // (undocumented)
     total: number;
 }
 

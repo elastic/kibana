@@ -16,10 +16,6 @@ interface RouteDependencies {
 }
 
 export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
-  const pitSchema = schema.object({
-    id: schema.string(),
-    keep_alive: schema.maybe(schema.string()),
-  });
   const referenceSchema = schema.object({
     type: schema.string(),
     id: schema.string(),
@@ -37,10 +33,6 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
           page: schema.number({ min: 0, defaultValue: 1 }),
           type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
           search: schema.maybe(schema.string()),
-          search_after: schema.maybe(
-            schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))
-          ),
-          pit: schema.maybe(pitSchema),
           default_search_operator: searchOperatorSchema,
           search_fields: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -72,11 +64,6 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
         page: query.page,
         type: Array.isArray(query.type) ? query.type : [query.type],
         search: query.search,
-        searchAfter: query.search_after,
-        pit: query.pit && {
-          id: query.pit.id,
-          keepAlive: query.pit.keep_alive,
-        },
         defaultSearchOperator: query.default_search_operator,
         searchFields:
           typeof query.search_fields === 'string' ? [query.search_fields] : query.search_fields,
