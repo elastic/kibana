@@ -22,10 +22,11 @@ const getSignalId = (signal: SignalSourceHit): string => signal._id;
 export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
   const dedupedHitsMap = signalHits.reduce<Map<unknown, SignalSourceHit>>((acc, signalHit) => {
     const signalId = getSignalId(signalHit);
-    if (!acc.has(signalId)) {
+    const existingSignalHit = acc.get(signalId);
+
+    if (existingSignalHit == null) {
       acc.set(signalId, signalHit);
     } else {
-      const existingSignalHit = acc.get(signalId) as SignalSourceHit;
       const existingQueries = existingSignalHit?.matched_queries ?? [];
       const newQueries = signalHit.matched_queries ?? [];
       existingSignalHit.matched_queries = [...existingQueries, ...newQueries];
