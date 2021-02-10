@@ -72,22 +72,20 @@ export const Overview: React.FC = () => {
   const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
   return (
-    <EuiPage restrictWidth>
+    <>
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
 
-      <EuiPageBody>
-        <ViewContentHeader
-          title={headerTitle}
-          description={headerDescription}
-          action={<ProductButton />}
-        />
-        {!hideOnboarding && <OnboardingSteps />}
-        <EuiSpacer size="xl" />
-        <OrganizationStats />
-        <EuiSpacer size="xl" />
-        <RecentActivity />
-      </EuiPageBody>
-    </EuiPage>
+      <ViewContentHeader
+        title={headerTitle}
+        description={headerDescription}
+        action={<ProductButton />}
+      />
+      {!hideOnboarding && <OnboardingSteps />}
+      <EuiSpacer size="xl" />
+      <OrganizationStats />
+      <EuiSpacer size="xl" />
+      <RecentActivity />
+    </>
   );
 };
