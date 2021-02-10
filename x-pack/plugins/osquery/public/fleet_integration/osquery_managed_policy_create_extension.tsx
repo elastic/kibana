@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PackagePolicyCreateExtensionComponentProps } from '../../../../../../../fleet/public';
+import { PackagePolicyCreateExtensionComponentProps } from '../../../fleet/public';
 
 /**
  * Exports Osquery-specific package policy instructions

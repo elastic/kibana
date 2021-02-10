@@ -28,13 +28,13 @@ export const createActionRoute = (router: IRouter) => {
         expiration: moment().add(2, 'days').toISOString(),
         type: 'INPUT_ACTION',
         input_type: 'osquery',
-        // @ts-expect-error
+        // @ts-expect-error update validation
         agents: request.body.agents,
         data: {
           commands: [
             {
               id: uuid.v4(),
-              // @ts-expect-error
+              // @ts-expect-error update validation
               query: request.body.command,
             },
           ],

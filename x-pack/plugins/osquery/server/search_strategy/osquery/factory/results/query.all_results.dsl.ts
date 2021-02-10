@@ -44,6 +44,13 @@ export const buildResultsQuery = ({
       size: querySize,
       track_total_hits: true,
       fields: agentId ? ['osquery.*'] : ['agent.*', 'osquery.*'],
+      sort: [
+        {
+          [sort.field]: {
+            order: [sort.direction],
+          },
+        },
+      ],
     },
   };
 

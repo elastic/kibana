@@ -51,7 +51,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
       setSelectedItems(newSelectedItems);
 
       if (onChange) {
-        // @ts-expect-error
+        // @ts-expect-error update types
         onChange(newSelectedItems.map((item) => item._id));
       }
     },
@@ -99,9 +99,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     () => ({
       pageIndex,
       pageSize,
+      // @ts-expect-error update types
       totalItemCount: data.totalCount ?? 0,
       pageSizeOptions: [3, 5, 8],
     }),
+    // @ts-expect-error update types
     [pageIndex, pageSize, data.totalCount]
   );
 
@@ -128,18 +130,23 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   useEffect(() => {
     if (
       selectedAgents?.length &&
+      // @ts-expect-error update types
       data.agents?.length &&
       selectedItems.length !== selectedAgents.length
     ) {
       tableRef?.current?.setSelection(
+        // @ts-expect-error update types
         selectedAgents.map((agentId) => find({ _id: agentId }, data.agents))
       );
     }
+    // @ts-expect-error update types
   }, [selectedAgents, data.agents, selectedItems.length]);
 
   return (
     <EuiBasicTable<Agent>
       ref={tableRef}
+      // @ts-expect-error update types
+      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data.agents ?? []}
       itemId="_id"
       columns={columns}

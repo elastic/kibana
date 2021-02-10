@@ -22,9 +22,11 @@ export const readScheduledQueryRoute = (router: IRouter, osqueryContext: Osquery
       const savedObjectsClient = context.core.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
-      const scheduledQuery = await packagePolicyService.get(savedObjectsClient, request.params.id);
+      // @ts-expect-error update types
+      const scheduledQuery = await packagePolicyService?.get(savedObjectsClient, request.params.id);
 
       return response.ok({
+        // @ts-expect-error update types
         body: scheduledQuery,
       });
     }

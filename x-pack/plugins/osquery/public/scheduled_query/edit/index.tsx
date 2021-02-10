@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery } from 'react-query';
 
@@ -18,12 +16,14 @@ const EditScheduledQueryPageComponent = () => {
   const { http } = useKibana().services;
   const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();
 
-  const { isLoading, data } = useQuery(['scheduledQuery', { scheduledQueryId }], () =>
+  const { data } = useQuery(['scheduledQuery', { scheduledQueryId }], () =>
     http.get(`/internal/osquery/scheduled_query/${scheduledQueryId}`)
   );
 
-  const { data: agentPolicies } = useQuery(['agentPolicy'], () =>
-    http.get(`/api/fleet/agent_policies`)
+  const { data: agentPolicies } = useQuery(
+    ['agentPolicy'],
+    () => http.get(`/api/fleet/agent_policies`),
+    { initialData: { items: [] } }
   );
 
   const updateScheduledQueryMutation = useMutation((payload) =>
@@ -34,7 +34,9 @@ const EditScheduledQueryPageComponent = () => {
     return (
       <EditScheduledQueryForm
         data={data}
-        agentPolicies={agentPolicies?.items ?? []}
+        // @ts-expect-error update types
+        agentPolicies={agentPolicies?.items}
+        // @ts-expect-error update types
         handleSubmit={updateScheduledQueryMutation.mutate}
       />
     );

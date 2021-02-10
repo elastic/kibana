@@ -21,6 +21,7 @@ import { useQuery } from 'react-query';
 
 import { useKibana } from '../../common/lib/kibana';
 
+// @ts-expect-error update types
 const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
   const { http } = useKibana().services;
   const { data: { saved_objects: savedQueries } = {} } = useQuery(['savedQueryList'], () =>
@@ -29,12 +30,11 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
     })
   );
 
-  console.error('savedA', savedQueries);
-
   const { setValue } = field;
 
   const savedQueriesOptions = useMemo(
     () =>
+      // @ts-expect-error update types
       (savedQueries ?? []).map((savedQuery) => ({
         text: savedQuery.attributes.title,
         value: savedQuery.id,
@@ -49,6 +49,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
       const savedQuery = find(['id', savedQueryId], savedQueries);
 
       if (savedQuery) {
+        // @ts-expect-error update types
         setValue((prev) => ({
           ...prev,
           vars: {
@@ -69,6 +70,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
   );
 
   const handleEnabledChange = useCallback(() => {
+    // @ts-expect-error update types
     setValue((prev) => ({
       ...prev,
       enabled: !prev.enabled,
@@ -78,6 +80,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
   const handleQueryChange = useCallback(
     (event) => {
       event.persist();
+      // @ts-expect-error update types
       setValue((prev) => ({
         ...prev,
         vars: {
@@ -95,6 +98,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
   const handleIntervalChange = useCallback(
     (event) => {
       event.persist();
+      // @ts-expect-error update types
       setValue((prev) => ({
         ...prev,
         vars: {
@@ -112,6 +116,7 @@ const OsqueryStreamFieldComponent = ({ field, removeItem }) => {
   const handleIdChange = useCallback(
     (event) => {
       event.persist();
+      // @ts-expect-error update types
       setValue((prev) => ({
         ...prev,
         vars: {

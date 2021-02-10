@@ -5,16 +5,11 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../../src/core/server';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-import {
-  createSavedQueryRequestSchema,
-  CreateSavedQueryRequestSchemaDecoded,
-} from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
-import { savedQuerySavedObjectType } from '../../../common/types';
-import { buildRouteValidation } from '../../utils/build_validation/route_validation';
-
-export const createScheduledQueryRoute = (router: IRouter, osqueryContext) => {
+export const createScheduledQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
       path: '/internal/osquery/scheduled',
@@ -23,15 +18,15 @@ export const createScheduledQueryRoute = (router: IRouter, osqueryContext) => {
       },
     },
     async (context, request, response) => {
-      console.log(context);
       const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
       const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-      const integration = await packagePolicyService.create(
+      const integration = await packagePolicyService?.create(
         savedObjectsClient,
         esClient,
         callCluster,
+        // @ts-expect-error update types
         request.body
       );
 

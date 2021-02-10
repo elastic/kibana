@@ -21,10 +21,12 @@ export const deleteSavedQueryRoute = (router: IRouter) => {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
+      // @ts-expect-error update types
       const { savedQueryIds } = request.body;
 
       await Promise.all(
         savedQueryIds.map(
+          // @ts-expect-error update types
           async (savedQueryId) =>
             await savedObjectsClient.delete(savedQuerySavedObjectType, savedQueryId, {
               refresh: 'wait_for',

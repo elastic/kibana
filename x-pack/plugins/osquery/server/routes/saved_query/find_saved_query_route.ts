@@ -23,9 +23,13 @@ export const findSavedQueryRoute = (router: IRouter) => {
 
       const savedQueries = await savedObjectsClient.find({
         type: savedQuerySavedObjectType,
+        // @ts-expect-error update types
         page: parseInt(request.query.pageIndex, 10) + 1,
+        // @ts-expect-error update types
         perPage: request.query.pageSize,
+        // @ts-expect-error update types
         sortField: request.query.sortField,
+        // @ts-expect-error update types
         sortOrder: request.query.sortDirection,
       });
 

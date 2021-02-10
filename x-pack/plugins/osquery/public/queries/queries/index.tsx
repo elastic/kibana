@@ -22,7 +22,7 @@ const QueriesPageComponent = () => {
   const [sortField, setSortField] = useState('updated_at');
   const [sortDirection, setSortDirection] = useState('desc');
   const [selectedItems, setSelectedItems] = useState([]);
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const { http } = useKibana().services;
   const newQueryLinkProps = useRouterNavigate('queries/new');
 
@@ -162,6 +162,7 @@ const QueriesPageComponent = () => {
 
   const handleDeleteClick = useCallback(() => {
     const selectedItemsIds = map<string>('id', selectedItems);
+    // @ts-expect-error update types
     deleteSavedQueriesMutation.mutate({ savedQueryIds: selectedItemsIds });
   }, [deleteSavedQueriesMutation, selectedItems]);
 
@@ -181,12 +182,15 @@ const QueriesPageComponent = () => {
         <EuiBasicTable
           items={savedQueries}
           itemId="id"
+          // @ts-expect-error update types
           columns={columns}
           pagination={pagination}
+          // @ts-expect-error update types
           sorting={sorting}
           isSelectable={true}
           selection={selection}
           onChange={onTableChange}
+          // @ts-expect-error update types
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           rowHeader="id"
         />

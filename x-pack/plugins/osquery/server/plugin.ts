@@ -19,6 +19,7 @@ import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
+import { ConfigType } from './config';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -49,7 +50,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     initSavedObjects(core.savedObjects);
     defineRoutes(router, osqueryContext);
 
-    core.getStartServices().then(([_, depsStart]) => {
+    core.getStartServices().then(([, depsStart]) => {
       const osquerySearchStrategy = osquerySearchStrategyProvider(depsStart.data);
 
       plugins.data.search.registerSearchStrategy('osquerySearchStrategy', osquerySearchStrategy);
@@ -64,6 +65,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.osqueryAppContextService.start({
       ...plugins.fleet,
+      // @ts-expect-error update types
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
       logger: this.logger,

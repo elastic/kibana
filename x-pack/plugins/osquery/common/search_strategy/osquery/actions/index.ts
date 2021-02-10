@@ -21,9 +21,10 @@ export interface ActionsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
-export type ActionsRequestOptions = RequestOptionsPaginated<{}>;
+export type ActionsRequestOptions = RequestOptionsPaginated;
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   actionDetails: Record<string, any>;
   inspect?: Maybe<Inspect>;
 }

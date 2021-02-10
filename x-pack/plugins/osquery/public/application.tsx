@@ -55,6 +55,7 @@ export const renderApp = (
       // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
       services={{
         appName: PLUGIN_NAME,
+        kibanaVersion,
         ...core,
         ...services,
         storage,

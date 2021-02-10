@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
+import deepEqual from 'fast-deep-equal';
 
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ActionEdges,
   PageInfoPaginated,
-  DocValueFields,
   OsqueryQueries,
   ActionsRequestOptions,
   ActionsStrategyResponse,
@@ -38,7 +37,6 @@ interface UseAllActions {
   direction: Direction;
   limit: number;
   sortField: string;
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
@@ -48,7 +46,6 @@ export const useAllActions = ({
   direction,
   limit,
   sortField,
-  docValueFields,
   filterQuery,
   skip = false,
 }: UseAllActions) => {
@@ -62,7 +59,7 @@ export const useAllActions = ({
       if (!actionsRequest) return Promise.resolve();
 
       const responseData = await data.search
-        .search<ActionsRequestOptions, ActionsStrategyResponse>(actionsRequest!, {
+        .search<ActionsRequestOptions, ActionsStrategyResponse>(actionsRequest, {
           strategy: 'osquerySearchStrategy',
         })
         .toPromise();
@@ -70,7 +67,7 @@ export const useAllActions = ({
       return {
         ...responseData,
         actions: responseData.edges,
-        inspect: getInspectResponse(responseData, {}),
+        inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
@@ -82,7 +79,6 @@ export const useAllActions = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        docValueFields: docValueFields ?? [],
         factoryQueryType: OsqueryQueries.actions,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -96,7 +92,7 @@ export const useAllActions = ({
       }
       return prevRequest;
     });
-  }, [activePage, direction, docValueFields, filterQuery, limit, sortField]);
+  }, [activePage, direction, filterQuery, limit, sortField]);
 
   return response;
 };

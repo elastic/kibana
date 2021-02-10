@@ -6,7 +6,7 @@
  */
 
 import { lazy } from 'react';
-import { PackagePolicyCreateExtensionComponent } from '../../../../../../../fleet/public';
+import { PackagePolicyCreateExtensionComponent } from '../../../fleet/public';
 
 export const LazyOsqueryManagedPolicyCreateExtension = lazy<PackagePolicyCreateExtensionComponent>(
   async () => {

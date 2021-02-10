@@ -59,7 +59,7 @@ const ActionsTableComponent = () => {
   ]);
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
-    () => ({ rowIndex, columnId, setCellProps }) => {
+    () => ({ rowIndex, columnId }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
       const value = data[rowIndex].fields[columnId];
@@ -91,6 +91,7 @@ const ActionsTableComponent = () => {
   );
 
   useEffect(() => {
+    // @ts-expect-error update types
     const newColumns = keys(actionsData?.actions[0]?.fields)
       .sort()
       .map((fieldName) => ({
@@ -103,6 +104,7 @@ const ActionsTableComponent = () => {
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
+    // @ts-expect-error update types
   }, [columns, actionsData?.actions]);
 
   if (actionsLoading) {
@@ -110,11 +112,14 @@ const ActionsTableComponent = () => {
   }
 
   return (
+    // @ts-expect-error update types
+    // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
     <DataContext.Provider value={actionsData?.actions ?? []}>
       <EuiDataGrid
         aria-label="Osquery actions"
         columns={columns}
         columnVisibility={columnVisibility}
+        // @ts-expect-error update types
         rowCount={actionsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}

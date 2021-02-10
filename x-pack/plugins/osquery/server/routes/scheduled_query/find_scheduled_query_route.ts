@@ -21,7 +21,9 @@ export const findScheduledQueryRoute = (router: IRouter, osqueryContext: Osquery
     async (context, request, response) => {
       const kuery = 'ingest-package-policies.attributes.package.name: osquery_elastic_managed';
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-      const policies = await packagePolicyService.list(context.core.savedObjects.client, { kuery });
+      const policies = await packagePolicyService?.list(context.core.savedObjects.client, {
+        kuery,
+      });
 
       return response.ok({
         body: policies,

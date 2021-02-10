@@ -13,7 +13,6 @@ import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   PageInfoPaginated,
-  DocValueFields,
   OsqueryQueries,
   AgentsRequestOptions,
   AgentsStrategyResponse,
@@ -38,7 +37,6 @@ interface UseAllAgents {
   direction: Direction;
   limit: number;
   sortField: string;
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
@@ -48,7 +46,6 @@ export const useAllAgents = ({
   direction,
   limit,
   sortField,
-  docValueFields,
   filterQuery,
   skip = false,
 }: UseAllAgents) => {
@@ -82,7 +79,6 @@ export const useAllAgents = ({
     setHostRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        docValueFields: docValueFields ?? [],
         factoryQueryType: OsqueryQueries.agents,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -96,7 +92,7 @@ export const useAllAgents = ({
       }
       return prevRequest;
     });
-  }, [activePage, direction, docValueFields, filterQuery, limit, sortField]);
+  }, [activePage, direction, filterQuery, limit, sortField]);
 
   return response;
 };

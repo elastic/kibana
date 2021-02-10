@@ -21,6 +21,7 @@ export const readSavedQueryRoute = (router: IRouter) => {
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;
 
+      // @ts-expect-error update types
       const savedQuery = await savedObjectsClient.get(savedQuerySavedObjectType, request.params.id);
 
       return response.ok({

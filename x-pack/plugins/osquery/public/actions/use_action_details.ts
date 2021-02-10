@@ -12,7 +12,6 @@ import { useQuery } from 'react-query';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
-  DocValueFields,
   OsqueryQueries,
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
@@ -30,17 +29,11 @@ export interface ActionDetailsArgs {
 
 interface UseActionDetails {
   actionId: string;
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
 
-export const useActionDetails = ({
-  actionId,
-  docValueFields,
-  filterQuery,
-  skip = false,
-}: UseActionDetails) => {
+export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
   const { data } = useKibana().services;
 
   const [actionDetailsRequest, setHostRequest] = useState<ActionDetailsRequestOptions | null>(null);
@@ -51,14 +44,14 @@ export const useActionDetails = ({
       if (!actionDetailsRequest) return Promise.resolve();
 
       const responseData = await data.search
-        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(actionDetailsRequest!, {
+        .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(actionDetailsRequest, {
           strategy: 'osquerySearchStrategy',
         })
         .toPromise();
 
       return {
         ...responseData,
-        inspect: getInspectResponse(responseData, {}),
+        inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
@@ -71,7 +64,6 @@ export const useActionDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         actionId,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: OsqueryQueries.actionDetails,
         filterQuery: createFilter(filterQuery),
       };
@@ -80,7 +72,7 @@ export const useActionDetails = ({
       }
       return prevRequest;
     });
-  }, [actionId, docValueFields, filterQuery]);
+  }, [actionId, filterQuery]);
 
   return response;
 };

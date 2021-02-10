@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
@@ -19,7 +20,7 @@ const QueryAgentResultsComponent = () => {
     <>
       <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
         {
-          // @ts-expect-error
+          // @ts-expect-error update types
           data?.actionDetails._source?.data.commands[0].query
         }
       </EuiCodeBlock>

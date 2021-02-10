@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { FIELD_TYPES, FormSchema } from '../../shared_imports';
+import { FIELD_TYPES } from '../../shared_imports';
 
-export const formSchema: FormSchema = {
-  title: {
+export const schema = {
+  policy_id: {
+    type: FIELD_TYPES.SELECT,
+    label: 'Policy',
+  },
+  name: {
     type: FIELD_TYPES.TEXT,
+    label: 'Name',
   },
   description: {
-    type: FIELD_TYPES.TEXTAREA,
-    validations: [],
+    type: FIELD_TYPES.TEXT,
+    label: 'Description',
   },
-  command: {
-    type: FIELD_TYPES.TEXTAREA,
-    validations: [],
+  streams: {
+    type: FIELD_TYPES.MULTI_SELECT,
   },
 };

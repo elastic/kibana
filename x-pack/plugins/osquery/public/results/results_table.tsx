@@ -48,7 +48,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
     [setSortingColumns]
   );
 
-  const { data: allResultsData } = useAllResults({
+  const { data: allResultsData = [] } = useAllResults({
     actionId,
     agentId,
     activePage: pagination.pageIndex,
@@ -64,7 +64,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
   ]);
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
-    () => ({ rowIndex, columnId, setCellProps }) => {
+    () => ({ rowIndex, columnId }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
@@ -100,6 +100,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
   );
 
   useEffect(() => {
+    // @ts-expect-error update types
     const newColumns = keys(allResultsData?.results[0]?.fields)
       .sort()
       .reduce((acc, fieldName) => {
@@ -132,14 +133,17 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
+    // @ts-expect-error update types
   }, [columns, allResultsData?.results]);
 
   return (
-    <DataContext.Provider value={allResultsData?.results ?? []}>
+    // @ts-expect-error update types
+    <DataContext.Provider value={allResultsData?.results}>
       <EuiDataGrid
         aria-label="Osquery results"
         columns={columns}
         columnVisibility={columnVisibility}
+        // @ts-expect-error update types
         rowCount={allResultsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}

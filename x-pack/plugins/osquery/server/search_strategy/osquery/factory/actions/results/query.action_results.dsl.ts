@@ -11,7 +11,6 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 
 export const buildActionResultsQuery = ({
   actionId,
-  docValueFields,
   filterQuery,
   pagination: { activePage, querySize },
   sort,
@@ -35,6 +34,13 @@ export const buildActionResultsQuery = ({
       size: querySize,
       track_total_hits: true,
       fields: ['*'],
+      sort: [
+        {
+          [sort.field]: {
+            order: [sort.direction],
+          },
+        },
+      ],
     },
   };
 

@@ -11,6 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useHistory } from 'react-router-dom';
 
+import { Direction } from '../../../common/search_strategy';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 
 const ScheduledQueriesPageComponent = () => {
@@ -18,8 +19,8 @@ const ScheduledQueriesPageComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState('updated_at');
-  const [sortDirection, setSortDirection] = useState('desc');
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [sortDirection, setSortDirection] = useState(Direction.desc);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, any>>({});
   const { http } = useKibana().services;
   const newQueryLinkProps = useRouterNavigate('scheduled_queries/new');
@@ -49,6 +50,7 @@ const ScheduledQueriesPageComponent = () => {
       if (itemIdToExpandedRowMapValues[item.id]) {
         delete itemIdToExpandedRowMapValues[item.id];
       } else {
+        // @ts-expect-error update types
         itemIdToExpandedRowMapValues[item.id] = item.inputs[0].streams.map((stream) => (
           <EuiCodeBlock key={stream} language="sql" fontSize="m" paddingSize="m">
             {`${stream.vars.query.value} every ${stream.vars.interval.value}s`}
@@ -145,7 +147,6 @@ const ScheduledQueriesPageComponent = () => {
   const selection = useMemo(
     () => ({
       selectable: () => true,
-      onSelectionChange: setSelectedItems,
       initialSelected: [],
     }),
     []
@@ -161,6 +162,7 @@ const ScheduledQueriesPageComponent = () => {
         <EuiBasicTable
           items={savedQueries}
           itemId="id"
+          // @ts-expect-error update types
           columns={columns}
           pagination={pagination}
           sorting={sorting}

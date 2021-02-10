@@ -33,6 +33,7 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   prevResponse?: InspectResponse
 ): InspectResponse => ({
   dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
+  // @ts-expect-error update types
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });

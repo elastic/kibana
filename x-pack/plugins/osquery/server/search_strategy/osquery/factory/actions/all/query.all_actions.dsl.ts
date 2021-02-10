@@ -10,9 +10,9 @@ import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 // import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionsQuery = ({
-  docValueFields,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
-  pagination: { activePage, cursorStart, querySize },
+  pagination: { cursorStart, querySize },
   sort,
 }: AgentsRequestOptions): ISearchRequestParams => {
   // const filter = [...createQueryFilterClauses(filterQuery)];
@@ -36,8 +36,8 @@ export const buildActionsQuery = ({
       fields: ['*'],
       sort: [
         {
-          '@timestamp': {
-            order: 'desc',
+          [sort.field]: {
+            order: [sort.direction],
           },
         },
       ],

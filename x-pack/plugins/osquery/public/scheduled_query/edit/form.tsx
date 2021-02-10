@@ -7,17 +7,9 @@
 
 import produce from 'immer';
 import { get, omit } from 'lodash/fp';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiForm,
-  EuiSpacer,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import uuid from 'uuid';
-import React, { useCallback, useMemo } from 'react';
-import { useQuery } from 'react-query';
+import React, { useMemo } from 'react';
 
 import {
   UseField,
@@ -27,34 +19,28 @@ import {
   Field,
   ToggleField,
   Form,
-  FIELD_TYPES,
 } from '../../shared_imports';
 
 import { OsqueryStreamField } from '../common/osquery_stream_field';
+import { schema } from './schema';
 
 const CommonUseField = getUseField({ component: Field });
 
 const EDIT_SCHEDULED_QUERY_FORM_ID = 'editScheduledQueryForm';
 
-const schema = {
-  policy_id: {
-    type: FIELD_TYPES.SELECT,
-    label: 'Policy',
-  },
-  name: {
-    type: FIELD_TYPES.TEXT,
-    label: 'Name',
-  },
-  description: {
-    type: FIELD_TYPES.TEXT,
-    label: 'Description',
-  },
-  streams: {
-    type: FIELD_TYPES.MULTI_SELECT,
-  },
-};
+interface EditScheduledQueryFormProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  agentPolicies: Array<Record<string, any>>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: Array<Record<string, any>>;
+  handleSubmit: () => Promise<void>;
+}
 
-const EditScheduledQueryFormComponent = ({ data, agentPolicies, handleSubmit }) => {
+const EditScheduledQueryFormComponent: React.FC<EditScheduledQueryFormProps> = ({
+  agentPolicies,
+  data,
+  handleSubmit,
+}) => {
   const agentPoliciesOptions = useMemo(
     () =>
       agentPolicies.map((policy) => ({
@@ -69,8 +55,10 @@ const EditScheduledQueryFormComponent = ({ data, agentPolicies, handleSubmit }) 
     id: EDIT_SCHEDULED_QUERY_FORM_ID,
     onSubmit: handleSubmit,
     defaultValue: data,
+    // @ts-expect-error update types
     deserializer: (payload) => {
       const deserialized = produce(payload, (draft) => {
+        // @ts-expect-error update types
         draft.inputs[0].streams.forEach((stream) => {
           delete stream.compiled_stream;
         });
@@ -78,33 +66,31 @@ const EditScheduledQueryFormComponent = ({ data, agentPolicies, handleSubmit }) 
 
       return deserialized;
     },
-    serializer: (payload) => {
-      console.error('serri', { ...data, ...payload });
-
-      return omit(
-        ['id', 'revision', 'created_at', 'created_by', 'updated_at', 'updated_by', 'version'],
-        {
-          ...data,
-          ...payload,
-          inputs: [{ type: 'osquery', ...((payload.inputs && payload.inputs[0]) ?? {}) }],
-        }
-      );
-    },
+    // @ts-expect-error update types
+    serializer: (payload) =>
+      omit(['id', 'revision', 'created_at', 'created_by', 'updated_at', 'updated_by', 'version'], {
+        ...data,
+        ...payload,
+        // @ts-expect-error update types
+        inputs: [{ type: 'osquery', ...((payload.inputs && payload.inputs[0]) ?? {}) }],
+      }),
   });
 
   const { submit } = form;
 
+  const policyIdComponentProps = useMemo(
+    () => ({
+      euiFieldProps: {
+        disabled: true,
+        options: agentPoliciesOptions,
+      },
+    }),
+    [agentPoliciesOptions]
+  );
+
   return (
     <Form form={form}>
-      <CommonUseField
-        path="policy_id"
-        componentProps={{
-          euiFieldProps: {
-            disabled: true,
-            options: agentPoliciesOptions,
-          },
-        }}
-      />
+      <CommonUseField path="policy_id" componentProps={policyIdComponentProps} />
       <EuiSpacer />
       <CommonUseField path="name" />
       <EuiSpacer />
@@ -114,15 +100,17 @@ const EditScheduledQueryFormComponent = ({ data, agentPolicies, handleSubmit }) 
       <EuiHorizontalRule />
       <EuiSpacer />
       <UseArray path="inputs[0].streams">
-        {({ items, error, form, addItem, removeItem }) => (
+        {({ items, addItem, removeItem }) => (
           <>
             {items.map((item) => (
               <UseField
                 key={item.path}
                 path={item.path}
                 component={OsqueryStreamField}
+                // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
                 removeItem={() => removeItem(item.id)}
                 defaultValue={
+                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                   get(item.path, form.getFormData()) ?? {
                     data_stream: {
                       type: 'logs',

@@ -6,7 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
 import { createFilter } from '../common/helpers';
@@ -14,7 +14,6 @@ import { useKibana } from '../common/lib/kibana';
 import {
   ResultEdges,
   PageInfoPaginated,
-  DocValueFields,
   OsqueryQueries,
   ResultsRequestOptions,
   ResultsStrategyResponse,
@@ -39,7 +38,6 @@ interface UseActionResults {
   direction: Direction;
   limit: number;
   sortField: string;
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
@@ -50,7 +48,6 @@ export const useActionResults = ({
   direction,
   limit,
   sortField,
-  docValueFields,
   filterQuery,
   skip = false,
 }: UseActionResults) => {
@@ -64,7 +61,7 @@ export const useActionResults = ({
       if (!resultsRequest) return Promise.resolve();
 
       const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(resultsRequest!, {
+        .search<ResultsRequestOptions, ResultsStrategyResponse>(resultsRequest, {
           strategy: 'osquerySearchStrategy',
         })
         .toPromise();
@@ -72,7 +69,7 @@ export const useActionResults = ({
       return {
         ...responseData,
         results: responseData.edges,
-        inspect: getInspectResponse(responseData, {}),
+        inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
@@ -85,7 +82,6 @@ export const useActionResults = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         actionId,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: OsqueryQueries.actionResults,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -99,7 +95,7 @@ export const useActionResults = ({
       }
       return prevRequest;
     });
-  }, [actionId, activePage, direction, docValueFields, filterQuery, limit, sortField]);
+  }, [actionId, activePage, direction, filterQuery, limit, sortField]);
 
   return response;
 };

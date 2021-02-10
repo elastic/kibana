@@ -14,7 +14,6 @@ import { useKibana } from '../common/lib/kibana';
 import {
   ResultEdges,
   PageInfoPaginated,
-  DocValueFields,
   OsqueryQueries,
   ResultsRequestOptions,
   ResultsStrategyResponse,
@@ -40,7 +39,6 @@ interface UseAllResults {
   direction: Direction;
   limit: number;
   sortField: string;
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
@@ -52,7 +50,6 @@ export const useAllResults = ({
   direction,
   limit,
   sortField,
-  docValueFields,
   filterQuery,
   skip = false,
 }: UseAllResults) => {
@@ -66,7 +63,7 @@ export const useAllResults = ({
       if (!resultsRequest) return Promise.resolve();
 
       const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(resultsRequest!, {
+        .search<ResultsRequestOptions, ResultsStrategyResponse>(resultsRequest, {
           strategy: 'osquerySearchStrategy',
         })
         .toPromise();
@@ -74,7 +71,7 @@ export const useAllResults = ({
       return {
         ...responseData,
         results: responseData.edges,
-        inspect: getInspectResponse(responseData, {}),
+        inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
@@ -88,7 +85,6 @@ export const useAllResults = ({
         ...(prevRequest ?? {}),
         actionId,
         agentId,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: OsqueryQueries.results,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -102,7 +98,7 @@ export const useAllResults = ({
       }
       return prevRequest;
     });
-  }, [actionId, activePage, agentId, direction, docValueFields, filterQuery, limit, sortField]);
+  }, [actionId, activePage, agentId, direction, filterQuery, limit, sortField]);
 
   return response;
 };

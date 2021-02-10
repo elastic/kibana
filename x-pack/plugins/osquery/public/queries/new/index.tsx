@@ -34,6 +34,7 @@ const NewSavedQueryPageComponent = () => {
   const { form: savedQueryForm } = useForm({
     id: SAVED_QUERY_FORM_ID,
     // schema: formSchema,
+    // @ts-expect-error update types
     onSubmit: createSavedQueryMutation.mutate,
     options: {
       stripEmptyFields: false,
@@ -46,7 +47,7 @@ const NewSavedQueryPageComponent = () => {
     form: savedQueryForm,
   });
 
-  const createActionMutation = useMutation((payload: Record<string, any>) =>
+  const createActionMutation = useMutation((payload: Record<string, unknown>) =>
     http.post('/internal/osquery/action', {
       body: JSON.stringify({ ...payload, command: savedQueryFormData.command }),
     })
@@ -59,7 +60,10 @@ const NewSavedQueryPageComponent = () => {
     <>
       <SavedQueryForm form={savedQueryForm} />
       <EuiSpacer />
-      <LiveQueryForm onSubmit={createActionMutation.mutate} />
+      {
+        // @ts-expect-error update types
+        <LiveQueryForm onSubmit={createActionMutation.mutate} />
+      }
 
       {createActionMutation.data && (
         <>

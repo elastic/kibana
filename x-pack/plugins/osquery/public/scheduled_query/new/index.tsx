@@ -25,6 +25,7 @@ const NewScheduledQueryPageComponent = () => {
     }
   );
 
+  // @ts-expect-error update types
   return <NewScheduledQueryForm handleSubmit={createScheduledQueryMutation.mutate} />;
 };
 
