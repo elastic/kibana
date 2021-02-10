@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../../applications/shared/licensing';
 import { Loading } from '../../../shared/loading';
@@ -133,14 +133,12 @@ export const PrivateSources: React.FC = () => {
     <ContentSection
       title={PRIVATE_SHARED_SOURCES_TITLE}
       description={
-        hasSharedSources &&
-        i18n.translate(
-          'xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description',
-          {
-            defaultMessage:
-              'You have access to the following sources through the {groups, plural, one {group} other {groups}} {groupsSentence}.',
-            values: { groups: groups.length, groupsSentence },
-          }
+        hasSharedSources && (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description"
+            defaultMessage="You have access to the following sources through {newline}the {groups, plural, one {group} other {groups}} {groupsSentence}."
+            values={{ groups: groups.length, groupsSentence, newline: <br /> }}
+          />
         )
       }
     >
