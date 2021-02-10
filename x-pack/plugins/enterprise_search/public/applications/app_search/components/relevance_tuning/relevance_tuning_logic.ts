@@ -364,7 +364,7 @@ export const RelevanceTuningLogic = kea<
           ...searchFields,
           [name]: {
             ...searchFields[name],
-            weight: parseFloat(weight.toFixed(1)),
+            weight: Math.round(weight * 10) / 10,
           },
         },
       });
@@ -414,7 +414,7 @@ export const RelevanceTuningLogic = kea<
       const { searchSettings } = values;
       const { boosts } = searchSettings;
       const updatedBoosts = cloneDeep(boosts[name]);
-      updatedBoosts[index].factor = parseFloat(factor.toFixed(1));
+      updatedBoosts[index].factor = Math.round(factor * 10) / 10;
 
       actions.setSearchSettings({
         ...searchSettings,
