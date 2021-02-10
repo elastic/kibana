@@ -10,13 +10,15 @@ import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__';
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
 import { Layout } from '../shared/layout';
+
 import { WorkplaceSearchHeaderActions } from './components/layout';
-import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
 import { Overview } from './views/overview';
+import { SetupGuide } from './views/setup_guide';
 
 import { WorkplaceSearch, WorkplaceSearchUnconfigured, WorkplaceSearchConfigured } from './';
 
@@ -63,7 +65,7 @@ describe('WorkplaceSearchConfigured', () => {
   });
 
   it('initializes app data with passed props', () => {
-    shallow(<WorkplaceSearchConfigured isFederatedAuth={true} />);
+    shallow(<WorkplaceSearchConfigured isFederatedAuth />);
 
     expect(initializeAppData).toHaveBeenCalledWith({ isFederatedAuth: true });
   });

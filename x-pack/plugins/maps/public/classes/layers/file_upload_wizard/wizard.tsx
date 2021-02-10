@@ -16,7 +16,7 @@ import {
 } from '../../../../common/constants';
 import { getFileUploadComponent } from '../../../kibana_services';
 import { GeoJsonFileSource } from '../../sources/geojson_file_source';
-import { VectorLayer } from '../../layers/vector_layer/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { FileUploadComponentProps } from '../../../../../maps_file_upload/public';
