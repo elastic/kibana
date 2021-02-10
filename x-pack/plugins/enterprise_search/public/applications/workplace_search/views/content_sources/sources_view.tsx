@@ -9,9 +9,6 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButton,
   EuiLink,
@@ -25,10 +22,11 @@ import {
   EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Loading } from '../../../shared/loading';
 import { SourceIcon } from '../../components/shared/source_icon';
-
 import { EXTERNAL_IDENTITIES_DOCS_URL, DOCUMENT_PERMISSIONS_DOCS_URL } from '../../routes';
 
 import {
@@ -36,7 +34,6 @@ import {
   DOCUMENT_PERMISSIONS_LINK,
   UNDERSTAND_BUTTON,
 } from './constants';
-
 import { SourcesLogic } from './sources_logic';
 
 interface SourcesViewProps {
