@@ -260,6 +260,10 @@ slows requests when working on big documents.
 [[doctable-legacy]]`doc_table:legacy`:: 
 Control the way the Discover's table looks and works. Set this property to `true` to revert to the legacy implementation.
 
+[[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
+When enabled, documents will be loaded and displayed using `_source`. This is soon going to be deprecated. 
+When disabled, the new `fields` parameter of Elasticsearch search service is being used. This way runtime, alias and 
+multi fields can be displayed.
 
 [float]
 [[kibana-ml-settings]]
