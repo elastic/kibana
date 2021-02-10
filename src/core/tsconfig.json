@@ -5,6 +5,7 @@
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
+    "outDir": "../../bazel/bin/src/core",
     "tsBuildInfoFile": ".tsbuildinfo"
   },
   "include": [

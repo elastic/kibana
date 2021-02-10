@@ -4,8 +4,8 @@
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
-      "kibana/public": ["bazel/bin/src/core/public", "src/core/public"],
-      "kibana/server": ["bazel/bin/src/core/server", "src/core/server"],
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
 //      "kibana/src/legacy/*": [
 //        "src/legacy/*",
 //        "bazel-out/darwin-fastbuild/bin/src/legacy/*"
