@@ -156,14 +156,14 @@ describe('getOperationTypesForField', () => {
   });
 
   describe('getAvailableOperationsByMetaData', () => {
-    it('should put the average operation first', () => {
+    it('should put the median operation first', () => {
       const numberOperation = getAvailableOperationsByMetadata(expectedIndexPatterns[1]).find(
         ({ operationMetaData }) =>
           !operationMetaData.isBucketed && operationMetaData.dataType === 'number'
       )!;
       expect(numberOperation.operations[0]).toEqual(
         expect.objectContaining({
-          operationType: 'avg',
+          operationType: 'median',
         })
       );
     });
@@ -240,6 +240,11 @@ describe('getOperationTypesForField', () => {
             "operations": Array [
               Object {
                 "field": "bytes",
+                "operationType": "median",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
                 "operationType": "avg",
                 "type": "field",
               },
@@ -287,11 +292,6 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "source",
                 "operationType": "cardinality",
-                "type": "field",
-              },
-              Object {
-                "field": "bytes",
-                "operationType": "median",
                 "type": "field",
               },
               Object {
