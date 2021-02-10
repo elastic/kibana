@@ -1,0 +1,295 @@
+---
+id: kibDevTutorialDataSearchAndSessions
+slug: /kibana-dev-docs/tutorials/data/search-and-sessions
+title: Kibana data.search Service
+summary: Kibana Search Service
+date: 2021-02-10
+tags: ['kibana', 'onboarding', 'dev', 'tutorials', 'search']
+---
+
+## Search Service
+
+### Low Level Search 
+
+Searching data stored in `Elasticsearch` can be done in various ways, for example using the `Elasticsearch` REST API or using an `Elasticsearch Client` for low level access.
+
+However, the recommended and easist way to search `Elasticsearch` is by using the low level search service. The service is exposed from the `data` plugin, and by using it, you don't only gain access to the data you stored, but also to additional capabilities, such as Custom Search Strategies, Asynchronous Search, Partial Results, Search Sessions and more.
+
+Here is a basic example for using the `data.search` service from a custom plugin:
+
+```ts
+import { CoreStart, Plugin } from 'kibana/public';
+import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from '???';
+
+export interface MyPluginStartDependencies {
+  data: DataPublicPluginStart;
+}
+
+export class MyPlugin implements Plugin {
+  public start(core: CoreStart, { data }: MyPluginStartDependencies) {
+    const query = {
+      filter: [{
+        match_all: {}
+      }],
+    };
+    const req = {
+      params: {
+        index: 'my-index-*',
+        body: {
+          query,
+          aggs: {},
+        },
+      }
+    };
+    data.search.search(req).subscribe({
+      next: (result) => {
+        if (isCompleteResponse(res)) {
+          // handle search result
+        } else if (isErrorResponse(res)) {
+          // handle error, this means that some results were returned, but the search has failed to complete.
+        } else {
+          // handle partial results. See LINK TO PARTIAL RESULTS for more information.
+        }
+      }, 
+      error: (e) => {
+        // handle error thrown, for example a server hangup
+      },
+    })
+  }
+}
+```
+
+Note: The `data` plugin contains services to help you generate the `query` and `aggs` portions, as well as managing indicies using the `data.indexPatterns` service. You can read more about them [here]().  
+
+#### Error handling
+
+The `search` method can throw several types of errors. 
+
+If you want to display them to a user, within the context of an application, you may use the helper method provided on the `data.search` service. Those errors will be shown in a toast message, using the `core.notifications` service.  
+
+```ts
+data.search.search(req).subscribe({
+  next: (result) => {}, 
+  error: (e) => {
+    data.search.showError(e);
+  },
+})
+```
+
+If you choose to handle errors by yourself, look out for errors coming from `Elasticsearch`. They have an additional `attributes` property that holds the raw error from `Elasticsearch`.
+
+```ts
+data.search.search(req).subscribe({
+  next: (result) => {}, 
+  error: (e) => {
+    if (e instanceof IEsError) {
+      showErrorReason(e.attributes);
+    }
+  },
+})
+```
+
+#### Aborting a running search 
+
+The search service `search` method supports a second argument called `options`. One of those options is providing an `abortSignal`, to stop searches from running to completion, if the result is no longer needed.
+
+[source,typescript]
+```ts
+const abortController = new AbortController();
+data.search.search(req, {
+  abortSignal: abortController.signal,
+}).subscribe({
+  next: (result) => {
+    // handle result
+  }, 
+  error: (e) => {
+    if (e instanceof AbortError) {
+      // you can ignore this
+      return;
+    }
+    // handle error, for example a server hangup
+  },
+});
+
+setTimeout(() => {
+  abortController.abort();
+}, 1000);
+```
+
+#### Search Strategies
+
+By default, the search service uses the DSL query and aggregation syntax and returns the response from Elasticsearch as is. It also provides several additional basic strategies, such as Async DSL (`x-pack` default) and EQL.
+
+For example, to run an EQL query using the `data.search` service, you should to specify the strategy name using the options parameter:
+
+[source,typescript]
+```ts
+const req = getEqlRequest();
+data.search.search(req, {
+  strategy: EQL_SEARCH_STRATEGY,
+}).subscribe({
+  next: (result) => {
+    // handle result
+  }, 
+});
+```
+
+##### Custom Search Strategies
+
+If you wish to use a different syntax, pre-process the request or process the response before returning it, you may create and register a custom search strategy to encapsulate your custom logic.
+
+The following example shows how to define, register and use a search strategy that pre-processes the request before sending it to the default DSL search strategy, then processes the response before returning it to the client.
+
+```ts
+// ./myPlugin/server/myStrategy.ts
+export const mySearchStrategyProvider = (
+  data: PluginStart
+): ISearchStrategy<IMyStrategyRequest, IMyStrategyResponse> => {
+  // Get the default search strategy
+  const es = data.search.getSearchStrategy(ES_SEARCH_STRATEGY);
+  return {
+    search: (request, options, deps) => {
+      return formatResponse(es.search(preprocessRequest(request), options, deps));
+    },
+  };
+};
+```
+
+```ts
+// ./myPlugin/server/plugin.ts
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from 'kibana/server';
+
+import { mySearchStrategyProvider } from './my_strategy';
+
+export interface MyPluginSetupDeps {
+  data: PluginSetup;
+}
+
+export interface MyPluginStartDeps {
+  data: PluginStart;
+}
+
+export class MyPlugin implements Plugin {
+  public setup(
+    core: CoreSetup<MyPluginStartDeps>,
+    deps: MyPluginSetupDeps
+  ) {
+    core.getStartServices().then(([_, depsStart]) => {
+      const myStrategy = mySearchStrategyProvider(depsStart.data);
+      deps.data.search.registerSearchStrategy('myCustomStrategy', myStrategy);
+    });
+  }
+}
+```
+
+```ts
+// ./myPlugin/public/plugin.ts
+const req = getEqlRequest();
+data.search.search(req, {
+  strategy: 'myCustomStrategy',
+}).subscribe({
+  next: (result) => {
+    // handle result
+  }, 
+});
+```
+
+##### Async Search and Custom Async Search Strategies
+
+The open source default search strategy (`ES_SEARCH_STRATEGY`), run searches synchronously, keeping an open connection to Elasticsearch the whole time the query executes. The duration of those queries is restricted by the `elasticsearch.requestTimeout` setting in `kibana.yml`, which is 30 seconds, by default.
+
+However, the introductions of features, such as `Data Tiers` and `Runtime Fields`, increased the need to allow running slower queries. In 7.7, `Elasticsearch` have introduced the [async_search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html), allowing a query to run for longer, without having to keep an open connection.
+
+The [async_search API](https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html) is also what drives more advanced `search` features, such as `Partial Results` and `Search Sessions`.
+
+Running with a Basic+ license, the default search strategy of `Kibana` is automatically set to the async default search strategy (`ENHANCED_ES_SEARCH_STRATEGY`), empowering kibana to run longer queries, with an **optional** duration restriction defined by the UI setting (`search:timeout`).
+
+If you are implementing an async custom search strategy, make sure to implement `cancel` and `extend` as shown in the example bellow: 
+
+```ts
+// ./myPlugin/server/myEnhancedStrategy.ts
+export const myEnhancedSearchStrategyProvider = (
+  data: PluginStart
+): ISearchStrategy<IMyStrategyRequest, IMyStrategyResponse> => {
+  // Get the default search strategy
+  const ese = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+  return {
+    search: (request, options, deps) => {
+      // search will be called multiple times, handling partial results, as well as the final result.
+      return formatResponse(ese.search(preprocessRequest(request), options, deps));
+    },
+    cancel: async (id, options, deps) => {
+      await ese.cancel(id, options, deps);
+    },
+    extend: async (id, keepAlive, options, deps) => {
+      await ese.extend(id, options, deps);
+    },
+  };
+};
+```
+
+### High Level Search
+
+#### Search Source
+
+```ts
+function searchWithSearchSource() {
+  const indexPattern = data.indexPatterns.getDefault();
+  const query = data.query.queryString.getQuery();
+  const filters = data.query.filterManager.getFilters();
+  const timefilter = data.query.timefilter.timefilter.createFilter(indexPattern);
+  if (timefilter) {
+    filters.push(timefilter);
+  }
+
+  const searchSource = await data.search.searchSource.create();
+
+  searchSource
+    .setField('index', indexPattern)
+    .setField('filter', filters)
+    .setField('query', query)
+    .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : ['*'])
+    .setField('aggs', getAggsDsl());
+    
+  searchSource.fetch$().subscribe({
+    next: () => {},
+    error: () => {},
+  });
+}
+```
+
+### Partial Results
+
+When searching using a strategy powered by an `async` API (such as async DSL and async EQL), the search service will stream back partial results.   
+
+While you may ignore them and wait for the final result before rendering, you may also use those partial results to create more interactive experience for your users. It is highly advised however, to make sure users are aware that the results they are seeing are partial.
+
+```ts
+// Handling partial results
+data.search.search(req).subscribe({
+  next: (result) => {
+    if (isCompleteResponse(res)) {
+      renderFinalResult(res);
+    } else if (isPartialResponse(res)) {
+      renderPartialResult(res);
+    }
+  },
+})
+
+// Ignoring partial results
+const finalResult = await data.search.search(req).toPromise();
+```
+
+### Search Sessions
+
+A Search Session is a higher level concept, 
+
+#### Session Service
+
+##### Client Side
+
+##### Server Side
