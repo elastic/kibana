@@ -7,6 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 
 import { FeedActivity } from './recent_activity';
@@ -102,8 +103,12 @@ export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>
   },
   listeners: ({ actions }) => ({
     initializeOverview: async () => {
-      const response = await HttpLogic.values.http.get('/api/workplace_search/overview');
-      actions.setServerData(response);
+      try {
+        const response = await HttpLogic.values.http.get('/api/workplace_search/overview');
+        actions.setServerData(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
 });
