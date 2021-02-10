@@ -183,7 +183,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initRoutes(
       router,
       config,
-      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false,
+      plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
       plugins.ml
     );

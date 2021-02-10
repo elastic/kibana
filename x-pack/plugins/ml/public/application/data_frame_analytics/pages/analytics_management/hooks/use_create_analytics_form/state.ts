@@ -56,6 +56,7 @@ export interface State {
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    earlyStoppingEnabled: undefined | boolean;
     eta: undefined | number;
     featureBagFraction: undefined | number;
     featureInfluenceThreshold: undefined | number;
@@ -125,6 +126,7 @@ export const getInitialState = (): State => ({
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    earlyStoppingEnabled: undefined,
     eta: undefined,
     featureBagFraction: undefined,
     featureInfluenceThreshold: undefined,
@@ -239,7 +241,10 @@ export const getJobConfigFromFormState = (
       formState.gamma && { gamma: formState.gamma },
       formState.lambda && { lambda: formState.lambda },
       formState.maxTrees && { max_trees: formState.maxTrees },
-      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed }
+      formState.randomizeSeed && { randomize_seed: formState.randomizeSeed },
+      formState.earlyStoppingEnabled !== undefined && {
+        early_stopping_enabled: formState.earlyStoppingEnabled,
+      }
     );
 
     jobConfig.analysis = {
