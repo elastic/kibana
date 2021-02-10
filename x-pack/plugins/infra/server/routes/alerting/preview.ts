@@ -122,6 +122,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               alertInterval,
               alertThrottle,
               alertOnNoData,
+              alertNotifyWhen,
             });
 
             return response.ok({
