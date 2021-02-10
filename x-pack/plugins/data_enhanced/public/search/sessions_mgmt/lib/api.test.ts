@@ -46,7 +46,13 @@ describe('Search Sessions Management API', () => {
           saved_objects: [
             {
               id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: 'complete' },
+              attributes: {
+                name: 'Veggie',
+                appId: 'pizza',
+                status: 'complete',
+                initialState: {},
+                restoreState: {},
+              },
             },
           ],
         } as SavedObjectsFindResponse;
@@ -61,6 +67,7 @@ describe('Search Sessions Management API', () => {
         Array [
           Object {
             "actions": Array [
+              "inspect",
               "extend",
               "delete",
             ],
@@ -68,8 +75,10 @@ describe('Search Sessions Management API', () => {
             "created": undefined,
             "expires": undefined,
             "id": "hello-pizza-123",
+            "initialState": Object {},
             "name": "Veggie",
             "reloadUrl": "hello-cool-undefined-url",
+            "restoreState": Object {},
             "restoreUrl": "hello-cool-undefined-url",
             "status": "complete",
           },
