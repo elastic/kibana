@@ -1,10 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   ExternalServiceApi,
+  GetChoicesHandlerArgs,
+  GetChoicesResponse,
   GetCommonFieldsHandlerArgs,
   GetCommonFieldsResponse,
   GetIncidentApiHandlerArgs,
@@ -21,6 +25,7 @@ const pushToServiceHandler = async ({
   externalService,
   params,
   secrets,
+  commentFieldKey,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const { comments } = params;
   let res: PushToServiceResponse;
@@ -49,7 +54,7 @@ const pushToServiceHandler = async ({
         incidentId: res.id,
         incident: {
           ...incident,
-          comments: currentComment.comment,
+          [commentFieldKey]: currentComment.comment,
         },
       });
       res.comments = [
@@ -71,7 +76,16 @@ const getFieldsHandler = async ({
   return res;
 };
 
+const getChoicesHandler = async ({
+  externalService,
+  params,
+}: GetChoicesHandlerArgs): Promise<GetChoicesResponse> => {
+  const res = await externalService.getChoices(params.fields);
+  return res;
+};
+
 export const api: ExternalServiceApi = {
+  getChoices: getChoicesHandler,
   getFields: getFieldsHandler,
   getIncident: getIncidentHandler,
   handshake: handshakeHandler,

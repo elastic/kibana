@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { http } from '../http_service';
@@ -34,24 +35,31 @@ export type GetDataFrameAnalyticsStatsResponse =
   | GetDataFrameAnalyticsStatsResponseOk
   | GetDataFrameAnalyticsStatsResponseError;
 
-interface GetDataFrameAnalyticsResponse {
+export interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-interface DeleteDataFrameAnalyticsWithIndexResponse {
+export interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
+export interface JobsExistsResponse {
+  results: {
+    [jobId: string]: boolean;
+  };
+}
+
 export const dataFrameAnalytics = {
-  getDataFrameAnalytics(analyticsId?: string) {
+  getDataFrameAnalytics(analyticsId?: string, excludeGenerated?: boolean) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return http<GetDataFrameAnalyticsResponse>({
       path: `${basePath()}/data_frame/analytics${analyticsIdString}`,
       method: 'GET',
+      ...(excludeGenerated ? { query: { excludeGenerated } } : {}),
     });
   },
   getDataFrameAnalyticsStats(analyticsId?: string) {
@@ -96,6 +104,14 @@ export const dataFrameAnalytics = {
       path: `${basePath()}/data_frame/analytics/map${idString}`,
       method: 'GET',
       query: { treatAsRoot, type },
+    });
+  },
+  jobsExists(analyticsIds: string[], allSpaces: boolean = false) {
+    const body = JSON.stringify({ analyticsIds, allSpaces });
+    return http<JobsExistsResponse>({
+      path: `${basePath()}/data_frame/analytics/jobs_exist`,
+      method: 'POST',
+      body,
     });
   },
   evaluateDataFrameAnalytics(evaluateConfig: any) {

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import { isEmpty } from 'lodash';
-import { Link } from 'react-router-dom';
 
 import {
   EuiButton,
@@ -20,30 +21,46 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AppLogic } from '../../../app_logic';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
+import {
+  CANCEL_BUTTON,
+  OK_BUTTON,
+  CONFIRM_MODAL_TITLE,
+  SAVE_CHANGES_BUTTON,
+  REMOVE_BUTTON,
+} from '../../../constants';
 import { SourceDataItem } from '../../../types';
-import { AppLogic } from '../../../app_logic';
+import { AddSourceLogic } from '../components/add_source/add_source_logic';
+import {
+  SOURCE_SETTINGS_TITLE,
+  SOURCE_SETTINGS_DESCRIPTION,
+  SOURCE_NAME_LABEL,
+  SOURCE_CONFIG_TITLE,
+  SOURCE_CONFIG_DESCRIPTION,
+  SOURCE_CONFIG_LINK,
+  SOURCE_REMOVE_TITLE,
+  SOURCE_REMOVE_DESCRIPTION,
+} from '../constants';
 import { staticSourceData } from '../source_data';
-
 import { SourceLogic } from '../source_logic';
 
 export const SourceSettings: React.FC = () => {
-  const {
-    updateContentSource,
-    removeContentSource,
-    resetSourceState,
-    getSourceConfigData,
-  } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
     contentSource: { name, id, serviceType },
     buttonLoading,
-    sourceConfigData: { configuredFields },
   } = useValues(SourceLogic);
+
+  const {
+    sourceConfigData: { configuredFields },
+  } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -51,6 +68,7 @@ export const SourceSettings: React.FC = () => {
     getSourceConfigData(serviceType);
     return resetSourceState;
   }, []);
+
   const {
     configuration: { isPublicKey },
     editPath,
@@ -85,16 +103,22 @@ export const SourceSettings: React.FC = () => {
   const confirmModal = (
     <EuiOverlayMask>
       <EuiConfirmModal
-        title="Please confirm"
+        title={CONFIRM_MODAL_TITLE}
         onConfirm={handleSourceRemoval}
         onCancel={hideConfirm}
         buttonColor="danger"
-        cancelButtonText="Cancel"
-        confirmButtonText="Ok"
+        cancelButtonText={CANCEL_BUTTON}
+        confirmButtonText={OK_BUTTON}
         defaultFocusedButton="confirm"
       >
-        Your source documents will be deleted from Workplace Search. <br />
-        Are you sure you want to remove {name}?
+        <FormattedMessage
+          id="xpack.enterpriseSearch.workplaceSearch.sources.settingsModal.text"
+          defaultMessage="Your source documents will be deleted from Workplace Search.{lineBreak}Are you sure you want to remove {name}?"
+          values={{
+            name,
+            lineBreak: <br />,
+          }}
+        />
       </EuiConfirmModal>
     </EuiOverlayMask>
   );
@@ -102,10 +126,7 @@ export const SourceSettings: React.FC = () => {
   return (
     <>
       <ViewContentHeader title="Source settings" />
-      <ContentSection
-        title="Content source name"
-        description="Customize the name of this content source."
-      >
+      <ContentSection title={SOURCE_SETTINGS_TITLE} description={SOURCE_SETTINGS_DESCRIPTION}>
         <form onSubmit={submitNameChange}>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -114,7 +135,7 @@ export const SourceSettings: React.FC = () => {
                   value={inputValue}
                   size={64}
                   onChange={handleNameChange}
-                  aria-label="Source Name"
+                  aria-label={SOURCE_NAME_LABEL}
                   disabled={buttonLoading}
                   data-test-subj="SourceNameInput"
                 />
@@ -127,17 +148,14 @@ export const SourceSettings: React.FC = () => {
                 onClick={submitNameChange}
                 data-test-subj="SaveChangesButton"
               >
-                Save changes
+                {SAVE_CHANGES_BUTTON}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </form>
       </ContentSection>
       {showConfig && (
-        <ContentSection
-          title="Content source configuration"
-          description="Edit content source connector settings to change."
-        >
+        <ContentSection title={SOURCE_CONFIG_TITLE} description={SOURCE_CONFIG_DESCRIPTION}>
           <SourceConfigFields
             clientId={clientId}
             clientSecret={clientSecret}
@@ -147,12 +165,12 @@ export const SourceSettings: React.FC = () => {
           />
           <EuiFormRow>
             <Link to={editPath}>
-              <EuiButtonEmpty flush="left">Edit content source connector settings</EuiButtonEmpty>
+              <EuiButtonEmpty flush="left">{SOURCE_CONFIG_LINK}</EuiButtonEmpty>
             </Link>
           </EuiFormRow>
         </ContentSection>
       )}
-      <ContentSection title="Remove this source" description="This action cannot be undone.">
+      <ContentSection title={SOURCE_REMOVE_TITLE} description={SOURCE_REMOVE_DESCRIPTION}>
         <EuiButton
           isLoading={buttonLoading}
           data-test-subj="DeleteSourceButton"
@@ -160,7 +178,7 @@ export const SourceSettings: React.FC = () => {
           color="danger"
           onClick={showConfirm}
         >
-          Remove
+          {REMOVE_BUTTON}
         </EuiButton>
         {confirmModalVisible && confirmModal}
       </ContentSection>

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -16,6 +17,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../saved_object_types';
 
 export const createMockSavedObjectsRepository = ({
@@ -23,11 +25,13 @@ export const createMockSavedObjectsRepository = ({
   caseCommentSavedObject = [],
   caseConfigureSavedObject = [],
   caseMappingsSavedObject = [],
+  caseUserActionsSavedObject = [],
 }: {
   caseSavedObject?: any[];
   caseCommentSavedObject?: any[];
   caseConfigureSavedObject?: any[];
   caseMappingsSavedObject?: any[];
+  caseUserActionsSavedObject?: any[];
 } = {}) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
@@ -56,6 +60,7 @@ export const createMockSavedObjectsRepository = ({
         }),
       };
     }),
+    bulkCreate: jest.fn(),
     bulkUpdate: jest.fn((objects: Array<SavedObjectsBulkUpdateObject<unknown>>) => {
       return {
         saved_objects: objects.map(({ id, type, attributes }) => {
@@ -135,6 +140,16 @@ export const createMockSavedObjectsRepository = ({
           saved_objects: caseCommentSavedObject,
         };
       }
+
+      if (findArgs.type === CASE_USER_ACTION_SAVED_OBJECT) {
+        return {
+          page: 1,
+          per_page: 5,
+          total: caseUserActionsSavedObject.length,
+          saved_objects: caseUserActionsSavedObject,
+        };
+      }
+
       return {
         page: 1,
         per_page: 5,

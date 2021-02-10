@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ComponentType } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 import {
@@ -17,7 +18,7 @@ import {
   RubyFrameHeadingRenderer,
 } from './frame_heading_renderers';
 
-const FileDetails = styled.div`
+const FileDetails = euiStyled.div`
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
   line-height: 1.5; /* matches the line-hight of the accordion container button */
   padding: ${px(units.eighth)} 0;
@@ -25,12 +26,12 @@ const FileDetails = styled.div`
   font-size: ${fontSize};
 `;
 
-const LibraryFrameFileDetail = styled.span`
+const LibraryFrameFileDetail = euiStyled.span`
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
   word-break: break-word;
 `;
 
-const AppFrameFileDetail = styled.span`
+const AppFrameFileDetail = euiStyled.span`
   color: ${({ theme }) => theme.eui.euiColorFullShade};
   word-break: break-word;
 `;

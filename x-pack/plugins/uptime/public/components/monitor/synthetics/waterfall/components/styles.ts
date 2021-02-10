@@ -1,22 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanelProps } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { FunctionComponent } from 'react';
+import { StyledComponent } from 'styled-components';
+import { euiStyled, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
   height?: string;
 }
 
-export const WaterfallChartOuterContainer = euiStyled.div<WaterfallChartOuterContainerProps>`
-  height: ${(props) => (props.height ? `${props.height}` : 'auto')};
-  overflow-y: ${(props) => (props.height ? 'scroll' : 'visible')};
-  overflow-x: hidden;
+const StyledScrollDiv = euiStyled.div`
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};
@@ -32,22 +32,50 @@ export const WaterfallChartOuterContainer = euiStyled.div<WaterfallChartOuterCon
   }
 `;
 
-export const WaterfallChartFixedTopContainer = euiStyled.div`
+export const WaterfallChartOuterContainer = euiStyled(
+  StyledScrollDiv
+)<WaterfallChartOuterContainerProps>`
+  height: ${(props) => (props.height ? `${props.height}` : 'auto')};
+  overflow-y: ${(props) => (props.height ? 'scroll' : 'visible')};
+  overflow-x: hidden;
+`;
+
+export const WaterfallChartFixedTopContainer = euiStyled(StyledScrollDiv)`
   position: sticky;
   top: 0;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
-  border-bottom: ${(props) => `1px solid ${props.theme.eui.euiColorLightShade}`};
+  overflow-y: scroll;
+  overflow-x: hidden;
 `;
 
-export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
+export const WaterfallChartAxisOnlyContainer = euiStyled(EuiFlexItem)`
+  margin-left: -22px;
+`;
+
+export const WaterfallChartTopContainer = euiStyled(EuiFlexGroup)`
+`;
+
+export const WaterfallChartFixedTopContainerSidebarCover: StyledComponent<
+  FunctionComponent<EuiPanelProps>,
+  EuiTheme
+> = euiStyled(EuiPanel)`
   height: 100%;
   border-radius: 0 !important;
   border: none;
 `; // NOTE: border-radius !important is here as the "border" prop isn't working
 
+export const WaterfallChartFilterContainer = euiStyled.div`
+  && {
+    padding: 16px;
+    z-index: ${(props) => props.theme.eui.euiZLevel5};
+    border-bottom: 0.3px solid ${(props) => props.theme.eui.euiColorLightShade};
+  }
+`; // NOTE: border-radius !important is here as the "border" prop isn't working
+
 export const WaterfallChartFixedAxisContainer = euiStyled.div`
   height: ${FIXED_AXIS_HEIGHT}px;
   z-index: ${(props) => props.theme.eui.euiZLevel4};
+  height: 100%;
 `;
 
 interface WaterfallChartSidebarContainer {
@@ -59,7 +87,10 @@ export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSideba
   overflow-y: hidden;
 `;
 
-export const WaterfallChartSidebarContainerInnerPanel = euiStyled(EuiPanel)`
+export const WaterfallChartSidebarContainerInnerPanel: StyledComponent<
+  FunctionComponent<EuiPanelProps>,
+  EuiTheme
+> = euiStyled(EuiPanel)`
   border: 0;
   height: 100%;
 `;
@@ -73,6 +104,12 @@ export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
   min-width: 0;
   padding-left: ${(props) => props.theme.eui.paddingSizes.m};
   padding-right: ${(props) => props.theme.eui.paddingSizes.m};
+  z-index: ${(props) => props.theme.eui.euiZLevel4};
+`;
+
+export const SideBarItemHighlighter = euiStyled.span<{ isHighlighted: boolean }>`
+  opacity: ${(props) => (props.isHighlighted ? 1 : 0.4)};
+  height: 100%;
 `;
 
 interface WaterfallChartChartContainer {
@@ -105,6 +142,12 @@ export const WaterfallChartTooltip = euiStyled.div`
 `;
 
 export const NetworkRequestsTotalStyle = euiStyled(EuiText)`
-  line-height: ${FIXED_AXIS_HEIGHT}px;
-  margin-left: ${(props) => props.theme.eui.paddingSizes.m}
+  line-height: 28px;
+  padding: 0 ${(props) => props.theme.eui.paddingSizes.m};
+  border-bottom: 0.3px solid ${(props) => props.theme.eui.euiColorLightShade};
+  z-index: ${(props) => props.theme.eui.euiZLevel5};
+`;
+
+export const RelativeContainer = euiStyled.div`
+    position: relative;
 `;

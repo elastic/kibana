@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOperationTypesForField, getAvailableOperationsByMetadata } from './index';
@@ -55,7 +56,22 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['terms']));
+      ).toEqual(['terms', 'cardinality', 'last_value']);
+    });
+
+    it('should return only bucketed operations on strings when passed proper filterOperations function', () => {
+      expect(
+        getOperationTypesForField(
+          {
+            type: 'string',
+            name: 'a',
+            displayName: 'aLabel',
+            aggregatable: true,
+            searchable: true,
+          },
+          (op) => op.isBucketed
+        )
+      ).toEqual(['terms']);
     });
 
     it('should return operations on numbers', () => {
@@ -67,7 +83,33 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
+      ).toEqual([
+        'range',
+        'terms',
+        'avg',
+        'sum',
+        'min',
+        'max',
+        'cardinality',
+        'median',
+        'percentile',
+        'last_value',
+      ]);
+    });
+
+    it('should return only metric operations on numbers when passed proper filterOperations function', () => {
+      expect(
+        getOperationTypesForField(
+          {
+            type: 'number',
+            name: 'a',
+            displayName: 'aLabel',
+            aggregatable: true,
+            searchable: true,
+          },
+          (op) => !op.isBucketed
+        )
+      ).toEqual(['avg', 'sum', 'min', 'max', 'cardinality', 'median', 'percentile', 'last_value']);
     });
 
     it('should return operations on dates', () => {

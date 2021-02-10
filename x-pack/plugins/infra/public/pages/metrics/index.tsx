@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -11,6 +12,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/common';
+import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
@@ -33,13 +35,11 @@ import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
 
-import { InventoryAlertDropdown } from '../../alerting/inventory/components/alert_dropdown';
-import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
+import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { SavedView } from '../../containers/saved_view/saved_view';
-import { SourceConfigurationFields } from '../../graphql/types';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
-import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomoly_detection_flyout';
+import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 
@@ -82,8 +82,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                             <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <Route path={'/explorer'} component={MetricsAlertDropdown} />
-                            <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                            <MetricsAlertDropdown />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiButtonEmpty
@@ -189,7 +188,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 };
 
 const PageContent = (props: {
-  configuration: SourceConfigurationFields.Fragment;
+  configuration: InfraSourceConfiguration;
   createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;

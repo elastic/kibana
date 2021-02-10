@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { ConfigType } from '../';
-import { Access } from './check_access';
 
-import { InitialAppData } from '../../common/types';
 import { stripTrailingSlash } from '../../common/strip_slashes';
+import { InitialAppData } from '../../common/types';
+import { ConfigType } from '../index';
+
+import { Access } from './check_access';
 
 interface Params {
   request: KibanaRequest;

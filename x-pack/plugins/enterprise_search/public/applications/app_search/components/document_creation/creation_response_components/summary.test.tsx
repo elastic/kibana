@@ -1,21 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFlyoutBody, EuiCallOut, EuiButton } from '@elastic/eui';
 
+import { FlyoutHeader, FlyoutBody, FlyoutFooter } from './summary';
 import {
   InvalidDocumentsSummary,
   ValidDocumentsSummary,
   SchemaFieldsSummary,
 } from './summary_sections';
-import { Summary, FlyoutHeader, FlyoutBody, FlyoutFooter } from './summary';
+
+import { Summary } from './';
 
 describe('Summary', () => {
   const values = {

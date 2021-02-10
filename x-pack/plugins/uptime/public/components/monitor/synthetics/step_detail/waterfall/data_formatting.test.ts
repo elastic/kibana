@@ -1,12 +1,146 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { colourPalette, getSeriesAndDomain } from './data_formatting';
+import { colourPalette, getSeriesAndDomain, getSidebarItems } from './data_formatting';
 import { NetworkItems, MimeType } from './types';
 import { WaterfallDataEntry } from '../../waterfall/types';
+
+const networkItems: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'https://unpkg.com/todomvc-app-css@2.0.4/index.css',
+    status: 200,
+    mimeType: 'text/css',
+    requestSentTime: 18098833.175,
+    requestStartTime: 18098835.439,
+    loadEndTime: 18098957.145,
+    timings: {
+      connect: 81.10800000213203,
+      wait: 34.577999998873565,
+      receive: 0.5520000013348181,
+      send: 0.3600000018195715,
+      total: 123.97000000055414,
+      proxy: -1,
+      blocked: 0.8540000017092098,
+      queueing: 2.263999998831423,
+      ssl: 55.38700000033714,
+      dns: 3.559999997378327,
+    },
+  },
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'https://unpkg.com/director@1.2.8/build/director.js',
+    status: 200,
+    mimeType: 'application/javascript',
+    requestSentTime: 18098833.537,
+    requestStartTime: 18098837.233999997,
+    loadEndTime: 18098977.648000002,
+    timings: {
+      blocked: 84.54599999822676,
+      receive: 3.068000001803739,
+      queueing: 3.69700000010198,
+      proxy: -1,
+      total: 144.1110000014305,
+      wait: 52.56100000042352,
+      connect: -1,
+      send: 0.2390000008745119,
+      ssl: -1,
+      dns: -1,
+    },
+  },
+];
+
+const networkItemsWithoutFullTimings: NetworkItems = [
+  networkItems[0],
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+    status: 0,
+    mimeType: 'text/javascript',
+    requestSentTime: 18098834.097,
+    loadEndTime: 18098836.889999997,
+    timings: {
+      total: 2.7929999996558763,
+      blocked: -1,
+      ssl: -1,
+      wait: -1,
+      connect: -1,
+      dns: -1,
+      queueing: -1,
+      send: -1,
+      proxy: -1,
+      receive: -1,
+    },
+  },
+];
+
+const networkItemsWithoutAnyTimings: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+    status: 0,
+    mimeType: 'text/javascript',
+    requestSentTime: 18098834.097,
+    loadEndTime: 18098836.889999997,
+    timings: {
+      total: -1,
+      blocked: -1,
+      ssl: -1,
+      wait: -1,
+      connect: -1,
+      dns: -1,
+      queueing: -1,
+      send: -1,
+      proxy: -1,
+      receive: -1,
+    },
+  },
+];
+
+const networkItemsWithoutTimingsObject: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+    status: 0,
+    mimeType: 'text/javascript',
+    requestSentTime: 18098834.097,
+    loadEndTime: 18098836.889999997,
+  },
+];
+
+const networkItemsWithUncommonMimeType: NetworkItems = [
+  {
+    timestamp: '2021-01-05T19:22:28.928Z',
+    method: 'GET',
+    url: 'https://unpkg.com/director@1.2.8/build/director.js',
+    status: 200,
+    mimeType: 'application/x-javascript',
+    requestSentTime: 18098833.537,
+    requestStartTime: 18098837.233999997,
+    loadEndTime: 18098977.648000002,
+    timings: {
+      blocked: 84.54599999822676,
+      receive: 3.068000001803739,
+      queueing: 3.69700000010198,
+      proxy: -1,
+      total: 144.1110000014305,
+      wait: 52.56100000042352,
+      connect: -1,
+      send: 0.2390000008745119,
+      ssl: -1,
+      dns: -1,
+    },
+  },
+];
 
 describe('Palettes', () => {
   it('A colour palette comprising timing and mime type colours is correctly generated', () => {
@@ -29,139 +163,6 @@ describe('Palettes', () => {
 });
 
 describe('getSeriesAndDomain', () => {
-  const networkItems: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'https://unpkg.com/todomvc-app-css@2.0.4/index.css',
-      status: 200,
-      mimeType: 'text/css',
-      requestSentTime: 18098833.175,
-      requestStartTime: 18098835.439,
-      loadEndTime: 18098957.145,
-      timings: {
-        connect: 81.10800000213203,
-        wait: 34.577999998873565,
-        receive: 0.5520000013348181,
-        send: 0.3600000018195715,
-        total: 123.97000000055414,
-        proxy: -1,
-        blocked: 0.8540000017092098,
-        queueing: 2.263999998831423,
-        ssl: 55.38700000033714,
-        dns: 3.559999997378327,
-      },
-    },
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'https://unpkg.com/director@1.2.8/build/director.js',
-      status: 200,
-      mimeType: 'application/javascript',
-      requestSentTime: 18098833.537,
-      requestStartTime: 18098837.233999997,
-      loadEndTime: 18098977.648000002,
-      timings: {
-        blocked: 84.54599999822676,
-        receive: 3.068000001803739,
-        queueing: 3.69700000010198,
-        proxy: -1,
-        total: 144.1110000014305,
-        wait: 52.56100000042352,
-        connect: -1,
-        send: 0.2390000008745119,
-        ssl: -1,
-        dns: -1,
-      },
-    },
-  ];
-
-  const networkItemsWithoutFullTimings: NetworkItems = [
-    networkItems[0],
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
-      status: 0,
-      mimeType: 'text/javascript',
-      requestSentTime: 18098834.097,
-      loadEndTime: 18098836.889999997,
-      timings: {
-        total: 2.7929999996558763,
-        blocked: -1,
-        ssl: -1,
-        wait: -1,
-        connect: -1,
-        dns: -1,
-        queueing: -1,
-        send: -1,
-        proxy: -1,
-        receive: -1,
-      },
-    },
-  ];
-
-  const networkItemsWithoutAnyTimings: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
-      status: 0,
-      mimeType: 'text/javascript',
-      requestSentTime: 18098834.097,
-      loadEndTime: 18098836.889999997,
-      timings: {
-        total: -1,
-        blocked: -1,
-        ssl: -1,
-        wait: -1,
-        connect: -1,
-        dns: -1,
-        queueing: -1,
-        send: -1,
-        proxy: -1,
-        receive: -1,
-      },
-    },
-  ];
-
-  const networkItemsWithoutTimingsObject: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
-      status: 0,
-      mimeType: 'text/javascript',
-      requestSentTime: 18098834.097,
-      loadEndTime: 18098836.889999997,
-    },
-  ];
-
-  const networkItemsWithUncommonMimeType: NetworkItems = [
-    {
-      timestamp: '2021-01-05T19:22:28.928Z',
-      method: 'GET',
-      url: 'https://unpkg.com/director@1.2.8/build/director.js',
-      status: 200,
-      mimeType: 'application/x-javascript',
-      requestSentTime: 18098833.537,
-      requestStartTime: 18098837.233999997,
-      loadEndTime: 18098977.648000002,
-      timings: {
-        blocked: 84.54599999822676,
-        receive: 3.068000001803739,
-        queueing: 3.69700000010198,
-        proxy: -1,
-        total: 144.1110000014305,
-        wait: 52.56100000042352,
-        connect: -1,
-        send: 0.2390000008745119,
-        ssl: -1,
-        dns: -1,
-      },
-    },
-  ];
-
   it('formats timings', () => {
     const actual = getSeriesAndDomain(networkItems);
     expect(actual).toMatchInlineSnapshot(`
@@ -174,6 +175,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#dcd4c4",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#dcd4c4",
@@ -187,6 +189,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#54b399",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#54b399",
@@ -200,6 +203,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#da8b45",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#da8b45",
@@ -213,6 +217,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#edc5a2",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#edc5a2",
@@ -226,6 +231,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
@@ -239,6 +245,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
@@ -252,6 +259,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#ca8eae",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
@@ -265,6 +273,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#dcd4c4",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#dcd4c4",
@@ -278,6 +287,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
@@ -291,6 +301,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
@@ -304,6 +315,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#9170b8",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
@@ -315,6 +327,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 137.70799999925657,
           },
         ],
+        "totalHighlightedRequests": 2,
       }
     `);
   });
@@ -331,6 +344,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#dcd4c4",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#dcd4c4",
@@ -344,6 +358,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#54b399",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#54b399",
@@ -357,6 +372,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#da8b45",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#da8b45",
@@ -370,6 +386,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#edc5a2",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#edc5a2",
@@ -383,6 +400,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
@@ -396,6 +414,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
@@ -409,6 +428,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#ca8eae",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
@@ -422,6 +442,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#9170b8",
+              "isHighlighted": true,
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
@@ -433,6 +454,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 0.9219999983906746,
           },
         ],
+        "totalHighlightedRequests": 2,
       }
     `);
   });
@@ -449,6 +471,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "",
+              "isHighlighted": true,
               "showTooltip": false,
               "tooltipProps": undefined,
             },
@@ -457,6 +480,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 0,
           },
         ],
+        "totalHighlightedRequests": 1,
       }
     `);
   });
@@ -472,6 +496,7 @@ describe('getSeriesAndDomain', () => {
         "series": Array [
           Object {
             "config": Object {
+              "isHighlighted": true,
               "showTooltip": false,
             },
             "x": 0,
@@ -479,6 +504,7 @@ describe('getSeriesAndDomain', () => {
             "y0": 0,
           },
         ],
+        "totalHighlightedRequests": 1,
       }
     `);
   });
@@ -499,5 +525,42 @@ describe('getSeriesAndDomain', () => {
       return false;
     });
     expect(contentDownloadedingConfigItem).toBeDefined();
+  });
+
+  it('counts the total number of highlighted items', () => {
+    // only one CSS file in this array of network Items
+    const actual = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    expect(actual.totalHighlightedRequests).toBe(1);
+  });
+
+  it('adds isHighlighted to waterfall entry when filter matches', () => {
+    // only one CSS file in this array of network Items
+    const { series } = getSeriesAndDomain(networkItems, false, '', ['stylesheet']);
+    series.forEach((item) => {
+      if (item.x === 0) {
+        expect(item.config.isHighlighted).toBe(true);
+      } else {
+        expect(item.config.isHighlighted).toBe(false);
+      }
+    });
+  });
+
+  it('adds isHighlighted to waterfall entry when query matches', () => {
+    // only the second item matches this query
+    const { series } = getSeriesAndDomain(networkItems, false, 'director', []);
+    series.forEach((item) => {
+      if (item.x === 1) {
+        expect(item.config.isHighlighted).toBe(true);
+      } else {
+        expect(item.config.isHighlighted).toBe(false);
+      }
+    });
+  });
+});
+
+describe('getSidebarItems', () => {
+  it('passes the item index offset by 1 to offsetIndex for visual display', () => {
+    const actual = getSidebarItems(networkItems, false, '', []);
+    expect(actual[0].offsetIndex).toBe(1);
   });
 });

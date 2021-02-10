@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
@@ -27,10 +28,10 @@ import {
   TRAINING_PERCENT_MAX,
   FieldSelectionItem,
 } from '../../../../common/analytics';
+import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import {
-  AnalyticsJobType,
   DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -51,18 +52,7 @@ import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/sea
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
-import { LEGEND_TYPES, ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
-
-const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType) => {
-  switch (jobType) {
-    case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
-      return LEGEND_TYPES.NOMINAL;
-    case ANALYSIS_CONFIG_TYPE.REGRESSION:
-      return LEGEND_TYPES.QUANTITATIVE;
-    default:
-      return undefined;
-  }
-};
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -498,6 +488,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
                   : undefined
               }
               legendType={getScatterplotMatrixLegendType(jobType)}
+              searchQuery={jobConfigQuery}
             />
           </EuiPanel>
           <EuiSpacer />

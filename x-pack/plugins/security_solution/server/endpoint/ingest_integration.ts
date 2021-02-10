@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ExceptionListClient } from '../../../lists/server';
@@ -10,7 +11,10 @@ import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common/types/models';
-import { factory as policyConfigFactory } from '../../common/endpoint/models/policy_config';
+import {
+  policyFactory as policyConfigFactory,
+  policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
+} from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
 import { ManifestManager } from './services/artifacts';
 import { Manifest } from './lib/artifacts';
@@ -22,7 +26,7 @@ import { createDetectionIndex } from '../lib/detection_engine/routes/index/creat
 import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
 import { buildFrameworkRequest } from '../lib/timeline/routes/utils/common';
 import { isEndpointPolicyValidForLicense } from '../../common/license/policy_config';
-import { LicenseService } from '../../common/license/license';
+import { isAtLeast, LicenseService } from '../../common/license/license';
 
 const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
   let manifest: Manifest | null = null;
@@ -35,37 +39,18 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
     if (manifest == null) {
       // New computed manifest based on current state of exception list
       const newManifest = await manifestManager.buildNewManifest();
-      const diffs = newManifest.diff(Manifest.getDefault());
-
-      // Compress new artifacts
-      const adds = diffs.filter((diff) => diff.type === 'add').map((diff) => diff.id);
-      for (const artifactId of adds) {
-        const compressError = await newManifest.compressArtifact(artifactId);
-        if (compressError) {
-          throw compressError;
-        }
-      }
 
       // Persist new artifacts
-      const artifacts = adds
-        .map((artifactId) => newManifest.getArtifact(artifactId))
-        .filter((artifact): artifact is InternalArtifactCompleteSchema => artifact !== undefined);
-      if (artifacts.length !== adds.length) {
-        throw new Error('Invalid artifact encountered.');
-      }
-      const persistErrors = await manifestManager.pushArtifacts(artifacts);
+      const persistErrors = await manifestManager.pushArtifacts(
+        newManifest.getAllArtifacts() as InternalArtifactCompleteSchema[]
+      );
       if (persistErrors.length) {
         reportErrors(logger, persistErrors);
         throw new Error('Unable to persist new artifacts.');
       }
 
       // Commit the manifest state
-      if (diffs.length) {
-        const error = await manifestManager.commit(newManifest);
-        if (error) {
-          throw error;
-        }
-      }
+      await manifestManager.commit(newManifest);
 
       manifest = newManifest;
     }
@@ -86,9 +71,10 @@ export const getPackagePolicyCreateCallback = (
   maxTimelineImportExportSize: number,
   securitySetup: SecurityPluginSetup,
   alerts: AlertsStartContract,
+  licenseService: LicenseService,
   exceptionsClient: ExceptionListClient | undefined
 ): ExternalCallback[1] => {
-  const handlePackagePolicyCreate = async (
+  return async (
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
@@ -138,7 +124,7 @@ export const getPackagePolicyCreateCallback = (
 
     // Get most recent manifest
     const manifest = await getManifest(logger, manifestManager);
-    const serializedManifest = manifest.toEndpointFormat();
+    const serializedManifest = manifest.toPackagePolicyManifest();
     if (!manifestDispatchSchema.is(serializedManifest)) {
       // This should not happen.
       // But if it does, we log it and return it anyway.
@@ -151,6 +137,12 @@ export const getPackagePolicyCreateCallback = (
 
     // Until we get the Default Policy Configuration in the Endpoint package,
     // we will add it here manually at creation time.
+
+    // generate the correct default policy depending on the license
+    const defaultPolicy = isAtLeast(licenseService.getLicenseInformation(), 'platinum')
+      ? policyConfigFactory()
+      : policyConfigFactoryWithoutPaidFeatures();
+
     updatedPackagePolicy = {
       ...newPackagePolicy,
       inputs: [
@@ -163,7 +155,7 @@ export const getPackagePolicyCreateCallback = (
               value: serializedManifest,
             },
             policy: {
-              value: policyConfigFactory(),
+              value: defaultPolicy,
             },
           },
         },
@@ -172,15 +164,13 @@ export const getPackagePolicyCreateCallback = (
 
     return updatedPackagePolicy;
   };
-
-  return handlePackagePolicyCreate;
 };
 
 export const getPackagePolicyUpdateCallback = (
   logger: Logger,
   licenseService: LicenseService
 ): ExternalCallback[1] => {
-  const handlePackagePolicyUpdate = async (
+  return async (
     newPackagePolicy: NewPackagePolicy,
     context: RequestHandlerContext,
     request: KibanaRequest
@@ -202,5 +192,4 @@ export const getPackagePolicyUpdateCallback = (
     }
     return newPackagePolicy;
   };
-  return handlePackagePolicyUpdate;
 };

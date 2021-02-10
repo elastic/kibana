@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FunctionComponent, useState } from 'react';
@@ -16,13 +17,14 @@ import {
   EuiTextColor,
   EuiSwitch,
   EuiIconTip,
+  EuiText,
 } from '@elastic/eui';
 
-import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
+import { useFormData, SelectField, NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues, UseField } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -37,8 +39,8 @@ import {
   ReadonlyField,
   ShrinkField,
 } from '../shared_fields';
-
 import { Phase } from '../phase';
+
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
 export const HotPhase: FunctionComponent = () => {
@@ -66,8 +68,20 @@ export const HotPhase: FunctionComponent = () => {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                  defaultMessage="Automate rollover of time series data for efficient storage and higher performance."
-                />{' '}
+                  defaultMessage="Start writing to a new index when the current index reaches a certain size, document count, or age. Enables you to optimize performance and manage resource usage when working with time series data."
+                />
+              </p>
+            </EuiTextColor>
+            <EuiSpacer />
+            <EuiTextColor color="subdued">
+              <p>
+                <strong>
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescriptionNote',
+                    { defaultMessage: 'Note: ' }
+                  )}
+                </strong>
+                {i18nTexts.editPolicy.rolloverOffsetsHotPhaseTiming}{' '}
                 <LearnMoreLink
                   text={
                     <FormattedMessage
@@ -83,21 +97,18 @@ export const HotPhase: FunctionComponent = () => {
             <UseField<boolean> path={isUsingDefaultRolloverPath}>
               {(field) => (
                 <>
-                  <EuiSwitch
-                    label={field.label}
-                    checked={field.value}
-                    onChange={(e) => field.setValue(e.target.checked)}
-                    data-test-subj="useDefaultRolloverSwitch"
-                  />
-                  &nbsp;
-                  <EuiIconTip
-                    type="questionInCircle"
-                    content={
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
-                        defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
-                      />
-                    }
+                  <EuiText color="default">
+                    <EuiSwitch
+                      label={field.label}
+                      checked={field.value}
+                      onChange={(e) => field.setValue(e.target.checked)}
+                      data-test-subj="useDefaultRolloverSwitch"
+                    />
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent"
+                    defaultMessage="Rollover when an index is 30 days old or reaches 50 gigabytes."
                   />
                 </>
               )}

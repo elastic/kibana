@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getChunks, MiddleTruncatedText } from './middle_truncated_text';
@@ -24,15 +25,21 @@ describe('getChunks', () => {
 });
 
 describe('Component', () => {
-  it('renders truncated text', () => {
-    const { getByText } = render(<MiddleTruncatedText text={longString} />);
+  it('renders truncated text and aria label', () => {
+    const { getByText, getByLabelText } = render(
+      <MiddleTruncatedText text={longString} ariaLabel={longString} />
+    );
 
     expect(getByText(first)).toBeInTheDocument();
     expect(getByText(last)).toBeInTheDocument();
+
+    expect(getByLabelText(longString)).toBeInTheDocument();
   });
 
   it('renders screen reader only text', () => {
-    const { getByTestId } = render(<MiddleTruncatedText text={longString} />);
+    const { getByTestId } = render(
+      <MiddleTruncatedText text={longString} ariaLabel={longString} />
+    );
 
     const { getByText } = within(getByTestId('middleTruncatedTextSROnly'));
 

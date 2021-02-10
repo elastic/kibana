@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -19,17 +20,12 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { getReindexJobRoute } from '../../../../routes';
-import { AppLogic } from '../../../../app_logic';
-
-import { Loading } from '../../../../../shared/loading';
-import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-
-import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
 import { IndexingStatus } from '../../../../../shared/indexing_status';
-
-import { SchemaFieldsTable } from './schema_fields_table';
-import { SchemaLogic } from './schema_logic';
+import { Loading } from '../../../../../shared/loading';
+import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
+import { AppLogic } from '../../../../app_logic';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
+import { getReindexJobRoute } from '../../../../routes';
 
 import {
   SCHEMA_ADD_FIELD_BUTTON,
@@ -41,6 +37,8 @@ import {
   SCHEMA_EMPTY_SCHEMA_TITLE,
   SCHEMA_EMPTY_SCHEMA_DESCRIPTION,
 } from './constants';
+import { SchemaFieldsTable } from './schema_fields_table';
+import { SchemaLogic } from './schema_logic';
 
 export const Schema: React.FC = () => {
   const {
@@ -121,7 +119,7 @@ export const Schema: React.FC = () => {
                   <EuiFlexItem>{addFieldButton}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {percentageComplete < 100 ? (
-                      <EuiButton isLoading={true} fill={true}>
+                      <EuiButton isLoading fill>
                         {SCHEMA_UPDATING}
                       </EuiButton>
                     ) : (
@@ -129,7 +127,7 @@ export const Schema: React.FC = () => {
                         disabled={formUnchanged}
                         data-test-subj="UpdateTypesButton"
                         onClick={updateFields}
-                        fill={true}
+                        fill
                       >
                         {SCHEMA_SAVE_BUTTON}
                       </EuiButton>

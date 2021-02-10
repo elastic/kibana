@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -60,13 +61,6 @@ export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
     values: { serviceName },
     defaultMessage: 'Successfully sent to { serviceName }',
   });
-
-export const ERROR_PUSH_TO_SERVICE = i18n.translate(
-  'xpack.securitySolution.case.configure.errorPushingToService',
-  {
-    defaultMessage: 'Error pushing to service',
-  }
-);
 
 export const ERROR_GET_FIELDS = i18n.translate(
   'xpack.securitySolution.case.configure.errorGetFields',

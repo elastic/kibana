@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,8 +11,9 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfigType } from './types';
+import { ActionsConfig } from './config';
 import { ActionTypeDisabledError } from './lib';
+import { ProxySettings } from './types';
 
 export enum AllowedHosts {
   Any = '*',
@@ -33,6 +35,8 @@ export interface ActionsConfigurationUtilities {
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
+  isRejectUnauthorizedCertificatesEnabled: () => boolean;
+  getProxySettings: () => undefined | ProxySettings;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -56,14 +60,14 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
-function isAllowed({ allowedHosts }: ActionsConfigType, hostname: string | null): boolean {
+function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): boolean {
   const allowed = new Set(allowedHosts);
   if (allowed.has(AllowedHosts.Any)) return true;
   if (hostname && allowed.has(hostname)) return true;
   return false;
 }
 
-function isHostnameAllowedInUri(config: ActionsConfigType, uri: string): boolean {
+function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
     tryCatch(() => url.parse(uri)),
     map((parsedUrl) => parsedUrl.hostname),
@@ -73,7 +77,7 @@ function isHostnameAllowedInUri(config: ActionsConfigType, uri: string): boolean
 }
 
 function isActionTypeEnabledInConfig(
-  { enabledActionTypes }: ActionsConfigType,
+  { enabledActionTypes }: ActionsConfig,
   actionType: string
 ): boolean {
   const enabled = new Set(enabledActionTypes);
@@ -82,8 +86,20 @@ function isActionTypeEnabledInConfig(
   return false;
 }
 
+function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySettings {
+  if (!config.proxyUrl) {
+    return undefined;
+  }
+
+  return {
+    proxyUrl: config.proxyUrl,
+    proxyHeaders: config.proxyHeaders,
+    proxyRejectUnauthorizedCertificates: config.proxyRejectUnauthorizedCertificates,
+  };
+}
+
 export function getActionsConfigurationUtilities(
-  config: ActionsConfigType
+  config: ActionsConfig
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
@@ -92,6 +108,8 @@ export function getActionsConfigurationUtilities(
     isHostnameAllowed,
     isUriAllowed,
     isActionTypeEnabled,
+    getProxySettings: () => getProxySettingsFromConfig(config),
+    isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
