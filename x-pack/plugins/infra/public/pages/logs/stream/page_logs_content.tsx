@@ -32,7 +32,6 @@ import { PageViewLogInContext } from './page_view_log_in_context';
 import { useLogStreamContext } from '../../../containers/logs/log_stream';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 
-// FIXME Duplicated from <LogStream />. See where to put this
 const PAGE_THRESHOLD = 2;
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
