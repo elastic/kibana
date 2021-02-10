@@ -32,8 +32,6 @@ yarn kbn bootstrap
 ###
 echo " -- downloading es snapshot"
 node scripts/es snapshot --download-only;
-node scripts/es snapshot --license=oss --download-only;
-
 
 ###
 ### verify no git modifications

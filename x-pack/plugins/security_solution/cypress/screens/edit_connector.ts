@@ -7,7 +7,7 @@
 
 import { connectorIds } from '../objects/case';
 
-export const CONNECTOR_RESILIENT = `[data-test-subj="connector-settings-resilient"]`;
+export const CONNECTOR_RESILIENT = `[data-test-subj="connector-fields-resilient"]`;
 
 export const CONNECTOR_SELECTOR = '[data-test-subj="dropdown-connectors"]';
 
