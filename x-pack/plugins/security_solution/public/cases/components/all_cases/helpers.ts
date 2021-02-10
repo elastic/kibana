@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { filter } from 'lodash/fp';
-import { CaseStatuses } from '../../../../../case/common/api';
-import { Case } from '../../containers/types';
+import { AssociationType, CaseStatuses } from '../../../../../case/common/api';
+import { Case, SubCase } from '../../containers/types';
 import { statuses } from '../status';
+
+export const isSubCase = (theCase: Case | SubCase): theCase is SubCase =>
+  (theCase as SubCase).caseParentId !== undefined &&
+  (theCase as SubCase).associationType === AssociationType.subCase;
 
 export const getSubCasesStatusCountsBadges = (
   subCases: Case[]

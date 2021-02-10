@@ -10,7 +10,7 @@ import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { Case } from '../../containers/types';
 import { CasesColumns } from './columns';
-import { CaseType } from '../../../../../case/common/api';
+import { AssociationType } from '../../../../../case/common/api';
 
 type ExpandedRowMap = Record<string, Element> | {};
 
@@ -48,7 +48,7 @@ export const getExpandedRowMap = ({
         ...subCase,
         caseParentId: curr.id,
         title: `${curr.title} ${index + 1}`,
-        type: CaseType.individual,
+        associationType: AssociationType.subCase,
       }));
       return {
         ...acc,

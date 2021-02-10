@@ -19,15 +19,15 @@ import {
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../case/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { Case } from '../../containers/types';
+import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
 import * as i18n from './translations';
 import { STATUS } from '../case_view/translations';
 import { Status } from '../status';
-import { getSubCasesStatusCountsBadges } from './helpers';
+import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../../app/home/translations';
 
 export type CasesColumns =
@@ -60,13 +60,13 @@ export const getCasesColumns = (
   const columns = [
     {
       name: i18n.NAME,
-      render: (theCase: Case) => {
+      render: (theCase: Case | SubCase) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = !isModal ? (
             <CaseDetailsLink
-              detailName={theCase.caseParentId ?? theCase.id}
+              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
               title={theCase.title}
-              subCaseId={theCase.type === CaseType.individual ? theCase.id : undefined}
+              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
             >
               {theCase.title}
             </CaseDetailsLink>

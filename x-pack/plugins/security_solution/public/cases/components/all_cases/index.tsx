@@ -349,7 +349,10 @@ export const AllCases = React.memo<AllCasesProps>(
     };
 
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
-      () => ({ onSelectionChange: setSelectedCases }),
+      () => ({
+        selectable: (theCase) => theCase.subCases == null || theCase.subCases.length === 0,
+        onSelectionChange: setSelectedCases,
+      }),
       [setSelectedCases]
     );
     const isCasesLoading = useMemo(

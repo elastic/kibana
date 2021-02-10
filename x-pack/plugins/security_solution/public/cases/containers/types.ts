@@ -57,7 +57,6 @@ export interface CaseExternalService {
 
 interface BasicCase {
   id: string;
-  caseParentId?: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
@@ -78,7 +77,11 @@ interface BasicCase {
   settings: CaseAttributes['settings'];
 }
 
-export type SubCase = BasicCase;
+export interface SubCase extends BasicCase {
+  caseParentId: string;
+  associationType: AssociationType;
+}
+
 export interface Case extends BasicCase {
   subCases?: SubCase[] | null;
 }
