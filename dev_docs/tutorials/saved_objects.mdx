@@ -124,18 +124,8 @@ fields they add to the mappings. Similarly, Saved Object types should never use 
 
  ## References
 
- When a Saved Object declares references to other Saved Objects, the Saved Objects Export API will automatically export the target object with all of its references. 
- This makes it easy for users to export the entire reference graph of an object.
-
-If a Saved Object can’t be used on its own, that is, it needs other objects to exist for a feature to function correctly, that
-Saved Object should declare references to all the objects it requires. For example, a dashboard object might have panels for several
-visualization objects. When these visualization objects don’t exist, the dashboard cannot be rendered correctly. The dashboard object should declare
-references to all it’s visualizations.
-
-However, visualization objects can continue to be rendered or embedded into other dashboards even if the dashboard it was originally embedded
-into doesn’t exist. As a result, visualization objects should not declare references to dashboard objects.
-
-For each referenced object, an id, type and name are added to the references array:
+Declare <DocLink id="kibDevDocsSavedObjectsIntro" section="References" text="Saved Object references"/> by adding an id, type and name to the
+ `references` array.
 
 ```ts
 router.get(

@@ -7,7 +7,7 @@ date: 2021-02-02
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
-"Saved Objects" are well defined, persisted entities, stored in the Kibana system index (which is also sometimes referred to as the `.kibana` index).
+"Saved Objects" are developer defined, persisted entities, stored in the Kibana system index (which is also sometimes referred to as the `.kibana` index).
 The Saved Objects service allows Kibana plugins to use Elasticsearch like a primary database. Think of it as an Object Document Mapper for Elasticsearch.
  Some examples of Saved Object types are dashboards, lens, canvas workpads, index patterns, cases, ml jobs, and advanced settings. Some Saved Object types are 
  exposed to the user in the [Saved Object management UI](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html), but not all.
@@ -22,7 +22,9 @@ services.
 
 ## References
 
-In order to support import and export capabilities, Saved Objects need to explicitly list any references they contain to other Saved Objects.
+In order to support import and export, and space-sharing capabilities, Saved Objects need to explicitly list any references they contain to other Saved Objects.
+The parent should have a reference to it's children, not the other way around. That way when a "parent" is exported (or shared to a space),
+ all the "children" will be automatically included. However, when a "child" is exported, it will not include all "parents".
 
 <DocLink id="kibDevTutorialSavedObject" section="references" text="Learn how to define Saved Object references"/>
 
@@ -52,9 +54,19 @@ objects can be private to the user, shared with a selection of others, or made p
  
 ## Scalability
 
-Because all Saved Objects are stored in a single index, they don’t scale well, and at this time we recommend no more than 10,000 saved
-objects of any given type should exist. This is becoming a growing issue, especially for use cases like alerts. If you see the phrase “[X] as data” it is 
-referring to this scalability limitation. Should the information in question be stored as Saved Objects in the Kibana index, or in a data index?
+By default all saved object types go into a single index. If you expect your saved object type to have a lot of unique fields, or if you expect there
+to be many of them, you can have your objects go in a separate index by using the `indexPattern` field. Reporting and task manager are two 
+examples of features that use this capability.
+
+No matter which index your saved objects are stored in, we recommend no more than 10,000 saved
+objects of any given type exist at a given time. This is because the `SavedObjectsClient.find` function does not at the moment
+support paging past 10k saved-objects.
+
+## Searchability
+
+Because saved objects are stored in system indices, they cannot be searched like other data can. If you see the phrase “[X] as data” it is 
+referring to this searching limitation. Users will not be able to create custom dashboards using saved object data, like they would for data stored
+in Elasticsearch data indices.
 
 ## Saved Objects by value
 
