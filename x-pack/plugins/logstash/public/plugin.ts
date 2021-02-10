@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subscription, BehaviorSubject, combineLatest } from 'rxjs';
+import { Subscription, Subject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { once } from 'lodash';
 
@@ -30,7 +30,7 @@ interface SetupDeps {
 
 export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
   private licenseSubscription?: Subscription;
-  private capabilities$ = new BehaviorSubject<null | Capabilities>(null);
+  private capabilities$ = new Subject<Capabilities>();
 
   public setup(core: CoreSetup, plugins: SetupDeps) {
     const logstashLicense$ = plugins.licensing.license$.pipe(
@@ -54,9 +54,6 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
 
     this.licenseSubscription = combineLatest([logstashLicense$, this.capabilities$]).subscribe(
       ([license, capabilities]) => {
-        if (!capabilities) {
-          return;
-        }
         const shouldShow = license.enableLinks && capabilities.management.ingest.pipelines === true;
         if (shouldShow) {
           managementApp.enable();
