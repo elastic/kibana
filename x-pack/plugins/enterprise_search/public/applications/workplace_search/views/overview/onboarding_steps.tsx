@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+
 import { useValues, useActions } from 'kea';
 
 import {
@@ -22,17 +21,18 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
-import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
-import { TelemetryLogic } from '../../../shared/telemetry';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { TelemetryLogic } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
+import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
+import { ContentSection } from '../../components/shared/content_section';
 import { SOURCES_PATH, USERS_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
-import { ContentSection } from '../../components/shared/content_section';
-
-import { AppLogic } from '../../app_logic';
-import { OverviewLogic } from './overview_logic';
-
 import { OnboardingCard } from './onboarding_card';
+import { OverviewLogic } from './overview_logic';
 
 const SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingSourcesCard.title',
