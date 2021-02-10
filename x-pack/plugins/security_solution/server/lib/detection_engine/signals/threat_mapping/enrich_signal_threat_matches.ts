@@ -82,7 +82,7 @@ export const enrichSignalThreatMatches = async (
     buildMatchedIndicator({ queries, threats: matchedThreats })
   );
 
-  const enrichedSignals = uniqueHits.map((signalHit, i) => {
+  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
     const threat = get(signalHit._source, 'threat') ?? {};
     if (!isObject(threat)) {
       throw new Error(`Expected threat field to be an object, but found: ${threat}`);
