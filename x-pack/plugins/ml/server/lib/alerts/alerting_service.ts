@@ -400,13 +400,15 @@ export function alertingServiceProvider(mlClient: MlClient) {
       time: {
         from: r.bucketRange.start,
         to: r.bucketRange.end,
+        mode: 'absolute',
       },
     };
+
     const appState = {
       explorer: {
-        ...(isInfluencerResult
-          ? {
-              mlExplorerFilter: {
+        mlExplorerFilter: {
+          ...(isInfluencerResult
+            ? {
                 filterActive: true,
                 filteredFields: [
                   r.topInfluencers![0].influencer_field_name,
@@ -425,24 +427,24 @@ export function alertingServiceProvider(mlClient: MlClient) {
                     ],
                   },
                 },
-              },
-            }
-          : {}),
-        // Don't highlight selection for record resutls
-        ...(type !== ANOMALY_RESULT_TYPE.RECORD
-          ? {
-              mlExplorerSwimlane: {
+              }
+            : {}),
+        },
+        mlExplorerSwimlane: {
+          // Don't highlight selection for record results
+          ...(type !== ANOMALY_RESULT_TYPE.RECORD
+            ? {
                 selectedLanes: [
                   isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
                 ],
-                selectedTimes: [r.timestampEpoch],
+                selectedTimes: r.timestampEpoch,
                 selectedType: isInfluencerResult ? 'viewBy' : 'overall',
                 ...(isInfluencerResult
                   ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
                   : {}),
-              },
-            }
-          : {}),
+              }
+            : {}),
+        },
       },
     };
     return `/app/ml/explorer/?_g=${encodeURIComponent(
