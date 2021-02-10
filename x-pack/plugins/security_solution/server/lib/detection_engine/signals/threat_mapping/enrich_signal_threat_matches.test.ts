@@ -291,13 +291,33 @@ describe('buildMatchedIndicator', () => {
     ]);
   });
 
-  it('throws an error if indicator field is not an object or an array', () => {
+  it('throws an error if indicator field is a not an object', () => {
     threats = [
       getThreatListItemMock({
         _id: '123',
         _source: {
           threat: {
             indicator: 'not an object',
+          },
+        },
+      }),
+    ];
+
+    expect(() =>
+      buildMatchedIndicator({
+        queries,
+        threats,
+      })
+    ).toThrowError('Expected indicator field to be an object, but found: not an object');
+  });
+
+  it('throws an error if indicator field is not an array of objects', () => {
+    threats = [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          threat: {
+            indicator: ['not an object'],
           },
         },
       }),
