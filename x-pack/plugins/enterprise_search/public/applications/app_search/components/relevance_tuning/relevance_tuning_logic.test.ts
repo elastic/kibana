@@ -9,7 +9,7 @@ import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../
 
 import { nextTick } from '@kbn/test/jest';
 
-import { BoostType } from './types';
+import { Boost, BoostType } from './types';
 
 import { RelevanceTuningLogic } from './';
 
@@ -228,10 +228,10 @@ describe('RelevanceTuningLogic', () => {
   describe('listeners', () => {
     const { http } = mockHttpValues;
     const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
-    let scrollToSpy: any;
-    let confirmSpy: any;
+    let scrollToSpy: jest.SpyInstance;
+    let confirmSpy: jest.SpyInstance;
 
-    const searchSettingsWithBoost = (boost: any) => ({
+    const searchSettingsWithBoost = (boost: Boost) => ({
       ...searchSettings,
       boosts: {
         foo: [
