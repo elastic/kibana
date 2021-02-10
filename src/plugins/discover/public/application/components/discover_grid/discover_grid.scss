@@ -9,6 +9,14 @@
     border-bottom: $euiBorderThin;
   }
 
+  .euiDataGridRowCell.euiDataGridRowCell--firstColumn {
+    border-left: none;
+  }
+
+  .euiDataGridRowCell.euiDataGridRowCell--lastColumn {
+    border-right: none;
+  }
+
   .euiDataGridRowCell:first-of-type,
   .euiDataGrid--headerShade.euiDataGrid--bordersAll .euiDataGridHeaderCell:first-of-type {
     border-left: none;
