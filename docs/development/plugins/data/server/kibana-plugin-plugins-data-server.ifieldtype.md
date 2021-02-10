@@ -24,6 +24,7 @@ export interface IFieldType
 |  [lang](./kibana-plugin-plugins-data-server.ifieldtype.lang.md) | <code>string</code> |  |
 |  [name](./kibana-plugin-plugins-data-server.ifieldtype.name.md) | <code>string</code> |  |
 |  [readFromDocValues](./kibana-plugin-plugins-data-server.ifieldtype.readfromdocvalues.md) | <code>boolean</code> |  |
+|  [runtimeField](./kibana-plugin-plugins-data-server.ifieldtype.runtimefield.md) | <code>RuntimeField</code> |  |
 |  [script](./kibana-plugin-plugins-data-server.ifieldtype.script.md) | <code>string</code> |  |
 |  [scripted](./kibana-plugin-plugins-data-server.ifieldtype.scripted.md) | <code>boolean</code> |  |
 |  [searchable](./kibana-plugin-plugins-data-server.ifieldtype.searchable.md) | <code>boolean</code> |  |
