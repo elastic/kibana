@@ -8,7 +8,8 @@
 import React from 'react';
 
 import { EuiPage, EuiPageSideBar, EuiPageBody, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import { PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING } from './constants';
 
 import './private_sources_layout.scss';
 
@@ -31,13 +32,7 @@ export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
             className="enterpriseSearchLayout__readOnlyMode"
             color="warning"
             iconType="lock"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.privateDashboard.readOnlyMode.warning',
-              {
-                defaultMessage:
-                  'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
-              }
-            )}
+            title={PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING}
           />
         )}
         {children}
