@@ -8,7 +8,7 @@ Packaging tests use Vagrant virtual machines as hosts and Ansible for provisioni
 
   ```
   # Ubuntu
-  sudo apt-get install python3-pip
+  sudo apt-get install python3-pip libarchive-tools
   pip3 install --user ansible
 
   # Darwin
