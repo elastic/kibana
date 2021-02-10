@@ -9,8 +9,22 @@
 import { omit } from 'lodash';
 
 interface VegaStateRestorerOptions {
+  /**
+   * By default, we only recover signals,
+   * but if the data also needs to be recovered, this option should be set to true
+   */
   restoreData?: boolean;
+  /**
+   *  List of excluded signals
+   *
+   *  By default, all Build-in signals (width,height,padding,autosize,background) were excluded
+   *  @see https://vega.github.io/vega/docs/signals/
+   */
   omitSignals?: string[];
+  /**
+   * Gets a value that indicates whether the VegaStateRestorer is active.
+   */
+  isActive?: () => boolean;
 }
 
 type State = Partial<{
@@ -18,19 +32,23 @@ type State = Partial<{
   data: Record<string, any>;
 }>;
 
-export const createVegaStateRestorer = (options: VegaStateRestorerOptions = {}) => {
+export const createVegaStateRestorer = ({
+  restoreData = false,
+  omitSignals = ['width', 'height', 'padding', 'autosize', 'background'],
+  isActive = () => true,
+}: VegaStateRestorerOptions = {}) => {
   let state: State | null;
 
   return {
     save: (newState: State) => {
-      if (newState) {
+      if (newState && isActive()) {
         state = {
-          signals: omit(newState.signals, options.omitSignals || []),
-          ...(options.restoreData ? { data: newState.data } : undefined),
+          signals: omit(newState.signals, omitSignals || []),
+          ...(restoreData ? { data: newState.data } : undefined),
         };
       }
     },
-    restore: () => state,
+    restore: () => (isActive() ? state : null),
     clear: () => {
       state = null;
     },

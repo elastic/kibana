@@ -444,6 +444,8 @@ kibanaSetTimeFilter(start, end)
       hideWarnings: true
       // Vega renderer to use: `svg` or `canvas` (default)
       renderer: canvas
+      // If true, Restores Vega signal values on refresh
+      restoreSignalValuesOnRefresh: true
     }
   }
 }

@@ -36,5 +36,6 @@ export class VegaBaseView {
   _$container: any;
   _parser: any;
   _vegaViewConfig: any;
-  _serviceSettings: any;
+  _serviceSettings: VegaViewParams['serviceSettings'];
+  _vegaStateRestorer: VegaViewParams['vegaStateRestorer'];
 }

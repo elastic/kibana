@@ -26,12 +26,7 @@ export const createVegaVisualization = ({
     private readonly dataPlugin = getData();
     private vegaView: InstanceType<typeof VegaView> | null = null;
     private vegaStateRestorer = createVegaStateRestorer({
-      restoreData: false,
-      /**
-       *  exclude Built-in signals
-       *  @see https://vega.github.io/vega/docs/signals/
-       */
-      omitSignals: ['width', 'height', 'padding', 'autosize', 'background'],
+      isActive: () => Boolean(this.vegaView?._parser?.restoreSignalValuesOnRefresh),
     });
 
     constructor(

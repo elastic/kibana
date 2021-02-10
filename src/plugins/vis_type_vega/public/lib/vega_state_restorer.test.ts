@@ -81,4 +81,13 @@ describe('extractIndexPatternsFromSpec', () => {
       }
     `);
   });
+  test('should not save state if isActive is false', () => {
+    const vegaStateRestorer = createVegaStateRestorer({ isActive: () => false });
+
+    vegaStateRestorer.save({
+      signals: { foo: 'foo' },
+    });
+
+    expect(vegaStateRestorer.restore()).toMatchInlineSnapshot(`null`);
+  });
 });
