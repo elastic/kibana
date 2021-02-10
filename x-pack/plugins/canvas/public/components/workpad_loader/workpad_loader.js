@@ -331,6 +331,7 @@ export class WorkpadLoader extends React.PureComponent {
         display="default"
         compressed
         className="canvasWorkpad__upload--compressed"
+        aria-label={strings.getFilePickerPlaceholder()}
         initialPromptText={strings.getFilePickerPlaceholder()}
         onChange={([file]) => uploadWorkpad(file, this.onUpload, this.props.notify)}
         accept="application/json"

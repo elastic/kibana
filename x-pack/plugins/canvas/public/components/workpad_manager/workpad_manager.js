@@ -50,7 +50,9 @@ export const WorkpadManager = ({ onClose }) => {
       <EuiModalHeader className="canvasHomeApp__modalHeader">
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiModalHeaderTitle>{strings.getModalTitle()}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>
+              <h1>{strings.getModalTitle()}</h1>
+            </EuiModalHeaderTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
