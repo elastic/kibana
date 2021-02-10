@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('by value', () => {
       it('save and return button returns to dashboard after editing visualization with changes saved', async () => {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
 
         await createMarkdownVis();
