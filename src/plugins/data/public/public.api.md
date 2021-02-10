@@ -2474,6 +2474,8 @@ export interface SearchUsageCollector {
     // (undocumented)
     trackSessionSentToBackground: () => Promise<void>;
     // (undocumented)
+    trackSessionsListLoaded: () => Promise<void>;
+    // (undocumented)
     trackSessionViewRestored: () => Promise<void>;
     // (undocumented)
     trackViewSessionsList: () => Promise<void>;
