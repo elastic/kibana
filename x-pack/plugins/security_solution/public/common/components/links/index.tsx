@@ -73,7 +73,12 @@ const HostDetailsLinkComponent: React.FC<{
   );
 
   return isButton ? (
-    <LinkButton onClick={goToHostDetails}>{children ? children : hostName}</LinkButton>
+    <LinkButton
+      onClick={goToHostDetails}
+      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkButton>
   ) : (
     <LinkAnchor
       onClick={goToHostDetails}
@@ -138,7 +143,12 @@ const NetworkDetailsLinkComponent: React.FC<{
   );
 
   return isButton ? (
-    <LinkButton onClick={goToNetworkDetails}>{children ? children : ip}</LinkButton>
+    <LinkButton
+      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      onClick={goToNetworkDetails}
+    >
+      {children ? children : ip}
+    </LinkButton>
   ) : (
     <LinkAnchor
       onClick={goToNetworkDetails}

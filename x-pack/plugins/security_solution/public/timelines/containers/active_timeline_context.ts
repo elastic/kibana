@@ -53,13 +53,11 @@ class ActiveTimelineEvents {
       isSameExpandedDetail =
         expandedDetail?.panelView === 'eventDetail' &&
         expandedDetail?.params?.eventId === currentExpandedDetail?.params?.eventId;
-    }
-    if (currentExpandedDetail?.panelView === 'hostDetail') {
+    } else if (currentExpandedDetail?.panelView === 'hostDetail') {
       isSameExpandedDetail =
         expandedDetail?.panelView === 'hostDetail' &&
         expandedDetail?.params?.hostName === currentExpandedDetail?.params?.hostName;
-    }
-    if (currentExpandedDetail?.panelView === 'networkDetail') {
+    } else if (currentExpandedDetail?.panelView === 'networkDetail') {
       isSameExpandedDetail =
         expandedDetail?.panelView === 'networkDetail' &&
         expandedDetail?.params?.ip === currentExpandedDetail?.params?.ip;
