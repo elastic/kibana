@@ -18,6 +18,7 @@ a flight that arrived or departed from `Warsaw` or `Venice` when the weather was
 +
 The results are currently sorted by first `Time`, and then by `_score`.
 . To sort only by `_score`, remove the `Time` field.
-* As a result you've got a table of documents starting with the best matches.
++
+Your table now shows documents with the best matches, from most to least relevant.
 [role="screenshot"]
 image::images/discover-search-for-relevance.png["Example of a search for relevance"]
