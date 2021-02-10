@@ -2219,6 +2219,13 @@
         }
       }
     },
+    "fileUploadTelemetry": {
+      "properties": {
+        "filesUploadedTotalCount": {
+          "type": "long"
+        }
+      }
+    },
     "maps": {
       "properties": {
         "settings": {

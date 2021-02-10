@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const MAX_BYTES = 31457280;
+import { MAX_BYTES } from '../../common/constants/file_import';
 
 // MAX_BYTES is a good guideline for splitting up posts, but this logic
 // occasionally sizes chunks so closely to the limit, that the remaining content
