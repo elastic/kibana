@@ -84,12 +84,7 @@ export function CopyToDashboardModal({
                       data-test-subj="add-to-existing-dashboard-option"
                       id="existing-dashboard-option"
                       name="dashboard-option"
-                      label={i18n.translate(
-                        'presentationUtil.saveModalDashboard.existingDashboardOptionLabel',
-                        {
-                          defaultMessage: 'Existing',
-                        }
-                      )}
+                      label={dashboardCopyToDashboardAction.getExistingDashboardOption()}
                       onChange={() => setDashboardOption('existing')}
                     />
                     <div className="savAddDashboard__searchDashboards">
@@ -110,12 +105,7 @@ export function CopyToDashboardModal({
                       id="new-dashboard-option"
                       name="dashboard-option"
                       disabled={!dashboardId}
-                      label={i18n.translate(
-                        'presentationUtil.saveModalDashboard.newDashboardOptionLabel',
-                        {
-                          defaultMessage: 'New',
-                        }
-                      )}
+                      label={dashboardCopyToDashboardAction.getNewDashboardOption()}
                       onChange={() => setDashboardOption('new')}
                     />
                     <EuiSpacer size="s" />

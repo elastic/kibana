@@ -38,7 +38,7 @@ const ExtendConfirm = ({
     defaultMessage: 'Extend search session expiration',
   });
   const confirm = i18n.translate('xpack.data.mgmt.searchSessions.extendModal.extendButton', {
-    defaultMessage: 'Extend',
+    defaultMessage: 'Extend expiration',
   });
   const extend = i18n.translate('xpack.data.mgmt.searchSessions.extendModal.dontExtendButton', {
     defaultMessage: 'Cancel',
@@ -58,7 +58,9 @@ const ExtendConfirm = ({
         onCancel={onConfirmDismiss}
         onConfirm={async () => {
           setIsLoading(true);
-          await api.sendExtend(id, `${extendByDuration.asMilliseconds()}ms`);
+          await api.sendExtend(id, `${newExpiration.toISOString()}`);
+          setIsLoading(false);
+          onConfirmDismiss();
           onActionComplete();
         }}
         confirmButtonText={confirm}

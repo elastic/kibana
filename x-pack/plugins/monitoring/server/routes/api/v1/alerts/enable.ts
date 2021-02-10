@@ -25,8 +25,7 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
     },
     async (context, request, response) => {
       try {
-        const alerts = AlertsFactory.getAll().filter((a) => a.isEnabled(npRoute.licenseService));
-
+        const alerts = AlertsFactory.getAll();
         if (alerts.length) {
           const {
             isSufficientlySecure,

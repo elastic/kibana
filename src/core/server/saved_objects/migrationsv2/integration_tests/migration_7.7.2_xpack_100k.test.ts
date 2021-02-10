@@ -32,7 +32,7 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
       adjustTimeout: (t: number) => jest.setTimeout(600000),
       settings: {
         es: {
-          license: oss ? 'oss' : 'trial',
+          license: 'trial',
           dataArchive,
         },
       },

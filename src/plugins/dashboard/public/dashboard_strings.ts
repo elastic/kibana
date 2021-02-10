@@ -88,6 +88,14 @@ export const dashboardCopyToDashboardAction = {
     i18n.translate('dashboard.panel.copyToDashboard.goToDashboard', {
       defaultMessage: 'Copy and go',
     }),
+  getNewDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
+      defaultMessage: 'New',
+    }),
+  getExistingDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
+      defaultMessage: 'Existing',
+    }),
 };
 
 export const dashboardAddToLibraryAction = {

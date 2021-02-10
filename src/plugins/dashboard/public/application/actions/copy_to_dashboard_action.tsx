@@ -34,7 +34,7 @@ function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer 
 export class CopyToDashboardAction implements Action<CopyToDashboardActionContext> {
   public readonly type = ACTION_COPY_TO_DASHBOARD;
   public readonly id = ACTION_COPY_TO_DASHBOARD;
-  public order = 7;
+  public order = 1;
 
   constructor(
     private overlays: OverlayStart,
