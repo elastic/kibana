@@ -23,7 +23,7 @@ import type {
   ObservabilityPluginStart,
 } from '../../observability/public';
 import type { SpacesPluginStart } from '../../spaces/public';
-import { MlPluginStart, MlPluginSetup } from '../../ml/public';
+import { MlPluginStart } from '../../ml/public';
 import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 
 // Our own setup and start contract values
@@ -36,7 +36,6 @@ export interface InfraClientSetupDeps {
   observability: ObservabilityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
-  ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
 }
 

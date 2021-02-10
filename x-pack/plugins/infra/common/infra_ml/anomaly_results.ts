@@ -5,44 +5,36 @@
  * 2.0.
  */
 
-export enum ANOMALY_SEVERITY {
-  CRITICAL = 'critical',
-  MAJOR = 'major',
-  MINOR = 'minor',
-  WARNING = 'warning',
-  LOW = 'low',
-  UNKNOWN = 'unknown',
-}
-
-export enum ANOMALY_THRESHOLD {
-  CRITICAL = 75,
-  MAJOR = 50,
-  MINOR = 25,
-  WARNING = 3,
-  LOW = 0,
-}
-
-export const SEVERITY_COLORS = {
-  CRITICAL: '#fe5050',
-  MAJOR: '#fba740',
-  MINOR: '#fdec25',
-  WARNING: '#8bc8fb',
-  LOW: '#d2e9f7',
-  BLANK: '#ffffff',
+export const ML_SEVERITY_SCORES = {
+  warning: 3,
+  minor: 25,
+  major: 50,
+  critical: 75,
 };
 
-export const getSeverityCategoryForScore = (score: number): ANOMALY_SEVERITY | undefined => {
-  if (score >= ANOMALY_THRESHOLD.CRITICAL) {
-    return ANOMALY_SEVERITY.CRITICAL;
-  } else if (score >= ANOMALY_THRESHOLD.MAJOR) {
-    return ANOMALY_SEVERITY.MAJOR;
-  } else if (score >= ANOMALY_THRESHOLD.MINOR) {
-    return ANOMALY_SEVERITY.MINOR;
-  } else if (score >= ANOMALY_THRESHOLD.WARNING) {
-    return ANOMALY_SEVERITY.WARNING;
+export type MLSeverityScoreCategories = keyof typeof ML_SEVERITY_SCORES;
+
+export const ML_SEVERITY_COLORS = {
+  critical: 'rgb(228, 72, 72)',
+  major: 'rgb(229, 113, 0)',
+  minor: 'rgb(255, 221, 0)',
+  warning: 'rgb(125, 180, 226)',
+};
+
+export const getSeverityCategoryForScore = (
+  score: number
+): MLSeverityScoreCategories | undefined => {
+  if (score >= ML_SEVERITY_SCORES.critical) {
+    return 'critical';
+  } else if (score >= ML_SEVERITY_SCORES.major) {
+    return 'major';
+  } else if (score >= ML_SEVERITY_SCORES.minor) {
+    return 'minor';
+  } else if (score >= ML_SEVERITY_SCORES.warning) {
+    return 'warning';
   } else {
     // Category is too low to include
-    return ANOMALY_SEVERITY.LOW;
+    return undefined;
   }
 };
 

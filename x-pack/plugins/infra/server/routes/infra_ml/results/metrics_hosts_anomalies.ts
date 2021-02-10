@@ -53,7 +53,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           hasMoreEntries,
           timing,
         } = await getMetricsHostsAnomalies(
-          requestContext.infra,
+          requestContext,
           sourceId,
           anomalyThreshold,
           startTime,

@@ -7,10 +7,10 @@
 
 import React, { useCallback, useContext, useMemo } from 'react';
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/metric_threshold/types';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 
 interface Props {
   visible?: boolean;
@@ -41,11 +41,4 @@ export const AlertFlyout = (props: Props) => {
   );
 
   return <>{visible && AddAlertFlyout}</>;
-};
-
-export const PrefilledThresholdAlertFlyout = ({ onClose }: { onClose(): void }) => {
-  const { metricThresholdPrefill } = useAlertPrefillContext();
-  const { groupBy, filterQuery, metrics } = metricThresholdPrefill;
-
-  return <AlertFlyout options={{ groupBy, filterQuery, metrics }} visible setVisible={onClose} />;
 };
