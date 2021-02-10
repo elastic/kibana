@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { loggingSystemMock, elasticsearchServiceMock } from 'src/core/server/mocks';
-import { actionsClientMock } from '../../../../../actions/server/mocks';
+import { KibanaRequest, kibanaResponseFactory } from '../../../../../../../src/core/server';
+import {
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '../../../../../../../src/core/server/mocks';
 import { createCaseClient } from '../../../client';
 import {
   AlertService,
   CaseService,
   CaseConfigureService,
   ConnectorMappingsService,
+  CaseUserActionService,
 } from '../../../services';
-import { getActions, getActionTypes } from '../__mocks__/request_responses';
 import { authenticationMock } from '../__fixtures__';
 import type { CasesRequestHandlerContext } from '../../../types';
+import { createActionsClient } from './mock_actions_client';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
-  const actionsMock = actionsClientMock.create();
-  actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
-  actionsMock.listTypes.mockImplementation(() => Promise.resolve(getActionTypes()));
+  const actionsMock = createActionsClient();
 
   const log = loggingSystemMock.create().get('case');
   const esClientMock = elasticsearchServiceMock.createClusterClient();
@@ -30,11 +31,13 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
   const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
+  const caseUserActionsServicePlugin = new CaseUserActionService(log);
 
   const caseService = await caseServicePlugin.setup({
     authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
   });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+  const userActionService = await caseUserActionsServicePlugin.setup();
   const alertsService = new AlertService();
   alertsService.initialize(esClientMock);
 
@@ -59,16 +62,14 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const caseClient = createCaseClient({
     savedObjectsClient: client,
     request: {} as KibanaRequest,
+    response: kibanaResponseFactory,
     caseService,
     caseConfigureService,
     connectorMappingsService,
-    userActionService: {
-      postUserActions: jest.fn(),
-      getUserActions: jest.fn(),
-    },
+    userActionService,
     alertsService,
     context,
   });
 
-  return context;
+  return { context, services: { userActionService } };
 };

@@ -1,0 +1,46 @@
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - labeled
+      - closed
+
+jobs:
+  backport:
+    name: Backport PR
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'auto-backport')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Get backport config'
+        run: |
+          curl 'https://raw.githubusercontent.com/elastic/kibana/master/.backportrc.json' > .backportrc.json
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Install backport CLI
+        run: npm install -g backport@5.6.4
+
+      - name: Backport PR
+        run: |
+          git config --global user.name "kibanamachine"
+          git config --global user.email "42973632+kibanamachine@users.noreply.github.com"
+          backport --fork true --username kibanamachine --accessToken "${{ secrets.KIBANAMACHINE_TOKEN }}" --ci --pr "$PR_NUMBER" --labels backport --assignee "$PR_OWNER" | tee 'output.log'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_OWNER: ${{ github.event.pull_request.user.login }}
+
+      - name: Report backport status
+        run: |
+          COMMENT="Backport result
+          \`\`\`
+          $(cat output.log)
+          \`\`\`"
+
+          GITHUB_TOKEN="${{ secrets.KIBANAMACHINE_TOKEN }}" gh api -X POST repos/elastic/kibana/issues/$PR_NUMBER/comments -F body="$COMMENT"
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}

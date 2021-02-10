@@ -8,21 +8,20 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
-
-import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import { IndexingStatus } from '../../../../../shared/indexing_status';
 import { Loading } from '../../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
 
-import { SchemaFieldsTable } from './schema_fields_table';
-
 import { Schema } from './schema';
+import { SchemaFieldsTable } from './schema_fields_table';
 
 describe('Schema', () => {
   const initializeSchema = jest.fn();
