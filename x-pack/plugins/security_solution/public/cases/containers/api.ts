@@ -6,7 +6,6 @@
  */
 
 import {
-  CaseExternalServiceRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
@@ -17,8 +16,6 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
-  ServiceConnectorCaseParams,
-  ServiceConnectorCaseResponse,
   User,
 } from '../../../../case/common/api';
 
@@ -32,7 +29,7 @@ import {
 
 import {
   getCaseCommentsUrl,
-  getCaseConfigurePushUrl,
+  getCasePushUrl,
   getCaseDetailsUrl,
   getCaseUserActionUrl,
 } from '../../../../case/common/api/helpers';
@@ -59,10 +56,8 @@ import {
   decodeCasesFindResponse,
   decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
-  decodeServiceConnectorCaseResponse,
 } from './utils';
-import * as i18n from './translations';
-import { ActionTypeExecutorResult } from '../../../../actions/common';
+
 export const getCase = async (
   caseId: string,
   includeComments: boolean = true,
@@ -231,41 +226,19 @@ export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promi
 
 export const pushCase = async (
   caseId: string,
-  push: CaseExternalServiceRequest,
+  connectorId: string,
   signal: AbortSignal
 ): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(
-    `${getCaseDetailsUrl(caseId)}/_push`,
+    getCasePushUrl(caseId, connectorId),
     {
       method: 'POST',
-      body: JSON.stringify(push),
+      body: JSON.stringify({}),
       signal,
     }
   );
+
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
-};
-
-export const pushToService = async (
-  connectorId: string,
-  connectorType: string,
-  casePushParams: ServiceConnectorCaseParams,
-  signal: AbortSignal
-): Promise<ServiceConnectorCaseResponse> => {
-  const response = await KibanaServices.get().http.fetch<
-    ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
-  >(`${getCaseConfigurePushUrl(connectorId)}`, {
-    method: 'POST',
-    body: JSON.stringify({
-      connector_type: connectorType,
-      params: casePushParams,
-    }),
-    signal,
-  });
-
-  if (response.status === 'error') {
-    throw new Error(response.serviceMessage ?? response.message ?? i18n.ERROR_PUSH_TO_SERVICE);
-  }
-  return decodeServiceConnectorCaseResponse(response.data);
 };
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> => {

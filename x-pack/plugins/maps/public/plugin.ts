@@ -54,7 +54,7 @@ import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { StartContract as FileUploadStartContract } from '../../maps_file_upload/public';
+import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import {
@@ -64,6 +64,7 @@ import {
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
 import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -76,9 +77,10 @@ export interface MapsPluginSetupDependencies {
 }
 
 export interface MapsPluginStartDependencies {
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  mapsFileUpload: FileUploadStartContract;
+  fileUpload: FileUploadStartContract;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
   navigation: NavigationPublicPluginStart;

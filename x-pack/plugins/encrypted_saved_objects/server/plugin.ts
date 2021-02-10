@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { first, map } from 'rxjs/operators';
 import nodeCrypto from '@elastic/node-crypto';
-import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
+import { Logger, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { SecurityPluginSetup } from '../../security/server';
 import { createConfig, ConfigSchema } from './config';
@@ -40,7 +39,9 @@ export interface EncryptedSavedObjectsPluginStart {
 /**
  * Represents EncryptedSavedObjects Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class EncryptedSavedObjectsPlugin
+  implements
+    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup> {
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
 
@@ -48,17 +49,11 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(
-    core: CoreSetup,
-    deps: PluginsSetup
-  ): Promise<EncryptedSavedObjectsPluginSetup> {
-    const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
-      .pipe(
-        map((rawConfig) => createConfig(rawConfig, this.initializerContext.logger.get('config')))
-      )
-      .pipe(first())
-      .toPromise();
+  public setup(core: CoreSetup, deps: PluginsSetup): EncryptedSavedObjectsPluginSetup {
+    const config = createConfig(
+      this.initializerContext.config.get<TypeOf<typeof ConfigSchema>>(),
+      this.initializerContext.logger.get('config')
+    );
     const auditLogger = new EncryptedSavedObjectsAuditLogger(
       deps.security?.audit.getLogger('encryptedSavedObjects')
     );
