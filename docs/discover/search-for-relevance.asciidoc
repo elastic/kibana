@@ -15,7 +15,8 @@ a flight that arrived or departed from `Warsaw` or `Venice` when the weather was
 .  If you don't see any results, open the time filter and select a time range that contains data.
 .  From the list of *Available fields*, add `_score` to the document table.
 . Click the header for the `_score` column and sort it  by descending scores.
-* Now the result is sorted by `Time` (1) and `_score` (2).  To sort only by `_score` you've
++
+The results are currently sorted by first `Time`, and then by `_score`.
  to remove sorting by `Time`.
 * As a result you've got a table of documents starting with the best matches.
 [role="screenshot"]
