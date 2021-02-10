@@ -83,7 +83,7 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.spaces.available).to.be(true);
-      expect(stats.stack_stats.kibana.plugins.fileUpload.file_upload.index_creation_count).to.be.a(
+      expect(stats.stack_stats.kibana.plugins.fileUploadTelemetry.filesUploadedTotalCount).to.be.a(
         'number'
       );
 

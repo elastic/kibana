@@ -12,7 +12,7 @@ import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elast
 
 import numeral from '@elastic/numeral';
 import { ErrorResponse } from '../../../../../../common/types/errors';
-import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../../../file_upload/public';
+import { FILE_SIZE_DISPLAY_FORMAT } from '../../../../../../../file_upload/common';
 
 interface FileTooLargeProps {
   fileSize: number;

@@ -11,7 +11,7 @@
     "features",
     "inspector",
     "data",
-    "fileUpload",
+    "mapsFileUpload",
     "uiActions",
     "navigation",
     "visualizations",

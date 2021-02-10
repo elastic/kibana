@@ -6,11 +6,25 @@
  */
 
 import _ from 'lodash';
+import { ES_GEO_FIELD_TYPE } from '../../common/constants/file_import';
 
-export const ES_GEO_FIELD_TYPE = {
-  GEO_POINT: 'geo_point',
-  GEO_SHAPE: 'geo_shape',
+const DEFAULT_SETTINGS = {
+  number_of_shards: 1,
 };
+
+const DEFAULT_GEO_SHAPE_MAPPINGS = {
+  coordinates: {
+    type: ES_GEO_FIELD_TYPE.GEO_SHAPE,
+  },
+};
+
+const DEFAULT_GEO_POINT_MAPPINGS = {
+  coordinates: {
+    type: ES_GEO_FIELD_TYPE.GEO_POINT,
+  },
+};
+
+const DEFAULT_INGEST_PIPELINE = {};
 
 export function getGeoIndexTypesForFeatures(featureTypes) {
   const hasNoFeatureType = !featureTypes || !featureTypes.length;
@@ -63,16 +77,11 @@ export function geoJsonToEs(parsedGeojson, datatype) {
 export function getGeoJsonIndexingDetails(parsedGeojson, dataType) {
   return {
     data: geoJsonToEs(parsedGeojson, dataType),
-    ingestPipeline: {},
-    mappings: {
-      properties: {
-        coordinates: {
-          type: dataType,
-        },
-      },
-    },
-    settings: {
-      number_of_shards: 1,
-    },
+    ingestPipeline: DEFAULT_INGEST_PIPELINE,
+    mappings:
+      dataType === ES_GEO_FIELD_TYPE.GEO_POINT
+        ? DEFAULT_GEO_POINT_MAPPINGS
+        : DEFAULT_GEO_SHAPE_MAPPINGS,
+    settings: DEFAULT_SETTINGS,
   };
 }
