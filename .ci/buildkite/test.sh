@@ -78,8 +78,6 @@ yarn config set yarn-offline-mirror "$YARN_OFFLINE_CACHE"
 export YARN_GLOBAL_BIN="$(yarn global bin)"
 export PATH="$PATH:$YARN_GLOBAL_BIN"
 
-tc_end_block "Setup Yarn"
-
 #################
 
 echo "### Bootstrap"
