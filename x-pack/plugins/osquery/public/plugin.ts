@@ -20,7 +20,10 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_NAME } from '../common';
-import { LazyOsqueryManagedPolicyCreateExtension } from './fleet_integration/lazy_osquery_managed_policy_create_extension';
+import {
+  LazyOsqueryManagedPolicyCreateExtension,
+  LazyOsqueryManagedPolicyEditExtension,
+} from './fleet_integration';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -76,7 +79,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerExtension({
         package: 'osquery_elastic_managed',
         view: 'package-policy-edit',
-        component: LazyOsqueryManagedPolicyCreateExtension,
+        component: LazyOsqueryManagedPolicyEditExtension,
       });
     }
 
