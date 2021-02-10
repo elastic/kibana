@@ -905,6 +905,17 @@ describe('#find', () => {
     );
   });
 
+  test(`throws BadRequestError when searching across namespaces when pit is provided`, async () => {
+    const options = {
+      type: [type1, type2],
+      pit: { id: 'abc123' },
+      namespaces: ['some-ns', 'another-ns'],
+    };
+    await expect(client.find(options)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"_find across namespaces is not permitted when using the \`pit\` option."`
+    );
+  });
+
   test(`checks privileges for user, actions, and namespaces`, async () => {
     const options = { type: [type1, type2], namespaces };
     await expectPrivilegeCheck(client.find, { options }, namespaces);
