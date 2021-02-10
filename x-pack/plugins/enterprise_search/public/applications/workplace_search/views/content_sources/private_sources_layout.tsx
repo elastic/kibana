@@ -5,64 +5,26 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
-import classNames from 'classnames';
-
-import { EuiPage, EuiPageSideBar, EuiPageBody, EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar, EuiPageBody, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import './private_sources_layout.scss';
 
 interface LayoutProps {
-  navigation: React.ReactNode;
   restrictWidth?: boolean;
   readOnlyMode?: boolean;
 }
 
-export interface INavContext {
-  closeNavigation(): void;
-}
-export const NavContext = React.createContext({});
-
 export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
   children,
-  navigation,
   restrictWidth,
   readOnlyMode,
 }) => {
-  const [isNavOpen, setIsNavOpen] = useState(false);
-  const toggleNavigation = () => setIsNavOpen(!isNavOpen);
-  const closeNavigation = () => setIsNavOpen(false);
-
-  const navClasses = classNames('enterpriseSearchLayout__sideBar', {
-    'enterpriseSearchLayout__sideBar--isOpen': isNavOpen, // eslint-disable-line @typescript-eslint/naming-convention
-  });
-
   return (
     <EuiPage className="enterpriseSearchLayout">
-      <EuiPageSideBar className={navClasses}>
-        <div className="enterpriseSearchLayout__sideBarToggle">
-          <EuiButton
-            size="s"
-            iconType={isNavOpen ? 'arrowDown' : 'arrowRight'}
-            iconSide="right"
-            aria-label={i18n.translate('xpack.enterpriseSearch.nav.toggleMenu', {
-              defaultMessage: 'Toggle secondary navigation',
-            })}
-            aria-expanded={isNavOpen}
-            aria-pressed={isNavOpen}
-            aria-controls="enterpriseSearchNav"
-            onClick={toggleNavigation}
-            data-test-subj="enterpriseSearchNavToggle"
-          >
-            {i18n.translate('xpack.enterpriseSearch.nav.menu', {
-              defaultMessage: 'Menu',
-            })}
-          </EuiButton>
-        </div>
-        <NavContext.Provider value={{ closeNavigation }}>{navigation}</NavContext.Provider>
-      </EuiPageSideBar>
+      <EuiPageSideBar className={'enterpriseSearchLayout__sideBar'} />
       <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
         {readOnlyMode && (
           <EuiCallOut
