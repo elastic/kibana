@@ -32,7 +32,7 @@ import { SourceSubNav } from './views/content_sources/components/source_sub_nav'
 import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
-import { Overview } from './views/overview';
+import { Overview as OverviewMVP } from './views/overview_mvp';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
 import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
@@ -78,7 +78,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route exact path="/">
-        {errorConnecting ? <ErrorState /> : <Overview />}
+        {errorConnecting ? <ErrorState /> : <OverviewMVP />}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
         {/* TODO: replace Layout with PrivateSourcesLayout (needs to be created) */}
