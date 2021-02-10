@@ -3,7 +3,7 @@
 
 Once you've narrowed your search to a specific event,
 you might want to inspect the documents that occurred
-immediately before and after the event. With the Context view,
+immediately before and after the event. 
 you can do just that for index patterns that contain time-based events.
 
 . In the document table, click the expand icon (>).
