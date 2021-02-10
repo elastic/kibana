@@ -38,11 +38,13 @@ export type AnomalyDetectionAlertContext = {
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
   anomalyExplorerUrl: string;
+  kibanaBaseUrl: string;
 } & AlertInstanceContext;
 
 export function registerAnomalyDetectionAlertType({
   alerts,
   mlSharedServices,
+  publicBaseUrl,
 }: RegisterAlertParams) {
   alerts.registerType<
     MlAnomalyDetectionAlertParams,
@@ -109,6 +111,14 @@ export function registerAnomalyDetectionAlertType({
           }),
           useWithTripleBracesInTemplates: true,
         },
+        // TODO remove when https://github.com/elastic/kibana/pull/90525 is merged
+        {
+          name: 'kibanaBaseUrl',
+          description: i18n.translate('xpack.ml.alertContext.kibanaBasePathUrlDescription', {
+            defaultMessage: 'Kibana base path',
+          }),
+          useWithTripleBracesInTemplates: true,
+        },
       ],
     },
     producer: PLUGIN_ID,
@@ -119,7 +129,7 @@ export function registerAnomalyDetectionAlertType({
         services.savedObjectsClient,
         fakeRequest
       );
-      const executionResult = await execute(params);
+      const executionResult = await execute(params, publicBaseUrl);
 
       if (executionResult) {
         const alertInstanceName = executionResult.name;

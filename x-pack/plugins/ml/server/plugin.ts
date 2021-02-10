@@ -212,6 +212,7 @@ export class MlServerPlugin
       registerMlAlerts({
         alerts: plugins.alerts,
         mlSharedServices: sharedServices,
+        publicBaseUrl: coreSetup.http.basePath.publicBaseUrl,
       });
     }
 

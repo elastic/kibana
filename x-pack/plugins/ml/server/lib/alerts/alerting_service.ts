@@ -439,7 +439,9 @@ export function alertingServiceProvider(mlClient: MlClient) {
         },
       },
     };
-    return `/app/ml/explorer/?_g=${rison.encode(globalState)}&_a=${rison.encode(appState)}`;
+    return `/app/ml/explorer/?_g=${encodeURIComponent(
+      rison.encode(globalState)
+    )}&_a=${encodeURIComponent(rison.encode(appState))}`;
   };
 
   return {
@@ -449,7 +451,8 @@ export function alertingServiceProvider(mlClient: MlClient) {
      * @param params
      */
     execute: async (
-      params: MlAnomalyDetectionAlertParams
+      params: MlAnomalyDetectionAlertParams,
+      publicBaseUrl: string | undefined
     ): Promise<AnomalyDetectionAlertContext | undefined> => {
       const res = await fetchAnomalies(params);
 
@@ -466,6 +469,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
         ...result,
         name: result.key_as_string,
         anomalyExplorerUrl,
+        kibanaBaseUrl: publicBaseUrl!,
       };
     },
     /**

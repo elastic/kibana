@@ -12,6 +12,7 @@ import { SharedServices } from '../../shared_services';
 export interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
   mlSharedServices: SharedServices;
+  publicBaseUrl: string | undefined;
 }
 
 export function registerMlAlerts(params: RegisterAlertParams) {
