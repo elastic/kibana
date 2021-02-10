@@ -12,7 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { LicensingLogic } from '../../../../applications/shared/licensing';
+import { LicensingLogic } from '../../../shared/licensing';
 import { Loading } from '../../../shared/loading';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { AppLogic } from '../../app_logic';
