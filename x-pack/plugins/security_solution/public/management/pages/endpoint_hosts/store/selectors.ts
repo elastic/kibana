@@ -16,6 +16,7 @@ import {
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
   MetadataQueryStrategyVersions,
+  HostStatus,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
@@ -57,8 +58,6 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
 export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
-
-export const hostStatusInfo = (state: Immutable<EndpointState>) => state.hostStatus;
 
 export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
   return state.agentsWithEndpointsTotal > state.endpointsTotal;
@@ -223,6 +222,16 @@ export const showView: (state: EndpointState) => 'policy_response' | 'details' =
   uiQueryParams,
   (searchParams) => {
     return searchParams.show === 'policy_response' ? 'policy_response' : 'details';
+  }
+);
+
+/**
+ * Returns the Host Status which is connected the fleet agent
+ */
+export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
+  (state) => state.hostStatus,
+  (hostStatus) => {
+    return hostStatus ? hostStatus : HostStatus.ERROR;
   }
 );
 
