@@ -103,8 +103,8 @@ export const createThreatSignals = async ({
     };
     const threatResponse = await getThreatList({
       callCluster: services.callCluster,
-      exceptionItems: exceptionItems ?? [],
-      threatFilters: [...(threatFilters ?? []), matchedThreatsFilter],
+      exceptionItems,
+      threatFilters: [...threatFilters, matchedThreatsFilter],
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
@@ -117,7 +117,7 @@ export const createThreatSignals = async ({
       perPage: undefined,
     });
 
-    return threatResponse.hits.hits ?? [];
+    return threatResponse.hits.hits;
   };
 
   const threatEnrichment = (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
