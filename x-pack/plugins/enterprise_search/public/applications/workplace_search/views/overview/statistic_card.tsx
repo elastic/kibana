@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiCard, EuiFlexItem, EuiTitle, EuiTextColor } from '@elastic/eui';
 
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';

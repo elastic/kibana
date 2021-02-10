@@ -21,9 +21,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { DisplaySettingsLogic } from './display_settings_logic';
-
 import { DESCRIPTION_LABEL } from '../../../../constants';
+
 import {
   LEAVE_UNASSIGNED_FIELD,
   SEARCH_RESULTS_TITLE,
@@ -34,7 +33,7 @@ import {
   STANDARD_RESULTS_TITLE,
   STANDARD_RESULTS_DESCRIPTION,
 } from './constants';
-
+import { DisplaySettingsLogic } from './display_settings_logic';
 import { ExampleSearchResultGroup } from './example_search_result_group';
 import { ExampleStandoutResult } from './example_standout_result';
 

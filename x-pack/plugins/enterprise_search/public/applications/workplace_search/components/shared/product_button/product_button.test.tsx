@@ -9,7 +9,9 @@ import '../../../../__mocks__/kea.mock';
 import { mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 

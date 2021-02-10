@@ -9,7 +9,8 @@
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { vega, vegaLite } from '../lib/vega';
+import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
+import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +20,7 @@ import { esFilters } from '../../../data/public';
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
-vega.scheme('elastic', euiPaletteColorBlind());
+scheme('elastic', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -32,8 +33,8 @@ const vegaFunctions = {
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
-  if (!vega.expressionFunction(funcName)) {
-    vega.expressionFunction(funcName, function handlerFwd(...args) {
+  if (!expressionFunction(funcName)) {
+    expressionFunction(funcName, function handlerFwd(...args) {
       const view = this.context.dataflow;
       view.runAfter(() => view._kibanaView.vegaFunctionsHandler(funcName, ...args));
     });
@@ -164,9 +165,9 @@ export class VegaBaseView {
     };
 
     // Override URL sanitizer to prevent external data loading (if disabled)
-    const loader = vega.loader();
-    const originalSanitize = loader.sanitize.bind(loader);
-    loader.sanitize = (uri, options) => {
+    const vegaLoader = loader();
+    const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
+    vegaLoader.sanitize = (uri, options) => {
       if (uri.bypassToken === bypassToken) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
@@ -185,14 +186,14 @@ export class VegaBaseView {
       }
       return originalSanitize(uri, options);
     };
-    config.loader = loader;
+    config.loader = vegaLoader;
 
-    const logger = vega.logger(vega.Warn);
+    const vegaLogger = logger(Warn);
 
-    logger.warn = this.onWarn.bind(this);
-    logger.error = this.onError.bind(this);
+    vegaLogger.warn = this.onWarn.bind(this);
+    vegaLogger.error = this.onError.bind(this);
 
-    config.logger = logger;
+    config.logger = vegaLogger;
 
     return config;
   }
@@ -430,8 +431,8 @@ export class VegaBaseView {
       }
       const debugObj = {};
       window.VEGA_DEBUG = debugObj;
-      window.VEGA_DEBUG.VEGA_VERSION = vega.version;
-      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
+      window.VEGA_DEBUG.VEGA_VERSION = vegaVersion;
+      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLiteVersion;
       window.VEGA_DEBUG.view = view;
       window.VEGA_DEBUG.vega_spec = spec;
       window.VEGA_DEBUG.vegalite_spec = vlspec;
