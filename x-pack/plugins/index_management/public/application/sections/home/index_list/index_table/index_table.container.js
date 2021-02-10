@@ -76,8 +76,8 @@ const mapDispatchToProps = (dispatch) => {
     loadIndices: () => {
       dispatch(loadIndices());
     },
-    reloadIndices: (indexNames) => {
-      dispatch(reloadIndices(indexNames));
+    reloadIndices: (indexNames, options) => {
+      dispatch(reloadIndices(indexNames, options));
     },
   };
 };

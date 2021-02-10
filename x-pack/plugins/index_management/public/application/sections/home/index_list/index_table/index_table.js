@@ -103,7 +103,11 @@ export class IndexTable extends Component {
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(
-      () => this.props.reloadIndices(this.props.indices.map((i) => i.name)),
+      () =>
+        this.props.reloadIndices(
+          this.props.indices.map((i) => i.name),
+          { asSystemRequest: true }
+        ),
       REFRESH_RATE_INDEX_LIST
     );
     const { location, filterChanged } = this.props;
