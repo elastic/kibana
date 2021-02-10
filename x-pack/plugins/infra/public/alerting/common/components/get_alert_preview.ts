@@ -10,13 +10,15 @@ import {
   INFRA_ALERT_PREVIEW_PATH,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_ANOMALY_ALERT_TYPE_ID,
   AlertPreviewRequestParams,
   AlertPreviewSuccessResponsePayload,
 } from '../../../../common/alerting/metrics';
 
 export type PreviewableAlertTypes =
   | typeof METRIC_THRESHOLD_ALERT_TYPE_ID
-  | typeof METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
+  | typeof METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID
+  | typeof METRIC_ANOMALY_ALERT_TYPE_ID;
 
 export async function getAlertPreview({
   fetch,
