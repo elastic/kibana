@@ -81,6 +81,11 @@
     { "path": "../plugins/triggers_actions_ui/tsconfig.json" },
     { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../plugins/upgrade_assistant/tsconfig.json" },
-    { "path": "../plugins/watcher/tsconfig.json" }
+    { "path": "../plugins/watcher/tsconfig.json" },
+    { "path": "../plugins/rollup/tsconfig.json" },
+    { "path": "../plugins/remote_clusters/tsconfig.json" },
+    { "path": "../plugins/cross_cluster_replication/tsconfig.json" },
+    { "path": "../plugins/index_lifecycle_management/tsconfig.json"},
+    { "path": "../plugins/uptime/tsconfig.json" }
   ]
 }

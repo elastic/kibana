@@ -12,7 +12,6 @@ import { registerHelpers } from './rollup.test_helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
   const {
     createIndexWithMappings,
@@ -23,7 +22,7 @@ export default function ({ getService }) {
     startJob,
     stopJob,
     cleanUp,
-  } = registerHelpers({ supertest, es });
+  } = registerHelpers(getService);
 
   describe('jobs', () => {
     after(() => cleanUp());

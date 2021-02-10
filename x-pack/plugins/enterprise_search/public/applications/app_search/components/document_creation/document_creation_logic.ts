@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
 import dedent from 'dedent';
+import { kea, MakeLogicType } from 'kea';
 import { isPlainObject, chunk, uniq } from 'lodash';
 
 import { HttpLogic } from '../../../shared/http';

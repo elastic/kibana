@@ -6,12 +6,10 @@
  */
 
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 import { isEmpty } from 'lodash';
-import { Link } from 'react-router-dom';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -23,7 +21,12 @@ import {
   EuiFlexItem,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AppLogic } from '../../../app_logic';
+import { ContentSection } from '../../../components/shared/content_section';
+import { SourceConfigFields } from '../../../components/shared/source_config_fields';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   CANCEL_BUTTON,
   OK_BUTTON,
@@ -31,6 +34,7 @@ import {
   SAVE_CHANGES_BUTTON,
   REMOVE_BUTTON,
 } from '../../../constants';
+import { SourceDataItem } from '../../../types';
 import {
   SOURCE_SETTINGS_TITLE,
   SOURCE_SETTINGS_DESCRIPTION,
@@ -41,30 +45,23 @@ import {
   SOURCE_REMOVE_TITLE,
   SOURCE_REMOVE_DESCRIPTION,
 } from '../constants';
-
-import { ContentSection } from '../../../components/shared/content_section';
-import { SourceConfigFields } from '../../../components/shared/source_config_fields';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
-import { SourceDataItem } from '../../../types';
-import { AppLogic } from '../../../app_logic';
 import { staticSourceData } from '../source_data';
-
 import { SourceLogic } from '../source_logic';
 
+import { AddSourceLogic } from './add_source/add_source_logic';
+
 export const SourceSettings: React.FC = () => {
-  const {
-    updateContentSource,
-    removeContentSource,
-    resetSourceState,
-    getSourceConfigData,
-  } = useActions(SourceLogic);
+  const { updateContentSource, removeContentSource, resetSourceState } = useActions(SourceLogic);
+  const { getSourceConfigData } = useActions(AddSourceLogic);
 
   const {
     contentSource: { name, id, serviceType },
     buttonLoading,
-    sourceConfigData: { configuredFields },
   } = useValues(SourceLogic);
+
+  const {
+    sourceConfigData: { configuredFields },
+  } = useValues(AddSourceLogic);
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -72,6 +69,7 @@ export const SourceSettings: React.FC = () => {
     getSourceConfigData(serviceType);
     return resetSourceState;
   }, []);
+
   const {
     configuration: { isPublicKey },
     editPath,

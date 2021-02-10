@@ -24,6 +24,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
     async createIndices(indices: string) {
@@ -104,7 +105,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
       // Delete all transform related notifications to clear messages tabs
       // in the transforms list expanded rows.
-      await this.deleteIndices('.transform-notifications-*');
+      await esDeleteAllIndices('.transform-notifications-*');
     },
 
     async getTransformStats(transformId: string): Promise<TransformStats> {

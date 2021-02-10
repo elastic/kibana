@@ -12,7 +12,10 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchHelpers = (es) => {
+export const initElasticsearchHelpers = (getService) => {
+  const es = getService('legacyEs');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   let indicesCreated = [];
   let componentTemplatesCreated = [];
 
@@ -21,13 +24,10 @@ export const initElasticsearchHelpers = (es) => {
     return es.indices.create({ index, body }).then(() => index);
   };
 
-  const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter((i) => i !== index);
-    return es.indices.delete({ index, ignoreUnavailable: true });
+  const deleteAllIndices = async () => {
+    await esDeleteAllIndices(indicesCreated);
+    indicesCreated = [];
   };
-
-  const deleteAllIndices = () =>
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => (indicesCreated = []));
 
   const catIndex = (index, h) => es.cat.indices({ index, format: 'json', h });
 
@@ -61,7 +61,6 @@ export const initElasticsearchHelpers = (es) => {
 
   return {
     createIndex,
-    deleteIndex,
     deleteAllIndices,
     catIndex,
     indexStats,
