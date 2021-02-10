@@ -93,4 +93,4 @@ node scripts/build_plugin_list_docs
 
 #######################
 
-node scripts/jest --config jest.config.oss.js --ci --verbose
+node scripts/jest --ci --verbose
