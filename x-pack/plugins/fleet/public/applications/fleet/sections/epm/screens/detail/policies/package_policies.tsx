@@ -17,11 +17,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
-import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { InstallStatus } from '../../../../../types';
 import { useLink, useStartServices, useUrlPagination } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { LinkAndRevision, LinkAndRevisionProps, } from '../../../../../components';
+import { LinkAndRevision, LinkAndRevisionProps } from '../../../../../components';
 import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
 import { useGetPackageInstallStatus } from '../../../hooks';
 import {
@@ -57,17 +56,15 @@ const AgentPolicyDetailLink = memo<{
   const { application } = useStartServices();
 
   return (
-    <RedirectAppLinks application={application}>
-      <LinkAndRevision
-        className="eui-textTruncate"
-        revision={revision}
-        href={getHref('policy_details', {
-          policyId: agentPolicyId,
-        })}
-      >
-        {children}
-      </LinkAndRevision>
-    </RedirectAppLinks>
+    <LinkAndRevision
+      className="eui-textTruncate"
+      revision={revision}
+      href={getHref('policy_details', {
+        policyId: agentPolicyId,
+      })}
+    >
+      {children}
+    </LinkAndRevision>
   );
 });
 
@@ -146,14 +143,12 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         width: '8ch',
         render({ packagePolicy, agentPolicy }: PackagePolicyAndAgentPolicy) {
           return (
-            <RedirectAppLinks application={application}>
-              <LinkedAgentCount
-                count={agentPolicy?.agents ?? 0}
-                agentPolicyId={packagePolicy.policy_id}
-                className="eui-textTruncate"
-                data-test-subj="rowAgentCount"
-              />
-            </RedirectAppLinks>
+            <LinkedAgentCount
+              count={agentPolicy?.agents ?? 0}
+              agentPolicyId={packagePolicy.policy_id}
+              className="eui-textTruncate"
+              data-test-subj="rowAgentCount"
+            />
           );
         },
       },
@@ -206,7 +201,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
   if (packageInstallStatus.status !== InstallStatus.installed) {
-    return <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />;
+    return (
+      <Redirect to={getPath('integration_details_overview', { pkgkey: `${name}-${version}` })} />
+    );
   }
 
   return (
