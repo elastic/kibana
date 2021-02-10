@@ -25,7 +25,8 @@ is officially recommended for use in production. *Alerting* guides you
 through building your alerts, provides seamless integration with
 *Elastic Security* and *Elastic Observability*, integrates with the external
 systems where your workflows run, and more. For more information,
-check out {kibana-ref}/alerting-getting-started.html[Alerting and Actions].
+check out the
+https://www.elastic.co/blog/elastic-stack-alerting-now-generally-available[{kib} alerting GA 7.11 blog].
 
 [role="screenshot"]
 image::user/images/highlights-alerting.png[Alerts and actions]
@@ -121,7 +122,8 @@ image::user/images/highlights-visualization-chooser.png[Improved visualization c
 The Elastic Maps Service powers *Maps* for most instances of {kib}.
 In 7.11, for customers in a secure, air-gapped environment, you can now use the
 same maps and boundaries that come with {kib} by default. The Elastic Maps Server
-can be downloaded and deployed to your self-managed environment.
+can be
+https://www.elastic.co/downloads/elastic-maps-server[downloaded and deployed to your self-managed environment].
 
 [float]
 ==== Tracks layer
