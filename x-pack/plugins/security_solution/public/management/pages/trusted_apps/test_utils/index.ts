@@ -44,6 +44,7 @@ const generate = <T>(count: number, generator: (i: number) => T) =>
 export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedApp => {
   return {
     id: String(i),
+    version: 'abc123',
     name: generate(longTexts ? 10 : 1, () => `trusted app ${i}`).join(' '),
     description: generate(longTexts ? 10 : 1, () => `Trusted App ${i}`).join(' '),
     created_at: '1 minute ago',
