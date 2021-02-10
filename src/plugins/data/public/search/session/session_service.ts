@@ -270,8 +270,12 @@ export class SessionService {
    * @param sessionId
    */
   public getSearchOptions(
-    sessionId: string
+    sessionId?: string
   ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> | null {
+    if (!sessionId) {
+      return null;
+    }
+
     // in case user doesn't have permissions to search session, do not forward sessionId to the server
     // because user most likely also doesn't have access to `search-session` SO
     if (!this.hasAccessToSearchSessions) {

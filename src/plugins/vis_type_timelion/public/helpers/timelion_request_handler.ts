@@ -94,8 +94,7 @@ export function getTimelionRequestHandler({
       });
 
     try {
-      const searchSessionOptions =
-        searchSessionId && dataSearch.session.getSearchOptions(searchSessionId);
+      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
       return await http.post('/api/timelion/run', {
         body: JSON.stringify({
           sheet: [expression],

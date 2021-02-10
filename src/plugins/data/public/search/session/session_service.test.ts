@@ -159,6 +159,8 @@ describe('Session service', () => {
       isRestore: true,
       sessionId,
     });
+
+    expect(sessionService.getSearchOptions(undefined)).toBeNull();
   });
   test('isCurrentSession', () => {
     expect(sessionService.isCurrentSession()).toBeFalsy();

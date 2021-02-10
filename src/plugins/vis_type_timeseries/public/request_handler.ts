@@ -48,8 +48,7 @@ export const metricsRequestHandler = async ({
       });
 
     try {
-      const searchSessionOptions =
-        searchSessionId && dataSearch.session.getSearchOptions(searchSessionId);
+      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
       return await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
