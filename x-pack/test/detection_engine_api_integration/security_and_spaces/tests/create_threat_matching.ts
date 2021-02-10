@@ -484,6 +484,11 @@ export default ({ getService }: FtrProviderContext) => {
                   provider: 'other_provider',
                   type: 'ip',
                 },
+                // We do not merge matched indicators during enrichment, so in
+                // certain circumstances a given indicator document could appear
+                // multiple times in an enriched alert (albeit with different
+                // threat.indicator.matched data). That's the case with the
+                // first and third indicators matched, here.
                 {
                   description: 'this should match auditbeat/hosts on both port and ip',
                   first_seen: '2021-01-26T11:06:03.000Z',
