@@ -148,7 +148,7 @@ export const previewMetricThresholdAlert: (
             notifyWithThrottle('fired');
           } else if (allConditionsWarnInMappedBucket) {
             numberOfTimesWarned++;
-            notifyWithThrottle('fired');
+            notifyWithThrottle('warning');
           } else {
             previousActionGroup = 'recovered';
             if (throttleTracker > 0) {

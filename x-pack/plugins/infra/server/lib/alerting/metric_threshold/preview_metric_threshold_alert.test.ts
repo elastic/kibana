@@ -91,10 +91,10 @@ describe('Previewing the metric threshold alert type', () => {
         alertOnNoData: true,
         alertNotifyWhen: 'onActionGroupChange',
       });
-      const [firedResults, noDataResults, errorResults, notifications] = ungroupedResult;
-      expect(firedResults).toBe(20);
-      expect(noDataResults).toBe(0);
-      expect(errorResults).toBe(0);
+      const { fired, noData, error, notifications } = ungroupedResult;
+      expect(fired).toBe(20);
+      expect(noData).toBe(0);
+      expect(error).toBe(0);
       expect(notifications).toBe(20);
     });
   });
