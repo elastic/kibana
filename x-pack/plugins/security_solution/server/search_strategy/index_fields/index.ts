@@ -7,7 +7,12 @@
 
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
-import { IndexPatternsFetcher, ISearchStrategy } from '../../../../../../src/plugins/data/server';
+import {
+  IFieldType,
+  IndexPatternsFetcher,
+  ISearchStrategy,
+  PluginStart,
+} from '../../../../../../src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FieldDescriptor } from '../../../../../../src/plugins/data/server/index_patterns';
 import {
@@ -17,11 +22,11 @@ import {
   BeatFields,
   SourcererPatternType,
 } from '../../../common/search_strategy/index_fields';
+import { FactoryQueryTypes } from '../../../common/search_strategy/security_solution';
 
-export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse
-> => {
+export const securitySolutionIndexFieldsProvider = <T extends FactoryQueryTypes>(
+  data: PluginStart
+): ISearchStrategy<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse> => {
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -50,29 +55,27 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
     },
   };
   return {
-    search: (request, options, { esClient }) =>
+    search: (request, options, { esClient, savedObjectsClient }) =>
       from(
         new Promise<IndexFieldsStrategyResponse>(async (resolve) => {
           const indexPatternsFetcher = new IndexPatternsFetcher(esClient.asCurrentUser);
-          // const dedupeIndices = selectedPatterns.length > 1 ? dedupeIndexName(request.selectedPatterns);
-          let responsesIndexFields: FieldDescriptor[] = [];
+          let responsesIndexFields: FieldDescriptor[] | IFieldType[] = [];
           let selectedIndexNames: string[] = [];
           let indexFields: IndexField[] = [];
-          console.log('request', JSON.stringify(request));
           if (
             request.selectedPatterns.length === 1 &&
             request.selectedPatterns[0].id !== SourcererPatternType.config &&
             request.selectedPatterns[0].id !== SourcererPatternType.detections
           ) {
-            // selected pattern is a KIP, get fields from KIP API
+            const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+              savedObjectsClient,
+              esClient.asCurrentUser
+            );
             selectedIndexNames = [request.selectedPatterns[0].title];
-            // responsesIndexFields = something!
-            console.log('here we are, a KIP!!', request.selectedPatterns);
-            responsesIndexFields = await indexPatternsFetcher.getFieldsForWildcard({
-              pattern: selectedIndexNames.join(),
-            });
+            // selected pattern is a KIP, get fields from KIP API
+            const ourPattern = await indexPatternsService.get(request.selectedPatterns[0].id);
+            responsesIndexFields = ourPattern.fields;
           } else if (request.selectedPatterns.length > 0) {
-            console.log('looloo config');
             selectedIndexNames = dedupeIndexName(
               request.selectedPatterns.map(({ title }) => title)
             );
@@ -132,7 +135,10 @@ const missingFields: FieldDescriptor[] = [
  * @param beatFields The generated beat documentation
  * @param index The index its self
  */
-export const createFieldItem = (beatFields: BeatFields, index: FieldDescriptor): IndexField => {
+export const createFieldItem = (
+  beatFields: BeatFields,
+  index: FieldDescriptor | IFieldType
+): IndexField => {
   const splitIndexName = index.name.split('.');
   const indexName =
     splitIndexName[splitIndexName.length - 1] === 'text'
@@ -145,6 +151,9 @@ export const createFieldItem = (beatFields: BeatFields, index: FieldDescriptor):
   return {
     ...beatIndex,
     ...index,
+    aggregatable: index.aggregatable != null ? index.aggregatable : false,
+    readFromDocValues: index.readFromDocValues != null ? index.readFromDocValues : false,
+    searchable: index.searchable != null ? index.searchable : false,
   };
 };
 
@@ -164,13 +173,13 @@ export const createFieldItem = (beatFields: BeatFields, index: FieldDescriptor):
  */
 export const formatFieldsResponsibly = async (
   beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[]
+  responsesIndexFields: FieldDescriptor[] | IFieldType[]
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(
         [...missingFields, ...responsesIndexFields].reduce(
-          (accumulator: IndexField[], fieldDescriptor: FieldDescriptor) => {
+          (accumulator: IndexField[], fieldDescriptor: FieldDescriptor | IFieldType) => {
             const item = createFieldItem(beatFields, fieldDescriptor);
             return [...accumulator, item];
           },
@@ -192,7 +201,7 @@ export const formatFieldsResponsibly = async (
  */
 export const formatIndexFields = async (
   beatFields: BeatFields,
-  responsesIndexFields: FieldDescriptor[]
+  responsesIndexFields: FieldDescriptor[] | IFieldType[]
 ): Promise<IndexField[]> => {
   const fields = await formatFieldsResponsibly(beatFields, responsesIndexFields);
   return fields;

@@ -298,7 +298,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
-      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
+      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider(depsStart.data);
 
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
