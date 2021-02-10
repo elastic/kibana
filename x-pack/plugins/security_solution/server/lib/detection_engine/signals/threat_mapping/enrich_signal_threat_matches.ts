@@ -20,23 +20,23 @@ const DEFAULT_INDICATOR_PATH = 'threat.indicator';
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
 export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
-  const dedupedHitsMap = signalHits.reduce<Map<unknown, SignalSourceHit>>((acc, signalHit) => {
+  const dedupedHitsMap = signalHits.reduce<Record<string, SignalSourceHit>>((acc, signalHit) => {
     const signalId = getSignalId(signalHit);
-    const existingSignalHit = acc.get(signalId);
+    const existingSignalHit = acc[signalId];
 
     if (existingSignalHit == null) {
-      acc.set(signalId, signalHit);
+      acc[signalId] = signalHit;
     } else {
       const existingQueries = existingSignalHit?.matched_queries ?? [];
       const newQueries = signalHit.matched_queries ?? [];
       existingSignalHit.matched_queries = [...existingQueries, ...newQueries];
 
-      acc.set(signalId, existingSignalHit);
+      acc[signalId] = existingSignalHit;
     }
 
     return acc;
-  }, new Map());
-  const dedupedHits = Array.from(dedupedHitsMap.values());
+  }, {});
+  const dedupedHits = Object.values(dedupedHitsMap);
   return dedupedHits;
 };
 
