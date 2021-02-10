@@ -70,7 +70,7 @@ export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
       </EuiFlexItem>
     ) : null;
   return (
-    <div className="lnsExpressionRendererEmbeddedError">
+    <div className="lnsExpressionRenderer__embeddedError">
       <EuiFlexGroup
         direction="column"
         justifyContent="center"
