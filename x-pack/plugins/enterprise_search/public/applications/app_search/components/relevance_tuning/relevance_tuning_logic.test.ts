@@ -320,24 +320,32 @@ describe('RelevanceTuningLogic', () => {
       });
 
       it('should make an API call and set state based on the response', async () => {
+        const searchSettingsWithNewBoostProp = {
+          boosts: {
+            foo: [
+              {
+                type: 'value' as BoostType,
+                factor: 5,
+                newBoost: true, // This should be deleted before sent to the server
+              },
+            ],
+          },
+        };
+
+        const searchSettingsWithoutNewBoostProp = {
+          boosts: {
+            foo: [
+              {
+                type: 'value' as BoostType,
+                factor: 5,
+              },
+            ],
+          },
+        };
+
         mount({
           query: 'foo',
-          searchSettings: {
-            boosts: {
-              foo: [
-                {
-                  type: 'value' as BoostType,
-                  factor: 5,
-                  newBoost: true, // This should be deleted before sent to the server
-                },
-              ],
-            },
-            search_fields: {
-              foo: {
-                weight: 1,
-              },
-            },
-          },
+          searchSettings: searchSettingsWithNewBoostProp,
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchResults');
         jest.spyOn(RelevanceTuningLogic.actions, 'setResultsLoading');
@@ -355,8 +363,7 @@ describe('RelevanceTuningLogic', () => {
         expect(http.post).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings_search',
           {
-            body:
-              '{"boosts":{"foo":[{"type":"value","factor":5}]},"search_fields":{"foo":{"weight":1}}}',
+            body: JSON.stringify(searchSettingsWithoutNewBoostProp),
             query: {
               query: 'foo',
             },
@@ -464,11 +471,33 @@ describe('RelevanceTuningLogic', () => {
 
     describe('updateSearchSettings', () => {
       it('calls an API endpoint and handles success response', async () => {
+        const searchSettingsWithNewBoostProp = {
+          boosts: {
+            foo: [
+              {
+                type: 'value' as BoostType,
+                factor: 5,
+                newBoost: true, // This should be deleted before sent to the server
+              },
+            ],
+          },
+        };
+
+        const searchSettingsWithoutNewBoostProp = {
+          boosts: {
+            foo: [
+              {
+                type: 'value' as BoostType,
+                factor: 5,
+              },
+            ],
+          },
+        };
         mount({
-          searchSettings,
+          searchSettings: searchSettingsWithNewBoostProp,
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'onSearchSettingsSuccess');
-        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettingsWithoutNewBoostProp));
 
         RelevanceTuningLogic.actions.updateSearchSettings();
         await nextTick();
@@ -476,14 +505,14 @@ describe('RelevanceTuningLogic', () => {
         expect(http.put).toHaveBeenCalledWith(
           '/api/app_search/engines/test-engine/search_settings',
           {
-            body: JSON.stringify(searchSettings),
+            body: JSON.stringify(searchSettingsWithoutNewBoostProp),
           }
         );
         expect(setSuccessMessage).toHaveBeenCalledWith(
           'Relevance successfully tuned. The changes will impact your results shortly.'
         );
         expect(RelevanceTuningLogic.actions.onSearchSettingsSuccess).toHaveBeenCalledWith(
-          searchSettings
+          searchSettingsWithoutNewBoostProp
         );
       });
 
@@ -866,33 +895,15 @@ describe('RelevanceTuningLogic', () => {
     });
 
     describe('updateBoostCenter', () => {
-      it('will update the boost center', () => {
+      it('will parse the provided provided value and set the center to that parsed value', () => {
         mount({
+          schema: {
+            foo: 'number',
+          },
           searchSettings: searchSettingsWithBoost({
             factor: 1,
             type: 'proximity',
-            center: 2.2,
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.updateBoostCenter('foo', 1, 5);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'proximity',
-            center: 5,
-          })
-        );
-      });
-
-      it('will also work with strings', () => {
-        mount({
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'proximity',
-            center: 3,
+            center: 1,
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
@@ -903,55 +914,7 @@ describe('RelevanceTuningLogic', () => {
           searchSettingsWithBoost({
             factor: 1,
             type: 'proximity',
-            center: '4',
-          })
-        );
-      });
-
-      it('will parse the numeric string if the field type is a number', () => {
-        mount({
-          schema: {
-            foo: 'number',
-          },
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'proximity',
             center: 4,
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.updateBoostCenter('foo', 1, '5');
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'proximity',
-            center: 5,
-          })
-        );
-      });
-
-      it('will leave a string as a string if the number value cannot be parsed', () => {
-        mount({
-          schema: {
-            foo: 'number',
-          },
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'proximity',
-            center: 5,
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.updateBoostCenter('foo', 1, 'whatever');
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'proximity',
-            center: 'whatever',
           })
         );
       });
@@ -1176,24 +1139,6 @@ describe('RelevanceTuningLogic', () => {
           },
         });
         expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual(['bar', 'baz']);
-      });
-
-      it('should return all schema fields if there is no filter applied', () => {
-        mount({
-          filterTerm: '',
-          schema: {
-            id: 'string',
-            foo: 'string',
-            bar: 'string',
-            baz: 'string',
-          },
-        });
-        expect(RelevanceTuningLogic.values.filteredSchemaFields).toEqual([
-          'id',
-          'foo',
-          'bar',
-          'baz',
-        ]);
       });
     });
 

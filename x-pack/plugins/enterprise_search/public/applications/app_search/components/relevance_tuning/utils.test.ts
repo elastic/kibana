@@ -5,7 +5,74 @@
  * 2.0.
  */
 import { BoostType } from './types';
-import { normalizeBoostValues } from './utils';
+import {
+  filterIfTerm,
+  normalizeBoostValues,
+  removeBoostStateProps,
+  parseBoostCenter,
+} from './utils';
+
+describe('filterIfTerm', () => {
+  it('will filter a list of strings to a list of strings containing the specified string', () => {
+    expect(filterIfTerm(['jalepeno', 'no', 'not', 'panorama', 'truck'], 'no')).toEqual([
+      'jalepeno',
+      'no',
+      'not',
+      'panorama',
+    ]);
+  });
+
+  it('will not filter at all if an empty string is provided', () => {
+    expect(filterIfTerm(['jalepeno', 'no', 'not', 'panorama', 'truck'], '')).toEqual([
+      'jalepeno',
+      'no',
+      'not',
+      'panorama',
+      'truck',
+    ]);
+  });
+});
+
+describe('removeBoostStateProps', () => {
+  it('will remove the newBoost flag from boosts within the provided searchSettings object', () => {
+    const searchSettings = {
+      boosts: {
+        foo: [
+          {
+            type: 'value' as BoostType,
+            factor: 5,
+            newBoost: true,
+          },
+        ],
+      },
+      search_fields: {
+        foo: {
+          weight: 1,
+        },
+      },
+    };
+    expect(removeBoostStateProps(searchSettings)).toEqual({
+      ...searchSettings,
+      boosts: {
+        foo: [
+          {
+            type: 'value' as BoostType,
+            factor: 5,
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('parseBoostCenter', () => {
+  it('should parse a boost center', () => {
+    expect(parseBoostCenter('text', 5)).toEqual(5);
+    expect(parseBoostCenter('text', '4')).toEqual('4');
+    expect(parseBoostCenter('number', 5)).toEqual(5);
+    expect(parseBoostCenter('number', '5')).toEqual(5);
+  });
+});
 
 describe('normalizeBoostValues', () => {
   const boosts = {
