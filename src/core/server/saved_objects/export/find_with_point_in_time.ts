@@ -165,7 +165,7 @@ export class FindWithPointInTime {
         sortOrder: 'desc',
         // Bump keep_alive by 2m on every new request to allow for the ES client
         // to make multiple retries in the event of a network failure.
-        ...(id ? { pit: { keepAlive: '2m', ...findOptions.pit, id } } : {}),
+        ...(id ? { pit: { id, keepAlive: '2m' } } : {}),
         ...(searchAfter ? { searchAfter } : {}),
         ...findOptions,
       });
