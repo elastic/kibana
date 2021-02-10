@@ -17,12 +17,15 @@ export const migrateAgentToV7120: SavedObjectMigrationFn<Agent & { shared_id?: s
 };
 
 export const migrateAgentPolicyToV7120: SavedObjectMigrationFn<
-  Exclude<AgentPolicy, 'is_managed'>,
+  Exclude<AgentPolicy, 'is_managed' | 'is_default_fleet_server'>,
   AgentPolicy
 > = (agentPolicyDoc) => {
-  const isV12 = 'is_managed' in agentPolicyDoc.attributes;
-  if (!isV12) {
+  if (!('is_managed' in agentPolicyDoc.attributes)) {
     agentPolicyDoc.attributes.is_managed = false;
   }
+  if (!('is_default_fleet_server' in agentPolicyDoc.attributes)) {
+    agentPolicyDoc.attributes.is_default_fleet_server = false;
+  }
+
   return agentPolicyDoc;
 };

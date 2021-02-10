@@ -56,15 +56,20 @@ async function createSetupSideEffects(
   esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
+  const isFleetServerEnabled = appContextService.getConfig()?.agents.fleetServerEnabled;
   const [
     installedPackages,
     defaultOutput,
     { created: defaultAgentPolicyCreated, defaultAgentPolicy },
+    { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
   ] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
+    isFleetServerEnabled
+      ? agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient)
+      : {},
     updateFleetRoleIfExists(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -83,7 +88,7 @@ async function createSetupSideEffects(
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
   await ensurePackagesCompletedInstall(soClient, callCluster);
-  if (appContextService.getConfig()?.agents.fleetServerEnabled) {
+  if (isFleetServerEnabled) {
     await ensureInstalledPackage({
       savedObjectsClient: soClient,
       pkgName: FLEET_SERVER_PACKAGE,
@@ -94,14 +99,27 @@ async function createSetupSideEffects(
   }
 
   if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
-    await ensureInstalledPackage({
+    const fleetServerPackage = await ensureInstalledPackage({
       savedObjectsClient: soClient,
       pkgName: FLEET_SERVER_PACKAGE,
       callCluster,
     });
     await ensureFleetServerIndicesCreated(esClient);
     await runFleetServerMigration();
+
+    if (defaultFleetServerPolicyCreated) {
+      await addPackageToAgentPolicy(
+        soClient,
+        esClient,
+        callCluster,
+        fleetServerPackage,
+        defaultFleetServerPolicy,
+        defaultOutput
+      );
+    }
   }
+
+  // If we just created the default fleet server policy add the fleet server package
 
   // If we just created the default policy, ensure default packages are added to it
   if (defaultAgentPolicyCreated) {
