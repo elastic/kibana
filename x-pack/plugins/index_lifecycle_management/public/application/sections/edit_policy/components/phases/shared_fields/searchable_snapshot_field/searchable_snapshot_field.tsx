@@ -185,6 +185,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           <div className="ilmSearchableSnapshotField">
             <UseField<string>
               config={{
+                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
                 defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
                 validations: [
                   {
@@ -209,6 +210,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                         value: singleSelectionArray,
                       } as any
                     }
+                    label={field.label}
                     fullWidth={false}
                     euiFieldProps={{
                       'data-test-subj': 'searchableSnapshotCombobox',
