@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
 import { InstallStatus } from '../../../../../types';
-import { useLink, useStartServices, useUrlPagination } from '../../../../../hooks';
+import { useLink, useUrlPagination } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { LinkAndRevision, LinkAndRevisionProps } from '../../../../../components';
 import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
@@ -53,7 +53,6 @@ const AgentPolicyDetailLink = memo<{
   children: ReactNode;
 }>(({ agentPolicyId, revision, children }) => {
   const { getHref } = useLink();
-  const { application } = useStartServices();
 
   return (
     <LinkAndRevision
@@ -74,7 +73,6 @@ interface PackagePoliciesPanelProps {
 }
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { getPath } = useLink();
-  const { application } = useStartServices();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
@@ -177,7 +175,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
     ],
-    [application]
+    []
   );
 
   const noItemsMessage = useMemo(() => {
