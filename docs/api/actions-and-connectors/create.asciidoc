@@ -102,10 +102,6 @@ The API returns the following:
 | `.servicenow`
 | <<servicenow-connector-config-properties, ServiceNow ITSM config and secrets properties>>
 
-| ServiceNow SecOps
-| `.servicenow-sir`
-| <<servicenow-connector-config-properties, ServiceNow SIR config and secrets properties>>
-
 | Slack
 | `.slack`
 | <<slack-connector-config-properties, Slack config and secrets properties>>

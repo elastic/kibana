@@ -117,10 +117,6 @@ The API returns the following:
 | `.servicenow`
 | <<servicenow-action-configuration, ServiceNow ITSM action parameters>>
 
-| ServiceNow SecOps
-| `.servicenow-sir`
-| <<servicenow-action-configuration, ServiceNow SIR action parameters>>
-
 | Slack
 | `.slack`
 | <<slack-action-configuration, Slack action parameters>>
