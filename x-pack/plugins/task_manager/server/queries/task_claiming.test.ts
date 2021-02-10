@@ -226,33 +226,27 @@ describe('TaskClaiming', () => {
           must: [
             {
               bool: {
-                must: [
+                should: [
                   {
                     bool: {
-                      should: [
+                      must: [
+                        { term: { 'task.status': 'idle' } },
+                        { range: { 'task.runAt': { lte: 'now' } } },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
                         {
                           bool: {
-                            must: [
-                              { term: { 'task.status': 'idle' } },
-                              { range: { 'task.runAt': { lte: 'now' } } },
+                            should: [
+                              { term: { 'task.status': 'running' } },
+                              { term: { 'task.status': 'claiming' } },
                             ],
                           },
                         },
-                        {
-                          bool: {
-                            must: [
-                              {
-                                bool: {
-                                  should: [
-                                    { term: { 'task.status': 'running' } },
-                                    { term: { 'task.status': 'claiming' } },
-                                  ],
-                                },
-                              },
-                              { range: { 'task.retryAt': { lte: 'now' } } },
-                            ],
-                          },
-                        },
+                        { range: { 'task.retryAt': { lte: 'now' } } },
                       ],
                     },
                   },
