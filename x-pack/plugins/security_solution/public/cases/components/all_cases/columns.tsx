@@ -19,9 +19,9 @@ import {
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../case/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { Case, CaseType } from '../../containers/types';
+import { Case } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { CaseDetailsLink } from '../../../common/components/links';
 import * as i18n from './translations';
@@ -66,7 +66,7 @@ export const getCasesColumns = (
             <CaseDetailsLink
               detailName={theCase.caseParentId ?? theCase.id}
               title={theCase.title}
-              subCaseId={theCase.type === CaseType.subCase ? theCase.id : undefined}
+              subCaseId={theCase.type === CaseType.individual ? theCase.id : undefined}
             >
               {theCase.title}
             </CaseDetailsLink>

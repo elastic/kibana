@@ -8,8 +8,9 @@
 import React from 'react';
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import styled from 'styled-components';
-import { Case, AllCaseType } from '../../containers/types';
+import { Case } from '../../containers/types';
 import { CasesColumns } from './columns';
+import { CaseType } from '../../../../../case/common/api';
 
 type ExpandedRowMap = Record<string, Element> | {};
 
@@ -47,7 +48,7 @@ export const getExpandedRowMap = ({
         ...subCase,
         caseParentId: curr.id,
         title: `${curr.title} ${index + 1}`,
-        type: AllCaseType.subCase,
+        type: CaseType.individual,
       }));
       return {
         ...acc,
