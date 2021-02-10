@@ -87,12 +87,11 @@ export const PrivateSources: React.FC = () => {
 
   const privateSourcesEmptyState = (
     <ContentSection
-      className="zero-state__private-sources"
       title={PRIVATE_HEADER_TITLE}
       description={PRIVATE_HEADER_DESCRIPTION}
       action={canAddSources && headerAction}
     >
-      <EuiPanel className="euiPanel--inset">
+      <EuiPanel>
         <EuiSpacer size="xxl" />
         <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
         <EuiSpacer size="xxl" />
@@ -101,8 +100,8 @@ export const PrivateSources: React.FC = () => {
   );
 
   const sharedSourcesEmptyState = (
-    <ContentSection className="zero-state__private-sources">
-      <EuiPanel className="euiPanel--inset">
+    <ContentSection>
+      <EuiPanel>
         <EuiSpacer size="xxl" />
         <EuiEmptyPrompt
           iconType={noSharedSourcesIcon}
