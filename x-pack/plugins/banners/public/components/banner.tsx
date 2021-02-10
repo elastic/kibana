@@ -9,6 +9,8 @@ import React, { FC } from 'react';
 import { Markdown } from '../../../../../src/plugins/kibana_react/public';
 import { BannerConfiguration } from '../../common';
 
+import './banner.scss';
+
 interface BannerProps {
   bannerConfig: BannerConfiguration;
 }
@@ -17,11 +19,8 @@ export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
   const { textContent, textColor, backgroundColor } = bannerConfig;
   return (
     <div
+      className="kbnUserBanner__container"
       style={{
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         backgroundColor,
         color: textColor,
       }}
