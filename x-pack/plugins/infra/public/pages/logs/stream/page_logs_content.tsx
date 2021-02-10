@@ -76,6 +76,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     fetchEntries,
     fetchPreviousEntries,
     fetchNextEntries,
+    fetchNewestEntries,
   } = useLogStreamContext();
 
   const prevStartTimestamp = usePrevious(startTimestamp);
@@ -105,10 +106,16 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       isCenterPointOutsideLoadedRange ||
       hasQueryChanged
     ) {
-      fetchEntries();
+      if (isStreaming) {
+        fetchNewestEntries();
+      } else {
+        fetchEntries();
+      }
     }
   }, [
     fetchEntries,
+    fetchNewestEntries,
+    isStreaming,
     prevStartTimestamp,
     prevEndTimestamp,
     startTimestamp,
