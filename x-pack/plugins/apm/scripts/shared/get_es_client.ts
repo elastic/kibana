@@ -12,9 +12,7 @@ import {
   ESSearchRequest,
 } from '../../../../typings/elasticsearch';
 
-export type ESClient = Client & {
-  search(request: any): Promise<any>;
-};
+export type ESClient = ReturnType<typeof getEsClient>;
 
 export function getEsClient({
   node,
@@ -22,7 +20,7 @@ export function getEsClient({
 }: {
   node: string;
   auth?: BasicAuth | ApiKeyAuth;
-}): ESClient {
+}) {
   const client = new Client({
     node,
     ssl: {
@@ -32,18 +30,25 @@ export function getEsClient({
     auth,
   });
 
-  return {
-    ...client,
-    // @ts-ignore
-    async search<TDocument, TSearchRequest extends ESSearchRequest>(
-      request: TSearchRequest
-    ) {
-      const response = await client.search(request as any);
+  async function search<
+    TDocument = unknown,
+    TSearchRequest extends ESSearchRequest = ESSearchRequest
+  >(request: TSearchRequest) {
+    const response = await client.search<TDocument>(request);
 
-      return {
-        ...response,
-        body: response.body as ESSearchResponse<TDocument, TSearchRequest>,
-      };
-    },
+    return {
+      ...response,
+      body: (response.body as unknown) as ESSearchResponse<
+        TDocument,
+        TSearchRequest
+      >,
+    };
+  }
+
+  // @ts-expect-error
+  client.search = search;
+
+  return (client as unknown) as Omit<Client, 'search'> & {
+    search: typeof search;
   };
 }
