@@ -226,9 +226,9 @@ export class TaskClaiming {
             }).then((result) => {
               const { stats, docs } = accumulateClaimOwnershipResults(accumulatedResult, result);
               stats.tasksConflicted = correctVersionConflictsForContinuation(
-                stats.tasksUpdated,
+                stats.tasksClaimed,
                 stats.tasksConflicted,
-                capacity
+                initialCapacity
               );
               return { stats, docs, timing: stopTaskTimer() };
             })
@@ -384,11 +384,9 @@ export class TaskClaiming {
     const result = await this.taskStore.updateByQuery(
       asUpdateByQuery({
         query: matchesClauses(
-          mustBeAllOf(
-            claimTasksById && claimTasksById.length
-              ? asPinnedQuery(claimTasksById, queryForScheduledTasks)
-              : queryForScheduledTasks
-          ),
+          claimTasksById && claimTasksById.length
+            ? mustBeAllOf(asPinnedQuery(claimTasksById, queryForScheduledTasks))
+            : queryForScheduledTasks,
           filterDownBy(InactiveTasks)
         ),
         update: updateFieldsAndMarkAsFailed(

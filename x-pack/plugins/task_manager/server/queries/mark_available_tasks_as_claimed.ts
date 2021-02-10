@@ -140,6 +140,8 @@ export const updateFieldsAndMarkAsFailed = (
       ${markAsClaimingScript}
     } else if (!params.skippedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
+    } else {
+      ctx.op = "noop";
     }`,
     lang: 'painless',
     params: {
