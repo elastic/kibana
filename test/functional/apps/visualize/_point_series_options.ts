@@ -169,9 +169,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.toggleGridCategoryLines();
         await PageObjects.visEditor.clickGo();
         const gridLines = await PageObjects.visChart.getGridLines();
-        // FLAKY relaxing as depends on chart size/browser size and produce differences between local and CI
-        // The objective here is to check whenever the grid lines are rendered, not the exact quantity
-        expect(gridLines.length).to.be.greaterThan(0);
+        const expectedCount = await PageObjects.visChart.getExpectedValue(9, 6);
+        expect(gridLines.length).to.be(expectedCount);
         gridLines.forEach((gridLine) => {
           expect(gridLine.y).to.be(0);
         });
@@ -268,14 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show round labels in default timezone', async function () {
         const expectedLabels = await PageObjects.visChart.getExpectedValue(
           ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00'],
-          [
-            '2015-09-20 00:00',
-            '2015-09-20 12:00',
-            '2015-09-21 00:00',
-            '2015-09-21 12:00',
-            '2015-09-22 00:00',
-            '2015-09-22 12:00',
-          ]
+          ['2015-09-20 00:00', '2015-09-20 18:00', '2015-09-21 12:00', '2015-09-22 06:00']
         );
         await initChart();
         const labels = await PageObjects.visChart.getXAxisLabels();
