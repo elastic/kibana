@@ -54,7 +54,7 @@ export const ChecksNavigation = ({ timestamp, details }: Props) => {
           }}
         >
           <FormattedMessage
-            id="xpack.uptime.synthetics.stepList.previousCheck"
+            id="xpack.uptime.synthetics.stepList.nextCheck"
             defaultMessage="Next check"
           />
         </EuiButtonEmpty>
