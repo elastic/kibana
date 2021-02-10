@@ -12,21 +12,19 @@ export const telemetryJWKS: PublicJWKS = {
   keys: [
     {
       kty: 'RSA',
-      kid: 'kibana_1',
+      kid: 'kibana1',
       use: 'enc',
       alg: 'RSA-OAEP',
       e: 'AQAB',
-      n:
-        'sZWMmiCy9Ysb_ZByG9024bL8a8cDNnXd4BqF4bPm6QwPponFS8cQhvZclz68qiVOa8aZOwB50bz7hVVzBKHP053u4wNN0PbpKD4w2rHS-pgN0m2hRFXwM9clmtEr-9aPTDqfWHsclS5ZZMT9_qyD42VS-zMrTwxBvQU5FNNcogakcaspXRtW3_8J7ZtbwkdvySY7e1DlHHrM7t60bLQ4RQB4q_ocqoeb447Sx1Tf8bJS4m-klregXQ7xQ7gcuuVW1n7tN9N1KDw_GqGm65wkDYDGskTca52STUbKAqX4sird0LI7QTTBX9oKfcNPpMOiD0XJQKGfXuoXQSFIa6vpuQ',
+      n: 'gjwVNVkOqbTZ6QrxdeYbKDnBzhCZGXM97Iq0dXJlpa-7UegcBemI1ALZkbX6AaDrCmqzetsnxJbVz2gr-uzkc97zzjTvPAn-jM-9cfjfsb-nd70qLY7ru3qdyOLb5-ho8cjmjnAp7VaEPuiNOjZ6V6tXq8Cn5LHH8G6K8oZLU1N4RWqkcAvEIlfaLusfMnl15fe7aZkYaKfVFjD-pti_2JGRV9XZ0knRI2oIRMaroBYpfYJxbpR0NLhR7ND6U5WlvxfnaVvRK4c_plVLOtcROqZVn98Z8yZ6GU14vCcvkIBox2D_xd1gSkpMammTQ3tVAEAvoq_wEn_qEbls1Uucgw'
     },
     {
       kty: 'RSA',
-      kid: 'kibana_dev',
+      kid: 'kibana_dev1',
       use: 'enc',
       alg: 'RSA-OAEP',
       e: 'AQAB',
-      n:
-        'juVHivsYFznjrDC449oL3xKVTvux_7dEgBGOgJdfzA2R2GspEAOzupT-VkBnqrJnRP_lznM8bQIvvst1f_DNQ1me_Lr9u9cwL5Vq6SWlmw_u9ur_-ewkShU4tBoJDArksOS-ciTaUJoMaxanb7jWexp0pCDlrLrQyAOCnKQL701mD1gdT4rIw7F-jkb5fLUNUVzOGaGyVy6DHAHZx7Tnyw8rswhyRVvuS73imbRp9XcdOFhBDOeSbrSuZGqrVCjoIlWw-UsiW2ueRd8brBoOIHSmTOMIrIMjpPmzMFRKyCvvhnbjrw8j3fQtFII8urhXCVAw8aIHZhiBc5t9ZuwbJw',
-    },
-  ],
+      n: 'rEi54h-9hCbqy9Mj_tJmx-dJdtrMmMzkhX5Wd63Pp3dABHpnLJSy--y8QoEa9K9ACaRfExSxgYQ-3K17Yy-UYj3ChAl3hrqZcP2AT3O18Lr2BN7EBjy88lTM0oeck9KLL_iGf8wz8_jeqQFIo3AWrBBuR3VFE0_k-_N1KCenSVm_fE3Nk_ZXm1ByFbgxWUFrYgLfEQn2v0FQYVpfTlbV_awtqoZLYGtuHmaLZhErzJFh6W8zrx8oSpGn8VlVLjF-AR3ugfw2F_HM8ZR8zY1dHVxvoLGz13F5aY8DHn0_ao9t0Yz2Y_SUNviyxMx0eIEJeo2njM2vMzYQNaT1Ghgc-w'
+    }
+  ]
 };
