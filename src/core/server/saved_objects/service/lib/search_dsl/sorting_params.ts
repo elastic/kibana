@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
 
 // TODO: The plan is for ES to automatically add this tiebreaker when
-// using PIT. We should remove this logic one that is resolved.
+// using PIT. We should remove this logic once that is resolved.
 // https://github.com/elastic/elasticsearch/issues/56828
 const ES_PROVIDED_TIEBREAKER = { _shard_doc: 'asc' };
 
