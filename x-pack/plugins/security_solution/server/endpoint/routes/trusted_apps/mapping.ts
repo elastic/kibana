@@ -184,7 +184,7 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     name,
     namespaceType: 'agnostic',
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
-    tags: [],
+    tags: ['policy:all'],
     type: 'simple',
   };
 };

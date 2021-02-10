@@ -32,8 +32,8 @@ import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/const
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,
-  os: string,
   schemaVersion: string,
+  os: string,
   name: string
 ): Promise<InternalArtifactCompleteSchema> {
   const exceptionsBuffer = Buffer.from(JSON.stringify(exceptions));
@@ -74,10 +74,10 @@ export function isCompressed(artifact: InternalArtifactSchema) {
   return artifact.compressionAlgorithm === 'zlib';
 }
 
-export async function getFullEndpointExceptionList(
+export async function getFilteredEndpointExceptionList(
   eClient: ExceptionListClient,
-  os: string,
   schemaVersion: string,
+  filter: string,
   listId: typeof ENDPOINT_LIST_ID | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
 ): Promise<WrappedTranslatedExceptionList> {
   const exceptions: WrappedTranslatedExceptionList = { entries: [] };
@@ -88,7 +88,7 @@ export async function getFullEndpointExceptionList(
     const response = await eClient.findExceptionListItem({
       listId,
       namespaceType: 'agnostic',
-      filter: `exception-list-agnostic.attributes.os_types:\"${os}\"`,
+      filter,
       perPage: 100,
       page,
       sortField: 'created_at',
@@ -112,6 +112,35 @@ export async function getFullEndpointExceptionList(
     throw new Error(errors);
   }
   return validated as WrappedTranslatedExceptionList;
+}
+
+export async function getEndpointExceptionList(
+  eClient: ExceptionListClient,
+  schemaVersion: string,
+  os: string
+): Promise<WrappedTranslatedExceptionList> {
+  const filter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
+
+  return getFilteredEndpointExceptionList(eClient, schemaVersion, filter, ENDPOINT_LIST_ID);
+}
+
+export async function getEndpointTrustedAppsList(
+  eClient: ExceptionListClient,
+  schemaVersion: string,
+  os: string,
+  policyId?: string
+): Promise<WrappedTranslatedExceptionList> {
+  const osFilter = `exception-list-agnostic.attributes.os_types:\"${os}\"`;
+  const policyFilter = `(exception-list-agnostic.attributes.tags:\"policy:all\"${
+    policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
+  })`;
+
+  return getFilteredEndpointExceptionList(
+    eClient,
+    schemaVersion,
+    `${osFilter} and ${policyFilter}`,
+    ENDPOINT_TRUSTED_APPS_LIST_ID
+  );
 }
 
 /**

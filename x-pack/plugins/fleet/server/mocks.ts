@@ -39,6 +39,7 @@ export const createPackagePolicyServiceMock = () => {
     get: jest.fn(),
     getByIDs: jest.fn(),
     list: jest.fn(),
+    listIds: jest.fn(),
     update: jest.fn(),
     runExternalCallbacks: jest.fn(),
   } as jest.Mocked<PackagePolicyServiceInterface>;

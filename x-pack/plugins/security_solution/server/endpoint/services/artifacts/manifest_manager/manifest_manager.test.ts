@@ -211,10 +211,19 @@ describe('ManifestManager', () => {
       ARTIFACT_NAME_TRUSTED_APPS_LINUX,
     ];
 
-    const getArtifactIds = (artifacts: InternalArtifactSchema[]) =>
-      artifacts.map((artifact) => artifact.identifier);
+    const getArtifactIds = (artifacts: InternalArtifactSchema[]) => [
+      ...new Set(artifacts.map((artifact) => artifact.identifier)).values(),
+    ];
 
-    test('Fails when exception list list client fails', async () => {
+    const mockPolicyListIdsResponse = (items: string[]) =>
+      jest.fn().mockResolvedValue({
+        items,
+        page: 1,
+        per_page: 100,
+        total: items.length,
+      });
+
+    test('Fails when exception list client fails', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
@@ -228,6 +237,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -237,11 +247,16 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
+      expect(artifacts.length).toBe(5);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
       for (const artifact of artifacts) {
         expect(await uncompressArtifact(artifact)).toStrictEqual({ entries: [] });
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
       }
     });
 
@@ -255,6 +270,7 @@ describe('ManifestManager', () => {
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
         [ENDPOINT_TRUSTED_APPS_LIST_ID]: { linux: [trustedAppListItem] },
       });
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -264,21 +280,25 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
+      expect(artifacts.length).toBe(5);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
+      expect(await uncompressArtifact(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+      });
+      expect(await uncompressArtifact(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[4])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+      });
+
       for (const artifact of artifacts) {
-        if (artifact.identifier === ARTIFACT_NAME_EXCEPTIONS_MACOS) {
-          expect(await uncompressArtifact(artifact)).toStrictEqual({
-            entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
-          });
-        } else if (artifact.identifier === 'endpoint-trustlist-linux-v1') {
-          expect(await uncompressArtifact(artifact)).toStrictEqual({
-            entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
-          });
-        } else {
-          expect(await uncompressArtifact(artifact)).toStrictEqual({ entries: [] });
-        }
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
       }
     });
 
@@ -291,6 +311,7 @@ describe('ManifestManager', () => {
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
       });
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
 
       const oldManifest = await manifestManager.buildNewManifest();
 
@@ -307,20 +328,89 @@ describe('ManifestManager', () => {
 
       const artifacts = manifest.getAllArtifacts();
 
+      expect(artifacts.length).toBe(5);
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
       expect(artifacts.every(isCompressed)).toBe(true);
 
+      expect(artifacts[0]).toStrictEqual(oldManifest.getAllArtifacts()[0]);
+      expect(await uncompressArtifact(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[4])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+      });
+
       for (const artifact of artifacts) {
-        if (artifact.identifier === ARTIFACT_NAME_EXCEPTIONS_MACOS) {
-          expect(artifact).toStrictEqual(oldManifest.getAllArtifacts()[0]);
-        } else if (artifact.identifier === 'endpoint-trustlist-linux-v1') {
-          expect(await uncompressArtifact(artifact)).toStrictEqual({
-            entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
-          });
-        } else {
-          expect(await uncompressArtifact(artifact)).toStrictEqual({ entries: [] });
-        }
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1])
+        );
       }
+    });
+
+    test('Builds manifest with policy specific exception list items for trusted apps', async () => {
+      const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const trustedAppListItemPolicy2 = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        entries: [
+          { field: 'other.field', operator: 'included', type: 'match', value: 'other value' },
+        ],
+      });
+      const context = buildManifestManagerContextMock({});
+      const manifestManager = new ManifestManager(context);
+
+      context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
+        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_TRUSTED_APPS_LIST_ID]: {
+          linux: [trustedAppListItem],
+          [`linux-${TEST_POLICY_ID_2}`]: [trustedAppListItem, trustedAppListItemPolicy2],
+        },
+      });
+      context.packagePolicyService.listIds = mockPolicyListIdsResponse([
+        TEST_POLICY_ID_1,
+        TEST_POLICY_ID_2,
+      ]);
+
+      const manifest = await manifestManager.buildNewManifest();
+
+      expect(manifest?.getSchemaVersion()).toStrictEqual('v1');
+      expect(manifest?.getSemanticVersion()).toStrictEqual('1.0.0');
+      expect(manifest?.getSavedObjectVersion()).toBeUndefined();
+
+      const artifacts = manifest.getAllArtifacts();
+
+      expect(artifacts.length).toBe(6);
+      expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
+      expect(artifacts.every(isCompressed)).toBe(true);
+
+      expect(await uncompressArtifact(artifacts[0])).toStrictEqual({
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+      });
+      expect(await uncompressArtifact(artifacts[1])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[2])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[3])).toStrictEqual({ entries: [] });
+      expect(await uncompressArtifact(artifacts[4])).toStrictEqual({
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+      });
+      expect(await uncompressArtifact(artifacts[5])).toStrictEqual({
+        entries: translateToEndpointExceptions(
+          [trustedAppListItem, trustedAppListItemPolicy2],
+          'v1'
+        ),
+      });
+
+      for (const artifact of artifacts.slice(0, 4)) {
+        expect(manifest.isDefaultArtifact(artifact)).toBe(true);
+        expect(manifest.getArtifactTargetPolicies(artifact)).toStrictEqual(
+          new Set([TEST_POLICY_ID_1, TEST_POLICY_ID_2])
+        );
+      }
+
+      expect(manifest.isDefaultArtifact(artifacts[5])).toBe(false);
+      expect(manifest.getArtifactTargetPolicies(artifacts[5])).toStrictEqual(
+        new Set([TEST_POLICY_ID_2])
+      );
     });
   });
 

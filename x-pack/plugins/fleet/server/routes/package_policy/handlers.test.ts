@@ -48,6 +48,7 @@ jest.mock('../../services/package_policy', (): {
       get: jest.fn(),
       getByIDs: jest.fn(),
       list: jest.fn(),
+      listIds: jest.fn(),
       update: jest.fn(),
       runExternalCallbacks: jest.fn((callbackType, newPackagePolicy, context, request) =>
         Promise.resolve(newPackagePolicy)

@@ -20,6 +20,7 @@ import {
   PackagePolicyInputStream,
   PackageInfo,
   ListWithKuery,
+  ListResult,
   packageToPackagePolicy,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
@@ -242,7 +243,7 @@ class PackagePolicyService {
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
-  ): Promise<{ items: PackagePolicy[]; total: number; page: number; perPage: number }> {
+  ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
     const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
@@ -260,6 +261,30 @@ class PackagePolicyService {
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
       })),
+      total: packagePolicies.total,
+      page,
+      perPage,
+    };
+  }
+
+  public async listIds(
+    soClient: SavedObjectsClientContract,
+    options: ListWithKuery
+  ): Promise<ListResult<string>> {
+    const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
+
+    const packagePolicies = await soClient.find<{}>({
+      type: SAVED_OBJECT_TYPE,
+      sortField,
+      sortOrder,
+      page,
+      perPage,
+      fields: [],
+      filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+    });
+
+    return {
+      items: packagePolicies.saved_objects.map((packagePolicySO) => packagePolicySO.id),
       total: packagePolicies.total,
       page,
       perPage,

@@ -40,6 +40,9 @@ const reduceOsTypes = (acc: string[], tag: string): string[] => {
   return [...acc];
 };
 
+const containsPolicyTags = (tags: string[]): boolean =>
+  tags.some((tag) => tag.startsWith('policy:'));
+
 export type OldExceptionListSoSchema = ExceptionListSoSchema & {
   _tags: string[];
 };
@@ -64,4 +67,25 @@ export const migrations = {
     },
     references: doc.references || [],
   }),
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<ExceptionListSoSchema>
+  ): SavedObjectSanitizedDoc<ExceptionListSoSchema> => {
+    if (doc.attributes.list_id === ENDPOINT_TRUSTED_APPS_LIST_ID) {
+      return {
+        ...doc,
+        ...{
+          attributes: {
+            ...doc.attributes,
+            tags: [
+              ...(doc.attributes.tags || []),
+              ...(containsPolicyTags(doc.attributes.tags) ? [] : ['policy:all']),
+            ],
+          },
+        },
+        references: doc.references || [],
+      };
+    } else {
+      return { ...doc, references: doc.references || [] };
+    }
+  },
 };
