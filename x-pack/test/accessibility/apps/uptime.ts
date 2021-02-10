@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/90555
-  describe.skip('uptime', () => {
+  describe('uptime', () => {
     before(async () => {
       await esArchiver.load('uptime/blank');
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
