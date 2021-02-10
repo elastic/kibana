@@ -539,3 +539,22 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
     }
   };
 }
+
+export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layer.getId(),
+      propName: '__areTilesLoaded',
+      newValue: areTilesLoaded,
+    });
+  };
+}

@@ -65,7 +65,7 @@ export function LayerControl({
       return layer.hasErrors();
     });
     const isLoading = layerList.some((layer) => {
-      return layer.isLayerLoading();
+      return layer.isLayerLoading() && layer.isVisible();
     });
 
     return (

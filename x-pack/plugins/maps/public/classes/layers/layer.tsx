@@ -75,7 +75,6 @@ export interface ILayer {
   canShowTooltip(): boolean;
   syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
-  isDataLoaded(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): string | undefined;
@@ -397,10 +396,6 @@ export class AbstractLayer implements ILayer {
     return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
-  isLayerLoading(): boolean {
-    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
-  }
-
   hasErrors(): boolean {
     return _.get(this._descriptor, '__isInErrorState', false);
   }
@@ -439,9 +434,8 @@ export class AbstractLayer implements ILayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-  isDataLoaded(): boolean {
-    const sourceDataRequest = this.getSourceDataRequest();
-    return sourceDataRequest ? sourceDataRequest.hasData() : false;
+  isLayerLoading(): boolean {
+    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
   async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {

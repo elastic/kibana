@@ -119,6 +119,10 @@ export class TileLayer extends AbstractLayer {
   }
 
   isLayerLoading() {
-    return false;
+    const areTilesLoaded =
+      typeof this._descriptor.__areTilesLoaded === 'boolean'
+        ? this._descriptor.__areTilesLoaded
+        : false;
+    return !areTilesLoaded || super.isLayerLoading();
   }
 }

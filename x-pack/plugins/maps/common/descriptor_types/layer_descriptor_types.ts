@@ -23,6 +23,7 @@ export type LayerDescriptor = {
   __isPreviewLayer?: boolean;
   __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
+  __areTilesLoaded?: boolean;
   alpha?: number;
   id: string;
   joins?: JoinDescriptor[];

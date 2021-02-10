@@ -167,7 +167,11 @@ export class VectorLayer extends AbstractLayer {
     return this.getValidJoins().length > 0;
   }
 
-  isDataLoaded() {
+  isLayerLoading(): boolean {
+    return !this._isDataLoaded();
+  }
+
+  _isDataLoaded() {
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest || !sourceDataRequest.hasData()) {
       return false;

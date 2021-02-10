@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Map as MapboxMap, MapboxOptions, MapMouseEvent } from 'mapbox-gl';
+import { Map as MapboxMap, MapboxOptions, MapDataEvent, MapMouseEvent } from 'mapbox-gl';
 // @ts-expect-error
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 // @ts-expect-error
@@ -72,6 +72,7 @@ export interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
+  setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
 }
 
 interface State {
@@ -165,6 +166,41 @@ export class MBMap extends Component<Props, State> {
     };
   }
 
+  _trackTileLoadingState(mbMap: MapboxMap) {
+    const sourceIdsToCheck: string[] = [];
+    const updateTileStatus = _.debounce(() => {
+      sourceIdsToCheck.forEach((sourceId) => {
+        for (let i = 0; i < this.props.layerList.length; i++) {
+          const layer: ILayer = this.props.layerList[i];
+          if (layer.ownsMbSourceId(sourceId)) {
+            // NOTE: isSourceLoaded seems quite buggy on its own
+            // The method will return `true` even though there are outstanding network request.
+            // Seems to occur in situations with failed tile-request.
+            // This can even be double checked by using `mbMap.areTilesLoaded()`.
+            // On a map with a single source, mbMap.areTilesLoaded() will return `false` corrctly
+            // when `mbMap.isSourceLoaded(sourceId)` would return `true` incorrectly.
+            this.props.setAreTilesLoaded(layer.getId(), mbMap.isSourceLoaded(sourceId));
+            break;
+          }
+        }
+      });
+
+      sourceIdsToCheck.length = 0;
+    }, 100);
+
+    mbMap.on('sourcedata', (e: MapDataEvent & { sourceId: string }) => {
+      if (
+        e.sourceId !== 'SPATIAL_FILTERS_LAYER_ID' &&
+        e.dataType === 'source' &&
+        e.tile &&
+        sourceIdsToCheck.indexOf(e.sourceId) < 0
+      ) {
+        sourceIdsToCheck.push(e.sourceId);
+        updateTileStatus();
+      }
+    });
+  }
+
   async _createMbMapInstance(): Promise<MapboxMap> {
     const initialView = await getInitialView(this.props.goto, this.props.settings);
     return new Promise((resolve) => {
@@ -200,6 +236,8 @@ export class MBMap extends Component<Props, State> {
       if (!this.props.settings.disableInteractive) {
         mbMap.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-left');
       }
+
+      this._trackTileLoadingState(mbMap);
 
       const tooManyFeaturesImageSrc =
         'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAA7DgAAOw4BzLahgwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAARLSURBVHic7ZnPbxRVAMe/7735sWO3293ZlUItJsivCxEE0oTYRgu1FqTQoFSwKTYx8SAH/wHjj4vRozGGi56sMcW2UfqTEuOhppE0KJc2GIuKQFDY7qzdtrudX88D3YTUdFuQN8+k87ltZt7uZz958/bNLAGwBWsYKltANmEA2QKyCQPIFpBNGEC2gGzCALIFZBMGkC0gmzCAbAHZhAFkC8gmDCBbQDZhANkCslnzARQZH6oDpNs0D5UDSUIInePcOpPLfdfnODNBuwQWIAWwNOABwHZN0x8npE6hNLJ4DPWRyFSf40wE5VOEQPBjcR0g3YlE4ybGmtK+/1NzJtOZA/xSYwZMs3nG962T2ez3It2AANaA/kSidYuivOQBs5WM1fUnk6f0u+GXJUqIuUtVXx00zRbRfkIDfBqL7a1WlIYbjvNtTTr99jXXHVpH6dMjK0R4cXq6c9rzxjcx9sKX8XitSEdhAToMI7VP10/97fsTh7PZrgWAN1lW72KE2vOm2b5chDTgtWQyn93x/bEEIetEOQIC14CxVOr1CkKefH929t0v8vn0vcdGEoljGxXl4C3PGz2YyXy+AHARDqtByAxoUdWKBKV70r4/vvTLA0CjZfX+5nkDGxirKzUTgkBIgNaysh3gnF627R+XO+dQJvP1ddcdrmSsbtA020pF+CAW21qrqmUiXIUEqGRsIwD0FQq/lzqv0bJ6rrvucBVjzwyb5ivLRTiiaW+8VV7eIEBVTAANiIIQd9RxZlc6t9Gyem647vn1jD07ZJonl4sQASoevqmgABzwwHnJzc69PGdZ3X+47sgGxuqHTPPE0ggeVtg5/QeEBMhxPg1Aa1DV2GrHPG9ZXy1G2D+wNALn9jyQEeHKAJgP+033Kgrdqij7AFwZtu3bqx3XWShMHtV1o1pRGo4YxiNd+fyEB2DKdX/4aG5u0hbwcylkBryTy/3scT6zW9Nq7ndso2Wdvea6Q1WUHuiPx1/WAXLBcWZXun94UMRcAoD/p+ddTFK6u8MwUvc7vsmyem+67oVqVT0wkEgcF+FYRNhW+L25uX6f84XThtHxIBudE5bVY/t++jFVrU/dvVSFICzAqG3PX/S8rihj2/61qK1AOUB7ksl2jdLUL7Z9rvgcQQRCFsEi5wqFmw26XnhCUQ63GcZmCly95Lrzpca0G0byk3j8tEnpU1c975tmyxoU5QcE8EAEAM5WVOzfoarHAeC2749dcpzxMwsLv07Ztg0AOzVNf03Ttu/S9T2PMlbjc25fdpyutmx2TLRbIAEA4M1otKo1EjmaoHQn4ZwBgA/kAVAK6MXXdzxv/ONcrq/HcbJBeAUWoEizqsaORaPbKglZrxMSZZyrM76f/ovzWx/m85PFWREUgQf4v7Hm/xcIA8gWkE0YQLaAbMIAsgVkEwaQLSCbMIBsAdmEAWQLyCYMIFtANmEA2QKyCQPIFpDNmg/wD3OFdEybUvJjAAAAAElFTkSuQmCC';

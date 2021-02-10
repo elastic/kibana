@@ -215,4 +215,12 @@ export class TiledVectorLayer extends VectorLayer {
   getFeatureById(id: string | number): Feature | null {
     return null;
   }
+
+  isLayerLoading(): boolean {
+    const areTilesLoading =
+      typeof this._descriptor.__areTilesLoaded === 'boolean'
+        ? this._descriptor.__areTilesLoaded
+        : false;
+    return !areTilesLoading || super.isLayerLoading();
+  }
 }
