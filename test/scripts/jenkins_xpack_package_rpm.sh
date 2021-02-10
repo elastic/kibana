@@ -2,6 +2,8 @@
 
 node scripts/build --all-platforms --debug --no-oss
 
+cd test/package
+
 vagrant up rpm --no-provision
 vagrant provision rpm
 
