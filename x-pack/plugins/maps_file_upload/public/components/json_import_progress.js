@@ -118,7 +118,9 @@ export class JsonImportProgress extends Component {
                 <a
                   data-test-subj="indexManagementNewIndexLink"
                   target="_blank"
-                  href={`${basePath}/app/management/kibana/indexPatterns`}
+                  href={`${basePath}/app/kibana#/
+                      management/elasticsearch/index_management/indices/
+                      filter/${indexName}`.replace(/\s/g, '')}
                 >
                   {i18n.translate('xpack.fileUpload.jsonImport.indexMgmtLink', {
                     defaultMessage: 'Index Management',
