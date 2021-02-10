@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const actionExists = await testSubjects.exists('embeddablePanelAction-downloadCsvReport');
       if (!actionExists) {
-        await this.clickContextMenuMoreItem();
+        await dashboardPanelActions.clickContextMenuMoreItem();
       }
       await testSubjects.existOrFail('embeddablePanelAction-downloadCsvReport'); // wait for the full panel to display or else the test runner could click the wrong option!
       await testSubjects.click('embeddablePanelAction-downloadCsvReport');
@@ -84,6 +84,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ); // panel title is hidden
       await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
+      const actionExists = await testSubjects.exists('embeddablePanelAction-downloadCsvReport');
+      if (!actionExists) {
+        await dashboardPanelActions.clickContextMenuMoreItem();
+      }
       await testSubjects.existOrFail('embeddablePanelAction-downloadCsvReport');
       await testSubjects.click('embeddablePanelAction-downloadCsvReport');
       await testSubjects.existOrFail('csvDownloadStarted');

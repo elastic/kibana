@@ -19,7 +19,6 @@ import {
   EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
 import { DashboardPicker } from '../../services/presentation_util';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';

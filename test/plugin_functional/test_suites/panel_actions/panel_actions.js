@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.openContextMenu();
       const actionExists = await testSubjects.exists('embeddablePanelAction-samplePanelLink');
       if (!actionExists) {
-        await this.clickContextMenuMoreItem();
+        await dashboardPanelActions.clickContextMenuMoreItem();
       }
       const actionElement = await testSubjects.find('embeddablePanelAction-samplePanelLink');
       const actionElementTag = await actionElement.getTagName();
