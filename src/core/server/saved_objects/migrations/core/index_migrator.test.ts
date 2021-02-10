@@ -28,7 +28,7 @@ describe('IndexMigrator', () => {
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
       pollInterval: 1,
-      scrollDuration: '2m',
+      scrollDuration: '1m',
       documentMigrator: {
         migrationVersion: {},
         migrate: _.identity,
