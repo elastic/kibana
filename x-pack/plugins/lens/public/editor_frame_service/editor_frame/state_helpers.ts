@@ -117,7 +117,7 @@ export async function persistedStateToExpression(
     datasourceStates[datasourceId].state,
     visualization,
     visualizationState,
-    { datasourceLayers } as FramePublicAPI
+    { datasourceLayers }
   );
 
   return {
@@ -139,7 +139,7 @@ export const validateDatasourceAndVisualization = (
   currentDatasourceState: unknown | null,
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
-  frameAPI: FramePublicAPI
+  frameAPI: Pick<FramePublicAPI, 'datasourceLayers'>
 ): ErrorMessage[] | undefined => {
   const layersGroups = currentVisualizationState
     ? currentVisualization
