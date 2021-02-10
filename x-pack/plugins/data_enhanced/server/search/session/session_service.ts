@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { throttle } from 'lodash';
+import { debounce } from 'lodash';
 import {
   CoreSetup,
   CoreStart,
@@ -43,6 +43,9 @@ interface SetupDependencies {
 interface StartDependencies {
   taskManager: TaskManagerStartContract;
 }
+
+const DEBOUNCE_UPDATE_OR_CREATE_WAIT = 300;
+const DEBOUNCE_UPDATE_OR_CREATE_MAX_WAIT = 1000;
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -86,33 +89,37 @@ export class SearchSessionService
     resolve: () => void;
     reject: (reason?: any) => void;
   }> = [];
-  private processUpdateOrCreateBatchQueue = throttle(() => {
-    const queue = [...this.updateOrCreateBatchQueue];
-    this.updateOrCreateBatchQueue = [];
-    if (queue.length === 0) return;
-    const batchedSessionAttributes = queue.reduce((res, next) => {
-      if (!res[next.sessionId]) {
-        res[next.sessionId] = next.attributes;
-      } else {
-        res[next.sessionId] = {
-          ...res[next.sessionId],
-          ...next.attributes,
-          idMapping: {
-            ...res[next.sessionId].idMapping,
-            ...next.attributes.idMapping,
-          },
-        };
-      }
-      return res;
-    }, {} as { [sessionId: string]: Partial<SearchSessionSavedObjectAttributes> });
+  private processUpdateOrCreateBatchQueue = debounce(
+    () => {
+      const queue = [...this.updateOrCreateBatchQueue];
+      this.updateOrCreateBatchQueue = [];
+      if (queue.length === 0) return;
+      const batchedSessionAttributes = queue.reduce((res, next) => {
+        if (!res[next.sessionId]) {
+          res[next.sessionId] = next.attributes;
+        } else {
+          res[next.sessionId] = {
+            ...res[next.sessionId],
+            ...next.attributes,
+            idMapping: {
+              ...res[next.sessionId].idMapping,
+              ...next.attributes.idMapping,
+            },
+          };
+        }
+        return res;
+      }, {} as { [sessionId: string]: Partial<SearchSessionSavedObjectAttributes> });
 
-    Object.keys(batchedSessionAttributes).forEach((sessionId) => {
-      const { deps, resolve, reject } = queue.find((s) => s.sessionId === sessionId)!;
-      this.updateOrCreate(deps, sessionId, batchedSessionAttributes[sessionId])
-        .then(resolve)
-        .catch(reject);
-    });
-  }, 100);
+      Object.keys(batchedSessionAttributes).forEach((sessionId) => {
+        const { deps, resolve, reject } = queue.find((s) => s.sessionId === sessionId)!;
+        this.updateOrCreate(deps, sessionId, batchedSessionAttributes[sessionId])
+          .then(resolve)
+          .catch(reject);
+      });
+    },
+    DEBOUNCE_UPDATE_OR_CREATE_WAIT,
+    { maxWait: DEBOUNCE_UPDATE_OR_CREATE_MAX_WAIT }
+  );
   private scheduleUpdateOrCreate = (
     deps: SearchSessionDependencies,
     sessionId: string,
