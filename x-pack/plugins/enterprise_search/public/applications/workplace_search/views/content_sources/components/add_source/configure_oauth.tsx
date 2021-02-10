@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 
-import { Loading } from '../../../../../../applications/shared/loading';
-import { parseQueryParams } from '../../../../../../applications/shared/query_params';
+import { Loading } from '../../../../../shared/loading';
+import { parseQueryParams } from '../../../../../shared/query_params';
 
 import { AddSourceLogic } from './add_source_logic';
 import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
