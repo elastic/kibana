@@ -60,5 +60,9 @@ export const createUsageCollector = (
     trackSessionCancelled: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_CANCELLED),
     trackSessionDeleted: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_DELETED),
     trackViewSessionsList: getCollector(METRIC_TYPE.CLICK, SEARCH_EVENT_TYPE.SESSION_VIEW_LIST),
+    trackSessionsListLoaded: getCollector(
+      METRIC_TYPE.LOADED,
+      SEARCH_EVENT_TYPE.SESSIONS_LIST_LOADED
+    ),
   };
 };

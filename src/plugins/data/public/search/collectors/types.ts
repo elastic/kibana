@@ -62,6 +62,10 @@ export enum SEARCH_EVENT_TYPE {
    * The user clicked a link to view the list of sessions
    */
   SESSION_VIEW_LIST = 'sessionViewList',
+  /**
+   * The user landed on the sessions management page
+   */
+  SESSIONS_LIST_LOADED = 'sessionsListLoaded',
 }
 
 /**
@@ -81,4 +85,5 @@ export interface SearchUsageCollector {
   trackSessionCancelled: () => Promise<void>;
   trackSessionDeleted: () => Promise<void>;
   trackViewSessionsList: () => Promise<void>;
+  trackSessionsListLoaded: () => Promise<void>;
 }

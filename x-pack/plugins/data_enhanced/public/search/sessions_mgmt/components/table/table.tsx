@@ -72,7 +72,8 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, 
   // initial data load
   useEffect(() => {
     doRefresh();
-  }, [doRefresh]);
+    plugins.data.search.usageCollector?.trackSessionsListLoaded();
+  }, [doRefresh, plugins]);
 
   useInterval(doRefresh, refreshInterval);
 
