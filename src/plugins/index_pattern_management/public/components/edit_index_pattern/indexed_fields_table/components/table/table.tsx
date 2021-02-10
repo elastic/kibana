@@ -157,6 +157,11 @@ const labelDescription = i18n.translate(
   { defaultMessage: 'A custom label for the field.' }
 );
 
+const runtimeFieldBadge = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.runtimeFieldBadge',
+  { defaultMessage: 'Runtime Field' }
+);
+
 interface IndexedFieldProps {
   indexPattern: IIndexPattern;
   items: IndexedFieldItem[];
@@ -197,6 +202,11 @@ export class Table extends PureComponent<IndexedFieldProps> {
               aria-label={primaryTimeAriaLabel}
               content={primaryTimeTooltip}
             />
+          </span>
+        ) : null}
+        {field.runtimeField && field.runtimeField.type ? (
+          <span>
+            &nbsp;<EuiBadge>{runtimeFieldBadge}</EuiBadge>
           </span>
         ) : null}
         {field.customLabel && field.customLabel !== field.name ? (

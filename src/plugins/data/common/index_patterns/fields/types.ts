@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec, IFieldSubType, IndexPattern } from '../..';
+import { FieldSpec, IFieldSubType, IndexPattern, RuntimeField } from '../..';
 
 export interface IFieldType {
   name: string;
@@ -28,5 +28,6 @@ export interface IFieldType {
   displayName?: string;
   customLabel?: string;
   format?: any;
+  runtimeField?: RuntimeField;
   toSpec?: (options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }) => FieldSpec;
 }
