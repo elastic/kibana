@@ -209,7 +209,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              indexNames: selectablePatterns.map(({ title }) => title),
+              indexNames: selectablePatterns.map(({ title: patternName }) => patternName),
               show: false,
             })
           );
