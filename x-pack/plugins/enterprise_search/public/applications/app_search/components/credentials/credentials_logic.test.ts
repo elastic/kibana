@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
@@ -16,6 +17,7 @@ jest.mock('../../app_logic', () => ({
 import { nextTick } from '@kbn/test/jest';
 
 import { AppLogic } from '../../app_logic';
+
 import { ApiTokenTypes } from './constants';
 
 import { CredentialsLogic } from './credentials_logic';

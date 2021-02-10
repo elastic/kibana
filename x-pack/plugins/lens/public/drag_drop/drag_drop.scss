@@ -2,6 +2,7 @@
 @import '../mixins';
 
 .lnsDragDrop {
+  user-select: none;
   transition: background-color $euiAnimSpeedFast ease-in-out, border-color $euiAnimSpeedFast ease-in-out;
 }
 
@@ -27,6 +28,7 @@
 
 // Drop area when there's an item being dragged
 .lnsDragDrop-isDropTarget {
+  @include lnsDroppable;
   @include lnsDroppableActive;
 }
 
@@ -52,7 +54,16 @@
   }
 }
 
-.lnsDragDrop__reorderableContainer {
+.lnsDragDrop-notCompatible {
+  background-color: $euiColorHighlight;
+  border: $euiBorderWidthThin dashed $euiBorderColor;
+  &.lnsDragDrop-isActiveDropTarget {
+    background-color: rgba(251, 208, 17, .25);
+    border-color: $euiColorVis5;
+  }
+}
+
+.lnsDragDrop__container {
   position: relative;
 }
 
@@ -63,9 +74,17 @@
   height: calc(100% + #{$lnsLayerPanelDimensionMargin});
 }
 
-.lnsDragDrop-isReorderable {
+.lnsDragDrop-translatableDrop {
+  transform: translateY(0);
   transition: transform $euiAnimSpeedFast ease-in-out;
   pointer-events: none;
+}
+
+.lnsDragDrop-translatableDrag {
+  transform: translateY(0);
+  transition: transform $euiAnimSpeedFast ease-in-out;
+  position: relative;
+  z-index: $euiZLevel1;
 }
 
 // Draggable item when it is moving

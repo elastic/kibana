@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { Writable } from '@kbn/utility-types';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType } from './alert_type';
@@ -56,6 +58,10 @@ describe('alertType', () => {
             "name": "esQuery",
           },
           Object {
+            "description": "The number of hits to retrieve for each query.",
+            "name": "size",
+          },
+          Object {
             "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
             "name": "threshold",
           },
@@ -73,6 +79,7 @@ describe('alertType', () => {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: '<',
@@ -90,6 +97,7 @@ describe('alertType', () => {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: 'between',

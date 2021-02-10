@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -21,8 +22,6 @@ import { buildSortedEventsQuery } from '../../../common/build_sorted_events_quer
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
-
-const DEFAULT_MAX_HITS_PER_EXECUTION = 1000;
 
 const ActionGroupId = 'query matched';
 const ConditionMetAlertInstanceId = 'query matched';
@@ -87,6 +86,13 @@ export function getAlertType(
     }
   );
 
+  const actionVariableContextSizeLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextSizeLabel',
+    {
+      defaultMessage: 'The number of hits to retrieve for each query.',
+    }
+  );
+
   const actionVariableContextThresholdLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextThresholdLabel',
     {
@@ -129,6 +135,7 @@ export function getAlertType(
       params: [
         { name: 'index', description: actionVariableContextIndexLabel },
         { name: 'esQuery', description: actionVariableContextQueryLabel },
+        { name: 'size', description: actionVariableContextSizeLabel },
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
       ],
@@ -159,7 +166,7 @@ export function getAlertType(
     }
 
     // During each alert execution, we run the configured query, get a hit count
-    // (hits.total) and retrieve up to DEFAULT_MAX_HITS_PER_EXECUTION hits. We
+    // (hits.total) and retrieve up to params.size hits. We
     // evaluate the threshold condition using the value of hits.total. If the threshold
     // condition is met, the hits are counted toward the query match and we update
     // the alert state with the timestamp of the latest hit. In the next execution
@@ -175,7 +182,17 @@ export function getAlertType(
               {
                 bool: {
                   must_not: [
-                    { bool: { filter: [{ range: { [params.timeField]: { lte: timestamp } } }] } },
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              [params.timeField]: { lte: new Date(timestamp).toISOString() },
+                            },
+                          },
+                        ],
+                      },
+                    },
                   ],
                 },
               },
@@ -189,7 +206,7 @@ export function getAlertType(
       from: dateStart,
       to: dateEnd,
       filter,
-      size: DEFAULT_MAX_HITS_PER_EXECUTION,
+      size: params.size,
       sortOrder: 'desc',
       searchAfterSortId: undefined,
       timeField: params.timeField,

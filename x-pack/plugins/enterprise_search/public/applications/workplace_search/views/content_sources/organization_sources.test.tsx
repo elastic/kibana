@@ -1,24 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../__mocks__';
-
-import { shallow } from 'enzyme';
+import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { contentSources } from '../../__mocks__/content_sources.mock';
+import { shallow } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
 import { SourcesTable } from '../../components/shared/sources_table';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import { OrganizationSources } from './organization_sources';

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -11,7 +11,19 @@
   Need tests for spacing, etc
 */
 
-const { evaluate, parse } = require('..');
+import { evaluate, parse } from '..';
+
+function variableEqual(value) {
+  return expect.objectContaining({ type: 'variable', value });
+}
+
+function functionEqual(name, args) {
+  return expect.objectContaining({ type: 'function', name, args });
+}
+
+function namedArgumentEqual(name, value) {
+  return expect.objectContaining({ type: 'namedArgument', name, value });
+}
 
 describe('Parser', () => {
   describe('Numbers', () => {
@@ -31,96 +43,144 @@ describe('Parser', () => {
 
   describe('Variables', () => {
     it('strings', () => {
-      expect(parse('f')).toEqual('f');
-      expect(parse('foo')).toEqual('foo');
+      expect(parse('f')).toEqual(variableEqual('f'));
+      expect(parse('foo')).toEqual(variableEqual('foo'));
+      expect(parse('foo1')).toEqual(variableEqual('foo1'));
+      expect(() => parse('1foo1')).toThrow('but "f" found');
+    });
+
+    it('strings with spaces', () => {
+      expect(parse(' foo ')).toEqual(variableEqual('foo'));
+      expect(() => parse(' foo bar ')).toThrow('but "b" found');
     });
 
     it('allowed characters', () => {
-      expect(parse('_foo')).toEqual('_foo');
-      expect(parse('@foo')).toEqual('@foo');
-      expect(parse('.foo')).toEqual('.foo');
-      expect(parse('-foo')).toEqual('-foo');
-      expect(parse('_foo0')).toEqual('_foo0');
-      expect(parse('@foo0')).toEqual('@foo0');
-      expect(parse('.foo0')).toEqual('.foo0');
-      expect(parse('-foo0')).toEqual('-foo0');
+      expect(parse('_foo')).toEqual(variableEqual('_foo'));
+      expect(parse('@foo')).toEqual(variableEqual('@foo'));
+      expect(parse('.foo')).toEqual(variableEqual('.foo'));
+      expect(parse('-foo')).toEqual(variableEqual('-foo'));
+      expect(parse('_foo0')).toEqual(variableEqual('_foo0'));
+      expect(parse('@foo0')).toEqual(variableEqual('@foo0'));
+      expect(parse('.foo0')).toEqual(variableEqual('.foo0'));
+      expect(parse('-foo0')).toEqual(variableEqual('-foo0'));
     });
   });
 
   describe('quoted variables', () => {
     it('strings with double quotes', () => {
-      expect(parse('"foo"')).toEqual('foo');
-      expect(parse('"f b"')).toEqual('f b');
-      expect(parse('"foo bar"')).toEqual('foo bar');
-      expect(parse('"foo bar fizz buzz"')).toEqual('foo bar fizz buzz');
-      expect(parse('"foo   bar   baby"')).toEqual('foo   bar   baby');
+      expect(parse('"foo"')).toEqual(variableEqual('foo'));
+      expect(parse('"f b"')).toEqual(variableEqual('f b'));
+      expect(parse('"foo bar"')).toEqual(variableEqual('foo bar'));
+      expect(parse('"foo bar fizz buzz"')).toEqual(variableEqual('foo bar fizz buzz'));
+      expect(parse('"foo   bar   baby"')).toEqual(variableEqual('foo   bar   baby'));
     });
 
     it('strings with single quotes', () => {
       /* eslint-disable prettier/prettier */
-      expect(parse("'foo'")).toEqual('foo');
-      expect(parse("'f b'")).toEqual('f b');
-      expect(parse("'foo bar'")).toEqual('foo bar');
-      expect(parse("'foo bar fizz buzz'")).toEqual('foo bar fizz buzz');
-      expect(parse("'foo   bar   baby'")).toEqual('foo   bar   baby');
+      expect(parse("'foo'")).toEqual(variableEqual('foo'));
+      expect(parse("'f b'")).toEqual(variableEqual('f b'));
+      expect(parse("'foo bar'")).toEqual(variableEqual('foo bar'));
+      expect(parse("'foo bar fizz buzz'")).toEqual(variableEqual('foo bar fizz buzz'));
+      expect(parse("'foo   bar   baby'")).toEqual(variableEqual('foo   bar   baby'));
+      expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
+      expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
+      expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
+      expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
+      expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
+      expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
       /* eslint-enable prettier/prettier */
     });
 
     it('allowed characters', () => {
-      expect(parse('"_foo bar"')).toEqual('_foo bar');
-      expect(parse('"@foo bar"')).toEqual('@foo bar');
-      expect(parse('".foo bar"')).toEqual('.foo bar');
-      expect(parse('"-foo bar"')).toEqual('-foo bar');
-      expect(parse('"_foo0 bar1"')).toEqual('_foo0 bar1');
-      expect(parse('"@foo0 bar1"')).toEqual('@foo0 bar1');
-      expect(parse('".foo0 bar1"')).toEqual('.foo0 bar1');
-      expect(parse('"-foo0 bar1"')).toEqual('-foo0 bar1');
-    });
-
-    it('invalid characters in double quotes', () => {
-      const check = (str) => () => parse(str);
-      expect(check('" foo bar"')).toThrow('but "\\"" found');
-      expect(check('"foo bar "')).toThrow('but "\\"" found');
-      expect(check('"0foo"')).toThrow('but "\\"" found');
-      expect(check('" foo bar"')).toThrow('but "\\"" found');
-      expect(check('"foo bar "')).toThrow('but "\\"" found');
-      expect(check('"0foo"')).toThrow('but "\\"" found');
-    });
-
-    it('invalid characters in single quotes', () => {
-      const check = (str) => () => parse(str);
-      /* eslint-disable prettier/prettier */
-      expect(check("' foo bar'")).toThrow('but "\'" found');
-      expect(check("'foo bar '")).toThrow('but "\'" found');
-      expect(check("'0foo'")).toThrow('but "\'" found');
-      expect(check("' foo bar'")).toThrow('but "\'" found');
-      expect(check("'foo bar '")).toThrow('but "\'" found');
-      expect(check("'0foo'")).toThrow('but "\'" found');
-      /* eslint-enable prettier/prettier */
+      expect(parse('"_foo bar"')).toEqual(variableEqual('_foo bar'));
+      expect(parse('"@foo bar"')).toEqual(variableEqual('@foo bar'));
+      expect(parse('".foo bar"')).toEqual(variableEqual('.foo bar'));
+      expect(parse('"-foo bar"')).toEqual(variableEqual('-foo bar'));
+      expect(parse('"_foo0 bar1"')).toEqual(variableEqual('_foo0 bar1'));
+      expect(parse('"@foo0 bar1"')).toEqual(variableEqual('@foo0 bar1'));
+      expect(parse('".foo0 bar1"')).toEqual(variableEqual('.foo0 bar1'));
+      expect(parse('"-foo0 bar1"')).toEqual(variableEqual('-foo0 bar1'));
+      expect(parse('" foo bar"')).toEqual(variableEqual(' foo bar'));
+      expect(parse('"foo bar "')).toEqual(variableEqual('foo bar '));
+      expect(parse('"0foo"')).toEqual(variableEqual('0foo'));
+      expect(parse('" foo bar"')).toEqual(variableEqual(' foo bar'));
+      expect(parse('"foo bar "')).toEqual(variableEqual('foo bar '));
+      expect(parse('"0foo"')).toEqual(variableEqual('0foo'));
     });
   });
 
   describe('Functions', () => {
     it('no arguments', () => {
-      expect(parse('foo()')).toEqual({ name: 'foo', args: [] });
+      expect(parse('foo()')).toEqual(functionEqual('foo', []));
     });
 
     it('arguments', () => {
-      expect(parse('foo(5,10)')).toEqual({ name: 'foo', args: [5, 10] });
+      expect(parse('foo(5,10)')).toEqual(functionEqual('foo', [5, 10]));
     });
 
     it('arguments with strings', () => {
-      expect(parse('foo("string with spaces")')).toEqual({
-        name: 'foo',
-        args: ['string with spaces'],
-      });
+      expect(parse('foo("string with spaces")')).toEqual(
+        functionEqual('foo', [variableEqual('string with spaces')])
+      );
 
-      /* eslint-disable prettier/prettier */
-      expect(parse("foo('string with spaces')")).toEqual({
-        name: 'foo',
-        args: ['string with spaces'],
-      });
-      /* eslint-enable prettier/prettier */
+      expect(parse("foo('string with spaces')")).toEqual(
+        functionEqual('foo', [variableEqual('string with spaces')])
+      );
+    });
+
+    it('named only', () => {
+      expect(parse('foo(q=10)')).toEqual(functionEqual('foo', [namedArgumentEqual('q', 10)]));
+    });
+
+    it('named argument is numeric', () => {
+      expect(parse('foo(q=10.1234e5)')).toEqual(
+        functionEqual('foo', [namedArgumentEqual('q', 10.1234e5)])
+      );
+    });
+
+    it('named and positional', () => {
+      expect(parse('foo(ref, q="bar")')).toEqual(
+        functionEqual('foo', [variableEqual('ref'), namedArgumentEqual('q', 'bar')])
+      );
+    });
+
+    it('numerically named', () => {
+      expect(() => parse('foo(1=2)')).toThrow('but "(" found');
+    });
+
+    it('multiple named', () => {
+      expect(parse('foo(q_param="bar", offset="1d")')).toEqual(
+        functionEqual('foo', [
+          namedArgumentEqual('q_param', 'bar'),
+          namedArgumentEqual('offset', '1d'),
+        ])
+      );
+    });
+
+    it('multiple named and positional', () => {
+      expect(parse('foo(q="bar", ref, offset="1d", 100)')).toEqual(
+        functionEqual('foo', [
+          namedArgumentEqual('q', 'bar'),
+          variableEqual('ref'),
+          namedArgumentEqual('offset', '1d'),
+          100,
+        ])
+      );
+    });
+
+    it('duplicate named', () => {
+      expect(parse('foo(q="bar", q="test")')).toEqual(
+        functionEqual('foo', [namedArgumentEqual('q', 'bar'), namedArgumentEqual('q', 'test')])
+      );
+    });
+
+    it('incomplete named', () => {
+      expect(() => parse('foo(a=)')).toThrow('but "(" found');
+      expect(() => parse('foo(=a)')).toThrow('but "(" found');
+    });
+
+    it('invalid named', () => {
+      expect(() => parse('foo(offset-type="1d")')).toThrow('but "(" found');
     });
   });
 
@@ -155,7 +215,7 @@ describe('Evaluate', () => {
     );
   });
 
-  it('valiables with dots', () => {
+  it('variables with dots', () => {
     expect(evaluate('foo.bar', { 'foo.bar': 20 })).toEqual(20);
     expect(evaluate('"is.null"', { 'is.null': null })).toEqual(null);
     expect(evaluate('"is.false"', { 'is.null': null, 'is.false': false })).toEqual(false);
@@ -208,6 +268,10 @@ describe('Evaluate', () => {
     expect(evaluate('"b" * 7', { b: 3 })).toEqual(21);
     expect(evaluate('"space name" * 2', { 'space name': [1, 2, 21] })).toEqual([2, 4, 42]);
     expect(evaluate('sum("space name")', { 'space name': [1, 2, 21] })).toEqual(24);
+  });
+
+  it('throws on named arguments', () => {
+    expect(() => evaluate('sum(invalid=a)')).toThrow('Named arguments are not supported');
   });
 
   it('equations with injected functions', () => {

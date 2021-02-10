@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -79,6 +81,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       // Grab the result of the most recent bucket
       last(result[item].shouldFire)
     );
+    const shouldAlertWarn = results.every((result) => last(result[item].shouldWarn));
 
     // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
     // whole alert is in a No Data/Error state
@@ -91,12 +94,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       ? AlertStates.NO_DATA
       : shouldAlertFire
       ? AlertStates.ALERT
+      : shouldAlertWarn
+      ? AlertStates.WARNING
       : AlertStates.OK;
 
     let reason;
-    if (nextState === AlertStates.ALERT) {
+    if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
       reason = results
-        .map((result) => buildReasonWithVerboseMetricName(result[item], buildFiredAlertReason))
+        .map((result) =>
+          buildReasonWithVerboseMetricName(
+            result[item],
+            buildFiredAlertReason,
+            nextState === AlertStates.WARNING
+          )
+        )
         .join('\n');
     } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
       /*
@@ -123,7 +134,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     }
     if (reason) {
       const actionGroupId =
-        nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS_ID;
+        nextState === AlertStates.OK
+          ? RecoveredActionGroup.id
+          : nextState === AlertStates.WARNING
+          ? WARNING_ACTIONS.id
+          : FIRED_ACTIONS.id;
       alertInstance.scheduleActions(
         /**
          * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
@@ -150,7 +165,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   }
 };
 
-const buildReasonWithVerboseMetricName = (resultItem: any, buildReason: (r: any) => string) => {
+const buildReasonWithVerboseMetricName = (
+  resultItem: any,
+  buildReason: (r: any) => string,
+  useWarningThreshold?: boolean
+) => {
   if (!resultItem) return '';
   const resultWithVerboseMetricName = {
     ...resultItem,
@@ -160,6 +179,8 @@ const buildReasonWithVerboseMetricName = (resultItem: any, buildReason: (r: any)
         ? getCustomMetricLabel(resultItem.customMetric)
         : resultItem.metric),
     currentValue: formatMetric(resultItem.metric, resultItem.currentValue),
+    threshold: useWarningThreshold ? resultItem.warningThreshold! : resultItem.threshold,
+    comparator: useWarningThreshold ? resultItem.warningComparator! : resultItem.comparator,
   };
   return buildReason(resultWithVerboseMetricName);
 };
@@ -175,11 +196,18 @@ const mapToConditionsLookup = (
       {}
     );
 
-export const FIRED_ACTIONS_ID = 'metrics.invenotry_threshold.fired';
+export const FIRED_ACTIONS_ID = 'metrics.inventory_threshold.fired';
 export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {
   id: FIRED_ACTIONS_ID,
   name: i18n.translate('xpack.infra.metrics.alerting.inventory.threshold.fired', {
-    defaultMessage: 'Fired',
+    defaultMessage: 'Alert',
+  }),
+};
+export const WARNING_ACTIONS_ID = 'metrics.inventory_threshold.warning';
+export const WARNING_ACTIONS = {
+  id: WARNING_ACTIONS_ID,
+  name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
+    defaultMessage: 'Warning',
   }),
 };
 

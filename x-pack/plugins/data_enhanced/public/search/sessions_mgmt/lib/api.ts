@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -10,21 +11,20 @@ import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
-import { SessionsConfigSchema } from '../';
-import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
-import type { SearchSessionSavedObjectAttributes } from '../../../../common';
+import { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import { SearchSessionStatus } from '../../../../common/search';
 import { ACTION } from '../components/actions';
-import { UISession } from '../types';
+import { PersistedSearchSessionSavedObjectAttributes, UISession } from '../types';
+import { SessionsConfigSchema } from '..';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
 function getActions(status: SearchSessionStatus) {
   const actions: ACTION[] = [];
-  actions.push(ACTION.RELOAD);
+  actions.push(ACTION.INSPECT);
   if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
     actions.push(ACTION.EXTEND);
-    actions.push(ACTION.CANCEL);
+    actions.push(ACTION.DELETE);
   }
   return actions;
 }
@@ -48,7 +48,7 @@ async function getUrlFromState(
 
 // Helper: factory for a function to map server objects to UI objects
 const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) => async (
-  savedObject: SavedObject<SearchSessionSavedObjectAttributes>
+  savedObject: SavedObject<PersistedSearchSessionSavedObjectAttributes>
 ): Promise<UISession> => {
   const {
     name,
@@ -79,6 +79,8 @@ const mapToUISession = (urls: UrlGeneratorsStart, config: SessionsConfigSchema) 
     actions,
     restoreUrl,
     reloadUrl,
+    initialState,
+    restoreState,
   };
 };
 
@@ -110,6 +112,8 @@ export class SearchSessionsMgmtAPI {
         perPage: mgmtConfig.maxSessions,
         sortField: 'created',
         sortOrder: 'asc',
+        searchFields: ['persisted'],
+        search: 'true',
       })
     );
     const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
@@ -129,7 +133,7 @@ export class SearchSessionsMgmtAPI {
       const result = await race<FetchResult | null>(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as Array<
-          SavedObject<SearchSessionSavedObjectAttributes>
+          SavedObject<PersistedSearchSessionSavedObjectAttributes>
         >;
         return await Promise.all(savedObjects.map(mapToUISession(this.deps.urls, this.config)));
       }
@@ -160,28 +164,35 @@ export class SearchSessionsMgmtAPI {
       await this.sessionsClient.delete(id);
 
       this.deps.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.canceled', {
-          defaultMessage: 'The search session was canceled and expired.',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deleted', {
+          defaultMessage: 'The search session was deleted.',
         }),
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
       this.deps.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.data.mgmt.searchSessions.api.cancelError', {
-          defaultMessage: 'Failed to cancel the search session!',
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.deletedError', {
+          defaultMessage: 'Failed to delete the search session!',
         }),
       });
     }
   }
 
   // Extend
-  public async sendExtend(id: string, ttl: string): Promise<void> {
-    this.deps.notifications.toasts.addError(new Error('Not implemented'), {
-      title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
-        defaultMessage: 'Failed to extend the session expiration!',
-      }),
-    });
+  public async sendExtend(id: string, expires: string): Promise<void> {
+    try {
+      await this.sessionsClient.extend(id, expires);
+
+      this.deps.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extended', {
+          defaultMessage: 'The search session was extended.',
+        }),
+      });
+    } catch (err) {
+      this.deps.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.data.mgmt.searchSessions.api.extendError', {
+          defaultMessage: 'Failed to extend the search session!',
+        }),
+      });
+    }
   }
 }

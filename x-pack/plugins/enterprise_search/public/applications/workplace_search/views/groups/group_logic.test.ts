@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -10,14 +11,14 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
 } from '../../../__mocks__';
+import { groups } from '../../__mocks__/groups.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { groups } from '../../__mocks__/groups.mock';
+import { GROUPS_PATH } from '../../routes';
+
 import { mockGroupValues } from './__mocks__/group_logic.mock';
 import { GroupLogic } from './group_logic';
-
-import { GROUPS_PATH } from '../../routes';
 
 describe('GroupLogic', () => {
   const { mount } = new LogicMounter(GroupLogic);

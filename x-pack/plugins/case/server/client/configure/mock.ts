@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -69,7 +70,7 @@ export const mappings: TestMappings = {
       action_type: 'append',
     },
   ],
-  [ConnectorTypes.servicenow]: [
+  [ConnectorTypes.serviceNowITSM]: [
     {
       source: 'title',
       target: 'short_description',
@@ -610,7 +611,7 @@ export const formatFieldsTestData: FormatFieldsTestData[] = [
       { id: 'upon_reject', name: 'Upon reject', required: false, type: 'text' },
     ],
     fields: serviceNowFields,
-    type: ConnectorTypes.servicenow,
+    type: ConnectorTypes.serviceNowITSM,
   },
 ];
 export const mockGetFieldsResponse = {

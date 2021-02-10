@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Logger } from '../../../../../../src/core/server';
-import { externalServiceMock, apiParams, serviceNowCommonFields } from './mocks';
+import { externalServiceMock, apiParams, serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { ExternalService } from './types';
 import { api } from './api';
 let mockedLogger: jest.Mocked<Logger>;
@@ -15,6 +16,7 @@ describe('api', () => {
 
   beforeEach(() => {
     externalService = externalServiceMock.create();
+    jest.clearAllMocks();
   });
 
   describe('create incident', () => {
@@ -25,6 +27,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -56,6 +59,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -76,6 +80,7 @@ describe('api', () => {
         params,
         secrets: { username: 'elastic', password: 'elastic' },
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
@@ -98,6 +103,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
       expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
       expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
@@ -124,6 +130,41 @@ describe('api', () => {
         incidentId: 'incident-1',
       });
     });
+
+    test('it post comments to different comment field key', async () => {
+      const params = { ...apiParams, incident: { ...apiParams.incident, externalId: null } };
+      await api.pushToService({
+        externalService,
+        params,
+        secrets: {},
+        logger: mockedLogger,
+        commentFieldKey: 'work_notes',
+      });
+      expect(externalService.updateIncident).toHaveBeenCalledTimes(2);
+      expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
+        incident: {
+          severity: '1',
+          urgency: '2',
+          impact: '3',
+          work_notes: 'A comment',
+          description: 'Incident description',
+          short_description: 'Incident title',
+        },
+        incidentId: 'incident-1',
+      });
+
+      expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
+        incident: {
+          severity: '1',
+          urgency: '2',
+          impact: '3',
+          work_notes: 'Another comment',
+          description: 'Incident description',
+          short_description: 'Incident title',
+        },
+        incidentId: 'incident-1',
+      });
+    });
   });
 
   describe('update incident', () => {
@@ -133,6 +174,7 @@ describe('api', () => {
         params: apiParams,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -160,6 +202,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(res).toEqual({
@@ -177,6 +220,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
 
       expect(externalService.updateIncident).toHaveBeenCalledWith({
@@ -199,6 +243,7 @@ describe('api', () => {
         params,
         secrets: {},
         logger: mockedLogger,
+        commentFieldKey: 'comments',
       });
       expect(externalService.updateIncident).toHaveBeenCalledTimes(3);
       expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
@@ -224,6 +269,40 @@ describe('api', () => {
         incidentId: 'incident-2',
       });
     });
+
+    test('it post comments to different comment field key', async () => {
+      const params = { ...apiParams };
+      await api.pushToService({
+        externalService,
+        params,
+        secrets: {},
+        logger: mockedLogger,
+        commentFieldKey: 'work_notes',
+      });
+      expect(externalService.updateIncident).toHaveBeenCalledTimes(3);
+      expect(externalService.updateIncident).toHaveBeenNthCalledWith(1, {
+        incident: {
+          severity: '1',
+          urgency: '2',
+          impact: '3',
+          description: 'Incident description',
+          short_description: 'Incident title',
+        },
+        incidentId: 'incident-3',
+      });
+
+      expect(externalService.updateIncident).toHaveBeenNthCalledWith(2, {
+        incident: {
+          severity: '1',
+          urgency: '2',
+          impact: '3',
+          work_notes: 'A comment',
+          description: 'Incident description',
+          short_description: 'Incident title',
+        },
+        incidentId: 'incident-2',
+      });
+    });
   });
 
   describe('getFields', () => {
@@ -233,6 +312,16 @@ describe('api', () => {
         params: {},
       });
       expect(res).toEqual(serviceNowCommonFields);
+    });
+  });
+
+  describe('getChoices', () => {
+    test('it returns the fields correctly', async () => {
+      const res = await api.getChoices({
+        externalService,
+        params: { fields: ['priority'] },
+      });
+      expect(res).toEqual(serviceNowChoices);
     });
   });
 });

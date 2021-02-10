@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,6 +12,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 const SEARCH_SESSION_INDICATOR_TEST_SUBJ = 'searchSessionIndicator';
 const SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
+
+export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;
+export const TOUR_RESTORE_STEP_KEY = `data.searchSession.tour.restore`;
 
 type SessionStateType =
   | 'none'
@@ -43,9 +47,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
 
     public async disabledOrFail() {
       await this.exists();
-      await expect(await (await (await this.find()).findByTagName('button')).isEnabled()).to.be(
-        false
-      );
+      await expect(await (await this.find()).getAttribute('data-save-disabled')).to.be('true');
     }
 
     public async expectState(state: SessionStateType) {
@@ -58,25 +60,22 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
     }
 
     public async viewSearchSessions() {
+      log.debug('viewSearchSessions');
       await this.ensurePopoverOpened();
-      await testSubjects.click('searchSessionIndicatorviewSearchSessionsLink');
+      await testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
     }
 
     public async save() {
+      log.debug('save the search session');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorSaveBtn');
       await this.ensurePopoverClosed();
     }
 
     public async cancel() {
+      log.debug('cancel the search session');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorCancelBtn');
-      await this.ensurePopoverClosed();
-    }
-
-    public async refresh() {
-      await this.ensurePopoverOpened();
-      await testSubjects.click('searchSessionIndicatorRefreshBtn');
       await this.ensurePopoverClosed();
     }
 
@@ -84,9 +83,25 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await this.ensurePopoverOpened();
     }
 
+    public async openedOrFail() {
+      return testSubjects.existOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
+        timeout: 15000, // because popover auto opens after search takes 10s
+      });
+    }
+
+    public async closedOrFail() {
+      return testSubjects.missingOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
+        timeout: 15000, // because popover auto opens after search takes 10s
+      });
+    }
+
     private async ensurePopoverOpened() {
+      log.debug('ensurePopoverOpened');
       const isAlreadyOpen = await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
-      if (isAlreadyOpen) return;
+      if (isAlreadyOpen) {
+        log.debug('Popover is already open');
+        return;
+      }
       return retry.waitFor(`searchSessions popover opened`, async () => {
         await testSubjects.click(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
         return await testSubjects.exists(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ);
@@ -94,6 +109,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
     }
 
     private async ensurePopoverClosed() {
+      log.debug('ensurePopoverClosed');
       const isAlreadyClosed = !(await testSubjects.exists(
         SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ
       ));
@@ -110,7 +126,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
      * Alternatively, a test can navigate to `Management > Search Sessions` and use the UI to delete any created tests.
      */
     public async deleteAllSearchSessions() {
-      log.debug('Deleting created searcg sessions');
+      log.debug('Deleting created search sessions');
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(10000, async () => {
         const { body } = await supertest
@@ -132,6 +148,20 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
           })
         );
       });
+    }
+
+    public async markTourDone() {
+      await Promise.all([
+        browser.setLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY, 'true'),
+        browser.setLocalStorageItem(TOUR_RESTORE_STEP_KEY, 'true'),
+      ]);
+    }
+
+    public async markTourUndone() {
+      await Promise.all([
+        browser.removeLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY),
+        browser.removeLocalStorageItem(TOUR_RESTORE_STEP_KEY),
+      ]);
     }
   })();
 }

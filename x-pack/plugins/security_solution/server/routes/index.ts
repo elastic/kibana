@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SecuritySolutionPluginRouter } from '../types';
@@ -46,7 +47,7 @@ import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  usingEphemeralEncryptionKey: boolean,
+  hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml']
 ) => {
@@ -101,5 +102,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, hasEncryptionKey);
 };

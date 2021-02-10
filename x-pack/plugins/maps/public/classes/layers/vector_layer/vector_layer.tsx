@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,10 +13,8 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
-import { getCentroidFeatures } from '../../../../common/get_centroid_features';
 import {
   FEATURE_ID_PROPERTY_NAME,
-  SOURCE_DATA_REQUEST_ID,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   SOURCE_BOUNDS_DATA_REQUEST_ID,
@@ -24,10 +23,8 @@ import {
   KBN_TOO_MANY_FEATURES_PROPERTY,
   LAYER_TYPE,
   FIELD_ORIGIN,
-  LAYER_STYLE_TYPE,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
-  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -36,7 +33,6 @@ import {
   canSkipStyleMetaUpdate,
   canSkipFormattersUpdate,
 } from '../../util/can_skip_fetch';
-import { assignFeatureIds } from '../../util/assign_feature_ids';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import {
   getCentroidFilterExpression,
@@ -63,6 +59,8 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
+import { ITermJoinSource } from '../../sources/term_join_source';
+import { addGeoJsonMbSource, syncVectorSource } from './utils';
 
 interface SourceResult {
   refreshed: boolean;
@@ -79,6 +77,7 @@ export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
+  chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
 
 export interface IVectorLayer extends ILayer {
@@ -92,7 +91,7 @@ export interface IVectorLayer extends ILayer {
   hasJoins(): boolean;
 }
 
-export class VectorLayer extends AbstractLayer {
+export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
 
   protected readonly _style: IVectorStyle;
@@ -117,13 +116,23 @@ export class VectorLayer extends AbstractLayer {
     return layerDescriptor as VectorLayerDescriptor;
   }
 
-  constructor({ layerDescriptor, source, joins = [] }: VectorLayerArguments) {
+  constructor({
+    layerDescriptor,
+    source,
+    joins = [],
+    chartsPaletteServiceGetColor,
+  }: VectorLayerArguments) {
     super({
       layerDescriptor,
       source,
     });
     this._joins = joins;
-    this._style = new VectorStyle(layerDescriptor.style, source, this);
+    this._style = new VectorStyle(
+      layerDescriptor.style,
+      source,
+      this,
+      chartsPaletteServiceGetColor
+    );
   }
 
   getSource(): IVectorSource {
@@ -275,11 +284,6 @@ export class VectorLayer extends AbstractLayer {
     return bounds;
   }
 
-  isLoadingBounds() {
-    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
-    return !!boundsDataRequest && boundsDataRequest.isLoading();
-  }
-
   async getLeftJoinFields() {
     return await this.getSource().getLeftJoinFields();
   }
@@ -407,11 +411,9 @@ export class VectorLayer extends AbstractLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta {
-    const styleFieldNames =
-      style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : [];
     const fieldNames = [
       ...source.getFieldNames(),
-      ...styleFieldNames,
+      ...style.getSourceFieldNames(),
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
@@ -472,82 +474,11 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  async _syncSource(
-    syncContext: DataRequestContext,
-    source: IVectorSource,
-    style: IVectorStyle
-  ): Promise<SourceResult> {
-    const {
-      startLoading,
-      stopLoading,
-      onLoadError,
-      registerCancelCallback,
-      dataFilters,
-      isRequestStillActive,
-    } = syncContext;
-    const dataRequestId = SOURCE_DATA_REQUEST_ID;
-    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
-      dataFilters,
-      source,
-      style
-    );
-    const prevDataRequest = this.getSourceDataRequest();
-    const canSkipFetch = await canSkipSourceUpdate({
-      source,
-      prevDataRequest,
-      nextMeta: searchFilters,
-    });
-    if (canSkipFetch) {
-      return {
-        refreshed: false,
-        featureCollection: prevDataRequest
-          ? (prevDataRequest.getData() as FeatureCollection)
-          : EMPTY_FEATURE_COLLECTION,
-      };
-    }
-
-    try {
-      startLoading(dataRequestId, requestToken, searchFilters);
-      const layerName = await this.getDisplayName(source);
-      const { data: sourceFeatureCollection, meta } = await source.getGeoJsonWithMeta(
-        layerName,
-        searchFilters,
-        registerCancelCallback.bind(null, requestToken),
-        () => {
-          return isRequestStillActive(dataRequestId, requestToken);
-        }
-      );
-      const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
-      const supportedShapes = await source.getSupportedShapeTypes();
-      if (
-        supportedShapes.includes(VECTOR_SHAPE_TYPE.LINE) ||
-        supportedShapes.includes(VECTOR_SHAPE_TYPE.POLYGON)
-      ) {
-        layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
-      }
-      stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
-      return {
-        refreshed: true,
-        featureCollection: layerFeatureCollection,
-      };
-    } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(dataRequestId, requestToken, error.message);
-      }
-      throw error;
-    }
-  }
-
   async _syncSourceStyleMeta(
     syncContext: DataRequestContext,
     source: IVectorSource,
     style: IVectorStyle
   ) {
-    if (this.getCurrentStyle().getType() !== LAYER_STYLE_TYPE.VECTOR) {
-      return;
-    }
-
     const sourceQuery = this.getQuery() as MapQuery;
     return this._syncStyleMeta({
       source,
@@ -574,7 +505,7 @@ export class VectorLayer extends AbstractLayer {
       dynamicStyleProps: this.getCurrentStyle()
         .getDynamicPropertiesArray()
         .filter((dynamicStyleProp) => {
-          const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getFieldName());
+          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
           return (
             dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN &&
             !!matchingField &&
@@ -599,7 +530,7 @@ export class VectorLayer extends AbstractLayer {
   }: {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
-    source: IVectorSource;
+    source: IVectorSource | ITermJoinSource;
     sourceQuery?: MapQuery;
     style: IVectorStyle;
   } & DataRequestContext) {
@@ -652,10 +583,6 @@ export class VectorLayer extends AbstractLayer {
     source: IVectorSource,
     style: IVectorStyle
   ) {
-    if (style.getType() !== LAYER_STYLE_TYPE.VECTOR) {
-      return;
-    }
-
     return this._syncFormatters({
       source,
       dataRequestId: SOURCE_FORMATTERS_DATA_REQUEST_ID,
@@ -679,7 +606,7 @@ export class VectorLayer extends AbstractLayer {
       fields: style
         .getDynamicPropertiesArray()
         .filter((dynamicStyleProp) => {
-          const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getFieldName());
+          const matchingField = joinSource.getFieldByName(dynamicStyleProp.getFieldName());
           return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN && !!matchingField;
         })
         .map((dynamicStyleProp) => {
@@ -699,7 +626,7 @@ export class VectorLayer extends AbstractLayer {
   }: {
     dataRequestId: string;
     fields: IField[];
-    source: IVectorSource;
+    source: IVectorSource | ITermJoinSource;
   } & DataRequestContext) {
     if (fields.length === 0) {
       return;
@@ -760,7 +687,14 @@ export class VectorLayer extends AbstractLayer {
     try {
       await this._syncSourceStyleMeta(syncContext, source, style);
       await this._syncSourceFormatters(syncContext, source, style);
-      const sourceResult = await this._syncSource(syncContext, source, style);
+      const sourceResult = await syncVectorSource({
+        layerId: this.getId(),
+        layerName: await this.getDisplayName(source),
+        prevDataRequest: this.getSourceDataRequest(),
+        requestMeta: this._getSearchFilters(syncContext.dataFilters, source, style),
+        syncContext,
+        source,
+      });
       if (
         !sourceResult.featureCollection ||
         !sourceResult.featureCollection.features.length ||
@@ -1048,31 +982,8 @@ export class VectorLayer extends AbstractLayer {
     this._setMbCentroidProperties(mbMap);
   }
 
-  _syncSourceBindingWithMb(mbMap: MbMap) {
-    const mbSource = mbMap.getSource(this._getMbSourceId());
-    if (!mbSource) {
-      mbMap.addSource(this._getMbSourceId(), {
-        type: 'geojson',
-        data: EMPTY_FEATURE_COLLECTION,
-      });
-    } else if (mbSource.type !== 'geojson') {
-      // Recreate source when existing source is not geojson. This can occur when layer changes from tile layer to vector layer.
-      this.getMbLayerIds().forEach((mbLayerId) => {
-        if (mbMap.getLayer(mbLayerId)) {
-          mbMap.removeLayer(mbLayerId);
-        }
-      });
-
-      mbMap.removeSource(this._getMbSourceId());
-      mbMap.addSource(this._getMbSourceId(), {
-        type: 'geojson',
-        data: EMPTY_FEATURE_COLLECTION,
-      });
-    }
-  }
-
   syncLayerWithMB(mbMap: MbMap) {
-    this._syncSourceBindingWithMb(mbMap);
+    addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
     this._syncFeatureCollectionWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);
   }

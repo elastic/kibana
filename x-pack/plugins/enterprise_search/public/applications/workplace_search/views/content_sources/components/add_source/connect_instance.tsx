@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -26,16 +25,16 @@ import {
   EuiBadge,
   EuiBadgeGroup,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LicensingLogic } from '../../../../../../applications/shared/licensing';
-
+import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { AddSourceLogic } from './add_source_logic';
-import { FeatureIds, Configuration, Features } from '../../../../types';
 import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
-import { SourceFeatures } from './source_features';
-
+import { FeatureIds, Configuration, Features } from '../../../../types';
 import { LEARN_MORE_LINK } from '../../constants';
+
+import { AddSourceLogic } from './add_source_logic';
 import {
   CONNECT_REMOTE,
   CONNECT_PRIVATE,
@@ -46,6 +45,7 @@ import {
   CONNECT_NOT_SYNCED_TITLE,
   CONNECT_NOT_SYNCED_TEXT,
 } from './constants';
+import { SourceFeatures } from './source_features';
 
 interface ConnectInstanceProps {
   header: React.ReactNode;

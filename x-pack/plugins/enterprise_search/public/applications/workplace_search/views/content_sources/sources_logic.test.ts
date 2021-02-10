@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -10,13 +11,12 @@ import {
   mockHttpValues,
   expectedAsyncError,
 } from '../../../__mocks__';
+import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
 
-import { AppLogic } from '../../app_logic';
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
-
-import { configuredSources, contentSources } from '../../__mocks__/content_sources.mock';
+import { AppLogic } from '../../app_logic';
 
 import { SourcesLogic, fetchSourceStatuses, POLLING_INTERVAL } from './sources_logic';
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -22,15 +23,11 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
-import { LicensingLogic } from '../../../shared/licensing';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { LicenseCallout } from '../../components/shared/license_callout';
+import { LicensingLogic } from '../../../shared/licensing';
 import { Loading } from '../../../shared/loading';
+import { LicenseCallout } from '../../components/shared/license_callout';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { SecurityLogic } from './security_logic';
-
-import { PrivateSourcesTable } from './components/private_sources_table';
-
 import {
   SECURITY_UNSAVED_CHANGES_MESSAGE,
   RESET_BUTTON,
@@ -44,6 +41,9 @@ import {
   CONFIRM_CHANGES_TEXT,
   PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT,
 } from '../../constants';
+
+import { PrivateSourcesTable } from './components/private_sources_table';
+import { SecurityLogic } from './security_logic';
 
 export const Security: React.FC = () => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
