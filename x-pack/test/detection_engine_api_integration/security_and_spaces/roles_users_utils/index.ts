@@ -6,6 +6,7 @@
  */
 
 import { assertUnreachable } from '../../../../plugins/security_solution/common/utility_types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   t1AnalystUser,
   t2AnalystUser,
@@ -26,10 +27,9 @@ import {
 } from '../../../../plugins/security_solution/server/lib/detection_engine/scripts/roles_users';
 
 import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export const createUserAndRole = async (
-  securityService: ReturnType<FtrProviderContext['getService']>,
+  getService: FtrProviderContext['getService'],
   role: ROLES
 ): Promise<void> => {
   switch (role) {
@@ -38,30 +38,45 @@ export const createUserAndRole = async (
         ROLES.detections_admin,
         detectionsAdminRole,
         detectionsAdminUser,
-        securityService
+        getService
       );
     case ROLES.t1_analyst:
-      return postRoleAndUser(ROLES.t1_analyst, t1AnalystRole, t1AnalystUser, securityService);
+      return postRoleAndUser(ROLES.t1_analyst, t1AnalystRole, t1AnalystUser, getService);
     case ROLES.t2_analyst:
-      return postRoleAndUser(ROLES.t2_analyst, t2AnalystRole, t2AnalystUser, securityService);
+      return postRoleAndUser(ROLES.t2_analyst, t2AnalystRole, t2AnalystUser, getService);
     case ROLES.hunter:
-      return postRoleAndUser(ROLES.hunter, hunterRole, hunterUser, securityService);
+      return postRoleAndUser(ROLES.hunter, hunterRole, hunterUser, getService);
     case ROLES.rule_author:
-      return postRoleAndUser(ROLES.rule_author, ruleAuthorRole, ruleAuthorUser, securityService);
+      return postRoleAndUser(ROLES.rule_author, ruleAuthorRole, ruleAuthorUser, getService);
     case ROLES.soc_manager:
-      return postRoleAndUser(ROLES.soc_manager, socManagerRole, socManagerUser, securityService);
+      return postRoleAndUser(ROLES.soc_manager, socManagerRole, socManagerUser, getService);
     case ROLES.platform_engineer:
       return postRoleAndUser(
         ROLES.platform_engineer,
         platformEngineerRole,
         platformEngineerUser,
-        securityService
+        getService
       );
     case ROLES.reader:
-      return postRoleAndUser(ROLES.reader, readerRole, readerUser, securityService);
+      return postRoleAndUser(ROLES.reader, readerRole, readerUser, getService);
     default:
       return assertUnreachable(role);
   }
+};
+
+/**
+ * Given a roleName and security service this will delete the roleName
+ * and user
+ * @param roleName The user and role to delete with the same name
+ * @param securityService The security service
+ */
+export const deleteUserAndRole = async (
+  getService: FtrProviderContext['getService'],
+  roleName: ROLES
+): Promise<void> => {
+  const securityService = getService('security');
+  await securityService.user.delete(roleName);
+  await securityService.role.delete(roleName);
 };
 
 interface UserInterface {
@@ -95,8 +110,9 @@ export const postRoleAndUser = async (
   roleName: string,
   role: RoleInterface,
   user: UserInterface,
-  securityService: ReturnType<FtrProviderContext['getService']>
-) => {
+  getService: FtrProviderContext['getService']
+): Promise<void> => {
+  const securityService = getService('security');
   await securityService.role.create(roleName, {
     kibana: role.kibana,
     elasticsearch: role.elasticsearch,

@@ -7,6 +7,8 @@
 
 import React, { useState, useMemo } from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,7 +23,6 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useValues } from 'kea';
 
 import { EngineLogic } from '../../engine';
 
