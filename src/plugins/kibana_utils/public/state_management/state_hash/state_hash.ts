@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Sha256 } from '../../../../../core/public/utils';
+import { Sha256 } from 'src/core/public';
 import { hashedItemStore } from '../../storage/hashed_item_store';
 
 // This prefix is used to identify hash strings that have been encoded in the URL.

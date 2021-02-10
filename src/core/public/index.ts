@@ -62,6 +62,7 @@ import { SavedObjectsStart } from './saved_objects';
 export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { Sha256 } from './utils';
 export {
   AppCategory,
   UiSettingsParams,

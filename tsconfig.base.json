@@ -8,16 +8,19 @@
       ],
       "kibana/public": [
         "bazel-out/darwin-fastbuild/bin/src/core/public",
+        "bazel-out/k8-fastbuild/bin/src/core/public",
         "bazel/bin/src/core/public",
         "src/core/public"
       ],
       "kibana/server": [
         "bazel-out/darwin-fastbuild/bin/src/core/server",
+        "bazel-out/k8-fastbuild/bin/src/core/server",
         "bazel/bin/src/core/server",
         "src/core/server"
       ],
       "src/core/*": [
         "bazel-out/darwin-fastbuild/bin/src/core/*",
+        "bazel-out/k8-fastbuild/bin/src/core/*",
         "bazel/bin/src/core/*",
         "src/core/*"
       ],
@@ -25,6 +28,7 @@
     },
     "rootDirs": [
       "bazel-out/darwin-fastbuild/bin",
+      "bazel-out/k8-fastbuild/bin",
       "bazel/bin",
       "."
     ],

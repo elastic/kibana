@@ -15,10 +15,9 @@ SRCS = glob(
 )
 
 NPM_DEPS = [
-  "//src/legacy",
   "@npm//@elastic/apm-rum",
-  "@npm//@elastic/eui",
   "@npm//@elastic/elasticsearch",
+  "@npm//@elastic/eui",
   "@npm//@elastic/numeral",
   "@npm//@hapi/boom",
   "@npm//@kbn/analytics",
@@ -28,8 +27,8 @@ NPM_DEPS = [
   "@npm//@kbn/i18n",
   "@npm//@kbn/legacy-logging",
   "@npm//@kbn/std",
-  "@npm//@kbn/test",
   "@npm//@kbn/test-subj-selector",
+  "@npm//@kbn/test",
   "@npm//@kbn/utility-types",
   "@npm//@testing-library/jest-dom",
   "@npm//@types/chance",
@@ -51,8 +50,8 @@ NPM_DEPS = [
   "@npm//@types/mock-fs",
   "@npm//@types/moment-timezone",
   "@npm//@types/mustache",
-  "@npm//@types/node",
   "@npm//@types/node-forge",
+  "@npm//@types/node",
   "@npm//@types/parse-link-header",
   "@npm//@types/react-router-dom",
   "@npm//@types/request",
@@ -69,18 +68,19 @@ NPM_DEPS = [
   "@npm//execa",
   "@npm//exit-hook",
   "@npm//fp-ts",
-  "@npm//jest",
   "@npm//jest-cli",
   "@npm//jest-styled-components",
+  "@npm//jest",
   "@npm//moment",
   "@npm//p-map",
   "@npm//query-string",
-  "@npm//react",
   "@npm//react-dom",
   "@npm//react-markdown",
   "@npm//react-use",
+  "@npm//react",
   "@npm//rxjs",
   "@npm//strip-ansi",
+  "//src/legacy",
 ]
 
 ts_config(
