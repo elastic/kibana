@@ -5,17 +5,35 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
 import {
-  ServiceNowITSMConnectorConfiguration,
-  JiraConnectorConfiguration,
-  ResilientConnectorConfiguration,
+  getResilientActionType,
+  getServiceNowITSMActionType,
+  getServiceNowSIRActionType,
+  getJiraActionType,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
 import { ConnectorConfiguration } from './types';
 
+const resilient = getResilientActionType();
+const serviceNowITSM = getServiceNowITSMActionType();
+const serviceNowSIR = getServiceNowSIRActionType();
+const jira = getJiraActionType();
+
 export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
-  '.servicenow': ServiceNowITSMConnectorConfiguration as ConnectorConfiguration,
-  '.jira': JiraConnectorConfiguration as ConnectorConfiguration,
-  '.resilient': ResilientConnectorConfiguration as ConnectorConfiguration,
+  '.servicenow': {
+    name: serviceNowITSM.actionTypeTitle ?? '',
+    logo: serviceNowITSM.iconClass,
+  },
+  '.servicenow-sir': {
+    name: serviceNowSIR.actionTypeTitle ?? '',
+    logo: serviceNowSIR.iconClass,
+  },
+  '.jira': {
+    name: jira.actionTypeTitle ?? '',
+    logo: jira.iconClass,
+  },
+  '.resilient': {
+    name: resilient.actionTypeTitle ?? '',
+    logo: resilient.iconClass,
+  },
 };

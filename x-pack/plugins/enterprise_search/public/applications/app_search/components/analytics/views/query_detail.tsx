@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
@@ -17,7 +18,7 @@ import { useDecodedParams } from '../../../utils/encode_path_params';
 
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSection, QueryClicksTable } from '../components';
-import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../';
+import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../index';
 
 const QUERY_DETAIL_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetail.title',
