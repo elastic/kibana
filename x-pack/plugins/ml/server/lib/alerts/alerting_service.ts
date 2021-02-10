@@ -100,18 +100,19 @@ export function alertingServiceProvider(mlClient: MlClient) {
    * @param severity
    */
   const getResultTypeAggRequest = (resultType: AnomalyResultType, severity: number) => {
-    const defaultSeverityThreshold = 3;
-
     return {
       influencer_results: {
-        filter: {
-          range: {
-            influencer_score: {
-              gte:
-                resultType === ANOMALY_RESULT_TYPE.INFLUENCER ? severity : defaultSeverityThreshold,
-            },
-          },
-        },
+        ...(resultType === ANOMALY_RESULT_TYPE.INFLUENCER
+          ? {
+              filter: {
+                range: {
+                  influencer_score: {
+                    gte: severity,
+                  },
+                },
+              },
+            }
+          : {}),
         aggs: {
           top_influencer_hits: {
             top_hits: {
@@ -155,13 +156,17 @@ export function alertingServiceProvider(mlClient: MlClient) {
         },
       },
       record_results: {
-        filter: {
-          range: {
-            record_score: {
-              gte: resultType === ANOMALY_RESULT_TYPE.RECORD ? severity : defaultSeverityThreshold,
-            },
-          },
-        },
+        ...(resultType === ANOMALY_RESULT_TYPE.RECORD
+          ? {
+              filter: {
+                range: {
+                  record_score: {
+                    gte: severity,
+                  },
+                },
+              },
+            }
+          : {}),
         aggs: {
           top_record_hits: {
             top_hits: {
@@ -206,47 +211,57 @@ export function alertingServiceProvider(mlClient: MlClient) {
           },
         },
       },
-      bucket_results: {
-        filter: {
-          range: {
-            anomaly_score: {
-              gt: resultType === ANOMALY_RESULT_TYPE.BUCKET ? severity : defaultSeverityThreshold,
-            },
-          },
-        },
-        aggs: {
-          top_bucket_hits: {
-            top_hits: {
-              sort: [
-                {
+      ...(resultType === ANOMALY_RESULT_TYPE.BUCKET
+        ? {
+            bucket_results: {
+              filter: {
+                range: {
                   anomaly_score: {
-                    order: 'desc',
+                    gt: severity,
                   },
                 },
-              ],
-              _source: {
-                includes: ['job_id', 'result_type', 'timestamp', 'anomaly_score', 'is_interim'],
               },
-              size: 1,
-              script_fields: {
-                ...getCommonScriptedFields(),
-                score: {
-                  script: {
-                    lang: 'painless',
-                    source: 'Math.round(doc["anomaly_score"].value)',
-                  },
-                },
-                unique_key: {
-                  script: {
-                    lang: 'painless',
-                    source: 'doc["timestamp"].value',
+              aggs: {
+                top_bucket_hits: {
+                  top_hits: {
+                    sort: [
+                      {
+                        anomaly_score: {
+                          order: 'desc',
+                        },
+                      },
+                    ],
+                    _source: {
+                      includes: [
+                        'job_id',
+                        'result_type',
+                        'timestamp',
+                        'anomaly_score',
+                        'is_interim',
+                      ],
+                    },
+                    size: 1,
+                    script_fields: {
+                      ...getCommonScriptedFields(),
+                      score: {
+                        script: {
+                          lang: 'painless',
+                          source: 'Math.round(doc["anomaly_score"].value)',
+                        },
+                      },
+                      unique_key: {
+                        script: {
+                          lang: 'painless',
+                          source: 'doc["timestamp"].value',
+                        },
+                      },
+                    },
                   },
                 },
               },
             },
-          },
-        },
-      },
+          }
+        : {}),
     };
   };
 
