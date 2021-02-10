@@ -129,7 +129,7 @@ export class VisualizePlugin
     uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
     core.application.register({
-      id: 'visualize',
+      id: VisualizeConstants.APP_ID,
       title: 'Visualize',
       order: 8000,
       euiIconType: 'logoKibana',

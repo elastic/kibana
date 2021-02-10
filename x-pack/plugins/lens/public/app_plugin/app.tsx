@@ -32,7 +32,7 @@ import {
   IndexPatternsContract,
   syncQueryStateWithUrl,
 } from '../../../../../src/plugins/data/public';
-import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
 import { SaveModal } from './save_modal';
@@ -474,7 +474,7 @@ export function App({
           isLinkedToOriginatingApp: false,
         }));
         // remove editor state so the connection is still broken after reload
-        stateTransfer.clearEditorState();
+        stateTransfer.clearEditorState(APP_ID);
 
         redirectTo(newInput.savedObjectId);
         return;
