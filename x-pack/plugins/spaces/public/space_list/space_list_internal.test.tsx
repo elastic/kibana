@@ -36,8 +36,8 @@ const getSpaceData = (inactiveSpaceCount: number = 0) => {
 
 /**
  * This node displays up to five named spaces (and an indicator for any number of unauthorized spaces) by default. The active space is
- * omitted from this list unless enableSpaceAgnosticBehavior is enabled. If more than five named spaces would be displayed, the extras
- * (along with the unauthorized spaces indicator, if present) are hidden behind a button.
+ * omitted from this list unless behaviorContext='outside-space'. If more than five named spaces would be displayed, the extras (along with
+ * the unauthorized spaces indicator, if present) are hidden behind a button.
  * If '*' (aka "All spaces") is present, it supersedes all of the above and just displays a single badge without a button.
  */
 describe('SpaceListInternal', () => {
@@ -264,8 +264,11 @@ describe('SpaceListInternal', () => {
         expect(getButton(wrapper)).toHaveLength(0);
       });
 
-      it('with enableSpaceAgnosticBehavior=true, shows badges with button', async () => {
-        const props = { namespaces: [...namespaces, '?'], enableSpaceAgnosticBehavior: true };
+      it('with behaviorContext="outside-space", shows badges with button', async () => {
+        const props: SpaceListProps = {
+          namespaces: [...namespaces, '?'],
+          behaviorContext: 'outside-space',
+        };
         const wrapper = await createSpaceList({ spaces, props });
 
         expect(getListText(wrapper)).toEqual(['D!', 'A', 'B', 'C', 'D']);

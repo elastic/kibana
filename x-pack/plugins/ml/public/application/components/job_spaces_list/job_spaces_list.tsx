@@ -75,7 +75,7 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
       title: jobId,
       noun: objectNoun,
     },
-    enableSpaceAgnosticBehavior: true,
+    behaviorContext: 'outside-space',
     changeSpacesHandler,
     onClose,
   };
@@ -83,7 +83,7 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
   return (
     <>
       <EuiButtonEmpty onClick={() => setShowFlyout(true)} style={{ height: 'auto' }}>
-        <SpaceList namespaces={spaceIds} displayLimit={0} enableSpaceAgnosticBehavior={true} />
+        <SpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
       </EuiButtonEmpty>
       {showFlyout && <ShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
     </>

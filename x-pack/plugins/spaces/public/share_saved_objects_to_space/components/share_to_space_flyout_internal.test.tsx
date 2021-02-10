@@ -37,7 +37,7 @@ interface SetupOpts {
   canShareToAllSpaces?: boolean; // default: true
   enableCreateCopyCallout?: boolean;
   enableCreateNewSpaceLink?: boolean;
-  enableSpaceAgnosticBehavior?: boolean;
+  behaviorContext?: 'within-space' | 'outside-space';
   mockFeatureId?: string; // optional feature ID to use for the SpacesContext
 }
 
@@ -117,7 +117,7 @@ const setup = async (opts: SetupOpts = {}) => {
         onClose={onClose}
         enableCreateCopyCallout={opts.enableCreateCopyCallout}
         enableCreateNewSpaceLink={opts.enableCreateNewSpaceLink}
-        enableSpaceAgnosticBehavior={opts.enableSpaceAgnosticBehavior}
+        behaviorContext={opts.behaviorContext}
       />
     </SpacesContext>
   );
@@ -674,7 +674,7 @@ describe('ShareToSpaceFlyout', () => {
       expect(option.disabled).toBeUndefined();
     };
 
-    describe('without enableSpaceAgnosticBehavior', () => {
+    describe('with behaviorContext="within-space" (default)', () => {
       it('correctly defines space selection options', async () => {
         const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
         const { wrapper } = await setup({ mockSpaces, namespaces });
@@ -724,12 +724,12 @@ describe('ShareToSpaceFlyout', () => {
       });
     });
 
-    describe('with enableSpaceAgnosticBehavior', () => {
-      const enableSpaceAgnosticBehavior = true;
+    describe('with behaviorContext="outside-space"', () => {
+      const behaviorContext = 'outside-space';
 
       it('correctly defines space selection options', async () => {
         const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
-        const { wrapper } = await setup({ enableSpaceAgnosticBehavior, mockSpaces, namespaces });
+        const { wrapper } = await setup({ behaviorContext, mockSpaces, namespaces });
 
         const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
         const options = selectable.prop('options');

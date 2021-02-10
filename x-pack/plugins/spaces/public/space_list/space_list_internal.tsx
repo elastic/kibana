@@ -23,7 +23,7 @@ const DEFAULT_DISPLAY_LIMIT = 5;
 export const SpaceListInternal = ({
   namespaces,
   displayLimit = DEFAULT_DISPLAY_LIMIT,
-  enableSpaceAgnosticBehavior,
+  behaviorContext,
 }: SpaceListProps) => {
   const { shareToSpacesDataPromise } = useSpaces();
 
@@ -66,7 +66,7 @@ export const SpaceListInternal = ({
       if (spaceTarget === undefined) {
         // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
         enabledSpaceTargets.push({ id: namespace, name: namespace });
-      } else if (enableSpaceAgnosticBehavior || !spaceTarget.isActiveSpace) {
+      } else if (behaviorContext === 'outside-space' || !spaceTarget.isActiveSpace) {
         if (spaceTarget.isFeatureDisabled) {
           disabledSpaceTargets.push(spaceTarget);
         } else {

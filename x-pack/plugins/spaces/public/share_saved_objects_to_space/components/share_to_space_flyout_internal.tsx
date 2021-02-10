@@ -117,7 +117,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     }),
     enableCreateCopyCallout = false,
     enableCreateNewSpaceLink = false,
-    enableSpaceAgnosticBehavior = false,
+    behaviorContext,
     changeSpacesHandler = createDefaultChangeSpacesHandler(
       savedObjectTarget,
       spacesManager,
@@ -126,6 +126,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     onUpdate = () => null,
     onClose = () => null,
   } = props;
+  const enableSpaceAgnosticBehavior = behaviorContext === 'outside-space';
 
   const [shareOptions, setShareOptions] = useState<ShareOptions>({
     selectedSpaceIds: [],

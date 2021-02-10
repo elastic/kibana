@@ -126,12 +126,13 @@ export interface ShareToSpaceFlyoutProps {
    */
   enableCreateNewSpaceLink?: boolean;
   /**
-   * When enabled, the flyout will allow the user to remove the object from the current space. Otherwise, the current space is noted, and
-   * the user cannot interact with it.
+   * When set to 'within-space' (default), the flyout behaves like it is running on a page within the active space, and it will prevent the
+   * user from removing the object from the active space.
    *
-   * Default value is false.
+   * Conversely, when set to 'outside-space', the flyout behaves like it is running on a page outside of any space, so it will allow the
+   * user to remove the object from the active space.
    */
-  enableSpaceAgnosticBehavior?: boolean;
+  behaviorContext?: 'within-space' | 'outside-space';
   /**
    * Optional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If
    * this is not defined, a default handler will be used that calls `/api/spaces/_share_saved_object_add` and/or
@@ -200,11 +201,13 @@ export interface SpaceListProps {
    */
   displayLimit?: number;
   /**
-   * When enabled, the space list will omit the active space. Otherwise, the active space is displayed.
+   * When set to 'within-space' (default), the space list behaves like it is running on a page within the active space, and it will omit the
+   * active space (e.g., it displays a list of all the _other_ spaces that an object is shared to).
    *
-   * Default value is false.
+   * Conversely, when set to 'outside-space', the space list behaves like it is running on a page outside of any space, so it will not omit
+   * the active space.
    */
-  enableSpaceAgnosticBehavior?: boolean;
+  behaviorContext?: 'within-space' | 'outside-space';
 }
 
 /**
