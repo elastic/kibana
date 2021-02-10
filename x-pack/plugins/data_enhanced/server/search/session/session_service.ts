@@ -20,7 +20,7 @@ import {
   ISearchOptions,
   nodeBuilder,
 } from '../../../../../../src/plugins/data/common';
-import { ISearchSessionService } from '../../../../../../src/plugins/data/server';
+import { esKuery, ISearchSessionService } from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../../security/server';
 import {
   TaskManagerSetupContract,
@@ -227,7 +227,11 @@ export class SearchSessionService
             ),
             nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.username`, `${user.username}`),
           ];
-    const filter = nodeBuilder.and(userFilters.concat(options.filter ?? []));
+    const filterKueryNode =
+      typeof options.filter === 'string'
+        ? esKuery.fromKueryExpression(options.filter)
+        : options.filter;
+    const filter = nodeBuilder.and(userFilters.concat(filterKueryNode ?? []));
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
       filter,

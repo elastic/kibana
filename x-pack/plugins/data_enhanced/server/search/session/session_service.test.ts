@@ -20,6 +20,7 @@ import { ConfigSchema } from '../../../config';
 // @ts-ignore
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { AuthenticatedUser } from '../../../../security/common/model';
+import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -306,6 +307,197 @@ describe('SearchSessionService', () => {
           },
           "page": 0,
           "perPage": 5,
+          "type": "search-session",
+        }
+      `);
+    });
+
+    it('mixes in passed-in filter as string and KQL node', async () => {
+      const mockFindSavedObject = {
+        ...mockSavedObject,
+        score: 1,
+      };
+      const mockResponse = {
+        saved_objects: [mockFindSavedObject],
+        total: 1,
+        per_page: 1,
+        page: 0,
+      };
+      savedObjectsClient.find.mockResolvedValue(mockResponse);
+
+      const options1 = { filter: 'foobar' };
+      const response1 = await service.find({ savedObjectsClient }, mockUser1, options1);
+
+      const options2 = { filter: nodeBuilder.is('foo', 'bar') };
+      const response2 = await service.find({ savedObjectsClient }, mockUser1, options2);
+
+      expect(response1).toBe(mockResponse);
+      expect(response2).toBe(mockResponse);
+
+      const [[findOptions1], [findOptions2]] = savedObjectsClient.find.mock.calls;
+      expect(findOptions1).toMatchInlineSnapshot(`
+        Object {
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "search-session.attributes.realmType",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "my_realm_type",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "search-session.attributes.realmName",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "my_realm_name",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "search-session.attributes.username",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "my_username",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": null,
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "foobar",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "and",
+            "type": "function",
+          },
+          "type": "search-session",
+        }
+      `);
+      expect(findOptions2).toMatchInlineSnapshot(`
+        Object {
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "search-session.attributes.realmType",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "my_realm_type",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "search-session.attributes.realmName",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "my_realm_name",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "search-session.attributes.username",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "my_username",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "foo",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "bar",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "and",
+            "type": "function",
+          },
           "type": "search-session",
         }
       `);
