@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanelProps } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { FunctionComponent } from 'react';
+import { StyledComponent } from 'styled-components';
+import { euiStyled, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
@@ -53,7 +55,10 @@ export const WaterfallChartAxisOnlyContainer = euiStyled(EuiFlexItem)`
 export const WaterfallChartTopContainer = euiStyled(EuiFlexGroup)`
 `;
 
-export const WaterfallChartFixedTopContainerSidebarCover = euiStyled(EuiPanel)`
+export const WaterfallChartFixedTopContainerSidebarCover: StyledComponent<
+  FunctionComponent<EuiPanelProps>,
+  EuiTheme
+> = euiStyled(EuiPanel)`
   height: 100%;
   border-radius: 0 !important;
   border: none;
@@ -82,7 +87,10 @@ export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSideba
   overflow-y: hidden;
 `;
 
-export const WaterfallChartSidebarContainerInnerPanel = euiStyled(EuiPanel)`
+export const WaterfallChartSidebarContainerInnerPanel: StyledComponent<
+  FunctionComponent<EuiPanelProps>,
+  EuiTheme
+> = euiStyled(EuiPanel)`
   border: 0;
   height: 100%;
 `;
