@@ -20,8 +20,9 @@ import {
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
-import { SelectablePatterns, SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
+import { SelectablePatterns } from '../../../../../common/search_strategy/index_fields';
 
 interface Props {
   timelineId?: string;

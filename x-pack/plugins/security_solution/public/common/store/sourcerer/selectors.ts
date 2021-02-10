@@ -8,14 +8,11 @@
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
 import { State } from '../types';
+import { KibanaIndexPatterns, ManageScope, SourcererScopeById, SourcererScopeName } from './model';
 import {
-  KibanaIndexPatterns,
-  ManageScope,
   SelectablePatterns,
   SourcererPatternType,
-  SourcererScopeById,
-  SourcererScopeName,
-} from './model';
+} from '../../../../common/search_strategy/index_fields';
 
 export const sourcererKibanaIndexPatternsSelector = ({ sourcerer }: State): KibanaIndexPatterns =>
   sourcerer.kibanaIndexPatterns;
@@ -59,6 +56,7 @@ export const getIndexPatternsSelectedSelector = () => {
   return (state: State, scopeId: SourcererScopeName): { selectedPatterns: SelectablePatterns } => {
     const scope = getScopeSelector(state, scopeId);
     const configIndexPatterns = getConfigIndexPatternsSelector(state);
+    // debugger;
     return {
       selectedPatterns:
         scope.selectedPatterns.length === 0
@@ -102,7 +100,7 @@ export const getAllSelectablePatternsSelector = () => {
   };
 };
 
-const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
+// const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
 
 export const getSourcererScopeSelector = () => {
   const getScopeIdSelector = scopeIdSelector();

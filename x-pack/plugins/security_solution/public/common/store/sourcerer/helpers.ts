@@ -7,13 +7,12 @@
 
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
+import { SourcererModel, SourcererScopeName } from './model';
+import { TimelineEventsType } from '../../../../common/types/timeline';
 import {
   SelectablePatterns,
-  SourcererModel,
   SourcererPatternType,
-  SourcererScopeName,
-} from './model';
-import { TimelineEventsType } from '../../../../common/types/timeline';
+} from '../../../../common/search_strategy/index_fields';
 
 export interface Args {
   eventType?: TimelineEventsType;

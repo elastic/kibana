@@ -47,7 +47,7 @@ import {
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
-import { SelectablePatterns } from '../../../common/store/sourcerer/model';
+import { SelectablePatterns } from '../../../../common/search_strategy/index_fields';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -209,7 +209,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultHeaders,
-              indexNames: selectablePatterns,
+              indexNames: selectablePatterns.map(({ title }) => title),
               show: false,
             })
           );

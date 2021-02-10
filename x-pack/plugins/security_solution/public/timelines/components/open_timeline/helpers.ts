@@ -14,21 +14,21 @@ import { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 import { oneTimelineQuery } from '../../containers/one/index.gql_query';
 import {
-  TimelineResult,
+  ColumnHeaderResult,
+  DataProviderResult,
+  FilterTimelineResult,
   GetOneTimeline,
   NoteResult,
-  FilterTimelineResult,
-  ColumnHeaderResult,
   PinnedEvent,
-  DataProviderResult,
+  TimelineResult,
 } from '../../../graphql/types';
 
 import {
   DataProviderType,
   TimelineId,
   TimelineStatus,
-  TimelineType,
   TimelineTabs,
+  TimelineType,
 } from '../../../../common/types/timeline';
 
 import {
@@ -36,13 +36,13 @@ import {
   updateNote as dispatchUpdateNote,
 } from '../../../common/store/app/actions';
 import {
-  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
   setRelativeRangeDatePicker as dispatchSetRelativeRangeDatePicker,
+  setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker,
 } from '../../../common/store/inputs/actions';
 import {
-  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
-  addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
+  addTimeline as dispatchAddTimeline,
+  applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
 } from '../../../timelines/store/timeline/actions';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -52,11 +52,11 @@ import {
   defaultHeaders,
 } from '../timeline/body/column_headers/default_headers';
 import {
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../timeline/body/constants';
 
-import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './types';
+import { DispatchUpdateTimeline, OpenTimelineResult, UpdateTimeline } from './types';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
@@ -66,6 +66,7 @@ import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
+import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -401,7 +402,11 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
     dispatch(
       sourcererActions.initTimelineIndexPatterns({
         id: SourcererScopeName.timeline,
-        selectedPatterns: timeline.indexNames,
+        // probably needs changing
+        selectedPatterns: timeline.indexNames.map((title) => ({
+          title,
+          id: SourcererPatternType.config,
+        })),
         eventType: timeline.eventType,
       })
     );

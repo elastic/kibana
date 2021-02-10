@@ -97,7 +97,7 @@ describe('epicLocalStorage', () => {
       sort,
       timelineId: 'foo',
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
+      updateEventTypeAndSelectedPatterns: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };

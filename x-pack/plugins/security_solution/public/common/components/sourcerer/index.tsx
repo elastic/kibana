@@ -29,7 +29,10 @@ import * as i18n from './translations';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { State } from '../../store';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
-import { SourcererPatternType } from '../../store/sourcerer/model';
+import {
+  SelectablePatterns,
+  SourcererPatternType,
+} from '../../../../common/search_strategy/index_fields';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -49,7 +52,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     State,
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, scopeId), deepEqual);
-  const configAsSelectable: sourcererModel.SelectablePatterns = useMemo(
+  const configAsSelectable: SelectablePatterns = useMemo(
     () => configIndexPatterns.map((title) => ({ title, id: SourcererPatternType.config })),
     [configIndexPatterns]
   );
@@ -66,7 +69,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const setPopoverIsOpenCb = useCallback(() => setPopoverIsOpen((prevState) => !prevState), []);
 
   const onChangeIndexPattern = useCallback(
-    (newSelectedPatterns: sourcererModel.SelectablePatterns) => {
+    (newSelectedPatterns: SelectablePatterns) => {
       dispatch(
         sourcererActions.setSelectedIndexPatterns({
           id: scopeId,
@@ -144,7 +147,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const handleSaveIndices = useCallback(() => {
     onChangeIndexPattern(
-      selectedOptions.map((so) => ({ title: so.label, id: so.key ?? SourcererPatternType.config }))
+      selectedOptions.map((so) => ({
+        title: so.label,
+        id: so.value ?? SourcererPatternType.config,
+      }))
     );
     setPopoverIsOpen(false);
   }, [onChangeIndexPattern, selectedOptions]);
@@ -153,10 +159,11 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setPopoverIsOpen(false);
   }, []);
 
-  const indexesPatternOptions = useMemo(
+  const indexPatternOptions = useMemo(
     () =>
       [...configAsSelectable, ...kibanaIndexPatterns].reduce<ComboBoxOptions>(
         (acc, { title: index, id: key }) => {
+          // probably wrong, revisit
           if (index != null && !acc.some((o) => o.label.includes(index))) {
             return [...acc, { label: index, value: key }];
           }
@@ -185,20 +192,20 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     ),
     [setPopoverIsOpenCb, loading]
   );
-  console.log({ indexesPatternOptions, selectedOptions });
+
   const comboBox = useMemo(
     () => (
       <EuiComboBox
         data-test-subj="indexPattern-switcher"
         placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
-        options={indexesPatternOptions}
+        options={indexPatternOptions}
         selectedOptions={selectedOptions}
         onChange={onChangeCombo}
         renderOption={renderOption}
       />
     ),
-    [indexesPatternOptions, onChangeCombo, renderOption, selectedOptions]
+    [indexPatternOptions, onChangeCombo, renderOption, selectedOptions]
   );
 
   useEffect(() => {

@@ -40,7 +40,7 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { SourcererPatternType } from '../../../../common/store/sourcerer/model';
+import { SourcererPatternType } from '../../../../../common/search_strategy/index_fields';
 
 const CommonUseField = getUseField({ component: Field });
 

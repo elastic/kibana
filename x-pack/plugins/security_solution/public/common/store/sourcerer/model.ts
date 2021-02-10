@@ -12,6 +12,7 @@ import {
   EMPTY_BROWSER_FIELDS,
   EMPTY_DOCVALUE_FIELD,
   EMPTY_INDEX_PATTERN,
+  SelectablePatterns,
 } from '../../../../common/search_strategy/index_fields';
 
 export type ErrorModel = Error[];
@@ -22,22 +23,6 @@ export enum SourcererScopeName {
   timeline = 'timeline',
 }
 
-export enum SourcererPatternType {
-  config = 'config',
-  detections = 'detections',
-  kip = 'ip',
-}
-
-export type SelectablePatterns = Array<{
-  /**
-   * if pattern is a KIP, the string will be the saved object id of the KIP
-   */
-  id: SourcererPatternType.config | SourcererPatternType.detections | string;
-  /**
-   * name of the pattern
-   */
-  title: string;
-}>;
 export interface ManageScope {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];

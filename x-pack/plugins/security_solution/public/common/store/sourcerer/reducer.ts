@@ -16,8 +16,9 @@ import {
   setSource,
   initTimelineIndexPatterns,
 } from './actions';
-import { initialSourcererState, SourcererModel, SourcererPatternType } from './model';
+import { initialSourcererState, SourcererModel } from './model';
 import { createDefaultIndexPatterns, defaultIndexPatternByEventType } from './helpers';
+import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 
 export type SourcererState = SourcererModel;
 

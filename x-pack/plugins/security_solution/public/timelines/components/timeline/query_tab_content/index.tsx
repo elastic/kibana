@@ -52,6 +52,7 @@ import { HideShowContainer } from '../styles';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
 import { ToggleExpandedEvent } from '../../../store/timeline/actions';
+import { SelectablePatterns } from '../../../../../common/search_strategy/index_fields';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -155,16 +156,16 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
-  updateEventTypeAndIndexesName,
+  updateEventTypeAndSelectedPatterns,
 }) => {
   const { timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
   const { timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
     docValueFields,
-    loading: loadingSourcerer,
+    indexNames,
     indexPattern,
-    selectedPatterns,
+    loading: loadingSourcerer,
   } = useSourcererScope(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
@@ -235,7 +236,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     docValueFields,
     endDate: end,
     id: timelineId,
-    indexNames: selectedPatterns,
+    indexNames,
     fields: timelineQueryFields,
     limit: itemsPerPage,
     filterQuery: combinedQueries?.filterQuery ?? '',
@@ -286,7 +287,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <PickEventType
                     eventType={eventType}
-                    onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
+                    onChangeEventTypeAndSelectedPatterns={updateEventTypeAndSelectedPatterns}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -427,13 +428,21 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
+  updateEventTypeAndSelectedPatterns: (
+    newEventType: TimelineEventsType,
+    selectedPatterns: SelectablePatterns
+  ) => {
     dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
+    dispatch(
+      timelineActions.updateIndexNames({
+        id: timelineId,
+        indexNames: selectedPatterns.map(({ title }) => title),
+      })
+    );
     dispatch(
       sourcererActions.setSelectedIndexPatterns({
         id: SourcererScopeName.timeline,
-        selectedPatterns: newIndexNames,
+        selectedPatterns,
       })
     );
   },
@@ -463,7 +472,8 @@ const QueryTabContent = connector(
       prevProps.showEventDetails === nextProps.showEventDetails &&
       prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
-      prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
+      prevProps.updateEventTypeAndSelectedPatterns ===
+        nextProps.updateEventTypeAndSelectedPatterns &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.filters, nextProps.filters) &&

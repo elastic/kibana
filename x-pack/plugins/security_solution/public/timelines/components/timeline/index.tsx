@@ -53,7 +53,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { selectedPatterns } = useSourcererScope(SourcererScopeName.timeline);
+  const { indexNames } = useSourcererScope(SourcererScopeName.timeline);
   const { graphEventId, savedObjectId, timelineType } = useDeepEqualSelector((state) =>
     pick(
       ['graphEventId', 'savedObjectId', 'timelineType'],
@@ -68,7 +68,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
         timelineActions.createTimeline({
           id: timelineId,
           columns: defaultHeaders,
-          indexNames: selectedPatterns,
+          indexNames,
           expandedEvent: {
             [TimelineTabs.query]: activeTimeline.getExpandedEvent(),
           },

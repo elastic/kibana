@@ -169,14 +169,14 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     globalFullScreen,
   ]);
 
-  let sourcereScope = SourcererScopeName.default;
+  let sourcererScope = SourcererScopeName.default;
   if ([TimelineId.detectionsRulesDetailsPage, TimelineId.detectionsPage].includes(timelineId)) {
-    sourcereScope = SourcererScopeName.detections;
+    sourcererScope = SourcererScopeName.detections;
   } else if (timelineId === TimelineId.active) {
-    sourcereScope = SourcererScopeName.timeline;
+    sourcererScope = SourcererScopeName.timeline;
   }
 
-  const { selectedPatterns } = useSourcererScope(sourcereScope);
+  const { indexNames } = useSourcererScope(sourcererScope);
   return (
     <OverlayContainer
       data-test-subj="overlayContainer"
@@ -200,7 +200,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
         <StyledResolver
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
-          indices={selectedPatterns}
+          indices={indexNames}
           shouldUpdate={shouldUpdate}
           filters={{ from, to }}
         />

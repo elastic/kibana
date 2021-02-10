@@ -57,7 +57,7 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { SourcererPatternType } from '../../../store/sourcerer/model';
+import { SourcererPatternType } from '../../../../../common/search_strategy/index_fields';
 
 export interface AddExceptionModalProps {
   ruleName: string;

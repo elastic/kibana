@@ -8,12 +8,8 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineEventsType } from '../../../../common/types/timeline';
 
-import {
-  KibanaIndexPatterns,
-  ManageScopeInit,
-  SelectablePatterns,
-  SourcererScopeName,
-} from './model';
+import { KibanaIndexPatterns, ManageScopeInit, SourcererScopeName } from './model';
+import { SelectablePatterns } from '../../../../common/search_strategy/index_fields';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/sourcerer');
 

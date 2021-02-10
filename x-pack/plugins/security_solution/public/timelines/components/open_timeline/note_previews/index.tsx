@@ -21,7 +21,7 @@ import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { sourcererSelectors } from '../../../../common/store';
-import { SelectablePatterns } from '../../../../common/store/sourcerer/model';
+import { SelectablePatterns } from '../../../../../common/search_strategy/index_fields';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};

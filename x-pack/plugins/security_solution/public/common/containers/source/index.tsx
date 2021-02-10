@@ -8,9 +8,10 @@
 import { keyBy, pick, isEmpty, isEqual, isUndefined } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 
+import deepEqual from 'fast-deep-equal';
 import { useKibana } from '../../lib/kibana';
 import {
   IndexField,
@@ -18,13 +19,19 @@ import {
   IndexFieldsStrategyRequest,
   BrowserField,
   BrowserFields,
+  SelectablePatterns,
 } from '../../../../common/search_strategy/index_fields';
 import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from './translations';
-import { SelectablePatterns, SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import { DocValueFields } from '../../../../common/search_strategy/common';
+import {
+  getSourcererScopeSelector,
+  SourcererScopeSelector,
+} from '../../components/sourcerer/selectors';
+import { State } from '../../store';
 
 export { BrowserField, BrowserFields, DocValueFields };
 
@@ -203,11 +210,12 @@ export const useFetchIndex = (
       !isEqual(
         previousIndexesName.current,
         selectedPatterns.map(({ title }) => title)
-      )
+      ) &&
+      !isLoading
     ) {
       indexFieldsSearch(selectedPatterns);
     }
-  }, [selectedPatterns, indexFieldsSearch, previousIndexesName]);
+  }, [selectedPatterns, indexFieldsSearch, previousIndexesName, isLoading]);
 
   return [isLoading, state];
 };
@@ -219,6 +227,11 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   const indexPatternsSelectedSelector = useMemo(
     () => sourcererSelectors.getIndexPatternsSelectedSelector(),
     []
+  );
+  const sourcererScopeSelector = useMemo(getSourcererScopeSelector, []);
+  const { sourcererScope } = useSelector<State, SourcererScopeSelector>(
+    (state) => sourcererScopeSelector(state, sourcererScopeName),
+    deepEqual
   );
   const { selectedPatterns } = useDeepEqualSelector<{
     selectedPatterns: SelectablePatterns;
@@ -232,14 +245,14 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   const indexFieldsSearch = useCallback(
-    (selectedPatterns) => {
+    (newSelectedPatterns) => {
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
         const searchSubscription$ = data.search
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
-            { selectedPatterns, onlyCheckIfIndicesExist: false },
+            { selectedPatterns: newSelectedPatterns, onlyCheckIfIndicesExist: false },
             {
               abortSignal: abortCtrl.current.signal,
               strategy: 'securitySolutionIndexFields',
@@ -298,9 +311,15 @@ export const useIndexFields = (sourcererScopeName: SourcererScopeName) => {
   );
 
   useEffect(() => {
-    //  && previousIndexNames !== selectedPatterns.sort().join()
-    if (!isEmpty(selectedPatterns)) {
+    if (
+      !isEmpty(selectedPatterns) &&
+      !sourcererScope.loading &&
+      selectedPatterns
+        .map(({ title }) => title)
+        .sort()
+        .join() !== sourcererScope.indexPattern.title
+    ) {
       indexFieldsSearch(selectedPatterns);
     }
-  }, [selectedPatterns, indexFieldsSearch]);
+  }, [selectedPatterns, indexFieldsSearch, sourcererScope]);
 };

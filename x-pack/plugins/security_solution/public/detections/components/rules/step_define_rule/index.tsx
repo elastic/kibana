@@ -55,7 +55,7 @@ import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { PreviewQuery, Threshold } from '../query_preview';
-import { SourcererPatternType } from '../../../../common/store/sourcerer/model';
+import { SourcererPatternType } from '../../../../../common/search_strategy/index_fields';
 
 const CommonUseField = getUseField({ component: Field });
 

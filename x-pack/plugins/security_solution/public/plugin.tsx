@@ -56,17 +56,12 @@ import {
   OVERVIEW,
   TIMELINES,
 } from './app/home/translations';
-import {
-  IndexFieldsStrategyRequest,
-  IndexFieldsStrategyResponse,
-} from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
 import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
-import { SourcererPatternType } from './common/store/sourcerer/model';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;

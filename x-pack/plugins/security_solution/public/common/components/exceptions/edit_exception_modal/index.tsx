@@ -49,7 +49,7 @@ import {
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { SourcererPatternType } from '../../../store/sourcerer/model';
+import { SourcererPatternType } from '../../../../../common/search_strategy/index_fields';
 
 interface EditExceptionModalProps {
   ruleName: string;

@@ -27,11 +27,15 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { sourcererModel, State } from '../../../../common/store';
-import { SourcererPatternType, SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { State } from '../../../../common/store';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
+import {
+  SelectablePatterns,
+  SourcererPatternType,
+} from '../../../../../common/search_strategy/index_fields';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -115,14 +119,17 @@ const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
 
 interface PickEventTypeProps {
   eventType: TimelineEventsType;
-  onChangeEventTypeAndIndexesName: (value: TimelineEventsType, indexNames: string[]) => void;
+  onChangeEventTypeAndSelectedPatterns: (
+    value: TimelineEventsType,
+    selectedPatterns: SelectablePatterns
+  ) => void;
 }
 
-type ComboOptions = Array<EuiComboBoxOptionOption<string> & { key: string }>;
+type ComboOptions = Array<EuiComboBoxOptionOption<string> & { value: string }>;
 
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   eventType = 'all',
-  onChangeEventTypeAndIndexesName,
+  onChangeEventTypeAndSelectedPatterns,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
@@ -139,7 +146,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       key,
     }))
   );
-  const configAsSelectable: sourcererModel.SelectablePatterns = useMemo(
+  const configAsSelectable: SelectablePatterns = useMemo(
     () => configIndexPatterns.map((title) => ({ title, id: SourcererPatternType.config })),
     [configIndexPatterns]
   );
@@ -246,12 +253,12 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const closePopover = useCallback(() => setPopover(false), []);
 
   const handleSaveIndices = useCallback(() => {
-    onChangeEventTypeAndIndexesName(
+    onChangeEventTypeAndSelectedPatterns(
       filterEventType,
-      selectedOptions.map((so) => so.label)
+      selectedOptions.map((so) => ({ title: so.label, id: so.value }))
     );
     setPopover(false);
-  }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
+  }, [filterEventType, onChangeEventTypeAndSelectedPatterns, selectedOptions]);
 
   const resetDataSources = useCallback(() => {
     setSelectedOptions(

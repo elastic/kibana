@@ -246,7 +246,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererScope(
+  const { indexNames, indexPattern, docValueFields, browserFields } = useSourcererScope(
     SourcererScopeName.timeline
   );
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -303,7 +303,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
   );
   const [loading, kpis] = useTimelineKpis({
-    defaultIndex: selectedPatterns,
+    defaultIndex: indexNames,
     docValueFields,
     timerange,
     isBlankTimeline,

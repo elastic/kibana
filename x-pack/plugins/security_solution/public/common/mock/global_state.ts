@@ -31,7 +31,12 @@ import { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
 import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
 import { mockIndexPattern } from './index_pattern';
+import { SourcererPatternType } from '../../../common/search_strategy/index_fields';
 
+const defaultPatternsAsSelectable = DEFAULT_INDEX_PATTERN.map((title) => ({
+  id: SourcererPatternType.config,
+  title,
+}));
 export const mockGlobalState: State = {
   app: {
     notesById: {},
@@ -208,7 +213,6 @@ export const mockGlobalState: State = {
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
-        indexNames: DEFAULT_INDEX_PATTERN,
         itemsPerPage: 5,
         dataProviders: [],
         description: '',
@@ -234,6 +238,7 @@ export const mockGlobalState: State = {
           end: '2020-07-08T08:20:18.966Z',
         },
         selectedEventIds: {},
+        indexNames: DEFAULT_INDEX_PATTERN,
         show: false,
         showCheckboxes: false,
         pinnedEventIds: {},
@@ -253,7 +258,7 @@ export const mockGlobalState: State = {
       ...initialSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
+        selectedPatterns: defaultPatternsAsSelectable,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,
@@ -261,7 +266,7 @@ export const mockGlobalState: State = {
       },
       [SourcererScopeName.timeline]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
+        selectedPatterns: defaultPatternsAsSelectable,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
         docValueFields: mockDocValueFields,

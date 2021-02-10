@@ -12,7 +12,6 @@ import {
   IFieldSubType,
 } from '../../../../../../src/plugins/data/common';
 import { DocValueFields, Maybe } from '../common';
-import { SelectablePatterns } from '../../../public/common/store/sourcerer/model';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
@@ -48,7 +47,22 @@ export interface IndexField {
 }
 
 export type BeatFields = Record<string, FieldInfo>;
+export enum SourcererPatternType {
+  config = 'config',
+  detections = 'detections',
+  kip = 'ip',
+}
 
+export type SelectablePatterns = Array<{
+  /**
+   * if pattern is a KIP, the string will be the saved object id of the KIP
+   */
+  id: SourcererPatternType.config | SourcererPatternType.detections | string;
+  /**
+   * name of the pattern
+   */
+  title: string;
+}>;
 export interface IndexFieldsStrategyRequest extends IEsSearchRequest {
   selectedPatterns: SelectablePatterns;
   onlyCheckIfIndicesExist: boolean;

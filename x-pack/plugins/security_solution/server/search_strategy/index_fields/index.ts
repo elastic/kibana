@@ -15,8 +15,8 @@ import {
   IndexField,
   IndexFieldsStrategyRequest,
   BeatFields,
+  SourcererPatternType,
 } from '../../../common/search_strategy/index_fields';
-import { SourcererPatternType } from '../../../public/common/store/sourcerer/model';
 
 export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
   IndexFieldsStrategyRequest,
@@ -72,6 +72,7 @@ export const securitySolutionIndexFieldsProvider = (): ISearchStrategy<
               pattern: selectedIndexNames.join(),
             });
           } else if (request.selectedPatterns.length > 0) {
+            console.log('looloo config');
             selectedIndexNames = dedupeIndexName(
               request.selectedPatterns.map(({ title }) => title)
             );

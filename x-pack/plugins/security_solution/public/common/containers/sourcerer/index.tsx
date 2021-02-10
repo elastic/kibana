@@ -9,16 +9,16 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import {
-  SelectablePatterns,
-  SourcererPatternType,
-  SourcererScopeName,
-} from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useIndexFields } from '../source';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import {
+  SelectablePatterns,
+  SourcererPatternType,
+} from '../../../../common/search_strategy/index_fields';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
