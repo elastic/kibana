@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { registerFileUploadUsageCollector } from './file_upload_usage_collector';
-export { fileUploadTelemetryMappingsType } from './mappings';
+export { HeatmapLayer } from './heatmap_layer';

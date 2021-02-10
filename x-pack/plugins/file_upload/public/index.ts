@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-let internalRepository;
-export const setInternalRepository = (createInternalRepository) => {
-  internalRepository = createInternalRepository();
-};
-export const getInternalRepository = () => internalRepository;
+import { FileUploadPlugin } from './plugin';
+
+export function plugin() {
+  return new FileUploadPlugin();
+}
+
+export * from '../common';
+
+export { StartContract } from './plugin';
+export { FileUploadComponentProps } from './get_file_upload_component';

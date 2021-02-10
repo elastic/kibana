@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { FileUploadPlugin } from './plugin';
-
-export * from './plugin';
-
-export const plugin = () => new FileUploadPlugin();
+export { addGeoJsonMbSource, syncVectorSource } from './utils';
+export { IVectorLayer, VectorLayer, VectorLayerArguments } from './vector_layer';
