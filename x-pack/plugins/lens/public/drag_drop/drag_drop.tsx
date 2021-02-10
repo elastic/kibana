@@ -95,9 +95,9 @@ interface BaseProps {
   order: number[];
 
   /**
-   * don't display ghost image for the drop element
+   * display ghost image for the drop element
    */
-  noGhost?: boolean;
+  showGhost?: boolean;
 }
 
 /**
@@ -361,9 +361,9 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     dragging,
     isDragging,
     isNotDroppable,
+    showGhost = true,
     dragType = 'copy',
     dropType,
-    noGhost,
     keyboardMode,
     activeDropTarget,
     registerDropTarget,
@@ -451,7 +451,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
         onDrop: drop,
         draggable,
       })}
-      {!noGhost &&
+      {showGhost &&
       dragging?.ghost &&
       activeDropTargetMatches &&
       keyboardMode &&

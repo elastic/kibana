@@ -75,19 +75,19 @@ describe('DragDrop', () => {
     expect(preventDefault).not.toBeCalled();
   });
 
-  test('dragstart sets dragging in the context', async () => {
+  test('dragstart sets dragging in the context and calls it with proper params', async () => {
     const setDragging = jest.fn();
 
     const setA11yMessage = jest.fn();
     const component = mount(
       <ChildDragDropProvider
         {...defaultContext}
-        dragging={{ ...value, ghost: <button>Hello!</button> }}
+        dragging={undefined}
         setDragging={setDragging}
         setA11yMessage={setA11yMessage}
       >
         <DragDrop value={value} draggable={true} order={[2, 0, 1, 0]}>
-          <button>Hello!</button>
+          <button>Hi!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -97,7 +97,7 @@ describe('DragDrop', () => {
     jest.runAllTimers();
 
     expect(dataTransfer.setData).toBeCalledWith('text', 'hello');
-    expect(setDragging).toBeCalledWith({ ...value, ghost: <button>Hello!</button> });
+    expect(setDragging).toBeCalledWith({ ...value, ghost: <button>Hi!</button> });
     expect(setA11yMessage).toBeCalledWith('Lifted hello');
   });
 
@@ -204,7 +204,6 @@ describe('DragDrop', () => {
     const getAdditionalClassesOnEnter = jest.fn().mockReturnValue('additional');
     const getAdditionalClassesOnDroppable = jest.fn().mockReturnValue('droppable');
     const setA11yMessage = jest.fn();
-    let activeDropTarget;
 
     const component = mount(
       <ChildDragDropProvider
@@ -214,10 +213,6 @@ describe('DragDrop', () => {
         setDragging={() => {
           dragging = { id: '1', humanData: { label: 'label1' }, ghost: <div>Hello</div> };
         }}
-        setActiveDropTarget={(val) => {
-          activeDropTarget = { activeDropTarget: val };
-        }}
-        activeDropTarget={activeDropTarget}
       >
         <DragDrop
           value={{ id: '3', humanData: { label: 'ignored' } }}
@@ -399,6 +394,83 @@ describe('DragDrop', () => {
         'move_compatible'
       );
     });
+  });
+
+  test('Keyboard navigation: ActiveDropTarget gets ghost image', () => {
+    const onDrop = jest.fn();
+    const setActiveDropTarget = jest.fn();
+    const setA11yMessage = jest.fn();
+    const items = [
+      {
+        draggable: true,
+        value: {
+          id: '1',
+          humanData: { label: 'label1', position: 1 },
+        },
+        children: '1',
+        order: [2, 0, 0, 0],
+      },
+      {
+        draggable: true,
+        dragType: 'move' as 'copy' | 'move',
+
+        value: {
+          id: '2',
+
+          humanData: { label: 'label2', position: 1 },
+        },
+        onDrop,
+        dropType: 'move_compatible' as DropType,
+        order: [2, 0, 1, 0],
+      },
+    ];
+    const component = mount(
+      <ChildDragDropProvider
+        {...{
+          ...defaultContext,
+          dragging: { ...items[0].value, ghost: <div>Hello</div> },
+          setActiveDropTarget,
+          setA11yMessage,
+          activeDropTarget: {
+            activeDropTarget: { ...items[1].value, onDrop, dropType: 'move_compatible' },
+            dropTargetsByOrder: {
+              '2,0,1,0': { ...items[1].value, onDrop, dropType: 'move_compatible' },
+            },
+          },
+          keyboardMode: true,
+        }}
+      >
+        {items.map((props) => (
+          <DragDrop {...props} key={props.value.id}>
+            <div />
+          </DragDrop>
+        ))}
+      </ChildDragDropProvider>
+    );
+
+    // console.log(component.find(DragDrop).at(1).hasClass('lnsDragDrop_ghost'))
+    expect(component.find(DragDrop).at(1).find('.lnsDragDrop_ghost').text()).toEqual('Hello');
+    // const keyboardHandler = component
+    //   .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+    //   .first()
+    //   .simulate('focus');
+    // act(() => {
+    //   keyboardHandler.simulate('keydown', { key: 'ArrowRight' });
+    //   expect(setActiveDropTarget).toBeCalledWith({
+    //     ...items[2].value,
+    //     onDrop,
+    //     dropType: items[2].dropType,
+    //   });
+    //   keyboardHandler.simulate('keydown', { key: 'Enter' });
+    //   expect(setA11yMessage).toBeCalledWith(
+    //     'Selected label3 in  group at position 1. Press space or enter to replace label3 with label1.'
+    //   );
+    //   expect(setActiveDropTarget).toBeCalledWith(undefined);
+    //   expect(onDrop).toBeCalledWith(
+    //     { humanData: { label: 'label1', position: 1 }, id: '1' },
+    //     'move_compatible'
+    //   );
+    // });
   });
 
   describe('reordering', () => {
