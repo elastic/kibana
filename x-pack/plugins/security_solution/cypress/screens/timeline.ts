@@ -150,6 +150,8 @@ export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
 
+export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
+
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
 export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"]';

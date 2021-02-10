@@ -47,7 +47,7 @@ describe('Timelines', (): void => {
 
     it('toggle create timeline ', () => {
       createNewTimeline();
-      cy.get('[data-test-subj="timeline-flyout-header-panel"]').should('be.visible');
+      cy.get(TIMELINE_PANEL).should('be.visible');
     });
   });
 
