@@ -191,12 +191,16 @@ describe('PingList component', () => {
         expect(formatDuration(984)).toBe('0 ms');
       });
 
-      it('returns milliseconds string if < 10 seconds', () => {
-        expect(formatDuration(9_210_390)).toBe('9210 ms');
+      it('returns milliseconds string if < 1 seconds', () => {
+        expect(formatDuration(921_039)).toBe('921 ms');
       });
 
-      it('returns seconds string if > 10 seconds', () => {
-        expect(formatDuration(10_321_001)).toBe('10 seconds');
+      it('returns seconds string if > 1 second', () => {
+        expect(formatDuration(1_032_100)).toBe('1 second');
+      });
+
+      it('rounds to closest second', () => {
+        expect(formatDuration(1_832_100)).toBe('2 seconds');
       });
     });
   });
