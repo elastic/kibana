@@ -1,7 +1,6 @@
 {
   "include": [],
   "references": [
-    { "path": "./bazel/bin/src/core/tsconfig.json" },
 //    { "path": "./src/plugins/advanced_settings/tsconfig.json" },
 //    { "path": "./src/plugins/apm_oss/tsconfig.json" },
 //    { "path": "./src/plugins/bfetch/tsconfig.json" },
@@ -20,7 +19,7 @@
 //    { "path": "./src/plugins/kibana_overview/tsconfig.json" },
 //    { "path": "./src/plugins/kibana_react/tsconfig.json" },
 //    { "path": "./src/plugins/kibana_usage_collection/tsconfig.json" },
-    { "path": "./src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "./src/plugins/kibana_utils/tsconfig.json" }
 //    { "path": "./src/plugins/legacy_export/tsconfig.json" },
 //    { "path": "./src/plugins/management/tsconfig.json" },
 //    { "path": "./src/plugins/maps_legacy/tsconfig.json" },

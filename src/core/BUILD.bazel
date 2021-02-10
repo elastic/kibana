@@ -100,8 +100,7 @@ ts_project(
   incremental = True,
   tsconfig = "tsconfig",
   srcs = SRCS,
-  deps = NPM_DEPS,
-  ts_build_info_file = ".tsbuildinfo"
+  deps = NPM_DEPS
 )
 
 copy_to_bin(

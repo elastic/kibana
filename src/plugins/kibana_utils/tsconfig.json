@@ -5,13 +5,7 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
-//    "rootDirs": [
-//      "../../../bazel-out/darwin-fastbuild/bin",
-//      "../../../bazel/bin",
-//      "../../../bazel/bin/src/plugins/kibana_utils",
-//      "./bazel/bin/src/plugins/kibana_utils"
-//    ]
+    "declarationMap": true
   },
   "include": [
     "common/**/*",
@@ -20,8 +14,5 @@
     "server/**/*",
     "index.ts",
     "../../../typings/**/*"
-  ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" }
   ]
 }

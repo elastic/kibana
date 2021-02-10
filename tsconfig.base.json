@@ -3,18 +3,29 @@
     "baseUrl": ".",
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
-      "kibana": ["./kibana"],
-      "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
-//      "kibana/src/legacy/*": [
-//        "src/legacy/*",
-//        "bazel-out/darwin-fastbuild/bin/src/legacy/*"
-//      ],
+      "kibana": [
+        "./kibana"
+      ],
+      "kibana/public": [
+        "bazel-out/darwin-fastbuild/bin/src/core/public",
+        "bazel/bin/src/core/public",
+        "src/core/public"
+      ],
+      "kibana/server": [
+        "bazel-out/darwin-fastbuild/bin/src/core/server",
+        "bazel/bin/src/core/server",
+        "src/core/server"
+      ],
+      "src/core/*": [
+        "bazel-out/darwin-fastbuild/bin/src/core/*",
+        "bazel/bin/src/core/*",
+        "src/core/*"
+      ],
       "fixtures/*": ["src/fixtures/*"]
     },
     "rootDirs": [
-      "./bazel-out/darwin-fastbuild/bin",
-      "./bazel/bin",
+      "bazel-out/darwin-fastbuild/bin",
+      "bazel/bin",
       "."
     ],
     // Support .tsx files and transform JSX into calls to React.createElement

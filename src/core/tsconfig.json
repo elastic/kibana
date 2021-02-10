@@ -4,9 +4,7 @@
     "composite": true,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
-    "outDir": "../../bazel/bin/src/core",
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "declarationMap": true
   },
   "include": [
     "public/**/*",
