@@ -13,5 +13,9 @@
     "common/*",
     "../../../typings/**/*"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../../core/tsconfig.json"
+    },
+  ]
 }

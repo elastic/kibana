@@ -13,6 +13,10 @@ import { TimelionConfigType } from './config';
 import { timelionSheetSavedObjectType } from './saved_objects';
 import { getDeprecations } from './deprecations';
 
+export interface PluginSetupDependencies {
+  deprecations: any; // TODO fix
+}
+
 /**
  * Deprecated since 7.0, the Timelion app will be removed in 8.0.
  * To continue using your Timelion worksheets, migrate them to a dashboard.
@@ -20,7 +24,9 @@ import { getDeprecations } from './deprecations';
  *  @link https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation
  **/
 const showWarningMessageIfTimelionSheetWasFound = async (core: CoreStart, logger: Logger) => {
-  const deprecations = await getDeprecations(core.savedObjects);
+  const savedObjectsClient = core.savedObjects.createInternalRepository();
+  // TODO fix
+  const deprecations = await getDeprecations({ savedObjectsClient });
 
   if (deprecations.length) {
     logger.warn(
@@ -36,7 +42,7 @@ export class TimelionPlugin implements Plugin {
     this.logger = context.logger.get();
   }
 
-  public setup(core: CoreSetup, { deprecations }) {
+  public setup(core: CoreSetup, { deprecations }: PluginSetupDependencies) {
     core.capabilities.registerProvider(() => ({
       timelion: {
         save: true,

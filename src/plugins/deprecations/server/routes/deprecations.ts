@@ -7,6 +7,7 @@
  */
 
 import { IRouter } from 'src/core/server';
+import { DeprecationDependencies, DeprecationInfo, DeprecationContext } from '../types';
 
 export function registerDeprecationRoutes(router: IRouter, deprecations: any) {
   router.get(
@@ -15,24 +16,38 @@ export function registerDeprecationRoutes(router: IRouter, deprecations: any) {
       validate: false,
     },
     async (context, request, response) => {
-      const deps = deprecations.getDeprecations();
+      const deprecationInfo: DeprecationContext = deprecations.getDeprecationInfo();
 
-      const esClient = context.core.elasticsearch.client;
+      const dependencies: DeprecationDependencies = {
+        esClient: context.core.elasticsearch.client,
+        savedObjectsClient: context.core.savedObjects.client,
+      };
 
-      const allDeps = await Promise.all(
-        Object.entries(deps).map(async ([key, value]) => {
-          const pluginDeprecations = await value.getDeprecations(esClient);
-          const pluginDeprecationsWithId = pluginDeprecations.map((deps) => ({
-            ...deps,
-            pluginId: key,
+      const pluginDeprecationsList = await Promise.all(
+        Object.entries(deprecationInfo).map(async ([pluginId, deprecationInfoContext]) => {
+          const pluginDeprecations: DeprecationInfo[] = await deprecationInfoContext.getDeprecations(
+            dependencies
+          );
+          const pluginDeprecationsWithId = pluginDeprecations.map((pluginDeprecation) => ({
+            ...pluginDeprecation,
+            pluginId,
           }));
           return pluginDeprecationsWithId;
         })
-      );
+      ).catch((error) => {
+        // TODO handle error
+        // eslint-disable-next-line no-console
+        console.log('error', error);
+      });
+
+      const flattenedPluginDeprecationsList =
+        pluginDeprecationsList && pluginDeprecationsList.length
+          ? pluginDeprecationsList.flat()
+          : [];
 
       return response.ok({
         body: {
-          deprecations: allDeps.flat(),
+          deprecations: flattenedPluginDeprecationsList,
         },
       });
     }

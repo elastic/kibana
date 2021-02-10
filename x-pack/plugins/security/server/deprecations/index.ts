@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DeprecationsService } from './deprecations';
+export { getDeprecations } from './deprecations';

@@ -9,6 +9,8 @@
 import { IRouter } from 'src/core/server';
 import { registerDeprecationRoutes } from './deprecations';
 
+export { DeprecationDependencies } from './deprecations';
+
 export function setupRoutes({ router, deprecations }: { router: IRouter; deprecations: any }) {
   registerDeprecationRoutes(router, deprecations);
 }

@@ -19,6 +19,9 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
     { "path": "../../../src/plugins/security_oss/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    {
+      "path": "../../../src/plugins/deprecations/tsconfig.json"
+    }
   ]
 }

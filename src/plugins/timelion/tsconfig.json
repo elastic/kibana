@@ -19,5 +19,8 @@
     { "path": "../vis_type_timelion/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
     { "path": "../kibana_legacy/tsconfig.json" },
+    {
+      "path": "../deprecations/tsconfig.json"
+    },
   ]
 }

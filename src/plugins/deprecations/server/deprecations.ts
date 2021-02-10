@@ -6,22 +6,12 @@
  * Side Public License, v 1.
  */
 
-interface DeprecationInfo {
-  message: string;
-  documentationUrl: string;
-  level: 'critical' | 'warning';
-  correctiveAction?: () => void;
-}
-
-interface PluginDeprecation {
-  pluginId: string;
-  getDeprecations: () => Promise<DeprecationInfo>;
-}
+import { DeprecationInfo, DeprecationContext } from './types';
 
 export class Deprecations {
-  private readonly deprecations: { [key: string]: PluginDeprecation } = {};
+  private readonly deprecations: { [key: string]: DeprecationContext } = {};
 
-  public registerDeprecations = (deprecation: PluginDeprecation) => {
+  public registerDeprecations = (deprecation: DeprecationContext) => {
     if (this.deprecations[deprecation.pluginId]) {
       throw new Error(`Plugin "${deprecation.pluginId}" is duplicated.`);
     }
@@ -29,11 +19,11 @@ export class Deprecations {
     this.deprecations[deprecation.pluginId] = deprecation;
   };
 
-  public getDeprecationsByPluginId = (pluginId: string) => {
+  public getDeprecationInfoByPluginId = (pluginId: string) => {
     return this.deprecations[pluginId];
   };
 
-  public getDeprecations = () => {
+  public getDeprecationInfo = () => {
     return this.deprecations;
   };
 }

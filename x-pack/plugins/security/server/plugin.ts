@@ -43,7 +43,7 @@ import { ElasticsearchService } from './elasticsearch';
 import { Session, SessionManagementService } from './session_management';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { setupSpacesClient } from './spaces';
-import { DeprecationsService } from './deprecations';
+import { getDeprecations } from './deprecations';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -89,7 +89,7 @@ export interface PluginSetupDependencies {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
-  deprecations: any;
+  deprecations: any; // TODO fix
   usageCollection?: UsageCollectionSetup;
   securityOss?: SecurityOssPluginSetup;
   spaces?: SpacesPluginSetup;
@@ -175,7 +175,6 @@ export class SecurityPlugin
     this.initializerContext.logger.get('anonymous-access'),
     this.getConfig
   );
-  private readonly deprecationsService = new DeprecationsService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -304,7 +303,7 @@ export class SecurityPlugin
 
     deprecations.registerDeprecations({
       pluginId: 'security',
-      getDeprecations: this.deprecationsService.getDeprecations.bind(this.deprecationsService),
+      getDeprecations,
     });
 
     return Object.freeze<SecurityPluginSetup>({

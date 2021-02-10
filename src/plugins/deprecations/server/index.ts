@@ -9,5 +9,7 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { DeprecationsPlugin } from './plugin';
 
+export { DeprecationDependencies, DeprecationInfo, DeprecationContext } from './types';
+
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new DeprecationsPlugin(initializerContext);
