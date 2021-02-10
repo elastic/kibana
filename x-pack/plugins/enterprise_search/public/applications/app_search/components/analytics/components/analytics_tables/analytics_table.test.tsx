@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { mountWithIntl, mockKibanaValues } from '../../../../../__mocks__';
+import { mountWithIntl } from '../../../../../__mocks__';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
+import { runActionColumnTests } from './shared_columns_tests';
+
 import { AnalyticsTable } from './';
 
 describe('AnalyticsTable', () => {
-  const { navigateToUrl } = mockKibanaValues;
-
   const items = [
     {
       key: 'some search',
@@ -69,18 +69,9 @@ describe('AnalyticsTable', () => {
     expect(tableContent).toContain('0');
   });
 
-  it('renders an action column', () => {
+  describe('renders an action column', () => {
     const wrapper = mountWithIntl(<AnalyticsTable items={items} />);
-    const viewQuery = wrapper.find('[data-test-subj="AnalyticsTableViewQueryButton"]').first();
-    const editQuery = wrapper.find('[data-test-subj="AnalyticsTableEditQueryButton"]').first();
-
-    viewQuery.simulate('click');
-    expect(navigateToUrl).toHaveBeenCalledWith(
-      '/engines/some-engine/analytics/query_detail/some%20search'
-    );
-
-    editQuery.simulate('click');
-    // TODO
+    runActionColumnTests(wrapper);
   });
 
   it('renders an empty prompt if no items are passed', () => {
