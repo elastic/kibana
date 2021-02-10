@@ -2187,10 +2187,10 @@
     pump "^3.0.0"
     secure-json-parse "^2.1.0"
 
-"@elastic/ems-client@7.11.0":
-  version "7.11.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.11.0.tgz#d2142d0ef5bd1aff7ae67b37c1394b73cdd48d8b"
-  integrity sha512-7+gDEkBr8nRS7X9i/UPg1WkS7bEBuNbBBjXCchQeYwqPRmw6vOb4wjlNzVwmOFsp2OH4lVFfZ+XU4pxTt32EXA==
+"@elastic/ems-client@7.12.0":
+  version "7.12.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-7.12.0.tgz#cf83f5ad76e26cedfa6f5b91277d2d919b9423d1"
+  integrity sha512-Svv3boWL1n14nIt6tL9gaA9Ym1B4AwWl6ISZT62+uKM2G+imZxWLkqpQc/HHcf7TfuAmleF2NFwnT5vw2vZTpA==
   dependencies:
     lodash "^4.17.15"
     semver "7.3.2"
