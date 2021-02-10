@@ -43,14 +43,14 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1].id).toEqual(
       'mock-comment'
@@ -71,14 +71,14 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1].id).toEqual(
       'mock-comment'
@@ -95,14 +95,14 @@ describe('POST comment', () => {
       body: {},
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
   });
@@ -124,14 +124,14 @@ describe('POST comment', () => {
         body: requestAttributes,
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -152,14 +152,14 @@ describe('POST comment', () => {
         },
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -183,14 +183,14 @@ describe('POST comment', () => {
         body: requestAttributes,
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -212,14 +212,14 @@ describe('POST comment', () => {
         },
       });
 
-      const theContext = await createRouteContext(
+      const { context } = await createRouteContext(
         createMockSavedObjectsRepository({
           caseSavedObject: mockCases,
           caseCommentSavedObject: mockCaseComments,
         })
       );
 
-      const response = await routeHandler(theContext, request, kibanaResponseFactory);
+      const response = await routeHandler(context, request, kibanaResponseFactory);
       expect(response.status).toEqual(400);
       expect(response.payload.isBoom).toEqual(true);
     }
@@ -238,14 +238,14 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
     expect(response.payload.isBoom).toEqual(true);
   });
@@ -262,14 +262,14 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
   });
@@ -289,7 +289,7 @@ describe('POST comment', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
@@ -297,7 +297,7 @@ describe('POST comment', () => {
       true
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1]).toEqual({
       comment: 'Wow, good luck catching that bad meanie!',

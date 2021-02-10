@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+
 import { i18n } from '@kbn/i18n';
 
 export const ANALYTICS_TITLE = i18n.translate(

@@ -8,16 +8,17 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { sourceConfigData } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiConfirmModal } from '@elastic/eui';
 
-import { sourceConfigData } from '../../../__mocks__/content_sources.mock';
-
 import { Loading } from '../../../../shared/loading';
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
+
 import { SourceConfig } from './source_config';
 
 describe('SourceConfig', () => {

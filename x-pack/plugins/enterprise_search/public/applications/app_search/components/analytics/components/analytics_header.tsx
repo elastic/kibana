@@ -6,12 +6,11 @@
  */
 
 import React, { useState } from 'react';
+
 import { useValues } from 'kea';
-
-import queryString from 'query-string';
 import moment from 'moment';
+import queryString from 'query-string';
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -23,11 +22,12 @@ import {
   EuiDatePicker,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
+import { AnalyticsLogic } from '../';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LogRetentionTooltip, LogRetentionOptions } from '../../log_retention';
 
-import { AnalyticsLogic } from '../';
 import { DEFAULT_START_DATE, DEFAULT_END_DATE, SERVER_DATE_FORMAT } from '../constants';
 import { convertTagsToSelectOptions } from '../utils';
 
