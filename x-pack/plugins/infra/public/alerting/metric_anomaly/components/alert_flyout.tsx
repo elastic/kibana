@@ -8,24 +8,22 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
+import { METRIC_ANOMALY_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 
 interface Props {
   visible?: boolean;
-  options?: Partial<InfraWaffleMapOptions>;
+  metric?: InfraWaffleMapOptions['metric'];
   nodeType?: InventoryItemType;
   filter?: string;
   setVisible(val: boolean): void;
 }
 
-export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
+export const AlertFlyout = ({ metric, nodeType, visible, setVisible }: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
 
-  const { inventoryPrefill } = useAlertPrefillContext();
-  const { customMetrics } = inventoryPrefill;
   const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
   const AddAlertFlyout = useMemo(
     () =>
@@ -34,12 +32,10 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
         consumer: 'infrastructure',
         onClose: onCloseFlyout,
         canChangeTrigger: false,
-        alertTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+        alertTypeId: METRIC_ANOMALY_ALERT_TYPE_ID,
         metadata: {
-          options,
+          metric,
           nodeType,
-          filter,
-          customMetrics,
         },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -49,17 +45,9 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
   return <>{visible && AddAlertFlyout}</>;
 };
 
-export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
+export const PrefilledAnomalyAlertFlyout = ({ onClose }: { onClose(): void }) => {
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, filterQuery } = inventoryPrefill;
+  const { nodeType, metric } = inventoryPrefill;
 
-  return (
-    <AlertFlyout
-      options={{ metric }}
-      nodeType={nodeType}
-      filter={filterQuery}
-      visible
-      setVisible={onClose}
-    />
-  );
+  return <AlertFlyout metric={metric} nodeType={nodeType} visible setVisible={onClose} />;
 };
