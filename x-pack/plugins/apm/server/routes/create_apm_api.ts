@@ -66,7 +66,6 @@ import {
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
 } from './transactions';
-import { rumOverviewLocalFiltersRoute } from './ui_filters';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -89,6 +88,7 @@ import {
   rumClientMetricsRoute,
   rumJSErrors,
   rumLongTaskMetrics,
+  rumOverviewLocalFiltersRoute,
   rumPageLoadDistBreakdownRoute,
   rumPageLoadDistributionRoute,
   rumPageViewsTrendRoute,

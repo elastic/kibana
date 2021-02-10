@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ui filter queries fetches environments 1`] = `
+exports[`getEnvironments fetches environments 1`] = `
 Object {
   "apm": Object {
     "events": Array [
@@ -44,7 +44,7 @@ Object {
 }
 `;
 
-exports[`ui filter queries fetches environments without a service name 1`] = `
+exports[`getEnvironments fetches environments without a service name 1`] = `
 Object {
   "apm": Object {
     "events": Array [

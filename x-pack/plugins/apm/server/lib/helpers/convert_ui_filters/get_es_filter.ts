@@ -11,7 +11,7 @@ import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
 import {
   localUIFilters,
   localUIFilterNames,
-} from '../../ui_filters/local_ui_filters/config';
+} from '../../rum_client/ui_filters/local_ui_filters/config';
 import { esKuery } from '../../../../../../../src/plugins/data/server';
 
 export function getEsFilter(uiFilters: UIFilters) {

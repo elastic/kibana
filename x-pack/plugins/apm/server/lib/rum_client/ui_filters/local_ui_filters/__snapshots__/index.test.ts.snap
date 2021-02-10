@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`local ui filter queries fetches local ui filter aggregations 1`] = `
+exports[`getLocalUIFilters fetches local ui filter aggregations 1`] = `
 Object {
   "apm": Object {
     "events": Array [
