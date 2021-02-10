@@ -46,7 +46,7 @@ const metricAnomalyInfluencerFilterRT = rt.type({
   fieldValue: rt.string,
 });
 
-export interface MetricAnomalyParams extends Record<string, unknown> {
+export interface MetricAnomalyParams {
   nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
   metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
   alertInterval?: string;

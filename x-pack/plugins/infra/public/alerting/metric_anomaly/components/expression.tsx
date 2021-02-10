@@ -41,8 +41,12 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
 }
 
+type AlertParams = MetricAnomalyParams & { sourceId: string; hasInfraMLCapabilities: boolean };
+
 type Props = Omit<
-  AlertTypeParamsExpressionProps<MetricAnomalyParams & { sourceId: string }, AlertContextMeta>,
+  // FIXME: Bug with AlertTypeParamsExpressionProps requiring an input type that extends Record<string, unknown>
+  // @ts-ignore
+  AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
 >;
 
