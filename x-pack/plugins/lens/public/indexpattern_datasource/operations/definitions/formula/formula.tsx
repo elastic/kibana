@@ -7,11 +7,10 @@
 
 import React, { useCallback, useState } from 'react';
 import { isObject } from 'lodash';
-import { TinymathVariable, TinymathAST } from '@kbn/tinymath';
-import { EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
+import type { TinymathAST, TinymathVariable } from '@kbn/tinymath';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { CodeEditor } from '../../../../../../../../src/plugins/kibana_react/public';
-import { useDebounceWithOptions } from '../helpers';
 import {
   OperationDefinition,
   GenericOperationDefinition,
@@ -21,19 +20,21 @@ import {
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
 import { getColumnOrder } from '../../layer_helpers';
-import { mathOperation, hasMathNode, findVariables } from './math';
+import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
+import { ErrorWrapper, runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
 import {
-  errorsLookup,
-  isParsingError,
-  runASTValidation,
-  shouldHaveFieldArgument,
-  tryToParse,
-  ErrorWrapper,
-} from './validation';
-import { suggest, getSuggestion, LensMathSuggestion, SUGGESTION_TYPE } from './math_completion';
+  findVariables,
+  getOperationParams,
+  getSafeFieldName,
+  groupArgsByType,
+  hasMathNode,
+} from './util';
+import { useDebounceWithOptions } from '../helpers';
+import { LensMathSuggestion, SUGGESTION_TYPE, suggest, getSuggestion } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
-import { getOperationParams, getSafeFieldName, groupArgsByType } from './util';
+
+import './formula.scss';
 
 export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'formula';
@@ -343,26 +344,20 @@ function parseAndExtract(
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
-  try {
-    const { root } = tryToParse(text, { shouldThrow: true });
-    if (!root) {
-      return { extracted: [], isValid: false };
-    }
-    // before extracting the data run the validation task and throw if invalid
-    runASTValidation(root, layer, indexPattern, operationDefinitionMap, { shouldThrow: true });
-    /*
-    { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
-    */
-    const extracted = extractColumns(columnId, operationDefinitionMap, root, layer, indexPattern);
-    return { extracted, isValid: true };
-  } catch (e) {
-    const context = e.message as string;
-    // propagate the error if it's one of those not controlled by the Formula logic
-    if (!errorsLookup.has(context) && !isParsingError(context)) {
-      throw e;
-    }
+  const { root, error } = tryToParse(text);
+  if (error || !root) {
     return { extracted: [], isValid: false };
   }
+  // before extracting the data run the validation task and throw if invalid
+  const errors = runASTValidation(root, layer, indexPattern, operationDefinitionMap);
+  if (errors.length) {
+    return { extracted: [], isValid: false };
+  }
+  /*
+    { name: 'add', args: [ { name: 'abc', args: [5] }, 5 ] }
+    */
+  const extracted = extractColumns(columnId, operationDefinitionMap, root, layer, indexPattern);
+  return { extracted, isValid: true };
 }
 
 export function regenerateLayerFromAst(
@@ -428,8 +423,7 @@ function extractColumns(
 ) {
   const columns: IndexPatternColumn[] = [];
 
-  // String response indicates a new column to add
-  function parseNode(node: TinymathAST): TinymathAST | string | undefined {
+  function parseNode(node: TinymathAST) {
     if (typeof node === 'number' || node.type !== 'function') {
       // leaf node
       return node;

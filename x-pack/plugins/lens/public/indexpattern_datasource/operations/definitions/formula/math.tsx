@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type {
-  TinymathAST,
-  TinymathFunction,
-  TinymathLocation,
-  TinymathVariable,
-} from '@kbn/tinymath';
-import { isObject } from 'lodash';
-import { OperationDefinition, GenericOperationDefinition } from '../index';
+import type { TinymathAST } from '@kbn/tinymath';
+import { OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
-
-const tinymathValidOperators = new Set(['add', 'subtract', 'multiply', 'divide']);
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
@@ -35,6 +27,7 @@ export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn
 export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managedReference'> = {
   type: 'math',
   displayName: 'Math',
+  hidden: true,
   getDefaultLabel: (column, indexPattern) => 'Math',
   input: 'managedReference',
   getDisabledStatus(indexPattern: IndexPattern) {
@@ -103,69 +96,4 @@ function astToString(ast: TinymathAST | string): string | number {
     return `${ast.name}=${ast.value}`;
   }
   return `${ast.name}(${ast.args.map(astToString).join(',')})`;
-}
-
-export function isMathNode(node: TinymathAST) {
-  return isObject(node) && node.type === 'function' && tinymathValidOperators.has(node.name);
-}
-
-function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
-  function flattenMathNodes(node: TinymathAST | string): TinymathFunction[] {
-    if (!isObject(node) || node.type !== 'function' || !isMathNode(node)) {
-      return [];
-    }
-    return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
-  }
-  return flattenMathNodes(root);
-}
-
-export function hasMathNode(root: TinymathAST): boolean {
-  return Boolean(findMathNodes(root).length);
-}
-
-function findFunctionNodes(root: TinymathAST | string): TinymathFunction[] {
-  function flattenFunctionNodes(node: TinymathAST | string): TinymathFunction[] {
-    if (!isObject(node) || node.type !== 'function') {
-      return [];
-    }
-    return [node, ...node.args.flatMap(flattenFunctionNodes)].filter(Boolean);
-  }
-  return flattenFunctionNodes(root);
-}
-
-export function hasInvalidOperations(
-  node: TinymathAST | string,
-  operations: Record<string, GenericOperationDefinition>
-): { names: string[]; locations: TinymathLocation[] } {
-  const nodes = findFunctionNodes(node).filter((v) => !isMathNode(v) && !operations[v.name]);
-  return {
-    // avoid duplicates
-    names: Array.from(new Set(nodes.map(({ name }) => name))),
-    locations: nodes.map(({ location }) => location),
-  };
-}
-
-// traverse a tree and find all string leaves. some string leaves are pre-parsed as column IDs
-export function findVariables(node: TinymathAST | string): TinymathVariable[] {
-  if (typeof node === 'string') {
-    return [
-      {
-        type: 'variable',
-        value: node,
-        text: node,
-        location: { min: 0, max: 0 },
-      },
-    ];
-  }
-  if (node == null) {
-    return [];
-  }
-  if (typeof node === 'number' || node.type === 'namedArgument') {
-    return [];
-  }
-  if (node.type === 'variable') {
-    // leaf node
-    return [node];
-  }
-  return node.args.flatMap(findVariables);
 }

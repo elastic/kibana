@@ -9,8 +9,8 @@
 // import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 // import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
-import { GenericOperationDefinition, IndexPatternColumn } from '../index';
+import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
+import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 
 jest.mock('../../layer_helpers', () => {
@@ -359,15 +359,14 @@ describe('formula', () => {
         )
       ).toEqual([`The field bytes cannot be used without operation`]);
 
-      // TODO: enable this later
-      //   expect(
-      //     formulaOperation.getErrorMessage!(
-      //       getNewLayerWithFormula('bytes + bytes'),
-      //       'col1',
-      //       indexPattern,
-      //       operationDefinitionMap
-      //     )
-      //   ).toEqual([`The field bytes cannot be used without operation`]);
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('bytes + bytes'),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([`Math operations are allowed between operations, not fields`]);
     });
 
     it('returns an error if parsing a syntax invalid formula', () => {
@@ -458,11 +457,14 @@ describe('formula', () => {
             indexPattern,
             operationDefinitionMap
           )
-        ).toEqual([
-          expect.stringMatching(
-            `The first argument for ${formula.substring(0, formula.indexOf('('))}`
-          ),
-        ]);
+        ).toEqual(
+          // some formulas may contain more errors
+          expect.arrayContaining([
+            expect.stringMatching(
+              `The first argument for ${formula.substring(0, formula.indexOf('('))}`
+            ),
+          ])
+        );
       }
     });
 

@@ -18,7 +18,7 @@ import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../type
 import { getSortScoreByPriority } from './operations';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
-import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula';
+import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './definitions/formula/formula';
 
 interface ColumnChange {
   op: OperationType;

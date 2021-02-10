@@ -7,15 +7,17 @@
 
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { parse } from '@kbn/tinymath';
-import type {
-  TinymathAST,
-  TinymathFunction,
-  TinymathNamedArgument,
-  TinymathLocation,
-} from '@kbn/tinymath';
-import { getOperationParams, getValueOrName, groupArgsByType } from './util';
-import { findVariables, hasInvalidOperations, isMathNode } from './math';
+import { parse, TinymathLocation } from '@kbn/tinymath';
+import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
+import {
+  findMathNodes,
+  findVariables,
+  getOperationParams,
+  getValueOrName,
+  groupArgsByType,
+  hasInvalidOperations,
+  isMathNode,
+} from './util';
 
 import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { IndexPattern, IndexPatternLayer } from '../../../types';
@@ -46,11 +48,15 @@ export function isParsingError(message: string) {
   return message.includes(validationErrors.failedParsing);
 }
 
-function getMessageFromId(
-  messageId: ErrorTypes,
-  values: Record<string, string | number>,
-  locations: TinymathLocation[]
-): ErrorWrapper {
+function getMessageFromId({
+  messageId,
+  values,
+  locations,
+}: {
+  messageId: ErrorTypes;
+  values: Record<string, string | number>;
+  locations: TinymathLocation[];
+}): ErrorWrapper {
   let message: string;
   switch (messageId) {
     case 'wrongFirstArgument':
@@ -120,35 +126,20 @@ function getMessageFromId(
   return { message, locations };
 }
 
-function addErrorOrThrow({
-  messageId,
-  values,
-  locations,
-  shouldThrow,
-}: {
-  messageId: ErrorTypes;
-  values: Record<string, string | number>;
-  locations: TinymathLocation[];
-  shouldThrow?: boolean;
-}) {
-  if (shouldThrow) {
-    throw Error(validationErrors[messageId]);
-  }
-  return getMessageFromId(messageId, values, locations);
-}
-
 export function tryToParse(formula: string, { shouldThrow }: { shouldThrow?: boolean } = {}) {
   let root;
   try {
     root = parse(formula);
   } catch (e) {
-    if (shouldThrow) {
-      // propagate the error
-      throw e;
-    }
     return {
       root: undefined,
-      error: getMessageFromId('failedParsing', { expression: formula }, []),
+      error: getMessageFromId({
+        messageId: 'failedParsing',
+        values: {
+          expression: formula,
+        },
+        locations: [],
+      }),
     };
   }
   return { root, error: null };
@@ -158,30 +149,23 @@ export function runASTValidation(
   ast: TinymathAST,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  operations: Record<string, GenericOperationDefinition>,
-  options: { shouldThrow?: boolean } = {}
-): ErrorWrapper[] {
+  operations: Record<string, GenericOperationDefinition>
+) {
   return [
-    ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations, options),
-    ...runFullASTValidation(ast, indexPattern, operations, options),
+    ...checkMissingVariableOrFunctions(ast, layer, indexPattern, operations),
+    ...runFullASTValidation(ast, layer, indexPattern, operations),
   ];
 }
 
-function checkVariableEdgeCases(
-  ast: TinymathAST,
-  missingVariables: string[],
-  { shouldThrow }: { shouldThrow?: boolean } = {}
-) {
+function checkVariableEdgeCases(ast: TinymathAST, missingVariables: Set<string>) {
   const invalidVariableErrors = [];
-  // TODO: add check for Math operation of fields as well
-  if (isObject(ast) && ast.type === 'variable' && !missingVariables.includes(ast.value)) {
+  if (isObject(ast) && ast.type === 'variable' && !missingVariables.has(ast.value)) {
     invalidVariableErrors.push(
-      addErrorOrThrow({
+      getMessageFromId({
         messageId: 'fieldWithNoOperation',
         values: {
           field: ast.value,
         },
-        shouldThrow,
         locations: [ast.location],
       })
     );
@@ -193,21 +177,19 @@ function checkMissingVariableOrFunctions(
   ast: TinymathAST,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  operations: Record<string, GenericOperationDefinition>,
-  { shouldThrow }: { shouldThrow?: boolean } = {}
+  operations: Record<string, GenericOperationDefinition>
 ): ErrorWrapper[] {
   const missingErrors: ErrorWrapper[] = [];
   const missingOperations = hasInvalidOperations(ast, operations);
 
   if (missingOperations.names.length) {
     missingErrors.push(
-      addErrorOrThrow({
+      getMessageFromId({
         messageId: 'missingOperation',
         values: {
           operationLength: missingOperations.names.length,
           operationsList: missingOperations.names.join(', '),
         },
-        shouldThrow,
         locations: missingOperations.locations,
       })
     );
@@ -220,38 +202,42 @@ function checkMissingVariableOrFunctions(
   // need to check the arguments here: check only strings for now
   if (missingVariables.length) {
     missingErrors.push(
-      addErrorOrThrow({
+      getMessageFromId({
         messageId: 'missingField',
         values: {
           variablesLength: missingVariables.length,
           variablesList: missingVariables.map(({ value }) => value).join(', '),
         },
-        shouldThrow,
         locations: missingVariables.map(({ location }) => location),
       })
     );
   }
   const invalidVariableErrors = checkVariableEdgeCases(
     ast,
-    missingVariables.map(({ value }) => value),
-    { shouldThrow }
+    new Set(missingVariables.map(({ value }) => value))
   );
   return [...missingErrors, ...invalidVariableErrors];
 }
 
 function runFullASTValidation(
   ast: TinymathAST,
+  layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  operations: Record<string, GenericOperationDefinition>,
-  { shouldThrow }: { shouldThrow?: boolean } = {}
+  operations: Record<string, GenericOperationDefinition>
 ): ErrorWrapper[] {
+  const missingVariables = findVariables(ast).filter(
+    // filter empty string as well?
+    ({ value }) => !indexPattern.getFieldByName(value) && !layer.columns[value]
+  );
+  const missingVariablesSet = new Set(missingVariables.map(({ value }) => value));
+
   function validateNode(node: TinymathAST): ErrorWrapper[] {
     if (!isObject(node) || node.type !== 'function') {
       return [];
     }
     const nodeOperation = operations[node.name];
     if (!nodeOperation) {
-      return [];
+      return validateMathNodes(node, missingVariablesSet);
     }
 
     const errors: ErrorWrapper[] = [];
@@ -262,14 +248,13 @@ function runFullASTValidation(
       if (shouldHaveFieldArgument(node)) {
         if (!isFirstArgumentValidType(firstArg, 'variable')) {
           errors.push(
-            addErrorOrThrow({
+            getMessageFromId({
               messageId: 'wrongFirstArgument',
               values: {
                 operation: node.name,
                 type: 'field',
                 argument: getValueOrName(firstArg),
               },
-              shouldThrow,
               locations: [node.location],
             })
           );
@@ -277,12 +262,11 @@ function runFullASTValidation(
       } else {
         if (firstArg) {
           errors.push(
-            addErrorOrThrow({
+            getMessageFromId({
               messageId: 'shouldNotHaveField',
               values: {
                 operation: node.name,
               },
-              shouldThrow,
               locations: [node.location],
             })
           );
@@ -290,12 +274,11 @@ function runFullASTValidation(
       }
       if (!canHaveParams(nodeOperation) && namedArguments.length) {
         errors.push(
-          addErrorOrThrow({
+          getMessageFromId({
             messageId: 'cannotAcceptParameter',
             values: {
               operation: node.name,
             },
-            shouldThrow,
             locations: [node.location],
           })
         );
@@ -303,13 +286,12 @@ function runFullASTValidation(
         const missingParams = getMissingParams(nodeOperation, namedArguments);
         if (missingParams.length) {
           errors.push(
-            addErrorOrThrow({
+            getMessageFromId({
               messageId: 'missingParameter',
               values: {
                 operation: node.name,
                 params: missingParams.map(({ name }) => name).join(', '),
               },
-              shouldThrow,
               locations: [node.location],
             })
           );
@@ -317,13 +299,12 @@ function runFullASTValidation(
         const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
         if (wrongTypeParams.length) {
           errors.push(
-            addErrorOrThrow({
+            getMessageFromId({
               messageId: 'wrongTypeParameter',
               values: {
                 operation: node.name,
                 params: wrongTypeParams.map(({ name }) => name).join(', '),
               },
-              shouldThrow,
               locations: [node.location],
             })
           );
@@ -334,26 +315,24 @@ function runFullASTValidation(
     if (nodeOperation.input === 'fullReference') {
       if (!isFirstArgumentValidType(firstArg, 'function') || isMathNode(firstArg)) {
         errors.push(
-          addErrorOrThrow({
+          getMessageFromId({
             messageId: 'wrongFirstArgument',
             values: {
               operation: node.name,
-              type: 'function',
+              type: 'operation',
               argument: getValueOrName(firstArg),
             },
-            shouldThrow,
             locations: [node.location],
           })
         );
       }
       if (!canHaveParams(nodeOperation) && namedArguments.length) {
         errors.push(
-          addErrorOrThrow({
+          getMessageFromId({
             messageId: 'cannotAcceptParameter',
             values: {
               operation: node.name,
             },
-            shouldThrow,
             locations: [node.location],
           })
         );
@@ -361,13 +340,12 @@ function runFullASTValidation(
         const missingParameters = getMissingParams(nodeOperation, namedArguments);
         if (missingParameters.length) {
           errors.push(
-            addErrorOrThrow({
+            getMessageFromId({
               messageId: 'missingParameter',
               values: {
                 operation: node.name,
                 params: missingParameters.map(({ name }) => name).join(', '),
               },
-              shouldThrow,
               locations: [node.location],
             })
           );
@@ -375,13 +353,12 @@ function runFullASTValidation(
         const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
         if (wrongTypeParams.length) {
           errors.push(
-            addErrorOrThrow({
+            getMessageFromId({
               messageId: 'wrongTypeParameter',
               values: {
                 operation: node.name,
                 params: wrongTypeParams.map(({ name }) => name).join(', '),
               },
-              shouldThrow,
               locations: [node.location],
             })
           );
@@ -459,4 +436,34 @@ export function shouldHaveFieldArgument(node: TinymathFunction) {
 
 export function isFirstArgumentValidType(arg: TinymathAST, type: TinymathNodeTypes['type']) {
   return isObject(arg) && arg.type === type;
+}
+
+export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<string>) {
+  const mathNodes = findMathNodes(root);
+  const errors = [];
+  const invalidNodes = mathNodes.filter((node: TinymathFunction) => {
+    // check the following patterns:
+    const { variables } = groupArgsByType(node.args);
+    const fieldVariables = variables.filter((v) => isObject(v) && !missingVariableSet.has(v.value));
+    // field + field (or string)
+    const atLeastTwoFields = fieldVariables.length > 1;
+    // field + number
+    // when computing the difference, exclude invalid fields
+    const validVariables = variables.filter(
+      (v) => !isObject(v) || !missingVariableSet.has(v.value)
+    );
+    // Make sure to have at least one valid field to compare, or skip the check
+    const mathBetweenFieldAndNumbers =
+      fieldVariables.length > 0 && validVariables.length - fieldVariables.length > 0;
+    return atLeastTwoFields || mathBetweenFieldAndNumbers;
+  });
+  if (invalidNodes.length) {
+    errors.push({
+      message: i18n.translate('xpack.lens.indexPattern.mathNotAllowedBetweenFields', {
+        defaultMessage: 'Math operations are allowed between operations, not fields',
+      }),
+      locations: invalidNodes.map(({ location }) => location),
+    });
+  }
+  return errors;
 }
