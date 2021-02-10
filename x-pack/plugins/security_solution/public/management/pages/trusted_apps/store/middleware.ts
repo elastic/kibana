@@ -63,7 +63,7 @@ import {
   getListItems,
   editItemState,
 } from './selectors';
-import { toNewTrustedApp } from '../service/to_new_trusted_app';
+import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 
 const createTrustedAppsListResourceStateChangedAction = (
   newState: Immutable<AsyncResourceState<TrustedAppsListData>>
@@ -154,21 +154,6 @@ const submitCreationIfNeeded = async (
   const entry = getCreationDialogFormEntry(currentState);
   const editMode = isEdit(currentState);
 
-  // FIXME: Implement PUT API for updating Trusted App
-  if (editMode) {
-    // eslint-disable-next-line no-console
-    console.warn('PUT Trusted APP API missing');
-    store.dispatch(
-      createTrustedAppCreationSubmissionResourceStateChanged({
-        type: 'LoadedResourceState',
-        data: entry as TrustedApp,
-      })
-    );
-    store.dispatch({
-      type: 'trustedAppsListDataOutdated',
-    });
-  }
-
   if (isStaleResourceState(submissionResourceState) && entry !== undefined && isValid) {
     store.dispatch(
       createTrustedAppCreationSubmissionResourceStateChanged({
@@ -178,12 +163,27 @@ const submitCreationIfNeeded = async (
     );
 
     try {
+      let responseTrustedApp: TrustedApp;
+
+      if (editMode) {
+        responseTrustedApp = (
+          await trustedAppsService.updateTrustedApp(
+            { id: editItemId(currentState)! },
+            // TODO: try to remove the cast
+            entry as PostTrustedAppCreateRequest
+          )
+        ).data;
+      } else {
+        // TODO: try to remove the cast
+        responseTrustedApp = (
+          await trustedAppsService.createTrustedApp(entry as PostTrustedAppCreateRequest)
+        ).data;
+      }
+
       store.dispatch(
         createTrustedAppCreationSubmissionResourceStateChanged({
           type: 'LoadedResourceState',
-          // TODO: try to remove the cast
-          data: (await trustedAppsService.createTrustedApp(entry as PostTrustedAppCreateRequest))
-            .data,
+          data: responseTrustedApp,
         })
       );
       store.dispatch({
@@ -411,7 +411,7 @@ const fetchEditTrustedAppIfNeeded = async (
       dispatch({
         type: 'trustedAppCreationDialogFormStateUpdated',
         payload: {
-          entry: toNewTrustedApp(trustedAppForEdit),
+          entry: toUpdateTrustedApp(trustedAppForEdit),
           isValid: true,
         },
       });

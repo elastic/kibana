@@ -10,12 +10,14 @@ import {
   GetOneTrustedAppRequestSchema,
   GetTrustedAppsRequestSchema,
   PostTrustedAppCreateRequestSchema,
+  PutTrustedAppUpdateRequestSchema,
 } from '../../../../common/endpoint/schema/trusted_apps';
 import {
   TRUSTED_APPS_CREATE_API,
   TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_GET_API,
   TRUSTED_APPS_LIST_API,
+  TRUSTED_APPS_UPDATE_API,
   TRUSTED_APPS_SUMMARY_API,
 } from '../../../../common/endpoint/constants';
 import {
@@ -24,6 +26,7 @@ import {
   getTrustedAppsGetOneHandler,
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
+  getTrustedAppsUpdateRouteHandler,
 } from './handlers';
 import { EndpointAppContext } from '../../types';
 import { SecuritySolutionPluginRouter } from '../../../types';
@@ -70,6 +73,16 @@ export const registerTrustedAppsRoutes = (
       options: { authRequired: true },
     },
     getTrustedAppsCreateRouteHandler(endpointAppContext)
+  );
+
+  // PUT
+  router.put(
+    {
+      path: TRUSTED_APPS_UPDATE_API,
+      validate: PutTrustedAppUpdateRequestSchema,
+      options: { authRequired: true },
+    },
+    getTrustedAppsUpdateRouteHandler(endpointAppContext)
   );
 
   // SUMMARY

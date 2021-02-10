@@ -16,17 +16,18 @@ import {
   GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
+  PutTrustedAppUpdateRequest,
+  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 
 import {
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItemOptions,
   osFromExceptionItem,
+  updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
-
-export class MissingTrustedAppException {
-  constructor(public id: string) {}
-}
+import { ExceptionListItemSchema } from '../../../../../lists/common';
+import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
@@ -39,7 +40,7 @@ export const deleteTrustedApp = async (
   });
 
   if (!exceptionListItem) {
-    throw new MissingTrustedAppException(id);
+    throw new TrustedAppNotFoundError(id);
   }
 };
 
@@ -95,11 +96,56 @@ export const createTrustedApp = async (
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
+  // Validate update TA entry - error if not valid
+  // TODO: implement validations
+
   const createdTrustedAppExceptionItem = await exceptionsListClient.createExceptionListItem(
     newTrustedAppToCreateExceptionListItemOptions(newTrustedApp)
   );
 
   return { data: exceptionListItemToTrustedApp(createdTrustedAppExceptionItem) };
+};
+
+export const updateTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  id: string,
+  updatedTrustedApp: PutTrustedAppUpdateRequest
+): Promise<PutTrustedAppUpdateResponse> => {
+  const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
+    itemId: '',
+    id,
+    namespaceType: 'agnostic',
+  });
+
+  if (!currentTrustedApp) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  // Validate update TA entry - error if not valid
+  // TODO: implement validations
+
+  let updatedTrustedAppExceptionItem: ExceptionListItemSchema | null;
+
+  try {
+    updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
+      updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
+    );
+  } catch (e) {
+    if (e?.output?.statusCode === 409) {
+      throw new TrustedAppVersionConflictError(id, e);
+    }
+
+    throw e;
+  }
+
+  // If `null` is returned, then that means the TA does not exist (could happen in race conditions)
+  if (!updatedTrustedAppExceptionItem) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  return {
+    data: exceptionListItemToTrustedApp(updatedTrustedAppExceptionItem),
+  };
 };
 
 export const getTrustedAppsSummary = async (

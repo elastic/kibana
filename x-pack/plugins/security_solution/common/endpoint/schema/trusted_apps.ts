@@ -7,7 +7,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
-import { getDuplicateFields, isValidHash } from '../validation/trusted_apps';
+import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 const entryFieldLabels: { [k in ConditionEntryField]: string } = {
   [ConditionEntryField.HASH]: 'Hash',
@@ -59,7 +59,8 @@ const SignerConditionEntrySchema = schema.object({
 
 const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends ConditionEntry>(
   osSchema: Type<O>,
-  entriesSchema: Type<E>
+  entriesSchema: Type<E>,
+  forUpdateFlow: boolean = false
 ) =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
@@ -70,7 +71,7 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends Con
       }),
       schema.object({
         type: schema.literal('policy'),
-        policies: schema.arrayOf(schema.string({ minLength: 1 })), // TODO: validate policies
+        policies: schema.arrayOf(schema.string({ minLength: 1 })),
       }),
     ]),
     os: osSchema,
@@ -84,6 +85,7 @@ const createNewTrustedAppForOsScheme = <O extends OperatingSystem, E extends Con
         );
       },
     }),
+    version: forUpdateFlow ? schema.maybe(schema.string()) : schema.never(),
   });
 
 export const PostTrustedAppCreateRequestSchema = {
@@ -95,6 +97,28 @@ export const PostTrustedAppCreateRequestSchema = {
     createNewTrustedAppForOsScheme(
       schema.literal(OperatingSystem.WINDOWS),
       schema.oneOf([HashConditionEntrySchema, PathConditionEntrySchema, SignerConditionEntrySchema])
+    ),
+  ]),
+};
+
+export const PutTrustedAppUpdateRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+  body: schema.oneOf([
+    createNewTrustedAppForOsScheme(
+      schema.oneOf([schema.literal(OperatingSystem.LINUX), schema.literal(OperatingSystem.MAC)]),
+      schema.oneOf([HashConditionEntrySchema, PathConditionEntrySchema]),
+      true
+    ),
+    createNewTrustedAppForOsScheme(
+      schema.literal(OperatingSystem.WINDOWS),
+      schema.oneOf([
+        HashConditionEntrySchema,
+        PathConditionEntrySchema,
+        SignerConditionEntrySchema,
+      ]),
+      true
     ),
   ]),
 };

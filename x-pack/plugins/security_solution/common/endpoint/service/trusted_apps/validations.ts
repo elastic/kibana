@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConditionEntry, ConditionEntryField } from '../types';
+import { ConditionEntry, ConditionEntryField } from '../../types';
 
 const HASH_LENGTHS: readonly number[] = [
   32, // MD5

@@ -12,6 +12,7 @@ import {
   TRUSTED_APPS_DELETE_API,
   TRUSTED_APPS_GET_API,
   TRUSTED_APPS_LIST_API,
+  TRUSTED_APPS_UPDATE_API,
   TRUSTED_APPS_SUMMARY_API,
 } from '../../../../../common/endpoint/constants';
 
@@ -22,6 +23,9 @@ import {
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
   GetTrustedAppsSummaryResponse,
+  PutTrustedAppUpdateRequest,
+  PutTrustedAppUpdateResponse,
+  PutTrustedAppsRequestParams,
   GetOneTrustedAppRequestParams,
   GetOneTrustedAppResponse,
 } from '../../../../../common/endpoint/types/trusted_apps';
@@ -34,6 +38,10 @@ export interface TrustedAppsService {
   getTrustedAppsList(request: GetTrustedAppsListRequest): Promise<GetTrustedListAppsResponse>;
   deleteTrustedApp(request: DeleteTrustedAppsRequestParams): Promise<void>;
   createTrustedApp(request: PostTrustedAppCreateRequest): Promise<PostTrustedAppCreateResponse>;
+  updateTrustedApp(
+    params: PutTrustedAppsRequestParams,
+    request: PutTrustedAppUpdateRequest
+  ): Promise<PutTrustedAppUpdateResponse>;
   getPolicyList(
     options?: Parameters<typeof sendGetEndpointSpecificPackagePolicies>[1]
   ): ReturnType<typeof sendGetEndpointSpecificPackagePolicies>;
@@ -62,6 +70,16 @@ export class TrustedAppsHttpService implements TrustedAppsService {
     return this.http.post<PostTrustedAppCreateResponse>(TRUSTED_APPS_CREATE_API, {
       body: JSON.stringify(request),
     });
+  }
+
+  async updateTrustedApp(
+    params: PutTrustedAppsRequestParams,
+    updatedTrustedApp: PutTrustedAppUpdateRequest
+  ) {
+    return this.http.put<PutTrustedAppUpdateResponse>(
+      resolvePathVariables(TRUSTED_APPS_UPDATE_API, params),
+      { body: JSON.stringify(updatedTrustedApp) }
+    );
   }
 
   async getTrustedAppsSummary() {
