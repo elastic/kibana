@@ -95,7 +95,7 @@ export default function (providerContext: FtrProviderContext) {
         indices: [
           {
             names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-            privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+            privileges: ['auto_configure', 'create_doc', 'indices:admin/auto_create'],
             allow_restricted_indices: false,
           },
         ],
