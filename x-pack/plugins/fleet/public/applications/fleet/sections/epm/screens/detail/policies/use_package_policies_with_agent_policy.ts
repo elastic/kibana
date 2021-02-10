@@ -6,19 +6,19 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { PackagePolicy } from '../../../../../../../common/types/models';
 import {
+  PackagePolicy,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-} from '../../../../../../../common/types/rest_spec';
-import { useGetPackagePolicies } from '../../../../hooks/use_request';
+  GetPackagePoliciesResponse,
+} from '../../../../../types';
+import { agentPolicyRouteService } from '../../../../../services';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
+import { useGetPackagePolicies } from '../../../../../hooks';
 import {
   SendConditionalRequestConfig,
   useConditionalRequest,
-} from '../../../../hooks/use_request/use_request';
-import { agentPolicyRouteService } from '../../../../../../../common/services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../common/constants';
-import { GetPackagePoliciesResponse } from '../../../../../../../common/types/rest_spec';
+} from '../../../../../hooks/use_request/use_request';
 
 export interface PackagePolicyEnriched extends PackagePolicy {
   _agentPolicy: GetAgentPoliciesResponseItem | undefined;
