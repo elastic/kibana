@@ -20,5 +20,6 @@ The results are currently sorted by first `Time`, and then by `_score`.
 . To sort only by `_score`, remove the `Time` field.
 +
 Your table now shows documents with the best matches, from most to least relevant.
++
 [role="screenshot"]
 image::images/discover-search-for-relevance.png["Example of a search for relevance"]
