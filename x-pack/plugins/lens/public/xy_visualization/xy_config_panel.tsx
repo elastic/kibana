@@ -336,7 +336,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
                       <EuiIconTip
                         color="subdued"
                         content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                          defaultMessage: `Gaps in the data are hidden by default. Or, you can select an option for filling the gap.`,
+                          defaultMessage: `By default, Lens hides the gaps in the data. To fill the gap, make a selection.`,
                         })}
                         iconProps={{
                           className: 'eui-alignTop',

@@ -55,7 +55,7 @@ const GranularityHelpPopover = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
-          defaultMessage='The size of the interval is a "nice" value.  The interval can stay the same when changing the granularity of the slider, if the “nice” interval is the same. The minimum granularity is 1, and the maximum value is 
+          defaultMessage='The size of the interval is a "nice" value. When the granularity of the slider changes, the interval stays the same when the “nice” interval is the same. The minimum granularity is 1, and the maximum value is 
             {setting}. To change the maximum granularity, go to Advanced settings.'
           values={{
             setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,

@@ -376,7 +376,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-          defaultMessage="Lens automatically chooses an interval by dividing the specified time range by the {targetBarSetting} setting. Lens tries to present “nice” time intervals. The maximum number of bars is set by the {maxBarSetting} value."
+          defaultMessage="To choose the interval, Lens divides the specified time range by the {targetBarSetting} setting. Lens calculates the best interval for your data. For example 30m, 1h, and 12. The maximum number of bars is set by the {maxBarSetting} value."
           values={{
             maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
             targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,

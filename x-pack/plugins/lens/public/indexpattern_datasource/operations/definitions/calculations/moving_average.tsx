@@ -192,7 +192,7 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.basicExplanation"
-          defaultMessage="Moving average slides a window across the data and displays the average value. Moving average is supported for date histograms only."
+          defaultMessage="Moving average slides a window across the data and displays the average value. Moving average is supported only by date histograms."
         />
       </p>
 
