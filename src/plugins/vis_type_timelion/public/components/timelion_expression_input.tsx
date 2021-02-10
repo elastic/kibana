@@ -115,6 +115,7 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
               minimap: {
                 enabled: false,
               },
+              wordBasedSuggestions: false,
               wordWrap: 'on',
               wrappingIndent: 'indent',
             }}

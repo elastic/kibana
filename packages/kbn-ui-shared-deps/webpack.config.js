@@ -85,13 +85,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           },
         ],
       },
-      {
-        test: /\.(ttf)(\?|$)/,
-        loader: 'url-loader',
-        options: {
-          limit: 8192,
-        },
-      },
     ],
   },
 

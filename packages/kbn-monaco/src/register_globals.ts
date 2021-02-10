@@ -39,8 +39,6 @@ const mapLanguageIdToWorker: { [key: string]: any } = {
 
 // @ts-ignore
 window.MonacoEnvironment = {
-  // needed for functional tests so that we can get value from 'editor'
-  monaco,
   getWorker: (module: string, languageId: string) => {
     const workerSrc = mapLanguageIdToWorker[languageId] || defaultWorkerSrc;
 
