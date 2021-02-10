@@ -35,7 +35,7 @@ $labelColumnWidth: 80px;
 .mlDataFrameAnalyticsClassification__dataGridMinWidth {
   float: left;
   min-width: 480px;
-  width: calc(100% - $labelColumnWidth);
+  width: calc(100% - #{$labelColumnWidth});
 
   .euiDataGridRowCell--boolean {
     text-transform: none;
