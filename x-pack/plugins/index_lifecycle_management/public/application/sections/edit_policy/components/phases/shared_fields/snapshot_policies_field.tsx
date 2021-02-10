@@ -196,6 +196,7 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
                   'data-test-subj': 'snapshotPolicyCombobox',
                   fullWidth: false,
                   options: policies,
+                  singleSelection: { asPlainText: true },
                   isLoading,
                   noSuggestions: !!(error || data.length === 0),
                   onCreateOption: (newOption: string) => {
