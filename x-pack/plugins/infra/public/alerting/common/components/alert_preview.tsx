@@ -125,7 +125,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
   }, [previewResult, showNoDataResults]);
 
   const hasWarningThreshold = useMemo(
-    () => alertParams.criteria?.some((c) => Reflect.has(c, 'warningThreshold')),
+    () => alertParams.criteria?.some((c) => Reflect.has(c, 'warningThreshold')) ?? false,
     [alertParams]
   );
 
