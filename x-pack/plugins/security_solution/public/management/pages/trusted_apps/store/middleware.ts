@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   Immutable,
   PostTrustedAppCreateRequest,
@@ -350,7 +351,25 @@ const fetchEditTrustedAppIfNeeded = async (
   const isAlreadyFetching = isFetchingEditTrustedAppItem(currentState);
   const editTrustedAppId = editItemId(currentState);
 
-  if (isPageActive && isEditFlow && editTrustedAppId && !isAlreadyFetching) {
+  if (isPageActive && isEditFlow && !isAlreadyFetching) {
+    if (!editTrustedAppId) {
+      const errorMessage = i18n.translate(
+        'xpack.securitySolution.trustedapps.middleware.editIdMissing',
+        {
+          defaultMessage: 'No id provided',
+        }
+      );
+
+      dispatch({
+        type: 'trustedAppCreationEditItemStateChanged',
+        payload: {
+          type: 'FailedResourceState',
+          error: Object.assign(new Error(errorMessage), { statusCode: 404, error: errorMessage }),
+        },
+      });
+      return;
+    }
+
     let trustedAppForEdit = editingTrustedApp(currentState);
 
     // If Trusted App is already loaded, then do nothing

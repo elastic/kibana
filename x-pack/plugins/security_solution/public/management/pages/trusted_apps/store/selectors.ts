@@ -226,6 +226,14 @@ export const isFetchingEditTrustedAppItem: (
   return editTrustedAppState ? isLoadingResourceState(editTrustedAppState) : false;
 });
 
+export const editTrustedAppFetchError: (
+  state: Immutable<TrustedAppsListPageState>
+) => ServerApiError | undefined = createSelector(editItemState, (itemForEditState) => {
+  if (itemForEditState && isFailedResourceState(itemForEditState)) {
+    return itemForEditState.error;
+  }
+});
+
 export const editingTrustedApp: (
   state: Immutable<TrustedAppsListPageState>
 ) => undefined | Immutable<TrustedApp> = createSelector(editItemState, (editTrustedAppState) => {
