@@ -712,12 +712,13 @@ export class SavedObjectsRepository {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
-   * @property {Array<string|integer>} [options.searchAfter]
+   * @property {Array<unknown>} [options.searchAfter]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {string} [options.pit]
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
@@ -759,6 +760,10 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
       );
+    } else if (preference?.length && pit) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.preference must be excluded when options.pit is used'
+      );
     }
 
     const types = type
@@ -794,19 +799,14 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      // If `pit` is provided, we drop the `index` and `preference` as those are already
-      // associated with the PIT in ES, and will otherwise return a 400.
-      ...(pit
-        ? {}
-        : {
-            index: this.getIndicesForTypes(allowedTypes),
-            preference,
-          }),
+      // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
+      ...(pit ? {} : { index: this.getIndicesForTypes(allowedTypes) }),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
       ...(searchAfter ? {} : { from: perPage * (page - 1) }),
-      size: perPage,
       _source: includedFields(type, fields),
+      preference,
       rest_total_hits_as_int: true,
+      size: perPage,
       body: {
         seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._registry, {

@@ -2813,6 +2813,13 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
 
+      it(`throws when a preference is provided with pit`, async () => {
+        await expect(
+          savedObjectsRepository.find({ type: 'foo', pit: { id: 'abc123' }, preference: 'hi' })
+        ).rejects.toThrowError('options.preference must be excluded when options.pit is used');
+        expect(client.search).not.toHaveBeenCalled();
+      });
+
       it(`throws when KQL filter syntax is invalid`, async () => {
         const findOpts = {
           namespaces: [namespace],
