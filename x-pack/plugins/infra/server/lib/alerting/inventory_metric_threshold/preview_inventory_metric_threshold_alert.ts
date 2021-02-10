@@ -7,6 +7,7 @@
 
 import { Unit } from '@elastic/datemath';
 import { first } from 'lodash';
+import { PreviewResult } from '../common/types';
 import { InventoryMetricConditions } from './types';
 import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -36,7 +37,9 @@ interface PreviewInventoryMetricThresholdAlertParams {
   alertNotifyWhen: string;
 }
 
-export const previewInventoryMetricThresholdAlert = async ({
+export const previewInventoryMetricThresholdAlert: (
+  params: PreviewInventoryMetricThresholdAlertParams
+) => Promise<PreviewResult[]> = async ({
   callCluster,
   params,
   source,
@@ -74,6 +77,7 @@ export const previewInventoryMetricThresholdAlert = async ({
       const numberOfResultBuckets = lookbackSize;
       const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);
       let numberOfTimesFired = 0;
+      let numberOfTimesWarned = 0;
       let numberOfNoDataResults = 0;
       let numberOfErrors = 0;
       let numberOfNotifications = 0;
@@ -96,6 +100,9 @@ export const previewInventoryMetricThresholdAlert = async ({
           const shouldFire = result[item].shouldFire as boolean[];
           return shouldFire[mappedBucketIndex];
         });
+        const allConditionsWarnInMappedBucket =
+          !allConditionsFiredInMappedBucket &&
+          results.every((result) => result[item].shouldWarn[mappedBucketIndex]);
         const someConditionsNoDataInMappedBucket = results.some((result) => {
           const hasNoData = result[item].isNoData as boolean[];
           return hasNoData[mappedBucketIndex];
@@ -116,6 +123,9 @@ export const previewInventoryMetricThresholdAlert = async ({
         } else if (allConditionsFiredInMappedBucket) {
           numberOfTimesFired++;
           notifyWithThrottle('fired');
+        } else if (allConditionsWarnInMappedBucket) {
+          numberOfTimesWarned++;
+          notifyWithThrottle('fired');
         } else {
           previousActionGroup = 'recovered';
           if (throttleTracker > 0) {
@@ -126,7 +136,13 @@ export const previewInventoryMetricThresholdAlert = async ({
           throttleTracker = 0;
         }
       }
-      return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors, numberOfNotifications];
+      return {
+        fired: numberOfTimesFired,
+        warning: numberOfTimesWarned,
+        noData: numberOfNoDataResults,
+        error: numberOfErrors,
+        notifications: numberOfNotifications,
+      };
     });
 
     return previewResults;

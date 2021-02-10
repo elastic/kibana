@@ -707,5 +707,31 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.saveAndReturn();
       }
     },
+
+    /**
+     * Asserts that the focused element is a field with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedField(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
+      expect(focusedElementText).to.eql(name);
+      expect(dataTestSubj).to.eql('lnsFieldListPanelField');
+    },
+
+    /**
+     * Asserts that the focused element is a dimension with with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedDimension(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      expect(focusedElementText).to.eql(name);
+    },
   });
 }
