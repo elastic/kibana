@@ -159,7 +159,7 @@ const labelDescription = i18n.translate(
 
 const runtimeFieldBadge = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.runtimeFieldBadge',
-  { defaultMessage: 'Runtime Field' }
+  { defaultMessage: 'Runtime field' }
 );
 
 interface IndexedFieldProps {
