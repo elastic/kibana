@@ -213,7 +213,7 @@ export class WorkpadLoader extends React.PureComponent {
         width: '20%',
         render: (date) => this.props.formatDate(date),
       },
-      { name: '', actions, width: '5%' },
+      { name: strings.getTableActionsColumnTitle(), actions, width: '100px' },
     ];
 
     const sorting = {
