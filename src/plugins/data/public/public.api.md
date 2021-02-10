@@ -2456,7 +2456,11 @@ export interface SearchUsageCollector {
     // (undocumented)
     trackSessionCancelled: () => Promise<void>;
     // (undocumented)
+    trackSessionDeleted: () => Promise<void>;
+    // (undocumented)
     trackSessionExtended: () => Promise<void>;
+    // (undocumented)
+    trackSessionIndicatorTourDisabled: () => Promise<void>;
     // (undocumented)
     trackSessionIndicatorTourLoading: () => Promise<void>;
     // (undocumented)
