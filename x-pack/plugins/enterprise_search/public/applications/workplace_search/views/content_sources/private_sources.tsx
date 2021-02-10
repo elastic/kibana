@@ -60,6 +60,15 @@ export const PrivateSources: React.FC = () => {
   const hasPrivateSources = privateContentSources?.length > 0;
   const hasSharedSources = contentSources.length > 0;
 
+  const licenseCallout = (
+    <>
+      <EuiCallOut title={LICENSE_CALLOUT_TITLE} iconType="iInCircle">
+        <p>{LICENSE_CALLOUT_DESCRIPTION}</p>
+      </EuiCallOut>
+      <EuiSpacer />
+    </>
+  );
+
   const headerAction = (
     <EuiButtonTo
       to={getSourcesPath(ADD_SOURCE_PATH, false)}
@@ -71,20 +80,20 @@ export const PrivateSources: React.FC = () => {
     </EuiButtonTo>
   );
 
-  const privateSourcesTable = (
-    <SourcesTable
-      showDetails
-      onSearchableToggle={setSourceSearchability}
-      sources={privateContentSources}
-    />
-  );
-
   const privateSourcesEmptyState = (
     <EuiPanel>
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
       <EuiSpacer size="xxl" />
     </EuiPanel>
+  );
+
+  const privateSourcesTable = (
+    <SourcesTable
+      showDetails
+      onSearchableToggle={setSourceSearchability}
+      sources={privateContentSources}
+    />
   );
 
   const privateSourcesSection = (
@@ -137,15 +146,6 @@ export const PrivateSources: React.FC = () => {
     >
       {hasSharedSources ? sharedSourcesTable : sharedSourcesEmptyState}
     </ContentSection>
-  );
-
-  const licenseCallout = (
-    <>
-      <EuiCallOut title={LICENSE_CALLOUT_TITLE} iconType="iInCircle">
-        <p>{LICENSE_CALLOUT_DESCRIPTION}</p>
-      </EuiCallOut>
-      <EuiSpacer />
-    </>
   );
 
   return (
