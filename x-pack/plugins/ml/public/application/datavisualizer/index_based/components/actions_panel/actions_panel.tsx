@@ -195,7 +195,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
                 defaultMessage="Data Frame Analytics"
               />
             }
-            data-test-subj="mlDataVisualizerCreateDFACard"
+            data-test-subj="mlDataVisualizerCreateDataFrameAnalyticsCard"
           />
           <EuiSpacer size="m" />
         </>
