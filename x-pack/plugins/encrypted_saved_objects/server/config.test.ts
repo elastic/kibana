@@ -87,6 +87,18 @@ describe('config schema', () => {
     );
   });
 
+  it('should not allow `null` value for the encryption key', () => {
+    expect(() => ConfigSchema.validate({ encryptionKey: null })).toThrowErrorMatchingInlineSnapshot(
+      `"[encryptionKey]: expected value of type [string] but got [null]"`
+    );
+
+    expect(() =>
+      ConfigSchema.validate({ encryptionKey: null }, { dist: true })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[encryptionKey]: expected value of type [string] but got [null]"`
+    );
+  });
+
   it('should throw error if any of the xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys is less than 32 characters', () => {
     expect(() =>
       ConfigSchema.validate({

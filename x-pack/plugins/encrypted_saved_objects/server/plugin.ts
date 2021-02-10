@@ -25,6 +25,9 @@ export interface PluginsSetup {
 }
 
 export interface EncryptedSavedObjectsPluginSetup {
+  /**
+   * Indicates if Saved Object encryption is possible. Requires an encryption key to be explicitly set via `xpack.encryptedSavedObjects.encryptionKey`.
+   */
   canEncrypt: boolean;
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
