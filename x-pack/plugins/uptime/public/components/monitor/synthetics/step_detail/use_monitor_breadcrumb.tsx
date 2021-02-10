@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useKibana, useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { JourneyState } from '../../../../state/reducers/journey';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { PLUGIN } from '../../../../../common/constants/plugin';
-import { i18n } from '@kbn/i18n';
 
 interface Props {
   details: JourneyState['details'];

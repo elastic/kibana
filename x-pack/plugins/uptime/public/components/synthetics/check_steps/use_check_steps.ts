@@ -24,6 +24,6 @@ export const useCheckSteps = (): JourneyState => {
     checkGroup: checkGroupId,
     steps: data?.steps ?? [],
     details: data?.details,
-    loading: status == FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING,
+    loading: status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING,
   };
 };

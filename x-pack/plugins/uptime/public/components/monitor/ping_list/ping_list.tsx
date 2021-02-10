@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useEffect, MouseEvent } from 'react';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
+import moment from 'moment';
 import { useDispatch } from 'react-redux';
 import { Ping } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
@@ -29,7 +30,6 @@ import { usePingsList } from './use_pings';
 import { PingListHeader } from './ping_list_header';
 import { clearPings } from '../../../state/actions';
 import { getShortTimeStamp } from '../../overview/monitor_list/columns/monitor_status_column';
-import moment from 'moment';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
