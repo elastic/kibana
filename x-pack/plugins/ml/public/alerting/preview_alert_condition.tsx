@@ -215,7 +215,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
             <EuiFlexItem grow={false}>
-              <EuiText size={'xs'}>
+              <EuiText size={'xs'} data-test-subj={'mlAnomalyAlertPreviewMessage'}>
                 <strong>
                   <FormattedMessage
                     id="xpack.ml.previewAlert.previewMessage"

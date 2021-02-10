@@ -182,6 +182,9 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async saveAlert() {
       await testSubjects.click('saveAlertButton');
+      const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmAlertSaveModal');
+      expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
+      await testSubjects.click('confirmModalConfirmButton');
     },
   };
 }

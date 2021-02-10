@@ -62,7 +62,7 @@ export function MachineLearningAlertingProvider(
     },
 
     async setTestInterval(interval: string) {
-      await testSubjects.setValue('mlAnomalyAlertPreviewInterval', '6m');
+      await testSubjects.setValue('mlAnomalyAlertPreviewInterval', interval);
     },
 
     async assertPreviewButtonState(expectedEnabled: boolean) {
@@ -78,6 +78,12 @@ export function MachineLearningAlertingProvider(
     async clickPreviewButton() {
       await testSubjects.click('mlAnomalyAlertPreviewButton');
       await this.assertPreviewCalloutVisible();
+    },
+
+    async checkPreview(expectedMessage: string) {
+      await this.clickPreviewButton();
+      const previewMessage = await testSubjects.getVisibleText('mlAnomalyAlertPreviewMessage');
+      expect(previewMessage).to.eql(expectedMessage);
     },
 
     async assertPreviewCalloutVisible() {
