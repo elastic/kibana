@@ -27,7 +27,7 @@ interface AgentsTableProps {
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<keyof Agent>('id');
+  const [sortField, setSortField] = useState<keyof Agent>('updated_at');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.asc);
   const [selectedItems, setSelectedItems] = useState([]);
   const tableRef = useRef<EuiBasicTable<Agent>>(null);

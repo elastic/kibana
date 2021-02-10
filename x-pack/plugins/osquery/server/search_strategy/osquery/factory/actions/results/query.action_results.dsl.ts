@@ -12,8 +12,8 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 export const buildActionResultsQuery = ({
   actionId,
   filterQuery,
+  // sort,
   pagination: { activePage, querySize },
-  sort,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -34,13 +34,13 @@ export const buildActionResultsQuery = ({
       size: querySize,
       track_total_hits: true,
       fields: ['*'],
-      sort: [
-        {
-          [sort.field]: {
-            order: [sort.direction],
-          },
-        },
-      ],
+      // sort: [
+      //   {
+      //     [sort.field]: {
+      //       order: [sort.direction],
+      //     },
+      //   },
+      // ],
     },
   };
 

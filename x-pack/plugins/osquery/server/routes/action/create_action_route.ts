@@ -31,13 +31,9 @@ export const createActionRoute = (router: IRouter) => {
         // @ts-expect-error update validation
         agents: request.body.agents,
         data: {
-          commands: [
-            {
-              id: uuid.v4(),
-              // @ts-expect-error update validation
-              query: request.body.command,
-            },
-          ],
+          id: uuid.v4(),
+          // @ts-expect-error update validation
+          query: request.body.command,
         },
       };
       const query = await esClient.index<{}, {}>({

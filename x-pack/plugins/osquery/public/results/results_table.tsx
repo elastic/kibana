@@ -101,6 +101,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
 
   useEffect(() => {
     // @ts-expect-error update types
+    if (!allResultsData?.results) {
+      return;
+    }
+    // @ts-expect-error update types
     const newColumns = keys(allResultsData?.results[0]?.fields)
       .sort()
       .reduce((acc, fieldName) => {

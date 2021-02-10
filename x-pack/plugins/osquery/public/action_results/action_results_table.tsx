@@ -95,7 +95,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     activePage: 0,
     limit: 1000,
     direction: Direction.desc,
-    sortField: '@timestamp',
+    sortField: 'updated_at',
   });
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
