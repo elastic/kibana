@@ -29,6 +29,8 @@ interface BaseMetricExpressionParams {
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
+  warningComparator?: Comparator;
+  warningThreshold?: number[];
 }
 
 interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
