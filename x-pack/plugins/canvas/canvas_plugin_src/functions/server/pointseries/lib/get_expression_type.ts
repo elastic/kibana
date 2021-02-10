@@ -6,11 +6,12 @@
  */
 
 import { parse } from '@kbn/tinymath';
+import { DatatableColumn } from 'src/plugins/expressions/common';
 import { getFieldType } from '../../../../../common/lib/get_field_type';
 import { isColumnReference } from './is_column_reference';
 import { getFieldNames } from './get_field_names';
 
-export function getExpressionType(columns, mathExpression) {
+export function getExpressionType(columns: DatatableColumn[], mathExpression: string) {
   // if isColumnReference returns true, then mathExpression is just a string
   // referencing a column in a datatable
   if (isColumnReference(mathExpression)) {
@@ -19,7 +20,7 @@ export function getExpressionType(columns, mathExpression) {
 
   const parsedMath = parse(mathExpression);
 
-  if (parsedMath.args) {
+  if (typeof parsedMath !== 'number' && parsedMath.type === 'function') {
     const fieldNames = parsedMath.args.reduce(getFieldNames, []);
 
     if (fieldNames.length > 0) {
@@ -30,7 +31,7 @@ export function getExpressionType(columns, mathExpression) {
         }
 
         return types;
-      }, []);
+      }, [] as string[]);
 
       return fieldTypes.length === 1 ? fieldTypes[0] : 'string';
     }

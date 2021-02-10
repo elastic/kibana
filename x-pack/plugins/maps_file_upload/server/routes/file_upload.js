@@ -41,6 +41,7 @@ const options = {
     maxBytes: MAX_BYTES,
     accepts: ['application/json'],
   },
+  tags: ['access:fileUpload:import'],
 };
 
 export const idConditionalValidation = (body, boolHasId) =>

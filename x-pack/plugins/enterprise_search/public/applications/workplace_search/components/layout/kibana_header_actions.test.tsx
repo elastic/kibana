@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { externalUrl } from '../../../shared/enterprise_search_url';
-
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiButtonEmpty } from '@elastic/eui';
+
+import { externalUrl } from '../../../shared/enterprise_search_url';
 
 import { WorkplaceSearchHeaderActions } from './';
 

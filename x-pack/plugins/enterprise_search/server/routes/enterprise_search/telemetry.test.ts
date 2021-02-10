@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { MockRouter, mockLogger, mockDependencies } from '../../__mocks__';
+
+import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 
 jest.mock('../../collectors/lib/telemetry', () => ({
   incrementUICounter: jest.fn(),

@@ -90,12 +90,17 @@ export type AlertPreviewRequestParams = rt.TypeOf<typeof alertPreviewRequestPara
 
 export const alertPreviewSuccessResponsePayloadRT = rt.type({
   numberOfGroups: rt.number,
-  resultTotals: rt.type({
-    fired: rt.number,
-    noData: rt.number,
-    error: rt.number,
-    notifications: rt.number,
-  }),
+  resultTotals: rt.intersection([
+    rt.type({
+      fired: rt.number,
+      noData: rt.number,
+      error: rt.number,
+      notifications: rt.number,
+    }),
+    rt.partial({
+      warning: rt.number,
+    }),
+  ]),
 });
 export type AlertPreviewSuccessResponsePayload = rt.TypeOf<
   typeof alertPreviewSuccessResponsePayloadRT
