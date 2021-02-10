@@ -11,7 +11,7 @@
 import apm from 'elastic-apm-node';
 import { Subject, Observable, from, of } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
-import { difference, partition, groupBy, mapValues, countBy } from 'lodash';
+import { difference, partition, groupBy, mapValues, countBy, pick } from 'lodash';
 import { some, none } from 'fp-ts/lib/Option';
 
 import { Logger } from '../../../../../src/core/server';
@@ -112,6 +112,7 @@ export class TaskClaiming {
   private getCapacity: (taskType?: string) => number;
   private logger: Logger;
   private readonly taskClaimingBatchesByType: TaskClaimingBatches;
+  private readonly taskMaxAttempts: Record<string, number>;
 
   /**
    * Constructs a new TaskStore.
@@ -126,6 +127,7 @@ export class TaskClaiming {
     this.getCapacity = opts.getCapacity;
     this.logger = opts.logger;
     this.taskClaimingBatchesByType = this.partitionIntoClaimingBatches(this.definitions);
+    this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -156,6 +158,12 @@ export class TaskClaiming {
         : []),
       ...(limitedConcurrency ? limitedConcurrency.map(({ type }) => asLimited(type)) : []),
     ];
+  }
+
+  private normalizeMaxAttempts(definitions: TaskTypeDictionary) {
+    return new Map(
+      [...definitions].map(([type, { maxAttempts }]) => [type, maxAttempts || this.maxAttempts])
+    );
   }
 
   private claimingBatchIndex = 0;
@@ -351,12 +359,9 @@ export class TaskClaiming {
     taskTypes,
   }: OwnershipClaimingOpts): Promise<UpdateByQueryResult> {
     const { taskTypesToSkip = [], taskTypesToClaim = [] } = groupBy(
-      [...this.definitions],
-      ([type]) => (taskTypes.has(type) ? 'taskTypesToClaim' : 'taskTypesToSkip')
+      this.definitions.getAllTypes(),
+      (type) => (taskTypes.has(type) ? 'taskTypesToClaim' : 'taskTypesToSkip')
     );
-    const taskMaxAttempts = taskTypesToClaim.reduce((accumulator, [type, { maxAttempts }]) => {
-      return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
-    }, {});
 
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
@@ -392,9 +397,9 @@ export class TaskClaiming {
             retryAt: claimOwnershipUntil,
           },
           claimTasksById || [],
-          taskTypesToClaim.map(([type]) => type),
-          taskTypesToSkip.map(([type]) => type),
-          taskMaxAttempts
+          taskTypesToClaim,
+          taskTypesToSkip,
+          pick(this.taskMaxAttempts, taskTypesToClaim)
         ),
         sort,
       }),
