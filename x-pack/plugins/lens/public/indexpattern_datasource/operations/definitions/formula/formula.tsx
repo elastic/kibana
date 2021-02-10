@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { isObject } from 'lodash';
 import { TinymathVariable, TinymathAST } from '@kbn/tinymath';
 import { EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
@@ -162,7 +162,6 @@ function FormulaEditor({
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const editorModel = React.useRef<monaco.editor.ITextModel | null>(null);
-  const argValueSuggestions = useMemo(() => [], []);
 
   useDebounceWithOptions(
     () => {
@@ -429,7 +428,8 @@ function extractColumns(
 ) {
   const columns: IndexPatternColumn[] = [];
 
-  function parseNode(node: TinymathAST) {
+  // String response indicates a new column to add
+  function parseNode(node: TinymathAST): TinymathAST | string | undefined {
     if (typeof node === 'number' || node.type !== 'function') {
       // leaf node
       return node;
@@ -515,6 +515,9 @@ function extractColumns(
     }
   }
   const root = parseNode(ast);
+  if (root === undefined) {
+    return [];
+  }
   const variables = findVariables(root);
   const mathColumn = mathOperation.buildColumn({
     layer,
