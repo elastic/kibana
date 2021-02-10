@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { SpacesManager } from '../spaces_manager';
-import { SpacesData } from '../types';
+import { ShareToSpacesData } from '../types';
 import { SpacesReactContext, SpacesReactContextValue, KibanaServices } from './types';
 
 const { useContext, createElement, createContext } = React;
@@ -24,11 +24,11 @@ export const useSpaces = <Extra extends object = {}>(): SpacesReactContextValue<
 export const createSpacesReactContext = <Services extends KibanaServices>(
   services: Services,
   spacesManager: SpacesManager,
-  spacesDataPromise: Promise<SpacesData>
+  shareToSpacesDataPromise: Promise<ShareToSpacesData>
 ): SpacesReactContext<Services> => {
   const value: SpacesReactContextValue<Services> = {
     spacesManager,
-    spacesDataPromise,
+    shareToSpacesDataPromise,
     services,
   };
   const Provider: React.FC = ({ children }) =>

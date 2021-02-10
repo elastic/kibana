@@ -13,7 +13,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { SpaceListProps } from '../../../../../src/plugins/spaces_oss/public';
-import { SpacesData, SpaceData } from '../types';
+import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { useSpaces } from '../spaces_context';
 import { SpaceAvatar } from '../space_avatar';
@@ -25,25 +25,25 @@ export const SpaceListInternal = ({
   displayLimit = DEFAULT_DISPLAY_LIMIT,
   enableSpaceAgnosticBehavior,
 }: SpaceListProps) => {
-  const { spacesDataPromise } = useSpaces();
+  const { shareToSpacesDataPromise } = useSpaces();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [spacesData, setSpacesData] = useState<SpacesData>();
+  const [shareToSpacesData, setShareToSpacesData] = useState<ShareToSpacesData>();
 
   useEffect(() => {
-    spacesDataPromise.then((x) => {
-      setSpacesData(x);
+    shareToSpacesDataPromise.then((x) => {
+      setShareToSpacesData(x);
     });
-  }, [spacesDataPromise]);
+  }, [shareToSpacesDataPromise]);
 
-  if (!spacesData) {
+  if (!shareToSpacesData) {
     return null;
   }
 
   const isSharedToAllSpaces = namespaces?.includes(ALL_SPACES_ID);
   const unauthorizedCount = (namespaces?.filter((namespace) => namespace === UNKNOWN_SPACE) ?? [])
     .length;
-  let displayedSpaces: SpaceData[];
+  let displayedSpaces: ShareToSpaceTarget[];
   let button: ReactNode = null;
 
   if (isSharedToAllSpaces) {
@@ -59,10 +59,10 @@ export const SpaceListInternal = ({
     ];
   } else {
     const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
-    const enabledSpaceTargets: SpaceData[] = [];
-    const disabledSpaceTargets: SpaceData[] = [];
+    const enabledSpaceTargets: ShareToSpaceTarget[] = [];
+    const disabledSpaceTargets: ShareToSpaceTarget[] = [];
     authorized.forEach((namespace) => {
-      const spaceTarget = spacesData.spacesMap.get(namespace);
+      const spaceTarget = shareToSpacesData.spacesMap.get(namespace);
       if (spaceTarget === undefined) {
         // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
         enabledSpaceTargets.push({ id: namespace, name: namespace });
@@ -122,6 +122,7 @@ export const SpaceListInternal = ({
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
       {displayedSpaces.map((space) => {
+        // color may be undefined, which is intentional; SpacesAvatar calls the getSpaceColor function before rendering
         const color = space.isFeatureDisabled ? 'hollow' : space.color;
         return (
           <EuiFlexItem grow={false} key={space.id}>

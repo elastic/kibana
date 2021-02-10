@@ -7,14 +7,14 @@
 
 import * as React from 'react';
 import { CoreStart } from 'src/core/public';
-import { SpacesData } from '../types';
+import { ShareToSpacesData } from '../types';
 import { SpacesManager } from '../spaces_manager';
 
 export type KibanaServices = Partial<CoreStart>;
 
 export interface SpacesReactContextValue<Services extends KibanaServices> {
   readonly spacesManager: SpacesManager;
-  readonly spacesDataPromise: Promise<SpacesData>;
+  readonly shareToSpacesDataPromise: Promise<ShareToSpacesData>;
   readonly services: Services;
 }
 

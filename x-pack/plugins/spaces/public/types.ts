@@ -7,16 +7,25 @@
 
 import { GetSpaceResult } from '../common';
 
-export interface SpacesData {
-  readonly spacesMap: Map<string, SpaceData>;
+/**
+ * The structure for all of the space data that must be loaded for share-to-space components to function.
+ */
+export interface ShareToSpacesData {
+  /** A map of each existing space's ID and its associated {@link ShareToSpaceTarget}. */
+  readonly spacesMap: Map<string, ShareToSpaceTarget>;
+  /** The ID of the active space. */
   readonly activeSpaceId: string;
 }
 
-export interface SpaceData extends Omit<GetSpaceResult, 'disabledFeatures'> {
+/**
+ * The data that was fetched for a specific space. Includes optional additional fields that are needed to handle edge cases in the
+ * share-to-space components that consume it.
+ */
+export interface ShareToSpaceTarget extends Omit<GetSpaceResult, 'disabledFeatures'> {
   /** True if this space is the active space. */
-  isActiveSpace?: boolean;
+  isActiveSpace?: true;
   /** True if the user has read access to this space, but is not authorized to share objects into this space. */
-  isPartiallyAuthorized?: boolean;
+  cannotShareToSpace?: true;
   /** True if the current feature (specified in the `SpacesContext`) is disabled in this space. */
-  isFeatureDisabled?: boolean;
+  isFeatureDisabled?: true;
 }

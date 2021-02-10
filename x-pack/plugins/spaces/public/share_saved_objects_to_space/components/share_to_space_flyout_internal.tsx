@@ -30,14 +30,17 @@ import type {
 } from 'src/plugins/spaces_oss/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { SpacesManager } from '../../spaces_manager';
-import { SpaceData } from '../../types';
+import { ShareToSpaceTarget } from '../../types';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { ShareOptions } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { useSpaces } from '../../spaces_context';
 
-const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.management.shareToSpace.objectNoun', {
+const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.shareToSpace.objectNoun', {
   defaultMessage: 'object',
+});
+const ALL_SPACES_TARGET = i18n.translate('xpack.spaces.shareToSpace.allSpacesTarget', {
+  defaultMessage: 'all',
 });
 
 const arraysAreEqual = (a: unknown[], b: unknown[]) =>
@@ -50,14 +53,14 @@ function createDefaultChangeSpacesHandler(
 ) {
   return async (spacesToAdd: string[], spacesToRemove: string[]) => {
     const { type, id, title } = object;
-    const toastTitle = i18n.translate('xpack.spaces.management.shareToSpace.shareSuccessTitle', {
+    const toastTitle = i18n.translate('xpack.spaces.shareToSpace.shareSuccessTitle', {
       values: { objectNoun: object.noun },
       defaultMessage: 'Updated {objectNoun}',
     });
     const isSharedToAllSpaces = spacesToAdd.includes(ALL_SPACES_ID);
     if (spacesToAdd.length > 0) {
       await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
-      const spaceTargets = isSharedToAllSpaces ? 'all' : `${spacesToAdd.length}`;
+      const spaceTargets = isSharedToAllSpaces ? ALL_SPACES_TARGET : `${spacesToAdd.length}`;
       const toastText =
         !isSharedToAllSpaces && spacesToAdd.length === 1
           ? i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessTextSingular', {
@@ -73,7 +76,7 @@ function createDefaultChangeSpacesHandler(
     if (spacesToRemove.length > 0) {
       await spacesManager.shareSavedObjectRemove({ type, id }, spacesToRemove);
       const isUnsharedFromAllSpaces = spacesToRemove.includes(ALL_SPACES_ID);
-      const spaceTargets = isUnsharedFromAllSpaces ? 'all' : `${spacesToRemove.length}`;
+      const spaceTargets = isUnsharedFromAllSpaces ? ALL_SPACES_TARGET : `${spacesToRemove.length}`;
       const toastText =
         !isUnsharedFromAllSpaces && spacesToRemove.length === 1
           ? i18n.translate('xpack.spaces.management.shareToSpace.shareRemoveSuccessTextSingular', {
@@ -92,7 +95,7 @@ function createDefaultChangeSpacesHandler(
 }
 
 export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
-  const { spacesManager, spacesDataPromise, services } = useSpaces();
+  const { spacesManager, shareToSpacesDataPromise, services } = useSpaces();
   const { notifications } = services;
   const toastNotifications = notifications!.toasts;
 
@@ -110,7 +113,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   );
   const {
     flyoutIcon,
-    flyoutTitle = i18n.translate('xpack.spaces.management.shareToSpace.flyoutTitle', {
+    flyoutTitle = i18n.translate('xpack.spaces.shareToSpace.flyoutTitle', {
       defaultMessage: 'Edit spaces for {objectNoun}',
       values: { objectNoun: savedObjectTarget.noun },
     }),
@@ -135,13 +138,13 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
 
   const [{ isLoading, spaces }, setSpacesState] = useState<{
     isLoading: boolean;
-    spaces: SpaceData[];
+    spaces: ShareToSpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
     const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObjectTarget.type);
-    Promise.all([spacesDataPromise, getPermissions])
-      .then(([spacesData, permissions]) => {
-        const activeSpaceId = !enableSpaceAgnosticBehavior && spacesData.activeSpaceId;
+    Promise.all([shareToSpacesDataPromise, getPermissions])
+      .then(([shareToSpacesData, permissions]) => {
+        const activeSpaceId = !enableSpaceAgnosticBehavior && shareToSpacesData.activeSpaceId;
         const selectedSpaceIds = savedObjectTarget.namespaces.filter(
           (spaceId) => spaceId !== activeSpaceId
         );
@@ -152,7 +155,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         setCanShareToAllSpaces(permissions.shareToAllSpaces);
         setSpacesState({
           isLoading: false,
-          spaces: [...spacesData.spacesMap].map(([, spaceTarget]) => spaceTarget),
+          spaces: [...shareToSpacesData.spacesMap].map(([, spaceTarget]) => spaceTarget),
         });
       })
       .catch((e) => {
@@ -165,7 +168,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   }, [
     savedObjectTarget,
     spacesManager,
-    spacesDataPromise,
+    shareToSpacesDataPromise,
     toastNotifications,
     enableSpaceAgnosticBehavior,
   ]);
@@ -181,13 +184,15 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     );
     const { selectedSpaceIds } = shareOptions;
     const filteredSelection = selectedSpaceIds.filter((x) => x !== UNKNOWN_SPACE);
-    const isSharedToAllSpaces =
-      !initialSelection.includes(ALL_SPACES_ID) && filteredSelection.includes(ALL_SPACES_ID);
-    const isUnsharedFromAllSpaces =
-      initialSelection.includes(ALL_SPACES_ID) && !filteredSelection.includes(ALL_SPACES_ID);
+
+    const initiallySharedToAllSpaces = initialSelection.includes(ALL_SPACES_ID);
+    const selectionIncludesAllSpaces = filteredSelection.includes(ALL_SPACES_ID);
+
+    const isSharedToAllSpaces = !initiallySharedToAllSpaces && selectionIncludesAllSpaces;
+    const isUnsharedFromAllSpaces = initiallySharedToAllSpaces && !selectionIncludesAllSpaces;
+
     const selectedSpacesChanged =
-      !filteredSelection.includes(ALL_SPACES_ID) &&
-      !arraysAreEqual(initialSelection, filteredSelection);
+      !selectionIncludesAllSpaces && !arraysAreEqual(initialSelection, filteredSelection);
     const isSelectionChanged =
       isSharedToAllSpaces ||
       isUnsharedFromAllSpaces ||
@@ -200,16 +205,16 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       (spaceId) => !filteredSelection.includes(spaceId)
     );
 
-    const spacesArray = activeSpaceId ? [activeSpaceId] : []; // if we have an active space, it is automatically selected
+    const activeSpaceArray = activeSpaceId ? [activeSpaceId] : []; // if we have an active space, it is automatically selected
     const spacesToAdd = isSharedToAllSpaces
       ? [ALL_SPACES_ID]
       : isUnsharedFromAllSpaces
-      ? [...spacesArray, ...selectedSpacesToAdd]
+      ? [...activeSpaceArray, ...selectedSpacesToAdd]
       : selectedSpacesToAdd;
     const spacesToRemove =
       isUnsharedFromAllSpaces || !isSharedToAllSpaces
         ? selectedSpacesToRemove
-        : [...spacesArray, ...initialSelection];
+        : [...activeSpaceArray, ...initialSelection];
     return { isSelectionChanged, spacesToAdd, spacesToRemove };
   };
   const { isSelectionChanged, spacesToAdd, spacesToRemove } = getSelectionChanges();
@@ -225,7 +230,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
     } catch (e) {
       setShareInProgress(false);
       toastNotifications.addError(e, {
-        title: i18n.translate('xpack.spaces.management.shareToSpace.shareErrorTitle', {
+        title: i18n.translate('xpack.spaces.shareToSpace.shareErrorTitle', {
           values: { objectNoun: savedObjectTarget.noun },
           defaultMessage: 'Error updating {objectNoun}',
         }),
