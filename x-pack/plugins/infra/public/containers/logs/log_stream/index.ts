@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import createContainer from 'constate';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
@@ -57,6 +57,7 @@ export function useLogStream({
   columns,
 }: LogStreamProps) {
   const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
+  const [resetOnSuccess, setResetOnSuccess] = useState<boolean>(false);
 
   // Ensure the pagination keeps working when the timerange gets extended
   const prevStartTimestamp = usePrevious(startTimestamp);
@@ -108,15 +109,21 @@ export function useLogStream({
   useSubscription(logEntriesAroundSearchResponses$, {
     next: ({ before, after, combined }) => {
       if ((before.response.data != null || after?.response.data != null) && !combined.isPartial) {
-        setState((prevState) => ({
-          ...prevState,
-          entries: combined.entries,
-          hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
-          hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
-          bottomCursor: combined.bottomCursor,
-          topCursor: combined.topCursor,
-          lastLoadedTime: new Date(),
-        }));
+        setState((_prevState) => {
+          const prevState = resetOnSuccess ? INITIAL_STATE : _prevState;
+          return {
+            ...(resetOnSuccess ? INITIAL_STATE : prevState),
+            entries: combined.entries,
+            hasMoreAfter: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+            hasMoreBefore: combined.hasMoreAfter ?? prevState.hasMoreAfter,
+            bottomCursor: combined.bottomCursor,
+            topCursor: combined.topCursor,
+            lastLoadedTime: new Date(),
+          };
+        });
+        if (resetOnSuccess) {
+          setResetOnSuccess(false);
+        }
       }
     },
   });
@@ -130,14 +137,20 @@ export function useLogStream({
   useSubscription(logEntriesBeforeSearchResponse$, {
     next: ({ response: { data, isPartial } }) => {
       if (data != null && !isPartial) {
-        setState((prevState) => ({
-          ...prevState,
-          entries: [...data.entries, ...prevState.entries],
-          hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
-          topCursor: data.topCursor ?? prevState.topCursor,
-          bottomCursor: prevState.bottomCursor ?? data.bottomCursor,
-          lastLoadedTime: new Date(),
-        }));
+        setState((_prevState) => {
+          const prevState = resetOnSuccess ? INITIAL_STATE : _prevState;
+          return {
+            ...(resetOnSuccess ? INITIAL_STATE : prevState),
+            entries: [...data.entries, ...prevState.entries],
+            hasMoreBefore: data.hasMoreBefore ?? prevState.hasMoreBefore,
+            topCursor: data.topCursor ?? prevState.topCursor,
+            bottomCursor: prevState.bottomCursor ?? data.bottomCursor,
+            lastLoadedTime: new Date(),
+          };
+        });
+        if (resetOnSuccess) {
+          setResetOnSuccess(false);
+        }
       }
     },
   });
@@ -171,14 +184,20 @@ export function useLogStream({
   useSubscription(logEntriesAfterSearchResponse$, {
     next: ({ response: { data, isPartial } }) => {
       if (data != null && !isPartial) {
-        setState((prevState) => ({
-          ...prevState,
-          entries: [...prevState.entries, ...data.entries],
-          hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
-          topCursor: prevState.topCursor ?? data.topCursor,
-          bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
-          lastLoadedTime: new Date(),
-        }));
+        setState((_prevState) => {
+          const prevState = resetOnSuccess ? INITIAL_STATE : _prevState;
+          return {
+            ...(resetOnSuccess ? INITIAL_STATE : prevState),
+            entries: [...prevState.entries, ...data.entries],
+            hasMoreAfter: data.hasMoreAfter ?? prevState.hasMoreAfter,
+            topCursor: prevState.topCursor ?? data.topCursor,
+            bottomCursor: data.bottomCursor ?? prevState.bottomCursor,
+            lastLoadedTime: new Date(),
+          };
+        });
+        if (resetOnSuccess) {
+          setResetOnSuccess(false);
+        }
       }
     },
   });
@@ -213,6 +232,14 @@ export function useLogStream({
     }
   }, [center, fetchLogEntriesAround, fetchLogEntriesBefore, setState]);
 
+  // Specialized version of `fetchEntries` for streaming.
+  // - Reset the entries _after_ the network request succeeds.
+  // - Ignores `center`.
+  const fetchNewestEntries = useCallback(() => {
+    setResetOnSuccess(true);
+    fetchLogEntriesBefore('last', { size: LOG_ENTRIES_CHUNK_SIZE });
+  }, [fetchLogEntriesBefore]);
+
   const isReloading = useMemo(
     () =>
       isLogEntriesAroundRequestRunning ||
@@ -235,6 +262,7 @@ export function useLogStream({
     fetchEntries,
     fetchNextEntries,
     fetchPreviousEntries,
+    fetchNewestEntries,
     isLoadingMore,
     isReloading,
   };
