@@ -93,6 +93,16 @@ async function createSetupSideEffects(
     await runFleetServerMigration();
   }
 
+  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
+    await ensureInstalledPackage({
+      savedObjectsClient: soClient,
+      pkgName: FLEET_SERVER_PACKAGE,
+      callCluster,
+    });
+    await ensureFleetServerIndicesCreated(esClient);
+    await runFleetServerMigration();
+  }
+
   // If we just created the default policy, ensure default packages are added to it
   if (defaultAgentPolicyCreated) {
     const agentPolicyWithPackagePolicies = await agentPolicyService.get(
