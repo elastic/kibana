@@ -130,12 +130,13 @@ image::images/alert-types-es-query-select.png[Choosing an ES query alert type]
 [float]
 ==== Defining the conditions
 
-The ES query alert has 4 clauses that define the condition to detect.
+The ES query alert has 5 clauses that define the condition to detect.
 
 [role="screenshot"]
 image::images/alert-types-es-query-conditions.png[Four clauses define the condition to detect]
 
 Index:: This clause requires an *index or index pattern* and a *time field* that will be used for the *time window*.
+Size:: This clause specifies the number of documents to pass to the configured actions when the the threshold condition is met.
 ES query:: This clause specifies the ES DSL query to execute. The number of documents that match this query will be evaulated against the threshold
 condition. Aggregations are not supported at this time. 
 Threshold:: This clause defines a threshold value and a comparison operator  (`is above`, `is above or equals`, `is below`, `is below or equals`, or `is between`). The number of documents that match the specified query is compared to this threshold.

@@ -12,6 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiLoadingContent, EuiButtonEmpty } from '@elastic/eui';
 
 import { GroupsLogic } from '../groups_logic';
+
 import { FilterableUsersPopover } from './filterable_users_popover';
 
 interface GroupRowUsersDropdownProps {
