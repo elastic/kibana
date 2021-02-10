@@ -12,6 +12,8 @@ import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
 import { render } from '../../../../../lib/helper/rtl_helpers';
 import { Ping } from '../../../../../../common/runtime_types/ping';
 import * as observabilityPublic from '../../../../../../../observability/public';
+import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
+import moment from 'moment';
 
 mockReduxHooks();
 
@@ -68,7 +70,7 @@ describe('Ping Timestamp component', () => {
         .spyOn(observabilityPublic, 'useFetcher')
         .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null });
       const { getByTestId } = render(
-        <PingTimestamp ping={response} timestamp={response.timestamp} />
+        <PingTimestamp ping={response} label={getShortTimeStamp(moment(response.timestamp))} />
       );
       expect(getByTestId('pingTimestampSpinner')).toBeInTheDocument();
     }
@@ -79,7 +81,7 @@ describe('Ping Timestamp component', () => {
       .spyOn(observabilityPublic, 'useFetcher')
       .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
     const { getByTestId } = render(
-      <PingTimestamp ping={response} timestamp={response.timestamp} />
+      <PingTimestamp ping={response} label={getShortTimeStamp(moment(response.timestamp))} />
     );
     expect(getByTestId('pingTimestampNoImageAvailable')).toBeInTheDocument();
   });
@@ -91,7 +93,9 @@ describe('Ping Timestamp component', () => {
       data: { src },
       refetch: () => null,
     });
-    const { container } = render(<PingTimestamp ping={response} timestamp={response.timestamp} />);
+    const { container } = render(
+      <PingTimestamp ping={response} label={getShortTimeStamp(moment(response.timestamp))} />
+    );
     expect(container.querySelector('img')?.src).toBe(src);
   });
 
@@ -103,7 +107,7 @@ describe('Ping Timestamp component', () => {
       refetch: () => null,
     });
     const { getByAltText, getByText, queryByAltText } = render(
-      <PingTimestamp ping={response} timestamp={response.timestamp} />
+      <PingTimestamp ping={response} label={getShortTimeStamp(moment(response.timestamp))} />
     );
     const caption = getByText('Nov 26, 2020 10:28:56 AM');
     fireEvent.mouseEnter(caption);

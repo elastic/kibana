@@ -42,11 +42,12 @@ const StepDiv = styled.div`
 `;
 
 interface Props {
-  timestamp: string;
+  label?: string;
   ping: Ping;
+  showNavBtn?: boolean;
 }
 
-export const PingTimestamp = ({ timestamp, ping }: Props) => {
+export const PingTimestamp = ({ label, ping, showNavBtn = true }: Props) => {
   const [stepNumber, setStepNumber] = useState(1);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -86,7 +87,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       maxSteps={data?.maxSteps}
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
-      timestamp={timestamp}
+      label={label}
     />
   );
 
@@ -110,12 +111,14 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           isPending={status === FETCH_STATUS.PENDING}
         />
       )}
-      <NavButtons
-        maxSteps={data?.maxSteps}
-        setIsImagePopoverOpen={setIsImagePopoverOpen}
-        setStepNumber={setStepNumber}
-        stepNumber={stepNumber}
-      />
+      {showNavBtn && (
+        <NavButtons
+          maxSteps={data?.maxSteps}
+          setIsImagePopoverOpen={setIsImagePopoverOpen}
+          setStepNumber={setStepNumber}
+          stepNumber={stepNumber}
+        />
+      )}
     </StepDiv>
   );
 };

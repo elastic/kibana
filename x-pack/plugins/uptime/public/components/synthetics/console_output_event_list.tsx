@@ -8,9 +8,9 @@
 import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC } from 'react';
-import { Ping } from '../../../../common/runtime_types';
-import { JourneyState } from '../../../state/reducers/journey';
 import { ConsoleEvent } from './console_event';
+import { Ping } from '../../../common/runtime_types/ping';
+import { JourneyState } from '../../state/reducers/journey';
 
 interface Props {
   journey: JourneyState;

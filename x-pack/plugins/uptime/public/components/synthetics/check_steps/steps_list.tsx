@@ -5,29 +5,75 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiPanel } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, MouseEvent } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { Ping } from '../../../../common/runtime_types';
 import { pruneJourneyState } from '../../../state/actions/journey';
 import { clearPings } from '../../../state/actions';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';
-import { PingStatusColumn } from '../../monitor/ping_list/columns/ping_status';
-import { PingTimestamp } from '../../monitor/ping_list/columns/ping_timestamp';
-import { ExpandRowColumn } from '../../monitor/ping_list/columns/expand_row';
 import { STEP_NAME_LABEL } from '../translations';
+import { ExpandRowColumn, toggleExpand } from './expand_row_col';
+import { StatusBadge } from '../status_badge';
+import { StepDetailLink } from '../../common/step_detail_link';
+import { VIEW_PERFORMANCE } from '../../monitor/synthetics/translations';
+import { StepImage } from './step_image';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
 `;
+interface Props {
+  data: any[];
+  error?: Error;
+  loading: boolean;
+}
 
-export const StepsList = ({ data, error, loading }) => {
+function isStepEnd(step: Ping) {
+  return step.synthetics?.type === 'step/end';
+}
+interface StepStatusCount {
+  failed: number;
+  skipped: number;
+  succeeded: number;
+}
+
+function statusMessage(count: StepStatusCount) {
+  const total = count.succeeded + count.failed + count.skipped;
+  if (count.failed + count.skipped === total) {
+    return i18n.translate('xpack.uptime.synthetics.journey.allFailedMessage', {
+      defaultMessage: '{total} Steps - all failed or skipped',
+      values: { total },
+    });
+  } else if (count.succeeded === total) {
+    return i18n.translate('xpack.uptime.synthetics.journey.allSucceededMessage', {
+      defaultMessage: '{total} Steps - all succeeded',
+      values: { total },
+    });
+  }
+  return i18n.translate('xpack.uptime.synthetics.journey.partialSuccessMessage', {
+    defaultMessage: '{total} Steps - {succeeded} succeeded',
+    values: { succeeded: count.succeeded, total },
+  });
+}
+
+function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
+  if (cur.synthetics?.payload?.status === 'succeeded') {
+    prev.succeeded += 1;
+    return prev;
+  } else if (cur.synthetics?.payload?.status === 'skipped') {
+    prev.skipped += 1;
+    return prev;
+  }
+  prev.failed += 1;
+  return prev;
+}
+
+export const StepsList = ({ data, error, loading }: Props) => {
   const dispatch = useDispatch();
 
-  const history = useHistory();
+  const steps = data.filter(isStepEnd);
 
   const pruneJourneysCallback = useCallback(
     (checkGroups: string[]) => dispatch(pruneJourneyState(checkGroups)),
@@ -66,57 +112,80 @@ export const StepsList = ({ data, error, loading }) => {
     pruneJourneysCallback(JSON.parse(expandedCheckGroupsStr));
   }, [pruneJourneysCallback, expandedCheckGroupsStr]);
 
-  const columns = [
+  const columns: any[] = [
     {
-      field: 'monitor.status',
+      field: 'synthetics.payload.status',
       name: STATUS_LABEL,
       render: (pingStatus: string, item: Ping) => (
-        <PingStatusColumn pingStatus={pingStatus} item={item} />
+        <StatusBadge status={pingStatus} stepNo={item.synthetics?.step?.index!} />
       ),
     },
-
     {
       align: 'left',
       field: 'timestamp',
       name: STEP_NAME_LABEL,
-      render: (timestamp: string, item: Ping) => (
-        <PingTimestamp timestamp={timestamp} ping={item} />
+      render: (timestamp: string, item: Ping) => <StepImage step={item} />,
+    },
+    {
+      align: 'left',
+      field: 'timestamp',
+      name: '',
+      width: '250px',
+      render: (val: string, item: Ping) => (
+        <StepDetailLink
+          checkGroupId={item.monitor.check_group!}
+          stepIndex={item.synthetics?.step?.index!}
+        >
+          {VIEW_PERFORMANCE}
+        </StepDetailLink>
       ),
     },
-
     {
       align: 'right',
       width: '24px',
       isExpander: true,
-      render: (item: Ping) => (
-        <ExpandRowColumn
-          item={item}
-          expandedRows={expandedRows}
-          setExpandedRows={setExpandedRows}
-        />
-      ),
+      render: (item: Ping) => {
+        return (
+          <ExpandRowColumn
+            item={item}
+            expandedRows={expandedRows}
+            setExpandedRows={setExpandedRows}
+          />
+        );
+      },
     },
   ];
 
   const getRowProps = (item: Ping) => {
     const { monitor } = item;
+
     return {
       'data-test-subj': `row-${monitor.check_group}`,
-      onClick: () => {
-        history.push(`/journey/${monitor.check_group}/steps`);
+      onClick: (evt: MouseEvent) => {
+        const targetElem = evt.target as HTMLElement;
+
+        // we dont want to capture image click event
+        if (targetElem.tagName !== 'IMG') {
+          toggleExpand(item, expandedRows, setExpandedRows);
+        }
       },
     };
   };
 
   return (
     <EuiPanel>
+      <EuiTitle>
+        <h2>
+          {statusMessage(steps.reduce(reduceStepStatus, { failed: 0, skipped: 0, succeeded: 0 }))}
+        </h2>
+      </EuiTitle>
       <EuiBasicTable
         loading={loading}
         columns={columns}
         error={error?.message}
         isExpandable={true}
         hasActions={true}
-        items={data}
+        items={steps}
         itemId="docId"
         itemIdToExpandedRowMap={expandedRows}
         noItemsMessage={

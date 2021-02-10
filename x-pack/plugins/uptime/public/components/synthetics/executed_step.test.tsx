@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { ExecutedStep } from './executed_step';
-import { Ping } from '../../../../common/runtime_types';
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render } from '../../lib/helper/rtl_helpers';
+import { Ping } from '../../../common/runtime_types/ping';
 
 describe('ExecutedStep', () => {
   let step: Ping;
@@ -34,33 +34,6 @@ describe('ExecutedStep', () => {
     };
   });
 
-  it('renders correct step heading', () => {
-    const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
-
-    expect(getByText(`${step?.synthetics?.step?.index}. ${step?.synthetics?.step?.name}`));
-  });
-
-  it('renders a link to the step detail view', () => {
-    const { getByRole, getByText } = render(
-      <ExecutedStep index={3} step={step} checkGroup={'fake-group'} />
-    );
-    expect(getByRole('link')).toHaveAttribute('href', '/journey/fake-group/step/4');
-    expect(getByText('4. STEP_NAME'));
-  });
-
-  it.each([
-    ['succeeded', 'Succeeded'],
-    ['failed', 'Failed'],
-    ['skipped', 'Skipped'],
-    ['somegarbage', '4.'],
-  ])('supplies status badge correct status', (status, expectedStatus) => {
-    step.synthetics = {
-      payload: { status },
-    };
-    const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
-    expect(getByText(expectedStatus));
-  });
-
   it('renders accordion for step', () => {
     step.synthetics = {
       payload: {
@@ -74,8 +47,7 @@ describe('ExecutedStep', () => {
 
     const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
 
-    expect(getByText('4. STEP_NAME'));
-    expect(getByText('Step script'));
+    expect(getByText('Script executed at this step'));
     expect(getByText(`const someVar = "the var"`));
   });
 
@@ -89,8 +61,7 @@ describe('ExecutedStep', () => {
 
     const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
 
-    expect(getByText('4.'));
-    expect(getByText('Error'));
+    expect(getByText('Error message'));
     expect(getByText('There was an error executing the step.'));
     expect(getByText('some.stack.trace.string'));
   });

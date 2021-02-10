@@ -251,6 +251,7 @@ export const SyntheticsJourneyApiResponseType = t.intersection([
       t.intersection([
         t.type({
           timestamp: t.string,
+          journey: PingType,
         }),
         t.partial({
           next: t.type({

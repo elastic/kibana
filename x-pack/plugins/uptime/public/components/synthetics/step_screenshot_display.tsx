@@ -11,17 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext, useEffect, useRef, useState, FC } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
-import { UptimeSettingsContext, UptimeThemeContext } from '../../../contexts';
+import { UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
 
 interface StepScreenshotDisplayProps {
   screenshotExists?: boolean;
   checkGroup?: string;
   stepIndex?: number;
   stepName?: string;
+  allowPopover?: boolean;
 }
 
-const THUMBNAIL_WIDTH = 320;
-const THUMBNAIL_HEIGHT = 180;
+const THUMBNAIL_WIDTH = 640;
+const THUMBNAIL_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;
 const POPOVER_IMG_HEIGHT = 360;
 
@@ -42,6 +43,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   screenshotExists,
   stepIndex,
   stepName,
+  allowPopover = true,
 }) => {
   const containerRef = useRef(null);
   const {
@@ -92,8 +94,8 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
               caption={`Step:${stepIndex} ${stepName}`}
               hasShadow
               url={imgSrc}
-              onMouseEnter={() => setIsImagePopoverOpen(true)}
-              onMouseLeave={() => setIsImagePopoverOpen(false)}
+              onMouseEnter={allowPopover ? () => setIsImagePopoverOpen(true) : undefined}
+              onMouseLeave={allowPopover ? () => setIsImagePopoverOpen(false) : undefined}
             />
           }
           closePopover={() => setIsImagePopoverOpen(false)}

@@ -8,20 +8,22 @@
 import { useParams } from 'react-router-dom';
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { fetchJourneySteps } from '../../../state/api/journey';
+import { JourneyState } from '../../../state/reducers/journey';
 
-export const useCheckSteps = () => {
+export const useCheckSteps = (): JourneyState => {
   const { checkGroupId } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
-  const { data, status } = useFetcher(() => {
+  const { data, status, error } = useFetcher(() => {
     return fetchJourneySteps({
       checkGroup: checkGroupId,
     });
   }, [checkGroupId]);
 
   return {
+    error,
+    checkGroup: checkGroupId,
     steps: data?.steps ?? [],
-    ping: data?.details.journey,
-    timestamp: data?.details.timestamp,
+    details: data?.details,
     loading: status == FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING,
   };
 };

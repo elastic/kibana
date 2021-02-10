@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { render } from '../../../lib/helper/rtl_helpers';
 import React from 'react';
 import { StepScreenshotDisplay } from './step_screenshot_display';
+import { render } from '../../lib/helper/rtl_helpers';
 
 jest.mock('react-use/lib/useIntersection', () => () => ({
   isIntersecting: true,

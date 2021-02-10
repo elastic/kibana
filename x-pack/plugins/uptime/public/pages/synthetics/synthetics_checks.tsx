@@ -6,72 +6,39 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPage,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useTrackPageview } from '../../../../observability/public';
 import { useInitApp } from '../../hooks/use_init_app';
 import { StepsList } from '../../components/synthetics/check_steps/steps_list';
 import { useCheckSteps } from '../../components/synthetics/check_steps/use_check_steps';
-import { useUiSetting$ } from '../../../../../../src/plugins/kibana_react/public';
+import { ChecksNavigation } from './checks_navigation';
+import { useMonitorBreadcrumb } from '../../components/monitor/synthetics/step_detail/use_monitor_breadcrumb';
+import { EmptyJourney } from '../../components/synthetics/empty_journey';
 
 export const SyntheticsCheckSteps: React.FC = () => {
   useInitApp();
   useTrackPageview({ app: 'uptime', path: 'syntheticCheckSteps' });
   useTrackPageview({ app: 'uptime', path: 'syntheticCheckSteps', delay: 15000 });
 
-  const { checkGroupId } = useParams<{ checkGroupId: string; stepIndex: string }>();
+  const { error, loading, steps, details, checkGroup } = useCheckSteps();
 
-  const { error, loading, steps, ping, timestamp } = useCheckSteps();
-
-  const [dateFormat] = useUiSetting$<string>('dateFormat');
+  useMonitorBreadcrumb({ details, activeStep: details?.journey });
 
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle>
-            <h1>{ping?.monitor.name}</h1>
+            <h1>{details?.journey?.monitor.name}</h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiButtonEmpty iconType="arrowLeft">
-                <FormattedMessage
-                  id="xpack.uptime.synthetics.stepList.previousCheck"
-                  defaultMessage="Previous check"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>{moment(timestamp).format(dateFormat).toString()}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonEmpty iconType="arrowRight" iconSide="right">
-                <FormattedMessage
-                  id="xpack.uptime.synthetics.stepList.previousCheck"
-                  defaultMessage="Next check"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {details && <ChecksNavigation timestamp={details.timestamp} details={details} />}
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer />
       <StepsList data={steps} loading={loading} error={error} />
+      {(!steps || steps.length === 0) && <EmptyJourney checkGroup={checkGroup} />}
     </>
   );
 };

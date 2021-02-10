@@ -6,10 +6,8 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
-import moment from 'moment';
+import React, { MouseEvent } from 'react';
 import { nextAriaLabel, prevAriaLabel } from './translations';
-import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 
 export interface StepImageCaptionProps {
   captionContent: string;
@@ -17,7 +15,7 @@ export interface StepImageCaptionProps {
   maxSteps?: number;
   setStepNumber: React.Dispatch<React.SetStateAction<number>>;
   stepNumber: number;
-  timestamp: string;
+  label?: string;
 }
 
 export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
@@ -26,7 +24,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   maxSteps,
   setStepNumber,
   stepNumber,
-  timestamp,
+  label,
 }) => {
   return (
     <>
@@ -37,8 +35,9 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
               <EuiButtonIcon
                 disabled={stepNumber === 1}
                 size="m"
-                onClick={() => {
+                onClick={(evt: MouseEvent<HTMLButtonElement>) => {
                   setStepNumber(stepNumber - 1);
+                  evt.preventDefault();
                 }}
                 iconType="arrowLeft"
                 aria-label={prevAriaLabel}
@@ -51,8 +50,9 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
               <EuiButtonIcon
                 disabled={stepNumber === maxSteps}
                 size="m"
-                onClick={() => {
+                onClick={(evt: MouseEvent<HTMLButtonElement>) => {
                   setStepNumber(stepNumber + 1);
+                  evt.stopPropagation();
                 }}
                 iconType="arrowRight"
                 aria-label={nextAriaLabel}
@@ -61,8 +61,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
           </EuiFlexGroup>
         )}
       </div>
-      {/* TODO: Add link to details page once it's available */}
-      <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
+      {label && <span className="eui-textNoWrap">{label}</span>}
       <EuiSpacer size="s" />
     </>
   );

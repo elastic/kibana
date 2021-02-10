@@ -11,13 +11,19 @@ import { useKibana, useUiSetting$ } from '../../../../../../../../src/plugins/ki
 import { JourneyState } from '../../../../state/reducers/journey';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { PLUGIN } from '../../../../../common/constants/plugin';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
-  journey: JourneyState;
+  details: JourneyState['details'];
   activeStep?: Ping;
+  performanceBreakDownView?: boolean;
 }
 
-export const useMonitorBreadcrumb = ({ journey, activeStep }: Props) => {
+export const useMonitorBreadcrumb = ({
+  details,
+  activeStep,
+  performanceBreakDownView = false,
+}: Props) => {
   const [dateFormat] = useUiSetting$<string>('dateFormat');
 
   const kibana = useKibana();
@@ -32,8 +38,22 @@ export const useMonitorBreadcrumb = ({ journey, activeStep }: Props) => {
           },
         ]
       : []),
-    ...(journey?.details?.timestamp
-      ? [{ text: moment(journey?.details?.timestamp).format(dateFormat) }]
+    ...(details?.journey?.monitor?.check_group
+      ? [
+          {
+            text: moment(details?.timestamp).format(dateFormat),
+            href: `${appPath}/journey/${details.journey.monitor.check_group}/steps`,
+          },
+        ]
+      : []),
+    ...(performanceBreakDownView
+      ? [
+          {
+            text: i18n.translate('xpack.uptime.synthetics.performanceBreakDown.label', {
+              defaultMessage: 'Performance breakdown',
+            }),
+          },
+        ]
       : []),
   ]);
 };

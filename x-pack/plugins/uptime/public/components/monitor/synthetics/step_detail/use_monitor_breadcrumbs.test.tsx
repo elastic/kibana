@@ -44,7 +44,7 @@ describe('useMonitorBreadcrumbs', () => {
     const Component = () => {
       useMonitorBreadcrumb({
         activeStep: { monitor: { id: 'test-monitor' } } as Ping,
-        journey: { details: { timestamp: '2021-01-04T11:25:19.104Z' } } as JourneyState,
+        details: { timestamp: '2021-01-04T11:25:19.104Z' } as JourneyState['details'],
       });
       return <>Step Water Fall</>;
     };
@@ -67,9 +67,6 @@ describe('useMonitorBreadcrumbs', () => {
           "href": "/app/uptime/monitor/dGVzdC1tb25pdG9y",
           "onClick": [Function],
           "text": "test-monitor",
-        },
-        Object {
-          "text": "Jan 4, 2021 @ 06:25:19.104",
         },
       ]
     `);

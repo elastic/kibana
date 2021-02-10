@@ -7,8 +7,9 @@
 
 import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, MouseEvent } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Ping } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
@@ -27,6 +28,8 @@ import { FailedStep } from './columns/failed_step';
 import { usePingsList } from './use_pings';
 import { PingListHeader } from './ping_list_header';
 import { clearPings } from '../../../state/actions';
+import { getShortTimeStamp } from '../../overview/monitor_list/columns/monitor_status_column';
+import moment from 'moment';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
@@ -39,6 +42,8 @@ export const PingList = () => {
   const [pageIndex, setPageIndex] = useState(0);
 
   const dispatch = useDispatch();
+
+  const history = useHistory();
 
   const pruneJourneysCallback = useCallback(
     (checkGroups: string[]) => dispatch(pruneJourneyState(checkGroups)),
@@ -111,7 +116,7 @@ export const PingList = () => {
             field: 'timestamp',
             name: TIMESTAMP_LABEL,
             render: (timestamp: string, item: Ping) => (
-              <PingTimestamp timestamp={timestamp} ping={item} />
+              <PingTimestamp label={getShortTimeStamp(moment(timestamp))} ping={item} />
             ),
           },
         ]
@@ -172,19 +177,38 @@ export const PingList = () => {
           },
         ]
       : []),
-    {
-      align: 'right',
-      width: '24px',
-      isExpander: true,
-      render: (item: Ping) => (
-        <ExpandRowColumn
-          item={item}
-          expandedRows={expandedRows}
-          setExpandedRows={setExpandedRows}
-        />
-      ),
-    },
+    ...(monitorType !== MONITOR_TYPES.BROWSER
+      ? [
+          {
+            align: 'right',
+            width: '24px',
+            isExpander: true,
+            render: (item: Ping) => (
+              <ExpandRowColumn
+                item={item}
+                expandedRows={expandedRows}
+                setExpandedRows={setExpandedRows}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
+
+  const getRowProps = (item: Ping) => {
+    const { monitor } = item;
+    return {
+      'data-test-subj': `row-${monitor.check_group}`,
+      onClick: (evt: MouseEvent) => {
+        const targetElem = evt.target as HTMLElement;
+
+        // we dont want to capture image click event
+        if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'path') {
+          history.push(`/journey/${monitor.check_group}/steps`);
+        }
+      },
+    };
+  };
 
   const pagination: Pagination = {
     initialPageSize: DEFAULT_PAGE_SIZE,
@@ -222,6 +246,7 @@ export const PingList = () => {
           setPageIndex(criteria.page!.index);
         }}
         tableLayout={'auto'}
+        rowProps={getRowProps}
       />
     </EuiPanel>
   );
