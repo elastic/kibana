@@ -309,6 +309,10 @@ export interface SavedObjectsResolveResponse<T = unknown> {
    *    `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID.
    */
   outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
+  /**
+   * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
+   */
+  aliasTargetId?: string;
 }
 
 /**

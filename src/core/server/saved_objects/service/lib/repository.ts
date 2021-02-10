@@ -1067,6 +1067,7 @@ export class SavedObjectsRepository {
       return {
         saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
         outcome: 'conflict',
+        aliasTargetId: legacyUrlAlias.targetId,
       };
     } else if (foundExactMatch) {
       return {
@@ -1077,6 +1078,7 @@ export class SavedObjectsRepository {
       return {
         saved_object: this.getSavedObjectFromSource(type, legacyUrlAlias.targetId, aliasMatchDoc),
         outcome: 'aliasMatch',
+        aliasTargetId: legacyUrlAlias.targetId,
       };
     }
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
