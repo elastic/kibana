@@ -411,7 +411,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
    * @returns {promise} - { succeeded: boolean; num_freed: number }
    */
-  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+  async closePointInTime(id: string, options: SavedObjectsClosePointInTimeOptions = {}) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.closePointInTime(id, {
       ...options,
