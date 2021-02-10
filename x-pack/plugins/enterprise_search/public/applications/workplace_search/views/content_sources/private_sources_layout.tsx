@@ -11,7 +11,7 @@ import { EuiPage, EuiPageSideBar, EuiPageBody, EuiCallOut } from '@elastic/eui';
 
 import { PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING } from './constants';
 
-import './private_sources_layout.scss';
+import './sources.scss';
 
 interface LayoutProps {
   restrictWidth?: boolean;
@@ -24,8 +24,8 @@ export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
   readOnlyMode,
 }) => {
   return (
-    <EuiPage className="enterpriseSearchLayout">
-      <EuiPageSideBar className={'enterpriseSearchLayout__sideBar'} />
+    <EuiPage className="enterpriseSearchLayout privateSourcesLayout">
+      <EuiPageSideBar className={'enterpriseSearchLayout__sideBar privateSourcesLayout__sideBar'} />
       <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
         {readOnlyMode && (
           <EuiCallOut

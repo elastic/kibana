@@ -22,3 +22,15 @@
     }
   }
 }
+
+.privateSourcesLayout {
+  $sideBarWidth: $euiSize * 30;
+
+  left: $sideBarWidth;
+  width: calc(100% - #{$sideBarWidth});
+
+  &__sideBar {
+    width: $sideBarWidth;
+    margin-left: -$sideBarWidth;
+  }
+}
