@@ -6,7 +6,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
 
@@ -47,7 +46,7 @@ import { isNotificationAlertExecutor } from './lib/detection_engine/notification
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
-import { createConfig$, ConfigType } from './config';
+import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
@@ -127,8 +126,7 @@ const caseSavedObjects = [
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
-  private readonly config$: Observable<ConfigType>;
-  private config?: ConfigType;
+  private readonly config: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private setupPlugins?: SetupPlugins;
@@ -145,7 +143,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get();
-    this.config$ = createConfig$(context);
+    this.config = createConfig(context);
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
     this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
@@ -154,13 +152,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('plugin initialized');
   }
 
-  public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
     this.setupPlugins = plugins;
 
-    const config = await this.config$.pipe(first()).toPromise();
-    this.config = config;
-    const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
+    const config = this.config;
+    const globalConfig = this.context.config.legacy.get();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);

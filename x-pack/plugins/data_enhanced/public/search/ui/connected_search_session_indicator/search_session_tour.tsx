@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MutableRefObject, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { SearchSessionIndicatorRef } from '../search_session_indicator';
 import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
@@ -16,7 +16,7 @@ export const TOUR_RESTORE_STEP_KEY = `data.searchSession.tour.restore`;
 
 export function useSearchSessionTour(
   storage: IStorageWrapper,
-  searchSessionIndicatorRef: MutableRefObject<SearchSessionIndicatorRef | null>,
+  searchSessionIndicatorRef: SearchSessionIndicatorRef | null,
   state: SearchSessionState,
   searchSessionsDisabled: boolean
 ) {
@@ -30,19 +30,20 @@ export function useSearchSessionTour(
 
   useEffect(() => {
     if (searchSessionsDisabled) return;
+    if (!searchSessionIndicatorRef) return;
     let timeoutHandle: number;
 
     if (state === SearchSessionState.Loading) {
       if (!safeHas(storage, TOUR_TAKING_TOO_LONG_STEP_KEY)) {
         timeoutHandle = window.setTimeout(() => {
-          safeOpen(searchSessionIndicatorRef);
+          searchSessionIndicatorRef.openPopover();
         }, TOUR_TAKING_TOO_LONG_TIMEOUT);
       }
     }
 
     if (state === SearchSessionState.Restored) {
       if (!safeHas(storage, TOUR_RESTORE_STEP_KEY)) {
-        safeOpen(searchSessionIndicatorRef);
+        searchSessionIndicatorRef.openPopover();
       }
     }
 
@@ -77,17 +78,5 @@ function safeSet(storage: IStorageWrapper, key: string) {
     storage.set(key, true);
   } catch (e) {
     return true;
-  }
-}
-
-function safeOpen(searchSessionIndicatorRef: MutableRefObject<SearchSessionIndicatorRef | null>) {
-  if (searchSessionIndicatorRef.current) {
-    searchSessionIndicatorRef.current.openPopover();
-  } else {
-    // TODO: needed for initial open when component is not rendered yet
-    // fix after: https://github.com/elastic/eui/issues/4460
-    setTimeout(() => {
-      searchSessionIndicatorRef.current?.openPopover();
-    }, 50);
   }
 }

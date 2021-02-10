@@ -19,6 +19,11 @@ export enum CaseType {
   individual = 'individual',
 }
 
+/**
+ * Exposing the field used to define the case type so that it can be used for filtering in saved object find queries.
+ */
+export const caseTypeField = 'type';
+
 const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
 
 const SettingsRt = rt.type({
@@ -30,7 +35,7 @@ const CaseBasicRt = rt.type({
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
-  type: CaseTypeRt,
+  [caseTypeField]: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
 });
@@ -94,8 +99,6 @@ export const CasePostRequestRt = rt.intersection([
   CasePostRequestNoTypeRt,
 ]);
 
-export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
-
 export const CasesFindRequestRt = rt.partial({
   type: CaseTypeRt,
   tags: rt.union([rt.array(rt.string), rt.string]),
@@ -143,6 +146,31 @@ export const CasePatchRequestRt = rt.intersection([
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
 
+export const CasePushRequestParamsRt = rt.type({
+  case_id: rt.string,
+  connector_id: rt.string,
+});
+
+export const ExternalServiceResponseRt = rt.intersection([
+  rt.type({
+    title: rt.string,
+    id: rt.string,
+    pushedDate: rt.string,
+    url: rt.string,
+  }),
+  rt.partial({
+    comments: rt.array(
+      rt.intersection([
+        rt.type({
+          commentId: rt.string,
+          pushedDate: rt.string,
+        }),
+        rt.partial({ externalCommentId: rt.string }),
+      ])
+    ),
+  }),
+]);
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 /**
  * This field differs from the CasePostRequest in that the post request's type field can be optional. This type requires
@@ -157,9 +185,9 @@ export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
-export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
+export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {

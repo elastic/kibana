@@ -12,6 +12,7 @@ import { AllCommentsResponseRt, CommentAttributes } from '../../../../../common/
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObjects, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { defaultSortField } from '../../../../common';
 
 export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
@@ -38,12 +39,18 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
           comments = await caseService.getAllSubCaseComments({
             client,
             id: request.query.subCaseID,
+            options: {
+              sortField: defaultSortField,
+            },
           });
         } else {
           comments = await caseService.getAllCaseComments({
             client,
             id: request.params.case_id,
             includeSubCaseComments: request.query?.includeSubCaseComments,
+            options: {
+              sortField: defaultSortField,
+            },
           });
         }
 

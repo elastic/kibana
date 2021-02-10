@@ -21,7 +21,7 @@ import {
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformSubCases, wrapError } from '../../utils';
 import { SUB_CASES_URL } from '../../../../../common/constants';
-import { constructQueries, findSubCases, findSubCaseStatusStats } from '../helpers';
+import { constructQueryOptions } from '../helpers';
 import { defaultPage, defaultPerPage } from '../..';
 
 export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
@@ -44,25 +44,32 @@ export function initFindSubCasesApi({ caseService, router }: RouteDeps) {
         );
 
         const ids = [request.params.case_id];
-        const subCases = await findSubCases({
+        const { subCase: subCaseQueryOptions } = constructQueryOptions({
+          status: queryParams.status,
+          sortByField: queryParams.sortField,
+        });
+
+        const subCases = await caseService.findSubCasesGroupByCase({
           client,
           ids,
-          caseService,
           options: {
             sortField: 'created_at',
             page: defaultPage,
             perPage: defaultPerPage,
             ...queryParams,
+            ...subCaseQueryOptions,
           },
         });
 
         const [open, inProgress, closed] = await Promise.all([
           ...caseStatuses.map((status) => {
-            const { subCase } = constructQueries({ status });
-            return findSubCaseStatusStats({
+            const { subCase: statusQueryOptions } = constructQueryOptions({
+              status,
+              sortByField: queryParams.sortField,
+            });
+            return caseService.findSubCaseStatusStats({
               client,
-              options: subCase ?? {},
-              caseService,
+              options: statusQueryOptions ?? {},
               ids,
             });
           }),

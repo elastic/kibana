@@ -32,6 +32,9 @@ interface SetStatusCasesParams {
   status: CaseStatuses;
 }
 
+/**
+ * Sets the status of some cases or sub cases. The cases field must be all of one type.
+ */
 export const setStatus = async ({
   supertest,
   cases,
@@ -79,24 +82,15 @@ export const createSubCase = async (args: {
   comment?: CommentRequestGeneratedAlertType;
   caseID?: string;
   caseInfo?: CasePostRequest;
+  actionID?: string;
 }): Promise<CreateSubCaseResp> => {
   return createSubCaseComment({ ...args, forceNewSubCase: true });
 };
 
-export const createSubCaseComment = async ({
-  supertest,
-  caseID,
-  comment = defaultCreateSubComment,
-  caseInfo = defaultCreateSubPost,
-  // if true it will close any open sub cases and force a new sub case to be opened
-  forceNewSubCase = false,
-}: {
-  supertest: st.SuperTest<supertestAsPromised.Test>;
-  comment?: CommentRequestGeneratedAlertType;
-  caseID?: string;
-  caseInfo?: CasePostRequest;
-  forceNewSubCase?: boolean;
-}): Promise<CreateSubCaseResp> => {
+/**
+ * Add case as a connector
+ */
+export const createCaseAction = async (supertest: st.SuperTest<supertestAsPromised.Test>) => {
   const { body: createdAction } = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'foo')
@@ -106,6 +100,46 @@ export const createSubCaseComment = async ({
       config: {},
     })
     .expect(200);
+  return createdAction.id;
+};
+
+/**
+ * Remove a connector
+ */
+export const deleteCaseAction = async (
+  supertest: st.SuperTest<supertestAsPromised.Test>,
+  id: string
+) => {
+  await supertest.delete(`/api/actions/action/${id}`).set('kbn-xsrf', 'foo');
+};
+
+/**
+ * Creates a sub case using the actions APIs. This will handle forcing a creation of a new sub case even if one exists
+ * if the forceNewSubCase parameter is set to true.
+ */
+export const createSubCaseComment = async ({
+  supertest,
+  caseID,
+  comment = defaultCreateSubComment,
+  caseInfo = defaultCreateSubPost,
+  // if true it will close any open sub cases and force a new sub case to be opened
+  forceNewSubCase = false,
+  actionID,
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  comment?: CommentRequestGeneratedAlertType;
+  caseID?: string;
+  caseInfo?: CasePostRequest;
+  forceNewSubCase?: boolean;
+  actionID?: string;
+}): Promise<CreateSubCaseResp> => {
+  let actionIDToUse: string;
+
+  if (actionID === undefined) {
+    actionIDToUse = await createCaseAction(supertest);
+  } else {
+    actionIDToUse = actionID;
+  }
 
   let collectionID: string;
 
@@ -145,7 +179,7 @@ export const createSubCaseComment = async ({
   }
 
   const caseConnector = await supertest
-    .post(`/api/actions/action/${createdAction.id}/_execute`)
+    .post(`/api/actions/action/${actionIDToUse}/_execute`)
     .set('kbn-xsrf', 'foo')
     .send({
       params: {
@@ -163,8 +197,8 @@ export const createSubCaseComment = async ({
 };
 
 export const getConfiguration = ({
-  id = 'connector-1',
-  name = 'Connector 1',
+  id = 'none',
+  name = 'none',
   type = ConnectorTypes.none,
   fields = null,
 }: Partial<CaseConnector> = {}): CasesConfigureRequest => {

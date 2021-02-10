@@ -7,11 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CaseResponseRt } from '../../../../common/api';
 import { RouteDeps } from '../types';
-import { flattenCaseSavedObject, wrapError } from '../utils';
+import { wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
-import { countAlertsForID } from '../../../common';
 
 export function initGetCaseApi({ caseConfigureService, caseService, router }: RouteDeps) {
   router.get(
@@ -23,49 +21,21 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
         }),
         query: schema.object({
           includeComments: schema.boolean({ defaultValue: true }),
+          includeSubCaseComments: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
     async (context, request, response) => {
+      const caseClient = context.case.getCaseClient();
+      const id = request.params.case_id;
+
       try {
-        const client = context.core.savedObjects.client;
-        const includeComments = request.query.includeComments;
-
-        const [theCase] = await Promise.all([
-          caseService.getCase({
-            client,
-            id: request.params.case_id,
-          }),
-        ]);
-
-        if (!includeComments) {
-          return response.ok({
-            body: CaseResponseRt.encode(
-              flattenCaseSavedObject({
-                savedObject: theCase,
-              })
-            ),
-          });
-        }
-
-        const theComments = await caseService.getAllCaseComments({
-          client,
-          id: request.params.case_id,
-          options: {
-            sortField: 'created_at',
-            sortOrder: 'asc',
-          },
-        });
-
         return response.ok({
-          body: CaseResponseRt.encode(
-            flattenCaseSavedObject({
-              savedObject: theCase,
-              comments: theComments.saved_objects,
-              totalComment: theComments.total,
-              totalAlerts: countAlertsForID({ comments: theComments, id: request.params.case_id }),
-            })
-          ),
+          body: await caseClient.get({
+            id,
+            includeComments: request.query.includeComments,
+            includeSubCaseComments: request.query.includeSubCaseComments,
+          }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

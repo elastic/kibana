@@ -23,12 +23,11 @@ import {
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { getComments } from '../helpers';
 import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
-  sub_case_id: rt.string,
+  subCaseID: rt.string,
 });
 
 export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
@@ -50,8 +49,8 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const id = query.sub_case_id ?? request.params.case_id;
-        const associationType = query.sub_case_id ? AssociationType.subCase : AssociationType.case;
+        const id = query.subCaseID ?? request.params.case_id;
+        const associationType = query.subCaseID ? AssociationType.subCase : AssociationType.case;
         const args = query
           ? {
               caseService,
@@ -80,7 +79,7 @@ export function initFindCaseCommentsApi({ caseService, router }: RouteDeps) {
               associationType,
             };
 
-        const theComments = await getComments(args);
+        const theComments = await caseService.getCommentsByAssociation(args);
         return response.ok({ body: CommentsResponseRt.encode(transformComments(theComments)) });
       } catch (error) {
         return response.customError(wrapError(error));

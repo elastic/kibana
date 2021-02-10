@@ -46,7 +46,7 @@ import {
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
-import { SortFieldCase, TotalCommentByCase } from './types';
+import { SortFieldCase } from './types';
 
 // TODO: refactor these functions to a common location, this is used by the caseClient too
 
@@ -230,22 +230,6 @@ export const transformSubCases = ({
   count_closed_cases: closed,
 });
 
-// TODO: remove because it is no longer used
-export const flattenCaseSavedObjects = (
-  savedObjects: Array<SavedObject<ESCaseAttributes>>,
-  totalCommentByCase: TotalCommentByCase[]
-): CaseResponse[] =>
-  savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<ESCaseAttributes>) => {
-    return [
-      ...acc,
-      flattenCaseSavedObject({
-        savedObject,
-        totalComment:
-          totalCommentByCase.find((tc) => tc.caseId === savedObject.id)?.totalComments ?? 0,
-      }),
-    ];
-  }, []);
-
 export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
@@ -381,18 +365,3 @@ export const decodeComment = (comment: CommentRequest) => {
     );
   }
 };
-
-export const getCommentContextFromAttributes = (
-  attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType =>
-  isUserContext(attributes)
-    ? {
-        type: CommentType.user,
-        comment: attributes.comment,
-      }
-    : {
-        // this can be either alert or generated_alert so just grab it from the attributes
-        type: attributes.type,
-        alertId: attributes.alertId,
-        index: attributes.index,
-      };

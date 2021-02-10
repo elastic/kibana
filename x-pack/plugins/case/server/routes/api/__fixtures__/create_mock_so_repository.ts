@@ -19,6 +19,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../saved_object_types';
 
 export const createMockSavedObjectsRepository = ({
@@ -26,11 +27,13 @@ export const createMockSavedObjectsRepository = ({
   caseCommentSavedObject = [],
   caseConfigureSavedObject = [],
   caseMappingsSavedObject = [],
+  caseUserActionsSavedObject = [],
 }: {
   caseSavedObject?: any[];
   caseCommentSavedObject?: any[];
   caseConfigureSavedObject?: any[];
   caseMappingsSavedObject?: any[];
+  caseUserActionsSavedObject?: any[];
 } = {}) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
@@ -59,6 +62,7 @@ export const createMockSavedObjectsRepository = ({
         }),
       };
     }),
+    bulkCreate: jest.fn(),
     bulkUpdate: jest.fn((objects: Array<SavedObjectsBulkUpdateObject<unknown>>) => {
       return {
         saved_objects: objects.map(({ id, type, attributes }) => {
@@ -159,6 +163,15 @@ export const createMockSavedObjectsRepository = ({
           per_page: 0,
           total: 0,
           saved_objects: [],
+        };
+      }
+
+      if (findArgs.type === CASE_USER_ACTION_SAVED_OBJECT) {
+        return {
+          page: 1,
+          per_page: 5,
+          total: caseUserActionsSavedObject.length,
+          saved_objects: caseUserActionsSavedObject,
         };
       }
 

@@ -118,7 +118,7 @@ export const caseSavedObjectType: SavedObjectsType = {
       tags: {
         type: 'keyword',
       },
-      // parent or individual
+      // collection or individual
       type: {
         type: 'keyword',
       },

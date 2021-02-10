@@ -13,6 +13,10 @@ import {
   MappingsClient,
   CaseClientUpdateAlertsStatus,
   CaseClientAddComment,
+  CaseClientGet,
+  CaseClientGetUserActions,
+  CaseClientGetAlerts,
+  CaseClientPush,
 } from './types';
 import { create } from './cases/create';
 import { update } from './cases/update';
@@ -28,6 +32,10 @@ import {
   AlertServiceContract,
 } from '../services';
 import { CasesPatchRequest, CasePostRequest } from '../../common/api';
+import { get } from './cases/get';
+import { get as getUserActions } from './user_actions/get';
+import { get as getAlerts } from './alerts/get';
+import { push } from './cases/push';
 
 // TODO: rename
 export class CaseClientImpl implements CaseClient {
@@ -51,26 +59,6 @@ export class CaseClientImpl implements CaseClient {
     this._savedObjectsClient = clientArgs.savedObjectsClient;
     this._userActionService = clientArgs.userActionService;
     this._alertsService = clientArgs.alertsService;
-  }
-
-  public get caseService(): CaseServiceSetup {
-    return this._caseService;
-  }
-
-  public get caseConfigureService(): CaseConfigureServiceSetup {
-    return this._caseConfigureService;
-  }
-
-  public get connectorMappingsService(): ConnectorMappingsServiceSetup {
-    return this._connectorMappingsService;
-  }
-
-  public get userActionService(): CaseUserActionServiceSetup {
-    return this._userActionService;
-  }
-
-  public get alertsService(): AlertServiceContract {
-    return this._alertsService;
   }
 
   public async create(caseInfo: CasePostRequest) {
@@ -125,6 +113,42 @@ export class CaseClientImpl implements CaseClient {
       ...args,
       alertsService: this._alertsService,
       scopedClusterClient: this._scopedClusterClient,
+    });
+  }
+
+  public async get(args: CaseClientGet) {
+    return get({
+      ...args,
+      caseService: this._caseService,
+      savedObjectsClient: this._savedObjectsClient,
+    });
+  }
+
+  public async getUserActions(args: CaseClientGetUserActions) {
+    return getUserActions({
+      ...args,
+      savedObjectsClient: this._savedObjectsClient,
+      userActionService: this._userActionService,
+    });
+  }
+
+  public async getAlerts(args: CaseClientGetAlerts) {
+    return getAlerts({
+      ...args,
+      alertsService: this._alertsService,
+      scopedClusterClient: this._scopedClusterClient,
+    });
+  }
+
+  public async push(args: CaseClientPush) {
+    return push({
+      ...args,
+      savedObjectsClient: this._savedObjectsClient,
+      caseService: this._caseService,
+      userActionService: this._userActionService,
+      request: this.request,
+      caseClient: this,
+      caseConfigureService: this._caseConfigureService,
     });
   }
 }

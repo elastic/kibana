@@ -80,6 +80,14 @@ export const CommentResponseRt = rt.intersection([
   }),
 ]);
 
+export const CommentResponseTypeAlertsRt = rt.intersection([
+  AttributesTypeAlertsRt,
+  rt.type({
+    id: rt.string,
+    version: rt.string,
+  }),
+]);
+
 export const AllCommentsResponseRT = rt.array(CommentResponseRt);
 
 export const CommentPatchRequestRt = rt.intersection([
@@ -87,7 +95,7 @@ export const CommentPatchRequestRt = rt.intersection([
    * Partial updates are not allowed.
    * We want to prevent the user for changing the type without removing invalid fields.
    */
-  ContextBasicRt,
+  rt.union([ContextTypeUserRt, ContextTypeAlertRt]),
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
@@ -115,6 +123,7 @@ export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
+export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;
 export type AllCommentsResponse = rt.TypeOf<typeof AllCommentsResponseRt>;
 export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;

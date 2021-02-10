@@ -9,7 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { findSubCasesResp, postCollectionReq } from '../../../../common/lib/mock';
-import { createSubCase, deleteAllCaseItems } from '../../../../common/lib/utils';
+import {
+  createCaseAction,
+  createSubCase,
+  deleteAllCaseItems,
+  deleteCaseAction,
+  setStatus,
+} from '../../../../common/lib/utils';
 import { getSubCasesUrl } from '../../../../../../plugins/case/common/api/helpers';
 import {
   CaseResponse,
@@ -24,6 +30,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('find_sub_cases', () => {
+    let actionID: string;
+    before(async () => {
+      actionID = await createCaseAction(supertest);
+    });
+    after(async () => {
+      await deleteCaseAction(supertest, actionID);
+    });
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -51,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return a sub cases with comment stats', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
       const { body }: { body: SubCasesFindResponse } = await supertest
         .get(`${getSubCasesUrl(caseInfo.id)}/_find`)
@@ -67,8 +80,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return multiple sub cases', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest });
-      const subCase2Resp = await createSubCase({ supertest, caseID: caseInfo.id });
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+      const subCase2Resp = await createSubCase({ supertest, caseID: caseInfo.id, actionID });
 
       const { body }: { body: SubCasesFindResponse } = await supertest
         .get(`${getSubCasesUrl(caseInfo.id)}/_find`)
@@ -99,8 +112,143 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    // TODO:
-    // tests for sorting on status, sort order, sort field
-    // tests for in-progress stats
+    it('should only return open when filtering for open', async () => {
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+      // this will result in one closed case and one open
+      await createSubCase({ supertest, caseID: caseInfo.id, actionID });
+
+      const { body }: { body: SubCasesFindResponse } = await supertest
+        .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses.open}`)
+        .expect(200);
+
+      expect(body.total).to.be(1);
+      expect(body.subCases[0].status).to.be(CaseStatuses.open);
+      expect(body.count_closed_cases).to.be(1);
+      expect(body.count_open_cases).to.be(1);
+      expect(body.count_in_progress_cases).to.be(0);
+    });
+
+    it('should only return closed when filtering for closed', async () => {
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+      // this will result in one closed case and one open
+      await createSubCase({ supertest, caseID: caseInfo.id, actionID });
+
+      const { body }: { body: SubCasesFindResponse } = await supertest
+        .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses.closed}`)
+        .expect(200);
+
+      expect(body.total).to.be(1);
+      expect(body.subCases[0].status).to.be(CaseStatuses.closed);
+      expect(body.count_closed_cases).to.be(1);
+      expect(body.count_open_cases).to.be(1);
+      expect(body.count_in_progress_cases).to.be(0);
+    });
+
+    it('should only return in progress when filtering for in progress', async () => {
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+      // this will result in one closed case and one open
+      const { newSubCaseInfo: secondSub } = await createSubCase({
+        supertest,
+        caseID: caseInfo.id,
+        actionID,
+      });
+
+      await setStatus({
+        supertest,
+        cases: [
+          {
+            id: secondSub.subCase!.id,
+            version: secondSub.subCase!.version,
+            status: CaseStatuses['in-progress'],
+          },
+        ],
+        type: 'sub_case',
+      });
+
+      const { body }: { body: SubCasesFindResponse } = await supertest
+        .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses['in-progress']}`)
+        .expect(200);
+
+      expect(body.total).to.be(1);
+      expect(body.subCases[0].status).to.be(CaseStatuses['in-progress']);
+      expect(body.count_closed_cases).to.be(1);
+      expect(body.count_open_cases).to.be(0);
+      expect(body.count_in_progress_cases).to.be(1);
+    });
+
+    it('should sort on createdAt field in descending order', async () => {
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+      // this will result in one closed case and one open
+      await createSubCase({
+        supertest,
+        caseID: caseInfo.id,
+        actionID,
+      });
+
+      const { body }: { body: SubCasesFindResponse } = await supertest
+        .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=createdAt&sortOrder=desc`)
+        .expect(200);
+
+      expect(body.total).to.be(2);
+      expect(body.subCases[0].status).to.be(CaseStatuses.open);
+      expect(body.subCases[1].status).to.be(CaseStatuses.closed);
+      expect(body.count_closed_cases).to.be(1);
+      expect(body.count_open_cases).to.be(1);
+      expect(body.count_in_progress_cases).to.be(0);
+    });
+
+    it('should sort on createdAt field in ascending order', async () => {
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+      // this will result in one closed case and one open
+      await createSubCase({
+        supertest,
+        caseID: caseInfo.id,
+        actionID,
+      });
+
+      const { body }: { body: SubCasesFindResponse } = await supertest
+        .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=createdAt&sortOrder=asc`)
+        .expect(200);
+
+      expect(body.total).to.be(2);
+      expect(body.subCases[0].status).to.be(CaseStatuses.closed);
+      expect(body.subCases[1].status).to.be(CaseStatuses.open);
+      expect(body.count_closed_cases).to.be(1);
+      expect(body.count_open_cases).to.be(1);
+      expect(body.count_in_progress_cases).to.be(0);
+    });
+
+    it('should sort on updatedAt field in ascending order', async () => {
+      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+      // this will result in one closed case and one open
+      const { newSubCaseInfo: secondSub } = await createSubCase({
+        supertest,
+        caseID: caseInfo.id,
+        actionID,
+      });
+
+      await setStatus({
+        supertest,
+        cases: [
+          {
+            id: secondSub.subCase!.id,
+            version: secondSub.subCase!.version,
+            status: CaseStatuses['in-progress'],
+          },
+        ],
+        type: 'sub_case',
+      });
+
+      const { body }: { body: SubCasesFindResponse } = await supertest
+        .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=updatedAt&sortOrder=asc`)
+        .expect(200);
+
+      expect(body.total).to.be(2);
+      expect(body.subCases[0].status).to.be(CaseStatuses.closed);
+      expect(body.subCases[1].status).to.be(CaseStatuses['in-progress']);
+      expect(body.count_closed_cases).to.be(1);
+      expect(body.count_open_cases).to.be(0);
+      expect(body.count_in_progress_cases).to.be(1);
+    });
   });
 };

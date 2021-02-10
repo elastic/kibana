@@ -10,6 +10,7 @@ import {
   AssociationType,
   CaseStatuses,
   CaseType,
+  CaseUserActionAttributes,
   CommentAttributes,
   CommentType,
   ConnectorMappings,
@@ -17,7 +18,10 @@ import {
   ESCaseAttributes,
   ESCasesConfigureAttributes,
 } from '../../../../common/api';
-import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../saved_object_types';
+import {
+  CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../../saved_object_types';
 import { mappings } from '../../../client/configure/mock';
 
 export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
@@ -432,6 +436,47 @@ export const mockCaseMappings: Array<SavedObject<ConnectorMappings>> = [
     attributes: {
       mappings: mappings[ConnectorTypes.jira],
     },
+    references: [],
+  },
+];
+
+export const mockUserActions: Array<SavedObject<CaseUserActionAttributes>> = [
+  {
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+    id: 'mock-user-actions-1',
+    attributes: {
+      action_field: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
+      action: 'create',
+      action_at: '2021-02-03T17:41:03.771Z',
+      action_by: {
+        email: 'elastic@elastic.co',
+        full_name: 'Elastic',
+        username: 'elastic',
+      },
+      new_value:
+        '{"title":"A case","tags":["case"],"description":"Yeah!","connector":{"id":"connector-od","name":"My Connector","type":".servicenow-sir","fields":{"category":"Denial of Service","destIp":true,"malwareHash":true,"malwareUrl":true,"priority":"2","sourceIp":true,"subcategory":"45"}},"settings":{"syncAlerts":true}}',
+      old_value: null,
+    },
+    version: 'WzYsMV0=',
+    references: [],
+  },
+  {
+    type: CASE_USER_ACTION_SAVED_OBJECT,
+    id: 'mock-user-actions-2',
+    attributes: {
+      action_field: ['comment'],
+      action: 'create',
+      action_at: '2021-02-03T17:44:21.067Z',
+      action_by: {
+        email: 'elastic@elastic.co',
+        full_name: 'Elastic',
+        username: 'elastic',
+      },
+      new_value:
+        '{"type":"alert","alertId":"cec3da90fb37a44407145adf1593f3b0d5ad94c4654201f773d63b5d4706128e","index":".siem-signals-default-000008"}',
+      old_value: null,
+    },
+    version: 'WzYsMV0=',
     references: [],
   },
 ];

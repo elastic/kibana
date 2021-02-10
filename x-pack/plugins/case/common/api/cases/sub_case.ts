@@ -13,7 +13,6 @@ import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt } from './status';
 import { CaseStatusRt } from './status';
 
-// TODO: comments
 const SubCaseBasicRt = rt.type({
   status: CaseStatusRt,
 });

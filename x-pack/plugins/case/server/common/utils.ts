@@ -8,9 +8,36 @@
 import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
 import { CommentAttributes, CommentType } from '../../common/api';
 
+/**
+ * Default sort field for querying saved objects.
+ */
 export const defaultSortField = 'created_at';
 
-// TODO: write unit tests for these function
+/**
+ * Combines multiple filter expressions using the specified operator and parenthesis if multiple expressions exist.
+ * This will ignore empty string filters. If a single valid filter is found it will not wrap in parenthesis.
+ *
+ * @param filters an array of filters to combine using the specified operator
+ * @param operator AND or OR
+ */
+export const combineFilters = (filters: string[] | undefined, operator: 'OR' | 'AND'): string => {
+  const noEmptyStrings = filters?.filter((value) => value !== '');
+  const joinedExp = noEmptyStrings?.join(` ${operator} `);
+  // if undefined or an empty string
+  if (!joinedExp) {
+    return '';
+  } else if ((noEmptyStrings?.length ?? 0) > 1) {
+    // if there were multiple filters, wrap them in ()
+    return `(${joinedExp})`;
+  } else {
+    // return a single value not wrapped in ()
+    return joinedExp;
+  }
+};
+
+/**
+ * Counts the total alert IDs within a single comment.
+ */
 export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) => {
   let totalAlerts = 0;
   if (
@@ -52,6 +79,9 @@ export const groupTotalAlertsByID = ({
   }, new Map<string, number>());
 };
 
+/**
+ * Counts the total alert IDs for a single case or sub case ID.
+ */
 export const countAlertsForID = ({
   comments,
   id,

@@ -7,22 +7,20 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { createExternalCaseClient } from '../../../client';
 import {
   AlertService,
   CaseService,
   CaseConfigureService,
   ConnectorMappingsService,
+  CaseUserActionService,
 } from '../../../services';
-import { getActions, getActionTypes } from '../__mocks__/request_responses';
 import { authenticationMock } from '../__fixtures__';
 import type { CasesRequestHandlerContext } from '../../../types';
+import { createActionsClient } from './mock_actions_client';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
-  const actionsMock = actionsClientMock.create();
-  actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
-  actionsMock.listTypes.mockImplementation(() => Promise.resolve(getActionTypes()));
+  const actionsMock = createActionsClient();
 
   const log = loggingSystemMock.create().get('case');
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -33,8 +31,10 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   );
   const caseConfigureServicePlugin = new CaseConfigureService(log);
   const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
+  const caseUserActionsServicePlugin = new CaseUserActionService(log);
 
   const caseConfigureService = await caseConfigureServicePlugin.setup();
+  const userActionService = await caseUserActionsServicePlugin.setup();
   const alertsService = new AlertService();
 
   const context = ({
@@ -62,13 +62,10 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     caseService,
     caseConfigureService,
     connectorMappingsService,
-    userActionService: {
-      postUserActions: jest.fn(),
-      getUserActions: jest.fn(),
-    },
+    userActionService,
     alertsService,
     scopedClusterClient: esClient,
   });
 
-  return context;
+  return { context, services: { userActionService } };
 };

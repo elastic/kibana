@@ -46,6 +46,12 @@ export const createCaseServiceMock = (): CaseServiceMock => ({
   patchComments: jest.fn(),
   patchSubCase: jest.fn(),
   patchSubCases: jest.fn(),
+  findSubCaseStatusStats: jest.fn(),
+  getCommentsByAssociation: jest.fn(),
+  getCaseCommentStats: jest.fn(),
+  findSubCasesGroupByCase: jest.fn(),
+  findCaseStatusStats: jest.fn(),
+  findCasesGroupedByID: jest.fn(),
 });
 
 export const createConfigureServiceMock = (): CaseConfigureServiceMock => ({
@@ -68,4 +74,5 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => ({
 
 export const createAlertServiceMock = (): AlertServiceMock => ({
   updateAlertsStatus: jest.fn(),
+  getAlerts: jest.fn(),
 });

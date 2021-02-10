@@ -6,15 +6,17 @@
  */
 
 import { mockTelemetryActions } from '../../../__mocks__';
+
 import './__mocks__/overview_logic.mock';
-import { setMockValues } from './__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { setMockValues } from './__mocks__';
 import { RecentActivity, RecentActivityItem } from './recent_activity';
 
 const organization = { name: 'foo', defaultOrgName: 'bar' };

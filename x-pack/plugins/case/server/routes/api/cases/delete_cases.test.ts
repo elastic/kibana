@@ -33,14 +33,14 @@ describe('DELETE case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(204);
   });
   it(`returns an error when thrown from deleteCase service`, async () => {
@@ -60,9 +60,9 @@ describe('DELETE case', () => {
     // so it makes a call to bulkGet first
     mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
 
-    const theContext = await createRouteContext(mockSO);
+    const { context } = await createRouteContext(mockSO);
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(404);
   });
   it(`returns an error when thrown from getAllCaseComments service`, async () => {
@@ -83,9 +83,9 @@ describe('DELETE case', () => {
     // so it makes a call to bulkGet first
     mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
 
-    const theContext = await createRouteContext(mockSO);
+    const { context } = await createRouteContext(mockSO);
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
@@ -106,9 +106,9 @@ describe('DELETE case', () => {
     // so it makes a call to bulkGet first
     mockSO.bulkGet.mockImplementation(async () => ({ saved_objects: [] }));
 
-    const theContext = await createRouteContext(mockSO);
+    const { context } = await createRouteContext(mockSO);
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
   });
 });

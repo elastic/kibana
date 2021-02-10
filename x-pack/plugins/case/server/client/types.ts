@@ -18,6 +18,7 @@ import {
   CommentRequest,
   ConnectorMappingsAttributes,
   GetFieldsResponse,
+  CaseUserActionsResponse,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -26,6 +27,7 @@ import {
   AlertServiceContract,
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
+import { CaseClientGetAlertsResponse } from './alerts/types';
 
 // TODO: Remove unused types
 
@@ -35,6 +37,18 @@ export interface CaseClientCreate {
 
 export interface CaseClientUpdate {
   cases: CasesPatchRequest;
+}
+
+export interface CaseClientGet {
+  id: string;
+  includeComments?: boolean;
+  includeSubCaseComments?: boolean;
+}
+
+export interface CaseClientPush {
+  actionsClient: ActionsClient;
+  caseId: string;
+  connectorId: string;
 }
 
 export interface CaseClientAddComment {
@@ -53,12 +67,28 @@ export interface CaseClientUpdateAlertsStatus {
   indices: Set<string>;
 }
 
+export interface CaseClientGetAlerts {
+  ids: string[];
+  indices: Set<string>;
+}
+
+export interface CaseClientGetUserActions {
+  caseId: string;
+}
+
+export interface MappingsClient {
+  actionsClient: ActionsClient;
+  connectorId: string;
+  connectorType: string;
+}
+
 export interface CaseClientFactoryArguments {
   scopedClusterClient: ElasticsearchClient;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   connectorMappingsService: ConnectorMappingsServiceSetup;
   request: KibanaRequest;
+  // response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
@@ -76,8 +106,12 @@ export interface ConfigureFields {
 export interface CaseClient {
   addComment(args: CaseClientAddComment): Promise<CollectionWithSubCaseResponse>;
   create(theCase: CasePostRequest): Promise<CaseResponse>;
+  get(args: CaseClientGet): Promise<CaseResponse>;
+  getAlerts(args: CaseClientGetAlerts): Promise<CaseClientGetAlertsResponse>;
   getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
   getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
+  getUserActions(args: CaseClientGetUserActions): Promise<CaseUserActionsResponse>;
+  push(args: CaseClientPush): Promise<CaseResponse>;
   update(args: CasesPatchRequest): Promise<CasesResponse>;
   updateAlertsStatus(args: CaseClientUpdateAlertsStatus): Promise<void>;
 }
