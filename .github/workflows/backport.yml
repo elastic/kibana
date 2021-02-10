@@ -1,5 +1,5 @@
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - master
     types:
@@ -9,9 +9,14 @@ on:
 jobs:
   backport:
     name: Backport PR
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'auto-backport')
+    if: |
+      github.event.pull_request.merged == true
+      && contains(github.event.pull_request.labels.*.name, 'auto-backport')
+      && (
+        (github.event.action == 'labeled' && github.event.label.name == 'auto-backport')
+        || (github.event.action == 'closed')
+      )
     runs-on: ubuntu-latest
-
     steps:
       - name: 'Get backport config'
         run: |
