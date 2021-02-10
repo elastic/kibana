@@ -6,7 +6,9 @@
  */
 
 import React, { ReactElement } from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiAccordion, EuiIcon } from '@elastic/eui';
 
 import { SummarySectionAccordion, SummarySectionEmpty } from './summary_section';

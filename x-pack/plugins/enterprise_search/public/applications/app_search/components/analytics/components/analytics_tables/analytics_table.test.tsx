@@ -9,6 +9,7 @@ import { mountWithIntl, mockKibanaValues } from '../../../../../__mocks__';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
+
 import { EuiBasicTable, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
 import { AnalyticsTable } from './';
