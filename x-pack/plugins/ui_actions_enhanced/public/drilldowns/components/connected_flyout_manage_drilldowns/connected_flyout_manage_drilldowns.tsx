@@ -9,11 +9,10 @@ import React, { useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 import { intersection } from 'lodash';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
-import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
-import { insufficientLicenseLevel, invalidDrilldownType } from './i18n';
+import { txtDrilldowns, insufficientLicenseLevel, invalidDrilldownType } from './i18n';
 import {
   ActionFactory,
   BaseActionConfig,
@@ -25,6 +24,9 @@ import { useWelcomeMessage } from '../../hooks/use_welcome_message';
 import { useCompatibleActionFactoriesForCurrentContext } from '../../hooks/use_compatible_action_factories_for_current_context';
 import { useDrilldownsStateManager } from '../../hooks/use_drilldown_state_manager';
 import { ActionFactoryPlaceContext } from '../types';
+import { FlyoutFrame } from '../flyout_frame';
+import { DrilldownHelloBar } from '../drilldown_hello_bar';
+import { ListManageDrilldowns } from '../list_manage_drilldowns';
 
 interface ConnectedFlyoutManageDrilldownsProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
@@ -161,26 +163,32 @@ export function createFlyoutManageDrilldowns({
             .reduce((res, next) => res.concat(next), [])
         ).length > 1;
       return (
-        <FlyoutListManageDrilldowns
-          docsLink={docsLink}
-          showWelcomeMessage={shouldShowWelcomeMessage}
-          onWelcomeHideClick={onHideWelcomeMessage}
-          drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
-          onDelete={(ids) => {
-            setCurrentEditId(null);
-            deleteDrilldown(ids);
-          }}
-          onEdit={(id) => {
-            setCurrentEditId(id);
-            setRoute(Routes.Edit);
-          }}
-          onCreate={() => {
-            setCurrentEditId(null);
-            setRoute(Routes.Create);
-          }}
+        <FlyoutFrame
+          title={txtDrilldowns}
           onClose={props.onClose}
-          showTriggerColumn={showTriggerColumn}
-        />
+          banner={
+            shouldShowWelcomeMessage && (
+              <DrilldownHelloBar docsLink={docsLink} onHideClick={onHideWelcomeMessage} />
+            )
+          }
+        >
+          <ListManageDrilldowns
+            drilldowns={drilldowns.map(mapToDrilldownToDrilldownListItem)}
+            onEdit={(id) => {
+              setCurrentEditId(id);
+              setRoute(Routes.Edit);
+            }}
+            onCreate={() => {
+              setCurrentEditId(null);
+              setRoute(Routes.Create);
+            }}
+            onDelete={(ids) => {
+              setCurrentEditId(null);
+              deleteDrilldown(ids);
+            }}
+            showTriggerColumn={showTriggerColumn}
+          />
+        </FlyoutFrame>
       );
     }
 

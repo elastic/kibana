@@ -7,6 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const txtDrilldowns = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.components.drilldownsFlyout.drilldowns',
+  {
+    defaultMessage: 'Drilldowns',
+    description: 'Drilldowns flyout title.',
+  }
+);
+
 export const insufficientLicenseLevel = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.insufficientLicenseLevelError',
   {
