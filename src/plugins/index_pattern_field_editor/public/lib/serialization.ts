@@ -19,7 +19,7 @@ export const deserializeField = (
 
   return {
     name: field.name,
-    type: field?.esTypes ? field.esTypes[0] : undefined,
+    type: field?.esTypes ? field.esTypes[0] : 'keyword',
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,

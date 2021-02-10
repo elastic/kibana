@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +17,7 @@ import {
   RuntimeType,
 } from '../shared_imports';
 import { Field, PluginStart, InternalFieldType } from '../types';
-import { deserializeField } from '../lib';
+import { deserializeField, getRuntimeFieldValidator } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 
@@ -28,6 +28,8 @@ export interface FieldEditorContext {
    * Default: "runtime"
    */
   fieldTypeToProcess: InternalFieldType;
+  /** The search service from the data plugin */
+  search: DataPublicPluginStart['search'];
 }
 
 export interface Props {
@@ -74,7 +76,7 @@ export const FieldEditorFlyoutContentContainer = ({
   onCancel,
   docLinks,
   indexPatternService,
-  ctx: { indexPattern, fieldTypeToProcess },
+  ctx: { indexPattern, fieldTypeToProcess, search },
   notifications,
   fieldFormatEditors,
   fieldFormats,
@@ -82,9 +84,12 @@ export const FieldEditorFlyoutContentContainer = ({
 }: Props) => {
   const fieldToEdit = deserializeField(indexPattern, field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const saveField = useCallback(
     async (updatedField: Field) => {
+      setIsSaving(true);
+
       const { script } = updatedField;
 
       if (fieldTypeToProcess === 'runtime') {
@@ -122,6 +127,7 @@ export const FieldEditorFlyoutContentContainer = ({
             values: { fieldName: updatedField.name },
           });
           notifications.toasts.addSuccess(message);
+          setIsSaving(false);
           onSave(editedField);
         });
       } catch (e) {
@@ -129,10 +135,16 @@ export const FieldEditorFlyoutContentContainer = ({
           defaultMessage: 'Failed to save field changes',
         });
         notifications.toasts.addError(e, { title });
+        setIsSaving(false);
       }
     },
     [onSave, indexPattern, indexPatternService, notifications, fieldTypeToProcess, field?.name]
   );
+
+  const validateRuntimeField = useMemo(() => getRuntimeFieldValidator(indexPattern.title, search), [
+    search,
+    indexPattern,
+  ]);
 
   const loadEditor = useCallback(async () => {
     const { FieldEditor } = await import('./field_editor');
@@ -157,6 +169,8 @@ export const FieldEditorFlyoutContentContainer = ({
       uiSettings={uiSettings}
       indexPattern={indexPattern}
       fieldTypeToProcess={fieldTypeToProcess}
+      runtimeFieldValidator={validateRuntimeField}
+      isSavingField={isSaving}
     />
   );
 };
