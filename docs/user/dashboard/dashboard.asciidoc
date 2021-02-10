@@ -18,8 +18,6 @@ image:images/Dashboard_example.png[Example dashboard]
 
 Dashboards provide you with the space where you add panels of your data.
 
-[[tsvb]]
-
 [float]
 [[dashboard-minimum-requirements]]
 === Minimum requirements
@@ -73,6 +71,8 @@ Choose the type of panel you want to create, then save the panel to the dashboar
 .. Click *Save and return*.
 
 TIP: To access your saved panels, open the main menu, then click *Visualize*.
+
+[[tsvb]]
 
 [float]
 [[arrange-panels]]
