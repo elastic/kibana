@@ -248,6 +248,10 @@ export class Explorer extends React.Component {
 
     const noJobsFound = selectedJobs === null || selectedJobs.length === 0;
     const hasResults = overallSwimlaneData.points && overallSwimlaneData.points.length > 0;
+    const hasResultsWithAnomalies =
+      hasResults &&
+      overallSwimlaneData.points.some((v) => v.value > 0) &&
+      tableData.anomalies?.length > 0;
 
     if (noJobsFound && !loading) {
       return (
@@ -257,10 +261,13 @@ export class Explorer extends React.Component {
       );
     }
 
-    if (noJobsFound && hasResults === false && !loading) {
+    if (hasResultsWithAnomalies === false && !loading) {
       return (
         <ExplorerPage jobSelectorProps={jobSelectorProps}>
-          <ExplorerNoResultsFound />
+          <ExplorerNoResultsFound
+            hasResults={hasResults}
+            hasResultsWithAnomalies={hasResultsWithAnomalies}
+          />
         </ExplorerPage>
       );
     }

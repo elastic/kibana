@@ -14,26 +14,38 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoResultsFound = () => (
-  <EuiEmptyPrompt
-    iconType="iInCircle"
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.ml.explorer.noResultsFoundLabel"
-          defaultMessage="No results found"
-        />
-      </h2>
-    }
-    body={
-      <React.Fragment>
-        <p>
-          <FormattedMessage
-            id="xpack.ml.explorer.tryWideningTimeSelectionLabel"
-            defaultMessage="Try widening the time selection or moving further back in time"
-          />
-        </p>
-      </React.Fragment>
-    }
-  />
-);
+export const ExplorerNoResultsFound = ({ hasResults, hasResultsWithAnomalies }) => {
+  const resultsHaveNoAnomalies = hasResults === true && hasResultsWithAnomalies === false;
+  const noResults = hasResults === false && hasResultsWithAnomalies === false;
+  return (
+    <EuiEmptyPrompt
+      iconType="iInCircle"
+      title={
+        <h2>
+          {resultsHaveNoAnomalies && (
+            <FormattedMessage
+              id="xpack.ml.explorer.noAnomaliesFoundLabel"
+              defaultMessage="No anomalies found"
+            />
+          )}
+          {noResults && (
+            <FormattedMessage
+              id="xpack.ml.explorer.noResultsFoundLabel"
+              defaultMessage="No results found"
+            />
+          )}
+        </h2>
+      }
+      body={
+        <React.Fragment>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.explorer.tryWideningTimeSelectionLabel"
+              defaultMessage="Try widening the time selection or moving further back in time"
+            />
+          </p>
+        </React.Fragment>
+      }
+    />
+  );
+};
