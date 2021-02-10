@@ -10,12 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
+
+type Node = MetricAnomalyParams['nodeType'];
 
 interface WhenExpressionProps {
-  value: InventoryItemType;
-  options: { [key: string]: { text: string; value: InventoryItemType } };
-  onChange: (value: InventoryItemType) => void;
+  value: Node;
+  options: { [key: string]: { text: string; value: Node } };
+  onChange: (value: Node) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -76,7 +78,7 @@ export const NodeTypeExpression = ({
           value={value}
           fullWidth
           onChange={(e) => {
-            onChange(e.target.value as InventoryItemType);
+            onChange(e.target.value as Node);
             setAggTypePopoverOpen(false);
           }}
           options={Object.values(options).map((o) => o)}
