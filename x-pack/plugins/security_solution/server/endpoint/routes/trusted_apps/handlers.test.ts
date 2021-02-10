@@ -25,6 +25,7 @@ import { createConditionEntry, createEntryMatch } from './mapping';
 import {
   getTrustedAppsCreateRouteHandler,
   getTrustedAppsDeleteRouteHandler,
+  getTrustedAppsGetOneHandler,
   getTrustedAppsListRouteHandler,
   getTrustedAppsSummaryRouteHandler,
 } from './handlers';
@@ -304,6 +305,62 @@ describe('handlers', () => {
       );
 
       assertResponse(mockResponse, 'internalError', error);
+      expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('getTrustedAppsGetOneHandler', () => {
+    let getOneHandler: ReturnType<typeof getTrustedAppsGetOneHandler>;
+
+    beforeEach(() => {
+      getOneHandler = getTrustedAppsGetOneHandler(appContextMock);
+    });
+
+    it('should return single trusted app', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(EXCEPTION_LIST_ITEM);
+
+      await getOneHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'ok', {
+        data: TRUSTED_APP,
+      });
+    });
+
+    // FIXME:PT unskip once pending PR is merged
+    it.skip('should return 404 if trusted app does not exist', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      exceptionsListClient.getExceptionListItem.mockResolvedValue(null);
+
+      await getOneHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        mockResponse
+      );
+
+      assertResponse(mockResponse, 'notFound', expect.any(Error));
+    });
+
+    // FIXME:PT unskip once pending PR is merged
+    it.skip('should log errors if any are encountered', async () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+      const error = new Error('I am an error');
+      exceptionsListClient.getExceptionListItem.mockImplementation(async () => {
+        throw error;
+      });
+
+      await getOneHandler(
+        createHandlerContextMock(),
+        httpServerMock.createKibanaRequest({ params: { page: 1, per_page: 20 } }),
+        mockResponse
+      );
+
       expect(appContextMock.logFactory.get('trusted_apps').error).toHaveBeenCalledWith(error);
     });
   });
