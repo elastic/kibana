@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-export { ActiveBadge } from './active_badge';
 export { LearnMoreLink } from './learn_more_link';
 export { OptionalLabel } from './optional_label';
 export { PolicyJsonFlyout } from './policy_json_flyout';
 export { DescribedFormRow, ToggleFieldWithDescribedFormRow } from './described_form_row';
 export { FieldLoadingError } from './field_loading_error';
-export { ActiveHighlight } from './active_highlight';
 export { Timeline } from './timeline';
 export { FormErrorsCallout } from './form_errors_callout';
-
+export { PhaseFooter } from './phase_footer';
 export * from './phases';
