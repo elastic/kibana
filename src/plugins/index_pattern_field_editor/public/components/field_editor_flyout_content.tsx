@@ -25,8 +25,8 @@ import { DocLinksStart, CoreStart } from 'src/core/public';
 
 import { Field, InternalFieldType, PluginStart, EsRuntimeField } from '../types';
 import { getLinks, RuntimeFieldPainlessError } from '../lib';
-import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 import type { IndexPattern, DataPublicPluginStart } from '../shared_imports';
+import type { Props as FieldEditorProps, FieldEditorFormState } from './field_editor/field_editor';
 
 const geti18nTexts = (field?: Field) => {
   return {
