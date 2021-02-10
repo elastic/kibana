@@ -134,6 +134,11 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     },
   });
 
+  const handleMlLinkClick = useCallback(() => {
+    if (!viewAnomalyInMachineLearningLink) return;
+    application.navigateToUrl(viewAnomalyInMachineLearningLink);
+  }, [viewAnomalyInMachineLearningLink, application]);
+
   const menuItems = useMemo(() => {
     if (!viewInStreamLinkProps.onClick || !viewAnomalyInMachineLearningLink) {
       return undefined;
@@ -153,7 +158,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       },
       {
         label: VIEW_ANOMALY_IN_ML_LABEL,
-        onClick: () => application.navigateToUrl(viewAnomalyInMachineLearningLink),
+        onClick: handleMlLinkClick,
         href: viewAnomalyInMachineLearningLink,
       },
     ];
@@ -162,7 +167,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     openLogEntryFlyout,
     viewInStreamLinkProps,
     viewAnomalyInMachineLearningLink,
-    application,
+    handleMlLinkClick,
   ]);
 
   return (

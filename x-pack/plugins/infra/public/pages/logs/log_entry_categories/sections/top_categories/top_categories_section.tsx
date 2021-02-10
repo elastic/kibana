@@ -52,7 +52,7 @@ export const TopCategoriesSection: React.FunctionComponent<{
   changeSortOptions,
 }) => {
   const {
-    services: { ml, http, application },
+    services: { ml, http },
   } = useKibanaContextForPlugin();
 
   const analyzeInMlLink = useMlHref(ml, http.basePath.get(), {

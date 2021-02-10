@@ -40,9 +40,8 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
     },
   });
 
-  const mlLinkOnClick = useCallback(() => {
+  const handleClick = useCallback(() => {
     if (!viewAnomalyInMachineLearningLink) return;
-
     application.navigateToUrl(viewAnomalyInMachineLearningLink);
   }, [application, viewAnomalyInMachineLearningLink]);
 
@@ -53,7 +52,7 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
         iconType="machineLearningApp"
         data-test-subj="analyzeCategoryDatasetInMlButton"
         href={viewAnomalyInMachineLearningLink}
-        onClick={mlLinkOnClick}
+        onClick={handleClick}
       />
     </EuiToolTip>
   );
