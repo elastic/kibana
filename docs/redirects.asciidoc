@@ -280,3 +280,8 @@ This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
 [role="exclude",id="explore-dashboard-data"]
 This content has moved. Refer to <<dashboard, **Dashboard**>>.
+
+[role="exclude",id="TSVB"]
+=== TSVB
+
+This content has moved. Refer to <<create-panels-with-tsvb,**TSVB**>>.
