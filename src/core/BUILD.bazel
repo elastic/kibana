@@ -100,14 +100,38 @@ ts_project(
   incremental = True,
   tsconfig = "tsconfig",
   srcs = SRCS,
-  deps = NPM_DEPS
+  deps = NPM_DEPS,
+  ts_build_info_file = ".tsbuildinfo"
 )
+
+#copy_to_bin(
+#  name = "copy_tsconfig",
+#  srcs = glob(
+#    [
+#     "public/**/*",
+#     "server/**/*",
+#     "test_helpers/**/*",
+#     "utils/**/*",
+#     "types/**/*",
+#     "index.ts",
+#     "tsconfig.json"
+#    ],
+#  )
+#)
 
 copy_to_bin(
   name = "copy_tsconfig",
-  srcs = [
-      "tsconfig.json"
-  ]
+  srcs = glob(
+    [
+     "public/**/*",
+     "server/**/*",
+     "test_helpers/**/*",
+     "utils/**/*",
+     "types/**/*",
+     "index.ts",
+     "tsconfig.json"
+    ],
+  )
 )
 
 filegroup(
