@@ -127,7 +127,7 @@ describe('normalizeBoostValues', () => {
     ],
   };
 
-  it('renders', () => {
+  it('converts all value types to string for consistency', () => {
     expect(normalizeBoostValues(boosts)).toEqual({
       bar: [{ factor: 9.5, type: 'proximity' }],
       foo: [
