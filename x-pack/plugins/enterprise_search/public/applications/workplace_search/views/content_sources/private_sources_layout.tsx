@@ -31,10 +31,13 @@ export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
             className="enterpriseSearchLayout__readOnlyMode"
             color="warning"
             iconType="lock"
-            title={i18n.translate('xpack.enterpriseSearch.readOnlyMode.warning', {
-              defaultMessage:
-                'Enterprise Search is in read-only mode. You will be unable to make changes such as creating, editing, or deleting.',
-            })}
+            title={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.privateDashboard.readOnlyMode.warning',
+              {
+                defaultMessage:
+                  'Workplace Search is currently available for search only, due to regular maintenance. Contact your system administrator for more information.',
+              }
+            )}
           />
         )}
         {children}
