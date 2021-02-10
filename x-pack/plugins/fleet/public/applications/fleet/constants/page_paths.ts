@@ -77,14 +77,10 @@ export const pagePathGetters: {
   integrations: () => '/integrations',
   integrations_all: () => '/integrations',
   integrations_installed: () => '/integrations/installed',
-  integration_details_overview: ({ pkgkey }) =>
-    `/integrations/detail/${pkgkey}/overview`,
-  integration_details_policies: ({ pkgkey }) =>
-    `/integrations/detail/${pkgkey}/policies`,
-  integration_details_settings: ({ pkgkey }) =>
-    `/integrations/detail/${pkgkey}/settings`,
-  integration_details_custom: ({ pkgkey }) =>
-    `/integrations/detail/${pkgkey}/custom`,
+  integration_details_overview: ({ pkgkey }) => `/integrations/detail/${pkgkey}/overview`,
+  integration_details_policies: ({ pkgkey }) => `/integrations/detail/${pkgkey}/policies`,
+  integration_details_settings: ({ pkgkey }) => `/integrations/detail/${pkgkey}/settings`,
+  integration_details_custom: ({ pkgkey }) => `/integrations/detail/${pkgkey}/custom`,
   integration_policy_edit: ({ packagePolicyId }) =>
     `/integrations/edit-integration/${packagePolicyId}`,
   policies: () => '/policies',
