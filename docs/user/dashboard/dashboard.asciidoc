@@ -12,13 +12,13 @@ then compare the panels side-by-side to identify the patterns and connections in
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-[[tsvb]]
-
 [float]
 [[create-dashboards]]
 == Create dashboards
 
 Dashboards provide you with the space where you add panels of your data.
+
+[[tsvb]]
 
 [float]
 [[dashboard-minimum-requirements]]
