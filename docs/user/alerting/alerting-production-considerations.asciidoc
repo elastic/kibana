@@ -6,7 +6,6 @@
 
 * *Persistence*: all task state and scheduling is stored in {es}, so if {kib} is restarted, alerts and actions will pick up where they left off.  Task definitions for alerts and actions are stored in the index specified by `xpack.task_manager.index` (defaults to `.kibana_task_manager`).  It is important to have at least 1 replica of this index for production deployments, since if you lose this index all scheduled alerts and actions are also lost.
 * *Scaling*: multiple {kib} instances can read from and update the same task queue in {es}, allowing the alerting and action load to be distributed across instances. In cases where a {kib} instance no longer has capacity to run alert checks or actions, capacity can be increased by adding additional {kib} instances.
-* *Synchronization*: {es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, you should synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].
 
 [float]
 === Running background alert checks and actions
@@ -29,3 +28,8 @@ Because by default tasks are polled at 3 second intervals and only 10 tasks can 
 For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
 
 ==============================================
+
+[float]
+=== Deployment considerations
+
+{es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, you should synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].
