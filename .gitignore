@@ -61,6 +61,9 @@ npm-debug.log*
 .ci/bash_standard_lib.sh
 .gradle
 
+# apm plugin
+/x-pack/plugins/apm/tsconfig.json
+apm.tsconfig.json
 ## @cypress/snapshot from apm plugin
 snapshots.js
 
