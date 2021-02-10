@@ -18,7 +18,7 @@ import {
 } from './lists';
 import { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
-import { ENDPOINT_LIST_ID } from '../../../../../lists/common';
+import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -542,54 +542,52 @@ describe('artifacts lists', () => {
 
   describe('getEndpointExceptionList', () => {
     test('it should build proper kuery', async () => {
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce({
-        data: [getFoundExceptionListItemSchemaMock()],
-        page: 1,
-        per_page: 20,
-        total: 0,
-      });
+      mockExceptionClient.findExceptionListItem = jest
+        .fn()
+        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
       const resp = await getEndpointExceptionList(mockExceptionClient, 'v1', 'windows');
 
       expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
-      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith(
-        mockExceptionClient,
-        'v1',
-        'exception-list-agnostic.attributes.os_types:"windows"',
-        ENDPOINT_LIST_ID
-      );
+      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
+        listId: ENDPOINT_LIST_ID,
+        namespaceType: 'agnostic',
+        filter: 'exception-list-agnostic.attributes.os_types:"windows"',
+        perPage: 100,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      });
     });
   });
 
   describe('getEndpointTrustedAppsList', () => {
     test('it should build proper kuery without policy', async () => {
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce({
-        data: [getFoundExceptionListItemSchemaMock()],
-        page: 1,
-        per_page: 20,
-        total: 0,
-      });
+      mockExceptionClient.findExceptionListItem = jest
+        .fn()
+        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
       const resp = await getEndpointTrustedAppsList(mockExceptionClient, 'v1', 'macos');
 
       expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
-      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith(
-        mockExceptionClient,
-        'v1',
-        'exception-list-agnostic.attributes.os_types:"macos" and (exception-list-agnostic.attributes.tags:"policy:all")',
-        ENDPOINT_LIST_ID
-      );
+      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
+        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        namespaceType: 'agnostic',
+        filter:
+          'exception-list-agnostic.attributes.os_types:"macos" and (exception-list-agnostic.attributes.tags:"policy:all")',
+        perPage: 100,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      });
     });
 
     test('it should build proper kuery with policy', async () => {
-      mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce({
-        data: [getFoundExceptionListItemSchemaMock()],
-        page: 1,
-        per_page: 20,
-        total: 0,
-      });
+      mockExceptionClient.findExceptionListItem = jest
+        .fn()
+        .mockReturnValueOnce(getFoundExceptionListItemSchemaMock());
 
       const resp = await getEndpointTrustedAppsList(
         mockExceptionClient,
@@ -600,14 +598,18 @@ describe('artifacts lists', () => {
 
       expect(resp).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
-      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith(
-        mockExceptionClient,
-        'v1',
-        'exception-list-agnostic.attributes.os_types:"macos" and ' +
+      expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
+        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        namespaceType: 'agnostic',
+        filter:
+          'exception-list-agnostic.attributes.os_types:"macos" and ' +
           '(exception-list-agnostic.attributes.tags:"policy:all" or ' +
           'exception-list-agnostic.attributes.tags:"policy:c6d16e42-c32d-4dce-8a88-113cfe276ad1")',
-        ENDPOINT_LIST_ID
-      );
+        perPage: 100,
+        page: 1,
+        sortField: 'created_at',
+        sortOrder: 'desc',
+      });
     });
   });
 });
