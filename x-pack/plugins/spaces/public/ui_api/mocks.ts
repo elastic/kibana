@@ -15,12 +15,14 @@ function createComponentsMock(): jest.Mocked<SpacesApiUiComponent> {
     SpacesContext: jest.fn(),
     ShareToSpaceFlyout: jest.fn(),
     SpaceList: jest.fn(),
+    LegacyUrlConflict: jest.fn(),
   };
 }
 
 function createUiApiMock(): jest.Mocked<SpacesApiUi> {
   return {
     components: createComponentsMock(),
+    redirectLegacyUrl: jest.fn(),
   };
 }
 

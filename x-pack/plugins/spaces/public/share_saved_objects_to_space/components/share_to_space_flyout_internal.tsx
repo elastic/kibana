@@ -35,10 +35,8 @@ import { ShareToSpaceForm } from './share_to_space_form';
 import { ShareOptions } from '../types';
 import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
 import { useSpaces } from '../../spaces_context';
+import { DEFAULT_OBJECT_NOUN } from './constants';
 
-const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.shareToSpace.objectNoun', {
-  defaultMessage: 'object',
-});
 const ALL_SPACES_TARGET = i18n.translate('xpack.spaces.shareToSpace.allSpacesTarget', {
   defaultMessage: 'all',
 });

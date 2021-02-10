@@ -8,7 +8,10 @@
 import { StartServicesAccessor } from 'src/core/public';
 import type { SpacesApiUiComponent } from '../../../../../src/plugins/spaces_oss/public';
 import { PluginsStart } from '../plugin';
-import { getShareToSpaceFlyoutComponent } from '../share_saved_objects_to_space';
+import {
+  getShareToSpaceFlyoutComponent,
+  getLegacyUrlConflict,
+} from '../share_saved_objects_to_space';
 import { getSpacesContextWrapper } from '../spaces_context';
 import { SpacesManager } from '../spaces_manager';
 import { getSpaceListComponent } from '../space_list';
@@ -26,5 +29,6 @@ export const getComponents = ({
     SpacesContext: getSpacesContextWrapper({ spacesManager, getStartServices }),
     ShareToSpaceFlyout: getShareToSpaceFlyoutComponent(),
     SpaceList: getSpaceListComponent(),
+    LegacyUrlConflict: getLegacyUrlConflict({ getStartServices }),
   };
 };

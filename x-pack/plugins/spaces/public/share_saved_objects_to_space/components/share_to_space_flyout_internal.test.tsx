@@ -7,7 +7,7 @@
 
 import React from 'react';
 import Boom from '@hapi/boom';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick, findTestSubject } from '@kbn/test/jest';
 import { ShareToSpaceForm } from './share_to_space_form';
 import {
   EuiCallOut,
@@ -18,7 +18,6 @@ import {
   EuiSelectable,
 } from '@elastic/eui';
 import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';
 import { spacesManagerMock } from '../../spaces_manager/mocks';

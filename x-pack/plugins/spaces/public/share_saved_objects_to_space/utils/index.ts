@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';
-export { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
-export { getLegacyUrlConflict } from './legacy_url_conflict';
+export { createRedirectLegacyUrl } from './redirect_legacy_url';

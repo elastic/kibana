@@ -22,6 +22,7 @@ type SpacesApiUiMock = Omit<jest.Mocked<SpacesApiUi>, 'components'> & {
 const createApiUiMock = () => {
   const mock: SpacesApiUiMock = {
     components: createApiUiComponentsMock(),
+    redirectLegacyUrl: jest.fn(),
   };
 
   return mock;
@@ -34,6 +35,7 @@ const createApiUiComponentsMock = () => {
     SpacesContext: jest.fn(),
     ShareToSpaceFlyout: jest.fn(),
     SpaceList: jest.fn(),
+    LegacyUrlConflict: jest.fn(),
   };
 
   return mock;

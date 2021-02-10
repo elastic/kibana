@@ -10,6 +10,7 @@ import type { SpacesApiUi } from '../../../../../src/plugins/spaces_oss/public';
 import { PluginsStart } from '../plugin';
 import { SpacesManager } from '../spaces_manager';
 import { getComponents } from './components';
+import { createRedirectLegacyUrl } from '../share_saved_objects_to_space';
 
 interface GetUiApiOptions {
   spacesManager: SpacesManager;
@@ -21,5 +22,6 @@ export const getUiApi = ({ spacesManager, getStartServices }: GetUiApiOptions): 
 
   return {
     components,
+    redirectLegacyUrl: createRedirectLegacyUrl(getStartServices),
   };
 };

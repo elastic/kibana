@@ -30,6 +30,25 @@ export interface SpacesApiUi {
    * {@link SpacesApiUiComponent | React components} to support the spaces feature.
    */
   components: SpacesApiUiComponent;
+  /**
+   * Redirect the user from a legacy URL to a new URL. This needs to be used if a call to `SavedObjectsClient.resolve()` results in an
+   * `"aliasMatch"` outcome, which indicates that the user has loaded the page using a legacy URL. Calling this function will trigger a
+   * client-side redirect to the new URL, and it will display a toast to the user.
+   *
+   * Consumers need to determine the local path for the new URL on their own, based on the object ID that was used to call
+   * `SavedObjectsClient.resolve()` (old ID) and the object ID in the result (new ID). For example...
+   *
+   * The old object ID is `workpad-123` and the new object ID is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.
+   *
+   * Full legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`
+   *
+   * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
+   *
+   * The protocol, hostname, port, base path, and app path are automatically included.
+   *
+   * @param path The path to use for the new URL, optionally including `search` and/or `hash` URL components.
+   */
+  redirectLegacyUrl: (path: string) => Promise<void>;
 }
 
 /**
@@ -39,17 +58,25 @@ export interface SpacesApiUi {
  */
 export interface SpacesApiUiComponent {
   /**
-   * Provides a context that is required to render all Spaces components.
+   * Provides a context that is required to render some Spaces components.
    */
   SpacesContext: FunctionComponent<SpacesContextProps>;
   /**
    * Displays the tags for given saved object.
+   *
+   * Note: must be rendered inside of a SpacesContext.
    */
   ShareToSpaceFlyout: FunctionComponent<ShareToSpaceFlyoutProps>;
   /**
    * Displays a corresponding list of spaces for a given list of saved object namespaces.
+   *
+   * Note: must be rendered inside of a SpacesContext.
    */
   SpaceList: FunctionComponent<SpaceListProps>;
+  /**
+   * Displays a warning callout when a user encounters a legacy URL alias conflict.
+   */
+  LegacyUrlConflict: FunctionComponent<LegacyUrlConflictProps>;
 }
 
 /**
@@ -176,4 +203,45 @@ export interface SpaceListProps {
    * Default value is false.
    */
   enableSpaceAgnosticBehavior?: boolean;
+}
+
+/**
+ * @public
+ *
+ * Displays a callout that. This needs to be used if a call to `SavedObjectsClient.resolve()` results in an `"conflict"` outcome, which
+ * indicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a
+ * different object (B).
+ *
+ * In this case, `SavedObjectsClient.resolve()` has returned object A. This component displays a callout to the user explaining that there
+ * is a conflict, and it includes a button that will redirect the user to object B when clicked.
+ *
+ * Consumers need to determine the local path for the new URL on their own, based on the object ID that was used to call
+ * `SavedObjectsClient.resolve()` (A) and the `aliasTargetId` value in the response (B). For example...
+ *
+ * A is `workpad-123` and B is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.
+ *
+ * Full legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`
+ *
+ * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
+ */
+export interface LegacyUrlConflictProps {
+  /**
+   * The string that is used to describe the object in the callout, e.g., _There is a legacy URL for this page that points to a different
+   * **object**_.
+   *
+   * Default value is 'object'.
+   */
+  objectNoun?: string;
+  /**
+   * The ID of the object that is currently shown on the page.
+   */
+  currentObjectId: string;
+  /**
+   * The ID of the other object that the legacy URL alias points to.
+   */
+  otherObjectId: string;
+  /**
+   * The path to use for the new URL, optionally including `search` and/or `hash` URL components.
+   */
+  otherObjectPath: string;
 }

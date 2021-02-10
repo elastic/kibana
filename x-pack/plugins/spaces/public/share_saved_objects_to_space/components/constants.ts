@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { ShareToSpaceFlyoutInternal } from './share_to_space_flyout_internal';
-export { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
-export { getLegacyUrlConflict } from './legacy_url_conflict';
+import { i18n } from '@kbn/i18n';
+
+export const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.shareToSpace.objectNoun', {
+  defaultMessage: 'object',
+});

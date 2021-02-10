@@ -23,6 +23,7 @@ export {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
   SpaceListProps,
+  LegacyUrlConflictProps,
 } from './api';
 
 export const plugin = () => new SpacesOssPlugin();
