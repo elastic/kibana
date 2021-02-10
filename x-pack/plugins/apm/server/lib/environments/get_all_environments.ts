@@ -14,6 +14,10 @@ import {
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
+/**
+ * This is used for getting *all* environments, and does not filter by range.
+ * It's used in places where we get the list of all possible environments.
+ */
 export async function getAllEnvironments({
   serviceName,
   setup,

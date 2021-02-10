@@ -9,14 +9,12 @@ import * as t from 'io-ts';
 import { omit } from 'lodash';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { LocalUIFilterName } from '../../common/ui_filter';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import {
   Setup,
   setupRequest,
   SetupTimeRange,
 } from '../lib/helpers/setup_request';
-import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { getLocalUIFilters } from '../lib/ui_filters/local_ui_filters';
 import { localUIFilterNames } from '../lib/ui_filters/local_ui_filters/config';
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
@@ -24,32 +22,6 @@ import { Projection } from '../projections/typings';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
 import { APMRequestHandlerContext } from './typings';
-
-export const uiFiltersEnvironmentsRoute = createRoute({
-  endpoint: 'GET /api/apm/ui_filters/environments',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-      }),
-      rangeRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const { serviceName } = context.params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
-      setup
-    );
-
-    return getEnvironments({
-      setup,
-      serviceName,
-      searchAggregatedTransactions,
-    });
-  },
-});
 
 const filterNamesRt = t.type({
   filterNames: jsonRt.pipe(

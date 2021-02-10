@@ -11,6 +11,7 @@ import {
   apmIndexPatternTitleRoute,
 } from './index_pattern';
 import { createApi } from './create_api';
+import { environmentsRoute } from './environments';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -65,10 +66,7 @@ import {
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
 } from './transactions';
-import {
-  rumOverviewLocalFiltersRoute,
-  uiFiltersEnvironmentsRoute,
-} from './ui_filters';
+import { rumOverviewLocalFiltersRoute } from './ui_filters';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -111,6 +109,9 @@ const createApmApi = () => {
     .add(staticIndexPatternRoute)
     .add(dynamicIndexPatternRoute)
     .add(apmIndexPatternTitleRoute)
+
+    // Environments
+    .add(environmentsRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -167,9 +168,6 @@ const createApmApi = () => {
     .add(transactionGroupsOverviewRoute)
     .add(transactionLatencyChatsRoute)
     .add(transactionThroughputChatsRoute)
-
-    // UI filters
-    .add(uiFiltersEnvironmentsRoute)
 
     // Service map
     .add(serviceMapRoute)
