@@ -165,12 +165,6 @@ export const searchAfterAndBulkCreate = async ({
             }),
           ]);
 
-          // TODO this comment was written when this code lived in a different
-          // TODO location. We should verify whether this is still true
-          // we are guaranteed to have searchResult hits at this point
-          // because we check before if the totalHits or
-          // searchResult.hits.hits.length is 0
-          // call this function setSortIdOrExit()
           const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
             sortId = lastSortId[0];
