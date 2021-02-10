@@ -665,5 +665,74 @@ describe('LayerPanel', () => {
         })
       );
     });
+
+    it('should call onDrop and update visualization when replacing between compatible groups', () => {
+      const mockVis = {
+        ...mockVisualization,
+        removeDimension: jest.fn(),
+        setDimension: jest.fn(),
+      };
+      mockVis.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [{ columnId: 'c' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup2',
+          },
+        ],
+      });
+
+      const draggingOperation = {
+        layerId: 'first',
+        columnId: 'a',
+        groupId: 'a',
+        id: 'a',
+        humanData: { label: 'Label' },
+      };
+
+      mockDatasource.onDrop.mockReturnValue({ deleted: 'a' });
+      const updateVisualization = jest.fn();
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
+          <LayerPanel
+            {...getDefaultProps()}
+            updateVisualization={updateVisualization}
+            activeVisualization={mockVis}
+          />
+        </ChildDragDropProvider>
+      );
+      component.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dropType: 'replace_compatible',
+          droppedItem: draggingOperation,
+        })
+      );
+      expect(mockVis.setDimension).toHaveBeenCalledWith({
+        columnId: 'c',
+        groupId: 'b',
+        layerId: 'first',
+        prevState: 'state',
+      });
+      expect(mockVis.removeDimension).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columnId: 'a',
+          layerId: 'first',
+        })
+      );
+      expect(updateVisualization).toHaveBeenCalled();
+    });
   });
 });
