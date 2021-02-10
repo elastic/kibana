@@ -74,7 +74,6 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
   const inventoryItems = Object.keys(first(results)!);
   for (const item of inventoryItems) {
-    const prevState = alertInstance.getState();
     // AND logic; all criteria must be across the threshold
     const shouldAlertFire = results.every((result) =>
       // Grab the result of the most recent bucket
