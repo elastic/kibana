@@ -51,16 +51,8 @@ export const getDataFromSourceHits = (
         {
           category: fieldCategory,
           field,
-          values: Array.isArray(item)
-            ? item.map((value) => {
-                if (isObject(value)) {
-                  return JSON.stringify(value);
-                }
-
-                return value;
-              })
-            : [item],
-          originalValue: item,
+          values: toStringArray(item),
+          originalValue: toStringArray(item),
         } as TimelineEventsDetailsItem,
       ];
     } else if (isObject(item)) {
