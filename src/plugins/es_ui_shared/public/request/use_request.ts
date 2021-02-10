@@ -65,49 +65,53 @@ export const useRequest = <D = any, E = Error>(
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [path, method, queryStringified, bodyStringified]);
 
-  const resendRequest = useCallback(async () => {
-    // If we're on an interval, this allows us to reset it if the user has manually requested the
-    // data, to avoid doubled-up requests.
-    clearPollInterval();
+  const resendRequest = useCallback(
+    async (asSystemRequest?: boolean) => {
+      // If we're on an interval, this allows us to reset it if the user has manually requested the
+      // data, to avoid doubled-up requests.
+      clearPollInterval();
 
-    const requestId = ++requestCountRef.current;
+      const requestId = ++requestCountRef.current;
 
-    // We don't clear error or data, so it's up to the consumer to decide whether to display the
-    // "old" error/data or loading state when a new request is in-flight.
-    setIsLoading(true);
+      // We don't clear error or data, so it's up to the consumer to decide whether to display the
+      // "old" error/data or loading state when a new request is in-flight.
+      setIsLoading(true);
 
-    const response = await sendRequest<D, E>(httpClient, requestBody);
-    const { data: serializedResponseData, error: responseError } = response;
+      const requestPayload = { ...requestBody, asSystemRequest };
+      const response = await sendRequest<D, E>(httpClient, requestPayload);
+      const { data: serializedResponseData, error: responseError } = response;
 
-    const isOutdatedRequest = requestId !== requestCountRef.current;
-    const isUnmounted = isMounted.current === false;
+      const isOutdatedRequest = requestId !== requestCountRef.current;
+      const isUnmounted = isMounted.current === false;
 
-    // Ignore outdated or irrelevant data.
-    if (isOutdatedRequest || isUnmounted) {
-      return;
-    }
+      // Ignore outdated or irrelevant data.
+      if (isOutdatedRequest || isUnmounted) {
+        return;
+      }
 
-    // Surface to consumers that at least one request has resolved.
-    isInitialRequestRef.current = false;
+      // Surface to consumers that at least one request has resolved.
+      isInitialRequestRef.current = false;
 
-    setError(responseError);
-    // If there's an error, keep the data from the last request in case it's still useful to the user.
-    if (!responseError) {
-      const responseData = deserializer
-        ? deserializer(serializedResponseData)
-        : serializedResponseData;
-      setData(responseData);
-    }
-    // Setting isLoading to false also acts as a signal for scheduling the next poll request.
-    setIsLoading(false);
-  }, [requestBody, httpClient, deserializer, clearPollInterval]);
+      setError(responseError);
+      // If there's an error, keep the data from the last request in case it's still useful to the user.
+      if (!responseError) {
+        const responseData = deserializer
+          ? deserializer(serializedResponseData)
+          : serializedResponseData;
+        setData(responseData);
+      }
+      // Setting isLoading to false also acts as a signal for scheduling the next poll request.
+      setIsLoading(false);
+    },
+    [requestBody, httpClient, deserializer, clearPollInterval]
+  );
 
   const scheduleRequest = useCallback(() => {
     // If there's a scheduled poll request, this new one will supersede it.
     clearPollInterval();
 
     if (pollIntervalMs) {
-      pollIntervalIdRef.current = setTimeout(resendRequest, pollIntervalMs);
+      pollIntervalIdRef.current = setTimeout(() => resendRequest(true), pollIntervalMs);
     }
   }, [pollIntervalMs, resendRequest, clearPollInterval]);
 

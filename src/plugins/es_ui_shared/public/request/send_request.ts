@@ -13,6 +13,7 @@ export interface SendRequestConfig {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
   query?: HttpFetchQuery;
   body?: any;
+  asSystemRequest?: boolean;
 }
 
 export interface SendRequestResponse<D = any, E = any> {
@@ -22,11 +23,15 @@ export interface SendRequestResponse<D = any, E = any> {
 
 export const sendRequest = async <D = any, E = any>(
   httpClient: HttpSetup,
-  { path, method, body, query }: SendRequestConfig
+  { path, method, body, query, asSystemRequest }: SendRequestConfig
 ): Promise<SendRequestResponse<D, E>> => {
   try {
     const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
-    const response = await httpClient[method](path, { body: stringifiedBody, query });
+    const response = await httpClient[method](path, {
+      body: stringifiedBody,
+      query,
+      asSystemRequest,
+    });
 
     return {
       data: response.data ? response.data : response,
