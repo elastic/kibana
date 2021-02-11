@@ -12,14 +12,26 @@ import { MetaEngineCreationLogic } from './meta_engine_creation_logic';
 describe('MetaEngineCreationLogic', () => {
   const { mount } = new LogicMounter(MetaEngineCreationLogic);
 
-  const DEFAULT_VALUES = {};
+  const DEFAULT_VALUES = {
+    rawName: '',
+  };
 
   it('has expected default values', () => {
     mount();
     expect(MetaEngineCreationLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  describe('actions', () => {});
+  describe('actions', () => {
+    describe('setRawName', () => {
+      it('should set rawName to provided value', () => {
+        mount();
+        MetaEngineCreationLogic.actions.setRawName('Name__With#$&*%Special--Characters');
+        expect(MetaEngineCreationLogic.values.rawName).toEqual(
+          'Name__With#$&*%Special--Characters'
+        );
+      });
+    });
+  });
 
   describe('listeners', () => {});
 });

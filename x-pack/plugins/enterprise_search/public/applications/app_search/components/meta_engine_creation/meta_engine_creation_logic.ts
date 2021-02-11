@@ -7,16 +7,29 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-interface MetaEngineCreationActions {}
+interface MetaEngineCreationActions {
+  setRawName(rawName: string): { rawName: string };
+}
 
-interface MetaEngineCreationValues {}
+interface MetaEngineCreationValues {
+  rawName: string;
+}
 
 export const MetaEngineCreationLogic = kea<
   MakeLogicType<MetaEngineCreationValues, MetaEngineCreationActions>
 >({
   path: ['enterprise_search', 'app_search', 'meta_engine_creation_logic'],
-  actions: {},
-  reducers: {},
+  actions: {
+    setRawName: (rawName) => ({ rawName }),
+  },
+  reducers: {
+    rawName: [
+      '',
+      {
+        setRawName: (_, { rawName }) => rawName,
+      },
+    ],
+  },
   selectors: ({ selectors }) => ({}),
   listeners: ({ values, actions }) => ({}),
 });
