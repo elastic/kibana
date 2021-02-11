@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -20,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 
 interface StatusResponse {
   index: string;
@@ -43,12 +44,10 @@ interface FinalizeResponse {
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const kbnClient = getService('kibanaServer');
-  const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/88302
-  describe.skip('Finalizing signals migrations', () => {
+  describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
     let createdMigrations: CreateResponse[];
@@ -233,7 +232,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       const { body } = await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
@@ -248,9 +247,11 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(finalizeResponse.completed).not.to.eql(true);
       expect(finalizeResponse.error).to.eql({
         message:
-          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst]',
+          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst], this action is granted by the cluster privileges [monitor,manage,all]',
         status_code: 403,
       });
+
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });
 };

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Role } from '../../../../common/model';
 import { RoleValidator } from './validate_role';
 
@@ -40,7 +42,7 @@ describe('validateRoleName', () => {
 
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
-      error: `Please provide a role name`,
+      error: `Please provide a role name.`,
     });
   });
 
@@ -57,13 +59,30 @@ describe('validateRoleName', () => {
 
     expect(validator.validateRoleName(role)).toEqual({
       isInvalid: true,
-      error: `Name must not exceed 1024 characters`,
+      error: `Name must not exceed 1024 characters.`,
+    });
+  });
+
+  test('it cannot start with whitespace character', () => {
+    const role = {
+      name: ' role-name',
+      elasticsearch: {
+        cluster: [],
+        indices: [],
+        run_as: [],
+      },
+      kibana: [],
+    };
+
+    expect(validator.validateRoleName(role)).toEqual({
+      isInvalid: true,
+      error: `Name must not contain leading or trailing spaces.`,
     });
   });
 
   const charList = `!#%^&*()+=[]{}\|';:"/,<>?`.split('');
   charList.forEach((element) => {
-    test(`it cannot support the "${element}" character`, () => {
+    test(`it allows the "${element}" character`, () => {
       const role = {
         name: `role-${element}`,
         elasticsearch: {
@@ -74,10 +93,7 @@ describe('validateRoleName', () => {
         kibana: [],
       };
 
-      expect(validator.validateRoleName(role)).toEqual({
-        isInvalid: true,
-        error: `Name must begin with a letter or underscore and contain only letters, underscores, and numbers.`,
-      });
+      expect(validator.validateRoleName(role)).toEqual({ isInvalid: false });
     });
   });
 });

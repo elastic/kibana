@@ -551,6 +551,16 @@ export class ExpressionRenderHandler {
     update$: Observable<UpdateValue | null>;
     }
 
+// Warning: (ae-missing-release-tag) "ExpressionsInspectorAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class ExpressionsInspectorAdapter extends EventEmitter {
+    // (undocumented)
+    get ast(): any;
+    // (undocumented)
+    logAST(ast: any): void;
+}
+
 // Warning: (ae-missing-release-tag) "ExpressionsPublicPlugin" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)

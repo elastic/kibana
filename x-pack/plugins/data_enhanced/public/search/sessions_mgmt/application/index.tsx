@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'kibana/public';
@@ -10,7 +11,7 @@ import type {
   AppDependencies,
   IManagementSectionsPluginsSetup,
   IManagementSectionsPluginsStart,
-  SessionsMgmtConfigSchema,
+  SessionsConfigSchema,
 } from '../';
 import { APP } from '../';
 import { SearchSessionsMgmtAPI } from '../lib/api';
@@ -20,7 +21,7 @@ import { renderApp } from './render';
 export class SearchSessionsMgmtApp {
   constructor(
     private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
-    private config: SessionsMgmtConfigSchema,
+    private config: SessionsConfigSchema,
     private params: ManagementAppMountParams,
     private pluginsSetup: IManagementSectionsPluginsSetup
   ) {}

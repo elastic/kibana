@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -20,7 +21,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { EuiSpacer } from '@elastic/eui';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { enableSignificantTerms } from '../../../../common/ui_settings_keys';
+import { enableCorrelations } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { LatencyCorrelations } from './LatencyCorrelations';
 import { ErrorCorrelations } from './ErrorCorrelations';
@@ -35,7 +36,7 @@ export function Correlations() {
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   if (
-    !uiSettings.get(enableSignificantTerms) ||
+    !uiSettings.get(enableCorrelations) ||
     !isActivePlatinumLicense(license)
   ) {
     return null;
@@ -48,7 +49,7 @@ export function Correlations() {
           setIsFlyoutVisible(true);
         }}
       >
-        View significant terms
+        View correlations
       </EuiButton>
 
       <EuiSpacer size="s" />
@@ -62,7 +63,7 @@ export function Correlations() {
           >
             <EuiFlyoutHeader hasBorder aria-labelledby="correlations-flyout">
               <EuiTitle>
-                <h2 id="correlations-flyout">Significant terms</h2>
+                <h2 id="correlations-flyout">Correlations</h2>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
@@ -88,7 +89,7 @@ export function Correlations() {
                 iconType="alert"
               >
                 <p>
-                  Significant terms is an experimental feature and in active
+                  Correlations is an experimental feature and in active
                   development. Bugs and surprises are to be expected but let us
                   know your feedback so we can improve it.
                 </p>

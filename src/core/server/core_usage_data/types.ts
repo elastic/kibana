@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreUsageStatsClient } from './core_usage_stats_client';
@@ -66,6 +66,13 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsGet.namespace.custom.total'?: number;
   'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'?: number;
   'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsResolve.total'?: number;
+  'apiCalls.savedObjectsResolve.namespace.default.total'?: number;
+  'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no'?: number;
+  'apiCalls.savedObjectsResolve.namespace.custom.total'?: number;
+  'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes'?: number;
+  'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsUpdate.total'?: number;
   'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
   'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'?: number;

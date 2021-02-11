@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import {
   apmIndexPattern,
@@ -12,6 +14,7 @@ import { hasHistoricalAgentData } from '../services/get_services/has_historical_
 import { Setup } from '../helpers/setup_request';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
+import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 
 export async function createStaticIndexPattern(
   setup: Setup,
@@ -33,7 +36,7 @@ export async function createStaticIndexPattern(
   }
 
   try {
-    const apmIndexPatternTitle = config['apm_oss.indexPattern'];
+    const apmIndexPatternTitle = getApmIndexPatternTitle(context);
     await savedObjectsClient.create(
       'index-pattern',
       {

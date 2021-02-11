@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Observable, Subscription, combineLatest } from 'rxjs';
@@ -11,6 +11,7 @@ import { first, map } from 'rxjs/operators';
 import { Server } from '@hapi/hapi';
 import { pick } from '@kbn/std';
 
+import type { RequestHandlerContext } from 'src/core/server';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
@@ -31,7 +32,6 @@ import {
   InternalHttpServiceStart,
 } from './types';
 
-import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
 import {
   ExternalUrlConfigType,
@@ -100,17 +100,23 @@ export class HttpService
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
-      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+        path: string,
+        pluginId: PluginOpaqueId = this.coreContext.coreId
+      ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
-        const router = new Router(path, this.log, enhanceHandler);
+        const router = new Router<Context>(path, this.log, enhanceHandler);
         registerRouter(router);
         return router;
       },
 
-      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      registerRouteHandlerContext: <
+        Context extends RequestHandlerContext,
+        ContextName extends keyof Context
+      >(
         pluginOpaqueId: PluginOpaqueId,
-        contextName: T,
-        provider: RequestHandlerContextProvider<T>
+        contextName: ContextName,
+        provider: RequestHandlerContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 

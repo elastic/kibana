@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { first, map } from 'rxjs/operators';
 import {
   IContextProvider,
   KibanaRequest,
+  KibanaResponseFactory,
   Logger,
   PluginInitializerContext,
-  RequestHandler,
-  RequestHandlerContext,
 } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
@@ -42,9 +41,10 @@ import {
 } from './services';
 import { createCaseClient } from './client';
 import { registerConnectors } from './connectors';
+import type { CasesRequestHandlerContext } from './types';
 
-function createConfig$(context: PluginInitializerContext) {
-  return context.config.create<ConfigType>().pipe(map((config) => config));
+function createConfig(context: PluginInitializerContext) {
+  return context.config.get<ConfigType>();
 }
 
 export interface PluginsSetup {
@@ -65,7 +65,7 @@ export class CasePlugin {
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
+    const config = createConfig(this.initializerContext);
 
     if (!config.enabled) {
       return;
@@ -91,7 +91,7 @@ export class CasePlugin {
     this.userActionService = await new CaseUserActionService(this.log).setup();
     this.alertsService = new AlertService();
 
-    core.http.registerRouteHandlerContext(
+    core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'case'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
@@ -103,7 +103,7 @@ export class CasePlugin {
       })
     );
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<CasesRequestHandlerContext>();
     initCaseApi({
       caseService: this.caseService,
       caseConfigureService: this.caseConfigureService,
@@ -123,17 +123,19 @@ export class CasePlugin {
     });
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
     this.alertsService!.initialize(core.elasticsearch.client);
 
     const getCaseClientWithRequestAndContext = async (
-      context: RequestHandlerContext,
-      request: KibanaRequest
+      context: CasesRequestHandlerContext,
+      request: KibanaRequest,
+      response: KibanaResponseFactory
     ) => {
       return createCaseClient({
         savedObjectsClient: core.savedObjects.getScopedClient(request),
         request,
+        response,
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
         connectorMappingsService: this.connectorMappingsService!,
@@ -166,8 +168,8 @@ export class CasePlugin {
     connectorMappingsService: ConnectorMappingsServiceSetup;
     userActionService: CaseUserActionServiceSetup;
     alertsService: AlertServiceContract;
-  }): IContextProvider<RequestHandler<unknown, unknown, unknown>, typeof APP_ID> => {
-    return async (context, request) => {
+  }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
+    return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getCaseClient: () => {
@@ -178,8 +180,9 @@ export class CasePlugin {
             connectorMappingsService,
             userActionService,
             alertsService,
-            request,
             context,
+            request,
+            response,
           });
         },
       };

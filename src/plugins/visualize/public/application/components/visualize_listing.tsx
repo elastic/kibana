@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './visualize_listing.scss';
@@ -40,6 +40,8 @@ export const VisualizeListing = () => {
       savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
+      dashboardCapabilities,
+      kbnUrlStateStorage,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -63,7 +65,7 @@ export const VisualizeListing = () => {
 
   useMount(() => {
     // Reset editor state if the visualize listing page is loaded.
-    stateTransferService.clearEditorState();
+    stateTransferService.clearEditorState(VisualizeConstants.APP_ID);
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
@@ -94,11 +96,10 @@ export const VisualizeListing = () => {
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
-  const tableColumns = useMemo(() => getTableColumns(application, history, savedObjectsTagging), [
-    application,
-    history,
-    savedObjectsTagging,
-  ]);
+  const tableColumns = useMemo(
+    () => getTableColumns(application, kbnUrlStateStorage, savedObjectsTagging),
+    [application, kbnUrlStateStorage, savedObjectsTagging]
+  );
 
   const fetchItems = useCallback(
     (filter) => {
@@ -148,6 +149,7 @@ export const VisualizeListing = () => {
   const calloutMessage = (
     <>
       <FormattedMessage
+        data-test-subj="visualize-dashboard-flow-prompt"
         id="visualize.visualizeListingDashboardFlowDescription"
         defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
         values={{
@@ -172,11 +174,12 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
-        <div className="visListingCallout">
-          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-        </div>
-      )}
+      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
+        dashboardCapabilities.createNew && (
+          <div className="visListingCallout">
+            <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+          </div>
+        )}
       <TableListView
         headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them

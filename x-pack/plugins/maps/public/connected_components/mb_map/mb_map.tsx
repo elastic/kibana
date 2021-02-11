@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -49,7 +50,7 @@ import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
 
-interface Props {
+export interface Props {
   isMapReady: boolean;
   settings: MapSettings;
   layerList: ILayer[];
@@ -332,7 +333,7 @@ export class MBMap extends Component<Props, State> {
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
-    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap));
+    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap!));
     syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 

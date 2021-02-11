@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
 import { EuiLink } from '@elastic/eui';
-import { EuiLinkTo } from '../react_router_helpers';
+
 import { ENTERPRISE_SEARCH_PLUGIN, APP_SEARCH_PLUGIN } from '../../../../common/constants';
+import { EuiLinkTo } from '../react_router_helpers';
 
 import { SideNav, SideNavLink, SideNavItem } from './';
 

@@ -12,6 +12,7 @@ import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import * as CSS from 'csstype';
+import { DetailedPeerCertificate } from 'tls';
 import { EmbeddableStart as EmbeddableStart_2 } from 'src/plugins/embeddable/public/plugin';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -25,6 +26,7 @@ import { History } from 'history';
 import { Href } from 'history';
 import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
+import { IncomingHttpHeaders } from 'http';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
@@ -32,30 +34,36 @@ import { Logger } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { NotificationsStart as NotificationsStart_2 } from 'src/core/public';
+import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { Optional } from '@kbn/utility-types';
 import { OverlayRef as OverlayRef_2 } from 'src/core/public';
 import { OverlayStart as OverlayStart_2 } from 'src/core/public';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
+import { PeerCertificate } from 'tls';
 import { PluginInitializerContext } from 'src/core/public';
 import * as PropTypes from 'prop-types';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { PublicUiSettingsParams } from 'src/core/server/types';
 import React from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { Request } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SavedObjectAttributes } from 'kibana/server';
 import { SavedObjectAttributes as SavedObjectAttributes_2 } from 'src/core/public';
 import { SavedObjectAttributes as SavedObjectAttributes_3 } from 'kibana/public';
+import { SchemaTypeError } from '@kbn/config-schema';
 import { SimpleSavedObject as SimpleSavedObject_2 } from 'src/core/public';
 import { Start as Start_2 } from 'src/plugins/inspector/public';
 import { TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiComponent } from 'src/plugins/kibana_utils/public';
 import { UnregisterCallback } from 'history';
+import { URL } from 'url';
 import { UserProvidedValues } from 'src/core/server/types';
 
 // Warning: (ae-missing-release-tag) "ACTION_ADD_PANEL" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -582,11 +590,10 @@ export class EmbeddableStateTransfer {
     // Warning: (ae-forgotten-export) The symbol "ApplicationStart" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "PublicAppInfo" needs to be exported by the entry point index.d.ts
     constructor(navigateToApp: ApplicationStart['navigateToApp'], currentAppId$: ApplicationStart['currentAppId$'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
-    // (undocumented)
-    clearEditorState(): void;
+    clearEditorState(appId: string): void;
     getAppNameFromId: (appId: string) => string | undefined;
-    getIncomingEditorState(removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
-    getIncomingEmbeddablePackage(removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
+    getIncomingEditorState(appId: string, removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
+    getIncomingEmbeddablePackage(appId: string, removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
     // (undocumented)
     isTransferInProgress: boolean;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ApplicationStart"

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { RuntimeField } from '../types';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
-import { IFieldType } from './types';
+import type { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
 import { shortenDottedString } from '../../utils';
 
@@ -33,6 +34,14 @@ export class IndexPatternField implements IFieldType {
 
   public set count(count: number) {
     this.spec.count = count;
+  }
+
+  public get runtimeField() {
+    return this.spec.runtimeField;
+  }
+
+  public set runtimeField(runtimeField: RuntimeField | undefined) {
+    this.spec.runtimeField = runtimeField;
   }
 
   /**
@@ -117,6 +126,13 @@ export class IndexPatternField implements IFieldType {
     return this.spec.subType;
   }
 
+  /**
+   * Is the field part of the index mapping?
+   */
+  public get isMapped() {
+    return this.spec.isMapped;
+  }
+
   // not writable, not serialized
   public get sortable() {
     return (
@@ -181,6 +197,8 @@ export class IndexPatternField implements IFieldType {
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
       customLabel: this.customLabel,
       shortDotsEnable: this.spec.shortDotsEnable,
+      runtimeField: this.runtimeField,
+      isMapped: this.isMapped,
     };
   }
 }

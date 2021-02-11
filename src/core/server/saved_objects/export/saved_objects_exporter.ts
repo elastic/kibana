@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createListStream } from '@kbn/utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObject, SavedObjectsClientContract } from '../types';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { fetchNestedDependencies } from './fetch_nested_dependencies';
 import { sortObjects } from './sort_objects';
 import {
@@ -16,8 +17,11 @@ import {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
+  SavedObjectsExportTransform,
 } from './types';
 import { SavedObjectsExportError } from './errors';
+import { applyExportTransforms } from './apply_export_transforms';
+import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
 
 /**
  * @public
@@ -29,17 +33,29 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
  */
 export class SavedObjectsExporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
+  readonly #exportTransforms: Record<string, SavedObjectsExportTransform>;
   readonly #exportSizeLimit: number;
 
   constructor({
     savedObjectsClient,
+    typeRegistry,
     exportSizeLimit,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
+    typeRegistry: ISavedObjectTypeRegistry;
     exportSizeLimit: number;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
     this.#exportSizeLimit = exportSizeLimit;
+    this.#exportTransforms = typeRegistry.getAllTypes().reduce((transforms, type) => {
+      if (type.management?.onExport) {
+        return {
+          ...transforms,
+          [type.name]: type.management.onExport,
+        };
+      }
+      return transforms;
+    }, {} as Record<string, SavedObjectsExportTransform>);
   }
 
   /**
@@ -51,7 +67,8 @@ export class SavedObjectsExporter {
    */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     const objects = await this.fetchByTypes(options);
-    return this.processObjects(objects, {
+    return this.processObjects(objects, byIdAscComparator, {
+      request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
@@ -70,7 +87,9 @@ export class SavedObjectsExporter {
       throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
     }
     const objects = await this.fetchByObjects(options);
-    return this.processObjects(objects, {
+    const comparator = getPreservedOrderComparator(objects);
+    return this.processObjects(objects, comparator, {
+      request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
@@ -79,7 +98,9 @@ export class SavedObjectsExporter {
 
   private async processObjects(
     savedObjects: SavedObject[],
+    sortFunction: SavedObjectComparator,
     {
+      request,
       excludeExportDetails = false,
       includeReferencesDeep = false,
       namespace,
@@ -87,6 +108,13 @@ export class SavedObjectsExporter {
   ) {
     let exportedObjects: Array<SavedObject<unknown>>;
     let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
+
+    savedObjects = await applyExportTransforms({
+      request,
+      objects: savedObjects,
+      transforms: this.#exportTransforms,
+      sortFunction,
+    });
 
     if (includeReferencesDeep) {
       const fetchResult = await fetchNestedDependencies(
@@ -145,7 +173,7 @@ export class SavedObjectsExporter {
       findResponse.saved_objects
         // exclude the find-specific `score` property from the exported objects
         .map(({ score, ...obj }) => obj)
-        .sort((a: SavedObject, b: SavedObject) => (a.id > b.id ? 1 : -1))
+        .sort(byIdAscComparator)
     );
   }
 }

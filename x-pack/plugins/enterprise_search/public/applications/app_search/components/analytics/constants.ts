@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
+
 import { i18n } from '@kbn/i18n';
 
 export const ANALYTICS_TITLE = i18n.translate(
@@ -24,6 +26,10 @@ export const TOTAL_API_OPERATIONS = i18n.translate(
 export const TOTAL_QUERIES = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalQueries',
   { defaultMessage: 'Total queries' }
+);
+export const TOTAL_QUERIES_NO_RESULTS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.analytics.totalQueriesNoResults',
+  { defaultMessage: 'Total queries with no results' }
 );
 export const TOTAL_CLICKS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalClicks',

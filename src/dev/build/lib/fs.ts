@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import fs from 'fs';
@@ -153,7 +153,7 @@ export async function copy(source: string, destination: string, options: CopyOpt
 interface CopyAllOptions {
   select?: string[];
   dot?: boolean;
-  time?: string | number | Date;
+  time?: Date;
 }
 
 export async function copyAll(
@@ -161,7 +161,7 @@ export async function copyAll(
   destination: string,
   options: CopyAllOptions = {}
 ) {
-  const { select = ['**/*'], dot = false, time = Date.now() } = options;
+  const { select = ['**/*'], dot = false, time = new Date() } = options;
 
   assertAbsolute(sourceDir);
   assertAbsolute(destination);

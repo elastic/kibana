@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isEqual } from 'lodash';
@@ -44,6 +44,10 @@ export interface AppState {
    * Data Grid related state
    */
   grid?: DiscoverGridSettings;
+  /**
+   * Hide chart
+   */
+  hideChart?: boolean;
   /**
    * id of the used index pattern
    */
@@ -200,7 +204,7 @@ export function getState({
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
-    flushToUrl: () => stateStorage.flush(),
+    flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
   };
 }
@@ -275,12 +279,12 @@ export function createSearchSessionRestorationDataProvider(deps: {
         initialState: createUrlGeneratorState({
           ...deps,
           getSavedSearchId,
-          forceAbsoluteTime: false,
+          shouldRestoreSearchSession: false,
         }),
         restoreState: createUrlGeneratorState({
           ...deps,
           getSavedSearchId,
-          forceAbsoluteTime: true,
+          shouldRestoreSearchSession: true,
         }),
       };
     },
@@ -291,15 +295,12 @@ function createUrlGeneratorState({
   appStateContainer,
   data,
   getSavedSearchId,
-  forceAbsoluteTime,
+  shouldRestoreSearchSession,
 }: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
-  /**
-   * Can force time range from time filter to convert from relative to absolute time range
-   */
-  forceAbsoluteTime: boolean;
+  shouldRestoreSearchSession: boolean;
 }): DiscoverUrlGeneratorState {
   const appState = appStateContainer.get();
   return {
@@ -307,10 +308,10 @@ function createUrlGeneratorState({
     indexPatternId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
-    timeRange: forceAbsoluteTime
+    timeRange: shouldRestoreSearchSession
       ? data.query.timefilter.timefilter.getAbsoluteTime()
       : data.query.timefilter.timefilter.getTime(),
-    searchSessionId: data.search.session.getSessionId(),
+    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     columns: appState.columns,
     sort: appState.sort,
     savedQuery: appState.savedQuery,

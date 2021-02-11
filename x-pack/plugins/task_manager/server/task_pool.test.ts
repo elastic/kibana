@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -13,6 +14,8 @@ import { Logger } from '../../../../src/core/server';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
+import uuid from 'uuid';
+import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
@@ -133,7 +136,7 @@ describe('TaskPool', () => {
     const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
     expect(logger.debug).toHaveBeenCalledWith(
-      'Task TaskType "shooooo" failed in attempt to run: Saved object [task/foo] not found'
+      `Task TaskType "shooooo" failed in attempt to run: Saved object [task/${taskFailedToRun.id}] not found`
     );
     expect(logger.warn).not.toHaveBeenCalled();
 
@@ -210,19 +213,21 @@ describe('TaskPool', () => {
       logger,
     });
 
-    const readyToExpire = resolvable();
+    const haltUntilWeAfterFirstRun = resolvable();
     const taskHasExpired = resolvable();
+    const haltTaskSoThatItCanBeCanceled = resolvable();
+
     const shouldRun = sinon.spy(() => Promise.resolve());
     const shouldNotRun = sinon.spy(() => Promise.resolve());
     const now = new Date();
     const result = await pool.run([
       {
-        ...mockTask(),
+        ...mockTask({ id: '1' }),
         async run() {
-          await readyToExpire;
+          await haltUntilWeAfterFirstRun;
           this.isExpired = true;
           taskHasExpired.resolve();
-          await sleep(10);
+          await haltTaskSoThatItCanBeCanceled;
           return asOk({ state: {} });
         },
         get expiration() {
@@ -235,9 +240,10 @@ describe('TaskPool', () => {
         cancel: shouldRun,
       },
       {
-        ...mockTask(),
+        ...mockTask({ id: '2' }),
         async run() {
-          await sleep(10);
+          // halt here so that we can verify that this task is counted in `occupiedWorkers`
+          await haltUntilWeAfterFirstRun;
           return asOk({ state: {} });
         },
         cancel: shouldNotRun,
@@ -248,16 +254,19 @@ describe('TaskPool', () => {
     expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
 
-    readyToExpire.resolve();
+    // release first stage in task so that it has time to expire, but not complete
+    haltUntilWeAfterFirstRun.resolve();
     await taskHasExpired;
 
-    expect(await pool.run([{ ...mockTask() }])).toBeTruthy();
+    expect(await pool.run([{ ...mockTask({ id: '3' }) }])).toBeTruthy();
 
     sinon.assert.calledOnce(shouldRun);
     sinon.assert.notCalled(shouldNotRun);
 
-    expect(pool.occupiedWorkers).toEqual(2);
-    expect(pool.availableWorkers).toEqual(0);
+    expect(pool.occupiedWorkers).toEqual(1);
+    expect(pool.availableWorkers).toEqual(1);
+
+    haltTaskSoThatItCanBeCanceled.resolve();
 
     expect(logger.warn).toHaveBeenCalledWith(
       `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 05m 30s (with timeout set at 5m).`
@@ -355,13 +364,14 @@ describe('TaskPool', () => {
     });
   }
 
-  function mockTask() {
+  function mockTask(overrides = {}) {
     return {
       isExpired: false,
-      id: 'foo',
+      id: uuid.v4(),
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
+      stage: TaskRunningStage.PENDING,
       toString: () => `TaskType "shooooo"`,
       get expiration() {
         return new Date();
@@ -377,6 +387,7 @@ describe('TaskPool', () => {
           createTaskRunner: jest.fn(),
         };
       },
+      ...overrides,
     };
   }
 });

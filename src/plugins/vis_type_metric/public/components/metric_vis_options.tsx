@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback } from 'react';
@@ -18,26 +18,46 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import {
   ColorRanges,
   SetColorRangeValue,
-  VisOptionsProps,
   SwitchOption,
   SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   RangeOption,
 } from '../../../vis_default_editor/public';
-import { ColorMode } from '../../../charts/public';
+import { ColorMode, colorSchemas } from '../../../charts/public';
 import { MetricVisParam, VisParams } from '../types';
+
+const metricColorMode = [
+  {
+    id: ColorMode.None,
+    label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
+      defaultMessage: 'None',
+    }),
+  },
+  {
+    id: ColorMode.Labels,
+    label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
+      defaultMessage: 'Labels',
+    }),
+  },
+  {
+    id: ColorMode.Background,
+    label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
+      defaultMessage: 'Background',
+    }),
+  },
+];
 
 function MetricVisOptions({
   stateParams,
   setValue,
   setValidity,
   setTouched,
-  vis,
   uiState,
-}: VisOptionsProps<VisParams>) {
+}: VisEditorOptionsProps<VisParams>) {
   const setMetricValue: <T extends keyof MetricVisParam>(
     paramName: T,
     value: MetricVisParam[T]
@@ -137,14 +157,14 @@ function MetricVisOptions({
             isDisabled={stateParams.metric.colorsRange.length === 1}
             isFullWidth={true}
             legend={metricColorModeLabel}
-            options={vis.type.editorConfig.collections.metricColorMode}
+            options={metricColorMode}
             onChange={setColorMode}
           />
         </EuiFormRow>
 
         <ColorSchemaOptions
           colorSchema={stateParams.metric.colorSchema}
-          colorSchemas={vis.type.editorConfig.collections.colorSchemas}
+          colorSchemas={colorSchemas}
           disabled={
             stateParams.metric.colorsRange.length === 1 ||
             stateParams.metric.metricColorMode === ColorMode.None

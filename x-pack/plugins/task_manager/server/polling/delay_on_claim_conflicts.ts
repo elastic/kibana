@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -10,7 +11,7 @@
 
 import stats from 'stats-lite';
 import { isNumber, random } from 'lodash';
-import { merge, of, Observable, combineLatest } from 'rxjs';
+import { merge, of, Observable, combineLatest, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Option, none, some, isSome, Some } from 'fp-ts/lib/Option';
 import { isOk } from '../lib/result_type';
@@ -31,7 +32,9 @@ export function delayOnClaimConflicts(
   runningAverageWindowSize: number
 ): Observable<number> {
   const claimConflictQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  return merge(
+  // return a subject to allow multicast and replay the last value to new subscribers
+  const multiCastDelays$ = new ReplaySubject<number>(1);
+  merge(
     of(0),
     combineLatest([
       maxWorkersConfiguration$,
@@ -69,5 +72,9 @@ export function delayOnClaimConflicts(
         return random(pollInterval * 0.25, pollInterval * 0.75, false);
       })
     )
-  );
+  ).subscribe((delay) => {
+    multiCastDelays$.next(delay);
+  });
+
+  return multiCastDelays$;
 }

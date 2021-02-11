@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as ts from 'typescript';
@@ -19,7 +19,7 @@ export enum TelemetryKinds {
   Date = 10001,
 }
 
-interface DescriptorValue {
+export interface DescriptorValue {
   kind: ts.SyntaxKind | TelemetryKinds;
   type: keyof typeof ts.SyntaxKind | keyof typeof TelemetryKinds;
 }
@@ -40,6 +40,13 @@ export function isObjectDescriptor(value: any) {
   }
 
   return false;
+}
+
+export function descriptorToObject(descriptor: Descriptor | DescriptorValue) {
+  return Object.entries(descriptor).reduce((acc, [key, value]) => {
+    acc[key] = value.kind ? kindToDescriptorName(value.kind) : descriptorToObject(value);
+    return acc;
+  }, {} as Record<string, any>);
 }
 
 export function kindToDescriptorName(kind: number) {
@@ -158,6 +165,16 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     if (symbolName === 'Date') {
       return { kind: TelemetryKinds.Date, type: 'Date' };
     }
+
+    // Support Array<T>
+    if (symbolName === 'Array') {
+      if (node.typeArguments?.length !== 1) {
+        throw Error('Array type only supports 1 type parameter Array<T>');
+      }
+      const typeArgument = node.typeArguments[0];
+      return { items: getDescriptor(typeArgument, program) };
+    }
+
     // Support `Record<string, SOMETHING>`
     if (symbolName === 'Record') {
       const descriptor = getDescriptor(node.typeArguments![1], program);
@@ -243,7 +260,7 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     case ts.SyntaxKind.UnionType:
     case ts.SyntaxKind.AnyKeyword:
     default:
-      throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}; ${node.getText()}`);
+      throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}`);
   }
 }
 

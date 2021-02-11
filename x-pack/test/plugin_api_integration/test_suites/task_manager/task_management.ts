@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -50,7 +51,7 @@ type SerializedConcreteTaskInstance<State = string, Params = string> = Omit<
 };
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');
@@ -58,28 +59,44 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
-    beforeEach(
-      async () => await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200)
-    );
+    beforeEach(async () => {
+      // clean up before each test
+      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+    });
 
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
-      if (exists) {
+      if (exists.body) {
         await es.deleteByQuery({
           index: testHistoryIndex,
-          q: 'type:task',
           refresh: true,
+          body: { query: { term: { type: 'task' } } },
         });
       } else {
         await es.indices.create({
           index: testHistoryIndex,
           body: {
             mappings: {
-              properties: taskManagerIndexMapping,
+              properties: {
+                type: {
+                  type: 'keyword',
+                },
+                taskId: {
+                  type: 'keyword',
+                },
+                params: taskManagerIndexMapping.params,
+                state: taskManagerIndexMapping.state,
+                runAt: taskManagerIndexMapping.runAt,
+              },
             },
           },
         });
       }
+    });
+
+    after(async () => {
+      // clean up after last test
+      return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
     function currentTasks<State = unknown, Params = unknown>(): Promise<{
@@ -97,7 +114,27 @@ export default function ({ getService }: FtrProviderContext) {
       return supertest
         .get(`/api/sample_tasks/task/${task}`)
         .send({ task })
-        .expect(200)
+        .expect((response) => {
+          expect(response.status).to.eql(200);
+          expect(typeof JSON.parse(response.text).id).to.eql(`string`);
+        })
+        .then((response) => response.body);
+    }
+
+    function currentTaskError<State = unknown, Params = unknown>(
+      task: string
+    ): Promise<{
+      statusCode: number;
+      error: string;
+      message: string;
+    }> {
+      return supertest
+        .get(`/api/sample_tasks/task/${task}`)
+        .send({ task })
+        .expect(function (response) {
+          expect(response.status).to.eql(200);
+          expect(typeof JSON.parse(response.text).message).to.eql(`string`);
+        })
         .then((response) => response.body);
     }
 
@@ -105,13 +142,21 @@ export default function ({ getService }: FtrProviderContext) {
       return supertest.get(`/api/ensure_tasks_index_refreshed`).send({}).expect(200);
     }
 
-    function historyDocs(taskId?: string): Promise<RawDoc[]> {
+    async function historyDocs(taskId?: string): Promise<RawDoc[]> {
       return es
         .search({
           index: testHistoryIndex,
-          q: taskId ? `taskId:${taskId}` : 'type:task',
+          body: {
+            query: {
+              term: { type: 'task' },
+            },
+          },
         })
-        .then((result: SearchResults) => result.hits.hits);
+        .then((result) =>
+          ((result.body as unknown) as SearchResults).hits.hits.filter((task) =>
+            taskId ? task._source?.taskId === taskId : true
+          )
+        );
     }
 
     function scheduleTask(
@@ -122,7 +167,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
-        .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
+        .then((response: { body: SerializedConcreteTaskInstance }) => {
+          log.debug(`Task Scheduled: ${response.body.id}`);
+          return response.body;
+        });
     }
 
     function runTaskNow(task: { id: string }) {
@@ -251,8 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
-        expect(scheduledTask.id).to.eql(task.id);
+        const scheduledTask = await currentTask(task.id);
         expect(scheduledTask.attempts).to.be.greaterThan(0);
         expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(
           Date.parse(task.runAt) + 5 * 60 * 1000
@@ -270,8 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
-        expect(scheduledTask.id).to.eql(task.id);
+        const scheduledTask = await currentTask(task.id);
         const retryAt = Date.parse(scheduledTask.retryAt!);
         expect(isNaN(retryAt)).to.be(false);
 
@@ -295,7 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs(originalTask.id)).length).to.eql(1);
 
-        const [task] = (await currentTasks<{ count: number }>()).docs;
+        const task = await currentTask<{ count: number }>(originalTask.id);
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(count + 1);
 
@@ -466,6 +512,134 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should only run as many instances of a task as its maxConcurrency will allow', async () => {
+      // should run as there's only one and maxConcurrency on this TaskType is 1
+      const firstWithSingleConcurrency = await scheduleTask({
+        taskType: 'sampleTaskWithSingleConcurrency',
+        params: {
+          waitForEvent: 'releaseFirstWaveOfTasks',
+        },
+      });
+
+      // should run as there's only two and maxConcurrency on this TaskType is 2
+      const [firstLimitedConcurrency, secondLimitedConcurrency] = await Promise.all([
+        scheduleTask({
+          taskType: 'sampleTaskWithLimitedConcurrency',
+          params: {
+            waitForEvent: 'releaseFirstWaveOfTasks',
+          },
+        }),
+        scheduleTask({
+          taskType: 'sampleTaskWithLimitedConcurrency',
+          params: {
+            waitForEvent: 'releaseSecondWaveOfTasks',
+          },
+        }),
+      ]);
+
+      await retry.try(async () => {
+        expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
+        expect((await historyDocs(firstLimitedConcurrency.id)).length).to.eql(1);
+        expect((await historyDocs(secondLimitedConcurrency.id)).length).to.eql(1);
+      });
+
+      // should not run as there one running and maxConcurrency on this TaskType is 1
+      const secondWithSingleConcurrency = await scheduleTask({
+        taskType: 'sampleTaskWithSingleConcurrency',
+        params: {
+          waitForEvent: 'releaseSecondWaveOfTasks',
+        },
+      });
+
+      // should not run as there are two running and maxConcurrency on this TaskType is 2
+      const thirdWithLimitedConcurrency = await scheduleTask({
+        taskType: 'sampleTaskWithLimitedConcurrency',
+        params: {
+          waitForEvent: 'releaseSecondWaveOfTasks',
+        },
+      });
+
+      // schedule a task that should get picked up before the two blocked tasks
+      const taskWithUnlimitedConcurrency = await scheduleTask({
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs(taskWithUnlimitedConcurrency.id)).length).to.eql(1);
+        expect((await currentTask(secondWithSingleConcurrency.id)).status).to.eql('idle');
+        expect((await currentTask(thirdWithLimitedConcurrency.id)).status).to.eql('idle');
+      });
+
+      // release the running SingleConcurrency task and only one of the LimitedConcurrency tasks
+      await releaseTasksWaitingForEventToComplete('releaseFirstWaveOfTasks');
+
+      await retry.try(async () => {
+        // ensure the completed tasks were deleted
+        expect((await currentTaskError(firstWithSingleConcurrency.id)).message).to.eql(
+          `Saved object [task/${firstWithSingleConcurrency.id}] not found`
+        );
+        expect((await currentTaskError(firstLimitedConcurrency.id)).message).to.eql(
+          `Saved object [task/${firstLimitedConcurrency.id}] not found`
+        );
+
+        // ensure blocked tasks is still running
+        expect((await currentTask(secondLimitedConcurrency.id)).status).to.eql('running');
+
+        // ensure the blocked tasks begin running
+        expect((await currentTask(secondWithSingleConcurrency.id)).status).to.eql('running');
+        expect((await currentTask(thirdWithLimitedConcurrency.id)).status).to.eql('running');
+      });
+
+      // release blocked task
+      await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
+    });
+
+    it('should return a task run error result when RunNow is called at a time that would cause the task to exceed its maxConcurrency', async () => {
+      // should run as there's only one and maxConcurrency on this TaskType is 1
+      const firstWithSingleConcurrency = await scheduleTask({
+        taskType: 'sampleTaskWithSingleConcurrency',
+        // include a schedule so that the task isn't deleted after completion
+        schedule: { interval: `30m` },
+        params: {
+          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
+        },
+      });
+
+      // should not run as the first is running
+      const secondWithSingleConcurrency = await scheduleTask({
+        taskType: 'sampleTaskWithSingleConcurrency',
+        params: {
+          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
+        },
+      });
+
+      // run the first tasks once just so that we can be sure it runs in response to our
+      // runNow callm, rather than the initial execution
+      await retry.try(async () => {
+        expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
+      });
+      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
+
+      // wait for second task to stall
+      await retry.try(async () => {
+        expect((await historyDocs(secondWithSingleConcurrency.id)).length).to.eql(1);
+      });
+
+      // run the first task again using runNow - should fail due to concurrency concerns
+      const failedRunNowResult = await runTaskNow({
+        id: firstWithSingleConcurrency.id,
+      });
+
+      expect(failedRunNowResult).to.eql({
+        id: firstWithSingleConcurrency.id,
+        error: `Error: Failed to run task "${firstWithSingleConcurrency.id}" as we would exceed the max concurrency of "Sample Task With Single Concurrency" which is 1. Rescheduled the task to ensure it is picked up as soon as possible.`,
+      });
+
+      // release the second task
+      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
+    });
+
     it('should return a task run error result when running a task now fails', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -521,6 +695,21 @@ export default function ({ getService }: FtrProviderContext) {
 
         const task = await currentTask(originalTask.id);
         expect(task.attempts).to.eql(1);
+      });
+    });
+
+    it('should increment attempts when task fails on markAsRunning', async () => {
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        params: { throwOnMarkAsRunning: true },
+      });
+
+      await delay(DEFAULT_POLL_INTERVAL * 3);
+
+      await retry.try(async () => {
+        const task = await currentTask(originalTask.id);
+        expect(task.attempts).to.eql(3);
+        expect(task.status).to.eql('failed');
       });
     });
 

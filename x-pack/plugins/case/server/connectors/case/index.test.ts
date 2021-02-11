@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -152,6 +153,8 @@ describe('case connector', () => {
                     impact: 'Medium',
                     severity: 'Medium',
                     urgency: 'Medium',
+                    category: 'software',
+                    subcategory: 'os',
                   },
                 },
                 settings: {
@@ -217,7 +220,13 @@ describe('case connector', () => {
                 id: 'servicenow',
                 name: 'Servicenow',
                 type: '.servicenow',
-                fields: { impact: null, severity: null, urgency: null },
+                fields: {
+                  impact: null,
+                  severity: null,
+                  urgency: null,
+                  category: null,
+                  subcategory: null,
+                },
               },
               settings: {
                 syncAlerts: true,
@@ -292,6 +301,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                   excess: null,
                 },
               },
@@ -469,6 +480,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                 },
               },
             },
@@ -516,7 +529,13 @@ describe('case connector', () => {
                 id: 'servicenow',
                 name: 'Servicenow',
                 type: '.servicenow',
-                fields: { impact: null, severity: null, urgency: null },
+                fields: {
+                  impact: null,
+                  severity: null,
+                  urgency: null,
+                  category: null,
+                  subcategory: null,
+                },
               },
             },
           });
@@ -589,6 +608,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                   excess: null,
                 },
               },

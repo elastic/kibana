@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
+import { DataEnhancedPluginRouter } from '../type';
 
-export function registerSessionRoutes(router: IRouter, logger: Logger): void {
+export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: Logger): void {
   router.post(
     {
       path: '/internal/session',
@@ -36,7 +38,7 @@ export function registerSessionRoutes(router: IRouter, logger: Logger): void {
       } = request.body;
 
       try {
-        const response = await context.search!.session.save(sessionId, {
+        const response = await context.search!.saveSession(sessionId, {
           name,
           appId,
           expires,
@@ -67,7 +69,7 @@ export function registerSessionRoutes(router: IRouter, logger: Logger): void {
     async (context, request, res) => {
       const { id } = request.params;
       try {
-        const response = await context.search!.session.get(id);
+        const response = await context.search!.getSession(id);
 
         return res.ok({
           body: response,
@@ -90,18 +92,22 @@ export function registerSessionRoutes(router: IRouter, logger: Logger): void {
           sortField: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.string()),
           filter: schema.maybe(schema.string()),
+          searchFields: schema.maybe(schema.arrayOf(schema.string())),
+          search: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, res) => {
-      const { page, perPage, sortField, sortOrder, filter } = request.body;
+      const { page, perPage, sortField, sortOrder, filter, searchFields, search } = request.body;
       try {
-        const response = await context.search!.session.find({
+        const response = await context.search!.findSessions({
           page,
           perPage,
           sortField,
           sortOrder,
           filter,
+          searchFields,
+          search,
         });
 
         return res.ok({
@@ -126,7 +132,30 @@ export function registerSessionRoutes(router: IRouter, logger: Logger): void {
     async (context, request, res) => {
       const { id } = request.params;
       try {
-        await context.search!.session.delete(id);
+        await context.search!.deleteSession(id);
+
+        return res.ok();
+      } catch (e) {
+        const err = e.output?.payload || e;
+        logger.error(err);
+        return reportServerError(res, err);
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/session/{id}/cancel',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      try {
+        await context.search!.cancelSession(id);
 
         return res.ok();
       } catch (e) {
@@ -154,12 +183,41 @@ export function registerSessionRoutes(router: IRouter, logger: Logger): void {
       const { id } = request.params;
       const { name, expires } = request.body;
       try {
-        const response = await context.search!.session.update(id, { name, expires });
+        const response = await context.search!.updateSession(id, { name, expires });
 
         return res.ok({
           body: response,
         });
       } catch (err) {
+        logger.error(err);
+        return reportServerError(res, err);
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/session/{id}/_extend',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          expires: schema.string(),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      const { expires } = request.body;
+      try {
+        const response = await context.search!.extendSession(id, new Date(expires));
+
+        return res.ok({
+          body: response,
+        });
+      } catch (e) {
+        const err = e.output?.payload || e;
         logger.error(err);
         return reportServerError(res, err);
       }

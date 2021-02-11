@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import {
+import type {
   CoreStart,
   PluginInitializerContext,
   CoreSetup,
@@ -15,6 +15,7 @@ import {
   KibanaRequest,
   RouteMethod,
   RequestHandler,
+  RequestHandlerContext,
 } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
@@ -77,9 +78,16 @@ export interface BfetchServerSetup {
    *
    * @param streamHandler
    */
-  createStreamingRequestHandler: <Response, P, Q, B, Method extends RouteMethod = any>(
+  createStreamingRequestHandler: <
+    Response,
+    P,
+    Q,
+    B,
+    Context extends RequestHandlerContext = RequestHandlerContext,
+    Method extends RouteMethod = any
+  >(
     streamHandler: StreamingRequestHandler<Response, P, Q, B, Method>
-  ) => RequestHandler<P, Q, B, Method>;
+  ) => RequestHandler<P, Q, B, Context, Method>;
 }
 
 // eslint-disable-next-line

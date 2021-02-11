@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
@@ -52,6 +52,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       // Test replaced vislib chart types
       loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_line_chart_split_series'));
+      loadTestFile(require.resolve('./_line_chart_split_chart'));
       loadTestFile(require.resolve('./_point_series_options'));
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
@@ -66,11 +67,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
-      loadTestFile(require.resolve('./_chart_types'));
       loadTestFile(require.resolve('./_area_chart'));
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
+
+      // this check is not needed when the CI doesn't run anymore for the OSS
+      if (!isOss) {
+        loadTestFile(require.resolve('./_chart_types'));
+      }
     });
 
     describe('', function () {
@@ -97,6 +102,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
+      loadTestFile(require.resolve('./_add_to_dashboard.ts'));
 
       if (isOss) {
         loadTestFile(require.resolve('./_tile_map'));

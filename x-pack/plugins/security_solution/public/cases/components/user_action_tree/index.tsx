@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import classNames from 'classnames';
 
 import {
@@ -22,7 +24,7 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector, CommentType } from '../../../../../case/common/api/cases';
+import { ActionConnector, CommentType } from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { Alert, OnUpdateFields } from '../case_view';

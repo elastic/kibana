@@ -1,18 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import '../../../__mocks__/kea.mock';
 import '../../../__mocks__/enterprise_search_url.mock';
-import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__/';
+import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__';
 
 import React from 'react';
+
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
+
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 import { EngineDetails } from '../engine/types';
+
 import { EnginesTable } from './engines_table';
 
 describe('EnginesTable', () => {

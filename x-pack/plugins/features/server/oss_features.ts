@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureConfig } from '../common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
@@ -19,6 +21,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.discoverFeatureName', {
         defaultMessage: 'Discover',
       }),
+      management: {
+        kibana: ['search_sessions'],
+      },
       order: 100,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['discover', 'kibana'],
@@ -93,6 +98,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['storeSearchSession'],
+                  management: {
+                    kibana: ['search_sessions'],
+                  },
                 },
               ],
             },
@@ -164,6 +172,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       name: i18n.translate('xpack.features.dashboardFeatureName', {
         defaultMessage: 'Dashboard',
       }),
+      management: {
+        kibana: ['search_sessions'],
+      },
       order: 200,
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['dashboards', 'kibana'],
@@ -258,6 +269,9 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['storeSearchSession'],
+                  management: {
+                    kibana: ['search_sessions'],
+                  },
                 },
               ],
             },

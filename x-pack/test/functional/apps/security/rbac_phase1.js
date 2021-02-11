@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -58,13 +59,12 @@ export default function ({ getService, getPageObjects }) {
           ],
         },
       });
-      await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'kibanauser',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'kibanafirst kibanalast',
+        confirm_password: 'changeme',
+        full_name: 'kibanafirst kibanalast',
         email: 'kibanauser@myEmail.com',
         save: true,
         roles: ['rbac_all'],
@@ -76,13 +76,12 @@ export default function ({ getService, getPageObjects }) {
       expect(users.kibanauser.roles).to.eql(['rbac_all']);
       expect(users.kibanauser.fullname).to.eql('kibanafirst kibanalast');
       expect(users.kibanauser.reserved).to.be(false);
-      await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'kibanareadonly',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'kibanareadonlyFirst kibanareadonlyLast',
+        confirm_password: 'changeme',
+        full_name: 'kibanareadonlyFirst kibanareadonlyLast',
         email: 'kibanareadonly@myEmail.com',
         save: true,
         roles: ['rbac_read'],

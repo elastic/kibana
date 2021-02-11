@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject, Observable } from 'rxjs';
@@ -43,6 +43,7 @@ import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
+import { registerCoreObjectTypes } from './object_types';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -305,6 +306,8 @@ export class SavedObjectsService
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
     });
 
+    registerCoreObjectTypes(this.typeRegistry);
+
     return {
       status$: calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
@@ -454,6 +457,7 @@ export class SavedObjectsService
       createExporter: (savedObjectsClient) =>
         new SavedObjectsExporter({
           savedObjectsClient,
+          typeRegistry: this.typeRegistry,
           exportSizeLimit: this.config!.maxImportExportSize,
         }),
       createImporter: (savedObjectsClient) =>

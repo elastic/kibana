@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import supertest from 'supertest';
@@ -175,19 +175,19 @@ describe('core lifecycle handlers', () => {
       });
 
       destructiveMethods.forEach((method) => {
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: testPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: allowlistedTestPath, validate: false },
           (context, req, res) => {
             return res.ok({ body: 'ok' });
           }
         );
-        ((router as any)[method.toLowerCase()] as RouteRegistrar<any>)<any, any, any>(
+        ((router as any)[method.toLowerCase()] as RouteRegistrar<any, any>)<any, any, any>(
           { path: xsrfDisabledTestPath, validate: false, options: { xsrfRequired: false } },
           (context, req, res) => {
             return res.ok({ body: 'ok' });

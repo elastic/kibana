@@ -1,40 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
-import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
-import { AppLogic } from './app_logic';
+import { KibanaLogic } from '../shared/kibana';
 import { Layout } from '../shared/layout';
-import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
+import { NotFound } from '../shared/not_found';
 
+import { AppLogic } from './app_logic';
+import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 import {
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
   SOURCES_PATH,
   PERSONAL_SOURCES_PATH,
   ORG_SETTINGS_PATH,
+  SECURITY_PATH,
 } from './routes';
-
-import { SetupGuide } from './views/setup_guide';
-import { ErrorState } from './views/error_state';
-import { NotFound } from '../shared/not_found';
-import { Overview } from './views/overview';
-import { GroupsRouter } from './views/groups';
 import { SourcesRouter } from './views/content_sources';
-import { SettingsRouter } from './views/settings';
-
-import { GroupSubNav } from './views/groups/components/group_sub_nav';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
+import { ErrorState } from './views/error_state';
+import { GroupsRouter } from './views/groups';
+import { GroupSubNav } from './views/groups/components/group_sub_nav';
+import { Overview } from './views/overview';
+import { Security } from './views/security';
+import { SettingsRouter } from './views/settings';
 import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
+import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -78,6 +80,12 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route exact path="/">
         {errorConnecting ? <ErrorState /> : <Overview />}
       </Route>
+      <Route path={PERSONAL_SOURCES_PATH}>
+        {/* TODO: replace Layout with PrivateSourcesLayout (needs to be created) */}
+        <Layout navigation={<></>} restrictWidth readOnlyMode={readOnlyMode}>
+          <SourcesRouter />
+        </Layout>
+      </Route>
       <Route path={SOURCES_PATH}>
         <Layout
           navigation={<WorkplaceSearchNav sourcesSubNav={showSourcesSubnav && <SourceSubNav />} />}
@@ -94,6 +102,11 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           readOnlyMode={readOnlyMode}
         >
           <GroupsRouter />
+        </Layout>
+      </Route>
+      <Route path={SECURITY_PATH}>
+        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
+          <Security />
         </Layout>
       </Route>
       <Route path={ORG_SETTINGS_PATH}>

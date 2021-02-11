@@ -1,23 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import semver from 'semver';
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
+import { isEqual } from 'lodash';
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
-import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';
+import {
+  manifestDispatchSchema,
+  ManifestSchema,
+} from '../../../../../common/endpoint/schema/manifest';
 
 import {
   ArtifactConstants,
   buildArtifact,
   getArtifactId,
   getFullEndpointExceptionList,
+  isCompressed,
   Manifest,
-  ManifestDiff,
+  maybeCompressArtifact,
 } from '../../../lib/artifacts';
 import {
   InternalArtifactCompleteSchema,
@@ -27,6 +34,7 @@ import { ArtifactClient } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 import { ENDPOINT_LIST_ID } from '../../../../../../lists/common';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common/constants';
+import { PackagePolicy } from '../../../../../../fleet/common/types/models';
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
@@ -37,14 +45,13 @@ export interface ManifestManagerContext {
   cache: LRU<string, Buffer>;
 }
 
-export interface ManifestSnapshotOpts {
-  initialize?: boolean;
-}
+const getArtifactIds = (manifest: ManifestSchema) =>
+  [...Object.keys(manifest.artifacts)].map(
+    (key) => `${key}-${manifest.artifacts[key].decoded_sha256}`
+  );
 
-export interface ManifestSnapshot {
-  manifest: Manifest;
-  diffs: ManifestDiff[];
-}
+const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
+  isEqual(new Set(getArtifactIds(manifest1)), new Set(getArtifactIds(manifest2)));
 
 export class ManifestManager {
   protected artifactClient: ArtifactClient;
@@ -207,8 +214,7 @@ export class ManifestManager {
    */
   public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
-      const manifestClient = this.getManifestClient();
-      const manifestSo = await manifestClient.getManifest();
+      const manifestSo = await this.getManifestClient().getManifest();
 
       if (manifestSo.version === undefined) {
         throw new Error('No version returned for manifest.');
@@ -220,14 +226,17 @@ export class ManifestManager {
         soVersion: manifestSo.version,
       });
 
-      for (const id of manifestSo.attributes.ids) {
-        const artifactSo = await this.artifactClient.getArtifact(id);
-        manifest.addEntry(artifactSo.attributes);
+      for (const entry of manifestSo.attributes.artifacts) {
+        manifest.addEntry(
+          (await this.artifactClient.getArtifact(entry.artifactId)).attributes,
+          entry.policyId
+        );
       }
+
       return manifest;
-    } catch (err) {
-      if (err.output.statusCode !== 404) {
-        throw err;
+    } catch (error) {
+      if (!error.output || error.output.statusCode !== 404) {
+        throw error;
       }
       return null;
     }
@@ -239,17 +248,36 @@ export class ManifestManager {
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
-  public async buildNewManifest(baselineManifest?: Manifest): Promise<Manifest> {
+  public async buildNewManifest(
+    baselineManifest: Manifest = Manifest.getDefault(this.schemaVersion)
+  ): Promise<Manifest> {
     // Build new exception list artifacts
     const artifacts = (
       await Promise.all([this.buildExceptionListArtifacts(), this.buildTrustedAppsArtifacts()])
     ).flat();
 
     // Build new manifest
-    const manifest = Manifest.fromArtifacts(
-      artifacts,
-      baselineManifest ?? Manifest.getDefault(this.schemaVersion)
-    );
+    const manifest = new Manifest({
+      schemaVersion: this.schemaVersion,
+      semanticVersion: baselineManifest.getSemanticVersion(),
+      soVersion: baselineManifest.getSavedObjectVersion(),
+    });
+
+    for (const artifact of artifacts) {
+      let artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
+
+      if (!isCompressed(artifactToAdd)) {
+        artifactToAdd = await maybeCompressArtifact(artifactToAdd);
+
+        if (!isCompressed(artifactToAdd)) {
+          throw new Error(`Unable to compress artifact: ${getArtifactId(artifactToAdd)}`);
+        } else if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
+          throw new Error(`Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`);
+        }
+      }
+
+      manifest.addEntry(artifactToAdd);
+    }
 
     return manifest;
   }
@@ -262,38 +290,33 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
-    const serializedManifest = manifest.toEndpointFormat();
-    if (!manifestDispatchSchema.is(serializedManifest)) {
-      return [new Error('Invalid manifest')];
-    }
-
-    let paging = true;
-    let page = 1;
     const errors: Error[] = [];
 
-    while (paging) {
-      const { items, total } = await this.packagePolicyService.list(this.savedObjectsClient, {
-        page,
-        perPage: 20,
-        kuery: 'ingest-package-policies.package.name:endpoint',
-      });
+    await this.forEachPolicy(async (packagePolicy) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
+      if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
+        const oldManifest = newPackagePolicy.inputs[0].config.artifact_manifest ?? {
+          value: {},
+        };
 
-      for (const packagePolicy of items) {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
-        if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
-          const oldManifest = newPackagePolicy.inputs[0].config.artifact_manifest ?? {
-            value: {},
-          };
+        const newManifestVersion = manifest.getSemanticVersion();
+        if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
+          const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
 
-          const newManifestVersion = manifest.getSemanticVersion();
-          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-            newPackagePolicy.inputs[0].config.artifact_manifest = {
-              value: serializedManifest,
-            };
+          if (!manifestDispatchSchema.is(serializedManifest)) {
+            errors.push(new Error(`Invalid manifest for policy ${packagePolicy.id}`));
+          } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
+            newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
 
             try {
-              await this.packagePolicyService.update(this.savedObjectsClient, id, newPackagePolicy);
+              await this.packagePolicyService.update(
+                this.savedObjectsClient,
+                // @ts-ignore
+                undefined,
+                id,
+                newPackagePolicy
+              );
               this.logger.debug(
                 `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
               );
@@ -301,15 +324,17 @@ export class ManifestManager {
               errors.push(err);
             }
           } else {
-            this.logger.debug(`No change in package policy: ${id}`);
+            this.logger.debug(
+              `No change in manifest content for package policy: ${id}. Staying on old version`
+            );
           }
         } else {
-          errors.push(new Error(`Package Policy ${id} has no config.`));
+          this.logger.debug(`No change in manifest version for package policy: ${id}`);
         }
+      } else {
+        errors.push(new Error(`Package Policy ${id} has no config.`));
       }
-      paging = (page - 1) * 20 + items.length < total;
-      page++;
-    }
+    });
 
     return errors;
   }
@@ -320,27 +345,41 @@ export class ManifestManager {
    * @param manifest The Manifest to commit.
    * @returns {Promise<Error | null>} An error, if encountered, or null.
    */
-  public async commit(manifest: Manifest): Promise<Error | null> {
-    try {
-      const manifestClient = this.getManifestClient();
+  public async commit(manifest: Manifest) {
+    const manifestClient = this.getManifestClient();
 
-      // Commit the new manifest
-      const manifestSo = manifest.toSavedObject();
-      const version = manifest.getSavedObjectVersion();
+    // Commit the new manifest
+    const manifestSo = manifest.toSavedObject();
+    const version = manifest.getSavedObjectVersion();
 
-      if (version == null) {
-        await manifestClient.createManifest(manifestSo);
-      } else {
-        await manifestClient.updateManifest(manifestSo, {
-          version,
-        });
-      }
-
-      this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
-    } catch (err) {
-      return err;
+    if (version == null) {
+      await manifestClient.createManifest(manifestSo);
+    } else {
+      await manifestClient.updateManifest(manifestSo, {
+        version,
+      });
     }
 
-    return null;
+    this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
+  }
+
+  private async forEachPolicy(callback: (policy: PackagePolicy) => Promise<void>) {
+    let paging = true;
+    let page = 1;
+
+    while (paging) {
+      const { items, total } = await this.packagePolicyService.list(this.savedObjectsClient, {
+        page,
+        perPage: 20,
+        kuery: 'ingest-package-policies.package.name:endpoint',
+      });
+
+      for (const packagePolicy of items) {
+        await callback(packagePolicy);
+      }
+
+      paging = (page - 1) * 20 + items.length < total;
+      page++;
+    }
   }
 }

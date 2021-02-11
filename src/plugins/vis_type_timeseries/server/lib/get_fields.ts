@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { uniqBy } from 'lodash';
 import { first, map } from 'rxjs/operators';
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest } from 'kibana/server';
 
 import { Framework } from '../plugin';
 import { IndexPatternsFetcher } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
+import { VisTypeTimeseriesRequestHandlerContext } from '../types';
 
 export async function getFields(
-  requestContext: RequestHandlerContext,
+  requestContext: VisTypeTimeseriesRequestHandlerContext,
   request: KibanaRequest,
   framework: Framework,
   indexPatternString: string

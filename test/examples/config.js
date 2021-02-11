@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import path from 'path';
@@ -19,6 +19,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./ui_actions'),
       require.resolve('./state_sync'),
       require.resolve('./routing'),
+      require.resolve('./expressions_explorer'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -33,7 +34,10 @@ export default async function ({ readConfigFile }) {
     },
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     apps: functionalConfig.get('apps'),
     esArchiver: {
       directory: path.resolve(__dirname, '../es_archives'),

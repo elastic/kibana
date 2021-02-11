@@ -1,21 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { SavedObject } from '../../../../src/core/server';
+import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('find', () => {
+    let KIBANA_VERSION: string;
+
+    before(async () => {
+      KIBANA_VERSION = await getKibanaVersion(getService);
+    });
+
     describe('with kibana index', () => {
       before(() => esArchiver.load('saved_objects/basic'));
       after(() => esArchiver.unload('saved_objects/basic'));
@@ -33,12 +40,13 @@ export default function ({ getService }: FtrProviderContext) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 'WzIsMV0=',
+                  version: 'WzE4LDJd',
                   attributes: {
                     title: 'Count of requests',
                   },
                   score: 0,
                   migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  coreMigrationVersion: KIBANA_VERSION,
                   namespaces: ['default'],
                   references: [
                     {
@@ -129,11 +137,12 @@ export default function ({ getService }: FtrProviderContext) {
                   {
                     type: 'visualization',
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzIsMV0=',
+                    version: 'WzE4LDJd',
                     attributes: {
                       title: 'Count of requests',
                     },
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     namespaces: ['default'],
                     score: 0,
                     references: [
@@ -165,11 +174,12 @@ export default function ({ getService }: FtrProviderContext) {
                   {
                     type: 'visualization',
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    version: 'WzIsMV0=',
+                    version: 'WzE4LDJd',
                     attributes: {
                       title: 'Count of requests',
                     },
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     namespaces: ['default'],
                     score: 0,
                     references: [
@@ -187,6 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
                     },
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     namespaces: ['foo-ns'],
                     references: [
                       {
@@ -198,11 +209,10 @@ export default function ({ getService }: FtrProviderContext) {
                     score: 0,
                     type: 'visualization',
                     updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzYsMV0=',
+                    version: 'WzIyLDJd',
                   },
                 ],
               });
-              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
             }));
       });
 
@@ -244,8 +254,9 @@ export default function ({ getService }: FtrProviderContext) {
                       },
                     ],
                     migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                    coreMigrationVersion: KIBANA_VERSION,
                     updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzIsMV0=',
+                    version: 'WzE4LDJd',
                   },
                 ],
               });
@@ -415,11 +426,11 @@ export default function ({ getService }: FtrProviderContext) {
           }));
     });
 
-    describe.skip('without kibana index', () => {
+    describe('without kibana index', () => {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await es.indices.delete({ index: '.kibana' }, { ignore: [404] })
+          await esDeleteAllIndices('.kibana*')
       );
 
       it('should return 200 with empty response', async () =>

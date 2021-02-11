@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { gt, valid } from 'semver';
@@ -60,13 +60,13 @@ function throwBadResponse(state: State, res: any): never {
  * Merge the _meta.migrationMappingPropertyHashes mappings of an index with
  * the given target mappings.
  *
- * @remarks Mapping updates are commutative (deeply merged) by Elasticsearch,
- * except for the _meta key. The source index we're migrating from might
- * contain documents created by a plugin that is disabled in the Kibana
- * instance performing this migration. We merge the
- * _meta.migrationMappingPropertyHashes mappings from the source index into
- * the targetMappings to ensure that any `migrationPropertyHashes` for
- * disabled plugins aren't lost.
+ * @remarks When another instance already completed a migration, the existing
+ * target index might contain documents and mappings created by a plugin that
+ * is disabled in the current Kibana instance performing this migration.
+ * Mapping updates are commutative (deeply merged) by Elasticsearch, except
+ * for the `_meta` key. By merging the `_meta.migrationMappingPropertyHashes`
+ * mappings from the existing target index index into the targetMappings we
+ * ensure that any `migrationPropertyHashes` for disabled plugins aren't lost.
  *
  * Right now we don't use these `migrationPropertyHashes` but it could be used
  * in the future to detect if mappings were changed. If mappings weren't
@@ -209,7 +209,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // index
           sourceIndex: Option.none,
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-          targetIndexMappings: disableUnknownTypeMappingFields(
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
             indices[aliases[stateP.currentAlias]].mappings
           ),
@@ -242,7 +242,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           sourceIndex: Option.some(source) as Option.Some<string>,
           targetIndex: target,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          targetIndexMappings: disableUnknownTypeMappingFields(
             stateP.targetIndexMappings,
             indices[source].mappings
           ),
@@ -279,7 +279,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
           targetIndex: target,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          targetIndexMappings: disableUnknownTypeMappingFields(
             stateP.targetIndexMappings,
             indices[stateP.legacyIndex].mappings
           ),
@@ -638,12 +638,20 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // alias_not_found_exception another instance has completed a
         // migration from the same source.
         return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
-      } else if (
-        left.type === 'remove_index_not_a_concrete_index' ||
-        left.type === 'index_not_found_exception'
-      ) {
-        // We don't handle these errors as the migration algorithm will never
-        // cause them to occur (these are only relevant to the LEGACY_DELETE
+      } else if (left.type === 'index_not_found_exception') {
+        if (left.index === stateP.tempIndex) {
+          // another instance has already completed the migration and deleted
+          // the temporary index
+          return { ...stateP, controlState: 'MARK_VERSION_INDEX_READY_CONFLICT' };
+        } else {
+          // The migration algorithm will never cause a
+          // index_not_found_exception for an index other than the temporary
+          // index handled above.
+          throwBadResponse(stateP, left as never);
+        }
+      } else if (left.type === 'remove_index_not_a_concrete_index') {
+        // We don't handle this error as the migration algorithm will never
+        // cause it to occur (this error is only relevant to the LEGACY_DELETE
         // step).
         throwBadResponse(stateP, left as never);
       } else {

@@ -14,6 +14,10 @@ Import hooks are executed during the savedObjects import process and allow to in
 onImport?: SavedObjectsImportHook;
 ```
 
+## Remarks
+
+`importableAndExportable` must be `true` to specify this property.
+
 ## Example
 
 Registering a hook displaying a warning about a specific type of object
@@ -48,5 +52,4 @@ export class Plugin() {
 }
 
 ```
- messages returned in the warnings are user facing and must be translated.
 

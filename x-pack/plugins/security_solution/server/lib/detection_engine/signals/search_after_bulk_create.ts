@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable complexity */
 
 import { singleSearchAfter } from './single_search_after';
@@ -70,6 +72,7 @@ export const searchAfterAndBulkCreate = async ({
     interval,
     buildRuleMessage,
   });
+  const tuplesToBeLogged = [...totalToFromTuples];
   logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
 
   while (totalToFromTuples.length > 0) {
@@ -294,5 +297,6 @@ export const searchAfterAndBulkCreate = async ({
     }
   }
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
+  toReturn.totalToFromTuples = tuplesToBeLogged;
   return toReturn;
 };

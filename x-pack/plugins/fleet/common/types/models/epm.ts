@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
@@ -220,6 +221,7 @@ export interface RegistryDataStream {
   path: string;
   ingest_pipeline: string;
   elasticsearch?: RegistryElasticsearch;
+  dataset_is_prefix?: boolean;
 }
 
 export interface RegistryElasticsearch {
@@ -326,7 +328,6 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
-    aliases: object;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];

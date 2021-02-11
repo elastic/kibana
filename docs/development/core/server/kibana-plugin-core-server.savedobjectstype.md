@@ -19,6 +19,28 @@ This is only internal for now, and will only be public when we expose the regist
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [convertToAliasScript](./kibana-plugin-core-server.savedobjectstype.converttoaliasscript.md) | <code>string</code> | If defined, will be used to convert the type to an alias. |
+|  [convertToMultiNamespaceTypeVersion](./kibana-plugin-core-server.savedobjectstype.converttomultinamespacetypeversion.md) | <code>string</code> | If defined, objects of this type will be converted to multi-namespace objects when migrating to this version.<!-- -->Requirements:<!-- -->1. This string value must be a valid semver version 2. This type must have previously specified [\`namespaceType: 'single'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md) 3. This type must also specify [\`namespaceType: 'multiple'\`](./kibana-plugin-core-server.savedobjectsnamespacetype.md)<!-- -->Example of a single-namespace type in 7.10:
+```ts
+{
+  name: 'foo',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: {...}
+}
+
+```
+Example after converting to a multi-namespace type in 7.11:
+```ts
+{
+  name: 'foo',
+  hidden: false,
+  namespaceType: 'multiple',
+  mappings: {...},
+  convertToMultiNamespaceTypeVersion: '7.11.0'
+}
+
+```
+Note: a migration function can be optionally specified for the same version. |
 |  [hidden](./kibana-plugin-core-server.savedobjectstype.hidden.md) | <code>boolean</code> | Is the type hidden by default. If true, repositories will not have access to this type unless explicitly declared as an <code>extraType</code> when creating the repository.<!-- -->See [createInternalRepository](./kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md)<!-- -->. |
 |  [indexPattern](./kibana-plugin-core-server.savedobjectstype.indexpattern.md) | <code>string</code> | If defined, the type instances will be stored in the given index instead of the default one. |
 |  [management](./kibana-plugin-core-server.savedobjectstype.management.md) | <code>SavedObjectsTypeManagementDefinition</code> | An optional [saved objects management section](./kibana-plugin-core-server.savedobjectstypemanagementdefinition.md) definition for the type. |

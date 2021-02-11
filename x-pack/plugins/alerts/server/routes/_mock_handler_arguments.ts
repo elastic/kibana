@@ -1,21 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  ILegacyClusterClient,
-} from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory, ILegacyClusterClient } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
 import { AlertsHealth, AlertType } from '../../common';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
   {
@@ -32,7 +29,11 @@ export function mockHandlerArguments(
   },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
+): [
+  AlertingRequestHandlerContext,
+  KibanaRequest<unknown, unknown, unknown>,
+  KibanaResponseFactory
+] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
@@ -44,7 +45,7 @@ export function mockHandlerArguments(
         },
         getFrameworkHealth,
       },
-    } as unknown) as RequestHandlerContext,
+    } as unknown) as AlertingRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];

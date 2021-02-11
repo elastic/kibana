@@ -4,6 +4,8 @@
 
 ## IndexPatternSpec.id property
 
+saved object id
+
 <b>Signature:</b>
 
 ```typescript

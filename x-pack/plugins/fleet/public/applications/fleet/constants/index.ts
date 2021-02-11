@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 export {
   PLUGIN_ID,
   EPM_API_ROUTES,
@@ -13,6 +15,9 @@ export {
   AGENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  // Fleet Server index
+  AGENTS_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
 } from '../../../../common';
 
 export * from './page_paths';

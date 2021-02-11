@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { RequestHandlerContext } from 'src/core/server';
@@ -53,12 +53,12 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
     return {
-      register: <P, Q, B>(
+      register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
         route: RouteConfig<P, Q, B, 'get'>,
-        handler: HttpResourcesRequestHandler<P, Q, B>
+        handler: HttpResourcesRequestHandler<P, Q, B, Context>
       ) => {
         return router.get<P, Q, B>(route, (context, request, response) => {
-          return handler(context, request, {
+          return handler(context as Context, request, {
             ...response,
             ...this.createResponseToolkit(deps, context, request, response),
           });

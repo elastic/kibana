@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { badRequest, boomify, isBoom } from '@hapi/boom';
@@ -190,11 +191,11 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-const isUserContext = (context: CommentRequest): context is CommentRequestUserType => {
+export const isUserContext = (context: CommentRequest): context is CommentRequestUserType => {
   return context.type === CommentType.user;
 };
 
-const isAlertContext = (context: CommentRequest): context is CommentRequestAlertType => {
+export const isAlertContext = (context: CommentRequest): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
 };
 
@@ -205,17 +206,3 @@ export const decodeComment = (comment: CommentRequest) => {
     pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(badRequest), identity));
   }
 };
-
-export const getCommentContextFromAttributes = (
-  attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType =>
-  isUserContext(attributes)
-    ? {
-        type: CommentType.user,
-        comment: attributes.comment,
-      }
-    : {
-        type: CommentType.alert,
-        alertId: attributes.alertId,
-        index: attributes.index,
-      };

@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { IndexPatternField } from './index_pattern_field';
 import { IndexPattern } from '../index_patterns';
 import { KBN_FIELD_TYPES, FieldFormat } from '../../../common';
-import { FieldSpec } from '../types';
+import { FieldSpec, RuntimeField } from '../types';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {
@@ -42,6 +42,12 @@ describe('Field', function () {
     } as unknown) as IndexPattern,
     $$spec: ({} as unknown) as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
+    runtimeField: {
+      type: 'keyword' as RuntimeField['type'],
+      script: {
+        source: "emit('hello world')",
+      },
+    },
   };
 
   it('the correct properties are writable', () => {

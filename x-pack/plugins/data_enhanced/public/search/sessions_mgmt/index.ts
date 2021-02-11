@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,6 +15,7 @@ import type { ConfigSchema } from '../../../config';
 import type { DataEnhancedStartDependencies } from '../../plugin';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
@@ -33,22 +35,22 @@ export interface AppDependencies {
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   i18n: I18nStart;
-  config: SessionsMgmtConfigSchema;
+  config: SessionsConfigSchema;
 }
 
 export const APP = {
-  id: 'search_sessions',
+  id: SEARCH_SESSIONS_MANAGEMENT_ID,
   getI18nName: (): string =>
     i18n.translate('xpack.data.mgmt.searchSessions.appTitle', {
       defaultMessage: 'Search Sessions',
     }),
 };
 
-export type SessionsMgmtConfigSchema = ConfigSchema['search']['sessions']['management'];
+export type SessionsConfigSchema = ConfigSchema['search']['sessions'];
 
 export function registerSearchSessionsMgmt(
   coreSetup: CoreSetup<DataEnhancedStartDependencies>,
-  config: SessionsMgmtConfigSchema,
+  config: SessionsConfigSchema,
   services: IManagementSectionsPluginsSetup
 ) {
   services.management.sections.section.kibana.registerApp({

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -15,7 +15,7 @@ import {
   SavedObjectsSerializer,
   SavedObjectUnsanitizedDoc,
 } from '../../serialization';
-import { TransformFn } from './document_migrator';
+import { MigrateAndConvertFn } from './document_migrator';
 import { SavedObjectsMigrationLogger } from '.';
 
 /**
@@ -28,21 +28,24 @@ import { SavedObjectsMigrationLogger } from '.';
  */
 export async function migrateRawDocs(
   serializer: SavedObjectsSerializer,
-  migrateDoc: TransformFn,
+  migrateDoc: MigrateAndConvertFn,
   rawDocs: SavedObjectsRawDoc[],
   log: SavedObjectsMigrationLogger
 ): Promise<SavedObjectsRawDoc[]> {
   const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
   const processedDocs = [];
   for (const raw of rawDocs) {
-    if (serializer.isRawSavedObject(raw)) {
-      const savedObject = serializer.rawToSavedObject(raw);
+    const options = { namespaceTreatment: 'lax' as 'lax' };
+    if (serializer.isRawSavedObject(raw, options)) {
+      const savedObject = serializer.rawToSavedObject(raw, options);
       savedObject.migrationVersion = savedObject.migrationVersion || {};
       processedDocs.push(
-        serializer.savedObjectToRaw({
-          references: [],
-          ...(await migrateDocWithoutBlocking(savedObject)),
-        })
+        ...(await migrateDocWithoutBlocking(savedObject)).map((attrs) =>
+          serializer.savedObjectToRaw({
+            references: [],
+            ...attrs,
+          })
+        )
       );
     } else {
       log.error(
@@ -63,8 +66,8 @@ export async function migrateRawDocs(
  * work in between each transform.
  */
 function transformNonBlocking(
-  transform: TransformFn
-): (doc: SavedObjectUnsanitizedDoc) => Promise<SavedObjectUnsanitizedDoc> {
+  transform: MigrateAndConvertFn
+): (doc: SavedObjectUnsanitizedDoc) => Promise<SavedObjectUnsanitizedDoc[]> {
   // promises aren't enough to unblock the event loop
   return (doc: SavedObjectUnsanitizedDoc) =>
     new Promise((resolve, reject) => {

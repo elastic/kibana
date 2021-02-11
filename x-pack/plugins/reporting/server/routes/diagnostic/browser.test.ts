@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
@@ -12,6 +13,7 @@ import supertest from 'supertest';
 import { ReportingCore } from '../..';
 import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
 import { registerDiagnoseBrowser } from './browser';
+import type { ReportingRequestHandlerContext } from '../../types';
 
 jest.mock('child_process');
 jest.mock('readline');
@@ -47,7 +49,11 @@ describe('POST /diagnose/browser', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext(reportingSymbol, 'reporting', () => ({}));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({})
+    );
 
     const mockSetupDeps = ({
       elasticsearch: {

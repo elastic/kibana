@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -29,7 +30,7 @@ export default function ({ getPageObjects, getService }) {
 
       //Source should be correct
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0]).to.equal(
-        '/api/maps/mvt/getTile?x={x}&y={y}&z={z}&geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:(includes:!(geometry,prop1)),docvalue_fields:!(prop1),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),script_fields:(),size:10000,stored_fields:!(geometry,prop1))&geoFieldType=geo_shape'
+        '/api/maps/mvt/getTile?x={x}&y={y}&z={z}&geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:(includes:!(geometry,prop1)),docvalue_fields:!(prop1),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),runtime_mappings:(),script_fields:(),size:10000,stored_fields:!(geometry,prop1))&geoFieldType=geo_shape'
       );
 
       //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)

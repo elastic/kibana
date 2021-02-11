@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { diffMappings } from './build_active_mappings';
@@ -60,13 +60,14 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiresMigration(context: Context): Promise<boolean> {
-  const { client, alias, documentMigrator, dest, log } = context;
+  const { client, alias, documentMigrator, dest, kibanaVersion, log } = context;
 
   // Have all of our known migrations been run against the index?
   const hasMigrations = await Index.migrationsUpToDate(
     client,
     alias,
-    documentMigrator.migrationVersion
+    documentMigrator.migrationVersion,
+    kibanaVersion
   );
 
   if (!hasMigrations) {
@@ -184,7 +185,7 @@ async function migrateSourceToDest(context: Context) {
     await Index.write(
       client,
       dest.indexName,
-      await migrateRawDocs(serializer, documentMigrator.migrate, docs, log)
+      await migrateRawDocs(serializer, documentMigrator.migrateAndConvert, docs, log)
     );
   }
 }

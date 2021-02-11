@@ -1,19 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from 'src/core/server';
 import { SearchRouteDependencies } from '../search_service';
 
 import { getCallMsearch } from './call_msearch';
 import { reportServerError } from '../../../../kibana_utils/server';
-
+import type { DataPluginRouter } from '../types';
 /**
  * The msearch route takes in an array of searches, each consisting of header
  * and body json, and reformts them into a single request for the _msearch API.
@@ -27,7 +26,10 @@ import { reportServerError } from '../../../../kibana_utils/server';
  *
  * @deprecated
  */
-export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependencies): void {
+export function registerMsearchRoute(
+  router: DataPluginRouter,
+  deps: SearchRouteDependencies
+): void {
   router.post(
     {
       path: '/internal/_msearch',

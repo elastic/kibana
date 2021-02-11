@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { useActions } from 'kea';
+
 import {
   EuiText,
   EuiCode,
@@ -19,10 +19,12 @@ import {
   EuiCard,
   EuiIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiCardTo } from '../../../shared/react_router_helpers';
-import { DOCS_PREFIX, getEngineRoute, ENGINE_CRAWLER_PATH } from '../../routes';
-import { EngineLogic } from '../engine';
+import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';
+import { generateEnginePath } from '../engine';
 
 import { DocumentCreationLogic } from './';
 
@@ -33,8 +35,7 @@ interface Props {
 export const DocumentCreationButtons: React.FC<Props> = ({ disabled = false }) => {
   const { openDocumentCreation } = useActions(DocumentCreationLogic);
 
-  const { engineName } = useValues(EngineLogic);
-  const crawlerLink = getEngineRoute(engineName) + ENGINE_CRAWLER_PATH;
+  const crawlerLink = generateEnginePath(ENGINE_CRAWLER_PATH);
 
   return (
     <>

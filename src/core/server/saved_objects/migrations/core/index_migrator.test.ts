@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -24,6 +24,7 @@ describe('IndexMigrator', () => {
       batchSize: 10,
       client: elasticsearchClientMock.createElasticsearchClient(),
       index: '.kibana',
+      kibanaVersion: '7.10.0',
       log: loggingSystemMock.create().get(),
       mappingProperties: {},
       pollInterval: 1,
@@ -31,6 +32,7 @@ describe('IndexMigrator', () => {
       documentMigrator: {
         migrationVersion: {},
         migrate: _.identity,
+        migrateAndConvert: _.identity,
         prepareMigrations: jest.fn(),
       },
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
@@ -58,6 +60,7 @@ describe('IndexMigrator', () => {
               namespaces: '2f4316de49999235636386fe51dc06c1',
               originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
+              coreMigrationVersion: '2f4316de49999235636386fe51dc06c1',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
             },
@@ -78,6 +81,7 @@ describe('IndexMigrator', () => {
                 id: { type: 'keyword' },
               },
             },
+            coreMigrationVersion: { type: 'keyword' },
           },
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
@@ -179,6 +183,7 @@ describe('IndexMigrator', () => {
               namespaces: '2f4316de49999235636386fe51dc06c1',
               originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
+              coreMigrationVersion: '2f4316de49999235636386fe51dc06c1',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
             },
@@ -200,6 +205,7 @@ describe('IndexMigrator', () => {
                 id: { type: 'keyword' },
               },
             },
+            coreMigrationVersion: { type: 'keyword' },
           },
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
@@ -240,6 +246,7 @@ describe('IndexMigrator', () => {
               namespaces: '2f4316de49999235636386fe51dc06c1',
               originId: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
+              coreMigrationVersion: '2f4316de49999235636386fe51dc06c1',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
             },
@@ -261,6 +268,7 @@ describe('IndexMigrator', () => {
                 id: { type: 'keyword' },
               },
             },
+            coreMigrationVersion: { type: 'keyword' },
           },
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
@@ -307,17 +315,15 @@ describe('IndexMigrator', () => {
   test('transforms all docs from the original index', async () => {
     let count = 0;
     const { client } = testOpts;
-    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
-      return {
-        ...doc,
-        attributes: { name: ++count },
-      };
+    const migrateAndConvertDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
+      return [{ ...doc, attributes: { name: ++count } }];
     });
 
     testOpts.documentMigrator = {
       migrationVersion: { foo: '1.2.3' },
+      migrate: jest.fn(),
+      migrateAndConvert: migrateAndConvertDoc,
       prepareMigrations: jest.fn(),
-      migrate: migrateDoc,
     };
 
     withIndex(client, {
@@ -331,14 +337,14 @@ describe('IndexMigrator', () => {
     await new IndexMigrator(testOpts).migrate();
 
     expect(count).toEqual(2);
-    expect(migrateDoc).toHaveBeenCalledWith({
+    expect(migrateAndConvertDoc).toHaveBeenNthCalledWith(1, {
       id: '1',
       type: 'foo',
       attributes: { name: 'Bar' },
       migrationVersion: {},
       references: [],
     });
-    expect(migrateDoc).toHaveBeenCalledWith({
+    expect(migrateAndConvertDoc).toHaveBeenNthCalledWith(2, {
       id: '2',
       type: 'foo',
       attributes: { name: 'Baz' },
@@ -363,14 +369,15 @@ describe('IndexMigrator', () => {
 
   test('rejects when the migration function throws an error', async () => {
     const { client } = testOpts;
-    const migrateDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
+    const migrateAndConvertDoc = jest.fn((doc: SavedObjectUnsanitizedDoc) => {
       throw new Error('error migrating document');
     });
 
     testOpts.documentMigrator = {
       migrationVersion: { foo: '1.2.3' },
+      migrate: jest.fn(),
+      migrateAndConvert: migrateAndConvertDoc,
       prepareMigrations: jest.fn(),
-      migrate: migrateDoc,
     };
 
     withIndex(client, {

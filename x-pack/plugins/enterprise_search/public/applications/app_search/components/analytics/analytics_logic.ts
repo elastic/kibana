@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 import queryString from 'query-string';
 
-import { KibanaLogic } from '../../../shared/kibana';
-import { HttpLogic } from '../../../shared/http';
 import { flashAPIErrors } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';
@@ -60,6 +61,97 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       {
         onAnalyticsDataLoad: (_, { allTags }) => allTags,
         onQueryDataLoad: (_, { allTags }) => allTags,
+      },
+    ],
+    recentQueries: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { recentQueries }) => recentQueries,
+      },
+    ],
+    topQueries: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueries }) => topQueries,
+      },
+    ],
+    topQueriesNoResults: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesNoResults }) => topQueriesNoResults,
+      },
+    ],
+    topQueriesNoClicks: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesNoClicks }) => topQueriesNoClicks,
+      },
+    ],
+    topQueriesWithClicks: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { topQueriesWithClicks }) => topQueriesWithClicks,
+      },
+    ],
+    totalQueries: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalQueries }) => totalQueries,
+      },
+    ],
+    totalQueriesNoResults: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalQueriesNoResults }) => totalQueriesNoResults,
+      },
+    ],
+    totalClicks: [
+      0,
+      {
+        onAnalyticsDataLoad: (_, { totalClicks }) => totalClicks,
+      },
+    ],
+    queriesPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { queriesPerDay }) => queriesPerDay,
+      },
+    ],
+    queriesNoResultsPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { queriesNoResultsPerDay }) => queriesNoResultsPerDay,
+      },
+    ],
+    clicksPerDay: [
+      [],
+      {
+        onAnalyticsDataLoad: (_, { clicksPerDay }) => clicksPerDay,
+      },
+    ],
+    totalQueriesForQuery: [
+      0,
+      {
+        onQueryDataLoad: (_, { totalQueriesForQuery }) => totalQueriesForQuery,
+      },
+    ],
+    queriesPerDayForQuery: [
+      [],
+      {
+        onQueryDataLoad: (_, { queriesPerDayForQuery }) => queriesPerDayForQuery,
+      },
+    ],
+    topClicksForQuery: [
+      [],
+      {
+        onQueryDataLoad: (_, { topClicksForQuery }) => topClicksForQuery,
+      },
+    ],
+    startDate: [
+      '',
+      {
+        onAnalyticsDataLoad: (_, { startDate }) => startDate,
+        onQueryDataLoad: (_, { startDate }) => startDate,
       },
     ],
   }),

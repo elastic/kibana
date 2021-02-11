@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback } from 'react';
@@ -19,12 +19,14 @@ import {
 } from '../../../../../../vis_default_editor/public';
 import { ValidationVisOptionsProps } from '../../common';
 import { VisParams } from '../../../../types';
+import { getThresholdLineStyles } from '../../../collections';
+
+const thresholdLineStyles = getThresholdLineStyles();
 
 function ThresholdPanel({
   stateParams,
   setValue,
   setMultipleValidity,
-  vis,
 }: ValidationVisOptionsProps<VisParams>) {
   const setThresholdLine = useCallback(
     <T extends keyof VisParams['thresholdLine']>(
@@ -76,6 +78,7 @@ function ThresholdPanel({
             value={stateParams.thresholdLine.value}
             setValue={setThresholdLine}
             setValidity={setThresholdLineValidity}
+            data-test-subj="thresholdValueInputOption"
           />
 
           <RequiredNumberInputOption
@@ -94,7 +97,7 @@ function ThresholdPanel({
             label={i18n.translate('visTypeXy.editors.pointSeries.thresholdLine.styleLabel', {
               defaultMessage: 'Line style',
             })}
-            options={vis.type.editorConfig.collections.thresholdLineStyles}
+            options={thresholdLineStyles}
             paramName="style"
             value={stateParams.thresholdLine.style}
             setValue={setThresholdLine}

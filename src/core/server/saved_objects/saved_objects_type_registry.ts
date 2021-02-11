@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { deepFreeze } from '@kbn/std';
@@ -32,6 +32,7 @@ export class SavedObjectTypeRegistry {
     if (this.types.has(type.name)) {
       throw new Error(`Type '${type.name}' is already registered`);
     }
+    validateType(type);
     this.types.set(type.name, deepFreeze(type));
   }
 
@@ -116,3 +117,13 @@ export class SavedObjectTypeRegistry {
     return this.types.get(type)?.management?.importableAndExportable ?? false;
   }
 }
+
+const validateType = ({ name, management }: SavedObjectsType) => {
+  if (management) {
+    if (management.onExport && !management.importableAndExportable) {
+      throw new Error(
+        `Type ${name}: 'management.importableAndExportable' must be 'true' when specifying 'management.onExport'`
+      );
+    }
+  }
+};

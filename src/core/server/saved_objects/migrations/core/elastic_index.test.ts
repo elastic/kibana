@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -103,17 +103,6 @@ describe('ElasticIndex', () => {
           },
         },
         index: '.abcd',
-      });
-    });
-  });
-
-  describe('deleteIndex', () => {
-    test('calls indices.delete', async () => {
-      await Index.deleteIndex(client, '.lotr');
-
-      expect(client.indices.delete).toHaveBeenCalledTimes(1);
-      expect(client.indices.delete).toHaveBeenCalledWith({
-        index: '.lotr',
       });
     });
   });
@@ -557,6 +546,7 @@ describe('ElasticIndex', () => {
       mappings,
       count,
       migrations,
+      kibanaVersion,
     }: any) {
       client.indices.get = jest.fn().mockReturnValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -570,7 +560,12 @@ describe('ElasticIndex', () => {
         })
       );
 
-      const hasMigrations = await Index.migrationsUpToDate(client, index, migrations);
+      const hasMigrations = await Index.migrationsUpToDate(
+        client,
+        index,
+        migrations,
+        kibanaVersion
+      );
       return { hasMigrations };
     }
 
@@ -584,6 +579,7 @@ describe('ElasticIndex', () => {
         },
         count: 0,
         migrations: { dashy: '2.3.4' },
+        kibanaVersion: '7.10.0',
       });
 
       expect(hasMigrations).toBeFalsy();
@@ -611,6 +607,7 @@ describe('ElasticIndex', () => {
         },
         count: 2,
         migrations: {},
+        kibanaVersion: '7.10.0',
       });
 
       expect(hasMigrations).toBeTruthy();
@@ -652,6 +649,7 @@ describe('ElasticIndex', () => {
         },
         count: 3,
         migrations: { dashy: '23.2.5' },
+        kibanaVersion: '7.10.0',
       });
 
       expect(hasMigrations).toBeFalsy();
@@ -677,6 +675,7 @@ describe('ElasticIndex', () => {
           bashy: '99.9.3',
           flashy: '3.4.5',
         },
+        kibanaVersion: '7.10.0',
       });
 
       function shouldClause(type: string, version: string) {
@@ -702,6 +701,15 @@ describe('ElasticIndex', () => {
                 shouldClause('dashy', '23.2.5'),
                 shouldClause('bashy', '99.9.3'),
                 shouldClause('flashy', '3.4.5'),
+                {
+                  bool: {
+                    must_not: {
+                      term: {
+                        coreMigrationVersion: '7.10.0',
+                      },
+                    },
+                  },
+                },
               ],
             },
           },

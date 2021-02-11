@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CasePostRequest } from '../../../../../case/common/api';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];
 export const sampleData: CasePostRequest = {
@@ -91,4 +93,9 @@ export const useGetFieldsByIssueTypeResponse = {
       defaultValue: { name: 'Medium', id: '3' },
     },
   },
+};
+
+export const useGetChoicesResponse = {
+  isLoading: false,
+  choices,
 };

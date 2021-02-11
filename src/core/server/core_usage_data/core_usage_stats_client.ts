@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
@@ -40,6 +40,7 @@ export const CREATE_STATS_PREFIX = 'apiCalls.savedObjectsCreate';
 export const DELETE_STATS_PREFIX = 'apiCalls.savedObjectsDelete';
 export const FIND_STATS_PREFIX = 'apiCalls.savedObjectsFind';
 export const GET_STATS_PREFIX = 'apiCalls.savedObjectsGet';
+export const RESOLVE_STATS_PREFIX = 'apiCalls.savedObjectsResolve';
 export const UPDATE_STATS_PREFIX = 'apiCalls.savedObjectsUpdate';
 export const IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsImport';
 export const RESOLVE_IMPORT_STATS_PREFIX = 'apiCalls.savedObjectsResolveImportErrors';
@@ -53,6 +54,7 @@ const ALL_COUNTER_FIELDS = [
   ...getFieldsForCounter(DELETE_STATS_PREFIX),
   ...getFieldsForCounter(FIND_STATS_PREFIX),
   ...getFieldsForCounter(GET_STATS_PREFIX),
+  ...getFieldsForCounter(RESOLVE_STATS_PREFIX),
   ...getFieldsForCounter(UPDATE_STATS_PREFIX),
   // Saved Objects Management APIs
   ...getFieldsForCounter(IMPORT_STATS_PREFIX),
@@ -121,6 +123,10 @@ export class CoreUsageStatsClient {
 
   public async incrementSavedObjectsGet(options: BaseIncrementOptions) {
     await this.updateUsageStats([], GET_STATS_PREFIX, options);
+  }
+
+  public async incrementSavedObjectsResolve(options: BaseIncrementOptions) {
+    await this.updateUsageStats([], RESOLVE_STATS_PREFIX, options);
   }
 
   public async incrementSavedObjectsUpdate(options: BaseIncrementOptions) {

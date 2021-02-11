@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { Credentials } from './credentials';
 import { EuiCopy, EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
+
+import { Credentials } from './credentials';
+
 import { CredentialsFlyout } from './credentials_flyout';
 
 describe('Credentials', () => {

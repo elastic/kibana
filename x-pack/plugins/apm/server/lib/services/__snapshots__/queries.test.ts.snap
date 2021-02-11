@@ -6,7 +6,6 @@ Object {
     "events": Array [
       "error",
       "metric",
-      "sourcemap",
       "transaction",
     ],
   },
@@ -122,24 +121,12 @@ Array [
                   },
                 },
                 "outcomes": Object {
-                  "aggs": Object {
-                    "count": Object {
-                      "value_count": Object {
-                        "field": "transaction.duration.us",
-                      },
-                    },
-                  },
                   "terms": Object {
                     "field": "event.outcome",
                     "include": Array [
                       "failure",
                       "success",
                     ],
-                  },
-                },
-                "real_document_count": Object {
-                  "value_count": Object {
-                    "field": "transaction.duration.us",
                   },
                 },
                 "timeseries": Object {
@@ -150,24 +137,12 @@ Array [
                       },
                     },
                     "outcomes": Object {
-                      "aggs": Object {
-                        "count": Object {
-                          "value_count": Object {
-                            "field": "transaction.duration.us",
-                          },
-                        },
-                      },
                       "terms": Object {
                         "field": "event.outcome",
                         "include": Array [
                           "failure",
                           "success",
                         ],
-                      },
-                    },
-                    "real_document_count": Object {
-                      "value_count": Object {
-                        "field": "transaction.duration.us",
                       },
                     },
                   },
@@ -184,9 +159,6 @@ Array [
               },
               "terms": Object {
                 "field": "transaction.type",
-                "order": Object {
-                  "real_document_count": "desc",
-                },
               },
             },
           },

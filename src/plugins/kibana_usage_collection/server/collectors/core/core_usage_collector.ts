@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -154,6 +154,13 @@ export function getCoreUsageCollector(
       'apiCalls.savedObjectsGet.namespace.custom.total': { type: 'long' },
       'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes': { type: 'long' },
       'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no': { type: 'long' },
+      'apiCalls.savedObjectsResolve.total': { type: 'long' },
+      'apiCalls.savedObjectsResolve.namespace.default.total': { type: 'long' },
+      'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.yes': { type: 'long' },
+      'apiCalls.savedObjectsResolve.namespace.default.kibanaRequest.no': { type: 'long' },
+      'apiCalls.savedObjectsResolve.namespace.custom.total': { type: 'long' },
+      'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.yes': { type: 'long' },
+      'apiCalls.savedObjectsResolve.namespace.custom.kibanaRequest.no': { type: 'long' },
       'apiCalls.savedObjectsUpdate.total': { type: 'long' },
       'apiCalls.savedObjectsUpdate.namespace.default.total': { type: 'long' },
       'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes': { type: 'long' },

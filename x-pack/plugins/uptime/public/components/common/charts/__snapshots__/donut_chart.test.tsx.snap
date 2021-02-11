@@ -39,6 +39,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
+              "shape": "circle",
               "strokeWidth": 1,
               "visible": false,
             },
@@ -134,6 +135,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
+              "shape": "circle",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -170,12 +172,17 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "#F5F5F5",
               "visible": true,
             },
-            "line": Object {
+            "crossLine": Object {
               "dash": Array [
                 5,
                 5,
               ],
-              "stroke": "#777",
+              "stroke": "#98A2B3",
+              "strokeWidth": 1,
+              "visible": true,
+            },
+            "line": Object {
+              "stroke": "#98A2B3",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -196,6 +203,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "fill": "white",
               "opacity": 1,
               "radius": 2,
+              "shape": "circle",
               "strokeWidth": 1,
               "visible": true,
             },
@@ -469,7 +477,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           <div
-            class="euiHealth"
+            class="euiHealth euiHealth--textSizeS"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -511,7 +519,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero c1"
         >
           <div
-            class="euiHealth"
+            class="euiHealth euiHealth--textSizeS"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -624,7 +632,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
           class="euiFlexItem euiFlexItem--flexGrowZero c2"
         >
           <div
-            class="euiHealth"
+            class="euiHealth euiHealth--textSizeS"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
@@ -666,7 +674,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
           class="euiFlexItem euiFlexItem--flexGrowZero c2"
         >
           <div
-            class="euiHealth"
+            class="euiHealth euiHealth--textSizeS"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import './index.scss';
@@ -20,15 +20,12 @@ import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
   setTypes,
-  setI18n,
   setApplication,
   setCapabilities,
   setHttp,
-  setIndexPatterns,
   setSearch,
   setSavedObjects,
   setUsageCollector,
-  setFilterManager,
   setExpressions,
   setUiActions,
   setSavedVisualizationsLoader,
@@ -47,8 +44,6 @@ import {
 } from './embeddable';
 import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { visualization as visualizationFunction } from './expressions/visualization_function';
-import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
@@ -138,8 +133,6 @@ export class VisualizationsPlugin
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
 
-    expressions.registerFunction(visualizationFunction);
-    expressions.registerRenderer(visualizationRenderer);
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
@@ -155,7 +148,6 @@ export class VisualizationsPlugin
     { data, expressions, uiActions, embeddable, dashboard, savedObjects }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
-    setI18n(core.i18n);
     setTypes(types);
     setEmbeddable(embeddable);
     setApplication(core.application);
@@ -163,9 +155,7 @@ export class VisualizationsPlugin
     setHttp(core.http);
     setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
-    setIndexPatterns(data.indexPatterns);
     setSearch(data.search);
-    setFilterManager(data.query.filterManager);
     setExpressions(expressions);
     setUiActions(uiActions);
     setTimeFilter(data.query.timefilter.timefilter);

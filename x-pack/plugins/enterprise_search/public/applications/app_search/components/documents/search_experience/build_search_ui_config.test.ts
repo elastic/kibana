@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SchemaTypes } from '../../../../shared/types';
@@ -15,24 +16,49 @@ describe('buildSearchUIConfig', () => {
       foo: 'text' as SchemaTypes,
       bar: 'number' as SchemaTypes,
     };
+    const fields = {
+      filterFields: ['fieldA', 'fieldB'],
+      sortFields: [],
+    };
 
-    const config = buildSearchUIConfig(connector, schema);
-    expect(config.apiConnector).toEqual(connector);
-    expect(config.searchQuery.result_fields).toEqual({
-      bar: {
-        raw: {},
-        snippet: {
-          fallback: true,
-          size: 300,
+    const config = buildSearchUIConfig(connector, schema, fields);
+    expect(config).toEqual({
+      alwaysSearchOnInitialLoad: true,
+      apiConnector: connector,
+      initialState: {
+        sortDirection: 'desc',
+        sortField: 'id',
+      },
+      searchQuery: {
+        disjunctiveFacets: ['fieldA', 'fieldB'],
+        facets: {
+          fieldA: {
+            size: 30,
+            type: 'value',
+          },
+          fieldB: {
+            size: 30,
+            type: 'value',
+          },
+        },
+        result_fields: {
+          bar: {
+            raw: {},
+            snippet: {
+              fallback: true,
+              size: 300,
+            },
+          },
+          foo: {
+            raw: {},
+            snippet: {
+              fallback: true,
+              size: 300,
+            },
+          },
         },
       },
-      foo: {
-        raw: {},
-        snippet: {
-          fallback: true,
-          size: 300,
-        },
-      },
+      trackUrlState: false,
     });
   });
 });

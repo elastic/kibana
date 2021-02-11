@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import { validateConnector } from './validators';
 
@@ -51,6 +53,8 @@ const ServiceNowFieldsSchema = schema.object({
   impact: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
   urgency: schema.nullable(schema.string()),
+  category: schema.nullable(schema.string()),
+  subcategory: schema.nullable(schema.string()),
 });
 
 const NoneFieldsSchema = schema.nullable(schema.object({}));

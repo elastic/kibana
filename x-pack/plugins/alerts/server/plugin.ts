@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -28,13 +30,13 @@ import {
   CoreStart,
   SavedObjectsServiceStart,
   IContextProvider,
-  RequestHandler,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
 } from '../../../../src/core/server';
+import type { AlertingRequestHandlerContext } from './types';
 
 import {
   aggregateAlertRoute,
@@ -151,7 +153,7 @@ export class AlertingPlugin {
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
-  private isESOUsingEphemeralEncryptionKey?: boolean;
+  private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
@@ -187,12 +189,11 @@ export class AlertingPlugin {
       };
     });
 
-    this.isESOUsingEphemeralEncryptionKey =
-      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
+    this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
-    if (this.isESOUsingEphemeralEncryptionKey) {
+    if (!this.isESOCanEncrypt) {
       this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     }
 
@@ -255,10 +256,13 @@ export class AlertingPlugin {
 
     initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
-    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
+    core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
+      'alerting',
+      this.createRouteHandlerContext(core)
+    );
 
     // Routes
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<AlertingRequestHandlerContext>();
     // Register routes
     aggregateAlertRoute(router, this.licenseState);
     createAlertRoute(router, this.licenseState);
@@ -306,7 +310,7 @@ export class AlertingPlugin {
 
   public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const {
-      isESOUsingEphemeralEncryptionKey,
+      isESOCanEncrypt,
       logger,
       taskRunnerFactory,
       alertTypeRegistry,
@@ -348,9 +352,9 @@ export class AlertingPlugin {
     });
 
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
-      if (isESOUsingEphemeralEncryptionKey === true) {
+      if (isESOCanEncrypt !== true) {
         throw new Error(
-          `Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+          `Unable to create alerts client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
       return alertsClientFactory!.create(request, core.savedObjects);
@@ -392,7 +396,7 @@ export class AlertingPlugin {
 
   private createRouteHandlerContext = (
     core: CoreSetup
-  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
+  ): IContextProvider<AlertingRequestHandlerContext, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();

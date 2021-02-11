@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { PluginStart as DataPluginStart, IEsSearchRequest } from 'src/plugins/data/server';
+import { IEsSearchRequest } from 'src/plugins/data/server';
 import { schema } from '@kbn/config-schema';
 import { IEsSearchResponse } from 'src/plugins/data/common';
-import { IRouter } from '../../../../src/core/server';
+import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import type { IRouter } from 'src/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
 
-export function registerServerSearchRoute(router: IRouter, data: DataPluginStart) {
+export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
     {
       path: SERVER_SEARCH_ROUTE_PATH,

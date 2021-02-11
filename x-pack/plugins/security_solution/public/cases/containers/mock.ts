@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import {
   CommentResponse,
-  ServiceConnectorCaseResponse,
   CaseStatuses,
   UserAction,
   UserActionField,
@@ -28,15 +28,11 @@ const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
 const laterTime = '2020-02-28T15:02:57.995Z';
+
 export const elasticUser = {
   fullName: 'Leslie Knope',
   username: 'lknope',
   email: 'leslie.knope@elastic.co',
-};
-
-export const serviceConnectorUser = {
-  fullName: 'Leslie Knope',
-  username: 'lknope',
 };
 
 export const tags: string[] = ['coke', 'pepsi'];
@@ -135,19 +131,6 @@ export const pushedCase: Case = {
   externalService: basicPush,
 };
 
-export const serviceConnector: ServiceConnectorCaseResponse = {
-  title: '123',
-  id: '444',
-  pushedDate: basicUpdatedAt,
-  url: 'connector.com',
-  comments: [
-    {
-      commentId: basicCommentId,
-      pushedDate: basicUpdatedAt,
-    },
-  ],
-};
-
 const basicAction = {
   actionAt: basicCreatedAt,
   actionBy: elasticUser,
@@ -155,25 +138,6 @@ const basicAction = {
   newValue: 'what a cool value',
   caseId: basicCaseId,
   commentId: null,
-};
-
-export const casePushParams = {
-  savedObjectId: basicCaseId,
-  createdAt: basicCreatedAt,
-  createdBy: elasticUser,
-  externalId: null,
-  title: 'what a cool value',
-  commentId: null,
-  updatedAt: basicCreatedAt,
-  updatedBy: elasticUser,
-  description: 'nice',
-  comments: null,
-};
-
-export const actionTypeExecutorResult = {
-  actionId: 'string',
-  status: 'ok',
-  data: serviceConnector,
 };
 
 export const cases: Case[] = [
@@ -191,10 +155,18 @@ export const allCases: AllCases = {
   total: 10,
   ...casesStatus,
 };
+
 export const actionLicenses: ActionLicense[] = [
   {
     id: '.servicenow',
     name: 'ServiceNow',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+  },
+  {
+    id: '.jira',
+    name: 'Jira',
     enabled: true,
     enabledInConfig: true,
     enabledInLicense: true,
@@ -207,6 +179,7 @@ export const elasticUserSnake = {
   username: 'lknope',
   email: 'leslie.knope@elastic.co',
 };
+
 export const basicCommentSnake: CommentResponse = {
   comment: 'Solve this fast!',
   type: CommentType.user,
@@ -252,11 +225,13 @@ export const pushSnake = {
   external_title: 'external title',
   external_url: 'basicPush.com',
 };
+
 export const basicPushSnake = {
   ...pushSnake,
   pushed_at: basicUpdatedAt,
   pushed_by: elasticUserSnake,
 };
+
 export const pushedCaseSnake = {
   ...basicCaseSnake,
   external_service: basicPushSnake,

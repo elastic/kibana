@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
@@ -12,7 +13,7 @@ import moment from 'moment';
 import { ReactElement } from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SessionsMgmtConfigSchema } from '../';
+import { SessionsConfigSchema } from '../';
 import { SearchSessionStatus } from '../../../../common/search';
 import { OnActionComplete } from '../components';
 import { UISession } from '../types';
@@ -22,7 +23,7 @@ import { getColumns } from './get_columns';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
-let mockConfig: SessionsMgmtConfigSchema;
+let mockConfig: SessionsConfigSchema;
 let api: SearchSessionsMgmtAPI;
 let sessionsClient: SessionsClient;
 let handleAction: OnActionComplete;
@@ -35,11 +36,14 @@ describe('Search Sessions Management table column factory', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     mockConfig = {
-      expiresSoonWarning: moment.duration(1, 'days'),
-      maxSessions: 2000,
-      refreshInterval: moment.duration(1, 'seconds'),
-      refreshTimeout: moment.duration(10, 'minutes'),
-    };
+      defaultExpiration: moment.duration('7d'),
+      management: {
+        expiresSoonWarning: moment.duration(1, 'days'),
+        maxSessions: 2000,
+        refreshInterval: moment.duration(1, 'seconds'),
+        refreshTimeout: moment.duration(10, 'minutes'),
+      },
+    } as any;
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
@@ -62,6 +66,8 @@ describe('Search Sessions Management table column factory', () => {
       status: SearchSessionStatus.IN_PROGRESS,
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
+      initialState: {},
+      restoreState: {},
     };
   });
 

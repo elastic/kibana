@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /*
@@ -12,6 +12,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import Semver from 'semver';
 import { KibanaConfigType } from '../../../kibana_config';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { Logger } from '../../../logging';
@@ -95,9 +96,9 @@ export class KibanaMigrator {
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
-    this.kibanaVersion = kibanaVersion;
+    this.kibanaVersion = kibanaVersion.split('-')[0]; // coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha) to a regular semver (x.y.z);
     this.documentMigrator = new DocumentMigrator({
-      kibanaVersion,
+      kibanaVersion: this.kibanaVersion,
       typeRegistry,
       log: this.log,
     });
@@ -163,6 +164,15 @@ export class KibanaMigrator {
       registry: this.typeRegistry,
     });
 
+    this.log.debug('Applying registered migrations for the following saved object types:');
+    Object.entries(this.documentMigrator.migrationVersion)
+      .sort(([t1, v1], [t2, v2]) => {
+        return Semver.compare(v1, v2);
+      })
+      .forEach(([type, migrationVersion]) => {
+        this.log.debug(`migrationVersion: ${migrationVersion} saved object type: ${type}`);
+      });
+
     const migrators = Object.keys(indexMap).map((index) => {
       // TODO migrationsV2: remove old migrations algorithm
       if (this.savedObjectsConfig.enableV2) {
@@ -177,7 +187,7 @@ export class KibanaMigrator {
               transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
                 migrateRawDocs(
                   this.serializer,
-                  this.documentMigrator.migrate,
+                  this.documentMigrator.migrateAndConvert,
                   rawDocs,
                   new MigrationLogger(this.log)
                 ),
@@ -192,6 +202,7 @@ export class KibanaMigrator {
           client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
           documentMigrator: this.documentMigrator,
           index,
+          kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
           pollInterval: this.savedObjectsConfig.pollInterval,

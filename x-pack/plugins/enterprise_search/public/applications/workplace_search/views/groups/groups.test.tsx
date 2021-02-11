@@ -1,46 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../__mocks__';
 import { groups } from '../../__mocks__/groups.mock';
+import { meta } from '../../__mocks__/meta.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { Groups } from './groups';
+import { EuiFieldSearch, EuiLoadingSpinner } from '@elastic/eui';
 
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { Loading } from '../../../shared/loading';
+import { DEFAULT_META } from '../../../shared/constants';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { Loading } from '../../../shared/loading';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { AddGroupModal } from './components/add_group_modal';
 import { ClearFiltersLink } from './components/clear_filters_link';
 import { GroupsTable } from './components/groups_table';
 import { TableFilters } from './components/table_filters';
-
-import { DEFAULT_META } from '../../../shared/constants';
-
-import { EuiFieldSearch, EuiLoadingSpinner } from '@elastic/eui';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { Groups } from './groups';
 
 const getSearchResults = jest.fn();
 const openNewGroupModal = jest.fn();
 const resetGroups = jest.fn();
 const setFilterValue = jest.fn();
 const setActivePage = jest.fn();
-
-const mockMeta = {
-  ...DEFAULT_META,
-  page: {
-    current: 1,
-    total_results: 50,
-    total_pages: 5,
-  },
-};
 
 const mockSuccessMessage = {
   type: 'success',
@@ -54,7 +46,7 @@ const mockValues = {
   newGroup: null,
   groupListLoading: false,
   hasFiltersSet: false,
-  groupsMeta: mockMeta,
+  groupsMeta: meta,
   filteredSources: [],
   filteredUsers: [],
   filterValue: '',

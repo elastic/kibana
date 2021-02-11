@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import {
   Headers,
-  IRouter,
   kibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult, AuthenticationServiceStart } from '../../authentication';
@@ -27,12 +27,12 @@ import { routeDefinitionParamsMock } from '../index.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('Change password', () => {
-  let router: jest.Mocked<IRouter>;
+  let router: jest.Mocked<SecurityRouter>;
   let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
-  let routeHandler: RequestHandler<any, any, any>;
+  let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
-  let mockContext: DeeplyMockedKeys<RequestHandlerContext>;
+  let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
 
   function checkPasswordChangeAPICall(username: string, headers?: Headers) {
     expect(
@@ -49,7 +49,10 @@ describe('Change password', () => {
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    session = routeParamsMock.session;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
+
     authc = authenticationServiceMock.createStart();
     routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 

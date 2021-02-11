@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
@@ -43,6 +43,7 @@ interface SavedObjectDoc<T = unknown> {
   namespace?: string;
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
+  coreMigrationVersion?: string;
   version?: string;
   updated_at?: string;
   originId?: string;
@@ -68,3 +69,19 @@ export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial
  * @public
  */
 export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
+
+/**
+ * Options that can be specified when using the saved objects serializer to parse a raw document.
+ *
+ * @public
+ */
+export interface SavedObjectsRawDocParseOptions {
+  /**
+   * Optional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously
+   * single-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade
+   * migrations.
+   *
+   * If not specified, the default treatment is `strict`.
+   */
+  namespaceTreatment?: 'strict' | 'lax';
+}

@@ -1,30 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
+
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
-  LogEntry,
-  LogColumn,
   LogEntriesRequest,
 } from '../../../../common/http_api';
+import { LogColumn, LogEntryCursor, LogEntry } from '../../../../common/log_entry';
 import {
   InfraSourceConfiguration,
   InfraSources,
   SavedSourceConfigurationFieldColumnRuntimeType,
 } from '../../sources';
-import { getBuiltinRules } from './builtin_rules';
+import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
 import {
   CompiledLogMessageFormattingRule,
   Fields,
   Highlights,
   compileFormattingRules,
-} from './message';
+} from '../../../services/log_entries/message/message';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
@@ -33,7 +34,6 @@ import {
   CompositeDatasetKey,
   createLogEntryDatasetsQuery,
 } from './queries/log_entry_datasets';
-import { LogEntryCursor } from '../../../../common/log_entry';
 
 export interface LogEntriesParams {
   startTimestamp: number;
@@ -68,7 +68,7 @@ export class InfraLogEntriesDomain {
   ) {}
 
   public async getLogEntriesAround(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesAroundParams,
     columnOverrides?: LogEntriesRequest['columns']
@@ -128,7 +128,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     params: LogEntriesParams,
     columnOverrides?: LogEntriesRequest['columns']
@@ -156,6 +156,7 @@ export class InfraLogEntriesDomain {
     const entries = documents.map((doc) => {
       return {
         id: doc.id,
+        index: doc.index,
         cursor: doc.cursor,
         columns: columnDefinitions.map(
           (column): LogColumn => {
@@ -187,7 +188,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryBucketsBetween(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     start: number,
     end: number,
@@ -210,7 +211,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogSummaryHighlightBucketsBetween(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceId: string,
     startTimestamp: number,
     endTimestamp: number,
@@ -256,7 +257,7 @@ export class InfraLogEntriesDomain {
   }
 
   public async getLogEntryDatasets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     timestampField: string,
     indexName: string,
     startTime: number,
@@ -297,14 +298,14 @@ export class InfraLogEntriesDomain {
 
 export interface LogEntriesAdapter {
   getLogEntries(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
   ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }>;
 
   getContainedLogSummaryBuckets(
-    requestContext: RequestHandlerContext,
+    requestContext: InfraPluginRequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     startTimestamp: number,
     endTimestamp: number,
@@ -317,6 +318,7 @@ export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
   id: string;
+  index: string;
   fields: Fields;
   highlights: Highlights;
   cursor: LogEntryCursor;

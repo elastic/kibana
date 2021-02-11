@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -33,7 +34,7 @@ import {
   StyleMetaData,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
@@ -97,7 +98,7 @@ export class DynamicStyleProperty<T>
     }
 
     const join = this._layer.getValidJoins().find((validJoin: InnerJoin) => {
-      return validJoin.getRightJoinSource().hasMatchingMetricField(fieldName);
+      return !!validJoin.getRightJoinSource().getFieldByName(fieldName);
     });
     return join ? join.getSourceMetaDataRequestId() : null;
   }

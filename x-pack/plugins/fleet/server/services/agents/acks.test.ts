@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { SavedObjectsBulkResponse } from 'kibana/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
 import {
   Agent,
@@ -19,6 +21,7 @@ import { acknowledgeAgentActions } from './acks';
 describe('test agent acks services', () => {
   it('should succeed on valid and matched actions', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     mockSavedObjectsClient.bulkGet.mockReturnValue(
       Promise.resolve({
@@ -41,6 +44,7 @@ describe('test agent acks services', () => {
 
     await acknowledgeAgentActions(
       mockSavedObjectsClient,
+      mockElasticsearchClient,
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
@@ -59,6 +63,7 @@ describe('test agent acks services', () => {
 
   it('should update config field on the agent if a policy change is acknowledged with an agent without policy', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const actionAttributes = {
       type: 'POLICY_CHANGE',
@@ -85,6 +90,7 @@ describe('test agent acks services', () => {
 
     await acknowledgeAgentActions(
       mockSavedObjectsClient,
+      mockElasticsearchClient,
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
@@ -100,24 +106,25 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(1);
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockSavedObjectsClient.update).toBeCalled();
+    expect(mockSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "fleet-agents",
+        "id",
+        Object {
           "packages": Array [
             "system",
           ],
           "policy_revision": 4,
         },
-        "id": "id",
-        "type": "fleet-agents",
-      }
+      ]
     `);
   });
 
   it('should update config field on the agent if a policy change is acknowledged with a higher revision than the agent one', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const actionAttributes = {
       type: 'POLICY_CHANGE',
@@ -144,6 +151,7 @@ describe('test agent acks services', () => {
 
     await acknowledgeAgentActions(
       mockSavedObjectsClient,
+      mockElasticsearchClient,
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
@@ -160,24 +168,25 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(1);
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockSavedObjectsClient.update).toBeCalled();
+    expect(mockSavedObjectsClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "fleet-agents",
+        "id",
+        Object {
           "packages": Array [
             "system",
           ],
           "policy_revision": 4,
         },
-        "id": "id",
-        "type": "fleet-agents",
-      }
+      ]
     `);
   });
 
   it('should not update config field on the agent if a policy change is acknowledged with a lower revision than the agent one', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const actionAttributes = {
       type: 'POLICY_CHANGE',
@@ -204,6 +213,7 @@ describe('test agent acks services', () => {
 
     await acknowledgeAgentActions(
       mockSavedObjectsClient,
+      mockElasticsearchClient,
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
@@ -220,12 +230,13 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(0);
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockSavedObjectsClient.update).not.toBeCalled();
   });
 
   it('should not update config field on the agent if a policy change for an old revision is acknowledged', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     mockSavedObjectsClient.bulkGet.mockReturnValue(
       Promise.resolve({
@@ -249,6 +260,7 @@ describe('test agent acks services', () => {
 
     await acknowledgeAgentActions(
       mockSavedObjectsClient,
+      mockElasticsearchClient,
       ({
         id: 'id',
         type: AGENT_TYPE_PERMANENT,
@@ -265,12 +277,13 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(0);
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockSavedObjectsClient.update).not.toBeCalled();
   });
 
   it('should fail for actions that cannot be found on agent actions list', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockSavedObjectsClient.bulkGet.mockReturnValue(
       Promise.resolve({
         saved_objects: [
@@ -288,6 +301,7 @@ describe('test agent acks services', () => {
     try {
       await acknowledgeAgentActions(
         mockSavedObjectsClient,
+        mockElasticsearchClient,
         ({
           id: 'id',
           type: AGENT_TYPE_PERMANENT,
@@ -310,6 +324,7 @@ describe('test agent acks services', () => {
 
   it('should fail for events that have types not in the allowed acknowledgement type list', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     mockSavedObjectsClient.bulkGet.mockReturnValue(
       Promise.resolve({
@@ -333,6 +348,7 @@ describe('test agent acks services', () => {
     try {
       await acknowledgeAgentActions(
         mockSavedObjectsClient,
+        mockElasticsearchClient,
         ({
           id: 'id',
           type: AGENT_TYPE_PERMANENT,

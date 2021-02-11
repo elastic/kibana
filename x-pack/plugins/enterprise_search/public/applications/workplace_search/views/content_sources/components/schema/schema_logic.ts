@@ -1,26 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
 import { kea, MakeLogicType } from 'kea';
-
-import { HttpLogic } from '../../../../../shared/http';
+import { cloneDeep, isEqual } from 'lodash';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
-import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
-import { OptionValue } from '../../../../types';
-
 import {
   flashAPIErrors,
   setSuccessMessage,
-  FlashMessagesLogic,
+  setErrorMessage,
+  clearFlashMessages,
 } from '../../../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../../../shared/http';
+import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
 import { AppLogic } from '../../../../app_logic';
+import { OptionValue } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
 import {
@@ -46,7 +45,6 @@ interface SchemaActions {
   }): { schema: Schema; formUnchanged: boolean };
   onIndexingComplete(numDocumentsWithErrors: number): number;
   resetMostRecentIndexJob(emptyReindexJob: IndexJob): IndexJob;
-  showFieldSuccess(successMessage: string): string;
   setFieldName(rawFieldName: string): string;
   setFilterValue(filterValue: string): string;
   addNewField(
@@ -111,7 +109,7 @@ interface SchemaChangeErrorsProps {
   fieldCoercionErrors: FieldCoercionErrors;
 }
 
-const dataTypeOptions = [
+export const dataTypeOptions = [
   { value: 'text', text: 'Text' },
   { value: 'date', text: 'Date' },
   { value: 'number', text: 'Number' },
@@ -132,7 +130,6 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     }),
     onIndexingComplete: (numDocumentsWithErrors: number) => numDocumentsWithErrors,
     resetMostRecentIndexJob: (emptyReindexJob: IndexJob) => emptyReindexJob,
-    showFieldSuccess: (successMessage: string) => successMessage,
     setFieldName: (rawFieldName: string) => rawFieldName,
     setFilterValue: (filterValue: string) => filterValue,
     openAddFieldModal: () => true,
@@ -299,7 +296,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
       } catch (e) {
-        flashAPIErrors({ ...e, message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE });
+        setErrorMessage(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       }
     },
     addNewField: ({ fieldName, newFieldType }) => {
@@ -326,7 +323,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       const emptyReindexJob = {
         percentageComplete: 100,
         numDocumentsWithErrors: 0,
-        activeReindexJobId: 0,
+        activeReindexJobId: '',
         isActive: false,
       };
 
@@ -348,10 +345,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       }
     },
     resetMostRecentIndexJob: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
     resetSchemaState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

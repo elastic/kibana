@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -79,8 +80,6 @@ export const CasePostRequestRt = rt.type({
   settings: SettingsRt,
 });
 
-export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
-
 export const CasesFindRequestRt = rt.partial({
   tags: rt.union([rt.array(rt.string), rt.string]),
   status: CaseStatusRt,
@@ -125,6 +124,31 @@ export const CasePatchRequestRt = rt.intersection([
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
 
+export const CasePushRequestParamsRt = rt.type({
+  case_id: rt.string,
+  connector_id: rt.string,
+});
+
+export const ExternalServiceResponseRt = rt.intersection([
+  rt.type({
+    title: rt.string,
+    id: rt.string,
+    pushedDate: rt.string,
+    url: rt.string,
+  }),
+  rt.partial({
+    comments: rt.array(
+      rt.intersection([
+        rt.type({
+          commentId: rt.string,
+          pushedDate: rt.string,
+        }),
+        rt.partial({ externalCommentId: rt.string }),
+      ])
+    ),
+  }),
+]);
+
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
@@ -132,8 +156,8 @@ export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
-export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
+export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {
