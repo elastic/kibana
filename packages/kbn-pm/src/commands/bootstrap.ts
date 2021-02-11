@@ -111,5 +111,7 @@ export const BootstrapCommand: ICommand = {
         log.success(`[${project.name}] bootstrap complete`);
       }
     });
+
+    log.info('For IDE TypeScript support run `node scripts/build_ts_refs`');
   },
 };

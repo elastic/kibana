@@ -8984,6 +8984,7 @@ const BootstrapCommand = {
         _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].success(`[${project.name}] bootstrap complete`);
       }
     });
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].info('For IDE TypeScript support run `node scripts/build_ts_refs`');
   }
 
 };
