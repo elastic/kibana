@@ -66,6 +66,7 @@ export const buildAnomaliesHistogramQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: true,
     body: {
       aggs: getHistogramAggregation(),
       query: {
@@ -74,7 +75,6 @@ export const buildAnomaliesHistogramQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
     },
   };
 
