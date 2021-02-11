@@ -6,7 +6,9 @@
  */
 
 import React, { Fragment } from 'react';
+
 import { useValues } from 'kea';
+
 import { EuiCallOut, EuiCallOutProps, EuiSpacer } from '@elastic/eui';
 
 import { FlashMessagesLogic } from './flash_messages_logic';

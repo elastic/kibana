@@ -8,13 +8,13 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues } from '../../../../__mocks__';
+import { fullContentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
-
-import { fullContentSources } from '../../../__mocks__/content_sources.mock';
 
 import { Loading } from '../../../../shared/loading';
 import { ComponentLoader } from '../../../components/shared/component_loader';
