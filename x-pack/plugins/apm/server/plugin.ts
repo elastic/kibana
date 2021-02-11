@@ -16,7 +16,8 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
-import { APMConfig, APMXPackConfig, mergeConfigs } from '.';
+import { APMConfig, APMXPackConfig } from '.';
+import { mergeConfigs } from './index';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';

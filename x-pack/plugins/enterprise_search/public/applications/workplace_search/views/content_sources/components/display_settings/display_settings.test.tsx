@@ -8,24 +8,21 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { mockKibanaValues } from '../../../../../__mocks__';
-
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
 import { unmountHandler } from '../../../../../__mocks__/shallow_useeffect.mock';
-
-import { shallow } from 'enzyme';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
-import { EuiButton, EuiTabbedContent } from '@elastic/eui';
+import { shallow } from 'enzyme';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+import { EuiButton, EuiTabbedContent } from '@elastic/eui';
 
 import { Loading } from '../../../../../shared/loading';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 
-import { FieldEditorModal } from './field_editor_modal';
-
 import { DisplaySettings } from './display_settings';
+import { FieldEditorModal } from './field_editor_modal';
 
 describe('DisplaySettings', () => {
   const { navigateToUrl } = mockKibanaValues;

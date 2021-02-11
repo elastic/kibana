@@ -21,7 +21,7 @@ export const getXDomain = (params: Aspect['params']): DomainRange => {
   const minInterval = (params as DateHistogramParams | HistogramParams)?.interval ?? undefined;
 
   if ((params as DateHistogramParams).date) {
-    const bounds = getTimefilter().getBounds();
+    const bounds = getTimefilter().getActiveBounds();
 
     if (bounds) {
       return {
