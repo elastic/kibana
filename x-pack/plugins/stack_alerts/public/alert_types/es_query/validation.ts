@@ -10,12 +10,21 @@ import { EsQueryAlertParams } from './types';
 import { ValidationResult, builtInComparators } from '../../../../triggers_actions_ui/public';
 
 export const validateExpression = (alertParams: EsQueryAlertParams): ValidationResult => {
-  const { index, timeField, esQuery, threshold, timeWindowSize, thresholdComparator } = alertParams;
+  const {
+    index,
+    timeField,
+    esQuery,
+    size,
+    threshold,
+    timeWindowSize,
+    thresholdComparator,
+  } = alertParams;
   const validationResult = { errors: {} };
   const errors = {
     index: new Array<string>(),
     timeField: new Array<string>(),
     esQuery: new Array<string>(),
+    size: new Array<string>(),
     threshold0: new Array<string>(),
     threshold1: new Array<string>(),
     thresholdComparator: new Array<string>(),
@@ -91,6 +100,21 @@ export const validateExpression = (alertParams: EsQueryAlertParams): ValidationR
     errors.timeWindowSize.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeWindowSizeText', {
         defaultMessage: 'Time window size is required.',
+      })
+    );
+  }
+  if (!size) {
+    errors.size.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSizeText', {
+        defaultMessage: 'Size is required.',
+      })
+    );
+  }
+  if ((size && size < 0) || size > 10000) {
+    errors.size.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.invalidSizeRangeText', {
+        defaultMessage: 'Size must be between 0 and {max, number}.',
+        values: { max: 10000 },
       })
     );
   }

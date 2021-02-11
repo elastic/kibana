@@ -21,6 +21,7 @@ export const config = {
     sourcemapIndices: schema.string({ defaultValue: 'apm-*' }),
     onboardingIndices: schema.string({ defaultValue: 'apm-*' }),
     indexPattern: schema.string({ defaultValue: 'apm-*' }),
+    fleetMode: schema.boolean({ defaultValue: true }),
   }),
 };
 

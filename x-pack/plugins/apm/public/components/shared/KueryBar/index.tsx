@@ -66,7 +66,7 @@ export function KueryBar(props: { prepend?: React.ReactNode | string }) {
 
   const example = examples[processorEvent || 'defaults'];
 
-  const { indexPattern } = useDynamicIndexPatternFetcher(processorEvent);
+  const { indexPattern } = useDynamicIndexPatternFetcher();
 
   const placeholder = i18n.translate('xpack.apm.kueryBar.placeholder', {
     defaultMessage: `Search {event, select,

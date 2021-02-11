@@ -30,10 +30,9 @@ describe('Actions', () => {
           ariaRowindex={2}
           checked={false}
           columnValues={'abc def'}
-          expanded={false}
           eventId="abc"
           loadingEventIds={[]}
-          onEventToggled={jest.fn()}
+          onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={true}
         />
@@ -52,9 +51,8 @@ describe('Actions', () => {
           checked={false}
           columnValues={'abc def'}
           eventId="abc"
-          expanded={false}
           loadingEventIds={[]}
-          onEventToggled={jest.fn()}
+          onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
         />
