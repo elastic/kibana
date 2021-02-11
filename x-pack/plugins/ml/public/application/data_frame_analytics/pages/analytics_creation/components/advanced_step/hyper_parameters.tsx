@@ -45,7 +45,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaHelpText', {
             defaultMessage:
-              'Regularization parameter to prevent overfitting on the training data set. Must be a non negative value.',
+              'A multiplier of the leaf weights in loss calculations. Must be a nonnegative value.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.LAMBDA] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.LAMBDA]}
@@ -53,7 +53,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaInputAriaLabel', {
               defaultMessage:
-                'Regularization parameter to prevent overfitting on the training data set.',
+                'A multiplier of leaf weights in loss calculations.',
             })}
             data-test-subj="mlAnalyticsCreateJobFlyoutLambdaInput"
             onChange={(e) =>
@@ -71,7 +71,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             defaultMessage: 'Max trees',
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.maxTreesText', {
-            defaultMessage: 'The maximum number of trees the forest is allowed to contain.',
+            defaultMessage: 'The maximum number of decision trees in the forest.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.MAX_TREES] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.MAX_TREES]}
@@ -80,7 +80,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.maxTreesInputAriaLabel',
               {
-                defaultMessage: 'The maximum number of trees the forest is allowed to contain.',
+                defaultMessage: 'The maximum number of decision trees in the forest.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobFlyoutMaxTreesInput"
@@ -102,7 +102,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.gammaText', {
             defaultMessage:
-              'Multiplies a linear penalty associated with the size of individual trees in the forest. Must be non-negative value.',
+              'A multiplier of the tree size in loss calcuations. Must be nonnegative value.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.GAMMA] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.GAMMA]}
@@ -110,7 +110,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.gammaInputAriaLabel', {
               defaultMessage:
-                'Multiplies a linear penalty associated with the size of individual trees in the forest',
+                'A multiplier of the tree size in loss calculations.',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardGammaInput"
             onChange={(e) =>
@@ -135,7 +135,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
         >
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.etaInputAriaLabel', {
-              defaultMessage: 'The shrinkage applied to the weights',
+              defaultMessage: 'The shrinkage applied to the weights.',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardEtaInput"
             onChange={(e) =>
@@ -193,7 +193,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedText', {
             defaultMessage:
-              'The seed to the random generator that is used to pick which documents will be used for training.',
+              'The seed for the random generator that picks training data.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED]}
@@ -203,7 +203,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
               'xpack.ml.dataframe.analytics.create.randomizeSeedInputAriaLabel',
               {
                 defaultMessage:
-                  'The seed to the random generator that is used to pick which documents will be used for training',
+                  'The seed to the random generator that picks training data.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardRandomizeSeedInput"
@@ -223,14 +223,14 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.alphaText', {
             defaultMessage:
-              'Multiplies a term based on tree depth in the regularized loss. Higher values result in shallower trees and faster training times. Must be greater than or equal to 0. ',
+              'A multiplier of the tree depth in loss calculations. Must be greater than or equal to 0.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ALPHA] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ALPHA]}
         >
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.alphaInputAriaLabel', {
-              defaultMessage: 'Multiplies a term based on tree depth in the regularized loss',
+              defaultMessage: 'A multiplier of the tree depth in loss calculations.',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardAlphaInput"
             onChange={(e) =>
@@ -249,7 +249,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.downsampleFactorText', {
             defaultMessage:
-              'Controls the fraction of data that is used to compute the derivatives of the loss function for tree training. Must be between 0 and 1.',
+              'The fraction of data used to compute derivatives of the loss function for tree training. Must be between 0 and 1.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.DOWNSAMPLE_FACTOR] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.DOWNSAMPLE_FACTOR]}
@@ -259,7 +259,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
               'xpack.ml.dataframe.analytics.create.downsampleFactorInputAriaLabel',
               {
                 defaultMessage:
-                  'Controls the fraction of data that is used to compute the derivatives of the loss function for tree training',
+                  'The fraction of data used to compute derivatives of the loss function for tree training.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardDownsampleFactorInput"
@@ -282,7 +282,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.etaGrowthRatePerTreeText', {
             defaultMessage:
-              'Specifies the rate at which eta increases for each new tree that is added to the forest. Must be between 0.5 and 2.',
+              'The rate at which eta increases for each new tree that is added to the forest. Must be between 0.5 and 2.',
           })}
           isInvalid={
             advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.ETA_GROWTH_RATE_PER_TREE] !== undefined
@@ -294,7 +294,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
               'xpack.ml.dataframe.analytics.create.etaGrowthRatePerTreeInputAriaLabel',
               {
                 defaultMessage:
-                  'Specifies the rate at which eta increases for each new tree that is added to the forest.',
+                  'The rate at which eta increases for each new tree that is added to the forest.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardEtaGrowthRatePerTreeInput"
@@ -322,7 +322,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             'xpack.ml.dataframe.analytics.create.maxOptimizationRoundsPerHyperparameterText',
             {
               defaultMessage:
-                'Multiplier responsible for determining the maximum number of hyperparameter optimization steps in the Bayesian optimization procedure.',
+                'The maximum number of optimization rounds for each undefined hyperparameter.',
             }
           )}
           isInvalid={
@@ -339,7 +339,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
               'xpack.ml.dataframe.analytics.create.maxOptimizationRoundsPerHyperparameterInputAriaLabel',
               {
                 defaultMessage:
-                  'Multiplier responsible for determining the maximum number of hyperparameter optimization steps in the Bayesian optimization procedure. Must be an integer between 0 and 20.',
+                  'The maximum number of optimization rounds for each undefined hyperparameter. Must be an integer between 0 and 20.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardMaxOptimizationRoundsPerHyperparameterInput"
