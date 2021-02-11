@@ -51,6 +51,13 @@ export default function () {
         '--telemetry.url=https://telemetry-staging.elastic.co/xpack/v2/send',
         '--telemetry.optInStatusUrl=https://telemetry-staging.elastic.co/opt_in_status/v2/send',
         `--server.maxPayloadBytes=1679958`,
+        // test saved objects hidden type
+        `--plugin-path=${path.join(
+          __dirname,
+          'fixtures',
+          'plugins',
+          'test_saved_objects_hidden_type'
+        )}`,
         // newsfeed mock service
         `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
         `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,

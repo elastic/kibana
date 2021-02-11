@@ -209,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
                     score: 0,
                     type: 'visualization',
                     updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzIyLDJd',
+                    version: 'WzE4LDJd',
                   },
                 ],
               });
@@ -290,6 +290,34 @@ export default function ({ getService }: FtrProviderContext) {
                   'whitespace but "<" found.\ndashboard.attributes.title:foo' +
                   '<invalid\n------------------------------^: Bad Request',
                 statusCode: 400,
+              });
+            }));
+      });
+
+      describe('hidden saved object types', () => {
+        it('returns empty response for importableAndExportable types', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=test-hidden-importable-exportable&fields=title')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 0,
+                saved_objects: [],
+              });
+            }));
+
+        it('returns empty response for non importableAndExportable types', async () =>
+          await supertest
+            .get('/api/saved_objects/_find?type=test-hidden-non-importable-exportable&fields=title')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 0,
+                saved_objects: [],
               });
             }));
       });
