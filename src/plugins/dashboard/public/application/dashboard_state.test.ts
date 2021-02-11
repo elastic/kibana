@@ -17,6 +17,7 @@ import { createKbnUrlStateStorage } from '../services/kibana_utils';
 import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
@@ -45,6 +46,7 @@ describe('DashboardState', function () {
       kibanaVersion: '7.0.0',
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
+      toasts: coreMock.createStart().notifications.toasts,
       hasTaggingCapabilities: mockHasTaggingCapabilities,
     });
   }

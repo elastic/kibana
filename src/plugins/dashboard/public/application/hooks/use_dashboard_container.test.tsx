@@ -20,6 +20,7 @@ import { DashboardCapabilities } from '../types';
 import { EmbeddableFactory } from '../../../../embeddable/public';
 import { HelloWorldEmbeddable } from '../../../../embeddable/public/tests/fixtures';
 import { DashboardContainer } from '../embeddable';
+import { coreMock } from 'src/core/public/mocks';
 
 const savedDashboard = getSavedDashboardMock();
 
@@ -32,12 +33,13 @@ const history = createBrowserHistory();
 const createDashboardState = () =>
   new DashboardStateManager({
     savedDashboard,
+    kibanaVersion: '7.0.0',
     hideWriteControls: false,
     allowByValueEmbeddables: false,
-    kibanaVersion: '7.0.0',
-    kbnUrlStateStorage: createKbnUrlStateStorage(),
     history: createBrowserHistory(),
+    kbnUrlStateStorage: createKbnUrlStateStorage(),
     hasTaggingCapabilities: mockHasTaggingCapabilities,
+    toasts: coreMock.createStart().notifications.toasts,
   });
 
 const defaultCapabilities: DashboardCapabilities = {
