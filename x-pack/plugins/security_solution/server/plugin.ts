@@ -6,7 +6,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
 
@@ -47,7 +46,7 @@ import { isNotificationAlertExecutor } from './lib/detection_engine/notification
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { AppClientFactory } from './client';
-import { createConfig$, ConfigType } from './config';
+import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
@@ -63,7 +62,7 @@ import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { ArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
+import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
@@ -119,8 +118,7 @@ const securitySubPlugins = [
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
-  private readonly config$: Observable<ConfigType>;
-  private config?: ConfigType;
+  private readonly config: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
   private setupPlugins?: SetupPlugins;
@@ -132,27 +130,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
-  private exceptionsCache: LRU<string, Buffer>;
+  private artifactsCache: LRU<string, Buffer>;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
     this.logger = context.logger.get();
-    this.config$ = createConfig$(context);
+    this.config = createConfig(context);
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
-    this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
 
     this.logger.debug('plugin initialized');
   }
 
-  public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
     this.setupPlugins = plugins;
 
-    const config = await this.config$.pipe(first()).toPromise();
-    this.config = config;
-    const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
+    const config = this.config;
+    const globalConfig = this.context.config.legacy.get();
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
@@ -186,7 +183,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initRoutes(
       router,
       config,
-      plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false,
+      plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
       plugins.ml
     );
@@ -195,7 +192,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
-    registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
+    registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
@@ -340,7 +337,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger: this.logger,
-        cache: this.exceptionsCache,
+        cache: this.artifactsCache,
       });
 
       if (this.manifestTask) {

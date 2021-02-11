@@ -65,7 +65,7 @@ export const VisualizeListing = () => {
 
   useMount(() => {
     // Reset editor state if the visualize listing page is loaded.
-    stateTransferService.clearEditorState();
+    stateTransferService.clearEditorState(VisualizeConstants.APP_ID);
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
@@ -149,6 +149,7 @@ export const VisualizeListing = () => {
   const calloutMessage = (
     <>
       <FormattedMessage
+        data-test-subj="visualize-dashboard-flow-prompt"
         id="visualize.visualizeListingDashboardFlowDescription"
         defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
         values={{

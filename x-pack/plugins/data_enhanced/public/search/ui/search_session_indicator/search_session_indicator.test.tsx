@@ -108,11 +108,21 @@ test('Canceled state', async () => {
 });
 
 test('Disabled state', async () => {
-  render(
+  const { rerender } = render(
     <Container>
-      <SearchSessionIndicator state={SearchSessionState.Loading} disabled={true} />
+      <SearchSessionIndicator state={SearchSessionState.Loading} saveDisabled={true} />
     </Container>
   );
 
-  expect(screen.getByTestId('searchSessionIndicator').querySelector('button')).toBeDisabled();
+  await userEvent.click(screen.getByLabelText('Search session loading'));
+
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+
+  rerender(
+    <Container>
+      <SearchSessionIndicator state={SearchSessionState.Completed} saveDisabled={true} />
+    </Container>
+  );
+
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
 });

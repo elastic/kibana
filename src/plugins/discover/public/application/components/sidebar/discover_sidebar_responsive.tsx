@@ -11,6 +11,7 @@ import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UiCounterMetricType } from '@kbn/analytics';
+import { IUiSettingsClient } from 'kibana/public';
 import {
   EuiTitle,
   EuiHideFor,
@@ -25,13 +26,14 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../data/common';
+import { IndexPatternAttributes, IndexPatternsContract } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../build_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { AppState } from '../../angular/discover_state';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -42,6 +44,10 @@ export interface DiscoverSidebarResponsiveProps {
    * the selected columns displayed in the doc table in discover
    */
   columns: string[];
+  /**
+   * Client of uiSettings
+   */
+  config: IUiSettingsClient;
   /**
    * a statistics of the distribution of fields in the given hits
    */
@@ -54,6 +60,10 @@ export interface DiscoverSidebarResponsiveProps {
    * List of available index patterns
    */
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  /**
+   * Index patterns service
+   */
+  indexPatterns: IndexPatternsContract;
   /**
    * Has been toggled closed
    */
@@ -80,9 +90,13 @@ export interface DiscoverSidebarResponsiveProps {
    */
   services: DiscoverServices;
   /**
-   * Callback function to select another index pattern
+   * Function to set the current state
    */
-  setIndexPattern: (id: string) => void;
+  setAppState: (state: Partial<AppState>) => void;
+  /**
+   * Discover App state
+   */
+  state: AppState;
   /**
    * Metric tracking function
    * @param metricType
@@ -151,9 +165,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             )}
           >
             <DiscoverIndexPattern
+              config={props.config}
               selectedIndexPattern={props.selectedIndexPattern}
-              setIndexPattern={props.setIndexPattern}
               indexPatternList={sortBy(props.indexPatternList, (o) => o.attributes.title)}
+              indexPatterns={props.indexPatterns}
+              state={props.state}
+              setAppState={props.setAppState}
+              useNewFieldsApi={props.useNewFieldsApi}
             />
           </section>
           <EuiSpacer size="s" />
