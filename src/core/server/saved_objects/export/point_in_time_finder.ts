@@ -120,7 +120,7 @@ export class PointInTimeFinder {
       yield results;
       // We've reached the end when there are fewer hits than our perPage size,
       // or when `close()` has been called.
-    } while (this.#open && lastHitSortValue && lastResultsCount >= this.#findOptions.perPage!);
+    } while (this.#open && lastResultsCount >= this.#findOptions.perPage!);
 
     return;
   }
