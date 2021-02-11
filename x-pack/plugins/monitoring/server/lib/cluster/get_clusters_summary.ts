@@ -42,7 +42,7 @@ export function getClustersSummary(
     } = cluster;
 
     const license = cluster.license || cluster.elasticsearch?.cluster?.stats?.license;
-    const version = cluster.version || cluster.elasticsearch?.cluster?.stats?.version;
+    const version = cluster.version || cluster.elasticsearch?.version;
     const clusterUuid = cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id;
     const clusterStats:
       | ElasticsearchLegacySource['cluster_stats']
@@ -74,7 +74,7 @@ export function getClustersSummary(
       count: clusterStats?.indices?.count ?? clusterStats?.indices?.total,
       docs: clusterStats?.indices?.docs,
       shards: clusterStats?.indices?.shards,
-      store: clusterStats?.indice?.store,
+      store: clusterStats?.indices?.store,
     };
 
     const jvm = {

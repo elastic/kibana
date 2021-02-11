@@ -61,6 +61,7 @@ function fetchClusterStats(req: LegacyRequest, esIndexPattern: string, clusterUu
       'hits.hits._source.cluster_name',
       'hits.hits._source.elasticsearch.cluster.name',
       'hits.hits._source.version',
+      'hits.hits._source.elasticsearch.version',
       'hits.hits._source.elasticsearch.cluster.node.version',
       'hits.hits._source.license.status', // license data only includes necessary fields to drive UI
       'hits.hits._source.elasticsearch.cluster.stats.license.status',

@@ -307,6 +307,7 @@ export interface ElasticsearchIndexRecoveryShard {
 }
 
 export interface ElasticsearchMetricbeatNode {
+  name?: string;
   stats?: ElasticsearchNodeStats;
 }
 
@@ -314,9 +315,6 @@ export interface ElasticsearchMetricbeatSource {
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
     index?: {
-      name?: string;
-    };
-    node?: {
       name?: string;
     };
     shard?: ElasticsearchLegacySource['shard'];
