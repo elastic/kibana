@@ -19,7 +19,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '../../../observability/public'
 
 import { setSavedObjectsClient } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
