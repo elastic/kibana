@@ -16,7 +16,6 @@ import {
   EuiCallOut,
   EuiTextColor,
   EuiSwitch,
-  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 
