@@ -15,7 +15,7 @@ import { getStatusColor } from './helpers';
 import * as i18n from './translations';
 
 interface RuleStatusProps {
-  children: React.ReactNode;
+  children: React.ReactNode | null | undefined;
   statusDate: string | null | undefined;
   status: RuleStatusType | null | undefined;
 }
