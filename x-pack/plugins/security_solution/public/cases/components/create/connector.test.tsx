@@ -96,10 +96,10 @@ describe('Connector', () => {
       );
     });
 
-    // await waitFor(() => {
-    //   wrapper.update();
-    //   expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeTruthy();
-    // });
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeTruthy();
+    });
   });
 
   it('it is loading when fetching connectors', async () => {
