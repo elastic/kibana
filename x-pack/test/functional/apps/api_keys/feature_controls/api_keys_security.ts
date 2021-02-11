@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard all with manage_security', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'manage_security'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'manage_security'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -60,8 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Security" section with API Keys', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(2);
-        expect(sections.find((s) => s.sectionId === 'security')).to.eql({
+        expect(sections).to.have.length(1);
+        expect(sections[0]).to.eql({
           sectionId: 'security',
           sectionLinks: ['users', 'roles', 'api_keys', 'role_mappings'],
         });

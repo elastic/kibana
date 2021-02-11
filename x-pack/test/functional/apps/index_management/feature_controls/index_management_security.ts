@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard all with index_management_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'index_management_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'index_management_user'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -60,8 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Data" section with index management', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(2);
-        expect(sections.find((s) => s.sectionId === 'data')).to.eql({
+        expect(sections).to.have.length(1);
+        expect(sections[0]).to.eql({
           sectionId: 'data',
           sectionLinks: ['index_management', 'transform'],
         });

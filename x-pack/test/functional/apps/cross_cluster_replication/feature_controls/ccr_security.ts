@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global dashboard all with ccr_user', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'ccr_user'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'ccr_user'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
