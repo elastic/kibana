@@ -17,7 +17,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common', 'visualize', 'dashboard']);
+
+  const PageObjects = getPageObjects([
+    'header',
+    'timePicker',
+    'common',
+    'visualize',
+    'dashboard',
+    'timeToVisualize',
+  ]);
 
   return logWrapper('lensPage', log, {
     /**
@@ -341,16 +349,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title: string,
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
-      addToDashboard?: boolean,
+      addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
-      await PageObjects.visualize.setSaveModalValues(title, {
+      await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
         redirectToOrigin,
-        addToDashboard,
+        addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
       });
 
@@ -706,6 +714,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       } else {
         await this.saveAndReturn();
       }
+    },
+
+    /**
+     * Asserts that the focused element is a field with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedField(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
+      expect(focusedElementText).to.eql(name);
+      expect(dataTestSubj).to.eql('lnsFieldListPanelField');
+    },
+
+    /**
+     * Asserts that the focused element is a dimension with with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedDimension(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      expect(focusedElementText).to.eql(name);
     },
   });
 }
