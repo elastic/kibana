@@ -427,7 +427,49 @@ describe('enrichSignalThreatMatches', () => {
     );
   });
 
-  it('enriches from a configured indicator path, if specified');
+  it('enriches from a configured indicator path, if specified', async () => {
+    getMatchedThreats = async () => [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          custom_threat: {
+            custom_indicator: {
+              domain: 'custom_domain',
+              other: 'custom_other',
+              type: 'custom_type',
+            },
+          },
+        },
+      }),
+    ];
+    matchedQuery = encodeThreatMatchNamedQuery(
+      getNamedQueryMock({
+        id: '123',
+        field: 'event.field',
+        value: 'custom_threat.custom_indicator.domain',
+      })
+    );
+    const signalHit = getSignalHitMock({
+      matched_queries: [matchedQuery],
+    });
+    const signals = getSignalsResponseMock([signalHit]);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      'custom_threat.custom_indicator'
+    );
+    const [enrichedHit] = enrichedSignals.hits.hits;
+    const indicators = get(enrichedHit._source, 'threat.indicator');
+
+    expect(indicators).toEqual([
+      {
+        domain: 'custom_domain',
+        matched: { atomic: 'custom_domain', field: 'event.field', type: 'custom_type' },
+        other: 'custom_other',
+        type: 'custom_type',
+      },
+    ]);
+  });
 
   it('merges duplicate matched signals into a single signal with multiple indicators', async () => {
     getMatchedThreats = async () => [
