@@ -508,7 +508,7 @@ export function DimensionEditor(
     return (
       <>
         <PalettePicker
-          palettes={props.frame.availablePalettes}
+          palettes={props.paletteService}
           activePalette={layer.palette}
           setPalette={(newPalette) => {
             setState(updateLayer(state, { ...layer, palette: newPalette }, index));

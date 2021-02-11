@@ -358,7 +358,8 @@ export interface LensMultiTable {
 
 export interface VisualizationConfigProps<T = unknown> {
   layerId: string;
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> &
+    Partial<Pick<FramePublicAPI, 'availablePalettes'>>;
   state: T;
 }
 

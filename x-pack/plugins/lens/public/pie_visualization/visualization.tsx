@@ -227,7 +227,7 @@ export const getPieVisualization = ({
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <DimensionEditor {...props} />
+        <DimensionEditor {...props} paletteService={paletteService} />
       </I18nProvider>,
       domElement
     );
