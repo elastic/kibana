@@ -7,7 +7,6 @@
 
 import {
   KibanaRequest,
-  KibanaResponseFactory,
   Logger,
   SavedObject,
   SavedObjectsClientContract,
@@ -35,6 +34,7 @@ import {
   caseTypeField,
 } from '../../common/api';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
+import { defaultPage, defaultPerPage } from '../routes/api';
 import {
   flattenCaseSavedObject,
   flattenSubCaseSavedObject,
@@ -163,7 +163,6 @@ interface PatchSubCases {
 
 interface GetUserArgs {
   request: KibanaRequest;
-  response?: KibanaResponseFactory;
 }
 
 interface SubCasesMapWithPageInfo {
@@ -284,9 +283,10 @@ export class CaseService implements CaseServiceSetup {
       client,
       options: subCaseOptions,
       ids: cases.saved_objects
-        .filter((caseInfo) => caseInfo.type === CaseType.collection)
+        .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
         .map((caseInfo) => caseInfo.id),
     });
+
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
       const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
 
@@ -445,6 +445,13 @@ export class CaseService implements CaseServiceSetup {
     ids: string[];
     associationType: AssociationType;
   }): Promise<CaseCommentStats> {
+    if (ids.length <= 0) {
+      return {
+        commentTotals: new Map<string, number>(),
+        alertTotals: new Map<string, number>(),
+      };
+    }
+
     const refType =
       associationType === AssociationType.case ? CASE_SAVED_OBJECT : SUB_CASE_SAVED_OBJECT;
 
@@ -502,8 +509,18 @@ export class CaseService implements CaseServiceSetup {
       return subCase.references.length > 0 ? subCase.references[0].id : undefined;
     };
 
+    const emptyResponse = {
+      subCasesMap: new Map<string, SubCaseResponse[]>(),
+      page: 0,
+      perPage: 0,
+    };
+
     if (!options) {
-      return { subCasesMap: new Map<string, SubCaseResponse[]>(), page: 0, perPage: 0 };
+      return emptyResponse;
+    }
+
+    if (ids.length <= 0) {
+      return emptyResponse;
     }
 
     const subCases = await this.findSubCases({
@@ -563,6 +580,10 @@ export class CaseService implements CaseServiceSetup {
     options,
     ids,
   }: FindSubCasesStatusStats): Promise<number> {
+    if (ids.length <= 0) {
+      return 0;
+    }
+
     const subCases = await this.findSubCases({
       client,
       options: {
@@ -781,6 +802,15 @@ export class CaseService implements CaseServiceSetup {
     ids,
     options,
   }: FindSubCasesByIDArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
+    if (ids.length <= 0) {
+      return {
+        total: 0,
+        saved_objects: [],
+        page: options?.page ?? defaultPage,
+        per_page: options?.perPage ?? defaultPerPage,
+      };
+    }
+
     try {
       this.log.debug(`Attempting to GET sub cases for case collection id ${ids.join(', ')}`);
       return this.findSubCases({
@@ -864,6 +894,14 @@ export class CaseService implements CaseServiceSetup {
   }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
+      if (refs.length <= 0) {
+        return {
+          saved_objects: [],
+          total: 0,
+          per_page: options?.perPage ?? defaultPerPage,
+          page: options?.page ?? defaultPage,
+        };
+      }
 
       let filter: string | undefined;
       if (!includeSubCaseComments) {
@@ -901,6 +939,14 @@ export class CaseService implements CaseServiceSetup {
   }: FindSubCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: SUB_CASE_SAVED_OBJECT, id: caseID }));
+      if (refs.length <= 0) {
+        return {
+          saved_objects: [],
+          total: 0,
+          per_page: options?.perPage ?? defaultPerPage,
+          page: options?.page ?? defaultPage,
+        };
+      }
 
       this.log.debug(`Attempting to GET all comments for sub case caseID ${id}`);
       return this.getAllComments({
@@ -936,8 +982,8 @@ export class CaseService implements CaseServiceSetup {
       throw error;
     }
   }
-  // TODO: remove response
-  public async getUser({ request, response }: GetUserArgs) {
+
+  public async getUser({ request }: GetUserArgs) {
     try {
       this.log.debug(`Attempting to authenticate a user`);
       if (this.authentication != null) {

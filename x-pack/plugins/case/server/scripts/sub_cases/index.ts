@@ -7,20 +7,17 @@
 /* eslint-disable no-console */
 import yargs from 'yargs';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
-import { CaseResponse, CaseType, ConnectorTypes } from '../../../common/api';
+import {
+  CaseResponse,
+  CaseType,
+  CollectionWithSubCaseResponse,
+  ConnectorTypes,
+} from '../../../common/api';
 import { CommentType } from '../../../common/api/cases/comment';
 import { CASES_URL } from '../../../common/constants';
+import { ActionResult, ActionTypeExecutorResult } from '../../../../actions/common';
 
 main();
-
-// TODO: find actual type
-interface ActionResp {
-  id: string;
-}
-
-interface ExecuteResp {
-  status: string;
-}
 
 function createClient(argv: any): KbnClient {
   return new KbnClient({
@@ -71,7 +68,7 @@ async function handleGenGroupAlerts(argv: any) {
   const client = createClient(argv);
 
   try {
-    const createdAction = await client.request<ActionResp>({
+    const createdAction = await client.request<ActionResult>({
       path: '/api/actions/action',
       method: 'POST',
       body: {
@@ -108,7 +105,9 @@ async function handleGenGroupAlerts(argv: any) {
     }
 
     console.log('Case id: ', caseID);
-    const executeResp = await client.request<ExecuteResp>({
+    const executeResp = await client.request<
+      ActionTypeExecutorResult<CollectionWithSubCaseResponse>
+    >({
       path: `/api/actions/action/${createdAction.data.id}/_execute`,
       method: 'POST',
       body: {
@@ -142,8 +141,9 @@ async function handleGenGroupAlerts(argv: any) {
 }
 
 async function main() {
-  // TODO: this isn't waiting for some reason
-  await yargs(process.argv.slice(2))
+  // This returns before the async handlers do
+  // We need to convert this to commander instead I think
+  yargs(process.argv.slice(2))
     .help()
     .options({
       kibana: {

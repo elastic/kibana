@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
+import { nullUser } from '../common';
 import {
   connectorMappingsServiceMock,
   createCaseServiceMock,
@@ -19,7 +19,7 @@ import {
 } from '../services/mocks';
 
 jest.mock('./client');
-import { CaseClientImpl } from './client';
+import { CaseClientHandler } from './client';
 import { createExternalCaseClient } from './index';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -27,7 +27,6 @@ const caseConfigureService = createConfigureServiceMock();
 const alertsService = createAlertServiceMock();
 const caseService = createCaseServiceMock();
 const connectorMappingsService = connectorMappingsServiceMock();
-const request = {} as KibanaRequest;
 const savedObjectsClient = savedObjectsClientMock.create();
 const userActionService = createUserActionServiceMock();
 
@@ -39,10 +38,10 @@ describe('createExternalCaseClient()', () => {
       caseConfigureService,
       caseService,
       connectorMappingsService,
-      request,
+      user: nullUser,
       savedObjectsClient,
       userActionService,
     });
-    expect(CaseClientImpl).toHaveBeenCalledTimes(1);
+    expect(CaseClientHandler).toHaveBeenCalledTimes(1);
   });
 });

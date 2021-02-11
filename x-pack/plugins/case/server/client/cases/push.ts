@@ -7,13 +7,12 @@
 
 import Boom, { isBoom, Boom as BoomType } from '@hapi/boom';
 import {
-  KibanaRequest,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
-import { ActionsClient } from '../../../../actions/server';
-import { flattenCaseSavedObject, getAlertIds } from '../../routes/api/utils';
+import { ActionResult, ActionsClient } from '../../../../actions/server';
+import { flattenCaseSavedObject, getAlertIndicesAndIDs } from '../../routes/api/utils';
 
 import {
   ActionConnector,
@@ -23,16 +22,18 @@ import {
   ExternalServiceResponse,
   ESCaseAttributes,
   CommentAttributes,
+  CaseUserActionsResponse,
+  User,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
-import { createIncident, getCommentContextFromAttributes, isCommentAlertType } from './utils';
+import { createIncident, getCommentContextFromAttributes } from './utils';
 import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
 } from '../../services';
-import { CaseClientImpl } from '../client';
+import { CaseClientHandler } from '../client';
 
 const createError = (e: Error | BoomType, message: string): Error | BoomType => {
   if (isBoom(e)) {
@@ -44,20 +45,15 @@ const createError = (e: Error | BoomType, message: string): Error | BoomType => 
   return Error(message);
 };
 
-interface AlertInfo {
-  ids: string[];
-  indices: Set<string>;
-}
-
 interface PushParams {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   caseConfigureService: CaseConfigureServiceSetup;
   userActionService: CaseUserActionServiceSetup;
-  request: KibanaRequest;
+  user: User;
   caseId: string;
   connectorId: string;
-  caseClient: CaseClientImpl;
+  caseClient: CaseClientHandler;
   actionsClient: ActionsClient;
 }
 
@@ -66,16 +62,16 @@ export const push = async ({
   caseService,
   caseConfigureService,
   userActionService,
-  request,
   caseClient,
   actionsClient,
   connectorId,
   caseId,
+  user,
 }: PushParams): Promise<CaseResponse> => {
   /* Start of push to external service */
-  let theCase;
-  let connector;
-  let userActions;
+  let theCase: CaseResponse;
+  let connector: ActionResult;
+  let userActions: CaseUserActionsResponse;
   let alerts;
   let connectorMappings;
   let externalServiceIncident;
@@ -98,16 +94,7 @@ export const push = async ({
     );
   }
 
-  const { ids, indices }: AlertInfo = theCase?.comments
-    ?.filter(isCommentAlertType)
-    .reduce<AlertInfo>(
-      (acc, comment) => {
-        acc.ids.push(...getAlertIds(comment));
-        acc.indices.add(comment.index);
-        return acc;
-      },
-      { ids: [], indices: new Set<string>() }
-    ) ?? { ids: [], indices: new Set<string>() };
+  const { ids, indices } = getAlertIndicesAndIDs(theCase?.comments);
 
   try {
     alerts = await caseClient.getAlerts({
@@ -160,14 +147,12 @@ export const push = async ({
   /* End of push to external service */
 
   /* Start of update case with push information */
-  let user;
   let myCase;
   let myCaseConfigure;
   let comments;
 
   try {
-    [user, myCase, myCaseConfigure, comments] = await Promise.all([
-      caseService.getUser({ request }),
+    [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
         client: savedObjectsClient,
         id: caseId,

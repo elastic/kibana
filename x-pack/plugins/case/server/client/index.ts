@@ -6,28 +6,15 @@
  */
 
 import { CaseClientFactoryArguments, CaseClient } from './types';
-import { CaseClientImpl } from './client';
+import { CaseClientHandler } from './client';
 
-export { CaseClientImpl } from './client';
+export { CaseClientHandler as CaseClientImpl } from './client';
 export { CaseClient } from './types';
 
-// TODO: this screws up the mocking because it won't mock out CaseClientImpl's methods
-/* export const createExternalCaseClient = (
-  clientArgs: CaseClientFactoryArguments
-): CaseClientPluginContract => {
-  const client = new CaseClientImpl(clientArgs);
-  return {
-    create: async (args: CaseClientPostRequest) => client.create(args),
-    addComment: async (args: CaseClientAddComment) => client.addComment(args),
-    getFields: async (args: ConfigureFields) => client.getFields(args),
-    getMappings: async (args: MappingsClient) => client.getMappings(args),
-    update: async (args: CasesPatchRequest) => client.update(args),
-    updateAlertsStatus: async (args: CaseClientUpdateAlertsStatus) =>
-      client.updateAlertsStatus(args),
-  };
-};*/
-
+/**
+ * Create a CaseClientHandler to external services (other plugins).
+ */
 export const createExternalCaseClient = (clientArgs: CaseClientFactoryArguments): CaseClient => {
-  const client = new CaseClientImpl(clientArgs);
+  const client = new CaseClientHandler(clientArgs);
   return client;
 };

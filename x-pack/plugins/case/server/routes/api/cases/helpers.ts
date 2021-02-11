@@ -23,8 +23,6 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../saved_object_
 import { sortToSnake } from '../utils';
 import { combineFilters } from '../../../common';
 
-// TODO: write unit tests for these functions
-
 export const addStatusFilter = ({
   status,
   appendFilter,

@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
@@ -21,6 +21,7 @@ import {
   CaseClientPostRequestRt,
   CasePostRequest,
   CaseType,
+  User,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
@@ -37,7 +38,7 @@ import {
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
-  request: KibanaRequest;
+  user: User;
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   theCase: CasePostRequest;
@@ -48,7 +49,7 @@ export const create = async ({
   caseService,
   caseConfigureService,
   userActionService,
-  request,
+  user,
   theCase,
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
@@ -60,7 +61,7 @@ export const create = async ({
   );
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = await caseService.getUser({ request });
+  const { username, full_name, email } = user;
   const createdDate = new Date().toISOString();
   const myCaseConfigure = await caseConfigureService.find({ client: savedObjectsClient });
   const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);

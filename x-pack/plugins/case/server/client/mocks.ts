@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   AlertServiceContract,
@@ -50,7 +49,6 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   // const actionsMock = createActionsClient();
   const log = loggingSystemMock.create().get('case');
-  const request = {} as KibanaRequest;
 
   const auth = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
   const caseService = new CaseService(log, auth);
@@ -73,7 +71,7 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
 
   const caseClient = createExternalCaseClient({
     savedObjectsClient,
-    request,
+    user: auth.getCurrentUser(),
     caseService,
     caseConfigureService,
     connectorMappingsService,

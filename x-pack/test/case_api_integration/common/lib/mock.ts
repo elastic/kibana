@@ -23,11 +23,12 @@ import {
   AssociationType,
   CollectionWithSubCaseResponse,
   SubCasesFindResponse,
+  GeneratedAlertRequestTypeField,
 } from '../../../../plugins/case/common/api';
 import {
-  getAlertIds,
-  isGeneratedAlertContext,
-  isAlertContext,
+  getAlertIdsFromRequest,
+  isCommentRequestTypeGenAlert,
+  isCommentRequestTypeAlert,
 } from '../../../../plugins/case/server/routes/api/utils';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
@@ -75,7 +76,7 @@ export const postCommentAlertReq: CommentRequestAlertType = {
 export const postCommentGenAlertReq: CommentRequestGeneratedAlertType = {
   alerts: [{ _id: 'test-id' }, { _id: 'test-id2' }],
   index: 'test-index',
-  type: CommentType.generatedAlert,
+  type: GeneratedAlertRequestTypeField,
 };
 
 export const postCaseResp = (
@@ -115,15 +116,15 @@ export const commentsResp = ({
       pushed_by: null,
       updated_by: null,
     };
-    if (isGeneratedAlertContext(comment)) {
+    if (isCommentRequestTypeGenAlert(comment)) {
       return {
         associationType,
-        alertId: getAlertIds(comment),
+        alertId: getAlertIdsFromRequest(comment),
         index: comment.index,
-        type: comment.type,
+        type: CommentType.generatedAlert,
         ...baseFields,
       };
-    } else if (isAlertContext(comment)) {
+    } else if (isCommentRequestTypeAlert(comment)) {
       return {
         associationType,
         ...comment,

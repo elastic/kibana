@@ -7,7 +7,6 @@
 
 import { curry } from 'lodash';
 
-import { KibanaRequest } from '../../../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createExternalCaseClient } from '../../client';
@@ -21,6 +20,7 @@ import {
 import * as i18n from './translations';
 
 import { GetActionTypeParams } from '..';
+import { nullUser } from '../../common';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -69,13 +69,11 @@ async function executor(
   let data: CaseExecutorResponse | null = null;
 
   const { savedObjectsClient, scopedClusterClient } = services;
-  // TODO: ??? calling a constructor in a curry generates this error, TypeError: _client.CaseClientImpl is not a constructor
-  // const caseClient = new CaseClientImpl({
   const caseClient = createExternalCaseClient({
     savedObjectsClient,
     scopedClusterClient,
-    // TODO: refactor this
-    request: {} as KibanaRequest,
+    // we might want the user information to be passed as part of the action request
+    user: nullUser,
     caseService,
     caseConfigureService,
     connectorMappingsService,

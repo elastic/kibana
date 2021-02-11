@@ -34,7 +34,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
       try {
         const client = context.core.savedObjects.client;
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
         const myComment = await caseService.getComment({

@@ -6,12 +6,44 @@
  */
 
 import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
-import { CommentAttributes, CommentType } from '../../common/api';
+import { CaseStatuses, CommentAttributes, CommentType, User } from '../../common/api';
+import { AlertInfo, getAlertIndicesAndIDs } from '../routes/api/utils';
 
 /**
  * Default sort field for querying saved objects.
  */
 export const defaultSortField = 'created_at';
+
+/**
+ * Default unknown user
+ */
+export const nullUser: User = { username: null, full_name: null, email: null };
+
+/**
+ * Adds the ids and indices to a map of statuses
+ */
+export function addAlertInfoToStatusMap({
+  comment,
+  statusMap,
+  status,
+}: {
+  comment: CommentAttributes;
+  statusMap: Map<CaseStatuses, AlertInfo>;
+  status: CaseStatuses;
+}) {
+  const newAlertInfo = getAlertIndicesAndIDs([comment]);
+
+  // combine the already accumulated ids and indices with the new ones from this alert comment
+  if (newAlertInfo.ids.length > 0 && newAlertInfo.indices.size > 0) {
+    const accAlertInfo = statusMap.get(status) ?? { ids: [], indices: new Set<string>() };
+    accAlertInfo.ids.push(...newAlertInfo.ids);
+    accAlertInfo.indices = new Set<string>([
+      ...accAlertInfo.indices.values(),
+      ...newAlertInfo.indices.values(),
+    ]);
+    statusMap.set(status, accAlertInfo);
+  }
+}
 
 /**
  * Combines multiple filter expressions using the specified operator and parenthesis if multiple expressions exist.

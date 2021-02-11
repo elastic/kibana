@@ -137,7 +137,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
 
         await deleteSubCases({ caseService, client, caseIds: request.query.ids });
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
         await userActionService.postUserActions({

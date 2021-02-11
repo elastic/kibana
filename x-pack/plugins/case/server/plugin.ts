@@ -127,10 +127,11 @@ export class CasePlugin {
       context: CasesRequestHandlerContext,
       request: KibanaRequest
     ) => {
+      const user = await this.caseService!.getUser({ request });
       return createExternalCaseClient({
         scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
         savedObjectsClient: core.savedObjects.getScopedClient(request),
-        request,
+        user,
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
         connectorMappingsService: this.connectorMappingsService!,
@@ -165,6 +166,7 @@ export class CasePlugin {
   }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
     return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
+      const user = await caseService.getUser({ request });
       return {
         getCaseClient: () => {
           return new CaseClientImpl({
@@ -175,7 +177,7 @@ export class CasePlugin {
             connectorMappingsService,
             userActionService,
             alertsService,
-            request,
+            user,
           });
         },
       };

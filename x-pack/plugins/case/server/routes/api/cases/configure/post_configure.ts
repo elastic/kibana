@@ -58,7 +58,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
           );
         }
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { email, full_name, username } = await caseService.getUser({ request, response });
+        const { email, full_name, username } = await caseService.getUser({ request });
 
         const creationDate = new Date().toISOString();
         let mappings: ConnectorMappingsAttributes[] = [];

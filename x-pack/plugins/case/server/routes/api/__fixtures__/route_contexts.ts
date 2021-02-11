@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { createExternalCaseClient } from '../../../client';
 import {
@@ -25,10 +24,9 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const log = loggingSystemMock.create().get('case');
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
-  const caseService = new CaseService(
-    log,
-    badAuth ? authenticationMock.createInvalid() : authenticationMock.create()
-  );
+  const authc = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
+
+  const caseService = new CaseService(log, authc);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
   const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
   const caseUserActionsServicePlugin = new CaseUserActionService(log);
@@ -47,18 +45,12 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     case: {
       getCaseClient: () => caseClient,
     },
-    // TODO: remove
-    /* securitySolution: {
-      getAppClient: () => ({
-        getSignalsIndex: () => '.siem-signals',
-      }),
-    },*/
   } as unknown) as CasesRequestHandlerContext;
 
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const caseClient = createExternalCaseClient({
     savedObjectsClient: client,
-    request: {} as KibanaRequest,
+    user: authc.getCurrentUser(),
     caseService,
     caseConfigureService,
     connectorMappingsService,

@@ -18,7 +18,7 @@ import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, decodeComment } from '../../utils';
+import { escapeHatch, wrapError, decodeCommentPatch } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { CaseServiceSetup } from '../../../../services';
 
@@ -81,7 +81,7 @@ export function initPatchCommentApi({
         );
 
         const { id: queryCommentId, version: queryCommentVersion, ...queryRestAttributes } = query;
-        decodeComment(queryRestAttributes);
+        decodeCommentPatch(queryRestAttributes);
 
         const commentableCase = await getCommentableCase({
           service: caseService,
@@ -119,7 +119,7 @@ export function initPatchCommentApi({
         }
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
         const userInfo: User = {
           username,
           full_name,

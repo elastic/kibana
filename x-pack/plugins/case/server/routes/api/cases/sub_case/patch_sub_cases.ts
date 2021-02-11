@@ -9,10 +9,15 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { SavedObjectsClientContract, KibanaRequest, SavedObject } from 'kibana/server';
+import {
+  SavedObjectsClientContract,
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsFindResponse,
+} from 'kibana/server';
 
 import { CaseClient } from '../../../../client';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../../saved_object_types';
+import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../../../services';
 import {
   CaseStatuses,
@@ -28,12 +33,20 @@ import {
   SubCaseResponse,
   SubCasesResponseRt,
   User,
+  CommentAttributes,
 } from '../../../../../common/api';
 import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
-import { escapeHatch, flattenSubCaseSavedObject, isAlertCommentSO, wrapError } from '../../utils';
+import {
+  AlertInfo,
+  escapeHatch,
+  flattenSubCaseSavedObject,
+  isGenOrAlertCommentAttributes,
+  wrapError,
+} from '../../utils';
 import { getCaseToUpdate } from '../helpers';
 import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
+import { addAlertInfoToStatusMap } from '../../../../common';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;
@@ -166,6 +179,79 @@ function getValidUpdateRequests(
   });
 }
 
+/**
+ * Get the id from a reference in a comment for a sub case
+ */
+function getID(comment: SavedObject<CommentAttributes>): string | undefined {
+  return comment.references.find((ref) => ref.type === SUB_CASE_SAVED_OBJECT)?.id;
+}
+
+/**
+ * Get all the alert comments for a set of sub cases
+ */
+async function getAlertComments({
+  subCasesToSync,
+  caseService,
+  client,
+}: {
+  subCasesToSync: SubCasePatchRequest[];
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+}): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+  const ids = subCasesToSync.map((subCase) => subCase.id);
+  return caseService.getAllSubCaseComments({
+    client,
+    id: ids,
+    options: {
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+    },
+  });
+}
+
+/**
+ * Updates the status of alerts for the specified sub cases.
+ */
+async function updateAlerts({
+  subCasesToSync,
+  caseService,
+  client,
+  caseClient,
+  subCasesMap,
+}: {
+  subCasesToSync: SubCasePatchRequest[];
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+  caseClient: CaseClient;
+  subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
+}) {
+  // get all the alerts for all sub cases that need to be synced
+  const totalAlerts = await getAlertComments({ caseService, client, subCasesToSync });
+  // create a map of the status (open, closed, etc) to alert info that needs to be updated
+  const alertsToUpdate = totalAlerts.saved_objects.reduce((acc, alertComment) => {
+    if (isGenOrAlertCommentAttributes(alertComment.attributes)) {
+      const id = getID(alertComment);
+      const status =
+        id !== undefined
+          ? subCasesMap.get(id)?.attributes.status ?? CaseStatuses.open
+          : CaseStatuses.open;
+
+      addAlertInfoToStatusMap({ comment: alertComment.attributes, statusMap: acc, status });
+    }
+    return acc;
+  }, new Map<CaseStatuses, AlertInfo>());
+
+  // This does at most 3 calls to Elasticsearch to update the status of the alerts to either open, closed, or in-progress
+  for (const [status, alertInfo] of alertsToUpdate.entries()) {
+    if (alertInfo.ids.length > 0 && alertInfo.indices.size > 0) {
+      caseClient.updateAlertsStatus({
+        ids: alertInfo.ids,
+        status,
+        indices: alertInfo.indices,
+      });
+    }
+  }
+}
+
 async function update({
   client,
   caseService,
@@ -204,7 +290,6 @@ async function update({
     subCasesMap,
   });
 
-  // TODO: extract to new function
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { username, full_name, email } = await caseService.getUser({ request });
   const updatedAt = new Date().toISOString();
@@ -259,41 +344,13 @@ async function update({
     );
   });
 
-  // TODO: extra to new function
-  for (const subCaseToSync of subCasesToSyncAlertsFor) {
-    const currentSubCase = subCasesMap.get(subCaseToSync.id);
-    const alertComments = await caseService.getAllSubCaseComments({
-      client,
-      id: subCaseToSync.id,
-      options: {
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
-      },
-    });
-
-    // TODO: comment about why we need this (aka alerts might come from different indices? so dedup them)
-    const idsAndIndices = alertComments.saved_objects.reduce(
-      (acc: { ids: string[]; indices: Set<string> }, comment) => {
-        if (isAlertCommentSO(comment)) {
-          const alertId = comment.attributes.alertId;
-          const ids = Array.isArray(alertId) ? alertId : [alertId];
-          acc.ids.push(...ids);
-          acc.indices.add(comment.attributes.index);
-        }
-        return acc;
-      },
-      { ids: [], indices: new Set<string>() }
-    );
-
-    if (idsAndIndices.ids.length > 0) {
-      caseClient.updateAlertsStatus({
-        ids: idsAndIndices.ids,
-        // We shouldn't really get in a case where the sub cases' status is undefined, but there wouldn't be anything to
-        // update in that case
-        status: subCaseToSync.status ?? currentSubCase?.attributes.status ?? CaseStatuses.open,
-        indices: idsAndIndices.indices,
-      });
-    }
-  }
+  await updateAlerts({
+    caseService,
+    client,
+    caseClient,
+    subCasesToSync: subCasesToSyncAlertsFor,
+    subCasesMap,
+  });
 
   const returnUpdatedSubCases = updatedCases.saved_objects.reduce<SubCaseResponse[]>(
     (acc, updatedSO) => {

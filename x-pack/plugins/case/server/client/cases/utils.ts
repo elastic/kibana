@@ -19,7 +19,7 @@ import {
   ConnectorTypes,
   CommentAttributes,
   CommentRequestUserType,
-  CommentRequestAlertType,
+  AttributesTypeAlertsWithoutBasic,
 } from '../../../common/api';
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
@@ -38,7 +38,7 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
-import { getAlertIds } from '../../routes/api/utils';
+import { getAlertIdsFromAttributes } from '../../routes/api/utils';
 
 export const getLatestPushInfo = (
   connectorId: string,
@@ -68,7 +68,7 @@ const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
   } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
-    const ids = getAlertIds(comment);
+    const ids = getAlertIdsFromAttributes(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
   }
 
@@ -301,7 +301,7 @@ export const isCommentAlertType = (
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType => {
+): CommentRequestUserType | AttributesTypeAlertsWithoutBasic => {
   switch (attributes.type) {
     case CommentType.user:
       return {

@@ -6,7 +6,13 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { AssociationType, CommentAttributes, CommentRequest, CommentType } from '../../common/api';
+import {
+  AssociationType,
+  CommentAttributes,
+  CommentRequest,
+  CommentType,
+  GeneratedAlertRequestTypeField,
+} from '../../common/api';
 import { transformNewComment } from '../routes/api/utils';
 import { combineFilters, countAlerts, countAlertsForID, groupTotalAlertsByID } from './utils';
 
@@ -98,7 +104,7 @@ describe('common utils', () => {
                 {
                   alerts: [{ _id: 'a' }, { _id: 'b' }, { _id: 'c' }],
                   index: '',
-                  type: CommentType.generatedAlert,
+                  type: GeneratedAlertRequestTypeField,
                 },
               ],
             },

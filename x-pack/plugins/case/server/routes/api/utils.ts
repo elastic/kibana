@@ -27,7 +27,6 @@ import {
   ESCaseAttributes,
   CommentRequest,
   ContextTypeUserRt,
-  ContextTypeAlertRt,
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentType,
@@ -39,16 +38,19 @@ import {
   SubCaseAttributes,
   SubCaseResponse,
   CommentRequestGeneratedAlertType,
-  ContextTypeGeneratedAlertRt,
+  GeneratedAlertCommentRequestRt,
   SubCasesFindResponse,
   AttributesTypeAlerts,
   User,
+  GeneratedAlertRequestTypeField,
+  AlertCommentRequestRt,
+  CommentPatchRequestTypes,
+  AlertCommentAttributesRt,
+  AttributesTypeAlertsWithoutBasic,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase } from './types';
-
-// TODO: refactor these functions to a common location, this is used by the caseClient too
 
 export const transformNewSubCase = ({
   createdAt,
@@ -105,12 +107,72 @@ type NewCommentArgs = CommentRequest & {
 };
 
 /**
+ * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
+ */
+export const getAlertIdsFromAttributes = (comment: CommentAttributes): string[] => {
+  if (isGenOrAlertCommentAttributes(comment)) {
+    return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+  }
+  return [];
+};
+
+/**
+ * This structure holds the alert IDs and indices found from multiple alert comments
+ */
+export interface AlertInfo {
+  ids: string[];
+  indices: Set<string>;
+}
+
+const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
+  if (isGenOrAlertCommentAttributes(comment)) {
+    acc.ids.push(...getAlertIdsFromAttributes(comment));
+    acc.indices.add(comment.index);
+  }
+  return acc;
+};
+
+/**
+ * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
+ */
+export const getAlertIndicesAndIDs = (comments: CommentAttributes[] | undefined): AlertInfo => {
+  if (comments === undefined) {
+    return { ids: [], indices: new Set<string>() };
+  }
+
+  return comments.reduce(
+    (acc: AlertInfo, comment) => {
+      return accumulateIndicesAndIDs(comment, acc);
+    },
+    { ids: [], indices: new Set<string>() }
+  );
+};
+
+/**
+ * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alert saved objects.
+ */
+export const getAlertIndicesAndIDsFromSO = (
+  comments: SavedObjectsFindResponse<CommentAttributes> | undefined
+): AlertInfo => {
+  if (comments === undefined) {
+    return { ids: [], indices: new Set<string>() };
+  }
+
+  return comments.saved_objects.reduce(
+    (acc: AlertInfo, comment) => {
+      return accumulateIndicesAndIDs(comment.attributes, acc);
+    },
+    { ids: [], indices: new Set<string>() }
+  );
+};
+
+/**
  * Return the IDs from the comment.
  *
- * @param comment the comment from the add comment request
+ * @param comment the comment from the add comment request or stored within a case
  */
-export const getAlertIds = (comment: CommentRequest): string[] => {
-  if (isGeneratedAlertContext(comment)) {
+export const getAlertIdsFromRequest = (comment: CommentRequest): string[] => {
+  if (isCommentRequestTypeGenAlert(comment)) {
     const ids: string[] = [];
     if (Array.isArray(comment.alerts)) {
       ids.push(
@@ -122,7 +184,7 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
       ids.push(comment.alerts._id);
     }
     return ids;
-  } else if (isAlertContext(comment)) {
+  } else if (isCommentRequestTypeAlert(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
   } else {
     return [];
@@ -138,14 +200,14 @@ export const transformNewComment = ({
   username,
   ...comment
 }: NewCommentArgs): CommentAttributes => {
-  if (isGeneratedAlertContext(comment)) {
-    const ids = getAlertIds(comment);
+  if (isCommentRequestTypeGenAlert(comment)) {
+    const ids = getAlertIdsFromRequest(comment);
 
     return {
       associationType,
       alertId: ids,
       index: comment.index,
-      type: comment.type,
+      type: CommentType.generatedAlert,
       created_at: createdDate,
       created_by: { email, full_name, username },
       pushed_at: null,
@@ -316,8 +378,8 @@ export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 /**
  * A type narrowing function for user comments. Exporting so integration tests can use it.
  */
-export const isUserContext = (
-  context: CommentRequest | CommentAttributes
+export const isCommentRequestTypeUser = (
+  context: CommentRequest | CommentPatchRequestTypes
 ): context is CommentRequestUserType => {
   return context.type === CommentType.user;
 };
@@ -325,10 +387,16 @@ export const isUserContext = (
 /**
  * A type narrowing function for alert comments. Exporting so integration tests can use it.
  */
-export const isAlertContext = (
-  context: CommentRequest | CommentAttributes
+export const isCommentRequestTypeAlert = (
+  context: CommentRequest | CommentPatchRequestTypes
 ): context is CommentRequestAlertType => {
   return context.type === CommentType.alert;
+};
+
+const isPatchRequestTypeAlertOrGenAlert = (
+  context: CommentPatchRequestTypes
+): context is AttributesTypeAlertsWithoutBasic => {
+  return context.type === CommentType.alert || context.type === CommentType.generatedAlert;
 };
 
 /**
@@ -338,30 +406,42 @@ export const isAlertContext = (
  * both a generated and user attached alert in the same structure but this function is useful to determine which
  * structure the new alert in the request has.
  */
-export const isGeneratedAlertContext = (
+export const isCommentRequestTypeGenAlert = (
   context: CommentRequest
 ): context is CommentRequestGeneratedAlertType => {
-  return context.type === CommentType.generatedAlert;
+  return context.type === GeneratedAlertRequestTypeField;
 };
 
-export const isAlertCommentSO = (
-  comment: SavedObject<CommentAttributes>
-): comment is SavedObject<AttributesTypeAlerts> => {
-  return (
-    comment.attributes.type === CommentType.generatedAlert ||
-    comment.attributes.type === CommentType.alert
-  );
+/**
+ * Returns true if the comment attribute is of type generated alert or alert.
+ */
+export const isGenOrAlertCommentAttributes = (
+  comment: CommentAttributes
+): comment is AttributesTypeAlerts => {
+  return comment.type === CommentType.generatedAlert || comment.type === CommentType.alert;
 };
 
-export const decodeComment = (comment: CommentRequest) => {
-  if (isUserContext(comment)) {
+export const decodeCommentRequest = (comment: CommentRequest) => {
+  if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isAlertContext(comment)) {
-    pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isGeneratedAlertContext(comment)) {
+  } else if (isCommentRequestTypeAlert(comment)) {
+    pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
+  } else if (isCommentRequestTypeGenAlert(comment)) {
     pipe(
-      excess(ContextTypeGeneratedAlertRt).decode(comment),
+      excess(GeneratedAlertCommentRequestRt).decode(comment),
       fold(throwErrors(badRequest), identity)
     );
+  }
+};
+
+/**
+ * This is used to decode a patch request. The patch comment is different from a comment request because it only allows
+ * a user, alert, or generated alert to be patched. It does not allow a generated alert using the {_id: string} format.
+ */
+export const decodeCommentPatch = (comment: CommentPatchRequestTypes) => {
+  if (isCommentRequestTypeUser(comment)) {
+    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
+  } else if (isPatchRequestTypeAlertOrGenAlert(comment)) {
+    pipe(excess(AlertCommentAttributesRt).decode(comment), fold(throwErrors(badRequest), identity));
   }
 };

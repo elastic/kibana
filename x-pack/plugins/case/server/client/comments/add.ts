@@ -10,8 +10,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { decodeComment, getAlertIds, isGeneratedAlertContext } from '../../routes/api/utils';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import {
+  decodeCommentRequest,
+  getAlertIdsFromRequest,
+  isCommentRequestTypeGenAlert,
+} from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -22,9 +26,10 @@ import {
   SubCaseAttributes,
   CommentRequest,
   CollectionWithSubCaseResponse,
-  ContextTypeGeneratedAlertRt,
+  GeneratedAlertCommentRequestRt,
   CommentRequestGeneratedAlertType,
   User,
+  GeneratedAlertRequestTypeField,
 } from '../../../common/api';
 import {
   buildCaseUserActionItem,
@@ -96,11 +101,11 @@ const addGeneratedAlerts = async ({
   comment,
 }: AddCommentFromRuleArgs): Promise<CollectionWithSubCaseResponse> => {
   const query = pipe(
-    ContextTypeGeneratedAlertRt.decode(comment),
+    GeneratedAlertCommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  decodeComment(comment);
+  decodeCommentRequest(comment);
   const createdDate = new Date().toISOString();
 
   const caseInfo = await caseService.getCase({
@@ -109,7 +114,7 @@ const addGeneratedAlerts = async ({
   });
 
   if (
-    query.type === CommentType.generatedAlert &&
+    query.type === GeneratedAlertRequestTypeField &&
     caseInfo.attributes.type !== CaseType.collection
   ) {
     throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
@@ -147,10 +152,10 @@ const addGeneratedAlerts = async ({
       newComment.attributes.type === CommentType.generatedAlert) &&
     caseInfo.attributes.settings.syncAlerts
   ) {
-    const ids = getAlertIds(query);
+    const ids = getAlertIdsFromRequest(query);
     await caseClient.updateAlertsStatus({
       ids,
-      status: caseInfo.attributes.status,
+      status: subCase.attributes.status,
       indices: new Set([newComment.attributes.index]),
     });
   }
@@ -221,24 +226,24 @@ interface AddCommentArgs {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
-  request: KibanaRequest;
+  user: User;
 }
 
 export const addComment = async ({
   savedObjectsClient,
   caseService,
   userActionService,
-  request,
   caseClient,
   caseId,
   comment,
+  user,
 }: AddCommentArgs): Promise<CollectionWithSubCaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  if (isGeneratedAlertContext(comment)) {
+  if (isCommentRequestTypeGenAlert(comment)) {
     return addGeneratedAlerts({
       caseId,
       comment,
@@ -249,13 +254,13 @@ export const addComment = async ({
     });
   }
 
-  decodeComment(comment);
+  decodeCommentRequest(comment);
   const createdDate = new Date().toISOString();
 
   const combinedCase = await getCombinedCase(caseService, savedObjectsClient, caseId);
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = await caseService.getUser({ request });
+  const { username, full_name, email } = user;
   const userInfo: User = {
     username,
     full_name,
@@ -269,7 +274,7 @@ export const addComment = async ({
   });
 
   if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
-    const ids = getAlertIds(query);
+    const ids = getAlertIdsFromRequest(query);
     await caseClient.updateAlertsStatus({
       ids,
       status: updatedCase.status,

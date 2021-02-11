@@ -11,12 +11,16 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
-  KibanaRequest,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from 'kibana/server';
-import { flattenCaseSavedObject } from '../../routes/api/utils';
+import {
+  AlertInfo,
+  flattenCaseSavedObject,
+  isGenOrAlertCommentAttributes,
+} from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -31,6 +35,9 @@ import {
   ESCaseAttributes,
   CaseType,
   CasesPatchRequest,
+  AssociationType,
+  CommentAttributes,
+  User,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
@@ -39,8 +46,13 @@ import {
 } from '../../routes/api/cases/helpers';
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../saved_object_types';
 import { CaseClientImpl } from '..';
+import { addAlertInfoToStatusMap } from '../../common';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -130,11 +142,187 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
   }
 }
 
+/**
+ * Get the id from a reference in a comment for a specific type.
+ */
+function getID(
+  comment: SavedObject<CommentAttributes>,
+  type: typeof CASE_SAVED_OBJECT | typeof SUB_CASE_SAVED_OBJECT
+): string | undefined {
+  return comment.references.find((ref) => ref.type === type)?.id;
+}
+
+/**
+ * Gets all the alert comments (generated or user alerts) for the requested cases.
+ */
+async function getAlertComments({
+  casesToSync,
+  caseService,
+  client,
+}: {
+  casesToSync: ESCasePatchRequest[];
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+}): Promise<SavedObjectsFindResponse<CommentAttributes>> {
+  const idsOfCasesToSync = casesToSync.map((casePatchReq) => casePatchReq.id);
+
+  // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
+  return caseService.getAllCaseComments({
+    client,
+    id: idsOfCasesToSync,
+    includeSubCaseComments: true,
+    options: {
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+    },
+  });
+}
+
+/**
+ * Returns a map of sub case IDs to their status. This uses a group of alert comments to determine which sub cases should
+ * be retrieved. This is based on whether the comment is associated to a sub case.
+ */
+async function getSubCasesToStatus({
+  totalAlerts,
+  caseService,
+  client,
+}: {
+  totalAlerts: SavedObjectsFindResponse<CommentAttributes>;
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+}): Promise<Map<string, CaseStatuses>> {
+  const subCasesToRetrieve = totalAlerts.saved_objects.reduce((acc, alertComment) => {
+    if (
+      isGenOrAlertCommentAttributes(alertComment.attributes) &&
+      alertComment.attributes.associationType === AssociationType.subCase
+    ) {
+      const id = getID(alertComment, SUB_CASE_SAVED_OBJECT);
+      if (id !== undefined) {
+        acc.add(id);
+      }
+    }
+    return acc;
+  }, new Set<string>());
+
+  const subCases = await caseService.getSubCases({
+    ids: Array.from(subCasesToRetrieve.values()),
+    client,
+  });
+
+  return subCases.saved_objects.reduce((acc, subCase) => {
+    // log about the sub cases that we couldn't find
+    if (!subCase.error) {
+      acc.set(subCase.id, subCase.attributes.status);
+    }
+    return acc;
+  }, new Map<string, CaseStatuses>());
+}
+
+/**
+ * Returns what status the alert comment should have based on whether it is associated to a case or sub case.
+ */
+function getSyncStatusForComment({
+  alertComment,
+  casesToSyncToStatus,
+  subCasesToStatus,
+}: {
+  alertComment: SavedObjectsFindResult<CommentAttributes>;
+  casesToSyncToStatus: Map<string, CaseStatuses>;
+  subCasesToStatus: Map<string, CaseStatuses>;
+}): CaseStatuses {
+  let status: CaseStatuses = CaseStatuses.open;
+  if (alertComment.attributes.associationType === AssociationType.case) {
+    const id = getID(alertComment, CASE_SAVED_OBJECT);
+    // We should log if we can't find the status
+    // attempt to get the case status from our cases to sync map if we found the ID otherwise default to open
+    status =
+      id !== undefined ? casesToSyncToStatus.get(id) ?? CaseStatuses.open : CaseStatuses.open;
+  } else if (alertComment.attributes.associationType === AssociationType.subCase) {
+    const id = getID(alertComment, SUB_CASE_SAVED_OBJECT);
+    status = id !== undefined ? subCasesToStatus.get(id) ?? CaseStatuses.open : CaseStatuses.open;
+  }
+  return status;
+}
+
+/**
+ * Updates the alert ID's status field based on the patch requests
+ */
+async function updateAlerts({
+  casesWithSyncSettingChangedToOn,
+  casesWithStatusChangedAndSynced,
+  casesMap,
+  caseService,
+  client,
+  caseClient,
+}: {
+  casesWithSyncSettingChangedToOn: ESCasePatchRequest[];
+  casesWithStatusChangedAndSynced: ESCasePatchRequest[];
+  casesMap: Map<string, SavedObject<ESCaseAttributes>>;
+  caseService: CaseServiceSetup;
+  client: SavedObjectsClientContract;
+  caseClient: CaseClientImpl;
+}) {
+  /**
+   * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
+   * last so when the map is built we will use the last status change as the source of truth.
+   */
+  const casesToSync = [...casesWithSyncSettingChangedToOn, ...casesWithStatusChangedAndSynced];
+
+  // build a map of case id to the status it has
+  // this will have collections in it but the alerts should be associated to sub cases and not collections so it shouldn't
+  // matter.
+  const casesToSyncToStatus = casesToSync.reduce((acc, caseInfo) => {
+    acc.set(
+      caseInfo.id,
+      caseInfo.status ?? casesMap.get(caseInfo.id)?.attributes.status ?? CaseStatuses.open
+    );
+    return acc;
+  }, new Map<string, CaseStatuses>());
+
+  // get all the alerts for all the alert comments for all cases and collections. Collections themselves won't have any
+  // but their sub cases could
+  const totalAlerts = await getAlertComments({
+    casesToSync,
+    caseService,
+    client,
+  });
+
+  // get a map of sub case id to the sub case status
+  const subCasesToStatus = await getSubCasesToStatus({ totalAlerts, client, caseService });
+
+  // create a map of the case statuses to the alert information that we need to update for that status
+  // This allows us to make at most 3 calls to ES, one for each status type that we need to update
+  // One potential improvement here is to do a tick (set timeout) to reduce the memory footprint if that becomes an issue
+  const alertsToUpdate = totalAlerts.saved_objects.reduce((acc, alertComment) => {
+    if (isGenOrAlertCommentAttributes(alertComment.attributes)) {
+      const status = getSyncStatusForComment({
+        alertComment,
+        casesToSyncToStatus,
+        subCasesToStatus,
+      });
+
+      addAlertInfoToStatusMap({ comment: alertComment.attributes, statusMap: acc, status });
+    }
+
+    return acc;
+  }, new Map<CaseStatuses, AlertInfo>());
+
+  // This does at most 3 calls to Elasticsearch to update the status of the alerts to either open, closed, or in-progress
+  for (const [status, alertInfo] of alertsToUpdate.entries()) {
+    if (alertInfo.ids.length > 0 && alertInfo.indices.size > 0) {
+      caseClient.updateAlertsStatus({
+        ids: alertInfo.ids,
+        status,
+        indices: alertInfo.indices,
+      });
+    }
+  }
+}
+
 interface UpdateArgs {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
-  request: KibanaRequest;
+  user: User;
   caseClient: CaseClientImpl;
   cases: CasesPatchRequest;
 }
@@ -143,7 +331,7 @@ export const update = async ({
   savedObjectsClient,
   caseService,
   userActionService,
-  request,
+  user,
   caseClient,
   cases,
 }: UpdateArgs): Promise<CasesResponse> => {
@@ -220,7 +408,7 @@ export const update = async ({
   });
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = await caseService.getUser({ request });
+  const { username, full_name, email } = user;
   const updatedDt = new Date().toISOString();
   const updatedCases = await caseService.patchCases({
     client: savedObjectsClient,
@@ -279,59 +467,15 @@ export const update = async ({
     );
   });
 
-  for (const theCase of [...casesWithSyncSettingChangedToOn, ...casesWithStatusChangedAndSynced]) {
-    const currentCase = myCases.saved_objects.find((c) => c.id === theCase.id);
-    const totalComments = await caseService.getAllCaseComments({
-      client: savedObjectsClient,
-      id: theCase.id,
-      options: {
-        fields: [],
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
-        page: 1,
-        perPage: 1,
-      },
-    });
-
-    // TODO: if a collection's sync settings are change we need to get all the sub cases and sync their alerts according
-    // to the SUB CASE status not the collection's status
-    // I think what we can do is get all comments for a collection's sub cases in a single call, then group the alerts by
-    // sub case ID, then query for all those sub cases that we need, grab their status, build another map of status
-    // to {ids: string[], indices: Set<string>} then iterate over the map and perform a updateAlertsStatus
-    // for each group of alerts for the 3 statuses.
-
-    const caseComments = (await caseService.getAllCaseComments({
-      client: savedObjectsClient,
-      id: theCase.id,
-      options: {
-        fields: [],
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
-        page: 1,
-        perPage: totalComments.total,
-      },
-      // The filter guarantees that the comments will be of type alert
-    })) as SavedObjectsFindResponse<{ alertId: string | string[]; index: string }>;
-
-    // TODO: comment about why we need this (aka alerts might come from different indices? so dedup them)
-    const idsAndIndices = caseComments.saved_objects.reduce(
-      (acc: { ids: string[]; indices: Set<string> }, comment) => {
-        const alertId = comment.attributes.alertId;
-        const ids = Array.isArray(alertId) ? alertId : [alertId];
-        acc.ids.push(...ids);
-        acc.indices.add(comment.attributes.index);
-        return acc;
-      },
-      { ids: [], indices: new Set<string>() }
-    );
-
-    if (idsAndIndices.ids.length > 0) {
-      caseClient.updateAlertsStatus({
-        ids: idsAndIndices.ids,
-        // Either there is a status update or the syncAlerts got turned on.
-        status: theCase.status ?? currentCase?.attributes.status ?? CaseStatuses.open,
-        indices: idsAndIndices.indices,
-      });
-    }
-  }
+  // Update the alert's status to match any case status or sync settings changes
+  await updateAlerts({
+    casesWithStatusChangedAndSynced,
+    casesWithSyncSettingChangedToOn,
+    caseService,
+    client: savedObjectsClient,
+    caseClient,
+    casesMap,
+  });
 
   const returnUpdatedCase = myCases.saved_objects
     .filter((myCase) =>
