@@ -34,6 +34,8 @@ const Message = euiStyled.div`
 `;
 
 export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsole = '' }) => {
+  const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
+
   return (
     <>
       <div style={{ padding: '8px', maxWidth: 1000 }}>
@@ -59,7 +61,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsol
           )}
           overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
           language="javascript"
-          initialIsOpen={true}
+          initialIsOpen={!isSucceeded}
         >
           {step.synthetics?.payload?.source}
         </CodeBlockAccordion>{' '}
@@ -74,7 +76,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsol
           )}
           overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
           language="javascript"
-          initialIsOpen={true}
+          initialIsOpen={!isSucceeded}
         >
           {browserConsole}
         </CodeBlockAccordion>
@@ -88,7 +90,7 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsol
           })}
           language="html"
           overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-          initialIsOpen={true}
+          initialIsOpen={!isSucceeded}
         >
           {step.synthetics?.error?.stack}
         </CodeBlockAccordion>
