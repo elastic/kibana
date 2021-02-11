@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
-        expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
+        log.debug(rowData);
+        expect(rowData).to.contain('Sep 22, 2015 @ 23:50:13.253');
       });
 
       it('save query should show toast message and display query name', async function () {

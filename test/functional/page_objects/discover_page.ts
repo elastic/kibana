@@ -20,6 +20,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
   const docTable = getService('docTable');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
+  const dataGrid = getService('dataGrid');
 
   class DiscoverPage {
     public async getChartTimespan() {
@@ -185,12 +186,17 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async getDocTableRows() {
       await header.waitUntilLoadingHasFinished();
-      return await testSubjects.findAll('docTableRow');
+      return await dataGrid.getBodyRows();
+      // return await testSubjects.findAll('docTableRow');
     }
 
     public async getDocTableIndex(index: number) {
-      const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
-      return await row.getVisibleText();
+      const row = await dataGrid.getRow({ rowIndex: index - 1 });
+      const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+      return result.join('');
+
+      // const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
+      // return await row.getVisibleText();
     }
 
     public async getDocTableField(index: number) {
