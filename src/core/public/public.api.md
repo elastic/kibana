@@ -561,7 +561,9 @@ export interface DocLinksStart {
             readonly scriptAggs: string;
             readonly painless: string;
             readonly painlessApi: string;
+            readonly painlessLangSpec: string;
             readonly painlessSyntax: string;
+            readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
@@ -601,6 +603,7 @@ export interface DocLinksStart {
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
+            painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putWatch: string;
             updateTransform: string;

@@ -8,32 +8,32 @@
 import { Observable } from 'rxjs';
 import { HttpService } from '../http_service';
 
-import { basePath } from './index';
-import { Dictionary } from '../../../../common/types/common';
-import {
+import type { Dictionary } from '../../../../common/types/common';
+import type {
   MlJobWithTimeRange,
   MlSummaryJobs,
   CombinedJobWithStats,
   Job,
   Datafeed,
 } from '../../../../common/types/anomaly_detection_jobs';
-import { JobMessage } from '../../../../common/types/audit_message';
-import { AggFieldNamePair } from '../../../../common/types/fields';
-import { ExistingJobsAndGroups } from '../job_service';
-import {
+import type { JobMessage } from '../../../../common/types/audit_message';
+import type { AggFieldNamePair } from '../../../../common/types/fields';
+import type { ExistingJobsAndGroups } from '../job_service';
+import type {
   CategorizationAnalyzer,
   CategoryFieldExample,
   FieldExampleCheck,
 } from '../../../../common/types/categories';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
-import { Category } from '../../../../common/types/categories';
-import { JobsExistResponse } from '../../../../common/types/job_service';
+import type { Category } from '../../../../common/types/categories';
+import type { JobsExistResponse } from '../../../../common/types/job_service';
+import { ML_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return httpService.http<MlSummaryJobs>({
-      path: `${basePath()}/jobs/jobs_summary`,
+      path: `${ML_BASE_PATH}/jobs/jobs_summary`,
       method: 'POST',
       body,
     });
@@ -45,7 +45,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       jobs: MlJobWithTimeRange[];
       jobsMap: Dictionary<MlJobWithTimeRange>;
     }>({
-      path: `${basePath()}/jobs/jobs_with_time_range`,
+      path: `${ML_BASE_PATH}/jobs/jobs_with_time_range`,
       method: 'POST',
       body,
     });
@@ -54,7 +54,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   jobForCloning(jobId: string) {
     const body = JSON.stringify({ jobId });
     return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
-      path: `${basePath()}/jobs/job_for_cloning`,
+      path: `${ML_BASE_PATH}/jobs/job_for_cloning`,
       method: 'POST',
       body,
     });
@@ -63,7 +63,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   jobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return httpService.http<CombinedJobWithStats[]>({
-      path: `${basePath()}/jobs/jobs`,
+      path: `${ML_BASE_PATH}/jobs/jobs`,
       method: 'POST',
       body,
     });
@@ -71,7 +71,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   groups() {
     return httpService.http<any>({
-      path: `${basePath()}/jobs/groups`,
+      path: `${ML_BASE_PATH}/jobs/groups`,
       method: 'GET',
     });
   },
@@ -79,7 +79,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   updateGroups(updatedJobs: string[]) {
     const body = JSON.stringify({ jobs: updatedJobs });
     return httpService.http<any>({
-      path: `${basePath()}/jobs/update_groups`,
+      path: `${ML_BASE_PATH}/jobs/update_groups`,
       method: 'POST',
       body,
     });
@@ -93,7 +93,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
 
     return httpService.http<any>({
-      path: `${basePath()}/jobs/force_start_datafeeds`,
+      path: `${ML_BASE_PATH}/jobs/force_start_datafeeds`,
       method: 'POST',
       body,
     });
@@ -102,7 +102,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   stopDatafeeds(datafeedIds: string[]) {
     const body = JSON.stringify({ datafeedIds });
     return httpService.http<any>({
-      path: `${basePath()}/jobs/stop_datafeeds`,
+      path: `${ML_BASE_PATH}/jobs/stop_datafeeds`,
       method: 'POST',
       body,
     });
@@ -111,7 +111,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   deleteJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return httpService.http<any>({
-      path: `${basePath()}/jobs/delete_jobs`,
+      path: `${ML_BASE_PATH}/jobs/delete_jobs`,
       method: 'POST',
       body,
     });
@@ -120,7 +120,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   closeJobs(jobIds: string[]) {
     const body = JSON.stringify({ jobIds });
     return httpService.http<any>({
-      path: `${basePath()}/jobs/close_jobs`,
+      path: `${ML_BASE_PATH}/jobs/close_jobs`,
       method: 'POST',
       body,
     });
@@ -129,7 +129,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   forceStopAndCloseJob(jobId: string) {
     const body = JSON.stringify({ jobId });
     return httpService.http<{ success: boolean }>({
-      path: `${basePath()}/jobs/force_stop_and_close_job`,
+      path: `${ML_BASE_PATH}/jobs/force_stop_and_close_job`,
       method: 'POST',
       body,
     });
@@ -139,7 +139,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     const jobIdString = jobId !== undefined ? `/${jobId}` : '';
     const query = from !== undefined ? { from } : {};
     return httpService.http<JobMessage[]>({
-      path: `${basePath()}/job_audit_messages/messages${jobIdString}`,
+      path: `${ML_BASE_PATH}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',
       query,
     });
@@ -147,7 +147,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   deletingJobTasks() {
     return httpService.http<any>({
-      path: `${basePath()}/jobs/deleting_jobs_tasks`,
+      path: `${ML_BASE_PATH}/jobs/deleting_jobs_tasks`,
       method: 'GET',
     });
   },
@@ -155,7 +155,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   jobsExist(jobIds: string[], allSpaces: boolean = false) {
     const body = JSON.stringify({ jobIds, allSpaces });
     return httpService.http<JobsExistResponse>({
-      path: `${basePath()}/jobs/jobs_exist`,
+      path: `${ML_BASE_PATH}/jobs/jobs_exist`,
       method: 'POST',
       body,
     });
@@ -164,7 +164,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   jobsExist$(jobIds: string[], allSpaces: boolean = false): Observable<JobsExistResponse> {
     const body = JSON.stringify({ jobIds, allSpaces });
     return httpService.http$({
-      path: `${basePath()}/jobs/jobs_exist`,
+      path: `${ML_BASE_PATH}/jobs/jobs_exist`,
       method: 'POST',
       body,
     });
@@ -173,7 +173,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   newJobCaps(indexPatternTitle: string, isRollup: boolean = false) {
     const query = isRollup === true ? { rollup: true } : {};
     return httpService.http<any>({
-      path: `${basePath()}/jobs/new_job_caps/${indexPatternTitle}`,
+      path: `${ML_BASE_PATH}/jobs/new_job_caps/${indexPatternTitle}`,
       method: 'GET',
       query,
     });
@@ -202,7 +202,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       splitFieldValue,
     });
     return httpService.http<any>({
-      path: `${basePath()}/jobs/new_job_line_chart`,
+      path: `${ML_BASE_PATH}/jobs/new_job_line_chart`,
       method: 'POST',
       body,
     });
@@ -229,7 +229,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       splitFieldName,
     });
     return httpService.http<any>({
-      path: `${basePath()}/jobs/new_job_population_chart`,
+      path: `${ML_BASE_PATH}/jobs/new_job_population_chart`,
       method: 'POST',
       body,
     });
@@ -237,7 +237,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   getAllJobAndGroupIds() {
     return httpService.http<ExistingJobsAndGroups>({
-      path: `${basePath()}/jobs/all_jobs_and_group_ids`,
+      path: `${ML_BASE_PATH}/jobs/all_jobs_and_group_ids`,
       method: 'GET',
     });
   },
@@ -249,7 +249,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       end,
     });
     return httpService.http<{ progress: number; isRunning: boolean; isJobClosed: boolean }>({
-      path: `${basePath()}/jobs/look_back_progress`,
+      path: `${ML_BASE_PATH}/jobs/look_back_progress`,
       method: 'POST',
       body,
     });
@@ -281,7 +281,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
       validationChecks: FieldExampleCheck[];
     }>({
-      path: `${basePath()}/jobs/categorization_field_examples`,
+      path: `${ML_BASE_PATH}/jobs/categorization_field_examples`,
       method: 'POST',
       body,
     });
@@ -293,7 +293,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       total: number;
       categories: Array<{ count?: number; category: Category }>;
     }>({
-      path: `${basePath()}/jobs/top_categories`,
+      path: `${ML_BASE_PATH}/jobs/top_categories`,
       method: 'POST',
       body,
     });
@@ -311,7 +311,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       total: number;
       categories: Array<{ count?: number; category: Category }>;
     }>({
-      path: `${basePath()}/jobs/revert_model_snapshot`,
+      path: `${ML_BASE_PATH}/jobs/revert_model_snapshot`,
       method: 'POST',
       body,
     });

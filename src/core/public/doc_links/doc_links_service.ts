@@ -110,7 +110,9 @@ export class DocLinksService {
           scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html#_values_source`,
           painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
           painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
+          painlessLangSpec: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
           painlessSyntax: `${ELASTICSEARCH_DOCS}modules-scripting-painless-syntax.html`,
+          painlessWalkthrough: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-walkthrough.html`,
           painlessLanguage: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
@@ -239,6 +241,7 @@ export class DocLinksService {
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
           putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
+          painlessExecuteAPIContexts: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html#_contexts`,
           putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
           putWatch: `${ELASTICSEARCH_DOCS}/watcher-api-put-watch.html`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
@@ -336,7 +339,9 @@ export interface DocLinksStart {
       readonly scriptAggs: string;
       readonly painless: string;
       readonly painlessApi: string;
+      readonly painlessLangSpec: string;
       readonly painlessSyntax: string;
+      readonly painlessWalkthrough: string;
       readonly luceneExpressions: string;
     };
     readonly indexPatterns: {
@@ -376,6 +381,7 @@ export interface DocLinksStart {
       openIndex: string;
       putComponentTemplate: string;
       painlessExecute: string;
+      painlessExecuteAPIContexts: string;
       putComponentTemplateMetadata: string;
       putWatch: string;
       updateTransform: string;
