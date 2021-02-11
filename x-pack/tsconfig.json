@@ -7,6 +7,7 @@
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/ftr_e2e/**/*",
     "plugins/apm/scripts/**/*",
+    "plugins/banners/**/*",
     "plugins/canvas/**/*",
     "plugins/console_extensions/**/*",
     "plugins/code/**/*",

@@ -476,6 +476,8 @@ export default ({ getService }: FtrProviderContext): void => {
               impact: null,
               severity: null,
               urgency: null,
+              category: null,
+              subcategory: null,
             },
           },
           created_by: {

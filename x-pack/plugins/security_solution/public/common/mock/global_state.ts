@@ -218,7 +218,7 @@ export const mockGlobalState: State = {
         description: '',
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         highlightedDropAndProviderId: '',
         historyIds: [],
         isFavorite: false,
