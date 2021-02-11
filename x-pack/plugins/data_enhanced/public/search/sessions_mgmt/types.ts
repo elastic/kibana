@@ -32,4 +32,6 @@ export interface UISession {
   actions?: ACTION[];
   reloadUrl: string;
   restoreUrl: string;
+  initialState: Record<string, unknown>;
+  restoreState: Record<string, unknown>;
 }
