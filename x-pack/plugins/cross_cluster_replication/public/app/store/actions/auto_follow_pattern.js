@@ -39,7 +39,7 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
     label: t.AUTO_FOLLOW_PATTERN_LOAD,
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
-    handler: async () => await loadAutoFollowPatternsRequest(),
+    handler: async () => await loadAutoFollowPatternsRequest(isUpdating),
   });
 
 export const getAutoFollowPattern = (id) =>
