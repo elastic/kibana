@@ -12,7 +12,6 @@ import {
   EuiLink,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -57,17 +56,6 @@ export function CorrelationsTable<T extends SignificantTerm>({
   );
   const history = useHistory();
   const columns: Array<EuiBasicTableColumn<T>> = [
-    {
-      width: '100px',
-      field: 'score',
-      name: i18n.translate(
-        'xpack.apm.correlations.correlationsTable.scoreLabel',
-        { defaultMessage: 'Score' }
-      ),
-      render: (_: any, term: T) => {
-        return <EuiBadge>{Math.round(term.score)}</EuiBadge>;
-      },
-    },
     {
       width: '100px',
       field: 'impact',
