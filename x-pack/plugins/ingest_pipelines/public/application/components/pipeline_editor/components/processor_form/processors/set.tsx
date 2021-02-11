@@ -101,7 +101,16 @@ export const SetProcessor: FunctionComponent = () => {
         })}
       />
 
-      <UseField config={fieldsConfig.value} component={Field} path="fields.value" />
+      <UseField
+        config={fieldsConfig.value}
+        component={Field}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'valueFieldInput',
+          },
+        }}
+        path="fields.value"
+      />
 
       <UseField config={fieldsConfig.override} component={ToggleField} path="fields.override" />
 
