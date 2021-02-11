@@ -11,12 +11,13 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { StatefulTimeline } from '../../timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
 import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
-  timelineId: string;
+  timelineId: TimelineId;
 }
 
 const EuiFlyoutContainer = styled.div`

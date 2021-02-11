@@ -50,6 +50,7 @@ import {
   TIMELINE_EDIT_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   QUERY_TAB_BUTTON,
+  CLOSE_OPEN_TIMELINE_MODAL_BTN,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -83,8 +84,20 @@ export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
+export const goToNotesTab = () => {
+  return cy.get(NOTES_TAB_BUTTON).click({ force: true });
+};
+
+export const getNotePreviewByNoteId = (noteId: string) => {
+  return cy.get(`[data-test-subj="note-preview-${noteId}"]`);
+};
+
+export const goToQueryTab = () => {
+  cy.get(QUERY_TAB_BUTTON).click({ force: true });
+};
+
 export const addNotesToTimeline = (notes: string) => {
-  cy.get(NOTES_TAB_BUTTON).click();
+  goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
   cy.get(ADD_NOTE_BUTTON).click();
   cy.get(QUERY_TAB_BUTTON).click();
@@ -121,6 +134,10 @@ export const checkIdToggleField = () => {
   cy.get(ID_TOGGLE_FIELD).check({
     force: true,
   });
+};
+
+export const closeOpenTimelineModal = () => {
+  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click({ force: true });
 };
 
 export const closeTimeline = () => {
@@ -168,6 +185,10 @@ export const openTimelineTemplateFromSettings = (id: string) => {
   openTimelineFromSettings();
   cy.get(OPEN_TIMELINE_TEMPLATE_ICON).click({ force: true });
   cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
+};
+
+export const openTimelineById = (timelineId: string) => {
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click({ force: true });
 };
 
 export const pinFirstEvent = () => {
@@ -222,4 +243,8 @@ export const waitForTimelineChanges = () => {
 
 export const waitForTimelinesPanelToBeLoaded = () => {
   cy.get(TIMELINES_TABLE).should('exist');
+};
+
+export const waitForEventsPanelToBeLoaded = () => {
+  cy.get(QUERY_TAB_BUTTON).find('.euiBadge').should('exist');
 };

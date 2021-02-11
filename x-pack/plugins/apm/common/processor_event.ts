@@ -10,8 +10,6 @@ export enum ProcessorEvent {
   error = 'error',
   metric = 'metric',
   span = 'span',
-  onboarding = 'onboarding',
-  sourcemap = 'sourcemap',
 }
 /**
  * Processor events that are searchable in the UI via the query bar.

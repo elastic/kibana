@@ -100,7 +100,7 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: ['fileUpload:import', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {

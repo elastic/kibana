@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
 import { kea, MakeLogicType } from 'kea';
-
-import { HttpLogic } from '../../../../../shared/http';
+import { cloneDeep, isEqual } from 'lodash';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
-import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
-import { OptionValue } from '../../../../types';
-
 import {
   flashAPIErrors,
   setSuccessMessage,
+  setErrorMessage,
   clearFlashMessages,
 } from '../../../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../../../shared/http';
+import { IndexJob, TOperation, Schema, SchemaTypes } from '../../../../../shared/types';
 import { AppLogic } from '../../../../app_logic';
+import { OptionValue } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
 import {
@@ -298,7 +296,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
       } catch (e) {
-        flashAPIErrors({ ...e, message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE });
+        setErrorMessage(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       }
     },
     addNewField: ({ fieldName, newFieldType }) => {
