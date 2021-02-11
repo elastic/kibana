@@ -4,11 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { schema } from '@kbn/config-schema';
-
-const createCodeConfigSchema = () => {
-  return schema.any({ defaultValue: {} });
-};
-
-export const CodeConfigSchema = createCodeConfigSchema();
+export { SettingsPage } from './settings';
