@@ -181,7 +181,7 @@ describe('useExceptionLists', () => {
           errorMessage: 'Uh oh',
           filterOptions: {
             created_by: 'Moi',
-            name: 'Sample Endpoint',
+            'name.text': 'Sample Endpoint',
           },
           http: mockKibanaHttpService,
           namespaceTypes: ['single', 'agnostic'],

@@ -112,7 +112,9 @@ describe('Exceptions utils', () => {
     });
 
     test('it properly formats filters when one namespace type passed in', () => {
-      const filters = getGeneralFilters({ created_by: 'moi', name: 'Sample' }, ['exception-list']);
+      const filters = getGeneralFilters({ created_by: 'moi', 'name.text': 'Sample' }, [
+        'exception-list',
+      ]);
 
       expect(filters).toEqual(
         '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name:Sample)'
@@ -120,7 +122,7 @@ describe('Exceptions utils', () => {
     });
 
     test('it properly formats filters when two namespace types passed in', () => {
-      const filters = getGeneralFilters({ created_by: 'moi', name: 'Sample' }, [
+      const filters = getGeneralFilters({ created_by: 'moi', 'name.text': 'Sample' }, [
         'exception-list',
         'exception-list-agnostic',
       ]);
@@ -176,7 +178,7 @@ describe('Exceptions utils', () => {
       });
 
       test('it properly formats when filters passed and "showTrustedApps" is false', () => {
-        const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['single'], false);
+        const filter = getFilters({ created_by: 'moi', 'name.text': 'Sample' }, ['single'], false);
 
         expect(filter).toEqual(
           '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name:Sample) AND (not exception-list.attributes.list_id: endpoint_trusted_apps*)'
@@ -184,7 +186,7 @@ describe('Exceptions utils', () => {
       });
 
       test('it if filters passed and "showTrustedApps" is true', () => {
-        const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['single'], true);
+        const filter = getFilters({ created_by: 'moi', 'name.text': 'Sample' }, ['single'], true);
 
         expect(filter).toEqual(
           '(exception-list.attributes.created_by:moi) AND (exception-list.attributes.name:Sample) AND (exception-list.attributes.list_id: endpoint_trusted_apps*)'
@@ -210,7 +212,11 @@ describe('Exceptions utils', () => {
       });
 
       test('it properly formats when filters passed and "showTrustedApps" is false', () => {
-        const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['agnostic'], false);
+        const filter = getFilters(
+          { created_by: 'moi', 'name.text': 'Sample' },
+          ['agnostic'],
+          false
+        );
 
         expect(filter).toEqual(
           '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name:Sample) AND (not exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
@@ -218,7 +224,7 @@ describe('Exceptions utils', () => {
       });
 
       test('it if filters passed and "showTrustedApps" is true', () => {
-        const filter = getFilters({ created_by: 'moi', name: 'Sample' }, ['agnostic'], true);
+        const filter = getFilters({ created_by: 'moi', 'name.text': 'Sample' }, ['agnostic'], true);
 
         expect(filter).toEqual(
           '(exception-list-agnostic.attributes.created_by:moi) AND (exception-list-agnostic.attributes.name:Sample) AND (exception-list-agnostic.attributes.list_id: endpoint_trusted_apps*)'
@@ -245,7 +251,7 @@ describe('Exceptions utils', () => {
 
       test('it properly formats when filters passed and "showTrustedApps" is false', () => {
         const filter = getFilters(
-          { created_by: 'moi', name: 'Sample' },
+          { created_by: 'moi', 'name.text': 'Sample' },
           ['single', 'agnostic'],
           false
         );
@@ -257,7 +263,7 @@ describe('Exceptions utils', () => {
 
       test('it properly formats when filters passed and "showTrustedApps" is true', () => {
         const filter = getFilters(
-          { created_by: 'moi', name: 'Sample' },
+          { created_by: 'moi', 'name.text': 'Sample' },
           ['single', 'agnostic'],
           true
         );
