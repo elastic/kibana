@@ -5,16 +5,13 @@
  * 2.0.
  */
 
+// @ts-expect-error untyped local
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { testTable } from './__fixtures__/test_tables';
+import { testTable, relationalTable } from './__fixtures__/test_tables';
 import { dropdownControl } from './dropdownControl';
 
 describe('dropdownControl', () => {
   const fn = functionWrapper(dropdownControl);
-  const uniqueNames = testTable.rows.reduce(
-    (unique, { name }) => (unique.includes(name) ? unique : unique.concat([name])),
-    []
-  );
 
   it('returns a render as dropdown_filter', () => {
     expect(fn(testTable, { filterColumn: 'name', valueColumn: 'name' })).toHaveProperty(
@@ -30,12 +27,26 @@ describe('dropdownControl', () => {
   describe('args', () => {
     describe('valueColumn', () => {
       it('populates dropdown choices with unique values in valueColumn', () => {
+        const uniqueNames = testTable.rows.reduce<Array<[string, string]>>(
+          (unique, { name }) =>
+            unique.find(([value, label]) => value === name) ? unique : [...unique, [name, name]],
+          []
+        );
         expect(fn(testTable, { valueColumn: 'name' }).value.choices).toEqual(uniqueNames);
       });
 
       it('returns an empty array when provided an invalid column', () => {
         expect(fn(testTable, { valueColumn: 'foo' }).value.choices).toEqual([]);
         expect(fn(testTable, { valueColumn: '' }).value.choices).toEqual([]);
+      });
+    });
+
+    describe('labelColumn', () => {
+      it('populates dropdown choices with labels from label column', () => {
+        const expectedChoices = relationalTable.rows.map((row) => [row.id, row.name]);
+        expect(
+          fn(relationalTable, { valueColumn: 'id', labelColumn: 'name' }).value.choices
+        ).toEqual(expectedChoices);
       });
     });
   });
