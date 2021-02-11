@@ -110,6 +110,47 @@ describe('engine routes', () => {
     });
   });
 
+  describe('POST /api/app_search/engines', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/engines',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      mockRouter.callRoute({ body: { name: 'some-engine', language: 'en' } });
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/collection',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: { name: 'some-engine', language: 'en' } };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing name', () => {
+        const request = { body: { language: 'en' } };
+        mockRouter.shouldThrow(request);
+      });
+
+      it('optional language', () => {
+        const request = { body: { name: 'some-engine' } };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
   describe('GET /api/app_search/engines/{name}', () => {
     let mockRouter: MockRouter;
 
