@@ -124,21 +124,22 @@ async function executor(
  */
 export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
   if (isCommentGeneratedAlert(comment)) {
-    const alertId: string[] = [];
-    if (Array.isArray(comment.alerts)) {
-      alertId.push(
-        ...comment.alerts.map((alert: { _id: string }) => {
-          return alert._id;
-        })
+    try {
+      const genAlerts: Array<{ _id: string; _index: string }> = JSON.parse(
+        `${comment.alerts.substring(0, comment.alerts.lastIndexOf('__SEPARATOR__'))}]`.replace(
+          /__SEPARATOR__/gi,
+          ','
+        )
       );
-    } else {
-      alertId.push(comment.alerts._id);
+
+      return {
+        type: CommentType.generatedAlert,
+        alertId: genAlerts.map((ga) => ga._id),
+        index: genAlerts.map((ga) => ga._index),
+      };
+    } catch (e) {
+      throw new Error(`Error parsing generated alert in case connector -> ${e.message}`);
     }
-    return {
-      type: CommentType.generatedAlert,
-      alertId,
-      index: comment.index,
-    };
   } else {
     return comment;
   }

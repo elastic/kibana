@@ -120,7 +120,8 @@ export interface AlertInfo {
 const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
   if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     acc.ids.push(...getAlertIds(comment));
-    acc.indices.add(comment.index);
+    const indices = Array.isArray(comment.index) ? comment.index : [comment.index];
+    indices.forEach((index) => acc.indices.add(index));
   }
   return acc;
 };

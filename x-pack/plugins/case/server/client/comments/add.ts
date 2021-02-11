@@ -160,7 +160,11 @@ const addGeneratedAlerts = async ({
     await caseClient.updateAlertsStatus({
       ids,
       status: subCase.attributes.status,
-      indices: new Set([newComment.attributes.index]),
+      indices: new Set([
+        ...(Array.isArray(newComment.attributes.index)
+          ? newComment.attributes.index
+          : [newComment.attributes.index]),
+      ]),
     });
   }
 
@@ -282,7 +286,11 @@ export const addComment = async ({
     await caseClient.updateAlertsStatus({
       ids,
       status: updatedCase.status,
-      indices: new Set([newComment.attributes.index]),
+      indices: new Set([
+        ...(Array.isArray(newComment.attributes.index)
+          ? newComment.attributes.index
+          : [newComment.attributes.index]),
+      ]),
     });
   }
 
