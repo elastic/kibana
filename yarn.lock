@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@axe-core/puppeteer@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@axe-core/puppeteer/-/puppeteer-4.1.1.tgz#e9dd2f2f13b717c057ff68c5943dec8d4ddd8acf"
+  integrity sha512-Ao9N7HL//s26hdasx3Ba18tlJgxpoO+1SmIN6eSx5vC50dqYhiRU0xp6wBKWqzo10u1jpzl/s4RFsOAuolFMBA==
+  dependencies:
+    axe-core "^4.1.1"
+
 "@babel/cli@^7.12.10":
   version "7.12.10"
   resolved "https://registry.yarnpkg.com/@babel/cli/-/cli-7.12.10.tgz#67a1015b1cd505bde1696196febf910c4c339a48"
@@ -2203,11 +2210,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@31.4.0":
-  version "31.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-31.4.0.tgz#d2c8cc91fc538f7b1c5e5229663e186fa0c9207c"
-  integrity sha512-ADdUeNxj2uiN13U7AkF0ishLAN0xcqFWHC+xjEmx8Wedyaj5DFrmmJEuH9aXv+XSQG5l8ppMgZQb3pMDjR2mKw==
+"@elastic/eui@31.6.0":
+  version "31.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-31.6.0.tgz#593a1ec2a753f6d48dda2c2838ad02916b6915ca"
+  integrity sha512-5Xm3fCv5CAuhPefpys3PczS+uv6CZ2ef4JQIw9C80S5Q9NPIpxniKyEUVpekGbwBWtsGJcLJXBM4Z8OO5j3jbg==
   dependencies:
+    "@axe-core/puppeteer" "^4.1.1"
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
     "@types/numeral" "^0.0.28"
@@ -8469,6 +8477,11 @@ axe-core@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.0.2.tgz#c7cf7378378a51fcd272d3c09668002a4990b1cb"
   integrity sha512-arU1h31OGFu+LPrOLGZ7nB45v940NMDMEJeNmbutu57P+UFDVnkZg3e+J1I2HJRZ9hT7gO8J91dn/PMrAiKakA==
+
+axe-core@^4.1.1:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.1.2.tgz#7cf783331320098bfbef620df3b3c770147bc224"
+  integrity sha512-V+Nq70NxKhYt89ArVcaNL9FDryB3vQOd+BFXZIfO3RP6rwtj+2yqqqdHEkacutglPaZLkJeuXKCjCJDMGPtPqg==
 
 axios@^0.21.1:
   version "0.21.1"
