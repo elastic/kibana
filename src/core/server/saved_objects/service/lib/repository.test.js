@@ -2812,6 +2812,13 @@ describe('SavedObjectsRepository', () => {
         expect(client.search).not.toHaveBeenCalled();
       });
 
+      it(`throws when a preference is provided with pit`, async () => {
+        await expect(
+          savedObjectsRepository.find({ type: 'foo', pit: { id: 'abc123' }, preference: 'hi' })
+        ).rejects.toThrowError('options.preference must be excluded when options.pit is used');
+        expect(client.search).not.toHaveBeenCalled();
+      });
+
       it(`throws when KQL filter syntax is invalid`, async () => {
         const findOpts = {
           namespaces: [namespace],
@@ -2969,6 +2976,32 @@ describe('SavedObjectsRepository', () => {
         expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
           ...relevantOpts,
           hasReferenceOperator: 'AND',
+        });
+      });
+
+      it(`accepts searchAfter`, async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          searchAfter: [1, 'a'],
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          ...relevantOpts,
+          searchAfter: [1, 'a'],
+        });
+      });
+
+      it(`accepts pit`, async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          pit: { id: 'abc123', keepAlive: '2m' },
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          ...relevantOpts,
+          pit: { id: 'abc123', keepAlive: '2m' },
         });
       });
 
@@ -4383,6 +4416,138 @@ describe('SavedObjectsRepository', () => {
       it(`includes originId property if present in cluster call response`, async () => {
         const result = await updateSuccess(type, id, attributes, {}, true);
         expect(result).toMatchObject({ originId });
+      });
+    });
+  });
+
+  describe('#openPointInTimeForType', () => {
+    const type = 'index-pattern';
+
+    const generateResults = (id) => ({ id: id || null });
+    const successResponse = async (type, options) => {
+      client.openPointInTime.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
+      );
+      const result = await savedObjectsRepository.openPointInTimeForType(type, options);
+      expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use the ES PIT API`, async () => {
+        await successResponse(type);
+        expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      });
+
+      it(`accepts preference`, async () => {
+        await successResponse(type, { preference: 'pref' });
+        expect(client.openPointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            preference: 'pref',
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`accepts keepAlive`, async () => {
+        await successResponse(type, { keepAlive: '2m' });
+        expect(client.openPointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            keep_alive: '2m',
+          }),
+          expect.anything()
+        );
+      });
+
+      it(`defaults keepAlive to 5m`, async () => {
+        await successResponse(type);
+        expect(client.openPointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            keep_alive: '5m',
+          }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('errors', () => {
+      const expectNotFoundError = async (types) => {
+        await expect(savedObjectsRepository.openPointInTimeForType(types)).rejects.toThrowError(
+          createGenericNotFoundError()
+        );
+      };
+
+      it(`throws when ES is unable to find the index`, async () => {
+        client.openPointInTime.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise({}, { statusCode: 404 })
+        );
+        await expectNotFoundError(type);
+        expect(client.openPointInTime).toHaveBeenCalledTimes(1);
+      });
+
+      it(`should return generic not found error when attempting to find only invalid or hidden types`, async () => {
+        const test = async (types) => {
+          await expectNotFoundError(types);
+          expect(client.openPointInTime).not.toHaveBeenCalled();
+        };
+
+        await test('unknownType');
+        await test(HIDDEN_TYPE);
+        await test(['unknownType', HIDDEN_TYPE]);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns id in the expected format`, async () => {
+        const id = 'abc123';
+        const results = generateResults(id);
+        client.openPointInTime.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(results)
+        );
+        const response = await savedObjectsRepository.openPointInTimeForType(type);
+        expect(response).toEqual({ id });
+      });
+    });
+  });
+
+  describe('#closePointInTime', () => {
+    const generateResults = () => ({ succeeded: true, num_freed: 3 });
+    const successResponse = async (id) => {
+      client.closePointInTime.mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(generateResults())
+      );
+      const result = await savedObjectsRepository.closePointInTime(id);
+      expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    describe('client calls', () => {
+      it(`should use the ES PIT API`, async () => {
+        await successResponse('abc123');
+        expect(client.closePointInTime).toHaveBeenCalledTimes(1);
+      });
+
+      it(`accepts id`, async () => {
+        await successResponse('abc123');
+        expect(client.closePointInTime).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              id: 'abc123',
+            }),
+          }),
+          expect.anything()
+        );
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns response body from ES`, async () => {
+        const results = generateResults('abc123');
+        client.closePointInTime.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(results)
+        );
+        const response = await savedObjectsRepository.closePointInTime('abc123');
+        expect(response).toEqual(results);
       });
     });
   });
