@@ -64,7 +64,7 @@ const i18nTexts = {
     }
   ),
   rolloverToolTipDescription: i18n.translate(
-    'xpack.indexLifecycleMgt.editPolicy.minimumAge.rolloverToolTipDescription',
+    'xpack.indexLifecycleMgmt.editPolicy.minimumAge.rolloverToolTipDescription',
     {
       defaultMessage:
         'Data age is calculated from rollover. Rollover is configured in the hot phase.',
@@ -121,7 +121,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                         );
                         const selectAppendValue: Array<string | React.ReactElement> = [
                           i18n.translate(
-                            'xpack.indexLifecycleMgt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
+                            'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
                             { defaultMessage: 'old' }
                           ),
                         ].concat(
