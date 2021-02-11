@@ -108,5 +108,72 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
+
+    describe('by value', () => {
+      it('save and return button returns to dashboard after editing visualization with changes saved', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await createMarkdownVis();
+
+        const originalPanelCount = PageObjects.dashboard.getPanelCount();
+
+        await editMarkdownVis();
+        await PageObjects.visualize.saveVisualizationAndReturn();
+
+        const markdownText = await testSubjects.find('markdownBody');
+        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+
+        const newPanelCount = PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.eql(originalPanelCount);
+      });
+
+      it('cancel button returns to dashboard after editing visualization without saving', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await createMarkdownVis();
+
+        await editMarkdownVis();
+        await PageObjects.visualize.cancelAndReturn(true);
+
+        const markdownText = await testSubjects.find('markdownBody');
+        expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+      });
+
+      it('save to library button returns to dashboard after editing visualization with changes saved', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await createMarkdownVis();
+
+        const originalPanelCount = PageObjects.dashboard.getPanelCount();
+
+        await editMarkdownVis();
+        await PageObjects.visualize.saveVisualization('test save to library', {
+          redirectToOrigin: true,
+        });
+
+        const markdownText = await testSubjects.find('markdownBody');
+        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+
+        const newPanelCount = PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.eql(originalPanelCount);
+      });
+
+      it('should lose its connection to the dashboard when creating new visualization', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.clickNewVisualization();
+        await PageObjects.visualize.clickMarkdownWidget();
+        await PageObjects.visualize.notLinkedToOriginatingApp();
+
+        // return to origin should not be present in save modal
+        await testSubjects.click('visualizeSaveButton');
+        const redirectToOriginCheckboxExists = await testSubjects.exists(
+          'returnToOriginModeSwitch'
+        );
+        expect(redirectToOriginCheckboxExists).to.be(false);
+      });
+    });
   });
 }
