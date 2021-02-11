@@ -63,12 +63,12 @@ export const sourceSchema = schema.object({
       schema.string(),
       schema.object({
         type: schema.string(),
-        script: schema.maybe(schema.string()),
-        source: schema.maybe(
+        script: schema.oneOf([
+          schema.string(),
           schema.object({
-            script: schema.string(),
-          })
-        ),
+            source: schema.string(),
+          }),
+        ]),
       })
     )
   ),

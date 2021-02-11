@@ -18,9 +18,11 @@ const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 export interface RuntimeField {
   type: RuntimeType;
-  script: {
-    source: string;
-  };
+  script:
+    | string
+    | {
+        source: string;
+      };
 }
 
 /**

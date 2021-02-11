@@ -87,7 +87,7 @@ export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
   partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
-  runtimeMappings?: object
+  runtimeMappings?: Record<string, RuntimeField>
 ): PostTransformsPreviewRequestSchema {
   const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 
