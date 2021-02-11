@@ -51,7 +51,7 @@ describe('EmbeddedMapComponent', () => {
       { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' },
       { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'auditbeat-*' },
     ],
-    sourcererScope: { selectedPatterns: ['filebeat-*', 'packetbeat-*'] },
+    sourcererScope: { indexNames: ['filebeat-*', 'packetbeat-*'] },
   };
   const mockCreateEmbeddable = {
     destroyed: false,

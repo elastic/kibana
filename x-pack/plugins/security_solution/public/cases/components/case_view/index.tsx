@@ -141,13 +141,13 @@ export const CaseComponent = React.memo<CaseProps>(
      * For the future developer: useSourcererScope is security solution dependent.
      * You can use useSignalIndex as an alternative.
      */
-    const { browserFields, docValueFields, selectedPatterns } = useSourcererScope(
+    const { browserFields, docValueFields, indexNames } = useSourcererScope(
       SourcererScopeName.detections
     );
 
     const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>(
       alertsQuery,
-      selectedPatterns[0].title
+      indexNames[0]
     );
 
     const alerts = useMemo(
