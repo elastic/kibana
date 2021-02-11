@@ -20,13 +20,14 @@ export function getContentType(body: any) {
   return 'application/json';
 }
 
-export function send(method: string, path: string, data: any) {
+export function send(method: string, path: string, data: any, asSystemRequest?: boolean) {
   const wrappedDfd = $.Deferred();
 
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
     headers: {
       'kbn-xsrf': 'kibana',
+      ...(asSystemRequest && { 'kbn-system-request': 'true' }),
     },
     data,
     contentType: getContentType(data),
