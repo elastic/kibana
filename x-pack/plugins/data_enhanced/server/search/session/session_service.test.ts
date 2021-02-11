@@ -40,6 +40,13 @@ describe('SearchSessionService', () => {
       name: 'my_realm_name',
     },
   } as AuthenticatedUser;
+  const mockUser2 = {
+    username: 'bar',
+    authentication_realm: {
+      type: 'bar',
+      name: 'bar',
+    },
+  } as AuthenticatedUser;
   const mockSavedObject: SavedObject<any> = {
     id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
     type: SEARCH_SESSION_TYPE,
@@ -177,6 +184,14 @@ describe('SearchSessionService', () => {
       expect(callAttributes).toHaveProperty('realmType', mockUser1.authentication_realm.type);
       expect(callAttributes).toHaveProperty('realmName', mockUser1.authentication_realm.name);
       expect(callAttributes).toHaveProperty('username', mockUser1.username);
+    });
+
+    it('throws error if user conflicts', () => {
+      savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+
+      expect(
+        service.get({ savedObjectsClient }, mockUser2, sessionId)
+      ).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
     });
 
     it('works without security', async () => {
@@ -559,6 +574,20 @@ describe('SearchSessionService', () => {
       expect(callAttributes).toHaveProperty('touched');
     });
 
+    it('throws if user conflicts', () => {
+      const mockUpdateSavedObject = {
+        ...mockSavedObject,
+        attributes: {},
+      };
+      savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+      savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+
+      const attributes = { name: 'new_name' };
+      expect(
+        service.update({ savedObjectsClient }, mockUser2, sessionId, attributes)
+      ).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
+    });
+
     it('works without security', async () => {
       const mockUpdateSavedObject = {
         ...mockSavedObject,
@@ -590,6 +619,14 @@ describe('SearchSessionService', () => {
       expect(id).toBe(sessionId);
       expect(callAttributes).toHaveProperty('status', SearchSessionStatus.CANCELLED);
       expect(callAttributes).toHaveProperty('touched');
+    });
+
+    it('throws if user conflicts', () => {
+      savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+
+      expect(
+        service.cancel({ savedObjectsClient }, mockUser2, sessionId)
+      ).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
     });
 
     it('works without security', async () => {

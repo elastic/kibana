@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { notFound } from '@hapi/boom';
 import {
   CoreSetup,
   CoreStart,
@@ -196,16 +197,18 @@ export class SearchSessionService
     );
   };
 
-  public get = (
+  public get = async (
     { savedObjectsClient }: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
     this.logger.debug(`get | ${sessionId}`);
-    return savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
+    const session = await savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId
     );
+    this.throwOnUserConflict(user, session);
+    return session;
   };
 
   public find = (
@@ -239,13 +242,14 @@ export class SearchSessionService
     });
   };
 
-  public update = (
+  public update = async (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string,
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`update | ${sessionId}`);
+    await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
       sessionId,
@@ -256,33 +260,36 @@ export class SearchSessionService
     );
   };
 
-  public extend(
+  public async extend(
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string,
     expires: Date
   ) {
     this.logger.debug(`extend | ${sessionId}`);
-
+    await this.get(deps, user, sessionId); // Verify correct user
     return this.update(deps, user, sessionId, { expires: expires.toISOString() });
   }
 
-  public cancel = (
+  public cancel = async (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
     this.logger.debug(`delete | ${sessionId}`);
+    await this.get(deps, user, sessionId); // Verify correct user
     return this.update(deps, user, sessionId, {
       status: SearchSessionStatus.CANCELLED,
     });
   };
 
-  public delete = (
+  public delete = async (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
+    this.logger.debug(`delete | ${sessionId}`);
+    await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
   };
 
@@ -378,5 +385,22 @@ export class SearchSessionService
         delete: this.delete.bind(this, deps, user),
       };
     };
+  };
+
+  private throwOnUserConflict = (
+    user: AuthenticatedUser | null,
+    session?: SavedObject<SearchSessionSavedObjectAttributes>
+  ) => {
+    if (user === null || !session) return;
+    if (
+      user.authentication_realm.type !== session.attributes.realmType ||
+      user.authentication_realm.name !== session.attributes.realmName ||
+      user.username !== session.attributes.username
+    ) {
+      this.logger.debug(
+        `User ${user.username} has no access to search session ${session.attributes.sessionId}`
+      );
+      throw notFound();
+    }
   };
 }
