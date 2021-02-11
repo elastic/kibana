@@ -449,6 +449,7 @@ export interface CoreConfigUsageData {
     };
     // (undocumented)
     savedObjects: {
+        customIndex: boolean;
         maxImportPayloadBytes: number;
         maxImportExportSizeBytes: number;
     };
