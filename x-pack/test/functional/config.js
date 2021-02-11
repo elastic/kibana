@@ -94,7 +94,7 @@ export default async function ({ readConfigFile }) {
         // monitoring plugin tries to read UiSettings while esArchiver is
         // deleting/migrating indices causing the test Kibana server to crash
         '--monitoring.cluster_alerts.email_notifications.enabled=true',
-        '--monitoring.cluster_alerts.email_notifications.email_address=e',
+        '--monitoring.cluster_alerts.email_notifications.email_address=test@example.com',
         '--logging.verbose=true',
         '--elasticsearch.logQueries=true',
       ],
