@@ -9,7 +9,6 @@ import { TransformPivotConfig } from '../../../../plugins/transform/common/types
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getLatestTransformConfig } from './index';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
@@ -32,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('editing', function () {
     const transformConfigWithPivot = getTransformConfig();
-    const transformConfigWithLatest = getLatestTransformConfig();
+    // const transformConfigWithLatest = getLatestTransformConfig();
 
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
@@ -42,10 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithPivot.id,
         transformConfigWithPivot
       );
-      await transform.api.createAndRunTransform(
-        transformConfigWithLatest.id,
-        transformConfigWithLatest
-      );
+      // await transform.api.createAndRunTransform(
+      //   transformConfigWithLatest.id,
+      //   transformConfigWithLatest
+      // );
 
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();
@@ -54,8 +53,8 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
-      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
 
@@ -75,21 +74,22 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       },
-      {
-        suiteTitle: 'edit transform with latest configuration',
-        originalConfig: transformConfigWithLatest,
-        transformDescription: 'updated description',
-        transformDocsPerSecond: '1000',
-        transformFrequency: '10m',
-        expected: {
-          messageText: 'updated transform.',
-          row: {
-            status: TRANSFORM_STATE.STOPPED,
-            mode: 'batch',
-            progress: '100',
-          },
-        },
-      },
+      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
+      // {
+      //   suiteTitle: 'edit transform with latest configuration',
+      //   originalConfig: transformConfigWithLatest,
+      //   transformDescription: 'updated description',
+      //   transformDocsPerSecond: '1000',
+      //   transformFrequency: '10m',
+      //   expected: {
+      //     messageText: 'updated transform.',
+      //     row: {
+      //       status: TRANSFORM_STATE.STOPPED,
+      //       mode: 'batch',
+      //       progress: '100',
+      //     },
+      //   },
+      // },
     ];
 
     for (const testData of testDataList) {
