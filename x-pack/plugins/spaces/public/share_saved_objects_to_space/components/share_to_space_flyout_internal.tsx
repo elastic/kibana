@@ -243,7 +243,10 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       return <EuiLoadingSpinner />;
     }
 
-    const showShareWarning =
+    // If the object has not been shared yet (e.g., it currently exists in exactly one space), and there is at least one space that we could
+    // share this object to, we want to display a callout to the user that explains the ramifications of shared objects. They might actually
+    // want to make a copy instead, so this callout contains a link that opens the Copy flyout.
+    const showCreateCopyCallout =
       enableCreateCopyCallout &&
       spaces.length > 1 &&
       savedObjectTarget.namespaces.length === 1 &&
@@ -255,7 +258,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
         objectNoun={savedObjectTarget.noun}
         shareOptions={shareOptions}
         onUpdate={setShareOptions}
-        showShareWarning={showShareWarning}
+        showCreateCopyCallout={showCreateCopyCallout}
         canShareToAllSpaces={canShareToAllSpaces}
         makeCopy={() => setShowMakeCopy(true)}
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}

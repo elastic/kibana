@@ -35,10 +35,10 @@ const getSpaceData = (inactiveSpaceCount: number = 0) => {
 };
 
 /**
- * This node displays up to five named spaces (and an indicator for any number of unauthorized spaces) by default. The active space is
- * omitted from this list unless behaviorContext='outside-space'. If more than five named spaces would be displayed, the extras (along with
- * the unauthorized spaces indicator, if present) are hidden behind a button.
- * If '*' (aka "All spaces") is present, it supersedes all of the above and just displays a single badge without a button.
+ * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for any
+ * number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras (along
+ * with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka "All spaces") is present, it supersedes all
+ * of the above and just displays a single badge without a button.
  */
 describe('SpaceListInternal', () => {
   const createSpaceList = async ({

@@ -40,7 +40,11 @@ interface Props {
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
 const ROW_HEIGHT = 40;
-const APPEND_ACTIVE_SPACE = <EuiBadge color="hollow">Current</EuiBadge>;
+const APPEND_ACTIVE_SPACE = (
+  <EuiBadge color="hollow">
+    {i18n.translate('xpack.spaces.shareToSpace.currentSpaceBadge', { defaultMessage: 'Current' })}
+  </EuiBadge>
+);
 const APPEND_CANNOT_SELECT = (
   <EuiIconTip
     content={i18n.translate('xpack.spaces.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked', {
@@ -156,7 +160,7 @@ export const SelectableSpacesControl = (props: Props) => {
     return null;
   };
 
-  // if space-agnostic behavior is not enabled, the active space is not selected or deselected by the user, so we have to artifically pad the count for this label
+  // if space-agnostic behavior is not enabled, the active space is not selected or deselected by the user, so we have to artificially pad the count for this label
   const selectedCountPad = enableSpaceAgnosticBehavior ? 0 : 1;
   const selectedCount =
     selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length +
@@ -231,7 +235,8 @@ function getAdditionalProps(
       disabled: true,
       checked: 'on' as 'on',
     };
-  } else if (space.cannotShareToSpace) {
+  }
+  if (space.cannotShareToSpace) {
     return {
       append: (
         <>
@@ -241,7 +246,8 @@ function getAdditionalProps(
       ),
       disabled: true,
     };
-  } else if (space.isFeatureDisabled) {
+  }
+  if (space.isFeatureDisabled) {
     return {
       append: APPEND_FEATURE_IS_DISABLED,
     };
@@ -256,9 +262,11 @@ function createSpacesComparator(activeSpaceId: string | false) {
   return (a: ShareToSpaceTarget, b: ShareToSpaceTarget) => {
     if (a.id === activeSpaceId) {
       return -1;
-    } else if (b.id === activeSpaceId) {
+    }
+    if (b.id === activeSpaceId) {
       return 1;
-    } else if (a.isFeatureDisabled !== b.isFeatureDisabled) {
+    }
+    if (a.isFeatureDisabled !== b.isFeatureDisabled) {
       return a.isFeatureDisabled ? 1 : -1;
     }
     return 0;

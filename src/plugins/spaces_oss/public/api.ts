@@ -70,13 +70,30 @@ export interface SpacesApiUiComponent {
    */
   ShareToSpaceFlyout: FunctionComponent<ShareToSpaceFlyoutProps>;
   /**
-   * Displays a corresponding list of spaces for a given list of saved object namespaces.
+   * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for
+   * any number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras
+   * (along with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka "All spaces") is present, it
+   * supersedes all of the above and just displays a single badge without a button.
    *
    * Note: must be rendered inside of a SpacesContext.
    */
   SpaceList: FunctionComponent<SpaceListProps>;
   /**
-   * Displays a warning callout when a user encounters a legacy URL alias conflict.
+   * Displays a callout that needs to be used if a call to `SavedObjectsClient.resolve()` results in an `"conflict"` outcome, which
+   * indicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a
+   * different object (B).
+   *
+   * In this case, `SavedObjectsClient.resolve()` has returned object A. This component displays a warning callout to the user explaining
+   * that there is a conflict, and it includes a button that will redirect the user to object B when clicked.
+   *
+   * Consumers need to determine the local path for the new URL on their own, based on the object ID that was used to call
+   * `SavedObjectsClient.resolve()` (A) and the `aliasTargetId` value in the response (B). For example...
+   *
+   * A is `workpad-123` and B is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.
+   *
+   * Full legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`
+   *
+   * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
    */
   LegacyUrlConflict: FunctionComponent<LegacyUrlConflictProps>;
 }
@@ -212,22 +229,6 @@ export interface SpaceListProps {
 
 /**
  * @public
- *
- * Displays a callout that. This needs to be used if a call to `SavedObjectsClient.resolve()` results in an `"conflict"` outcome, which
- * indicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a
- * different object (B).
- *
- * In this case, `SavedObjectsClient.resolve()` has returned object A. This component displays a callout to the user explaining that there
- * is a conflict, and it includes a button that will redirect the user to object B when clicked.
- *
- * Consumers need to determine the local path for the new URL on their own, based on the object ID that was used to call
- * `SavedObjectsClient.resolve()` (A) and the `aliasTargetId` value in the response (B). For example...
- *
- * A is `workpad-123` and B is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.
- *
- * Full legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`
- *
- * New URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`
  */
 export interface LegacyUrlConflictProps {
   /**

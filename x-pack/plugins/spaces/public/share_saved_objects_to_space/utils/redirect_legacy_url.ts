@@ -28,6 +28,6 @@ export function createRedirectLegacyUrl(
       values: { objectNoun },
     });
     notifications.toasts.addInfo({ title, text });
-    navigateToApp(appId!, { replace: true, path });
+    await navigateToApp(appId!, { replace: true, path });
   };
 }

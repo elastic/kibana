@@ -96,10 +96,6 @@ const setup = async (opts: SetupOpts = {}) => {
 };
 
 describe('CopyToSpaceFlyout', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 

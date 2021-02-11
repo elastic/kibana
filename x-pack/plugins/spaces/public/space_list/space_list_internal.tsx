@@ -20,6 +20,12 @@ import { SpaceAvatar } from '../space_avatar';
 
 const DEFAULT_DISPLAY_LIMIT = 5;
 
+/**
+ * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for any
+ * number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras (along
+ * with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka "All spaces") is present, it supersedes all
+ * of the above and just displays a single badge without a button.
+ */
 export const SpaceListInternal = ({
   namespaces,
   displayLimit = DEFAULT_DISPLAY_LIMIT,
@@ -40,8 +46,8 @@ export const SpaceListInternal = ({
     return null;
   }
 
-  const isSharedToAllSpaces = namespaces?.includes(ALL_SPACES_ID);
-  const unauthorizedCount = (namespaces?.filter((namespace) => namespace === UNKNOWN_SPACE) ?? [])
+  const isSharedToAllSpaces = namespaces.includes(ALL_SPACES_ID);
+  const unauthorizedSpacesCount = namespaces.filter((namespace) => namespace === UNKNOWN_SPACE)
     .length;
   let displayedSpaces: ShareToSpaceTarget[];
   let button: ReactNode = null;
@@ -58,7 +64,7 @@ export const SpaceListInternal = ({
       },
     ];
   } else {
-    const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
+    const authorized = namespaces.filter((namespace) => namespace !== UNKNOWN_SPACE);
     const enabledSpaceTargets: ShareToSpaceTarget[] = [];
     const disabledSpaceTargets: ShareToSpaceTarget[] = [];
     authorized.forEach((namespace) => {
@@ -95,7 +101,8 @@ export const SpaceListInternal = ({
             id="xpack.spaces.spaceList.showMoreSpacesLink"
             defaultMessage="+{count} more"
             values={{
-              count: authorizedSpaceTargets.length + unauthorizedCount - displayedSpaces.length,
+              count:
+                authorizedSpaceTargets.length + unauthorizedSpacesCount - displayedSpaces.length,
             }}
           />
         </EuiButtonEmpty>
@@ -103,18 +110,18 @@ export const SpaceListInternal = ({
     }
   }
 
-  const unauthorizedCountBadge =
-    !isSharedToAllSpaces && (isExpanded || button === null) && unauthorizedCount > 0 ? (
+  const unauthorizedSpacesCountBadge =
+    !isSharedToAllSpaces && (isExpanded || button === null) && unauthorizedSpacesCount > 0 ? (
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={
             <FormattedMessage
-              id="xpack.spaces.spaceList.unauthorizedCountLabel"
+              id="xpack.spaces.spaceList.unauthorizedSpacesCountLabel"
               defaultMessage="You don't have permission to view these spaces."
             />
           }
         >
-          <EuiBadge color="#DDD">+{unauthorizedCount}</EuiBadge>
+          <EuiBadge color="#DDD">+{unauthorizedSpacesCount}</EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
@@ -130,7 +137,7 @@ export const SpaceListInternal = ({
           </EuiFlexItem>
         );
       })}
-      {unauthorizedCountBadge}
+      {unauthorizedSpacesCountBadge}
       {button}
     </EuiFlexGroup>
   );

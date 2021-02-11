@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { SpacesOssPluginSetup, SpacesApi } from 'src/plugins/spaces_oss/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
@@ -49,7 +49,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     this.spacesApi = {
       ui: getUiApi({
         spacesManager: this.spacesManager,
-        getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
+        getStartServices: core.getStartServices,
       }),
       activeSpace$: this.spacesManager.onActiveSpaceChange$,
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
@@ -63,7 +63,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService = new ManagementService();
       this.managementService.setup({
         management: plugins.management,
-        getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
+        getStartServices: core.getStartServices,
         spacesManager: this.spacesManager,
       });
     }

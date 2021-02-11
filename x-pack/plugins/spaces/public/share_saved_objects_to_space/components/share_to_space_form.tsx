@@ -18,7 +18,7 @@ interface Props {
   objectNoun: string;
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;
-  showShareWarning: boolean;
+  showCreateCopyCallout: boolean;
   canShareToAllSpaces: boolean;
   makeCopy: () => void;
   enableCreateNewSpaceLink: boolean;
@@ -31,7 +31,7 @@ export const ShareToSpaceForm = (props: Props) => {
     objectNoun,
     onUpdate,
     shareOptions,
-    showShareWarning,
+    showCreateCopyCallout,
     canShareToAllSpaces,
     makeCopy,
     enableCreateNewSpaceLink,
@@ -41,48 +41,42 @@ export const ShareToSpaceForm = (props: Props) => {
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
     onUpdate({ ...shareOptions, selectedSpaceIds });
 
-  const getShareWarning = () => {
-    if (!showShareWarning) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          size="s"
-          title={
-            <FormattedMessage
-              id="xpack.spaces.shareToSpace.shareWarningTitle"
-              defaultMessage="Changes will be synchronized across spaces"
-            />
-          }
-          color="warning"
-        >
+  const createCopyCallout = showCreateCopyCallout ? (
+    <Fragment>
+      <EuiCallOut
+        size="s"
+        title={
           <FormattedMessage
-            id="xpack.spaces.shareToSpace.shareWarningBody"
-            defaultMessage="If you choose multiple spaces for this {objectNoun}, any changes will affect it in each space. If you don't want this to happen, {makeACopyLink} instead."
-            values={{
-              objectNoun,
-              makeACopyLink: (
-                <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
-                  <FormattedMessage
-                    id="xpack.spaces.shareToSpace.shareWarningLink"
-                    defaultMessage="make a copy"
-                  />
-                </EuiLink>
-              ),
-            }}
+            id="xpack.spaces.shareToSpace.shareWarningTitle"
+            defaultMessage="Changes will be synchronized across spaces"
           />
-        </EuiCallOut>
+        }
+        color="warning"
+      >
+        <FormattedMessage
+          id="xpack.spaces.shareToSpace.shareWarningBody"
+          defaultMessage="If you choose multiple spaces for this {objectNoun}, any changes will affect it in each space. If you don't want this to happen, {makeACopyLink} instead."
+          values={{
+            objectNoun,
+            makeACopyLink: (
+              <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
+                <FormattedMessage
+                  id="xpack.spaces.shareToSpace.shareWarningLink"
+                  defaultMessage="make a copy"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
 
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  };
+      <EuiSpacer size="m" />
+    </Fragment>
+  ) : null;
 
   return (
     <div data-test-subj="share-to-space-form">
-      {getShareWarning()}
+      {createCopyCallout}
 
       <ShareModeControl
         spaces={spaces}

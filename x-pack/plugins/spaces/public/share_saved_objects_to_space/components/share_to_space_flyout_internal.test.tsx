@@ -137,9 +137,9 @@ const setup = async (opts: SetupOpts = {}) => {
 };
 
 describe('ShareToSpaceFlyout', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
+  // beforeAll(() => {
+  //   jest.useFakeTimers();
+  // });
 
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
@@ -282,9 +282,9 @@ describe('ShareToSpaceFlyout', () => {
   it('handles errors thrown from shareSavedObjectsAdd API call', async () => {
     const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
 
-    mockSpacesManager.shareSavedObjectAdd.mockImplementation(() => {
-      return Promise.reject(Boom.serverUnavailable('Something bad happened'));
-    });
+    mockSpacesManager.shareSavedObjectAdd.mockRejectedValue(
+      Boom.serverUnavailable('Something bad happened')
+    );
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -313,9 +313,9 @@ describe('ShareToSpaceFlyout', () => {
   it('handles errors thrown from shareSavedObjectsRemove API call', async () => {
     const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
 
-    mockSpacesManager.shareSavedObjectRemove.mockImplementation(() => {
-      return Promise.reject(Boom.serverUnavailable('Something bad happened'));
-    });
+    mockSpacesManager.shareSavedObjectRemove.mockRejectedValue(
+      Boom.serverUnavailable('Something bad happened')
+    );
 
     expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
@@ -464,8 +464,8 @@ describe('ShareToSpaceFlyout', () => {
     ) {
       const iconTip = wrapper.find(EuiIconTip);
       return {
-        checked: !!wrapper.prop('checked'),
-        disabled: !!wrapper.prop('disabled'),
+        checked: wrapper.prop('checked'),
+        disabled: wrapper.prop('disabled'),
         ...(iconTip.length > 0 && { tooltip: iconTip.prop('content') as string }),
       };
     }
