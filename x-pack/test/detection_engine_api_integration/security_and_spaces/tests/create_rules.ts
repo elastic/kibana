@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
-        it('should create a single rule with a rule_id and an index pattern that does not match anything available and fail the rule', async () => {
+        it('should create a single rule with a rule_id and an index pattern that does not match anything available and warning for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, body.id, 'failed');
+          await waitForRuleSuccessOrStatus(supertest, body.id, 'warning');
 
           const { body: statusBody } = await supertest
             .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send({ ids: [body.id] })
             .expect(200);
 
-          expect(statusBody[body.id].current_status.status).to.eql('failed');
+          expect(statusBody[body.id].current_status.status).to.eql('warning');
           expect(statusBody[body.id].current_status.last_failure_message).to.eql(
             'The following index patterns did not match any indices: ["does-not-exist-*"]'
           );
