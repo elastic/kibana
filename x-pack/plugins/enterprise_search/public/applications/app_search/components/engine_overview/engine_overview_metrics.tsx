@@ -12,6 +12,8 @@ import { useValues } from 'kea';
 import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FlashMessages } from '../../../shared/flash_messages';
+
 import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 import { EngineOverviewLogic } from './';
@@ -30,6 +32,7 @@ export const EngineOverviewMetrics: React.FC = () => {
           </h1>
         </EuiTitle>
       </EuiPageHeader>
+      <FlashMessages />
       {apiLogsUnavailable ? (
         <UnavailablePrompt />
       ) : (

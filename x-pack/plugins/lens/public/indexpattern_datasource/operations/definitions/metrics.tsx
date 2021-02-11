@@ -183,6 +183,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
   type: 'median',
+  priority: 3,
   displayName: i18n.translate('xpack.lens.indexPattern.median', {
     defaultMessage: 'Median',
   }),
