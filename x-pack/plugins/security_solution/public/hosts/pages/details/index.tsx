@@ -95,7 +95,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, indexNames } = useSourcererScope();
   const filterQuery = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     indexPattern,
@@ -125,14 +125,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hostDetails}
                     hostName={detailName}
-                    indexNames={selectedPatterns}
+                    indexNames={indexNames}
                   />
                 }
                 title={detailName}
               />
 
               <HostOverviewByNameQuery
-                indexNames={selectedPatterns}
+                indexNames={indexNames}
                 sourceId="default"
                 hostName={detailName}
                 skip={isInitializing}
@@ -156,7 +156,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                         data={hostOverview as HostItem}
                         anomaliesData={anomaliesData}
                         isLoadingAnomaliesData={isLoadingAnomaliesData}
-                        indexNames={selectedPatterns}
+                        indexNames={indexNames}
                         loading={loading}
                         startDate={from}
                         endDate={to}
@@ -179,7 +179,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <HostsDetailsKpiComponent
                 filterQuery={filterQuery}
                 from={from}
-                indexNames={selectedPatterns}
+                indexNames={indexNames}
                 setQuery={setQuery}
                 to={to}
                 narrowDateRange={narrowDateRange}
@@ -197,7 +197,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
             <HostDetailsTabs
               docValueFields={docValueFields}
-              indexNames={selectedPatterns}
+              indexNames={indexNames}
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}
               pageFilters={hostDetailsPageFilters}

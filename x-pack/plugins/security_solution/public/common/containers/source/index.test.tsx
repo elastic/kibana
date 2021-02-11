@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IndexField } from '../../../../common/search_strategy/index_fields';
 import { getBrowserFields } from '.';
 import { mockBrowserFields, mocksSource } from './mock';
 
@@ -19,12 +18,12 @@ describe('source/index.tsx', () => {
     test('it returns the same input with the same title', () => {
       getBrowserFields('title 1', []);
       // Since it is memoized it will return the same output which is empty object given 'title 1' a second time
-      const fields = getBrowserFields('title 1', mocksSource.indexFields as IndexField[]);
+      const fields = getBrowserFields('title 1', mocksSource.indexFields);
       expect(fields).toEqual({});
     });
 
     test('it transforms input into output as expected', () => {
-      const fields = getBrowserFields('title 2', mocksSource.indexFields as IndexField[]);
+      const fields = getBrowserFields('title 2', mocksSource.indexFields);
       expect(fields).toEqual(mockBrowserFields);
     });
   });

@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash/fp';
 import { mockGlobalState } from '../../mock';
 import { SourcererScopeName } from './model';
 import { getSourcererScopeSelector } from './selectors';
+import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 
 describe('Sourcerer selectors', () => {
   describe('getSourcererScopeSelector', () => {
@@ -32,7 +33,7 @@ describe('Sourcerer selectors', () => {
       const mapStateToProps = getSourcererScopeSelector();
       const myMockGlobalState = cloneDeep(mockGlobalState);
       myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns.filter(
-        (index) => !index.includes('logs-*')
+        ({ title }) => !title.includes('logs-*')
       );
       expect(
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns
@@ -51,9 +52,9 @@ describe('Sourcerer selectors', () => {
       const myMockGlobalState = cloneDeep(mockGlobalState);
       myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
         ...myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns.filter(
-          (index) => !index.includes('logs-*')
+          ({ title }) => !title.includes('logs-*')
         ),
-        'logs-endpoint.event-*',
+        { id: SourcererPatternType.config, title: 'logs-endpoint.event-*' },
       ];
       expect(
         mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns

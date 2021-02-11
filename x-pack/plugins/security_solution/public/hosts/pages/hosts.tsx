@@ -109,7 +109,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, indexNames } = useSourcererScope();
   const filterQuery = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -172,7 +172,7 @@ const HostsComponent = () => {
                   <LastEventTime
                     docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hosts}
-                    indexNames={selectedPatterns}
+                    indexNames={indexNames}
                   />
                 }
                 title={i18n.PAGE_TITLE}
@@ -180,7 +180,7 @@ const HostsComponent = () => {
 
               <HostsKpiComponent
                 filterQuery={filterQuery}
-                indexNames={selectedPatterns}
+                indexNames={indexNames}
                 from={from}
                 setQuery={setQuery}
                 to={to}
@@ -201,7 +201,7 @@ const HostsComponent = () => {
               to={to}
               filterQuery={tabsFilterQuery}
               isInitializing={isInitializing}
-              indexNames={selectedPatterns}
+              indexNames={indexNames}
               setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               from={from}

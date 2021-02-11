@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { createDefaultIndexPatterns, Args } from './helpers';
+import { Args, createDefaultIndexPatterns } from './helpers';
 import { initialSourcererState, SourcererScopeName } from './model';
+import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 
 let defaultArgs: Args = {
   eventType: 'all',
   id: SourcererScopeName.default,
-  selectedPatterns: ['auditbeat-*', 'packetbeat-*'],
+  selectedPatterns: [
+    { id: SourcererPatternType.config, title: 'auditbeat-*' },
+    { id: SourcererPatternType.config, title: 'packetbeat-*' },
+  ],
   state: {
     ...initialSourcererState,
     configIndexPatterns: ['filebeat-*', 'auditbeat-*', 'packetbeat-*'],

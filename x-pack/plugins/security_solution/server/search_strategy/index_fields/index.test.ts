@@ -8,22 +8,13 @@
 import { sortBy } from 'lodash/fp';
 
 import { formatIndexFields, createFieldItem } from './index';
-import { mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField } from './mock';
+import { mockAuditbeatIndexField } from './mock';
 import { fieldsBeat as beatFields } from '../../utils/beat_schema/fields';
 
 describe('Index Fields', () => {
   describe('formatIndexFields', () => {
     test('Basic functionality', async () => {
-      expect(
-        sortBy(
-          'name',
-          await formatIndexFields(
-            beatFields,
-            [mockAuditbeatIndexField, mockFilebeatIndexField, mockPacketbeatIndexField],
-            ['auditbeat', 'filebeat', 'packetbeat']
-          )
-        )
-      ).toEqual(
+      expect(sortBy('name', await formatIndexFields(beatFields, mockAuditbeatIndexField))).toEqual(
         sortBy('name', [
           {
             description:
@@ -34,7 +25,6 @@ describe('Index Fields', () => {
             searchable: true,
             aggregatable: true,
             category: 'base',
-            indexes: ['auditbeat', 'filebeat', 'packetbeat'],
             readFromDocValues: true,
             esTypes: [],
           },
@@ -47,7 +37,6 @@ describe('Index Fields', () => {
             aggregatable: false,
             readFromDocValues: false,
             category: 'base',
-            indexes: ['auditbeat', 'filebeat', 'packetbeat'],
             esTypes: [],
           },
           {
@@ -60,7 +49,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             readFromDocValues: false,
             category: 'base',
-            indexes: ['auditbeat', 'filebeat', 'packetbeat'],
             esTypes: [],
           },
           {
@@ -72,7 +60,6 @@ describe('Index Fields', () => {
             searchable: true,
             aggregatable: true,
             category: 'agent',
-            indexes: ['auditbeat'],
             readFromDocValues: false,
             esTypes: [],
           },
@@ -84,7 +71,6 @@ describe('Index Fields', () => {
             type: 'string',
             aggregatable: true,
             category: 'agent',
-            indexes: ['filebeat'],
             readFromDocValues: false,
             esTypes: [],
           },
@@ -97,7 +83,6 @@ describe('Index Fields', () => {
             searchable: true,
             aggregatable: true,
             category: 'agent',
-            indexes: ['packetbeat'],
             readFromDocValues: false,
             esTypes: [],
           },
@@ -110,7 +95,6 @@ describe('Index Fields', () => {
             searchable: true,
             aggregatable: true,
             category: 'agent',
-            indexes: ['auditbeat', 'filebeat'],
             readFromDocValues: false,
             esTypes: [],
           },
@@ -123,7 +107,6 @@ describe('Index Fields', () => {
             searchable: true,
             aggregatable: true,
             category: 'agent',
-            indexes: ['auditbeat', 'packetbeat'],
             readFromDocValues: false,
             esTypes: [],
           },
@@ -135,7 +118,6 @@ describe('Index Fields', () => {
             searchable: true,
             aggregatable: true,
             category: 'agent',
-            indexes: ['auditbeat', 'filebeat'],
             readFromDocValues: false,
             esTypes: [],
           },
@@ -143,7 +125,6 @@ describe('Index Fields', () => {
             aggregatable: true,
             category: 'agent',
             esTypes: [],
-            indexes: ['auditbeat'],
             name: 'agent.user.name',
             readFromDocValues: false,
             searchable: true,
@@ -156,7 +137,6 @@ describe('Index Fields', () => {
               'Unique number allocated to the autonomous system. The autonomous system number (ASN) uniquely identifies each network on the Internet.',
             esTypes: [],
             example: 15169,
-            indexes: ['auditbeat'],
             name: 'client.as.number.text',
             readFromDocValues: false,
             searchable: true,
@@ -185,7 +165,6 @@ describe('Index Fields', () => {
         searchable: true,
         aggregatable: false,
         category: 'base',
-        indexes: ['auditbeat'],
         readFromDocValues: false,
         esTypes: [],
       });

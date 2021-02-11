@@ -22,6 +22,7 @@ import {
 import { createStore, State } from '../../store';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
+import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -34,13 +35,13 @@ jest.mock('react-redux', () => {
 });
 
 const mockOptions = [
-  { label: 'apm-*-transaction*', value: 'apm-*-transaction*' },
-  { label: 'auditbeat-*', value: 'auditbeat-*' },
-  { label: 'endgame-*', value: 'endgame-*' },
-  { label: 'filebeat-*', value: 'filebeat-*' },
-  { label: 'logs-*', value: 'logs-*' },
-  { label: 'packetbeat-*', value: 'packetbeat-*' },
-  { label: 'winlogbeat-*', value: 'winlogbeat-*' },
+  { label: 'apm-*-transaction*', value: SourcererPatternType.config },
+  { label: 'auditbeat-*', value: SourcererPatternType.config },
+  { label: 'endgame-*', value: SourcererPatternType.config },
+  { label: 'filebeat-*', value: SourcererPatternType.config },
+  { label: 'logs-*', value: SourcererPatternType.config },
+  { label: 'packetbeat-*', value: SourcererPatternType.config },
+  { label: 'winlogbeat-*', value: SourcererPatternType.config },
 ];
 
 const defaultProps = {
@@ -94,7 +95,9 @@ describe('Sourcerer component', () => {
           [SourcererScopeName.default]: {
             ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
             loading: false,
-            selectedPatterns: [DEFAULT_INDEX_PATTERN[0]],
+            selectedPatterns: [
+              { id: SourcererPatternType.config, title: DEFAULT_INDEX_PATTERN[0] },
+            ],
           },
         },
       },
@@ -139,7 +142,10 @@ describe('Sourcerer component', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedIndexPatterns({
         id: SourcererScopeName.default,
-        selectedPatterns: [mockOptions[0].value, mockOptions[1].value],
+        selectedPatterns: [
+          { id: mockOptions[0].value, title: mockOptions[0].label },
+          { id: mockOptions[1].value, title: mockOptions[1].label },
+        ],
       })
     );
   });

@@ -101,7 +101,7 @@ export const EmbeddedMapComponent = ({
   );
 
   const [mapIndexPatterns, setMapIndexPatterns] = useState(
-    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+    kibanaIndexPatterns.filter((kip) => sourcererScope.indexNames.includes(kip.title))
   );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
@@ -115,7 +115,7 @@ export const EmbeddedMapComponent = ({
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {
       const newIndexPatterns = kibanaIndexPatterns.filter((kip) =>
-        sourcererScope.selectedPatterns.includes(kip.title)
+        sourcererScope.indexNames.includes(kip.title)
       );
       if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
         if (newIndexPatterns.length === 0) {
@@ -125,7 +125,7 @@ export const EmbeddedMapComponent = ({
       }
       return prevMapIndexPatterns;
     });
-  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
+  }, [kibanaIndexPatterns, sourcererScope.indexNames]);
 
   // Initial Load useEffect
   useEffect(() => {
@@ -158,7 +158,7 @@ export const EmbeddedMapComponent = ({
         }
       }
     }
-    if (embeddable == null && sourcererScope.selectedPatterns.length > 0) {
+    if (embeddable == null && sourcererScope.indexNames.length > 0) {
       setupEmbeddable();
     }
 
@@ -174,7 +174,7 @@ export const EmbeddedMapComponent = ({
     query,
     portalNode,
     services.embeddable,
-    sourcererScope.selectedPatterns,
+    sourcererScope.indexNames,
     setQuery,
     startDate,
   ]);

@@ -88,7 +88,7 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indicesExist, indexPattern, indexNames } = useSourcererScope();
   const ip = decodeIpv6(detailName);
   const filterQuery = convertToBuildEsQuery({
     config: esQuery.getEsQueryConfig(uiSettings),
@@ -101,7 +101,7 @@ const NetworkDetailsComponent: React.FC = () => {
     docValueFields,
     skip: isInitializing,
     filterQuery,
-    indexNames: selectedPatterns,
+    indexNames,
     ip,
   });
 
@@ -134,7 +134,7 @@ const NetworkDetailsComponent: React.FC = () => {
                 <LastEventTime
                   docValueFields={docValueFields}
                   indexKey={LastEventIndexKey.ipDetails}
-                  indexNames={selectedPatterns}
+                  indexNames={indexNames}
                   ip={ip}
                 />
               }
@@ -168,7 +168,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
-                  indexNames={selectedPatterns}
+                  indexNames={indexNames}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -183,7 +183,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
-                  indexNames={selectedPatterns}
+                  indexNames={indexNames}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -202,7 +202,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
-                  indexNames={selectedPatterns}
+                  indexNames={indexNames}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -217,7 +217,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   endDate={to}
                   flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
-                  indexNames={selectedPatterns}
+                  indexNames={indexNames}
                   ip={ip}
                   skip={isInitializing}
                   startDate={from}
@@ -234,7 +234,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={flowTarget}
-              indexNames={selectedPatterns}
+              indexNames={indexNames}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -247,7 +247,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <NetworkHttpQueryTable
               endDate={to}
               filterQuery={filterQuery}
-              indexNames={selectedPatterns}
+              indexNames={indexNames}
               ip={ip}
               skip={isInitializing}
               startDate={from}
@@ -261,7 +261,7 @@ const NetworkDetailsComponent: React.FC = () => {
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={(flowTarget as unknown) as FlowTargetSourceDest}
-              indexNames={selectedPatterns}
+              indexNames={indexNames}
               ip={ip}
               setQuery={setQuery}
               skip={isInitializing}
@@ -277,7 +277,7 @@ const NetworkDetailsComponent: React.FC = () => {
               startDate={from}
               endDate={to}
               skip={isInitializing}
-              indexNames={selectedPatterns}
+              indexNames={indexNames}
               ip={ip}
               type={type}
               flowTarget={flowTarget}

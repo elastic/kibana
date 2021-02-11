@@ -107,7 +107,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+    const { docValueFields, indicesExist, indexPattern, indexNames } = useSourcererScope();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -163,7 +163,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     <LastEventTime
                       docValueFields={docValueFields}
                       indexKey={LastEventIndexKey.network}
-                      indexNames={selectedPatterns}
+                      indexNames={indexNames}
                     />
                   }
                   title={i18n.PAGE_TITLE}
@@ -182,7 +182,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkKpiComponent
                   filterQuery={filterQuery}
                   from={from}
-                  indexNames={selectedPatterns}
+                  indexNames={indexNames}
                   narrowDateRange={narrowDateRange}
                   setQuery={setQuery}
                   skip={isInitializing}
@@ -206,7 +206,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     from={from}
                     isInitializing={isInitializing}
                     indexPattern={indexPattern}
-                    indexNames={selectedPatterns}
+                    indexNames={indexNames}
                     setQuery={setQuery}
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
