@@ -359,7 +359,13 @@ export default ({ getService }: FtrProviderContext): void => {
             id: connector.id,
             name: connector.name,
             type: connector.actionTypeId,
-            fields: { urgency: '2', impact: '2', severity: '2' },
+            fields: {
+              urgency: '2',
+              impact: '2',
+              severity: '2',
+              category: 'software',
+              subcategory: 'os',
+            },
           }).connector,
         })
         .expect(200);

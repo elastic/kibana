@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export interface Choice {
-  value: string;
-  label: string;
-  dependent_value: string;
-  element: string;
-}
+import { EuiSelectOption } from '@elastic/eui';
+import { Choice } from './types';
 
-export type Fields = Record<string, Choice[]>;
+export const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
+  choices.map((choice) => ({ value: choice.value, text: choice.label }));
