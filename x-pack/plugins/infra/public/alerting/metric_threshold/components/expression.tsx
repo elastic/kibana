@@ -32,6 +32,7 @@ import {
 } from '../../../../../triggers_actions_ui/public/common';
 import {
   IErrorObject,
+  AlertTypeParams,
   AlertTypeParamsExpressionProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/types';
@@ -50,7 +51,7 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
-  AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
+  AlertTypeParamsExpressionProps<AlertTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
 >;
 

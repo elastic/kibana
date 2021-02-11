@@ -22,8 +22,11 @@ import {
   WhenExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public/types';
+import {
+  AlertTypeParams,
+  AlertTypeParamsExpressionProps,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../triggers_actions_ui/public/types';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
@@ -41,11 +44,10 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
 }
 
-type AlertParams = MetricAnomalyParams & { sourceId: string; hasInfraMLCapabilities: boolean };
+type AlertParams = AlertTypeParams &
+  MetricAnomalyParams & { sourceId: string; hasInfraMLCapabilities: boolean };
 
 type Props = Omit<
-  // FIXME: Bug with AlertTypeParamsExpressionProps requiring an input type that extends Record<string, unknown>
-  // @ts-ignore
   AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
 >;

@@ -54,7 +54,7 @@ export interface ExpressionChartData {
   series: ExpressionChartSeries;
 }
 
-export interface AlertParams extends Record<string, unknown> {
+export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];
   filterQuery?: string;
