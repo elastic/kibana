@@ -8,7 +8,6 @@
 import { uniq } from 'lodash';
 import { InfraTimerangeInput } from '../../../../common/http_api';
 import { ESSearchClient } from '../../../lib/metrics/types';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { getMetricsAggregations, InfraSnapshotRequestOptions } from './get_metrics_aggregations';
 import {
