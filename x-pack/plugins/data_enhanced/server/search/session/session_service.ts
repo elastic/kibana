@@ -334,7 +334,6 @@ export class SearchSessionService
     expires: Date
   ) {
     this.logger.debug(`extend | ${sessionId}`);
-    await this.get(deps, user, sessionId); // Verify correct user
     return this.update(deps, user, sessionId, { expires: expires.toISOString() });
   }
 
@@ -344,7 +343,6 @@ export class SearchSessionService
     sessionId: string
   ) => {
     this.logger.debug(`delete | ${sessionId}`);
-    await this.get(deps, user, sessionId); // Verify correct user
     return this.update(deps, user, sessionId, {
       status: SearchSessionStatus.CANCELLED,
     });
