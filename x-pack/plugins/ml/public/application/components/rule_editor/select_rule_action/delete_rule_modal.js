@@ -12,7 +12,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiConfirmModal, EuiLink, EuiOverlayMask, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class DeleteRuleModal extends Component {
@@ -43,32 +43,30 @@ export class DeleteRuleModal extends Component {
 
     if (this.state.isModalVisible) {
       modal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={
-              <FormattedMessage
-                id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle"
-                defaultMessage="Delete rule?"
-              />
-            }
-            onCancel={this.closeModal}
-            onConfirm={this.deleteRule}
-            buttonColor="danger"
-            cancelButtonText={
-              <FormattedMessage
-                id="xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            }
-            confirmButtonText={
-              <FormattedMessage
-                id="xpack.ml.ruleEditor.deleteRuleModal.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            }
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            <FormattedMessage
+              id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle"
+              defaultMessage="Delete rule?"
+            />
+          }
+          onCancel={this.closeModal}
+          onConfirm={this.deleteRule}
+          buttonColor="danger"
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.ml.ruleEditor.deleteRuleModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />
+          }
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
       );
     }
 

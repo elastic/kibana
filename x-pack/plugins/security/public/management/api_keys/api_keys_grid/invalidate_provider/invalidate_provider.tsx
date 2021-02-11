@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'src/core/public';
@@ -127,58 +127,56 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
     const isSingle = apiKeys.length === 1;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            isSingle
-              ? i18n.translate(
-                  'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateSingleTitle',
-                  {
-                    defaultMessage: "Invalidate API key '{name}'?",
-                    values: { name: apiKeys[0].name },
-                  }
-                )
-              : i18n.translate(
-                  'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleTitle',
-                  {
-                    defaultMessage: 'Invalidate {count} API keys?',
-                    values: { count: apiKeys.length },
-                  }
-                )
+      <EuiConfirmModal
+        title={
+          isSingle
+            ? i18n.translate(
+                'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateSingleTitle',
+                {
+                  defaultMessage: "Invalidate API key '{name}'?",
+                  values: { name: apiKeys[0].name },
+                }
+              )
+            : i18n.translate(
+                'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleTitle',
+                {
+                  defaultMessage: 'Invalidate {count} API keys?',
+                  values: { count: apiKeys.length },
+                }
+              )
+        }
+        onCancel={closeModal}
+        onConfirm={invalidateApiKey}
+        cancelButtonText={i18n.translate(
+          'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.cancelButtonLabel',
+          { defaultMessage: 'Cancel' }
+        )}
+        confirmButtonText={i18n.translate(
+          'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.confirmButtonLabel',
+          {
+            defaultMessage: 'Invalidate {count, plural, one {API key} other {API keys}}',
+            values: { count: apiKeys.length },
           }
-          onCancel={closeModal}
-          onConfirm={invalidateApiKey}
-          cancelButtonText={i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.cancelButtonLabel',
-            { defaultMessage: 'Cancel' }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.confirmButtonLabel',
-            {
-              defaultMessage: 'Invalidate {count, plural, one {API key} other {API keys}}',
-              values: { count: apiKeys.length },
-            }
-          )}
-          buttonColor="danger"
-          data-test-subj="invalidateApiKeyConfirmationModal"
-        >
-          {!isSingle ? (
-            <Fragment>
-              <p>
-                {i18n.translate(
-                  'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleListDescription',
-                  { defaultMessage: 'You are about to invalidate these API keys:' }
-                )}
-              </p>
-              <ul>
-                {apiKeys.map(({ name, id }) => (
-                  <li key={id}>{name}</li>
-                ))}
-              </ul>
-            </Fragment>
-          ) : null}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+        )}
+        buttonColor="danger"
+        data-test-subj="invalidateApiKeyConfirmationModal"
+      >
+        {!isSingle ? (
+          <Fragment>
+            <p>
+              {i18n.translate(
+                'xpack.security.management.apiKeys.invalidateApiKey.confirmModal.invalidateMultipleListDescription',
+                { defaultMessage: 'You are about to invalidate these API keys:' }
+              )}
+            </p>
+            <ul>
+              {apiKeys.map(({ name, id }) => (
+                <li key={id}>{name}</li>
+              ))}
+            </ul>
+          </Fragment>
+        ) : null}
+      </EuiConfirmModal>
     );
   };
 

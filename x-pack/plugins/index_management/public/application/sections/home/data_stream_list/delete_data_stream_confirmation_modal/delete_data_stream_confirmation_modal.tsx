@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -82,69 +82,67 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
   };
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        data-test-subj="deleteDataStreamsConfirmation"
-        title={
-          <FormattedMessage
-            id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.modalTitleText"
-            defaultMessage="Delete {dataStreamsCount, plural, one {data stream} other {# data streams}}"
-            values={{ dataStreamsCount }}
-          />
-        }
-        onCancel={() => onClose()}
-        onConfirm={handleDeleteDataStreams}
-        cancelButtonText={
-          <FormattedMessage
-            id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={
-          <FormattedMessage
-            id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.confirmButtonLabel"
-            defaultMessage="Delete {dataStreamsCount, plural, one {data stream} other {data streams} }"
-            values={{ dataStreamsCount }}
-          />
-        }
-      >
-        <Fragment>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.warningTitle"
-                defaultMessage="Deleting data streams also deletes indices"
-              />
-            }
-            color="danger"
-            iconType="alert"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.warningMessage"
-                defaultMessage="Data streams are collections of time series indices. Deleting a data stream will also delete its indices."
-              />
-            </p>
-          </EuiCallOut>
-
-          <EuiSpacer />
-
+    <EuiConfirmModal
+      buttonColor="danger"
+      data-test-subj="deleteDataStreamsConfirmation"
+      title={
+        <FormattedMessage
+          id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.modalTitleText"
+          defaultMessage="Delete {dataStreamsCount, plural, one {data stream} other {# data streams}}"
+          values={{ dataStreamsCount }}
+        />
+      }
+      onCancel={() => onClose()}
+      onConfirm={handleDeleteDataStreams}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.confirmButtonLabel"
+          defaultMessage="Delete {dataStreamsCount, plural, one {data stream} other {data streams} }"
+          values={{ dataStreamsCount }}
+        />
+      }
+    >
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.warningTitle"
+              defaultMessage="Deleting data streams also deletes indices"
+            />
+          }
+          color="danger"
+          iconType="alert"
+        >
           <p>
             <FormattedMessage
-              id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.deleteDescription"
-              defaultMessage="You are about to delete {dataStreamsCount, plural, one {this data stream} other {these data streams} }:"
-              values={{ dataStreamsCount }}
+              id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.warningMessage"
+              defaultMessage="Data streams are collections of time series indices. Deleting a data stream will also delete its indices."
             />
           </p>
+        </EuiCallOut>
 
-          <ul>
-            {dataStreams.map((name) => (
-              <li key={name}>{name}</li>
-            ))}
-          </ul>
-        </Fragment>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+        <EuiSpacer />
+
+        <p>
+          <FormattedMessage
+            id="xpack.idxMgmt.deleteDataStreamsConfirmationModal.deleteDescription"
+            defaultMessage="You are about to delete {dataStreamsCount, plural, one {this data stream} other {these data streams} }:"
+            values={{ dataStreamsCount }}
+          />
+        </p>
+
+        <ul>
+          {dataStreams.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      </Fragment>
+    </EuiConfirmModal>
   );
 };

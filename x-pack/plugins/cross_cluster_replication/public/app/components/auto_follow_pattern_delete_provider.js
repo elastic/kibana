@@ -9,7 +9,7 @@ import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { deleteAutoFollowPattern } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
@@ -61,7 +61,7 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
         );
 
     return (
-      <EuiOverlayMask>
+      <>
         {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
         <EuiConfirmModal
           title={title}
@@ -99,7 +99,7 @@ class AutoFollowPatternDeleteProviderUi extends PureComponent {
             </Fragment>
           )}
         </EuiConfirmModal>
-      </EuiOverlayMask>
+      </>
     );
   };
 

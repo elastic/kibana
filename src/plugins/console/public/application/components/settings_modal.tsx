@@ -22,7 +22,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSwitch,
 } from '@elastic/eui';
 
@@ -151,115 +150,107 @@ export function DevToolsSettingsModal(props: Props) {
     ) : undefined;
 
   return (
-    <EuiOverlayMask>
-      <EuiModal
-        data-test-subj="devToolsSettingsModal"
-        className="conApp__settingsModal"
-        onClose={props.onClose}
-      >
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
+    <EuiModal
+      data-test-subj="devToolsSettingsModal"
+      className="conApp__settingsModal"
+      onClose={props.onClose}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console Settings" />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <EuiFormRow
+          label={
+            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font Size" />
+          }
+        >
+          <EuiFieldNumber
+            autoFocus
+            data-test-subj="setting-font-size-input"
+            value={fontSize}
+            min={6}
+            max={50}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              if (!val) return;
+              setFontSize(val);
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiSwitch
+            checked={wrapMode}
+            data-test-subj="settingsWrapLines"
+            id="wrapLines"
+            label={
+              <FormattedMessage
+                defaultMessage="Wrap long lines"
+                id="console.settingsPage.wrapLongLinesLabelText"
+              />
+            }
+            onChange={(e) => setWrapMode(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
             <FormattedMessage
-              id="console.settingsPage.pageTitle"
-              defaultMessage="Console Settings"
+              id="console.settingsPage.jsonSyntaxLabel"
+              defaultMessage="JSON syntax"
             />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-
-        <EuiModalBody>
-          <EuiFormRow
+          }
+        >
+          <EuiSwitch
+            checked={tripleQuotes}
+            data-test-subj="tripleQuotes"
+            id="tripleQuotes"
             label={
               <FormattedMessage
-                id="console.settingsPage.fontSizeLabel"
-                defaultMessage="Font Size"
+                defaultMessage="Use triple quotes in output pane"
+                id="console.settingsPage.tripleQuotesMessage"
               />
             }
-          >
-            <EuiFieldNumber
-              autoFocus
-              data-test-subj="setting-font-size-input"
-              value={fontSize}
-              min={6}
-              max={50}
-              onChange={(e) => {
-                const val = parseInt(e.target.value, 10);
-                if (!val) return;
-                setFontSize(val);
-              }}
+            onChange={(e) => setTripleQuotes(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          labelType="legend"
+          label={
+            <FormattedMessage
+              id="console.settingsPage.autocompleteLabel"
+              defaultMessage="Autocomplete"
             />
-          </EuiFormRow>
+          }
+        >
+          <EuiCheckboxGroup
+            options={autoCompleteCheckboxes.map((opts) => {
+              const { stateSetter, ...rest } = opts;
+              return rest;
+            })}
+            idToSelectedMap={checkboxIdToSelectedMap}
+            onChange={(e: any) => {
+              onAutocompleteChange(e as AutocompleteOptions);
+            }}
+          />
+        </EuiFormRow>
 
-          <EuiFormRow>
-            <EuiSwitch
-              checked={wrapMode}
-              data-test-subj="settingsWrapLines"
-              id="wrapLines"
-              label={
-                <FormattedMessage
-                  defaultMessage="Wrap long lines"
-                  id="console.settingsPage.wrapLongLinesLabelText"
-                />
-              }
-              onChange={(e) => setWrapMode(e.target.checked)}
-            />
-          </EuiFormRow>
+        {pollingFields}
+      </EuiModalBody>
 
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="console.settingsPage.jsonSyntaxLabel"
-                defaultMessage="JSON syntax"
-              />
-            }
-          >
-            <EuiSwitch
-              checked={tripleQuotes}
-              data-test-subj="tripleQuotes"
-              id="tripleQuotes"
-              label={
-                <FormattedMessage
-                  defaultMessage="Use triple quotes in output pane"
-                  id="console.settingsPage.tripleQuotesMessage"
-                />
-              }
-              onChange={(e) => setTripleQuotes(e.target.checked)}
-            />
-          </EuiFormRow>
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="settingsCancelButton" onClick={props.onClose}>
+          <FormattedMessage id="console.settingsPage.cancelButtonLabel" defaultMessage="Cancel" />
+        </EuiButtonEmpty>
 
-          <EuiFormRow
-            labelType="legend"
-            label={
-              <FormattedMessage
-                id="console.settingsPage.autocompleteLabel"
-                defaultMessage="Autocomplete"
-              />
-            }
-          >
-            <EuiCheckboxGroup
-              options={autoCompleteCheckboxes.map((opts) => {
-                const { stateSetter, ...rest } = opts;
-                return rest;
-              })}
-              idToSelectedMap={checkboxIdToSelectedMap}
-              onChange={(e: any) => {
-                onAutocompleteChange(e as AutocompleteOptions);
-              }}
-            />
-          </EuiFormRow>
-
-          {pollingFields}
-        </EuiModalBody>
-
-        <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="settingsCancelButton" onClick={props.onClose}>
-            <FormattedMessage id="console.settingsPage.cancelButtonLabel" defaultMessage="Cancel" />
-          </EuiButtonEmpty>
-
-          <EuiButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
-            <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+        <EuiButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
+          <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 }

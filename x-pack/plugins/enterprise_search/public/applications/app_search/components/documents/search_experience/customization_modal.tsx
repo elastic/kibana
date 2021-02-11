@@ -20,7 +20,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -62,97 +61,94 @@ export const CustomizationModal: React.FC<Props> = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={onClose}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.title',
+    <EuiModal onClose={onClose}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.title',
+            {
+              defaultMessage: 'Customize document search',
+            }
+          )}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.filterFieldsLabel',
               {
-                defaultMessage: 'Customize document search',
+                defaultMessage: 'Filter fields',
               }
             )}
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <EuiForm>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.filterFieldsLabel',
-                {
-                  defaultMessage: 'Filter fields',
-                }
-              )}
-              fullWidth
-              helpText={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.filterFields',
-                {
-                  defaultMessage:
-                    'Faceted values rendered as filters and available as query refinement',
-                }
-              )}
-            >
-              <EuiComboBox
-                data-test-subj="filterFieldsDropdown"
-                fullWidth
-                options={selectableFilterFields}
-                selectedOptions={selectedFilterFields}
-                onChange={setSelectedFilterFields}
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.sortFieldsLabel',
-                {
-                  defaultMessage: 'Sort fields',
-                }
-              )}
-              fullWidth
-              helpText={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.sortFields',
-                {
-                  defaultMessage:
-                    'Used to display result sorting options, ascending and descending',
-                }
-              )}
-            >
-              <EuiComboBox
-                data-test-subj="sortFieldsDropdown"
-                fullWidth
-                options={selectableSortFields}
-                selectedOptions={selectedSortFields}
-                onChange={setSelectedSortFields}
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose}>
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.cancel',
+            fullWidth
+            helpText={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.filterFields',
               {
-                defaultMessage: 'Cancel',
+                defaultMessage:
+                  'Faceted values rendered as filters and available as query refinement',
               }
             )}
-          </EuiButtonEmpty>
-          <EuiButton
-            fill
-            onClick={() => {
-              onSave({
-                filterFields: selectedFilterFields.map(comboBoxOptionToFieldName),
-                sortFields: selectedSortFields.map(comboBoxOptionToFieldName),
-              });
-            }}
           >
-            {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.save',
+            <EuiComboBox
+              data-test-subj="filterFieldsDropdown"
+              fullWidth
+              options={selectableFilterFields}
+              selectedOptions={selectedFilterFields}
+              onChange={setSelectedFilterFields}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.sortFieldsLabel',
               {
-                defaultMessage: 'Save',
+                defaultMessage: 'Sort fields',
               }
             )}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+            fullWidth
+            helpText={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.sortFields',
+              {
+                defaultMessage: 'Used to display result sorting options, ascending and descending',
+              }
+            )}
+          >
+            <EuiComboBox
+              data-test-subj="sortFieldsDropdown"
+              fullWidth
+              options={selectableSortFields}
+              selectedOptions={selectedSortFields}
+              onChange={setSelectedSortFields}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onClose}>
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.cancel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={() => {
+            onSave({
+              filterFields: selectedFilterFields.map(comboBoxOptionToFieldName),
+              sortFields: selectedSortFields.map(comboBoxOptionToFieldName),
+            });
+          }}
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.save',
+            {
+              defaultMessage: 'Save',
+            }
+          )}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

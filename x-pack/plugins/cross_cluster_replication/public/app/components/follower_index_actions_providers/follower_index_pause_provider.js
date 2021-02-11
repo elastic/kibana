@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { pauseFollowerIndex } from '../../store/actions';
 import { arrify } from '../../../../common/services/utils';
@@ -69,7 +69,7 @@ class FollowerIndexPauseProviderUi extends PureComponent {
     const hasCustomSettings = indices.some((index) => !areAllSettingsDefault(index));
 
     return (
-      <EuiOverlayMask>
+      <>
         {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
         <EuiConfirmModal
           title={title}
@@ -126,7 +126,7 @@ class FollowerIndexPauseProviderUi extends PureComponent {
             </Fragment>
           )}
         </EuiConfirmModal>
-      </EuiOverlayMask>
+      </>
     );
   };
 

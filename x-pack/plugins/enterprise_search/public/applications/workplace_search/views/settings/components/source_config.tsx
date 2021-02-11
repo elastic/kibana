@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../shared/loading';
@@ -56,22 +56,19 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
         header={header}
       />
       {confirmModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            onConfirm={() => deleteSourceConfig(serviceType, name)}
-            onCancel={hideConfirmModal}
-            buttonColor="danger"
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',
-              {
-                defaultMessage:
-                  'Are you sure you want to remove the OAuth configuration for {name}?',
-                values: { name },
-              }
-            )}
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          onConfirm={() => deleteSourceConfig(serviceType, name)}
+          onCancel={hideConfirmModal}
+          buttonColor="danger"
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',
+            {
+              defaultMessage: 'Are you sure you want to remove the OAuth configuration for {name}?',
+              values: { name },
+            }
+          )}
+        </EuiConfirmModal>
       )}
     </>
   );

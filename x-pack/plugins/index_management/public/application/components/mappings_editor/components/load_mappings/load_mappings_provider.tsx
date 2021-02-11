@@ -8,14 +8,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiConfirmModal,
-  EuiOverlayMask,
-  EuiCallOut,
-  EuiText,
-  EuiSpacer,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../shared_imports';
 import { validateMappings, MappingsValidationError } from '../../lib';
@@ -220,61 +213,55 @@ export const LoadMappingsProvider = ({ onJson, children }: Props) => {
       {children(openModal)}
 
       {state.isModalOpen && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18nTexts.modalTitle}
-            onCancel={onCancel}
-            onConfirm={onConfirm}
-            cancelButtonText={i18nTexts.buttons.cancel}
-            confirmButtonText={i18nTexts.buttons.confirm}
-            maxWidth={600}
-          >
-            {view === 'json' ? (
-              // The CSS override for the EuiCodeEditor requires a parent .application css class
-              <div className="application">
-                <EuiText color="subdued">
-                  <FormattedMessage
-                    id="xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText"
-                    defaultMessage="Provide a mappings object, for example, the object assigned to an index {mappings} property. This will overwrite existing mappings, dynamic templates, and options."
-                    values={{
-                      mappings: <code>mappings</code>,
-                    }}
-                  />
-                </EuiText>
-
-                <EuiSpacer size="m" />
-
-                <JsonEditor
-                  label={i18nTexts.editor.label}
-                  onUpdate={onJsonUpdate}
-                  defaultValue={state.json?.unparsed}
-                  euiCodeEditorProps={{
-                    height: '450px',
+        <EuiConfirmModal
+          title={i18nTexts.modalTitle}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          cancelButtonText={i18nTexts.buttons.cancel}
+          confirmButtonText={i18nTexts.buttons.confirm}
+          maxWidth={600}
+        >
+          {view === 'json' ? (
+            // The CSS override for the EuiCodeEditor requires a parent .application css class
+            <div className="application">
+              <EuiText color="subdued">
+                <FormattedMessage
+                  id="xpack.idxMgmt.mappingsEditor.loadJsonModal.jsonEditorHelpText"
+                  defaultMessage="Provide a mappings object, for example, the object assigned to an index {mappings} property. This will overwrite existing mappings, dynamic templates, and options."
+                  values={{
+                    mappings: <code>mappings</code>,
                   }}
                 />
-              </div>
-            ) : (
-              <>
-                <EuiCallOut
-                  title={i18nTexts.validationErrors.title}
-                  iconType="alert"
-                  color="warning"
-                >
-                  <EuiText>
-                    <p>{i18nTexts.validationErrors.description}</p>
-                  </EuiText>
-                  <EuiSpacer />
-                  <ol>
-                    {state.errors!.slice(0, totalErrorsToDisplay).map((error, i) => (
-                      <li key={i}>{getErrorMessage(error)}</li>
-                    ))}
-                  </ol>
-                  {state.errors!.length > MAX_ERRORS_TO_DISPLAY && renderErrorsFilterButton()}
-                </EuiCallOut>
-              </>
-            )}
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+              </EuiText>
+
+              <EuiSpacer size="m" />
+
+              <JsonEditor
+                label={i18nTexts.editor.label}
+                onUpdate={onJsonUpdate}
+                defaultValue={state.json?.unparsed}
+                euiCodeEditorProps={{
+                  height: '450px',
+                }}
+              />
+            </div>
+          ) : (
+            <>
+              <EuiCallOut title={i18nTexts.validationErrors.title} iconType="alert" color="warning">
+                <EuiText>
+                  <p>{i18nTexts.validationErrors.description}</p>
+                </EuiText>
+                <EuiSpacer />
+                <ol>
+                  {state.errors!.slice(0, totalErrorsToDisplay).map((error, i) => (
+                    <li key={i}>{getErrorMessage(error)}</li>
+                  ))}
+                </ol>
+                {state.errors!.length > MAX_ERRORS_TO_DISPLAY && renderErrorsFilterButton()}
+              </EuiCallOut>
+            </>
+          )}
+        </EuiConfirmModal>
       )}
     </>
   );

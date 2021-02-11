@@ -16,7 +16,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiHorizontalRule,
   EuiCheckbox,
 } from '@elastic/eui';
@@ -139,78 +138,76 @@ export class StartDatafeedModal extends Component {
 
     if (this.state.isModalVisible) {
       modal = (
-        <EuiOverlayMask>
-          <EuiModal
-            onClose={this.closeModal}
-            style={{ width: '850px' }}
-            maxWidth={false}
-            data-test-subj="mlStartDatafeedModal"
-          >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <FormattedMessage
-                  id="xpack.ml.jobsList.startDatafeedModal.startJobsTitle"
-                  defaultMessage="Start {jobsCount, plural, one {{jobId}} other {# jobs}}"
-                  values={{
-                    jobsCount: startableJobs.length,
-                    jobId: startableJobs[0].id,
-                  }}
-                />
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-
-            <EuiModalBody>
-              <TimeRangeSelector
-                startTime={startTime === undefined ? initialSpecifiedStartTime : startTime}
-                endTime={endTime}
-                setStartTime={this.setStartTime}
-                setEndTime={this.setEndTime}
-                now={now}
-                setTimeRangeValid={this.setTimeRangeValid}
+        <EuiModal
+          onClose={this.closeModal}
+          style={{ width: '850px' }}
+          maxWidth={false}
+          data-test-subj="mlStartDatafeedModal"
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="xpack.ml.jobsList.startDatafeedModal.startJobsTitle"
+                defaultMessage="Start {jobsCount, plural, one {{jobId}} other {# jobs}}"
+                values={{
+                  jobsCount: startableJobs.length,
+                  jobId: startableJobs[0].id,
+                }}
               />
-              {this.state.endTime === undefined && (
-                <div className="create-watch">
-                  <EuiHorizontalRule />
-                  <EuiCheckbox
-                    id="createWatch"
-                    label={
-                      <FormattedMessage
-                        id="xpack.ml.jobsList.startDatafeedModal.createWatchDescription"
-                        defaultMessage="Create watch after datafeed has started"
-                      />
-                    }
-                    checked={createWatch}
-                    onChange={this.setCreateWatch}
-                  />
-                </div>
-              )}
-            </EuiModalBody>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-            <EuiModalFooter>
-              <EuiButtonEmpty
-                onClick={this.closeModal}
-                data-test-subj="mlStartDatafeedModalCancelButton"
-              >
-                <FormattedMessage
-                  id="xpack.ml.jobsList.startDatafeedModal.cancelButtonLabel"
-                  defaultMessage="Cancel"
+          <EuiModalBody>
+            <TimeRangeSelector
+              startTime={startTime === undefined ? initialSpecifiedStartTime : startTime}
+              endTime={endTime}
+              setStartTime={this.setStartTime}
+              setEndTime={this.setEndTime}
+              now={now}
+              setTimeRangeValid={this.setTimeRangeValid}
+            />
+            {this.state.endTime === undefined && (
+              <div className="create-watch">
+                <EuiHorizontalRule />
+                <EuiCheckbox
+                  id="createWatch"
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.startDatafeedModal.createWatchDescription"
+                      defaultMessage="Create watch after datafeed has started"
+                    />
+                  }
+                  checked={createWatch}
+                  onChange={this.setCreateWatch}
                 />
-              </EuiButtonEmpty>
+              </div>
+            )}
+          </EuiModalBody>
 
-              <EuiButton
-                onClick={this.save}
-                isDisabled={startDisabled}
-                fill
-                data-test-subj="mlStartDatafeedModalStartButton"
-              >
-                <FormattedMessage
-                  id="xpack.ml.jobsList.startDatafeedModal.startButtonLabel"
-                  defaultMessage="Start"
-                />
-              </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
+          <EuiModalFooter>
+            <EuiButtonEmpty
+              onClick={this.closeModal}
+              data-test-subj="mlStartDatafeedModalCancelButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.jobsList.startDatafeedModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+
+            <EuiButton
+              onClick={this.save}
+              isDisabled={startDisabled}
+              fill
+              data-test-subj="mlStartDatafeedModalStartButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.jobsList.startDatafeedModal.startButtonLabel"
+                defaultMessage="Start"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       );
     }
     return <div>{modal}</div>;

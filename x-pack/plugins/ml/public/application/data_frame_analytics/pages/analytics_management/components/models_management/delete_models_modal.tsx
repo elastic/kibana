@@ -8,7 +8,6 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiOverlayMask,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -31,57 +30,55 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     .map((model) => model.model_id);
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={onClose.bind(null, false)} initialFocus="[name=cancelModelDeletion]">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
+    <EuiModal onClose={onClose.bind(null, false)} initialFocus="[name=cancelModelDeletion]">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.deleteModal.header"
+            defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}?"
+            values={{
+              modelId: models[0].model_id,
+              modelsCount: models.length,
+            }}
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        {modelsWithPipelines.length > 0 && (
+          <EuiCallOut
+            data-test-subj="modelsWithPipelinesWarning"
+            color={'danger'}
+            iconType={'alert'}
+            size="s"
+          >
             <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.deleteModal.header"
-              defaultMessage="Delete {modelsCount, plural, one {{modelId}} other {# models}}?"
+              id="xpack.ml.trainedModels.modelsList.deleteModal.modelsWithPipelinesWarningMessage"
+              defaultMessage="{modelsWithPipelinesCount, plural, one{Model} other {Models}} {modelsWithPipelines} {modelsWithPipelinesCount, plural, one{has} other {have}} associated pipelines!"
               values={{
-                modelId: models[0].model_id,
-                modelsCount: models.length,
+                modelsWithPipelinesCount: modelsWithPipelines.length,
+                modelsWithPipelines: modelsWithPipelines.join(', '),
               }}
             />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+          </EuiCallOut>
+        )}
+      </EuiModalBody>
 
-        <EuiModalBody>
-          {modelsWithPipelines.length > 0 && (
-            <EuiCallOut
-              data-test-subj="modelsWithPipelinesWarning"
-              color={'danger'}
-              iconType={'alert'}
-              size="s"
-            >
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.deleteModal.modelsWithPipelinesWarningMessage"
-                defaultMessage="{modelsWithPipelinesCount, plural, one{Model} other {Models}} {modelsWithPipelines} {modelsWithPipelinesCount, plural, one{has} other {have}} associated pipelines!"
-                values={{
-                  modelsWithPipelinesCount: modelsWithPipelines.length,
-                  modelsWithPipelines: modelsWithPipelines.join(', '),
-                }}
-              />
-            </EuiCallOut>
-          )}
-        </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onClose.bind(null, false)} name="cancelModelDeletion">
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
 
-        <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose.bind(null, false)} name="cancelModelDeletion">
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-
-          <EuiButton onClick={onClose.bind(null, true)} fill color="danger">
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel"
-              defaultMessage="Delete"
-            />
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+        <EuiButton onClick={onClose.bind(null, true)} fill color="danger">
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel"
+            defaultMessage="Delete"
+          />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

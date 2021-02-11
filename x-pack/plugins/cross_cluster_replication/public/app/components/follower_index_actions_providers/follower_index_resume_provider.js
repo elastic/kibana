@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiLink, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiLink } from '@elastic/eui';
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import { routing } from '../../services/routing';
 import { resumeFollowerIndex } from '../../store/actions';
@@ -68,7 +68,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
         );
 
     return (
-      <EuiOverlayMask>
+      <>
         {/* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */}
         <EuiConfirmModal
           title={title}
@@ -138,7 +138,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
             </Fragment>
           )}
         </EuiConfirmModal>
-      </EuiOverlayMask>
+      </>
     );
   };
 

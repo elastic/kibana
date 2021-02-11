@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { PolicyFromES } from '../../../../../common/types';
 import { toasts } from '../../../services/notification';
@@ -50,33 +50,31 @@ export class ConfirmDelete extends Component<Props> {
       values: { name: policyToDelete.name },
     });
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={title}
-          onCancel={onCancel}
-          onConfirm={this.deletePolicy}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.confirmDelete.cancelButton"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.confirmDelete.deleteButton"
-              defaultMessage="Delete"
-            />
-          }
-          buttonColor="danger"
-        >
-          <div>
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
-              defaultMessage="You can't recover a deleted policy."
-            />
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={title}
+        onCancel={onCancel}
+        onConfirm={this.deletePolicy}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.confirmDelete.cancelButton"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.confirmDelete.deleteButton"
+            defaultMessage="Delete"
+          />
+        }
+        buttonColor="danger"
+      >
+        <div>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
+            defaultMessage="You can't recover a deleted policy."
+          />
+        </div>
+      </EuiConfirmModal>
     );
   }
 }

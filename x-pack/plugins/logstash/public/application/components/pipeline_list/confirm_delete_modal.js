@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function ConfirmDeleteModal({
@@ -67,23 +67,21 @@ export function ConfirmDeleteModal({
         };
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        cancelButtonText={
-          <FormattedMessage
-            id="xpack.logstash.confirmDeleteModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={confirmText.button}
-        defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
-        onCancel={cancelDeletePipelines}
-        onConfirm={deleteSelectedPipelines}
-        title={confirmText.title}
-      >
-        <p>{confirmText.message}</p>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      buttonColor="danger"
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.logstash.confirmDeleteModal.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={confirmText.button}
+      defaultFocusedButton={EUI_MODAL_CANCEL_BUTTON}
+      onCancel={cancelDeletePipelines}
+      onConfirm={deleteSelectedPipelines}
+      title={confirmText.title}
+    >
+      <p>{confirmText.message}</p>
+    </EuiConfirmModal>
   );
 }

@@ -21,7 +21,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
@@ -123,52 +122,50 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     );
 
     return (
-      <EuiOverlayMask>
-        <form onSubmit={this.onFormSubmit}>
-          <EuiModal
-            data-test-subj="savedObjectSaveModal"
-            className={`kbnSavedObjectSaveModal${
-              hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''
-            }`}
-            onClose={this.props.onClose}
-          >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <FormattedMessage
-                  id="savedObjects.saveModal.saveTitle"
-                  defaultMessage="Save {objectType}"
-                  values={{ objectType: this.props.objectType }}
-                />
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
+      <form onSubmit={this.onFormSubmit}>
+        <EuiModal
+          data-test-subj="savedObjectSaveModal"
+          className={`kbnSavedObjectSaveModal${
+            hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''
+          }`}
+          onClose={this.props.onClose}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="savedObjects.saveModal.saveTitle"
+                defaultMessage="Save {objectType}"
+                values={{ objectType: this.props.objectType }}
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-            <EuiModalBody>
-              {this.renderDuplicateTitleCallout(duplicateWarningId)}
+          <EuiModalBody>
+            {this.renderDuplicateTitleCallout(duplicateWarningId)}
 
-              <EuiForm>
-                {!this.props.showDescription && this.props.description && (
-                  <EuiText size="s" color="subdued">
-                    {this.props.description}
-                  </EuiText>
-                )}
-                {formBody}
-                {this.renderCopyOnSave()}
-              </EuiForm>
-            </EuiModalBody>
+            <EuiForm>
+              {!this.props.showDescription && this.props.description && (
+                <EuiText size="s" color="subdued">
+                  {this.props.description}
+                </EuiText>
+              )}
+              {formBody}
+              {this.renderCopyOnSave()}
+            </EuiForm>
+          </EuiModalBody>
 
-            <EuiModalFooter>
-              <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
-                <FormattedMessage
-                  id="savedObjects.saveModal.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
+          <EuiModalFooter>
+            <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+              <FormattedMessage
+                id="savedObjects.saveModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
 
-              {this.renderConfirmButton()}
-            </EuiModalFooter>
-          </EuiModal>
-        </form>
-      </EuiOverlayMask>
+            {this.renderConfirmButton()}
+          </EuiModalFooter>
+        </EuiModal>
+      </form>
     );
   }
 
