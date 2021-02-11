@@ -50,6 +50,6 @@ describe('WarningsFlyoutStep', () => {
 
     wrapper.find(`input#${idForWarning(ReindexWarning.apmReindex)}`).simulate('change');
     button.simulate('click');
-    expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
+    expect(defaultProps.advanceNextStep).toHaveBeenCalled();
   });
 });
