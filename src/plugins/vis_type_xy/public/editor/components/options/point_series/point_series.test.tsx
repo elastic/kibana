@@ -28,32 +28,25 @@ jest.mock('../../../../services', () => ({
 
 type PointSeriesOptionsProps = Parameters<typeof PointSeriesOptions>[0];
 
-const pointSeriesProps = {
-  aggs: getAggs(),
-  hasHistogramAgg: false,
-  extraProps: {
-    showElasticChartsOptions: false,
-  },
-  isTabSelected: false,
-  setMultipleValidity: jest.fn(),
-  setTouched: jest.fn(),
-  setValue: jest.fn(),
-  setValidity: jest.fn(),
-  stateParams: getStateParams(ChartType.Histogram, false),
-  vis: getVis('date_histogram'),
-};
-
-describe('PoitSeries Editor', function () {
+describe('PointSeries Editor', function () {
   let props: PointSeriesOptionsProps;
   let component: ReactWrapper<PointSeriesOptionsProps>;
 
-  beforeAll(() => {
-    props = (pointSeriesProps as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+  beforeEach(() => {
+    props = ({
+      aggs: getAggs(),
+      hasHistogramAgg: false,
+      extraProps: {
+        showElasticChartsOptions: false,
+      },
+      isTabSelected: false,
+      setMultipleValidity: jest.fn(),
+      setTouched: jest.fn(),
+      setValue: jest.fn(),
+      setValidity: jest.fn(),
+      stateParams: getStateParams(ChartType.Histogram, false),
+      vis: getVis('date_histogram'),
+    } as unknown) as PointSeriesOptionsProps;
   });
 
   it('renders the showValuesOnChart switch for a bar chart', async () => {
@@ -65,7 +58,7 @@ describe('PoitSeries Editor', function () {
 
   it('not renders the showValuesOnChart switch for an area chart', async () => {
     const areaVisProps = ({
-      ...pointSeriesProps,
+      ...props,
       stateParams: getStateParams(ChartType.Area, false),
     } as unknown) as ValidationVisOptionsProps<
       VisParams,
@@ -89,7 +82,7 @@ describe('PoitSeries Editor', function () {
 
   it('renders the orderBucketsBySum switch for a non date histogram bucket', async () => {
     const newVisProps = ({
-      ...pointSeriesProps,
+      ...props,
       vis: getVis('terms'),
     } as unknown) as ValidationVisOptionsProps<
       VisParams,
@@ -113,7 +106,7 @@ describe('PoitSeries Editor', function () {
 
   it('renders the editor options that are specific for the es charts implementation if showElasticChartsOptions is true', async () => {
     const newVisProps = ({
-      ...pointSeriesProps,
+      ...props,
       extraProps: {
         showElasticChartsOptions: true,
       },
@@ -131,7 +124,7 @@ describe('PoitSeries Editor', function () {
 
   it('not renders the fitting function for a bar chart', async () => {
     const newVisProps = ({
-      ...pointSeriesProps,
+      ...props,
       extraProps: {
         showElasticChartsOptions: true,
       },
@@ -149,7 +142,7 @@ describe('PoitSeries Editor', function () {
 
   it('renders the fitting function for a line chart', async () => {
     const newVisProps = ({
-      ...pointSeriesProps,
+      ...props,
       stateParams: getStateParams(ChartType.Line, false),
       extraProps: {
         showElasticChartsOptions: true,
@@ -168,7 +161,7 @@ describe('PoitSeries Editor', function () {
 
   it('renders the showCategoryLines switch', async () => {
     const newVisProps = ({
-      ...pointSeriesProps,
+      ...props,
       extraProps: {
         showElasticChartsOptions: true,
       },
@@ -193,7 +186,7 @@ describe('PoitSeries Editor', function () {
 
   it('renders the threshold panel if the Show threshold line switch is on', async () => {
     const newVisProps = ({
-      ...pointSeriesProps,
+      ...props,
       stateParams: getStateParams(ChartType.Histogram, true),
     } as unknown) as ValidationVisOptionsProps<
       VisParams,
