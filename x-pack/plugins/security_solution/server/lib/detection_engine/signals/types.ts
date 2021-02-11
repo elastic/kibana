@@ -50,8 +50,15 @@ export interface SignalsStatusParams {
 }
 
 export interface ThresholdResult {
+  terms?: Array<{
+    field?: string;
+    value: string;
+  }>;
+  cardinality?: Array<{
+    field: string;
+    value: number;
+  }>;
   count: number;
-  value: string | string[];
 }
 
 export interface SignalSource {
@@ -279,7 +286,14 @@ export interface ThresholdAggregationBucket extends TermAggregationBucket {
 }
 
 export interface MultiAggBucket {
-  terms: string[];
+  cardinality?: Array<{
+    field: string;
+    value: number;
+  }>;
+  terms: Array<{
+    field: string;
+    value: string;
+  }>;
   docCount: number;
   topThresholdHits?:
     | {
@@ -288,7 +302,6 @@ export interface MultiAggBucket {
         };
       }
     | undefined;
-  cardinalityCount?: number | undefined;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

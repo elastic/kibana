@@ -863,3 +863,27 @@ export const calculateThresholdSignalUuid = (
 
   return uuidv5(baseString, NAMESPACE_ID);
 };
+
+export const getThresholdAggregationParts = (
+  data: object,
+  index?: number
+):
+  | {
+      field: string;
+      index: number;
+      name: string;
+    }
+  | undefined => {
+  const idx = index != null ? index.toString() : '\\d';
+  const pattern = `threshold_(?<index>${idx}):(?<name>\\w+)`;
+  for (const key of Object.keys(data)) {
+    const matches = key.match(pattern);
+    if (matches != null && matches.groups?.name != null && matches.groups?.index != null) {
+      return {
+        field: key,
+        index: parseInt(matches.groups.index, 10),
+        name: matches.groups.name,
+      };
+    }
+  }
+};

@@ -50,7 +50,6 @@ export const findThresholdSignals = async ({
   searchDuration: string;
   searchErrors: string[];
 }> => {
-  // TODO: reuse logic from signal_rule_alert_type
   const thresholdFields = Array.isArray(threshold.field) ? threshold.field : [threshold.field];
 
   const aggregations =
@@ -58,14 +57,13 @@ export const findThresholdSignals = async ({
       ? thresholdFields.reduce((acc, field, i) => {
           const aggPath = [...Array(i + 1).keys()]
             .map((j) => {
-              return `threshold_${j}`;
+              return `['threshold_${j}:${thresholdFields[j]}']`;
             })
-            .join('.aggs.');
+            .join(`['aggs']`);
           set(acc, aggPath, {
             terms: {
               field,
               min_doc_count: threshold.value, // not needed on parent agg, but can help narrow down result set
-              // TODO: is size needed on outer aggs?
               size: 10000, // max 10k buckets
             },
           });
@@ -88,8 +86,9 @@ export const findThresholdSignals = async ({
                 size: 1,
               },
             };
+            // TODO: support case where threshold fields are not supplied, but cardinality is?
             if (!isEmpty(threshold.cardinality_field)) {
-              set(acc, `${aggPath}.aggs`, {
+              set(acc, `${aggPath}['aggs']`, {
                 top_threshold_hits: topHitsAgg,
                 cardinality_count: {
                   cardinality: {
@@ -106,7 +105,9 @@ export const findThresholdSignals = async ({
                 },
               });
             } else {
-              set(acc, `${aggPath}.aggs`, topHitsAgg);
+              set(acc, `${aggPath}['aggs']`, {
+                top_threshold_hits: topHitsAgg,
+              });
             }
           }
           return acc;

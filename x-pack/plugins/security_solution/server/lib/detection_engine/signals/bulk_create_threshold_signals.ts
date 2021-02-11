@@ -21,7 +21,7 @@ import {
 import { BaseHit, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { calculateThresholdSignalUuid } from './utils';
+import { calculateThresholdSignalUuid, getThresholdAggregationParts } from './utils';
 import { BuildRuleMessage } from './rule_messages';
 import { TermAggregationBucket } from '../../types';
 import { MultiAggBucket, SignalSearchResponse, SignalSource } from './types';
@@ -86,8 +86,13 @@ const getTransformedHits = (
     const source = {
       '@timestamp': timestamp,
       threshold_result: {
+        terms: [
+          {
+            value: ruleId,
+          },
+        ],
+        // TODO: cardinality?
         count: totalResults,
-        value: ruleId,
       },
     };
 
@@ -100,32 +105,56 @@ const getTransformedHits = (
     ];
   }
 
-  if (!results.aggregations?.threshold_0) {
+  const aggParts = results.aggregations && getThresholdAggregationParts(results.aggregations);
+  if (!aggParts.key) {
     return [];
   }
 
-  const getCombinations = (buckets: TermAggregationBucket[], i: number) => {
+  const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string) => {
     return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
       if (i < threshold.field.length - 1) {
         const nextLevelIdx = i + 1;
-        const nextLevelPath = `threshold_${nextLevelIdx}.buckets`;
+        const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
+        if (nextLevelAggParts == null) {
+          throw new Error('Something went horribly wrong');
+        }
+        const nextLevelPath = `${nextLevelAggParts.name}.buckets`;
         const nextBuckets = get(nextLevelPath, bucket);
-        const combinations = getCombinations(nextBuckets, nextLevelIdx);
+        const combinations = getCombinations(nextBuckets, nextLevelIdx, nextLevelAggParts.field);
         combinations.forEach((val) => {
           const el = {
-            terms: [bucket.key, ...val.terms],
-            docCount: val.docCount,
+            terms: [
+              {
+                field,
+                value: bucket.key,
+              },
+              ...val.terms,
+            ],
+            cardinality: val.cardinality,
             topThresholdHits: val.topThresholdHits,
-            cardinalityCount: val.cardinalityCount,
+            docCount: val.docCount,
           };
           acc.push(el);
         });
       } else {
         const el = {
-          terms: [bucket.key],
-          docCount: bucket.doc_count,
+          terms: [
+            {
+              field,
+              value: bucket.key,
+            },
+          ],
+          cardinality:
+            threshold.cardinality_field != null
+              ? [
+                  {
+                    field: threshold.cardinality_field,
+                    value: bucket.cardinality_count!.value,
+                  },
+                ]
+              : undefined,
           topThresholdHits: bucket.top_threshold_hits,
-          cardinalityCount: bucket.cardinality_count?.value,
+          docCount: bucket.doc_count,
         };
         acc.push(el);
       }
@@ -134,7 +163,7 @@ const getTransformedHits = (
     }, []);
   };
 
-  return getCombinations(results.aggregations.threshold_0.buckets, 0).reduce(
+  return getCombinations(results.aggregations[aggParts.name].buckets, 0, aggParts.field).reduce(
     (acc: Array<BaseHit<SignalSource>>, bucket) => {
       const hit = bucket.topThresholdHits?.hits.hits[0];
       if (hit == null) {
@@ -143,19 +172,30 @@ const getTransformedHits = (
 
       const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
       if (timestampArray == null) {
-        return [];
+        return acc;
       }
+
       const timestamp = timestampArray[0];
       if (typeof timestamp !== 'string') {
-        return [];
+        return acc;
       }
 
       const source = {
         '@timestamp': timestamp,
         threshold_result: {
+          terms: bucket.terms.map((term) => {
+            return {
+              field: term.field,
+              value: term.value,
+            };
+          }),
+          cardinality: bucket.cardinality?.map((cardinality) => {
+            return {
+              field: cardinality.field,
+              value: cardinality.value,
+            };
+          }),
           count: bucket.docCount,
-          value: bucket.terms,
-          cardinality_count: bucket.cardinalityCount,
         },
       };
 
@@ -169,6 +209,7 @@ const getTransformedHits = (
         ),
         _source: source,
       });
+
       return acc;
     },
     []

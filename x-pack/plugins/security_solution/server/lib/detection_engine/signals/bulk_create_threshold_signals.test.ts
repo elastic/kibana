@@ -32,12 +32,12 @@ describe('transformThresholdResultsToEcs', () => {
       {
         ...sampleDocSearchResultsNoSortId('abcd'),
         aggregations: {
-          threshold_0: {
+          'threshold_0:source.ip': {
             buckets: [
               {
                 key: '127.0.0.1',
                 doc_count: 15,
-                threshold_1: {
+                'threshold_1:host.name': {
                   buckets: [
                     {
                       key: 'garden-gnomes',
@@ -96,9 +96,21 @@ describe('transformThresholdResultsToEcs', () => {
             _source: {
               '@timestamp': '2020-04-20T21:27:45+0000',
               threshold_result: {
+                terms: [
+                  {
+                    field: 'source.ip',
+                    value: '127.0.0.1',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'garden-gnomes',
+                  },
+                ],
+                cardinality: {
+                  field: 'destination.ip',
+                  value: 7,
+                },
                 count: 12,
-                value: ['127.0.0.1', 'garden-gnomes'],
-                cardinality_count: 7,
               },
             },
           },

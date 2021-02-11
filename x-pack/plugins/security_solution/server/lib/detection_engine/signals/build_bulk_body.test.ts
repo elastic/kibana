@@ -110,6 +110,10 @@ describe('buildBulkBody', () => {
           severity_mapping: [],
           tags: ['some fake tag 1', 'some fake tag 2'],
           threat: [],
+          threshold: {
+            field: 'host.name',
+            value: 100,
+          },
           throttle: 'no_actions',
           type: 'query',
           to: 'now',
@@ -136,8 +140,13 @@ describe('buildBulkBody', () => {
       _source: {
         ...baseDoc._source,
         threshold_result: {
+          terms: [
+            {
+              field: '',
+              value: 'abcd',
+            },
+          ],
           count: 5,
-          value: 'abcd',
         },
       },
     };
@@ -231,8 +240,11 @@ describe('buildBulkBody', () => {
           exceptions_list: getListArrayMock(),
         },
         threshold_result: {
+          terms: {
+            field: 'host.name',
+            value: 'abcd',
+          },
           count: 5,
-          value: 'abcd',
         },
         depth: 1,
       },
