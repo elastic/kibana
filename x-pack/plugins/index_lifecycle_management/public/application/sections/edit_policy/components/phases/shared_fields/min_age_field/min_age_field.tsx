@@ -67,7 +67,7 @@ const i18nTexts = {
     'xpack.indexLifecycleMgt.editPolicy.minimumAge.rolloverToolTipDescription',
     {
       defaultMessage:
-        'Data age is calculated as time from rollover. Rollover is configured in the hot phase.',
+        'Data age is calculated from rollover. Rollover is configured in the hot phase.',
     }
   ),
 };
@@ -127,12 +127,15 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                         ].concat(
                           isUsingRollover
                             ? [
-                                <EuiIconTip
-                                  data-test-subj="rolloverMinAgeInputIconTip"
-                                  type="iInCircle"
-                                  aria-label={i18nTexts.rolloverToolTipDescription}
-                                  content={i18nTexts.rolloverToolTipDescription}
-                                />,
+                                <>
+                                  {/* This element is rendered for testing purposes only */}
+                                  <div data-test-subj={`${phase}-rolloverMinAgeInputIconTip`} />
+                                  <EuiIconTip
+                                    type="iInCircle"
+                                    aria-label={i18nTexts.rolloverToolTipDescription}
+                                    content={i18nTexts.rolloverToolTipDescription}
+                                  />
+                                </>,
                               ]
                             : ([] as any[])
                         );
