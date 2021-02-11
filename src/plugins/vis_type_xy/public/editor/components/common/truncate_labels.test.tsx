@@ -29,20 +29,20 @@ describe('TruncateLabelsOption', function () {
     expect(findTestSubject(component, 'xyLabelTruncateInput').length).toBe(1);
   });
 
-  it('renders the value on the input number', function () {
+  it('renders the value on the input number', () => {
     component = mountWithIntl(<TruncateLabelsOption {...props} />);
     const input = findTestSubject(component, 'xyLabelTruncateInput');
     expect(input.props().value).toBe(20);
   });
 
-  it('disables the input if disabled prop is given', function () {
+  it('disables the input if disabled prop is given', () => {
     const newProps = { ...props, disabled: true };
     component = mountWithIntl(<TruncateLabelsOption {...newProps} />);
     const input = findTestSubject(component, 'xyLabelTruncateInput');
-    expect(input.props().disabled).toBe(true);
+    expect(input.props().disabled).toBeTruthy();
   });
 
-  it('should set the new value', function () {
+  it('should set the new value', () => {
     component = mountWithIntl(<TruncateLabelsOption {...props} />);
     const input = findTestSubject(component, 'xyLabelTruncateInput');
     input.simulate('change', { target: { value: 100 } });

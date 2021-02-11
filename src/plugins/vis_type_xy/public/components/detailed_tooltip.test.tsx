@@ -8,19 +8,12 @@
 
 import { getTooltipData } from './detailed_tooltip';
 import {
-  getAspects,
-  getAspectsWithSplitColumn,
-  getAspectsWithSplitRow,
-  getHeader,
-  getValue,
+  aspects,
+  aspectsWithSplitColumn,
+  aspectsWithSplitRow,
+  header,
+  value,
 } from './detailed_tooltip.mock';
-
-// Get mock data
-const aspects = getAspects();
-const aspectsWithSplitColumn = getAspectsWithSplitColumn();
-const aspectsWithSplitRow = getAspectsWithSplitRow();
-const header = getHeader();
-const value = getValue();
 
 describe('getTooltipData', () => {
   it('returns an array with the header and data information', () => {
@@ -61,8 +54,8 @@ describe('getTooltipData', () => {
     const tooltipData = getTooltipData(aspectsWithSplitRow, null, value);
     expect(tooltipData).toStrictEqual([
       {
-        label: 'Cancelled: Descending',
-        value: 'true',
+        label: 'Carrier: Descending',
+        value: 'kibana',
       },
     ]);
   });

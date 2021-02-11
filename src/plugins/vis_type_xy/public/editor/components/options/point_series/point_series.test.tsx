@@ -26,6 +26,8 @@ jest.mock('../../../../services', () => ({
   }),
 }));
 
+type PointSeriesOptionsProps = Parameters<typeof PointSeriesOptions>[0];
+
 const pointSeriesProps = {
   aggs: getAggs(),
   hasHistogramAgg: false,
@@ -42,20 +44,8 @@ const pointSeriesProps = {
 };
 
 describe('PoitSeries Editor', function () {
-  let props: ValidationVisOptionsProps<
-    VisParams,
-    {
-      showElasticChartsOptions: boolean;
-    }
-  >;
-  let component: ReactWrapper<
-    ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >
-  >;
+  let props: PointSeriesOptionsProps;
+  let component: ReactWrapper<PointSeriesOptionsProps>;
 
   beforeAll(() => {
     props = (pointSeriesProps as unknown) as ValidationVisOptionsProps<
@@ -69,7 +59,7 @@ describe('PoitSeries Editor', function () {
   it('renders the showValuesOnChart switch for a bar chart', async () => {
     component = mountWithIntl(<PointSeriesOptions {...props} />);
     await act(async () => {
-      expect(findTestSubject(component, 'showValuesOnChart').length).toBe(1);
+      expect(findTestSubject(component, 'showValuesOnChart')).toHaveLength(1);
     });
   });
 
