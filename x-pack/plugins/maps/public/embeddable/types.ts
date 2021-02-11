@@ -12,7 +12,7 @@ import {
   SavedObjectEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
 import { RefreshInterval, Query, Filter, TimeRange } from '../../../../../src/plugins/data/common';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
+import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapSettings } from '../reducers/map';
 

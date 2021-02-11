@@ -25,6 +25,7 @@ jest.mock('../kibana_services', () => ({
   },
 }));
 
+import { Filter } from '../../../../../src/plugins/data/public';
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
 import { getDataFilters, getTimeFilters } from './map_selectors';
 
@@ -45,7 +46,7 @@ describe('getDataFilters', () => {
   const timeFilters = { to: '2001-01-01', from: '2001-12-31' };
   const refreshTimerLastTriggeredAt = '2001-01-01T00:00:00';
   const query = undefined;
-  const filters = [];
+  const filters: Filter[] = [];
   const searchSessionId = '12345';
   const searchSessionMapBuffer = {
     maxLat: 1.25,
