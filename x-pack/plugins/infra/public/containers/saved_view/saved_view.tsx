@@ -6,9 +6,14 @@
  */
 
 import createContainer from 'constate';
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 import { useCallback, useMemo, useState, useEffect, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SimpleSavedObject, SavedObjectAttributes } from 'kibana/public';
+import { useUrlState } from '../../utils/use_url_state';
 import { useFindSavedObject } from '../../hooks/use_find_saved_object';
 import { useCreateSavedObject } from '../../hooks/use_create_saved_object';
 import { useDeleteSavedObject } from '../../hooks/use_delete_saved_object';
@@ -39,6 +44,14 @@ interface Props {
   shouldLoadDefault: boolean;
 }
 
+const savedViewUrlStateRT = rt.type({
+  viewId: rt.string,
+});
+type SavedViewUrlState = rt.TypeOf<typeof savedViewUrlStateRT>;
+const DEFAULT_SAVED_VIEW_STATE: SavedViewUrlState = {
+  viewId: '0',
+};
+
 export const useSavedView = (props: Props) => {
   const {
     source,
@@ -52,6 +65,13 @@ export const useSavedView = (props: Props) => {
   const { data, loading, find, error: errorOnFind, hasView } = useFindSavedObject<
     SavedViewSavedObject<ViewState>
   >(viewType);
+  const [urlState, setUrlState] = useUrlState<SavedViewUrlState>({
+    defaultState: DEFAULT_SAVED_VIEW_STATE,
+    decodeUrlState,
+    encodeUrlState,
+    urlStateKey: 'savedView',
+  });
+
   const [shouldLoadDefault] = useState(props.shouldLoadDefault);
   const [currentView, setCurrentView] = useState<SavedView<any> | null>(null);
   const [loadingDefaultView, setLoadingDefaultView] = useState<boolean | null>(null);
@@ -212,25 +232,35 @@ export const useSavedView = (props: Props) => {
     });
   }, [setCurrentView, defaultViewId, defaultViewState]);
 
-  useEffect(() => {
-    if (loadingDefaultView || currentView || !shouldLoadDefault) {
-      return;
-    }
-
+  const loadDefaultViewIfSet = useCallback(() => {
     if (defaultViewId !== '0') {
       loadDefaultView();
     } else {
       setDefault();
       setLoadingDefaultView(false);
     }
-  }, [
-    loadDefaultView,
-    shouldLoadDefault,
-    setDefault,
-    loadingDefaultView,
-    currentView,
-    defaultViewId,
-  ]);
+  }, [defaultViewId, loadDefaultView, setDefault, setLoadingDefaultView]);
+
+  useEffect(() => {
+    if (loadingDefaultView || currentView || !shouldLoadDefault) {
+      return;
+    }
+
+    loadDefaultViewIfSet();
+  }, [loadDefaultViewIfSet, loadingDefaultView, currentView, shouldLoadDefault]);
+
+  useEffect(() => {
+    if (currentView && urlState.viewId !== currentView.id && data)
+      setUrlState({ viewId: currentView.id });
+  }, [urlState, setUrlState, currentView, defaultViewId, data]);
+
+  useEffect(() => {
+    if (!currentView && !loading && data) {
+      const viewToSet = views.find((v) => v.id === urlState.viewId);
+      if (viewToSet) setCurrentView(viewToSet);
+      else loadDefaultViewIfSet();
+    }
+  }, [loading, currentView, data, views, setCurrentView, loadDefaultViewIfSet, urlState.viewId]);
 
   return {
     views,
@@ -260,3 +290,11 @@ export const useSavedView = (props: Props) => {
 
 export const SavedView = createContainer(useSavedView);
 export const [SavedViewProvider, useSavedViewContext] = SavedView;
+
+const encodeUrlState = (state: SavedViewUrlState) => {
+  return savedViewUrlStateRT.encode(state);
+};
+const decodeUrlState = (value: unknown) => {
+  const state = pipe(savedViewUrlStateRT.decode(value), fold(constant(undefined), identity));
+  return state;
+};
