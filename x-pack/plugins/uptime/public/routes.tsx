@@ -15,7 +15,7 @@ import {
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
-  SYNTHETIC_CHECK_STEPs_ROUTE,
+  SYNTHETIC_CHECK_STEPS_ROUTE,
 } from '../common/constants';
 import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
@@ -75,7 +75,7 @@ const Routes: RouteProps[] = [
   },
   {
     title: baseTitle,
-    path: SYNTHETIC_CHECK_STEPs_ROUTE,
+    path: SYNTHETIC_CHECK_STEPS_ROUTE,
     component: SyntheticsCheckSteps,
     dataTestSubj: 'uptimeSyntheticCheckStepsPage',
     telemetryId: UptimePage.SyntheticCheckStepsPage,

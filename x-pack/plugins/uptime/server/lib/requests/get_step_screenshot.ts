@@ -18,8 +18,15 @@ export const getStepLastSuccessfulScreenshot: UMElasticsearchQueryFn<
   GetStepScreenshotParams,
   any
 > = async ({ uptimeEsClient, monitorId, stepIndex, timestamp }) => {
-  const params = {
+  const lastSuccessCheckParams = {
     size: 1,
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
+        },
+      },
+    ],
     query: {
       bool: {
         filter: [
@@ -37,7 +44,7 @@ export const getStepLastSuccessfulScreenshot: UMElasticsearchQueryFn<
           },
           {
             term: {
-              'synthetics.type': 'step/screenshot',
+              'synthetics.type': 'step/end',
             },
           },
           {
@@ -53,9 +60,10 @@ export const getStepLastSuccessfulScreenshot: UMElasticsearchQueryFn<
         ],
       },
     },
-    _source: ['synthetics.blob', 'synthetics.step.name'],
+    _source: ['monitor'],
   };
-  const { body: result } = await uptimeEsClient.search({ body: params });
+
+  const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
 
   if (result?.hits?.total.value < 1) {
     return null;
@@ -63,8 +71,38 @@ export const getStepLastSuccessfulScreenshot: UMElasticsearchQueryFn<
 
   const stepHit = result?.hits.hits[0]._source as Ping;
 
+  const lastSucessedCheckScreenshot = {
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.check_group': stepHit.monitor.check_group,
+            },
+          },
+          {
+            term: {
+              'synthetics.type': 'step/screenshot',
+            },
+          },
+          {
+            term: {
+              'synthetics.step.index': stepIndex,
+            },
+          },
+        ],
+      },
+    },
+    _source: ['synthetics.blob', 'synthetics.step.name'],
+  };
+
+  const { body: result1 } = await uptimeEsClient.search({ body: lastSucessedCheckScreenshot });
+
+  const stepScreenshotHit = result1?.hits.hits[0]._source as Ping;
+
   return {
-    blob: stepHit.synthetics?.blob ?? null,
-    stepName: stepHit?.synthetics?.step?.name ?? '',
+    blob: stepScreenshotHit.synthetics?.blob ?? null,
+    stepName: stepScreenshotHit?.synthetics?.step?.name ?? '',
   };
 };

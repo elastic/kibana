@@ -18,6 +18,9 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex: schema.number(),
       _debug: schema.maybe(schema.boolean()),
     }),
+    query: schema.object({
+      _debug: schema.maybe(schema.boolean()),
+    }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
@@ -54,7 +57,7 @@ export const createLastSuccessfulStepScreenshotRoute: UMRestApiRouteFactory = (
       stepIndex: schema.number(),
     }),
     query: schema.object({
-      timestamp: schema.number(),
+      timestamp: schema.string(),
       _debug: schema.maybe(schema.boolean()),
     }),
   },

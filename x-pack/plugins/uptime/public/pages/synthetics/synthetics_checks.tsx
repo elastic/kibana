@@ -38,7 +38,7 @@ export const SyntheticsCheckSteps: React.FC = () => {
       </EuiFlexGroup>
       <EuiSpacer />
       <StepsList data={steps} loading={loading} error={error} />
-      {(!steps || steps.length === 0) && <EmptyJourney checkGroup={checkGroup} />}
+      {(!steps || steps.length === 0) && !loading && <EmptyJourney checkGroup={checkGroup} />}
     </>
   );
 };

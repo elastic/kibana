@@ -15,7 +15,7 @@ export const CERTIFICATES_ROUTE = '/certificates';
 
 export const STEP_DETAIL_ROUTE = '/journey/:checkGroupId/step/:stepIndex';
 
-export const SYNTHETIC_CHECK_STEPs_ROUTE = '/journey/:checkGroupId/steps';
+export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
 export enum STATUS {
   UP = 'up',

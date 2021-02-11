@@ -15,7 +15,6 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
   validate: {
     params: schema.object({
       checkGroup: schema.string(),
-      _debug: schema.maybe(schema.boolean()),
     }),
     query: schema.object({
       // provides a filter for the types of synthetic events to include
@@ -23,6 +22,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       syntheticEventTypes: schema.maybe(
         schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
       ),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {
@@ -55,30 +55,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   validate: {
     query: schema.object({
       checkGroups: schema.arrayOf(schema.string()),
-    }),
-  },
-  handler: async ({ uptimeEsClient, request }): Promise<any> => {
-    const { checkGroups } = request.query;
-    const result = await libs.requests.getJourneyFailedSteps({
-      uptimeEsClient,
-      checkGroups,
-    });
-
-    return {
-      checkGroups,
-      steps: result,
-    };
-  },
-});
-
-export const createJourneyLastSuccessfulStepRoute: UMRestApiRouteFactory = (
-  libs: UMServerLibs
-) => ({
-  method: 'GET',
-  path: '/api/uptime/journeys/failed_steps',
-  validate: {
-    query: schema.object({
-      checkGroups: schema.arrayOf(schema.string()),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {

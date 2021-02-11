@@ -79,11 +79,6 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsol
           {browserConsole}
         </CodeBlockAccordion>
         <EuiSpacer />
-        <Label>
-          {i18n.translate('xpack.uptime.synthetics.executedStep.screenshot', {
-            defaultMessage: 'Screenshot',
-          })}
-        </Label>
         <StepScreenshots step={step} />
         <EuiSpacer />
         <CodeBlockAccordion

@@ -25,7 +25,7 @@ export const SpanWithMargin = styled.span`
   margin-right: 16px;
 `;
 interface Props {
-  data: any[];
+  data: Ping[];
   error?: Error;
   loading: boolean;
 }
@@ -151,7 +151,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
             browserConsole={
               data.find(
                 (step) =>
-                  step.synthetics.type === 'journey/browserconsole' &&
+                  step.synthetics?.type === 'journey/browserconsole' &&
                   step.synthetics?.step?.index! === item.synthetics?.step?.index
               )?.synthetics?.payload?.text
             }
@@ -172,7 +172,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
         const targetElem = evt.target as HTMLElement;
 
         // we dont want to capture image click event
-        if (targetElem.tagName !== 'IMG') {
+        if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'BUTTON') {
           toggleExpand({ ping: item, expandedRows, setExpandedRows });
         }
       },
