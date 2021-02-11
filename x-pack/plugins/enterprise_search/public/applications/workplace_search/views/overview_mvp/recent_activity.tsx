@@ -10,10 +10,10 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 import moment from 'moment';
 
-import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import { ContentSection } from '../../components/shared/content_section';
@@ -95,15 +95,19 @@ export const RecentActivityItem: React.FC<FeedActivity> = ({
       metric: 'recent_activity_source_details_link',
     });
 
+  const linkProps = {
+    onClick,
+    target: '_blank',
+    href: getWorkplaceSearchUrl(getContentSourcePath(SOURCE_DETAILS_PATH, sourceId, true)),
+    external: true,
+    color: status === 'error' ? 'danger' : 'primary',
+    'data-test-subj': 'viewSourceDetailsLink',
+  } as EuiLinkProps;
+
   return (
     <div className={`activity ${status ? `activity--${status}` : ''}`}>
       <div className="activity__message">
-        <EuiLinkTo
-          onClick={onClick}
-          color={status === 'error' ? 'danger' : 'primary'}
-          to={getContentSourcePath(SOURCE_DETAILS_PATH, sourceId, true)}
-          data-test-subj="viewSourceDetailsLink"
-        >
+        <EuiLink {...linkProps}>
           {id} {message}
           {status === 'error' && (
             <span className="activity--error__label">
@@ -114,7 +118,7 @@ export const RecentActivityItem: React.FC<FeedActivity> = ({
               />
             </span>
           )}
-        </EuiLinkTo>
+        </EuiLink>
       </div>
       <div className="activity__date">{moment.utc(timestamp).fromNow()}</div>
     </div>

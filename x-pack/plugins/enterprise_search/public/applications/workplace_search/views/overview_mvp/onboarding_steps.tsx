@@ -11,17 +11,20 @@ import { useValues, useActions } from 'kea';
 
 import {
   EuiSpacer,
+  EuiButtonEmpty,
   EuiTitle,
   EuiPanel,
   EuiIcon,
   EuiFlexGrid,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiButtonEmptyProps,
+  EuiLinkProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
@@ -141,6 +144,14 @@ export const OrgNameOnboarding: React.FC = () => {
       metric: 'org_name_change_button',
     });
 
+  const buttonProps = {
+    onClick,
+    target: '_blank',
+    color: 'primary',
+    href: getWorkplaceSearchUrl(ORG_SETTINGS_PATH),
+    'data-test-subj': 'orgNameChangeButton',
+  } as EuiButtonEmptyProps & EuiLinkProps;
+
   return (
     <EuiPanel paddingSize="l">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -158,16 +169,12 @@ export const OrgNameOnboarding: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmptyTo
-            to={ORG_SETTINGS_PATH}
-            onClick={onClick}
-            data-test-subj="orgNameChangeButton"
-          >
+          <EuiButtonEmpty {...buttonProps}>
             <FormattedMessage
               id="xpack.enterpriseSearch.workplaceSearch.orgNameOnboarding.buttonLabel"
               defaultMessage="Name your organization"
             />
-          </EuiButtonEmptyTo>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
