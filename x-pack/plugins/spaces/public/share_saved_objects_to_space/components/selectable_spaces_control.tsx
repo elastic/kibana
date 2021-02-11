@@ -67,7 +67,7 @@ const APPEND_FEATURE_IS_DISABLED = (
   <EuiIconTip
     content={i18n.translate('xpack.spaces.shareToSpace.featureIsDisabledTooltip', {
       defaultMessage:
-        'This feature is disabled in this space, it will have no effect unless the feature is enabled again.',
+        'This feature is disabled in this space.',
     })}
     position="left"
     type="alert"
