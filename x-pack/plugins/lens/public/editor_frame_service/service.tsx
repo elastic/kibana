@@ -26,7 +26,7 @@ import { Document } from '../persistence/saved_object_store';
 import { mergeTables } from './merge_tables';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
+import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 import { LensAttributeService } from '../lens_attribute_service';
 
@@ -72,7 +72,7 @@ export class EditorFrameService {
    * This is an asynchronous process and should only be triggered once for a saved object.
    * @param doc parsed Lens saved object
    */
-  private documentToExpression = async (doc: Document, palettes: PaletteRegistry) => {
+  private documentToExpression = async (doc: Document) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       collectAsyncDefinitions(this.datasources),
       collectAsyncDefinitions(this.visualizations),
@@ -80,12 +80,7 @@ export class EditorFrameService {
 
     const { persistedStateToExpression } = await import('../async_services');
 
-    return await persistedStateToExpression(
-      resolvedDatasources,
-      resolvedVisualizations,
-      doc,
-      palettes
-    );
+    return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
   };
 
   public setup(
@@ -106,7 +101,6 @@ export class EditorFrameService {
         documentToExpression: this.documentToExpression,
         indexPatternService: deps.data.indexPatterns,
         uiActions: deps.uiActions,
-        palettes: await plugins.charts.palettes.getPalettes(),
       };
     };
 

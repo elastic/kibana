@@ -95,7 +95,7 @@ export function getColorAssignments(
 
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
-  frame: Pick<FramePublicAPI, 'datasourceLayers'>,
+  frame: FramePublicAPI,
   layer: XYLayerConfig,
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
