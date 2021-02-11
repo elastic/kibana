@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { TestSavedObjectsHiddenTypePlugin } from './plugin';
+import { SavedObjectsHiddenTypePlugin } from './plugin';
 
-export const plugin = () => new TestSavedObjectsHiddenTypePlugin();
+export const plugin = () => new SavedObjectsHiddenTypePlugin();

@@ -8,12 +8,13 @@
 
 import { Plugin, CoreSetup } from 'kibana/server';
 
-export class TestSavedObjectsHiddenTypePlugin implements Plugin {
+export class SavedObjectsHiddenTypePlugin implements Plugin {
   public setup({ savedObjects }: CoreSetup, deps: {}) {
     // example of a SO type that is hidden and importableAndExportable
     savedObjects.registerType({
       name: 'test-hidden-importable-exportable',
       hidden: true,
+      namespaceType: 'single',
       mappings: {
         properties: {
           title: { type: 'text' },
@@ -28,6 +29,7 @@ export class TestSavedObjectsHiddenTypePlugin implements Plugin {
     savedObjects.registerType({
       name: 'test-hidden-non-importable-exportable',
       hidden: true,
+      namespaceType: 'single',
       mappings: {
         properties: {
           title: { type: 'text' },

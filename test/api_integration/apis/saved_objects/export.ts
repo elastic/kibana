@@ -181,37 +181,6 @@ export default function ({ getService }: FtrProviderContext) {
             });
         });
 
-        describe('hidden saved object types', () => {
-          it('returns objects with importableAndExportable types', async () =>
-            await supertest
-              .post('/api/saved_objects/_export')
-              .send({
-                type: ['test-hidden-importable-exportable'],
-              })
-              .expect(200)
-              .then((resp) => {
-                const objects = ndjsonToObject(resp.text);
-                expect(objects).to.have.length(2);
-                expect(objects[0]).to.have.property('id', 'ff3733a0-9fty-11e7-ahb3-3dcb94193fab');
-                expect(objects[0]).to.have.property('type', 'test-hidden-importable-exportable');
-              }));
-
-          it('excludes objects with non importableAndExportable types', async () =>
-            await supertest
-              .post('/api/saved_objects/_export')
-              .send({
-                type: ['test-hidden-non-importable-exportable'],
-              })
-              .then((resp) => {
-                expect(resp.body).to.eql({
-                  statusCode: 400,
-                  error: 'Bad Request',
-                  message:
-                    'Trying to export non-exportable type(s): test-hidden-non-importable-exportable',
-                });
-              }));
-        });
-
         it(`should return 400 when exporting unsupported type`, async () => {
           await supertest
             .post('/api/saved_objects/_export')

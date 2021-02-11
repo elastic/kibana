@@ -1,7 +1,7 @@
 {
-  "name": "test_saved_objects_hidden_type",
+  "name": "saved_objects_hidden_type",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/test_saved_objects_hidden_type",
+  "main": "target/test/plugin_functional/plugins/saved_objects_hidden_type",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"

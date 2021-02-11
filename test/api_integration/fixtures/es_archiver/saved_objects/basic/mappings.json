@@ -260,20 +260,6 @@
               "type": "text"
             }
           }
-        },
-        "test-hidden-non-importable-exportable": {
-          "properties": {
-            "title": {
-              "type": "text"
-            }
-          }
-        },
-        "test-hidden-importable-exportable": {
-          "properties": {
-            "title": {
-              "type": "text"
-            }
-          }
         }
       }
     }

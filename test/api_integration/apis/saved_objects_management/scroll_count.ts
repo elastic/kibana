@@ -87,22 +87,5 @@ export default function ({ getService }: FtrProviderContext) {
         search: 0,
       });
     });
-
-    it('only counts hidden types that are importableAndExportable', async () => {
-      const res = await supertest
-        .post(apiUrl)
-        .send({
-          typesToInclude: [
-            'test-hidden-non-importable-exportable',
-            'test-hidden-importable-exportable',
-          ],
-        })
-        .expect(200);
-
-      expect(res.body).to.eql({
-        'test-hidden-importable-exportable': 1,
-        'test-hidden-non-importable-exportable': 0,
-      });
-    });
   });
 }

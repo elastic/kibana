@@ -1,8 +1,0 @@
-{
-  "id": "testSavedObjectsHiddenType",
-  "version": "0.0.1",
-  "kibanaVersion": "kibana",
-  "configPath": ["test_saved_objects_hidden_type"],
-  "server": true,
-  "ui": false
-}

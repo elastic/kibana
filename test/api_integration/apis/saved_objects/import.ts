@@ -164,66 +164,6 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('hidden saved object types', () => {
-          it('imports objects with importableAndExportable type', async () => {
-            const fileBuffer = Buffer.from(
-              '{"id":"some-id-1","type":"test-hidden-importable-exportable","attributes":{"title":"my title"},"references":[]}',
-              'utf8'
-            );
-            await supertest
-              .post('/api/saved_objects/_import')
-              .attach('file', fileBuffer, 'export.ndjson')
-              .expect(200)
-              .then((resp) => {
-                expect(resp.body).to.eql({
-                  successCount: 1,
-                  success: true,
-                  warnings: [],
-                  successResults: [
-                    {
-                      type: 'test-hidden-importable-exportable',
-                      id: 'some-id-1',
-                      meta: {
-                        title: 'my title',
-                      },
-                    },
-                  ],
-                });
-              });
-          });
-
-          it('does not import objects with non importableAndExportable type', async () => {
-            const fileBuffer = Buffer.from(
-              '{"id":"some-id-1","type":"test-hidden-non-importable-exportable","attributes":{"title":"my title"},"references":[]}',
-              'utf8'
-            );
-            await supertest
-              .post('/api/saved_objects/_import')
-              .attach('file', fileBuffer, 'export.ndjson')
-              .expect(200)
-              .then((resp) => {
-                expect(resp.body).to.eql({
-                  successCount: 0,
-                  success: false,
-                  warnings: [],
-                  errors: [
-                    {
-                      id: 'some-id-1',
-                      type: 'test-hidden-non-importable-exportable',
-                      title: 'my title',
-                      meta: {
-                        title: 'my title',
-                      },
-                      error: {
-                        type: 'unsupported_type',
-                      },
-                    },
-                  ],
-                });
-              });
-          });
-        });
-
         it('should return 400 when trying to import more than 10,000 objects', async () => {
           const fileChunks = [];
           for (let i = 0; i < 10001; i++) {

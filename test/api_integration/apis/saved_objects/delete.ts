@@ -38,38 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
               message: 'Saved object [dashboard/not-a-real-id] not found',
             });
           }));
-
-      describe('hidden saved object types', () => {
-        it('should return generic 404 when trying to delete a doc with importableAndExportable types', async () =>
-          await supertest
-            .delete(
-              `/api/saved_objects/test-hidden-importable-exportable/ff3733a0-9fty-11e7-ahb3-3dcb94193fab`
-            )
-            .expect(404)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message:
-                  'Saved object [test-hidden-importable-exportable/ff3733a0-9fty-11e7-ahb3-3dcb94193fab] not found',
-              });
-            }));
-
-        it('returns empty response for non importableAndExportable types', async () =>
-          await supertest
-            .delete(
-              `/api/saved_objects/test-hidden-non-importable-exportable/op3767a1-9rcg-53u7-jkb3-3dnb74193awc`
-            )
-            .expect(404)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message:
-                  'Saved object [test-hidden-non-importable-exportable/op3767a1-9rcg-53u7-jkb3-3dnb74193awc] not found',
-              });
-            }));
-      });
     });
 
     describe('without kibana index', () => {

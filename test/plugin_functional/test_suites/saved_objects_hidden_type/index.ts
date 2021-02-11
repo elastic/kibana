@@ -9,11 +9,11 @@
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('Saved Objects Management', function () {
+  describe('Saved objects with hidden type', function () {
+    loadTestFile(require.resolve('./import'));
+    loadTestFile(require.resolve('./export'));
+    loadTestFile(require.resolve('./resolve_import_errors'));
     loadTestFile(require.resolve('./find'));
-    loadTestFile(require.resolve('./scroll_count'));
-    loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./export_transform'));
-    loadTestFile(require.resolve('./import_warnings'));
+    loadTestFile(require.resolve('./delete'));
   });
 }
