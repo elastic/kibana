@@ -1,5 +1,5 @@
 {
-  "id": "kbn_tp_custom_visualizations",
+  "id": "kbnTpCustomVisualizations",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
