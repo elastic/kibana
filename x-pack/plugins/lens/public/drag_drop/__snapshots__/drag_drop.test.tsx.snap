@@ -1,12 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DragDrop defined dropType is reflected in the className 1`] = `
-<button
-  class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
-  data-test-subj="lnsDragDrop"
+<div
+  class="lnsDragDrop__container"
 >
-  Hello!
-</button>
+  <button
+    class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
+    data-test-subj="lnsDragDrop"
+  >
+    Hello!
+  </button>
+</div>
 `;
 
 exports[`DragDrop items that has dropType=undefined get special styling when another item is dragged 1`] = `

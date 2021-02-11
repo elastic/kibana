@@ -2,7 +2,6 @@
 
 .lnsWorkspacePanelWrapper {
   @include euiScrollBar;
-  overflow: hidden;
   // Override panel size padding
   padding: 0 !important; // sass-lint:disable-line no-important
   margin-bottom: $euiSize;
@@ -10,6 +9,7 @@
   flex-direction: column;
   position: relative; // For positioning the dnd overlay
   min-height: $euiSizeXXL * 10;
+  overflow: visible;
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     @include euiScrollBar;
@@ -17,7 +17,6 @@
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    overflow: auto;
 
     > * {
       flex: 1 1 100%;

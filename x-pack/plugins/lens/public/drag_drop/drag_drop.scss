@@ -10,13 +10,15 @@
   @include lnsDraggable;
   border: $euiBorderWidthThin dashed $euiBorderColor;
   position: absolute !important;  // sass-lint:disable-line no-important
-  top:0;
+  margin: 0 !important;  // sass-lint:disable-line no-important
+  bottom: 100%;
   width: 100%;
-  left:0;
-  opacity:.9;
-  transform: translate(-25px, -30px);
+  left: 0;
+  opacity: .9;
+  transform: translate(-12px, 8px);
   z-index: $euiZLevel2;
   pointer-events: none;
+  @include euiFocusRing;
 }
 
 // Draggable item
@@ -78,6 +80,7 @@
 
 .lnsDragDrop__container {
   position: relative;
+  overflow: visible !important; // sass-lint:disable-line no-important
 }
 
 .lnsDragDrop__reorderableDrop {

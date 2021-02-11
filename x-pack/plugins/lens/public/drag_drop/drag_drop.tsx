@@ -93,11 +93,6 @@ interface BaseProps {
    * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
    */
   order: number[];
-
-  /**
-   * display ghost image for the drop element
-   */
-  showGhost?: boolean;
 }
 
 /**
@@ -182,6 +177,7 @@ export const DragDrop = (props: BaseProps) => {
   );
   const dropProps = {
     ...props,
+    keyboardMode,
     setKeyboardMode,
     dragging,
     setDragging,
@@ -224,7 +220,10 @@ const DragInner = memo(function DragInner({
   ariaDescribedBy,
   setA11yMessage,
 }: DragInnerProps) {
-  const dragStart = (e?: DroppableEvent | React.KeyboardEvent<HTMLButtonElement>) => {
+  const dragStart = (
+    e: DroppableEvent | React.KeyboardEvent<HTMLButtonElement>,
+    keyboardModeOn?: boolean
+  ) => {
     // Setting stopPropgagation causes Chrome failures, so
     // we are manually checking if we've already handled this
     // in a nested child, and doing nothing if so...
@@ -242,9 +241,21 @@ const DragInner = memo(function DragInner({
     // dragStart event, so we drop a setTimeout to avoid that.
 
     const currentTarget = e?.currentTarget;
+
     setTimeout(() => {
-      setDragging({ ...value, ghost: children });
+      setDragging({
+        ...value,
+        ghost: keyboardModeOn
+          ? {
+              children,
+              style: { width: currentTarget.offsetWidth, height: currentTarget.offsetHeight },
+            }
+          : undefined,
+      });
       setA11yMessage(announce.lifted(value.humanData));
+      if (keyboardModeOn) {
+        setKeyboardMode(true);
+      }
       if (onDragStart) {
         onDragStart(currentTarget);
       }
@@ -310,7 +321,7 @@ const DragInner = memo(function DragInner({
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
             if (isDragging) {
-              dragEnd();
+              // dragEnd();
             }
           }}
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -319,11 +330,11 @@ const DragInner = memo(function DragInner({
               if (activeDropTarget) {
                 dropToActiveDropTarget();
               }
+
               if (isDragging) {
                 dragEnd();
               } else {
-                dragStart(e);
-                setKeyboardMode(true);
+                dragStart(e, true);
               }
             } else if (key === keys.ESCAPE) {
               if (isDragging) {
@@ -366,7 +377,6 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     draggable,
     dragging,
     isNotDroppable,
-    showGhost = true,
     dropType,
     order,
     getAdditionalClassesOnEnter,
@@ -436,8 +446,13 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     setActiveDropTarget(undefined);
     setKeyboardMode(false);
   };
+
+  // const shouldShowGhost =  isActiveDropTarget && dropType !== 'reorder';
+  const ghost =
+    isActiveDropTarget && dropType !== 'reorder' && dragging?.ghost ? dragging.ghost : undefined;
+
   return (
-    <>
+    <div className="lnsDragDrop__container">
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, classes, className),
@@ -446,16 +461,13 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
         onDrop: drop,
         draggable,
       })}
-      {showGhost &&
-      dragging?.ghost &&
-      activeDropTargetMatches &&
-      keyboardMode &&
-      dropType !== 'reorder'
-        ? React.cloneElement(dragging.ghost, {
-            className: classNames('lnsDragDrop_ghost', children.props.className),
+      {ghost
+        ? React.cloneElement(ghost.children, {
+            className: 'lnsDragDrop_ghost',
+            style: ghost.style,
           })
         : null}
-    </>
+    </div>
   );
 });
 

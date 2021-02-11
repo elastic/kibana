@@ -26,7 +26,10 @@ export type DragDropIdentifier = Record<string, unknown> & {
 };
 
 export type DraggingIdentifier = DragDropIdentifier & {
-  ghost: React.ReactElement;
+  ghost?: {
+    children: React.ReactElement;
+    style: React.CSSProperties;
+  };
 };
 
 export type DropIdentifier = DragDropIdentifier & {

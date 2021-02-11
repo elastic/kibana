@@ -97,7 +97,7 @@ describe('DragDrop', () => {
     jest.runAllTimers();
 
     expect(dataTransfer.setData).toBeCalledWith('text', 'hello');
-    expect(setDragging).toBeCalledWith({ ...value, ghost: <button>Hi!</button> });
+    expect(setDragging).toBeCalledWith({ ...value });
     expect(setA11yMessage).toBeCalledWith('Lifted hello');
   });
 
@@ -110,7 +110,7 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider
         {...defaultContext}
-        dragging={{ id: '2', humanData: { label: 'label1' }, ghost: <button>Hello!</button> }}
+        dragging={{ id: '2', humanData: { label: 'label1' } }}
         setDragging={setDragging}
       >
         <DragDrop onDrop={onDrop} dropType="field_add" value={value} order={[2, 0, 1, 0]}>
@@ -126,10 +126,7 @@ describe('DragDrop', () => {
     expect(preventDefault).toBeCalled();
     expect(stopPropagation).toBeCalled();
     expect(setDragging).toBeCalledWith(undefined);
-    expect(onDrop).toBeCalledWith(
-      { id: '2', humanData: { label: 'label1' }, ghost: <button>Hello!</button> },
-      'field_add'
-    );
+    expect(onDrop).toBeCalledWith({ id: '2', humanData: { label: 'label1' } }, 'field_add');
   });
 
   test('drop function is not called on dropType undefined', async () => {
@@ -141,7 +138,7 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider
         {...defaultContext}
-        dragging={{ id: 'hi', humanData: { label: 'label1' }, ghost: <button>Hello!</button> }}
+        dragging={{ id: 'hi', humanData: { label: 'label1' } }}
         setDragging={setDragging}
       >
         <DragDrop onDrop={onDrop} dropType={undefined} value={value} order={[2, 0, 1, 0]}>
@@ -179,7 +176,7 @@ describe('DragDrop', () => {
 
   test('items that has dropType=undefined get special styling when another item is dragged', () => {
     const component = mount(
-      <ChildDragDropProvider {...defaultContext} dragging={{ ...value, ghost: <div /> }}>
+      <ChildDragDropProvider {...defaultContext} dragging={{ ...value }}>
         <DragDrop value={value} draggable={true} order={[2, 0, 1, 0]}>
           <button>Hello!</button>
         </DragDrop>
@@ -198,9 +195,7 @@ describe('DragDrop', () => {
   });
 
   test('additional styles are reflected in the className until drop', () => {
-    let dragging:
-      | { id: '1'; humanData: { label: 'label1' }; ghost: React.ReactElement }
-      | undefined;
+    let dragging: { id: '1'; humanData: { label: 'label1' } } | undefined;
     const getAdditionalClassesOnEnter = jest.fn().mockReturnValue('additional');
     const getAdditionalClassesOnDroppable = jest.fn().mockReturnValue('droppable');
     const setA11yMessage = jest.fn();
@@ -211,7 +206,7 @@ describe('DragDrop', () => {
         dragging={dragging}
         setA11yMessage={setA11yMessage}
         setDragging={() => {
-          dragging = { id: '1', humanData: { label: 'label1' }, ghost: <div>Hello</div> };
+          dragging = { id: '1', humanData: { label: 'label1' } };
         }}
       >
         <DragDrop
@@ -247,9 +242,7 @@ describe('DragDrop', () => {
   });
 
   test('additional enter styles are reflected in the className until dragleave', () => {
-    let dragging:
-      | { id: '1'; humanData: { label: 'label1' }; ghost: React.ReactElement }
-      | undefined;
+    let dragging: { id: '1'; humanData: { label: 'label1' } } | undefined;
     const getAdditionalClasses = jest.fn().mockReturnValue('additional');
     const getAdditionalClassesOnDroppable = jest.fn().mockReturnValue('droppable');
     const setActiveDropTarget = jest.fn();
@@ -259,7 +252,7 @@ describe('DragDrop', () => {
         setA11yMessage={jest.fn()}
         dragging={dragging}
         setDragging={() => {
-          dragging = { id: '1', humanData: { label: 'label1' }, ghost: <div /> };
+          dragging = { id: '1', humanData: { label: 'label1' } };
         }}
         setActiveDropTarget={setActiveDropTarget}
         activeDropTarget={
@@ -353,7 +346,7 @@ describe('DragDrop', () => {
       <ChildDragDropProvider
         {...{
           ...defaultContext,
-          dragging: { ...items[0].value, ghost: <div /> },
+          dragging: { ...items[0].value, ghost: { children: <div />, style: {} } },
           setActiveDropTarget,
           setA11yMessage,
           activeDropTarget: {
@@ -379,21 +372,60 @@ describe('DragDrop', () => {
       .simulate('focus');
     act(() => {
       keyboardHandler.simulate('keydown', { key: 'ArrowRight' });
-      expect(setActiveDropTarget).toBeCalledWith({
-        ...items[2].value,
-        onDrop,
-        dropType: items[2].dropType,
-      });
-      keyboardHandler.simulate('keydown', { key: 'Enter' });
-      expect(setA11yMessage).toBeCalledWith(
-        'Selected label3 in  group at position 1. Press space or enter to replace label3 with label1.'
-      );
-      expect(setActiveDropTarget).toBeCalledWith(undefined);
-      expect(onDrop).toBeCalledWith(
-        { humanData: { label: 'label1', position: 1 }, id: '1' },
-        'move_compatible'
-      );
     });
+    expect(setActiveDropTarget).toBeCalledWith({
+      ...items[2].value,
+      onDrop,
+      dropType: items[2].dropType,
+    });
+    keyboardHandler.simulate('keydown', { key: 'Enter' });
+    expect(setA11yMessage).toBeCalledWith(
+      'Selected label3 in  group at position 1. Press space or enter to replace label3 with label1.'
+    );
+    expect(setActiveDropTarget).toBeCalledWith(undefined);
+    expect(onDrop).toBeCalledWith(
+      { humanData: { label: 'label1', position: 1 }, id: '1' },
+      'move_compatible'
+    );
+  });
+
+  test('Keyboard navigation: dragstart sets dragging in the context and calls it with proper params', async () => {
+    const setDragging = jest.fn();
+
+    const setA11yMessage = jest.fn();
+    const component = mount(
+      <ChildDragDropProvider
+        {...defaultContext}
+        dragging={undefined}
+        setDragging={setDragging}
+        setA11yMessage={setA11yMessage}
+        keyboardMode={false}
+      >
+        <DragDrop value={value} draggable={true} order={[2, 0, 1, 0]}>
+          <button>Hi!</button>
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+
+    const keyboardHandler = component
+      .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+      .first()
+      .simulate('focus');
+
+    keyboardHandler.simulate('keydown', { key: 'Enter' });
+    jest.runAllTimers();
+
+    expect(setDragging).toBeCalledWith({
+      ...value,
+      ghost: {
+        children: <button>Hi!</button>,
+        style: {
+          height: 0,
+          width: 0,
+        },
+      },
+    });
+    expect(setA11yMessage).toBeCalledWith('Lifted hello');
   });
 
   test('Keyboard navigation: ActiveDropTarget gets ghost image', () => {
@@ -428,7 +460,7 @@ describe('DragDrop', () => {
       <ChildDragDropProvider
         {...{
           ...defaultContext,
-          dragging: { ...items[0].value, ghost: <div>Hello</div> },
+          dragging: { ...items[0].value, ghost: { children: <div>Hello</div>, style: {} } },
           setActiveDropTarget,
           setA11yMessage,
           activeDropTarget: {
@@ -448,29 +480,7 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    // console.log(component.find(DragDrop).at(1).hasClass('lnsDragDrop_ghost'))
     expect(component.find(DragDrop).at(1).find('.lnsDragDrop_ghost').text()).toEqual('Hello');
-    // const keyboardHandler = component
-    //   .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
-    //   .first()
-    //   .simulate('focus');
-    // act(() => {
-    //   keyboardHandler.simulate('keydown', { key: 'ArrowRight' });
-    //   expect(setActiveDropTarget).toBeCalledWith({
-    //     ...items[2].value,
-    //     onDrop,
-    //     dropType: items[2].dropType,
-    //   });
-    //   keyboardHandler.simulate('keydown', { key: 'Enter' });
-    //   expect(setA11yMessage).toBeCalledWith(
-    //     'Selected label3 in  group at position 1. Press space or enter to replace label3 with label1.'
-    //   );
-    //   expect(setActiveDropTarget).toBeCalledWith(undefined);
-    //   expect(onDrop).toBeCalledWith(
-    //     { humanData: { label: 'label1', position: 1 }, id: '1' },
-    //     'move_compatible'
-    //   );
-    // });
   });
 
   describe('reordering', () => {
@@ -560,7 +570,7 @@ describe('DragDrop', () => {
       const setA11yMessage = jest.fn();
       const setDragging = jest.fn();
       const component = mountComponent({
-        dragging: { ...items[0], ghost: <span>1</span> },
+        dragging: { ...items[0] },
         setDragging,
         setA11yMessage,
       });
@@ -572,7 +582,7 @@ describe('DragDrop', () => {
         jest.runAllTimers();
       });
 
-      expect(setDragging).toBeCalledWith({ ...items[0], ghost: <span>1</span> });
+      expect(setDragging).toBeCalledWith({ ...items[0] });
       expect(setA11yMessage).toBeCalledWith('Lifted label1');
       expect(
         component
@@ -582,7 +592,7 @@ describe('DragDrop', () => {
     });
 
     test(`Reordered elements get extra styles to show the reorder effect when dragging`, () => {
-      const component = mountComponent({ dragging: { ...items[0], ghost: <div /> } });
+      const component = mountComponent({ dragging: { ...items[0] } });
 
       act(() => {
         component
@@ -630,7 +640,7 @@ describe('DragDrop', () => {
       const setDragging = jest.fn();
 
       const component = mountComponent({
-        dragging: { ...items[0], ghost: <div /> },
+        dragging: { ...items[0] },
         setDragging,
         setA11yMessage,
       });
@@ -646,14 +656,14 @@ describe('DragDrop', () => {
       );
       expect(preventDefault).toBeCalled();
       expect(stopPropagation).toBeCalled();
-      expect(onDrop).toBeCalledWith({ ...items[0], ghost: <div /> }, 'reorder');
+      expect(onDrop).toBeCalledWith({ ...items[0] }, 'reorder');
     });
 
     test(`Keyboard Navigation: User cannot move an element outside of the group`, () => {
       const setA11yMessage = jest.fn();
       const setActiveDropTarget = jest.fn();
       const component = mountComponent({
-        dragging: { ...items[0], ghost: <div /> },
+        dragging: { ...items[0] },
         keyboardMode: true,
         activeDropTarget: {
           activeDropTarget: undefined,
@@ -682,7 +692,7 @@ describe('DragDrop', () => {
     });
     test(`Keyboard navigation: user can drop element to an activeDropTarget`, () => {
       const component = mountComponent({
-        dragging: { ...items[0], ghost: <div /> },
+        dragging: { ...items[0] },
         activeDropTarget: {
           activeDropTarget: { ...items[2], dropType: 'reorder', onDrop },
           dropTargetsByOrder: {
@@ -710,7 +720,7 @@ describe('DragDrop', () => {
       const setA11yMessage = jest.fn();
       const onDropHandler = jest.fn();
       const component = mountComponent(
-        { dragging: { ...items[0], ghost: <div /> }, setA11yMessage },
+        { dragging: { ...items[0] }, setA11yMessage },
         onDropHandler
       );
       const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
@@ -731,7 +741,7 @@ describe('DragDrop', () => {
     test(`Keyboard Navigation: Reordered elements get extra styles to show the reorder effect`, () => {
       const setA11yMessage = jest.fn();
       const component = mountComponent({
-        dragging: { ...items[0], ghost: <div /> },
+        dragging: { ...items[0] },
         keyboardMode: true,
         activeDropTarget: {
           activeDropTarget: undefined,
@@ -795,7 +805,7 @@ describe('DragDrop', () => {
               '2,0,1,1': { ...items[1], onDrop, dropType: 'reorder' },
             },
           }}
-          dragging={{ ...items[0], ghost: <div /> }}
+          dragging={{ ...items[0] }}
           setActiveDropTarget={setActiveDropTarget}
           setA11yMessage={setA11yMessage}
         >

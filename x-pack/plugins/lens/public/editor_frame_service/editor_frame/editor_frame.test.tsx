@@ -1326,7 +1326,6 @@ describe('editor_frame', () => {
                     setDragging({
                       id: 'draggedField',
                       humanData: { label: 'draggedField' },
-                      ghost: <div>Hello</div>,
                     });
                   }
                 },
@@ -1432,7 +1431,6 @@ describe('editor_frame', () => {
                     setDragging({
                       id: 'draggedField',
                       humanData: { label: '1' },
-                      ghost: <div>Hello</div>,
                     });
                   }
                 },
