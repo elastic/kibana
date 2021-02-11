@@ -76,7 +76,8 @@ export function EditorFrame(props: EditorFrameProps) {
           props.datasourceMap,
           state.datasourceStates,
           props.doc?.references,
-          visualizeTriggerFieldContext
+          visualizeTriggerFieldContext,
+          { isFullEditor: true }
         )
           .then((result) => {
             if (!isUnmounted) {
