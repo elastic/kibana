@@ -15,6 +15,7 @@ import { Setup } from '../helpers/setup_request';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { InternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client.js';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 
 export async function createStaticIndexPattern(
   setup: Setup,
@@ -37,7 +38,7 @@ export async function createStaticIndexPattern(
     }
 
     try {
-      const apmIndexPatternTitle = config['apm_oss.indexPattern'];
+      const apmIndexPatternTitle = getApmIndexPatternTitle(context);
       await withApmSpan('create_index_pattern_saved_object', () =>
         savedObjectsClient.create(
           'index-pattern',

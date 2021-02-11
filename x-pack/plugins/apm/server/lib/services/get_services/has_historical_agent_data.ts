@@ -20,7 +20,6 @@ export async function hasHistoricalAgentData(setup: Setup) {
         events: [
           ProcessorEvent.error,
           ProcessorEvent.metric,
-          ProcessorEvent.sourcemap,
           ProcessorEvent.transaction,
         ],
       },

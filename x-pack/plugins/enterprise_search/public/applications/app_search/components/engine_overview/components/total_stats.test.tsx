@@ -8,9 +8,11 @@
 import { setMockValues } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { AnalyticsCards } from '../../analytics';
+
 import { TotalStats } from './total_stats';
 
 describe('TotalStats', () => {
