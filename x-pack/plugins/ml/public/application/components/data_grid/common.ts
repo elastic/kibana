@@ -188,7 +188,7 @@ export const getFeatureImportance = (
   const featureImportance: Array<{
     feature_name: string[];
     classes?: Array<{ class_name: FeatureImportanceClassName[]; importance: number[] }>;
-    importance?: number;
+    importance?: number | number[];
   }> = row[`${mlResultsField}.feature_importance`];
   if (featureImportance === undefined) return [];
 
