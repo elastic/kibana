@@ -261,9 +261,9 @@ slows requests when working on big documents.
 Controls the way the document table looks and works. Set this property to `true` to revert to the legacy implementation.
 
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
-When enabled, documents will be loaded and displayed using `_source`. This is soon going to be deprecated. 
-When disabled, the new `fields` parameter of Elasticsearch search service is being used. This way runtime, alias and 
-multi fields can be displayed.
+Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
+When disabled, *Discover* loads fields using the {es} search API's
+{ref}/search-fields.html#search-fields-param[`fields`] parameter.
 
 [float]
 [[kibana-ml-settings]]
