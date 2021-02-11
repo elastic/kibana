@@ -12,7 +12,7 @@ import { validate } from '../../../../common/validate';
 
 import { Entry, EntryNested } from '../../../../../lists/common/schemas/types';
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_LIST_ID } from '../../../../common/shared_imports';
+import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../common/shared_imports';
 import {
   InternalArtifactSchema,
   TranslatedEntry,
@@ -28,7 +28,6 @@ import {
   internalArtifactCompleteSchema,
   InternalArtifactCompleteSchema,
 } from '../../schemas';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
 
 export async function buildArtifact(
   exceptions: WrappedTranslatedExceptionList,

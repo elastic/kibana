@@ -15,7 +15,7 @@ import {
   ExceptionListItemSchema,
   NestedEntriesArray,
 } from '../../../../../lists/common/shared_exports';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
 import { CreateExceptionListItemOptions } from '../../../../../lists/server';
 import {
   ConditionEntry,
