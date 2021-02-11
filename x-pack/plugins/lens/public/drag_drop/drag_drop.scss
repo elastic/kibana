@@ -18,7 +18,7 @@
   transform: translate(-12px, 8px);
   z-index: $euiZLevel2;
   pointer-events: none;
-  @include euiFocusRing;
+  box-shadow: 0 0 0 $euiFocusRingSize $euiFocusRingColor;
 }
 
 // Draggable item
