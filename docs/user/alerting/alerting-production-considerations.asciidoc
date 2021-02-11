@@ -33,3 +33,65 @@ For details on the settings that can influence the performance and throughput of
 === Deployment considerations
 
 {es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, you should synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].
+
+[float]
+=== Troubleshooting
+
+Use the information in this section to troubleshoot common problems and find answers for frequently asked questions.
+
+For issues that you cannot fix yourself … we’re here to help.
+If you are an existing Elastic customer with a support contract, please create a ticket in the
+https://support.elastic.co/customers/s/login/[Elastic Support portal].
+Or post in the https://discuss.elastic.co/[Elastic forum].
+
+[IMPORTANT]
+==============================================
+The most common problems encountered by customers can be addressed by tweaking the {kib} Task Manager or adjusting the cluster scaling strategy to better suit their unique use case.
+
+For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
+For details on diagnosing issues using the Task Manager Health endpoint, see {task-manager-health-endpoint}.
+
+==============================================
+
+[discrete]
+[[scheduled-alerts-small-check-interval-run-late]]
+=== Scheduled Alerts with Small Check Intervals Run Late
+
+*Symptoms*:
+Alert are scheduled to run every 2 seconds but they seem to be running too late
+
+*Resolution*:
+As mentioned above, Alerts are ran as background tasks at at the cadence specified by their *check interval*.
+By default, {kib} polls for these background tasks at a cadence of 3 second, which means that an Alert could run late if it uses a small *check interval*.
+
+Address this delay by adjusting the *check interval* of the Alert.
+The lowest interval possible is 3 seconds, though intervals of 30 seconds or higher are recommended.
+
+
+
+[discrete]
+[[scheduled-alerts-run-late]]
+=== Scheduled Alerts Run Late
+
+*Symptoms*:
+Scheduled Alerts run at an inconsistent cadence, often running late.
+Actions run long after the status of an Alert changes, notifying us of the change too late.
+
+*Resolution #1*:
+As mentioned above, Alerts are ran as background tasks at at the cadence specified by their *check interval*.
+By default, {kib} polls for these background tasks at a cadence of 3 second, and only 10 tasks can run concurrently per {kib} instance.
+
+This means that if there are many alerts or actions that have been scheduled to run at the same time, pending tasks will queue in {es}, and be pulled 10 at a time from the queue at 3 second intervals.
+
+There are several options for addressing this sort of delay, each with their own considerations:
+Tweak the Task Manager *Max Workers*, which would allow each {kib} to pull a higher numebr of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as their workload would be higher.
+Tweak the Task Manager *Poll Interval*, which would allow each {kib} to pull scheduled tasks aty a higher rate, but keep in mind that this could impact the performance of the {es} cluster as their workload would be higher.
+
+For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
+
+*Resolution #2*:
+An additional possible cause for delays is that *Long running tasks* may occupy slots for an extended time, leaving fewer slots for other tasks.
+
+Diagnosing such a scenario is possible by using the Task Manager Health endpoint to identify long running tasks, which could then be addressed by reconfiguring those alerts to address their extended duration on a case by case basis.
+
+For details on identifying long running tasks using the Task Manager Health endpoint, see {task-manager-health-endpoint}.

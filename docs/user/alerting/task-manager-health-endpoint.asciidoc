@@ -1,0 +1,4 @@
+[role="xpack"]
+[[task-manager-health-endpoint]]
+== Task Manager Health Endpoint
+
