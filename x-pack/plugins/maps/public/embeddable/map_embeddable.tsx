@@ -29,6 +29,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import {
   replaceLayerList,
+  setMapSettings,
   setQuery,
   setRefreshConfig,
   disableScrollZoom,
@@ -60,6 +61,7 @@ import {
   getCoreI18n,
   getHttp,
   getChartsPaletteServiceGetColor,
+  getSearchService,
 } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -85,6 +87,7 @@ export class MapEmbeddable
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
   private _subscription: Subscription;
+  private _prevIsRestore: boolean = false;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
@@ -233,6 +236,18 @@ export class MapEmbeddable
 
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
+    }
+
+    const isRestore = getSearchService().session.getSearchOptions(this.input.searchSessionId)
+      .isRestore;
+    if (isRestore !== this._prevIsRestore) {
+      this._prevIsRestore = isRestore;
+      this._savedMap.getStore().dispatch(
+        setMapSettings({
+          disableInteractive: isRestore,
+          hideToolbarOverlay: isRestore,
+        })
+      );
     }
   }
 
