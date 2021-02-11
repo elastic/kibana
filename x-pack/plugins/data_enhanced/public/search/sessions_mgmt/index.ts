@@ -15,6 +15,7 @@ import type { ConfigSchema } from '../../../config';
 import type { DataEnhancedStartDependencies } from '../../plugin';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public';
 
 export interface IManagementSectionsPluginsSetup {
   data: DataPublicPluginSetup;
@@ -39,7 +40,7 @@ export interface AppDependencies {
 }
 
 export const APP = {
-  id: 'search_sessions',
+  id: SEARCH_SESSIONS_MANAGEMENT_ID,
   getI18nName: (): string =>
     i18n.translate('xpack.data.mgmt.searchSessions.appTitle', {
       defaultMessage: 'Search Sessions',

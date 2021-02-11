@@ -85,6 +85,9 @@ export const createConnectedSearchSessionIndicator = ({
     let saveDisabled = false;
     let saveDisabledReasonText: string = '';
 
+    let managementDisabled = false;
+    let managementDisabledReasonText: string = '';
+
     if (autoRefreshEnabled) {
       saveDisabled = true;
       saveDisabledReasonText = i18n.translate(
@@ -108,6 +111,18 @@ export const createConnectedSearchSessionIndicator = ({
     if (isSaveDisabledByApp.disabled) {
       saveDisabled = true;
       saveDisabledReasonText = isSaveDisabledByApp.reasonText;
+    }
+
+    // check if user doesn't have access to search_sessions and search_sessions mgtm
+    // this happens in case there is no app that allows current user to use search session
+    if (!sessionService.hasAccess()) {
+      managementDisabled = saveDisabled = true;
+      managementDisabledReasonText = saveDisabledReasonText = i18n.translate(
+        'xpack.data.searchSessionIndicator.disabledDueToDisabledGloballyMessage',
+        {
+          defaultMessage: "You don't have permissions to manage search sessions",
+        }
+      );
     }
 
     const { markOpenedDone, markRestoredDone } = useSearchSessionTour(
@@ -157,6 +172,8 @@ export const createConnectedSearchSessionIndicator = ({
           state={state}
           saveDisabled={saveDisabled}
           saveDisabledReasonText={saveDisabledReasonText}
+          managementDisabled={managementDisabled}
+          managementDisabledReasonText={managementDisabledReasonText}
           onContinueInBackground={onContinueInBackground}
           onSaveResults={onSaveResults}
           onCancel={onCancel}

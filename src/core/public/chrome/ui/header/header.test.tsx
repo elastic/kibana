@@ -13,7 +13,7 @@ import { StubBrowserStorage, mountWithIntl } from '@kbn/test/jest';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
-import { ChromeBreadcrumbsAppendExtension } from '../../chrome_service';
+import { ChromeBreadcrumbsAppendExtension } from '../../types';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -63,6 +63,7 @@ describe('Header', () => {
     const navLinks$ = new BehaviorSubject([
       { id: 'kibana', title: 'kibana', baseUrl: '', href: '' },
     ]);
+    const headerBanner$ = new BehaviorSubject(undefined);
     const customNavLink$ = new BehaviorSubject({
       id: 'cloud-deployment-link',
       title: 'Manage cloud deployment',
@@ -85,6 +86,7 @@ describe('Header', () => {
         isLocked$={isLocked$}
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
+        headerBanner$={headerBanner$}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();

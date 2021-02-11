@@ -26,6 +26,7 @@ import { IntlProvider } from 'react-intl';
 import { createSearchUsageCollectorMock } from '../../../../../../../src/plugins/data/public/search/collectors/mocks';
 
 const coreStart = coreMock.createStart();
+const application = coreStart.application;
 const dataStart = dataPluginMock.createStartContract();
 const sessionService = dataStart.search.session as jest.Mocked<ISessionService>;
 let storage: Storage;
@@ -57,7 +58,7 @@ beforeEach(() => {
 test("shouldn't show indicator in case no active search session", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
@@ -85,7 +86,7 @@ test("shouldn't show indicator in case no active search session", async () => {
 test("shouldn't show indicator in case app hasn't opt-in", async () => {
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
@@ -115,7 +116,7 @@ test('should show indicator in case there is an active search session', async ()
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
@@ -132,12 +133,6 @@ test('should show indicator in case there is an active search session', async ()
 
 test('should be disabled in case uiConfig says so ', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
-  coreStart.application.currentAppId$ = new BehaviorSubject('discover');
-  (coreStart.application.capabilities as any) = {
-    discover: {
-      storeSearchSession: false,
-    },
-  };
   sessionService.getSearchSessionIndicatorUiConfig.mockImplementation(() => ({
     isDisabled: () => ({
       disabled: true,
@@ -146,7 +141,7 @@ test('should be disabled in case uiConfig says so ', async () => {
   }));
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
@@ -166,12 +161,36 @@ test('should be disabled in case uiConfig says so ', async () => {
   expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
 });
 
+test('should be disabled in case not enough permissions', async () => {
+  const state$ = new BehaviorSubject(SearchSessionState.Completed);
+  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
+    sessionService: { ...sessionService, state$, hasAccess: () => false },
+    application,
+    timeFilter,
+    storage,
+    disableSaveAfterSessionCompletesTimeout,
+  });
+
+  render(
+    <Container>
+      <SearchSessionIndicator />
+    </Container>
+  );
+
+  await waitFor(() => screen.getByTestId('searchSessionIndicator'));
+
+  await userEvent.click(screen.getByLabelText('Search session complete'));
+
+  expect(screen.getByRole('button', { name: 'Save session' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Manage sessions' })).toBeDisabled();
+});
+
 test('should be disabled during auto-refresh', async () => {
   const state$ = new BehaviorSubject(SearchSessionState.Loading);
 
   const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
-    application: coreStart.application,
+    application,
     timeFilter,
     storage,
     disableSaveAfterSessionCompletesTimeout,
@@ -209,7 +228,7 @@ describe('Completed inactivity', () => {
 
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
-      application: coreStart.application,
+      application,
       timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
@@ -267,7 +286,7 @@ describe('tour steps', () => {
       const state$ = new BehaviorSubject(SearchSessionState.Loading);
       const SearchSessionIndicator = createConnectedSearchSessionIndicator({
         sessionService: { ...sessionService, state$ },
-        application: coreStart.application,
+        application,
         timeFilter,
         storage,
         disableSaveAfterSessionCompletesTimeout,
@@ -305,7 +324,7 @@ describe('tour steps', () => {
       const state$ = new BehaviorSubject(SearchSessionState.Loading);
       const SearchSessionIndicator = createConnectedSearchSessionIndicator({
         sessionService: { ...sessionService, state$ },
-        application: coreStart.application,
+        application,
         timeFilter,
         storage,
         disableSaveAfterSessionCompletesTimeout,
@@ -337,7 +356,7 @@ describe('tour steps', () => {
     const state$ = new BehaviorSubject(SearchSessionState.Restored);
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
-      application: coreStart.application,
+      application,
       timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,
@@ -360,7 +379,7 @@ describe('tour steps', () => {
     const state$ = new BehaviorSubject(SearchSessionState.Completed);
     const SearchSessionIndicator = createConnectedSearchSessionIndicator({
       sessionService: { ...sessionService, state$ },
-      application: coreStart.application,
+      application,
       timeFilter,
       storage,
       disableSaveAfterSessionCompletesTimeout,

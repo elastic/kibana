@@ -24,6 +24,7 @@ import * as CSS from 'csstype';
 import { Datatable as Datatable_2 } from 'src/plugins/expressions';
 import { Datatable as Datatable_3 } from 'src/plugins/expressions/common';
 import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
+import { DatatableColumnType } from 'src/plugins/expressions/common';
 import { DetailedPeerCertificate } from 'tls';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
@@ -2238,6 +2239,11 @@ export const search: {
     tabifyGetColumns: typeof tabifyGetColumns;
 };
 
+// Warning: (ae-missing-release-tag) "SEARCH_SESSIONS_MANAGEMENT_ID" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export const SEARCH_SESSIONS_MANAGEMENT_ID = "search_sessions";
+
 // Warning: (ae-missing-release-tag) "SearchBar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -2651,7 +2657,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:421:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:424:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:34:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/search/session/session_service.ts:41:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/search/session/session_service.ts:42:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

@@ -126,14 +126,14 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
-    const { abortSignal, ...requestOptions } = options || {};
+    const { abortSignal, sessionId, ...requestOptions } = options || {};
 
     return this.batchedFetch(
       {
         request,
         options: {
           ...requestOptions,
-          ...(options?.sessionId && this.deps.session.getSearchOptions(options.sessionId)),
+          ...this.deps.session.getSearchOptions(sessionId),
         },
       },
       abortSignal
