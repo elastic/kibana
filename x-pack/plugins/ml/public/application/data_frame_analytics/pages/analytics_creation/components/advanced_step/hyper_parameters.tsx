@@ -395,7 +395,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceText',
             {
               defaultMessage:
-                'Controls how quickly the loss increases when tree depths exceed soft limits. The smaller the value the faster the loss increases. Must be greater than or equal to 0.01. ',
+                'Controls how quickly the loss increases when tree depths exceed soft limits. The smaller the value, the faster the loss increases. Must be greater than or equal to 0.01. ',
             }
           )}
           isInvalid={
