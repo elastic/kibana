@@ -1,0 +1,37 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      "exceptions": {
+        "is_write_index": false
+      }
+    },
+    "index": "exceptions-0001",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "agent": {
+          "properties": {
+            "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        },
+        "user": {
+          "type": "nested",
+          "properties": {
+            "first": {
+              "type": "keyword"
+            },
+            "last": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

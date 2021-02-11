@@ -351,7 +351,7 @@ export const ExceptionBuilderComponent = ({
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
+    <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
       {exceptions.map((exceptionListItem, index) => (
         <EuiFlexItem grow={1} key={getExceptionListItemId(exceptionListItem, index)}>
           <EuiFlexGroup gutterSize="s" direction="column">

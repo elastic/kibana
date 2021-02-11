@@ -180,8 +180,14 @@ export const filterExceptionItems = (
       const entries = exception.entries.filter((singleEntry) => {
         const strippedSingleEntry = removeIdFromItem(singleEntry);
 
-        if (singleEntry.type === 'nested') {
-          const [validatedNestedEntry] = validate(strippedSingleEntry, entriesNested);
+        if (entriesNested.is(strippedSingleEntry)) {
+          const strippedNestedEntries = strippedSingleEntry.entries.map((nestedEntry) =>
+            removeIdFromItem(nestedEntry)
+          );
+          const [validatedNestedEntry] = validate(
+            { ...strippedSingleEntry, entries: strippedNestedEntries },
+            entriesNested
+          );
 
           if (validatedNestedEntry != null) {
             return true;

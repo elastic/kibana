@@ -446,7 +446,7 @@ describe('BuilderEntryItem', () => {
     }).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'machine.os', operator: 'included', type: 'match', value: '' },
+      { id: '123', field: 'machine.os', operator: 'included', type: 'match', value: '' },
       0
     );
   });
@@ -482,7 +482,7 @@ describe('BuilderEntryItem', () => {
     }).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', operator: 'excluded', type: 'match', value: '1234' },
+      { id: '123', field: 'ip', operator: 'excluded', type: 'match', value: '1234' },
       0
     );
   });
@@ -518,7 +518,7 @@ describe('BuilderEntryItem', () => {
     }).onCreateOption('126.45.211.34');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', operator: 'excluded', type: 'match', value: '126.45.211.34' },
+      { id: '123', field: 'ip', operator: 'excluded', type: 'match', value: '126.45.211.34' },
       0
     );
   });
@@ -554,7 +554,7 @@ describe('BuilderEntryItem', () => {
     }).onCreateOption('126.45.211.34');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { field: 'ip', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
+      { id: '123', field: 'ip', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
       0
     );
   });
@@ -591,6 +591,7 @@ describe('BuilderEntryItem', () => {
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
+        id: '123',
         field: 'ip',
         operator: 'excluded',
         type: 'list',

@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 
+import { addIdToItem } from '../../../../../common/add_remove_id_to_item';
 import { IIndexPattern, IFieldType } from '../../../../../../../../src/plugins/data/common';
 import {
   Entry,
@@ -323,12 +324,13 @@ export const getUpdatedEntriesOnDelete = (
 export const getEntryFromOperator = (
   selectedOperator: OperatorOption,
   currentEntry: FormattedBuilderEntry
-): Entry => {
+): Entry & { id: string } => {
   const isSameOperatorType = currentEntry.operator.type === selectedOperator.type;
   const fieldValue = currentEntry.field != null ? currentEntry.field.name : '';
   switch (selectedOperator.type) {
     case 'match':
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.MATCH,
         operator: selectedOperator.operator,
@@ -337,6 +339,7 @@ export const getEntryFromOperator = (
       };
     case 'match_any':
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.MATCH_ANY,
         operator: selectedOperator.operator,
@@ -344,6 +347,7 @@ export const getEntryFromOperator = (
       };
     case 'list':
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.LIST,
         operator: selectedOperator.operator,
@@ -351,6 +355,7 @@ export const getEntryFromOperator = (
       };
     default:
       return {
+        id: currentEntry.id,
         field: fieldValue,
         type: OperatorTypeEnum.EXISTS,
         operator: selectedOperator.operator,
@@ -397,7 +402,7 @@ export const getOperatorOptions = (
 export const getEntryOnFieldChange = (
   item: FormattedBuilderEntry,
   newField: IFieldType
-): { updatedEntry: BuilderEntry; index: number } => {
+): { updatedEntry: BuilderEntry & { id: string }; index: number } => {
   const { parent, entryIndex, nested } = item;
   const newChildFieldValue = newField != null ? newField.name.split('.').slice(-1)[0] : '';
 
@@ -414,15 +419,16 @@ export const getEntryOnFieldChange = (
 
     return {
       updatedEntry: {
+        id: item.id,
         field: newParentFieldValue,
         type: OperatorTypeEnum.NESTED,
         entries: [
-          {
+          addIdToItem({
             field: newChildFieldValue ?? '',
             type: OperatorTypeEnum.MATCH,
             operator: isOperator.operator,
             value: '',
-          },
+          }),
         ],
       },
       index: entryIndex,
@@ -434,11 +440,12 @@ export const getEntryOnFieldChange = (
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
+            id: item.id,
             field: newChildFieldValue ?? '',
             type: OperatorTypeEnum.MATCH,
             operator: isOperator.operator,
             value: '',
-          },
+          } as EntryMatch & { id: string },
           ...parent.parent.entries.slice(entryIndex + 1),
         ],
       },
@@ -447,6 +454,7 @@ export const getEntryOnFieldChange = (
   } else {
     return {
       updatedEntry: {
+        id: item.id,
         field: newField != null ? newField.name : '',
         type: OperatorTypeEnum.MATCH,
         operator: isOperator.operator,
@@ -467,7 +475,7 @@ export const getEntryOnFieldChange = (
 export const getEntryOnOperatorChange = (
   item: FormattedBuilderEntry,
   newOperator: OperatorOption
-): { updatedEntry: BuilderEntry; index: number } => {
+): { updatedEntry: BuilderEntry & { id: string }; index: number } => {
   const { parent, entryIndex, field, nested } = item;
   const newEntry = getEntryFromOperator(newOperator, item);
 
@@ -502,7 +510,7 @@ export const getEntryOnOperatorChange = (
 export const getEntryOnMatchChange = (
   item: FormattedBuilderEntry,
   newField: string
-): { updatedEntry: BuilderEntry; index: number } => {
+): { updatedEntry: BuilderEntry & { id: string }; index: number } => {
   const { nested, parent, entryIndex, field, operator } = item;
 
   if (nested != null && parent != null) {
@@ -514,11 +522,12 @@ export const getEntryOnMatchChange = (
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
+            id: item.id,
             field: fieldName,
             type: OperatorTypeEnum.MATCH,
             operator: operator.operator,
             value: newField,
-          },
+          } as EntryMatch & { id: string },
           ...parent.parent.entries.slice(entryIndex + 1),
         ],
       },
@@ -527,6 +536,7 @@ export const getEntryOnMatchChange = (
   } else {
     return {
       updatedEntry: {
+        id: item.id,
         field: field != null ? field.name : '',
         type: OperatorTypeEnum.MATCH,
         operator: operator.operator,
@@ -548,7 +558,7 @@ export const getEntryOnMatchChange = (
 export const getEntryOnMatchAnyChange = (
   item: FormattedBuilderEntry,
   newField: string[]
-): { updatedEntry: BuilderEntry; index: number } => {
+): { updatedEntry: BuilderEntry & { id: string }; index: number } => {
   const { nested, parent, entryIndex, field, operator } = item;
 
   if (nested != null && parent != null) {
@@ -560,11 +570,12 @@ export const getEntryOnMatchAnyChange = (
         entries: [
           ...parent.parent.entries.slice(0, entryIndex),
           {
+            id: item.id,
             field: fieldName,
             type: OperatorTypeEnum.MATCH_ANY,
             operator: operator.operator,
             value: newField,
-          },
+          } as EntryMatchAny & { id: string },
           ...parent.parent.entries.slice(entryIndex + 1),
         ],
       },
@@ -573,6 +584,7 @@ export const getEntryOnMatchAnyChange = (
   } else {
     return {
       updatedEntry: {
+        id: item.id,
         field: field != null ? field.name : '',
         type: OperatorTypeEnum.MATCH_ANY,
         operator: operator.operator,
@@ -594,12 +606,13 @@ export const getEntryOnMatchAnyChange = (
 export const getEntryOnListChange = (
   item: FormattedBuilderEntry,
   newField: ListSchema
-): { updatedEntry: BuilderEntry; index: number } => {
+): { updatedEntry: BuilderEntry & { id: string }; index: number } => {
   const { entryIndex, field, operator } = item;
   const { id, type } = newField;
 
   return {
     updatedEntry: {
+      id: item.id,
       field: field != null ? field.name : '',
       type: OperatorTypeEnum.LIST,
       operator: operator.operator,

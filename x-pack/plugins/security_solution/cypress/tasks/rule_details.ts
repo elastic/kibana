@@ -53,6 +53,12 @@ export const addsException = (exception: Exception) => {
   cy.get(CONFIRM_BTN).should('not.exist');
 };
 
+export const openExceptionModalFromRuleSettings = () => {
+  cy.get(ADD_EXCEPTIONS_BTN).click();
+  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(FIELD_INPUT).should('be.visible');
+};
+
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
   cy.get(ADD_EXCEPTIONS_BTN).click();
   cy.get(LOADING_SPINNER).should('exist');

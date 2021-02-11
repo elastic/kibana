@@ -461,7 +461,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           )}
         {fetchOrCreateListError == null && (
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
+            <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+              {i18n.CANCEL}
+            </EuiButtonEmpty>
 
             <EuiButton
               data-test-subj="add-exception-confirm-button"
