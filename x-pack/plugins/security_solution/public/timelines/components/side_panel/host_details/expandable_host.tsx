@@ -47,10 +47,10 @@ export const ExpandableHostDetails = ({
   hostName,
 }: ExpandableHostProps & { contextID: string }) => {
   const { to, from, isInitializing } = useGlobalTime();
-  const { docValueFields, selectedPatterns } = useSourcererScope();
+  const { docValueFields, indexNames } = useSourcererScope();
   return (
     <HostOverviewByNameQuery
-      indexNames={selectedPatterns}
+      indexNames={indexNames}
       sourceId="default"
       hostName={hostName}
       skip={isInitializing}
@@ -73,7 +73,7 @@ export const ExpandableHostDetails = ({
               data={hostOverview as HostItem}
               anomaliesData={anomaliesData}
               isLoadingAnomaliesData={isLoadingAnomaliesData}
-              indexNames={selectedPatterns}
+              indexNames={indexNames}
               loading={loading}
               startDate={from}
               endDate={to}
