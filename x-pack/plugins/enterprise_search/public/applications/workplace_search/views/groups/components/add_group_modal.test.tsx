@@ -8,11 +8,12 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { AddGroupModal } from './add_group_modal';
-
 import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+
+import { AddGroupModal } from './add_group_modal';
 
 describe('AddGroupModal', () => {
   const closeNewGroupModal = jest.fn();
