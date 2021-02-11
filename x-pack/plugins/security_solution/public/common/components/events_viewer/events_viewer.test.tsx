@@ -86,7 +86,6 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
-  expandedEvent: {},
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -100,7 +99,6 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
-  handleCloseExpandedEvent: jest.fn(),
   start: from,
   sort: [
     {
@@ -150,14 +148,15 @@ describe('EventsViewer', () => {
         expect(mockDispatch).toBeCalledTimes(2);
         expect(mockDispatch.mock.calls[1][0]).toEqual({
           payload: {
-            event: {
+            panelView: 'eventDetail',
+            params: {
               eventId: 'yb8TkHYBRgU82_bJu_rY',
               indexName: 'auditbeat-7.10.1-2020.12.18-000001',
             },
             tabType: 'query',
             timelineId: TimelineId.test,
           },
-          type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
         });
       });
     });
