@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+
 import classNames from 'classnames';
 
 import './result.scss';
@@ -14,13 +15,14 @@ import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
-import { generateEncodedPath } from '../../utils/encode_path_params';
-import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 
 import { Schema } from '../../../shared/types';
-import { FieldValue, Result as ResultType } from './types';
+import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
+import { FieldValue, Result as ResultType } from './types';
 
 interface Props {
   result: ResultType;

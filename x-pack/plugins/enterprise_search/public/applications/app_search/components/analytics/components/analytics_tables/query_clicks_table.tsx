@@ -7,15 +7,16 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn, EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../../../routes';
-import { generateEnginePath } from '../../../engine';
 import { DOCUMENTS_TITLE } from '../../../documents';
+import { generateEnginePath } from '../../../engine';
 
 import { QueryClick } from '../../types';
+
 import { FIRST_COLUMN_PROPS, TAGS_COLUMN, COUNT_COLUMN_PROPS } from './shared_columns';
 
 interface Props {
