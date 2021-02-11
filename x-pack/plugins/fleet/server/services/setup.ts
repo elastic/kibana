@@ -192,17 +192,8 @@ async function putFleetRole(callCluster: CallESAsCurrentUser) {
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: [
-            'logs-*',
-            'metrics-*',
-            'traces-*',
-            '.ds-logs-*',
-            '.ds-metrics-*',
-            '.ds-traces-*',
-            '.logs-endpoint.diagnostic.collection-*',
-            '.ds-.logs-endpoint.diagnostic.collection-*',
-          ],
-          privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+          privileges: ['auto_configure', 'create_doc'],
         },
       ],
     },
