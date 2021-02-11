@@ -13,7 +13,6 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiHealth,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -21,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiPopoverFooter,
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
@@ -36,6 +36,12 @@ import {
   SelectablePatterns,
   SourcererPatternType,
 } from '../../../../../common/search_strategy/index_fields';
+import {
+  filterKipAsSoloPattern,
+  getPatternColor,
+  renderPatternOption,
+} from '../../../../common/components/sourcerer/helpers';
+import { ColorKey } from '../../../../common/components/sourcerer/color_key';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -141,9 +147,10 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
   const [selectedOptions, setSelectedOptions] = useState<ComboOptions>(
     sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
+      color: getPatternColor(id),
+      key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
       label: indexSelected,
       value: id,
-      key: `${id}-${i}`,
     }))
   );
   const configAsSelectable: SelectablePatterns = useMemo(
@@ -155,34 +162,28 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     () =>
       [
         ...configAsSelectable,
-        ...kibanaIndexPatterns,
         { title: signalIndexName, id: SourcererPatternType.detections },
+        ...kibanaIndexPatterns,
       ].reduce<ComboOptions>((acc, { title: index, id }, i) => {
         if (index != null) {
-          return [...acc, { label: index, value: id, key: `${id}-${i}` }];
+          return [
+            ...acc,
+            {
+              color: getPatternColor(id),
+              key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
+              label: index,
+              value: id,
+            },
+          ];
         }
         return acc;
       }, []),
     [configAsSelectable, kibanaIndexPatterns, signalIndexName]
   );
-
-  const renderOption = useCallback(
-    ({ label }) => {
-      if (kibanaIndexPatterns.some((kip) => kip.title === label)) {
-        return (
-          <>
-            <EuiIcon type="logoKibana" size="s" /> {label}
-          </>
-        );
-      }
-      return <>{label}</>;
-    },
-    [kibanaIndexPatterns]
-  );
-
   const onChangeCombo = useCallback(
     (newSelectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const localSelectedPatterns = newSelectedOptions.map((nso) => nso.label);
+      const filteredOptions = filterKipAsSoloPattern(selectedOptions, newSelectedOptions);
+      const localSelectedPatterns = filteredOptions.map((nso) => nso.label);
       if (
         localSelectedPatterns.sort().join() ===
         [...configIndexPatterns, signalIndexName].sort().join()
@@ -196,9 +197,9 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setFilterEventType('custom');
       }
 
-      setSelectedOptions(newSelectedOptions as ComboOptions);
+      setSelectedOptions(filteredOptions as ComboOptions);
     },
-    [configIndexPatterns, signalIndexName]
+    [configIndexPatterns, selectedOptions, signalIndexName]
   );
 
   const onChangeFilter = useCallback(
@@ -211,14 +212,16 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             { title: signalIndexName ?? '', id: SourcererPatternType.detections },
           ].map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
+            color: getPatternColor(id),
             value: id,
-            key: `${id}-${i}`,
+            key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
           configAsSelectable.map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
+            color: getPatternColor(id),
             value: id,
             key: `${id}-${i}`,
           }))
@@ -227,13 +230,16 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setSelectedOptions([
           {
             label: signalIndexName ?? '',
+            color: getPatternColor(SourcererPatternType.detections),
             value: SourcererPatternType.detections,
+            key: SourcererPatternType.detections,
           },
         ]);
       } else if (filter === 'kibana') {
         setSelectedOptions(
           kibanaIndexPatterns.map(({ title, id }, i) => ({
             label: title,
+            color: getPatternColor(id),
             value: id,
             key: `${id}-${i}`,
           }))
@@ -262,27 +268,27 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     setSelectedOptions(
       sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
         label: indexSelected,
+        color: getPatternColor(id),
         value: id,
-        key: `${id}-${i}`,
+        key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
       }))
     );
     setFilterEventType(eventType);
   }, [eventType, sourcererScope.selectedPatterns]);
 
-  const comboBox = useMemo(
-    () => (
+  const comboBox = useMemo(() => {
+    return (
       <EuiComboBox
         data-test-subj="timeline-sourcerer"
         fullWidth
         onChange={onChangeCombo}
         options={indexesPatternOptions}
         placeholder={i18n.PICK_INDEX_PATTERNS}
-        renderOption={renderOption}
+        renderOption={renderPatternOption}
         selectedOptions={selectedOptions}
       />
-    ),
-    [onChangeCombo, indexesPatternOptions, renderOption, selectedOptions]
-  );
+    );
+  }, [onChangeCombo, indexesPatternOptions, selectedOptions]);
 
   const filterOptions = useMemo(() => getEventTypeOptions(filterEventType !== 'custom'), [
     filterEventType,
@@ -336,8 +342,9 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     const newSelectedOptions = sourcererScope.selectedPatterns.map(
       ({ title: indexSelected, id }, i) => ({
         label: indexSelected,
+        color: getPatternColor(id),
         value: id,
-        key: `${id}-${i}`,
+        key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
       })
     );
     setSelectedOptions((prevSelectedOptions) => {
@@ -380,6 +387,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               <>
                 <EuiSpacer size="s" />
                 {comboBox}
+                <EuiSpacer size="s" />
+                <ColorKey includeDetections />
               </>
             </EuiAccordion>
             {!showAdvanceSettings && (
@@ -391,31 +400,33 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
               </>
             )}
             <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <ResetButton
-                  aria-label={i18n.DATA_SOURCES_RESET}
-                  data-test-subj="sourcerer-reset"
-                  flush="left"
-                  onClick={resetDataSources}
-                  size="l"
-                  title={i18n.DATA_SOURCES_RESET}
-                >
-                  {i18n.DATA_SOURCES_RESET}
-                </ResetButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={handleSaveIndices}
-                  data-test-subj="add-index"
-                  fill
-                  fullWidth
-                  size="s"
-                >
-                  {i18n.SAVE_INDEX_PATTERNS}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiPopoverFooter>
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <ResetButton
+                    aria-label={i18n.DATA_SOURCES_RESET}
+                    data-test-subj="sourcerer-reset"
+                    flush="left"
+                    onClick={resetDataSources}
+                    size="l"
+                    title={i18n.DATA_SOURCES_RESET}
+                  >
+                    {i18n.DATA_SOURCES_RESET}
+                  </ResetButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={handleSaveIndices}
+                    data-test-subj="add-index"
+                    fill
+                    fullWidth
+                    size="s"
+                  >
+                    {i18n.SAVE_INDEX_PATTERNS}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverFooter>
           </PopoverContent>
         </EuiPopover>
       </EuiToolTip>

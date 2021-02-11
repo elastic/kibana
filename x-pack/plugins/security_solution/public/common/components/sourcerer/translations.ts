@@ -51,3 +51,31 @@ export const PICK_INDEX_PATTERNS = i18n.translate(
     defaultMessage: 'Pick index patterns',
   }
 );
+
+export const KIBANA_INDEX_PATTERN = i18n.translate(
+  'xpack.securitySolution.indexPatterns.kibanaIndexPattern',
+  {
+    defaultMessage: 'Kibana Index Pattern',
+  }
+);
+
+export const SIEM_SIGNALS_INDEX = i18n.translate(
+  'xpack.securitySolution.indexPatterns.detectionsIndexPattern',
+  {
+    defaultMessage: 'detection alerts index pattern',
+  }
+);
+
+export const CONFIG_INDEX_PATTERN = i18n.translate(
+  'xpack.securitySolution.indexPatterns.configIndexPattern',
+  {
+    defaultMessage: 'Security Solution index pattern',
+  }
+);
+
+export const ADVANCED_SETTINGS = i18n.translate(
+  'xpack.securitySolution.indexPatterns.advancedSettings',
+  {
+    defaultMessage: 'advanced settings',
+  }
+);

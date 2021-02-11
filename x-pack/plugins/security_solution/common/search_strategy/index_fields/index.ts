@@ -52,12 +52,15 @@ export enum SourcererPatternType {
   detections = 'detections',
   kip = 'ip',
 }
-
+export type SelectablePatternId =
+  | SourcererPatternType.config
+  | SourcererPatternType.detections
+  | string;
 export type SelectablePatterns = Array<{
   /**
    * if pattern is a KIP, the string will be the saved object id of the KIP
    */
-  id: SourcererPatternType.config | SourcererPatternType.detections | string;
+  id: SelectablePatternId;
   /**
    * index pattern string
    */
