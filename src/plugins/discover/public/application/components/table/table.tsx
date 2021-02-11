@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DocViewTableRow } from './table_row';
 import { trimAngularSpan } from './table_helper';
@@ -54,6 +54,19 @@ export function DocViewTable({
     setFieldsWithParents(arr);
   }, [indexPattern, hit]);
 
+  const toggleColumn = useCallback(
+    (field: string) => {
+      if (onRemoveColumn && onAddColumn && Array.isArray(columns)) {
+        if (columns.includes(field)) {
+          onRemoveColumn(field);
+        } else {
+          onAddColumn(field);
+        }
+      }
+    },
+    [onRemoveColumn, onAddColumn, columns]
+  );
+
   if (!indexPattern) {
     return null;
   }
@@ -65,6 +78,7 @@ export function DocViewTable({
     fieldRowOpen[field] = !fieldRowOpen[field];
     setFieldRowOpen({ ...fieldRowOpen });
   }
+
   return (
     <table className="table table-condensed kbnDocViewerTable">
       <tbody>
@@ -85,16 +99,6 @@ export function DocViewTable({
 
             const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
-            const toggleColumn =
-              onRemoveColumn && onAddColumn && Array.isArray(columns)
-                ? () => {
-                    if (columns.includes(field)) {
-                      onRemoveColumn(field);
-                    } else {
-                      onAddColumn(field);
-                    }
-                  }
-                : undefined;
             const displayUnderscoreWarning = !mapping(field) && field.indexOf('_') === 0;
 
             const fieldType = isNestedFieldParent(field, indexPattern)
@@ -112,7 +116,7 @@ export function DocViewTable({
                   isColumnActive={Array.isArray(columns) && columns.includes(field)}
                   onFilter={filter}
                   onToggleCollapse={() => toggleValueCollapse(field)}
-                  onToggleColumn={toggleColumn}
+                  onToggleColumn={() => toggleColumn(field)}
                   value={value}
                   valueRaw={valueRaw}
                 />
@@ -134,17 +138,6 @@ export function DocViewTable({
                 ) : null}
                 {multiFields[field]
                   ? multiFields[field].map((multiField) => {
-                      const toggleColumnMulti =
-                        onRemoveColumn && onAddColumn && Array.isArray(columns)
-                          ? () => {
-                              if (columns.includes(multiField)) {
-                                onRemoveColumn(multiField);
-                              } else {
-                                onAddColumn(multiField);
-                              }
-                            }
-                          : undefined;
-
                       return (
                         <DocViewTableRow
                           key={multiField}
@@ -158,7 +151,7 @@ export function DocViewTable({
                           onToggleCollapse={() => {
                             toggleValueCollapse(multiField);
                           }}
-                          onToggleColumn={toggleColumnMulti}
+                          onToggleColumn={() => toggleColumn(multiField)}
                           value={value}
                           valueRaw={valueRaw}
                         />
