@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.11.1>>
 * <<release-notes-7.11.0>>
 * <<release-notes-7.10.1>>
 * <<release-notes-7.10.0>>
@@ -88,6 +89,45 @@ For detailed information about the n.n.n release, review the following sections.
 
 
 --
+
+[[release-notes-7.11.1]]
+== {kib} 7.11.1
+
+The 7.11.1 release includes the following enhancements and bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+
+[float]
+[[enhancement-v7.11.1]]
+=== Enhancements
+Machine Learning::
+* Improves existing job check in anomaly detection wizard {kibana-pull}87674[#87674]
+* Improves the Lazy ml node UI {kibana-pull}90455[#90455]
+Security::
+* Prevent autocompleting the username field {kibana-pull}88682[#88682]
+
+[float]
+[[bug-v7.11.1]]
+=== Bug fixes
+Dashboard::
+* Fixes a 7.11.0 regression where pending dashboard searches aren't canceled when navigating to another app {kibana-pull}90306[#90306]
+* Sync tooltip legend values {kibana-pull}90036[#90036]
+Discover::
+* Fixes 'auto' collapsing of documents {kibana-pull}89712[#89712]
+Elastic Security Solution::
+For the Elastic Security Solution 7.11.1 bug fixes, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens and visualizations::
+* *Lens* visualizations now load faster on dashboards {kibana-pull}88953[#88953]
+* Advanced input now works for aggregation-based visualizations {kibana-pull}88154[#88154]
+Machine Learning::
+* Fixes cloning of anomaly detection job with sparse data {kibana-pull}88322[#88322]
+Maps::
+* Always check license at plugin startup {kibana-pull}87873[#87873]
+Monitoring::
+* Fully control the in memory table pagination and sorting properties {kibana-pull}85862[#85862]
+* Tweak timeout for failing cloud test {kibana-pull}86671[#86671]
+* Stop using constructor.name for logstash pipelines {kibana-pull}87386[#87386]
+* Make sure we use the right duration for messaging on this alert {kibana-pull}87579[#87579]
+* Avoid spamming toast messages {kibana-pull}89930[#89930]
+
 
 [[release-notes-7.11.0]]
 == {kib} 7.11.0 
