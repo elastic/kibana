@@ -149,7 +149,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dragFieldWithKeyboard('bytes', 4);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
-          'Average of bytes',
+          'Median of bytes',
         ]);
         await PageObjects.lens.dragFieldWithKeyboard('@message.raw', 1, true);
         expect(
@@ -169,7 +169,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
-          'Average of bytes',
+          'Median of bytes',
           'Count of records [1]',
         ]);
 
