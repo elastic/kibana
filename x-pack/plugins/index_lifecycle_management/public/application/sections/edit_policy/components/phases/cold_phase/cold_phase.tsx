@@ -51,10 +51,8 @@ export const ColdPhase: FunctionComponent = () => {
   const showReplicasField = get(formData, formFieldPaths.searchableSnapshot) == null;
 
   return (
-    <Phase phase={'cold'}>
-      <SearchableSnapshotField phase={'cold'} />
-
-      {showReplicasField && <ReplicasField phase={'cold'} />}
+    <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>
+      {showReplicasField && <ReplicasField phase="cold" />}
 
       {/* Freeze section */}
       {!isUsingSearchableSnapshotInHotPhase && (
@@ -90,10 +88,10 @@ export const ColdPhase: FunctionComponent = () => {
       {/* Data tier allocation section */}
       <DataTierAllocationField
         description={i18nTexts.dataTierAllocation.description}
-        phase={'cold'}
+        phase="cold"
       />
 
-      <IndexPriorityField phase={'cold'} />
+      <IndexPriorityField phase="cold" />
     </Phase>
   );
 };

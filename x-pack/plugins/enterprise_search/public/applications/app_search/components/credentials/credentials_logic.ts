@@ -7,19 +7,19 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { formatApiName } from '../../utils/format_api_name';
-import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
-
-import { HttpLogic } from '../../../shared/http';
+import { Meta } from '../../../../../common/types';
 import {
   clearFlashMessages,
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
-
-import { Meta } from '../../../../../common/types';
 import { Engine } from '../../types';
+import { formatApiName } from '../../utils/format_api_name';
+
+import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
+
 import { ApiToken, CredentialsDetails, TokenReadWrite } from './types';
 
 export const defaultApiToken: ApiToken = {

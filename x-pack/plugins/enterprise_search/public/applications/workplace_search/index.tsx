@@ -7,16 +7,18 @@
 
 import React, { useEffect } from 'react';
 import { Route, Redirect, Switch, useLocation } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
-import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
-import { AppLogic } from './app_logic';
+import { KibanaLogic } from '../shared/kibana';
 import { Layout } from '../shared/layout';
-import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
+import { NotFound } from '../shared/not_found';
 
+import { AppLogic } from './app_logic';
+import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 import {
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
@@ -25,19 +27,16 @@ import {
   ORG_SETTINGS_PATH,
   SECURITY_PATH,
 } from './routes';
-
-import { SetupGuide } from './views/setup_guide';
-import { ErrorState } from './views/error_state';
-import { NotFound } from '../shared/not_found';
-import { Overview } from './views/overview';
-import { GroupsRouter } from './views/groups';
-import { Security } from './views/security';
 import { SourcesRouter } from './views/content_sources';
-import { SettingsRouter } from './views/settings';
-
-import { GroupSubNav } from './views/groups/components/group_sub_nav';
 import { SourceSubNav } from './views/content_sources/components/source_sub_nav';
+import { ErrorState } from './views/error_state';
+import { GroupsRouter } from './views/groups';
+import { GroupSubNav } from './views/groups/components/group_sub_nav';
+import { Overview } from './views/overview';
+import { Security } from './views/security';
+import { SettingsRouter } from './views/settings';
 import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
+import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
