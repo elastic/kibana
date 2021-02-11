@@ -24,7 +24,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { CorrelationsTable } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
 import { useTheme } from '../../../hooks/use_theme';
-import { CustomFields } from './custom_fields';
+import { CustomFields, PercentileOption } from './custom_fields';
 import { useFieldNames } from './useFieldNames';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
@@ -55,9 +55,12 @@ export function LatencyCorrelations({ onClose }: Props) {
     `apm.correlations.latency.fields:${serviceName}`,
     defaultFieldNames
   );
-  const [durationPercentile, setDurationPercentile] = useLocalStorage(
+  const [
+    durationPercentile,
+    setDurationPercentile,
+  ] = useLocalStorage<PercentileOption>(
     `apm.correlations.latency.threshold:${serviceName}`,
-    50
+    75
   );
 
   const { data, status } = useFetcher(

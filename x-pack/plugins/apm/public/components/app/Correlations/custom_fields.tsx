@@ -12,7 +12,7 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiLink,
-  EuiFieldNumber,
+  EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,17 +25,20 @@ import { useUiTracker } from '../../../../../observability/public';
 interface Props {
   fieldNames: string[];
   setFieldNames: (fieldNames: string[]) => void;
-  setDurationPercentile?: (value: number) => void;
+  setDurationPercentile?: (value: PercentileOption) => void;
   showThreshold?: boolean;
-  durationPercentile?: number;
+  durationPercentile?: PercentileOption;
 }
+
+export type PercentileOption = 50 | 75 | 99;
+const percentilOptions: PercentileOption[] = [50, 75, 99];
 
 export function CustomFields({
   fieldNames,
   setFieldNames,
   setDurationPercentile = () => {},
   showThreshold = false,
-  durationPercentile = 50,
+  durationPercentile = 75,
 }: Props) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { defaultFieldNames, getSuggestions } = useFieldNames();
@@ -67,17 +70,25 @@ export function CustomFields({
                 'xpack.apm.correlations.customize.thresholdLabel',
                 { defaultMessage: 'Threshold' }
               )}
-              helpText="Default threshold is 50th percentile."
+              helpText="Default threshold is 75th percentile."
             >
-              <EuiFieldNumber
-                value={durationPercentile.toString(10)}
+              <EuiSelect
+                value={durationPercentile}
+                options={percentilOptions.map((percentile) => ({
+                  value: percentile,
+                  text: i18n.translate(
+                    'xpack.apm.correlations.customize.thresholdPercentile',
+                    {
+                      defaultMessage: '{percentile}th percentile',
+                      values: { percentile },
+                    }
+                  ),
+                }))}
                 onChange={(e) => {
-                  const value = parseInt(e.currentTarget.value, 10);
-                  if (isValidPercentile(value)) {
-                    setDurationPercentile(value);
-                  }
+                  setDurationPercentile(
+                    parseInt(e.target.value, 10) as PercentileOption
+                  );
                 }}
-                prepend="Percentile"
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -151,8 +162,4 @@ export function CustomFields({
       </EuiFlexGroup>
     </EuiAccordion>
   );
-}
-
-function isValidPercentile(value: number) {
-  return !isNaN(value) && value >= 0 && value <= 100;
 }
