@@ -17,10 +17,10 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { connectorsMock } from '../../containers/configure/mock';
-import { useGetIncidentTypes } from '../settings/resilient/use_get_incident_types';
-import { useGetSeverity } from '../settings/resilient/use_get_severity';
-import { useGetIssueTypes } from '../settings/jira/use_get_issue_types';
-import { useGetFieldsByIssueType } from '../settings/jira/use_get_fields_by_issue_type';
+import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
+import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import {
   sampleConnectorData,
@@ -35,7 +35,6 @@ import { FormContext } from './form_context';
 import { CreateCaseForm } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { noop } from 'lodash/fp';
 
 const sampleId = 'case-id';
 
@@ -44,12 +43,12 @@ jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
-jest.mock('../settings/resilient/use_get_incident_types');
-jest.mock('../settings/resilient/use_get_severity');
-jest.mock('../settings/jira/use_get_issue_types');
-jest.mock('../settings/jira/use_get_fields_by_issue_type');
-jest.mock('../settings/jira/use_get_single_issue');
-jest.mock('../settings/jira/use_get_issues');
+jest.mock('../connectors/resilient/use_get_incident_types');
+jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/jira/use_get_issue_types');
+jest.mock('../connectors/jira/use_get_fields_by_issue_type');
+jest.mock('../connectors/jira/use_get_single_issue');
+jest.mock('../connectors/jira/use_get_issues');
 
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
@@ -60,7 +59,7 @@ const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const postCase = jest.fn();
-const postPushToService = jest.fn();
+const pushCaseToExternalService = jest.fn();
 
 const defaultPostCase = {
   isLoading: false,
@@ -69,11 +68,9 @@ const defaultPostCase = {
 };
 
 const defaultPostPushToService = {
-  serviceData: null,
-  pushedCaseData: null,
   isLoading: false,
   isError: false,
-  postPushToService,
+  pushCaseToExternalService,
 };
 
 const fillForm = (wrapper: ReactWrapper) => {
@@ -189,7 +186,7 @@ describe('Create case', () => {
         connector: {
           id: 'servicenow-1',
           name: 'SN',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         persistLoading: false,
@@ -237,7 +234,7 @@ describe('Create case', () => {
         connector: {
           id: 'not-exist',
           name: 'SN',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         persistLoading: false,
@@ -261,7 +258,7 @@ describe('Create case', () => {
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
       await waitFor(() => {
         expect(postCase).toBeCalledWith(sampleData);
-        expect(postPushToService).not.toHaveBeenCalled();
+        expect(pushCaseToExternalService).not.toHaveBeenCalled();
       });
     });
   });
@@ -283,13 +280,13 @@ describe('Create case', () => {
       );
 
       fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-settings-jira"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
 
       await waitFor(() => {
         wrapper.update();
-        expect(wrapper.find(`[data-test-subj="connector-settings-jira"]`).exists()).toBeTruthy();
+        expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeTruthy();
       });
 
       wrapper
@@ -318,17 +315,14 @@ describe('Create case', () => {
             fields: { issueType: '10007', parent: null, priority: '2' },
           },
         });
-        expect(postPushToService).toHaveBeenCalledWith({
+        expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
-          caseServices: {},
           connector: {
             id: 'jira-1',
             name: 'Jira',
             type: '.jira',
             fields: { issueType: '10007', parent: null, priority: '2' },
           },
-          alerts: {},
-          updateCase: noop,
         });
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
           id: sampleId,
@@ -353,15 +347,13 @@ describe('Create case', () => {
       );
 
       fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
 
       await waitFor(() => {
         wrapper.update();
-        expect(
-          wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()
-        ).toBeTruthy();
+        expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
       });
 
       act(() => {
@@ -390,17 +382,14 @@ describe('Create case', () => {
           },
         });
 
-        expect(postPushToService).toHaveBeenCalledWith({
+        expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
-          caseServices: {},
           connector: {
             id: 'resilient-2',
             name: 'My Connector 2',
             type: '.resilient',
             fields: { incidentTypes: ['19'], severityCode: '4' },
           },
-          alerts: {},
-          updateCase: noop,
         });
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({
@@ -426,10 +415,10 @@ describe('Create case', () => {
       );
 
       fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
-      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeTruthy();
 
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
         wrapper
@@ -453,17 +442,14 @@ describe('Create case', () => {
           },
         });
 
-        expect(postPushToService).toHaveBeenCalledWith({
+        expect(pushCaseToExternalService).toHaveBeenCalledWith({
           caseId: sampleId,
-          caseServices: {},
           connector: {
             id: 'servicenow-1',
             name: 'My Connector',
             type: '.servicenow',
             fields: { impact: '2', severity: '2', urgency: '2' },
           },
-          alerts: {},
-          updateCase: noop,
         });
 
         expect(onFormSubmitSuccess).toHaveBeenCalledWith({

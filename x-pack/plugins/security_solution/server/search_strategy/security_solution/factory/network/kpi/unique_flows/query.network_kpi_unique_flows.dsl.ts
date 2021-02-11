@@ -32,6 +32,7 @@ export const buildUniqueFlowsQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         unique_flow_id: {
@@ -46,7 +47,6 @@ export const buildUniqueFlowsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

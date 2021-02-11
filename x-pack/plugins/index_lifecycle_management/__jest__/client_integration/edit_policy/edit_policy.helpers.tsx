@@ -237,7 +237,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
-        await toggleSearchableSnapshot(true);
+        if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
+          await toggleSearchableSnapshot(true);
+        }
         act(() => {
           find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
             { label: value },
@@ -245,6 +247,27 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         });
         component.update();
       },
+    };
+  };
+
+  const createToggleDeletePhaseActions = () => {
+    const enablePhase = async () => {
+      await act(async () => {
+        find('enableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    const disablePhase = async () => {
+      await act(async () => {
+        find('disableDeletePhaseButton').simulate('click');
+      });
+      component.update();
+    };
+
+    return {
+      enablePhase,
+      disablePhase,
     };
   };
 
@@ -257,7 +280,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       savePolicy,
       hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
       timeline: {
-        hasRolloverIndicator: () => exists('timelineHotPhaseRolloverToolTip'),
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
@@ -303,7 +325,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         ...createSearchableSnapshotActions('cold'),
       },
       delete: {
-        enable: enable('delete'),
+        ...createToggleDeletePhaseActions(),
         setMinAgeValue: setMinAgeValue('delete'),
         setMinAgeUnits: setMinAgeUnits('delete'),
       },
