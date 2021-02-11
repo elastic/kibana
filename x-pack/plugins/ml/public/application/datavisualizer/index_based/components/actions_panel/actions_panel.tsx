@@ -49,11 +49,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
     },
   };
   const mlAvailable = isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
-  const showCreateAnomalyDetectionJob =
-    isFullLicense() &&
-    checkPermission('canCreateJob') &&
-    mlNodesAvailable() &&
-    indexPattern.timeFieldName !== undefined;
+  const showCreateAnomalyDetectionJob = mlAvailable && indexPattern.timeFieldName !== undefined;
 
   const createJobLink = useMlLink({
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED,
