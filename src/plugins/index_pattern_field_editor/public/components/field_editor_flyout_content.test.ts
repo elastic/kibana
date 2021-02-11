@@ -27,10 +27,30 @@ const defaultProps: Props = {
   isSavingField: false,
 };
 
-const setup = (props: Props = defaultProps) =>
-  registerTestBed(FieldEditorFlyoutContent, {
+const setup = (props: Props = defaultProps) => {
+  const testBed = registerTestBed(FieldEditorFlyoutContent, {
     memoryRouter: { wrapComponent: false },
   })(props) as TestBed;
+
+  const actions = {
+    toggleFormRow(row: 'customLabel' | 'value' | 'format', value: 'on' | 'off' = 'on') {
+      const testSubj = `${row}Row.toggle`;
+      const toggle = testBed.find(testSubj);
+      const isOn = toggle.props()['aria-checked'];
+
+      if ((value === 'on' && isOn) || (value === 'off' && isOn === false)) {
+        return;
+      }
+
+      testBed.form.toggleEuiSwitch(testSubj);
+    },
+  };
+
+  return {
+    ...testBed,
+    actions,
+  };
+};
 
 describe('<FieldEditorFlyoutContent />', () => {
   beforeAll(() => {
@@ -79,6 +99,8 @@ describe('<FieldEditorFlyoutContent />', () => {
     });
 
     await act(async () => {
+      // The painless syntax validation has a timeout set to 600ms
+      // we give it a bit more time just to be on the safe side
       jest.advanceTimersByTime(1000);
     });
 
@@ -94,5 +116,93 @@ describe('<FieldEditorFlyoutContent />', () => {
     find('closeFlyoutButton').simulate('click');
 
     expect(onCancel).toHaveBeenCalled();
+  });
+
+  describe('validation', () => {
+    test('should validate the fields and prevent saving invalid form', async () => {
+      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+
+      const { find, exists, form, component } = setup({ ...defaultProps, onSave });
+
+      expect(find('fieldSaveButton').props().disabled).toBe(false);
+
+      await act(async () => {
+        find('fieldSaveButton').simulate('click');
+      });
+
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      component.update();
+
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(find('fieldSaveButton').props().disabled).toBe(true);
+      expect(form.getErrorsMessages()).toEqual(['A name is required.']);
+      expect(exists('formError')).toBe(true);
+      expect(find('formError').text()).toBe('Fix errors in form before continuing.');
+    });
+
+    test('should forward values from the form', async () => {
+      const onSave: jest.Mock<Props['onSave']> = jest.fn();
+
+      const {
+        find,
+        component,
+        form,
+        actions: { toggleFormRow },
+      } = setup({ ...defaultProps, onSave });
+
+      act(() => {
+        form.setInputValue('nameField.input', 'someName');
+        toggleFormRow('value');
+      });
+      component.update();
+
+      await act(async () => {
+        form.setInputValue('scriptField', 'echo("hello")');
+      });
+
+      await act(async () => {
+        // Let's make sure that validation has finished running
+        jest.advanceTimersByTime(1000);
+      });
+
+      await act(async () => {
+        find('fieldSaveButton').simulate('click');
+      });
+
+      expect(onSave).toHaveBeenCalled();
+
+      let fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(fieldReturned).toEqual({
+        name: 'someName',
+        type: 'keyword', // default to keyword
+        script: { source: 'echo("hello")' },
+      });
+
+      // Change the type and make sure it is forwarded
+      act(() => {
+        find('typeField').simulate('change', [
+          {
+            label: 'Other type',
+            value: 'other_type',
+          },
+        ]);
+      });
+
+      await act(async () => {
+        find('fieldSaveButton').simulate('click');
+      });
+
+      fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
+
+      expect(fieldReturned).toEqual({
+        name: 'someName',
+        type: 'other_type',
+        script: { source: 'echo("hello")' },
+      });
+    });
   });
 });
