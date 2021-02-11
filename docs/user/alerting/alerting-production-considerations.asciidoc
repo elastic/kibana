@@ -36,7 +36,7 @@ Or post in the https://discuss.elastic.co/[Elastic forum].
 ==============================================
 The most common problems encountered by customers can be addressed by tweaking the {kib} Task Manager or adjusting the cluster scaling strategy to better suit their unique use case.
 
-For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings, Task Manager Settings>>.
+For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings-kb, Task Manager Settings>>.
 
 For details on diagnosing issues using the Task Manager Health endpoint, see <<task-manager-health-endpoint, Task Manager Health Monitoring>>.
 
@@ -76,7 +76,7 @@ There are several options for addressing this sort of delay, each with their own
 Tweak the Task Manager *Max Workers*, which would allow each {kib} to pull a higher numebr of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as their workload would be higher.
 Tweak the Task Manager *Poll Interval*, which would allow each {kib} to pull scheduled tasks aty a higher rate, but keep in mind that this could impact the performance of the {es} cluster as their workload would be higher.
 
-For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings, Task Manager Settings>>.
+For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings-kb, Task Manager Settings>>.
 
 *Resolution #2*:
 An additional possible cause for delays is that *Long running tasks* may occupy slots for an extended time, leaving fewer slots for other tasks.
