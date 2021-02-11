@@ -59,6 +59,19 @@ const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
 
+/**
+ * This is incredibly hacky... The config service doesn't allow you to determine
+ * whether or not a config value has been changed from the default value, and the
+ * default value is defined in legacy code.
+ *
+ * This will be going away in 8.0, so please look away for a few months
+ *
+ * @param index The `kibana.index` setting from the `kibana.yml`
+ */
+const isCustomIndex = (index: string) => {
+  return index !== '.kibana';
+};
+
 export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, CoreUsageDataStart> {
   private logger: Logger;
   private elasticsearchConfig?: ElasticsearchConfigType;
@@ -220,6 +233,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         },
 
         savedObjects: {
+          customIndex: isCustomIndex(this.kibanaConfig!.index),
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSizeBytes: this.soConfig.maxImportExportSize.getValueInBytes(),
         },

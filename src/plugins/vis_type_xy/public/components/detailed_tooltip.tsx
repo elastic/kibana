@@ -30,7 +30,7 @@ interface TooltipData {
 // TODO: replace when exported from elastic/charts
 const DEFAULT_SINGLE_PANEL_SM_VALUE = '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__';
 
-const getTooltipData = (
+export const getTooltipData = (
   aspects: Aspects,
   header: TooltipValue | null,
   value: TooltipValue

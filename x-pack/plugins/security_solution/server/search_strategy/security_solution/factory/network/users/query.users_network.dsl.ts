@@ -37,6 +37,7 @@ export const buildUsersQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggs: {
         user_count: {
@@ -84,7 +85,6 @@ export const buildUsersQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 
