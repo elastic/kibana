@@ -31,7 +31,7 @@ export async function getServiceInstanceTransactionStats({
   searchAggregatedTransactions,
   numBuckets,
 }: ServiceInstanceParams) {
-  return withApmSpan('get_service_instance_transacion_stats', async () => {
+  return withApmSpan('get_service_instance_transaction_stats', async () => {
     const { apmEventClient, start, end, esFilter } = setup;
 
     const { intervalString, bucketSize } = getBucketSize({
