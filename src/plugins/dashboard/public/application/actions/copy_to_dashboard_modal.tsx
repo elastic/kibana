@@ -18,6 +18,7 @@ import {
   EuiPanel,
   EuiRadio,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
 import { DashboardPicker } from '../../services/presentation_util';
@@ -73,6 +74,9 @@ export function CopyToDashboardModal({
 
       <EuiModalBody>
         <>
+          <EuiText className="dshCopyToParagraph">
+            <p>{dashboardCopyToDashboardAction.getDescription()}</p>
+          </EuiText>
           <EuiFormRow hasChildLabel={false}>
             <EuiPanel color="subdued" hasShadow={false} data-test-subj="add-to-dashboard-options">
               <div>
