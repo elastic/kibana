@@ -241,7 +241,9 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
         exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
       toggleSearchableSnapshot,
       setSearchableSnapshot: async (value: string) => {
-        await toggleSearchableSnapshot(true);
+        if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
+          await toggleSearchableSnapshot(true);
+        }
         act(() => {
           find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
             { label: value },
@@ -282,7 +284,6 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
       savePolicy,
       hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
       timeline: {
-        hasRolloverIndicator: () => exists('timelineHotPhaseRolloverToolTip'),
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),

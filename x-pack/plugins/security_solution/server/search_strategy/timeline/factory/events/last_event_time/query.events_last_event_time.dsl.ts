@@ -40,6 +40,7 @@ export const buildLastEventTimeQuery = ({
             allowNoIndices: true,
             index: indicesToQuery.network,
             ignoreUnavailable: true,
+            track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
@@ -47,7 +48,6 @@ export const buildLastEventTimeQuery = ({
               },
               query: { bool: { should: getIpDetailsFilter(details.ip) } },
               size: 0,
-              track_total_hits: false,
             },
           };
         }
@@ -58,6 +58,7 @@ export const buildLastEventTimeQuery = ({
             allowNoIndices: true,
             index: indicesToQuery.hosts,
             ignoreUnavailable: true,
+            track_total_hits: false,
             body: {
               ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               aggregations: {
@@ -65,7 +66,6 @@ export const buildLastEventTimeQuery = ({
               },
               query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
               size: 0,
-              track_total_hits: false,
             },
           };
         }
@@ -76,6 +76,7 @@ export const buildLastEventTimeQuery = ({
           allowNoIndices: true,
           index: indicesToQuery[indexKey],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
             aggregations: {
@@ -83,7 +84,6 @@ export const buildLastEventTimeQuery = ({
             },
             query: { match_all: {} },
             size: 0,
-            track_total_hits: false,
           },
         };
       default:
