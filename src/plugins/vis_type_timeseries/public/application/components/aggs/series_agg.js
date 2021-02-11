@@ -63,6 +63,13 @@ function SeriesAggUi(props) {
     },
     {
       label: intl.formatMessage({
+        id: 'visTypeTimeseries.seriesAgg.functionOptions.countLabel',
+        defaultMessage: 'Series count',
+      }),
+      value: 'count',
+    },
+    {
+      label: intl.formatMessage({
         id: 'visTypeTimeseries.seriesAgg.functionOptions.overallSumLabel',
         defaultMessage: 'Overall Sum',
       }),
