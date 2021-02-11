@@ -78,7 +78,7 @@ export const FriendlyFlyoutLabels = {
   [Metadata.BytesDownloadedCompressed]: i18n.translate(
     'xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloadedCompressed',
     {
-      defaultMessage: 'Bytes downloaded (Compressed)',
+      defaultMessage: 'Bytes downloaded (compressed)',
     }
   ),
   [Metadata.CertificateIssuer]: i18n.translate(

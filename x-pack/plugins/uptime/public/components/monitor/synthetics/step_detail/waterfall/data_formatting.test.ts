@@ -576,7 +576,7 @@ describe('getSeriesAndDomain', () => {
                 "value": undefined,
               },
               Object {
-                "name": "Bytes downloaded (Compressed)",
+                "name": "Bytes downloaded (compressed)",
                 "value": undefined,
               },
               Object {
