@@ -7,12 +7,16 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-interface MetaEngineCreationActions {
-  setRawName(rawName: string): { rawName: string };
+interface MetaEngineCreationValues {
+  indexedEngineNames: string[];
+  rawName: string;
 }
 
-interface MetaEngineCreationValues {
-  rawName: string;
+interface MetaEngineCreationActions {
+  setIndexedEngineNames(
+    indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']
+  ): { indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'] };
+  setRawName(rawName: string): { rawName: string };
 }
 
 export const MetaEngineCreationLogic = kea<
@@ -20,9 +24,16 @@ export const MetaEngineCreationLogic = kea<
 >({
   path: ['enterprise_search', 'app_search', 'meta_engine_creation_logic'],
   actions: {
+    setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
   },
   reducers: {
+    indexedEngineNames: [
+      [],
+      {
+        setIndexedEngineNames: (_, { indexedEngineNames }) => indexedEngineNames,
+      },
+    ],
     rawName: [
       '',
       {

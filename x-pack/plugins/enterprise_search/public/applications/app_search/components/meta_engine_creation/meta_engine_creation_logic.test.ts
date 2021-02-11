@@ -13,6 +13,7 @@ describe('MetaEngineCreationLogic', () => {
   const { mount } = new LogicMounter(MetaEngineCreationLogic);
 
   const DEFAULT_VALUES = {
+    indexedEngineNames: [],
     rawName: '',
   };
 
@@ -29,6 +30,18 @@ describe('MetaEngineCreationLogic', () => {
         expect(MetaEngineCreationLogic.values.rawName).toEqual(
           'Name__With#$&*%Special--Characters'
         );
+      });
+    });
+
+    describe('setIndexedEngineNames', () => {
+      it('should set indexedEngineNames to provided value', () => {
+        mount();
+        MetaEngineCreationLogic.actions.setIndexedEngineNames(['first', 'middle', 'last']);
+        expect(MetaEngineCreationLogic.values.indexedEngineNames).toEqual([
+          'first',
+          'middle',
+          'last',
+        ]);
       });
     });
   });
