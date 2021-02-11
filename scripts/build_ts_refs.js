@@ -7,9 +7,4 @@
  */
 
 require('../src/setup_node_env');
-
-if (process.env.KBN_NO_TS_REFS === 'true') {
-  console.log('`KBN_NO_TS_REFS=true`, skipping');
-} else {
-  require('../src/dev/typescript').runBuildRefsCli();
-}
+require('../src/dev/typescript').runBuildRefsCli();
