@@ -8,10 +8,9 @@
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useLinks } from '../../hooks';
-import { ContentCollapse } from './content_collapse';
+import { useLinks } from '../../../hooks';
+import { sendGetFileByPath } from '../../../../../hooks';
 import { markdownRenderers } from './markdown_renderers';
-import { sendGetFileByPath } from '../../../../hooks';
 
 export function Readme({
   readmePath,
@@ -43,13 +42,11 @@ export function Readme({
   return (
     <Fragment>
       {markdown !== undefined ? (
-        <ContentCollapse>
-          <ReactMarkdown
-            transformImageUri={handleImageUri}
-            renderers={markdownRenderers}
-            source={markdown}
-          />
-        </ContentCollapse>
+        <ReactMarkdown
+          transformImageUri={handleImageUri}
+          renderers={markdownRenderers}
+          source={markdown}
+        />
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}

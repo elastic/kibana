@@ -8,9 +8,9 @@
 import { EuiButton } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PackageInfo, InstallStatus } from '../../../../types';
-import { useCapabilities } from '../../../../hooks';
-import { useUninstallPackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
+import { PackageInfo, InstallStatus } from '../../../../../types';
+import { useCapabilities } from '../../../../../hooks';
+import { useUninstallPackage, useGetPackageInstallStatus, useInstallPackage } from '../../../hooks';
 import { ConfirmPackageUninstall } from './confirm_package_uninstall';
 import { ConfirmPackageInstall } from './confirm_package_install';
 
