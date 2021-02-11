@@ -3116,6 +3116,7 @@ export interface UiSettingsParams<T = unknown> {
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];
+    order?: number;
     readonly?: boolean;
     requiresPageReload?: boolean;
     // (undocumented)
@@ -3138,7 +3139,7 @@ export interface UiSettingsServiceStart {
 }
 
 // @public
-export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
+export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image' | 'color';
 
 // @public
 export interface UserProvidedValues<T = any> {

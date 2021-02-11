@@ -378,9 +378,16 @@ export interface ChromeStart {
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
     setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
+    setHeaderBanner(headerBanner?: ChromeUserBanner): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
     setIsVisible(isVisible: boolean): void;
+}
+
+// @public (undocumented)
+export interface ChromeUserBanner {
+    // (undocumented)
+    content: MountPoint<HTMLDivElement>;
 }
 
 // @internal (undocumented)
@@ -1519,6 +1526,7 @@ export interface UiSettingsParams<T = unknown> {
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];
+    order?: number;
     readonly?: boolean;
     requiresPageReload?: boolean;
     // (undocumented)
@@ -1537,7 +1545,7 @@ export interface UiSettingsState {
 }
 
 // @public
-export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
+export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image' | 'color';
 
 // @public
 export type UnmountCallback = () => void;
