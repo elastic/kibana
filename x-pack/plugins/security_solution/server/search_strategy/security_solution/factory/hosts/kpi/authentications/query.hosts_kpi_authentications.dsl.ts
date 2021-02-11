@@ -41,6 +41,7 @@ export const buildHostsKpiAuthenticationsQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggs: {
         authentication_success: {
@@ -94,7 +95,6 @@ export const buildHostsKpiAuthenticationsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 
