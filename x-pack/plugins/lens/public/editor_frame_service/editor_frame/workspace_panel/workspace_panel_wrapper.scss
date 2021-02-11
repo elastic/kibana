@@ -33,6 +33,8 @@
   // Color the whole panel instead
   background-color: transparent !important; // sass-lint:disable-line no-important
   border: none !important; // sass-lint:disable-line no-important
+  width: 100%;
+  height: 100%;
 }
 
 .lnsExpressionRenderer {
