@@ -63,6 +63,15 @@ export function MachineLearningAlertingProvider(
 
     async setTestInterval(interval: string) {
       await testSubjects.setValue('mlAnomalyAlertPreviewInterval', interval);
+      await this.assertTestIntervalValue(interval);
+    },
+
+    async assertTestIntervalValue(expectedInterval: string) {
+      const actualValue = await testSubjects.getAttribute('mlAnomalyAlertPreviewInterval', 'value');
+      expect(actualValue).to.eql(
+        expectedInterval,
+        `Expected test interval to equal ${expectedInterval}, got ${actualValue}`
+      );
     },
 
     async assertPreviewButtonState(expectedEnabled: boolean) {
