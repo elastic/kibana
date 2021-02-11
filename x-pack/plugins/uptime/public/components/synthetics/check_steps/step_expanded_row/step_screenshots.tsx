@@ -59,7 +59,6 @@ export const StepScreenshots = ({ step }: Props) => {
           )}
         </Label>
         <StepScreenshotDisplay
-          allowPopover={false}
           checkGroup={step.monitor.check_group}
           screenshotExists={step.synthetics?.screenshotExists}
           stepIndex={step.synthetics?.step?.index}
@@ -68,7 +67,7 @@ export const StepScreenshots = ({ step }: Props) => {
         <EuiSpacer size="xs" />
         <Label>{moment(step.timestamp).format(dateFormat)}</Label>
       </EuiFlexItem>
-      {!isSucceeded && lastSuccessfulStep && (
+      {!isSucceeded && lastSuccessfulStep?.monitor && (
         <EuiFlexItem>
           <Label>
             <FormattedMessage
@@ -77,7 +76,6 @@ export const StepScreenshots = ({ step }: Props) => {
             />
           </Label>
           <StepScreenshotDisplay
-            allowPopover={false}
             checkGroup={lastSuccessfulStep.monitor.check_group}
             screenshotExists={true}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
