@@ -24,6 +24,7 @@ import {
 import { getUiSettings } from './ui_settings';
 import type { DataEnhancedRequestHandlerContext } from './type';
 import { ConfigSchema } from '../config';
+import { registerUsageCollector } from './collectors';
 
 interface SetupDependencies {
   data: DataPluginSetup;
@@ -82,6 +83,10 @@ export class EnhancedDataServerPlugin
     this.sessionService.setup(core, {
       taskManager: deps.taskManager,
     });
+
+    if (deps.usageCollection) {
+      registerUsageCollector(deps.usageCollection, this.initializerContext);
+    }
   }
 
   public start(core: CoreStart, { taskManager }: StartDependencies) {
