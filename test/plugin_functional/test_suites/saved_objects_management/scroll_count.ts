@@ -26,7 +26,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       )
     );
 
-    describe('saved objects with hidden types', () => {
+    describe('saved objects with hidden type', () => {
       it('only counts hidden types that are importableAndExportable', async () => {
         const res = await supertest
           .post(apiUrl)

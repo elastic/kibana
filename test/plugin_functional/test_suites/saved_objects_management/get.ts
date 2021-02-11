@@ -25,7 +25,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       )
     );
 
-    describe('saved objects with hidden types', () => {
+    describe('saved objects with hidden type', () => {
       const hiddenTypeExportableImportable =
         'test-hidden-importable-exportable/ff3733a0-9fty-11e7-ahb3-3dcb94193fab';
       const hiddenTypeNonExportableImportable =
