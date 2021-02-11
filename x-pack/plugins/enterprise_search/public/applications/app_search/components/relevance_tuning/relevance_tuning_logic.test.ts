@@ -342,9 +342,15 @@ describe('RelevanceTuningLogic', () => {
               },
             ],
           },
+          search_fields: {
+            bar: {
+              weight: 1,
+            },
+          },
         };
 
         const searchSettingsWithoutNewBoostProp = {
+          ...searchSettingsWithNewBoostProp,
           boosts: {
             foo: [
               {

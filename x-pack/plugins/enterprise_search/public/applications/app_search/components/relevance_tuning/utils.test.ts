@@ -66,11 +66,18 @@ describe('removeBoostStateProps', () => {
 });
 
 describe('parseBoostCenter', () => {
-  it('should parse a boost center', () => {
-    expect(parseBoostCenter('text', 5)).toEqual(5);
-    expect(parseBoostCenter('text', '4')).toEqual('4');
+  it('should parse the value to a number when the type is number', () => {
     expect(parseBoostCenter('number', 5)).toEqual(5);
     expect(parseBoostCenter('number', '5')).toEqual(5);
+  });
+
+  it('should not try to parse the value when the type is text', () => {
+    expect(parseBoostCenter('text', 5)).toEqual(5);
+    expect(parseBoostCenter('text', '4')).toEqual('4');
+  });
+
+  it('should leave text invalid numbers alone', () => {
+    expect(parseBoostCenter('number', 'foo')).toEqual('foo');
   });
 });
 
