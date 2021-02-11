@@ -14,24 +14,10 @@ export const MESSAGE = i18n.translate(
   }
 );
 
-export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.timeline.expandableEvent.copyToClipboardToolTip',
-  {
-    defaultMessage: 'Copy to Clipboard',
-  }
-);
-
 export const CLOSE = i18n.translate(
   'xpack.securitySolution.timeline.expandableEvent.closeEventDetailsLabel',
   {
     defaultMessage: 'close',
-  }
-);
-
-export const EVENT = i18n.translate(
-  'xpack.securitySolution.timeline.expandableEvent.eventToolTipTitle',
-  {
-    defaultMessage: 'Event',
   }
 );
 
