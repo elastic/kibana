@@ -125,8 +125,6 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
-    "type": "doc",
     "id": "index-pattern:logstash-*",
     "index": ".kibana_1",
     "source": {
