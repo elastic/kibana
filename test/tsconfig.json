@@ -2,7 +2,7 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "incremental": false,
-    "types": ["node", "flot"]
+    "types": ["node", "flot", "jest"]
   },
   "include": [
     "**/*",
