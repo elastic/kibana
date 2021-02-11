@@ -14,21 +14,24 @@ import { BOOST_TYPE_TO_DISPLAY_MAP } from '../../../constants';
 import { Boost } from '../../../types';
 import { ValueBadge } from '../../value_badge';
 
+import { BoostItemContent } from './boost_item_content';
 import { getBoostSummary } from './get_boost_summary';
 
 interface Props {
   boost: Boost;
   id: string;
+  index: number;
+  name: string;
 }
 
-export const BoostItem: React.FC<Props> = ({ id, boost }) => {
+export const BoostItem: React.FC<Props> = ({ id, boost, index, name }) => {
   const summary = useMemo(() => getBoostSummary(boost), [boost]);
 
   return (
     <EuiAccordion
       id={id}
       className="boosts__item"
-      buttonContentClassName="boosts__itemContent"
+      buttonContentClassName="boosts__itemButton"
       buttonContent={
         <EuiFlexGroup responsive={false} wrap>
           <EuiFlexItem>
@@ -48,6 +51,8 @@ export const BoostItem: React.FC<Props> = ({ id, boost }) => {
         </EuiFlexGroup>
       }
       paddingSize="s"
-    />
+    >
+      <BoostItemContent boost={boost} index={index} name={name} />
+    </EuiAccordion>
   );
 };

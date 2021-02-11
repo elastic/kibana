@@ -111,7 +111,13 @@ export const Boosts: React.FC<Props> = ({ name, type, boosts = [] }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       {boosts.map((boost, index) => (
-        <BoostItem key={index} id={`boost-${index}`} boost={boost} />
+        <BoostItem
+          key={index}
+          id={`boost-${name}-${index}`}
+          boost={boost}
+          name={name}
+          index={index}
+        />
       ))}
     </EuiPanel>
   );
