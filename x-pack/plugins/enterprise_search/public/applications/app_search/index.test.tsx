@@ -21,6 +21,7 @@ import { EngineRouter } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
+import { MetaEngineCreation } from './components/meta_engine_creation';
 import { SetupGuide } from './components/setup_guide';
 
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
@@ -115,6 +116,22 @@ describe('AppSearchConfigured', () => {
         const wrapper = shallow(<AppSearchConfigured />);
 
         expect(wrapper.find(EngineCreation)).toHaveLength(0);
+      });
+    });
+
+    describe('canManageMetaEngines', () => {
+      it('renders MetaEngineCreation when user canManageMetaEngines is true', () => {
+        setMockValues({ myRole: { canManageMetaEngines: true } });
+        const wrapper = shallow(<AppSearchConfigured />);
+
+        expect(wrapper.find(MetaEngineCreation)).toHaveLength(1);
+      });
+
+      it('does not render MetaEngineCreation when user canManageMetaEngines is false', () => {
+        setMockValues({ myRole: { canManageMetaEngines: false } });
+        const wrapper = shallow(<AppSearchConfigured />);
+
+        expect(wrapper.find(MetaEngineCreation)).toHaveLength(0);
       });
     });
   });
