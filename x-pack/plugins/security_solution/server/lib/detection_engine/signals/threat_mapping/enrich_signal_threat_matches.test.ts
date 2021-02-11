@@ -93,6 +93,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries: [],
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(indicators).toEqual([]);
@@ -102,6 +103,7 @@ describe('buildMatchedIndicator', () => {
     const [indicator] = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(get(indicator, 'matched.atomic')).toEqual('domain_1');
@@ -111,6 +113,7 @@ describe('buildMatchedIndicator', () => {
     const [indicator] = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(get(indicator, 'matched.field')).toEqual('event.field');
@@ -120,6 +123,7 @@ describe('buildMatchedIndicator', () => {
     const [indicator] = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(get(indicator, 'matched.type')).toEqual('type_1');
@@ -148,6 +152,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(indicators).toHaveLength(queries.length);
@@ -157,6 +162,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(indicators).toEqual([
@@ -192,9 +198,9 @@ describe('buildMatchedIndicator', () => {
     ];
 
     const indicators = buildMatchedIndicator({
-      indicatorPath: 'custom.indicator.path',
       queries,
       threats,
+      indicatorPath: 'custom.indicator.path',
     });
 
     expect(indicators).toEqual([
@@ -221,6 +227,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(indicators).toEqual([
@@ -245,6 +252,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(indicators).toEqual([
@@ -276,6 +284,7 @@ describe('buildMatchedIndicator', () => {
     const indicators = buildMatchedIndicator({
       queries,
       threats,
+      indicatorPath: 'threat.indicator',
     });
 
     expect(indicators).toEqual([
@@ -307,6 +316,7 @@ describe('buildMatchedIndicator', () => {
       buildMatchedIndicator({
         queries,
         threats,
+        indicatorPath: 'threat.indicator',
       })
     ).toThrowError('Expected indicator field to be an object, but found: not an object');
   });
@@ -327,6 +337,7 @@ describe('buildMatchedIndicator', () => {
       buildMatchedIndicator({
         queries,
         threats,
+        indicatorPath: 'threat.indicator',
       })
     ).toThrowError('Expected indicator field to be an object, but found: not an object');
   });
@@ -352,7 +363,11 @@ describe('enrichSignalThreatMatches', () => {
 
   it('performs no enrichment if there are no signals', async () => {
     const signals = getSignalsResponseMock([]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      'threat.indicator'
+    );
 
     expect(enrichedSignals.hits.hits).toEqual([]);
   });
@@ -363,7 +378,11 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      'threat.indicator'
+    );
     const [enrichedHit] = enrichedSignals.hits.hits;
     const indicators = get(enrichedHit._source, 'threat.indicator');
 
@@ -384,7 +403,11 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      'threat.indicator'
+    );
     const [enrichedHit] = enrichedSignals.hits.hits;
     const indicators = get(enrichedHit._source, 'threat.indicator');
 
@@ -401,7 +424,11 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      'threat.indicator'
+    );
     const [enrichedHit] = enrichedSignals.hits.hits;
     const indicators = get(enrichedHit._source, 'threat.indicator');
 
@@ -422,9 +449,9 @@ describe('enrichSignalThreatMatches', () => {
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
-    await expect(() => enrichSignalThreatMatches(signals, getMatchedThreats)).rejects.toThrowError(
-      'Expected threat field to be an object, but found: whoops'
-    );
+    await expect(() =>
+      enrichSignalThreatMatches(signals, getMatchedThreats, 'threat.indicator')
+    ).rejects.toThrowError('Expected threat field to be an object, but found: whoops');
   });
 
   it('enriches from a configured indicator path, if specified', async () => {
@@ -499,7 +526,11 @@ describe('enrichSignalThreatMatches', () => {
       ],
     });
     const signals = getSignalsResponseMock([signalHit, otherSignalHit]);
-    const enrichedSignals = await enrichSignalThreatMatches(signals, getMatchedThreats);
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      'threat.indicator'
+    );
     expect(enrichedSignals.hits.total).toEqual(expect.objectContaining({ value: 1 }));
     expect(enrichedSignals.hits.hits).toHaveLength(1);
 

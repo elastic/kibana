@@ -216,6 +216,7 @@ export interface BuildThreatEnrichmentOptions {
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   threatFilters: PartialFilter[];
   threatIndex: ThreatIndex;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   threatQuery: ThreatQuery;
 }
