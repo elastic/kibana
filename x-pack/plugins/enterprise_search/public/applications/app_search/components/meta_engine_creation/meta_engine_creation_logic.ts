@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 interface MetaEngineCreationValues {
   indexedEngineNames: string[];
   rawName: string;
+  selectedIndexedEngineNames: string[];
 }
 
 interface MetaEngineCreationActions {
@@ -17,6 +18,9 @@ interface MetaEngineCreationActions {
     indexedEngineNames: MetaEngineCreationValues['indexedEngineNames']
   ): { indexedEngineNames: MetaEngineCreationValues['indexedEngineNames'] };
   setRawName(rawName: string): { rawName: string };
+  setSelectedIndexedEngineNames(
+    selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames']
+  ): { selectedIndexedEngineNames: MetaEngineCreationValues['selectedIndexedEngineNames'] };
 }
 
 export const MetaEngineCreationLogic = kea<
@@ -26,6 +30,7 @@ export const MetaEngineCreationLogic = kea<
   actions: {
     setIndexedEngineNames: (indexedEngineNames) => ({ indexedEngineNames }),
     setRawName: (rawName) => ({ rawName }),
+    setSelectedIndexedEngineNames: (selectedIndexedEngineNames) => ({ selectedIndexedEngineNames }),
   },
   reducers: {
     indexedEngineNames: [
@@ -38,6 +43,13 @@ export const MetaEngineCreationLogic = kea<
       '',
       {
         setRawName: (_, { rawName }) => rawName,
+      },
+    ],
+    selectedIndexedEngineNames: [
+      [],
+      {
+        setSelectedIndexedEngineNames: (_, { selectedIndexedEngineNames }) =>
+          selectedIndexedEngineNames,
       },
     ],
   },

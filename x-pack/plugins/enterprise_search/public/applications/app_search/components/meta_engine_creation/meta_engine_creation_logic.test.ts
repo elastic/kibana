@@ -15,6 +15,7 @@ describe('MetaEngineCreationLogic', () => {
   const DEFAULT_VALUES = {
     indexedEngineNames: [],
     rawName: '',
+    selectedIndexedEngineNames: [],
   };
 
   it('has expected default values', () => {
@@ -41,6 +42,18 @@ describe('MetaEngineCreationLogic', () => {
           'first',
           'middle',
           'last',
+        ]);
+      });
+    });
+
+    describe('setSelectedIndexedEngineNames', () => {
+      it('should set selectedIndexedEngineNames to provided value', () => {
+        mount();
+        MetaEngineCreationLogic.actions.setSelectedIndexedEngineNames(['one', 'two', 'three']);
+        expect(MetaEngineCreationLogic.values.selectedIndexedEngineNames).toEqual([
+          'one',
+          'two',
+          'three',
         ]);
       });
     });
