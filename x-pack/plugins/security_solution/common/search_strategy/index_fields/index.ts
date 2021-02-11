@@ -59,7 +59,7 @@ export type SelectablePatterns = Array<{
    */
   id: SourcererPatternType.config | SourcererPatternType.detections | string;
   /**
-   * name of the pattern
+   * index pattern string
    */
   title: string;
 }>;
