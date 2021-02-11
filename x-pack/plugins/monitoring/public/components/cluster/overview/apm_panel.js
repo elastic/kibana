@@ -32,15 +32,14 @@ import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
 const linkLabel = (config, total) => {
-  const values = {
-    apmsTotal: <span data-test-subj="apmsTotal">{total}</span>,
-  };
+  const apmsTotal = <span data-test-subj="apmsTotal">{total}</span>;
+
   if (config && config.container && config.agentMode) {
     return (
       <FormattedMessage
         id="xpack.monitoring.cluster.overview.apmPanel.agentServersTotalLinkLabel"
         defaultMessage="Elastic Agent group servers: {apmsTotal}"
-        values={values}
+        values={{ apmsTotal }}
       />
     );
   }
@@ -49,7 +48,7 @@ const linkLabel = (config, total) => {
     <FormattedMessage
       id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
       defaultMessage="APM servers: {apmsTotal}"
-      values={values}
+      values={{ apmsTotal }}
     />
   );
 };
