@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -28,10 +29,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
-      await PageObjects.dashboard.switchToEditMode();
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       originalPanelCount = await PageObjects.dashboard.getPanelCount();
+    });
 
+    it('does not show unsaved changes badge when there are no unsaved changes', async () => {
+      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    });
+
+    it('shows the unsaved changes badge after adding panels', async () => {
+      await PageObjects.dashboard.switchToEditMode();
       // add an area chart by value
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.visualize.clickAggBasedVisualizations();
@@ -41,6 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // add a metric by reference
       await dashboardAddPanel.addVisualization('Rendering-Test: metric');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
     });
 
     it('has correct number of panels', async () => {
@@ -72,8 +82,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('resets to original panel count upon entering view mode', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const currentPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(originalPanelCount);
+    });
+
+    it('shows unsaved changes badge in view mode if changes have not been discarded', async () => {
+      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
     });
 
     it('retains unsaved panel count after returning to edit mode', async () => {
@@ -81,6 +96,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
       const currentPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(unsavedPanelCount);
+    });
+
+    it('does not show unsaved changes badge after saving', async () => {
+      await PageObjects.dashboard.saveDashboard('Unsaved State Test');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
     });
   });
 }

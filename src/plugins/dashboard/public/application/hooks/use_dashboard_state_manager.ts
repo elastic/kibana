@@ -160,7 +160,6 @@ export const useDashboardStateManager = (
     const dashboardTitle = getDashboardTitle(
       stateManager.getTitle(),
       stateManager.getViewMode(),
-      stateManager.getIsDirty(timefilter),
       stateManager.isNew()
     );
 

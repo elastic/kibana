@@ -7,7 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiHeaderLinks } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '../../../../core/public';
@@ -23,6 +23,7 @@ import { TopNavMenuItem } from './top_nav_menu_item';
 export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'kibana' | 'intl' | 'timeHistory'> & {
     config?: TopNavMenuData[];
+    badges?: Array<EuiBadgeProps & { badgeText: string }>;
     showSearchBar?: boolean;
     showQueryBar?: boolean;
     showQueryInput?: boolean;
@@ -61,10 +62,28 @@ export type TopNavMenuProps = StatefulSearchBarProps &
  **/
 
 export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
-  const { config, showSearchBar, ...searchBarProps } = props;
+  const { config, badges, showSearchBar, ...searchBarProps } = props;
 
   if ((!config || config.length === 0) && (!showSearchBar || !props.data)) {
     return null;
+  }
+
+  function renderBadges(): ReactElement | null {
+    if (!badges || badges.length === 0) return null;
+    return (
+      <span className={'kbnTopNavMenu__badgeGroup'}>
+        <EuiBadgeGroup>
+          {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
+            const { badgeText, ...badgeProps } = badge;
+            return (
+              <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
+                {badgeText}
+              </EuiBadge>
+            );
+          })}
+        </EuiBadgeGroup>
+      </span>
+    );
   }
 
   function renderItems(): ReactElement[] | null {
@@ -98,7 +117,10 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
       return (
         <>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
-            <span className={wrapperClassName}>{renderMenu(menuClassName)}</span>
+            <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
+              {renderBadges()}
+              {renderMenu(menuClassName)}
+            </span>
           </MountPointPortal>
           <span className={wrapperClassName}>{renderSearchBar()}</span>
         </>

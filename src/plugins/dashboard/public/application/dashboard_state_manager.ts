@@ -538,10 +538,13 @@ export class DashboardStateManager {
    *
    * @returns True if the dashboard has changed since the last save (or, is new).
    */
-  public getIsDirty(timeFilter?: Timefilter) {
+  public getIsDirty(timeFilter?: Timefilter, checkForUnsavedPanelState?: boolean) {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
+    if (checkForUnsavedPanelState) {
+      return this.isDirty || hasTimeFilterChanged || this.hasUnsavedPanelState();
+    }
     return this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged);
   }
 
@@ -699,6 +702,11 @@ export class DashboardStateManager {
     }
     const panels = this.dashboardPanelStorage.getPanels(this.savedDashboard?.id);
     return panels ? { panels } : {};
+  }
+
+  private hasUnsavedPanelState(): boolean {
+    const panels = this.dashboardPanelStorage?.getPanels(this.savedDashboard?.id);
+    return panels !== undefined && panels.length > 0;
   }
 
   private setUnsavedPanels(newPanels: SavedDashboardPanel[]) {

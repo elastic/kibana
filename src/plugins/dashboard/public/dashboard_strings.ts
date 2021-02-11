@@ -12,36 +12,23 @@ import { ViewMode } from './services/embeddable';
 /**
  * @param title {string} the current title of the dashboard
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
- * @param isDirty {boolean} if the dashboard is in a dirty state. If in dirty state, adds (unsaved) to the
- * end of the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(
-  title: string,
-  viewMode: ViewMode,
-  isDirty: boolean,
-  isNew: boolean
-): string {
+export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: boolean): string {
   const isEditMode = viewMode === ViewMode.EDIT;
-  let displayTitle: string;
   const dashboardTitle = isNew ? getNewDashboardTitle() : title;
-
-  if (isEditMode && isDirty) {
-    displayTitle = i18n.translate('dashboard.strings.dashboardUnsavedEditTitle', {
-      defaultMessage: 'Editing {title} (unsaved)',
-      values: { title: dashboardTitle },
-    });
-  } else if (isEditMode) {
-    displayTitle = i18n.translate('dashboard.strings.dashboardEditTitle', {
-      defaultMessage: 'Editing {title}',
-      values: { title: dashboardTitle },
-    });
-  } else {
-    displayTitle = dashboardTitle;
-  }
-
-  return displayTitle;
+  return isEditMode
+    ? i18n.translate('dashboard.strings.dashboardEditTitle', {
+        defaultMessage: 'Editing {title}',
+        values: { title: dashboardTitle },
+      })
+    : dashboardTitle;
 }
+
+export const getUnsavedChangesBadgeText = () =>
+  i18n.translate('dashboard.unsavedChangesBadge', {
+    defaultMessage: 'Unsaved changes',
+  });
 
 /*
   Plugin

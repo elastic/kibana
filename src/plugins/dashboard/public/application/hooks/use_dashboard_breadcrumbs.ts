@@ -45,7 +45,6 @@ export const useDashboardBreadcrumbs = (
         text: getDashboardTitle(
           dashboardStateManager.getTitle(),
           dashboardStateManager.getViewMode(),
-          dashboardStateManager.getIsDirty(timefilter),
           dashboardStateManager.isNew()
         ),
       },

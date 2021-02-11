@@ -67,7 +67,13 @@ export function DashboardApp({
     savedDashboard,
     history
   );
-  const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const dashboardContainer = useDashboardContainer({
+    timeFilter: data.query.timefilter.timefilter,
+    dashboardStateManager,
+    setUnsavedChanges,
+    history,
+  });
   const searchSessionIdQuery$ = useMemo(
     () => createQueryParamObservable(history, DashboardConstants.SEARCH_SESSION_ID),
     [history]
@@ -200,6 +206,9 @@ export function DashboardApp({
     );
 
     dashboardStateManager.registerChangeListener(() => {
+      setUnsavedChanges(
+        Boolean(dashboardStateManager?.getIsDirty(data.query.timefilter.timefilter, true))
+      );
       // we aren't checking dirty state because there are changes the container needs to know about
       // that won't make the dashboard "dirty" - like a view mode change.
       triggerRefresh$.next();
@@ -281,6 +290,7 @@ export function DashboardApp({
               embedSettings,
               indexPatterns,
               savedDashboard,
+              unsavedChanges,
               dashboardContainer,
               dashboardStateManager,
             }}

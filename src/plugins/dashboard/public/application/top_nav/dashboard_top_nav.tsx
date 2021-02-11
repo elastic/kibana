@@ -45,7 +45,7 @@ import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
-import { getNewDashboardTitle } from '../../dashboard_strings';
+import { getNewDashboardTitle, getUnsavedChangesBadgeText } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
 
@@ -64,6 +64,7 @@ export interface DashboardTopNavProps {
   timefilter: TimefilterContract;
   indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
+  unsavedChanges?: boolean;
   lastDashboardId?: string;
   viewMode: ViewMode;
 }
@@ -72,6 +73,7 @@ export function DashboardTopNav({
   dashboardStateManager,
   dashboardContainer,
   lastDashboardId,
+  unsavedChanges,
   savedDashboard,
   onQuerySubmit,
   embedSettings,
@@ -425,7 +427,18 @@ export function DashboardTopNav({
       dashboardCapabilities.hideWriteControls
     );
 
+    const badges = unsavedChanges
+      ? [
+          {
+            'data-test-subj': 'dashboardUnsavedChangesBadge',
+            badgeText: getUnsavedChangesBadgeText(),
+            color: 'secondary',
+          },
+        ]
+      : undefined;
+
     return {
+      badges,
       appName: 'dashboard',
       config: showTopNavMenu ? topNav : undefined,
       className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
