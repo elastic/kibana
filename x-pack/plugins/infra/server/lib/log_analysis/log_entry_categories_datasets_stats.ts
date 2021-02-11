@@ -79,7 +79,7 @@ export async function getLatestLogEntriesCategoriesDatasetsStats(
       return {
         categorization_status: latestHitSource.categorization_status,
         categorized_doc_count: latestHitSource.categorized_doc_count,
-        dataset: bucket.key.dataset ?? '',
+        dataset: bucket.key?.dataset ?? '',
         dead_category_count: latestHitSource.dead_category_count,
         failed_category_count: latestHitSource.failed_category_count,
         frequent_category_count: latestHitSource.frequent_category_count,

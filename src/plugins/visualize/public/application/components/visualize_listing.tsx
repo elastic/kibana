@@ -149,6 +149,7 @@ export const VisualizeListing = () => {
   const calloutMessage = (
     <>
       <FormattedMessage
+        data-test-subj="visualize-dashboard-flow-prompt"
         id="visualize.visualizeListingDashboardFlowDescription"
         defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
         values={{
