@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('resets to original panel count upon entering view mode', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await PageObjects.dashboard.clickCancel();
       const currentPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(currentPanelCount).to.eql(originalPanelCount);
     });
