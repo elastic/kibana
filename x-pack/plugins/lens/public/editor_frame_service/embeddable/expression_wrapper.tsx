@@ -49,6 +49,7 @@ export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
       <EuiEmptyPrompt
         iconType="alert"
         iconColor="danger"
+        data-test-subj="embeddable-lens-failure"
         body={
           <>
             {errors ? (
