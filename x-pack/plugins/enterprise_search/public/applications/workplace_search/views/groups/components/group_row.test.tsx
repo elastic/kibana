@@ -9,13 +9,14 @@ import { setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 import moment from 'moment';
 
+import { EuiTableRow } from '@elastic/eui';
+
 import { GroupRow, NO_USERS_MESSAGE, NO_SOURCES_MESSAGE } from './group_row';
 import { GroupUsers } from './group_users';
-
-import { EuiTableRow } from '@elastic/eui';
 
 describe('GroupRow', () => {
   beforeEach(() => {

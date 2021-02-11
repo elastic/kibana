@@ -31,6 +31,7 @@ export const buildOverviewNetworkQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         unique_flow_count: {
@@ -99,7 +100,6 @@ export const buildOverviewNetworkQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

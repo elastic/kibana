@@ -318,10 +318,6 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |The cloud plugin adds cloud specific features to Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/code[code]
-|WARNING: Missing README.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
 |This plugin provides autocomplete definitions of licensed APIs to the OSS Console plugin.
 
@@ -441,10 +437,6 @@ using the CURL scripts in the scripts folder.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/maps_file_upload/README.md[mapsFileUpload]
-|Deprecated - plugin targeted for removal and will get merged into file_upload plugin
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps_legacy_licensing/README.md[mapsLegacyLicensing]
