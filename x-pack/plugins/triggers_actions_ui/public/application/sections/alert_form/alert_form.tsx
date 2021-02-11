@@ -768,6 +768,7 @@ export const AlertForm = ({
                     setAlertIntervalUnit(e.target.value);
                     setScheduleProperty('interval', `${alertInterval}${e.target.value}`);
                   }}
+                  data-test-subj="intervalInputUnit"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
