@@ -79,6 +79,7 @@ export function getCoreUsageCollector(
         },
 
         savedObjects: {
+          customIndex: { type: 'boolean' },
           maxImportPayloadBytes: { type: 'long' },
           maxImportExportSizeBytes: { type: 'long' },
         },
@@ -97,7 +98,7 @@ export function getCoreUsageCollector(
             items: {
               docsCount: { type: 'long' },
               docsDeleted: { type: 'long' },
-              alias: { type: 'text' },
+              alias: { type: 'keyword' },
               primaryStoreSizeBytes: { type: 'long' },
               storeSizeBytes: { type: 'long' },
             },
