@@ -70,6 +70,10 @@ const i18nTexts = {
         'Data age is calculated from rollover. Rollover is configured in the hot phase.',
     }
   ),
+  ageUnitFieldSuffix: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
+    { defaultMessage: 'old' }
+  ),
 };
 
 interface Props {
@@ -119,26 +123,22 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                         const { isInvalid: isUnitFieldInvalid } = getFieldValidityAndErrorMessage(
                           unitField
                         );
-                        const selectAppendValue: Array<string | React.ReactElement> = [
-                          i18n.translate(
-                            'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
-                            { defaultMessage: 'old' }
-                          ),
-                        ].concat(
-                          isUsingRollover
-                            ? [
-                                <>
-                                  {/* This element is rendered for testing purposes only */}
-                                  <div data-test-subj={`${phase}-rolloverMinAgeInputIconTip`} />
-                                  <EuiIconTip
-                                    type="iInCircle"
-                                    aria-label={i18nTexts.rolloverToolTipDescription}
-                                    content={i18nTexts.rolloverToolTipDescription}
-                                  />
-                                </>,
-                              ]
-                            : ([] as any[])
+                        const icon = (
+                          <>
+                            {/* This element is rendered for testing purposes only */}
+                            <div data-test-subj={`${phase}-rolloverMinAgeInputIconTip`} />
+                            <EuiIconTip
+                              type="iInCircle"
+                              aria-label={i18nTexts.rolloverToolTipDescription}
+                              content={i18nTexts.rolloverToolTipDescription}
+                            />
+                          </>
                         );
+                        const selectAppendValue: Array<
+                          string | React.ReactElement
+                        > = isUsingRollover
+                          ? [i18nTexts.ageUnitFieldSuffix, icon]
+                          : [i18nTexts.ageUnitFieldSuffix];
                         return (
                           <EuiSelect
                             compressed
