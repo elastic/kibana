@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { FunctionComponent, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
@@ -18,7 +19,7 @@ import {
   AbsoluteTimings,
 } from '../../lib';
 
-import { InfinityIcon } from '../infinity_icon';
+import { InfinityIcon, LearnMoreLink } from '..';
 
 import { TimelinePhaseText } from './components';
 
@@ -55,13 +56,6 @@ const i18nTexts = {
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
     defaultMessage: 'Hot phase',
   }),
-  rolloverTooltip: i18n.translate(
-    'xpack.indexLifecycleMgmt.timeline.hotPhaseRolloverToolTipContent',
-    {
-      defaultMessage:
-        'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
-    }
-  ),
   warmPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.warmPhaseSectionTitle', {
     defaultMessage: 'Warm phase',
   }),
@@ -143,6 +137,16 @@ export const Timeline: FunctionComponent<Props> = memo(
           </EuiTitle>
           <EuiText size="s" color="subdued">
             {i18nTexts.description}
+            &nbsp;
+            <LearnMoreLink
+              docPath="ilm-index-lifecycle.html#ilm-phase-transitions"
+              text={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                  defaultMessage="Learn about timing"
+                />
+              }
+            />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
