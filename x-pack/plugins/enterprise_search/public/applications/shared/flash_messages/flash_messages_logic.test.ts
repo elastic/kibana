@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { mockKibanaValues } from '../../__mocks__/kibana_logic.mock';
 
 import { resetContext } from 'kea';
 
-import { mockKibanaValues } from '../../__mocks__/kibana_logic.mock';
 const { history } = mockKibanaValues;
 
-import { FlashMessagesLogic, mountFlashMessagesLogic, IFlashMessage } from './flash_messages_logic';
+import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
+import { IFlashMessage } from './types';
 
 describe('FlashMessagesLogic', () => {
   const mount = () => mountFlashMessagesLogic();

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -244,9 +246,8 @@ export const EditPackagePolicyForm = memo<{
   const cancelUrl = useMemo((): string => {
     if (packageInfo && policyId) {
       return from === 'package-edit'
-        ? getHref('integration_details', {
+        ? getHref('integration_details_policies', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-            panel: 'policies',
           })
         : getHref('policy_details', { policyId });
     }
@@ -256,9 +257,8 @@ export const EditPackagePolicyForm = memo<{
   const successRedirectPath = useMemo(() => {
     if (packageInfo && policyId) {
       return from === 'package-edit'
-        ? getPath('integration_details', {
+        ? getPath('integration_details_policies', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-            panel: 'policies',
           })
         : getPath('policy_details', { policyId });
     }

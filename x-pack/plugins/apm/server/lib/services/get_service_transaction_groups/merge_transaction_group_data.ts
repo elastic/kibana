@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { calculateThroughput } from '../../helpers/calculate_throughput';
 import { getLatencyValue } from '../../helpers/latency_aggregation_type';
 import { TransactionGroupTimeseriesData } from './get_timeseries_data_for_transaction_groups';
 import { TransactionGroupWithoutTimeseriesData } from './get_transaction_groups_for_page';
@@ -25,8 +27,6 @@ export function mergeTransactionGroupData({
   latencyAggregationType: LatencyAggregationType;
   transactionType: string;
 }) {
-  const deltaAsMinutes = (end - start) / 1000 / 60;
-
   return transactionGroups.map((transactionGroup) => {
     const groupBucket = timeseriesData.find(
       ({ key }) => key === transactionGroup.name
@@ -52,18 +52,18 @@ export function mergeTransactionGroupData({
             ...acc.throughput,
             timeseries: acc.throughput.timeseries.concat({
               x: point.key,
-              y: point.transaction_count.value / deltaAsMinutes,
+              y: calculateThroughput({
+                start,
+                end,
+                value: point.doc_count,
+              }),
             }),
           },
           errorRate: {
             ...acc.errorRate,
             timeseries: acc.errorRate.timeseries.concat({
               x: point.key,
-              y:
-                point.transaction_count.value > 0
-                  ? (point[EVENT_OUTCOME].transaction_count.value ?? 0) /
-                    point.transaction_count.value
-                  : null,
+              y: point[EVENT_OUTCOME].doc_count / point.doc_count,
             }),
           },
         };

@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject, of } from 'rxjs';
@@ -51,7 +51,14 @@ describe('SearchSource', () => {
   let searchSource: SearchSource;
 
   beforeEach(() => {
-    mockSearchMethod = jest.fn().mockReturnValue(of({ rawResponse: '' }));
+    mockSearchMethod = jest
+      .fn()
+      .mockReturnValue(
+        of(
+          { rawResponse: { isPartial: true, isRunning: true } },
+          { rawResponse: { isPartial: false, isRunning: false } }
+        )
+      );
 
     searchSourceDependencies = {
       getConfig: jest.fn(),
@@ -70,6 +77,175 @@ describe('SearchSource', () => {
     test('gets the value for the property', () => {
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).toBe(5);
+    });
+  });
+
+  describe('#getFields()', () => {
+    test('gets the value for the property', () => {
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getFields()).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+        }
+      `);
+    });
+
+    test('recurses parents to get the entire filters: plain object filter', () => {
+      const RECURSE = true;
+
+      const parent = new SearchSource({}, searchSourceDependencies);
+      parent.setField('filter', [
+        {
+          meta: {
+            index: 'd180cae0-60c3-11eb-8569-bd1f5ed24bc9',
+            params: {},
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+          query: {
+            range: {
+              '@date': {
+                gte: '2016-01-27T18:11:05.010Z',
+                lte: '2021-01-27T18:11:05.010Z',
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        },
+      ]);
+      searchSource.setParent(parent);
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
+
+      // calling twice gives the same result: no searchSources in the hierarchy were modified
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
+    });
+
+    test('recurses parents to get the entire filters: function filter', () => {
+      const RECURSE = true;
+
+      const parent = new SearchSource({}, searchSourceDependencies);
+      parent.setField('filter', () => ({
+        meta: {
+          index: 'd180cae0-60c3-11eb-8569-bd1f5ed24bc9',
+          params: {},
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          range: {
+            '@date': {
+              gte: '2016-01-27T18:11:05.010Z',
+              lte: '2021-01-27T18:11:05.010Z',
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
+      }));
+      searchSource.setParent(parent);
+      searchSource.setField('aggs', 5);
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
+
+      // calling twice gives the same result: no double-added filters
+      expect(searchSource.getFields(RECURSE)).toMatchInlineSnapshot(`
+        Object {
+          "aggs": 5,
+          "filter": Array [
+            Object {
+              "meta": Object {
+                "alias": null,
+                "disabled": false,
+                "index": "d180cae0-60c3-11eb-8569-bd1f5ed24bc9",
+                "negate": false,
+                "params": Object {},
+              },
+              "query": Object {
+                "range": Object {
+                  "@date": Object {
+                    "format": "strict_date_optional_time",
+                    "gte": "2016-01-27T18:11:05.010Z",
+                    "lte": "2021-01-27T18:11:05.010Z",
+                  },
+                },
+              },
+            },
+          ],
+        }
+      `);
     });
   });
 
@@ -564,6 +740,34 @@ describe('SearchSource', () => {
       await searchSource.fetch(options);
       expect(mockSearchMethod).toBeCalledTimes(1);
     });
+
+    test('should return partial results', (done) => {
+      searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
+      const options = {};
+
+      const next = jest.fn();
+      const complete = () => {
+        expect(next).toBeCalledTimes(2);
+        expect(next.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "isPartial": true,
+              "isRunning": true,
+            },
+          ]
+        `);
+        expect(next.mock.calls[1]).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "isPartial": false,
+              "isRunning": false,
+            },
+          ]
+        `);
+        done();
+      };
+      searchSource.fetch$(options).subscribe({ next, complete });
+    });
   });
 
   describe('#serialize', () => {
@@ -584,13 +788,13 @@ describe('SearchSource', () => {
       expect(JSON.parse(searchSourceJSON).from).toEqual(123456);
     });
 
-    test('should omit sort and size', () => {
+    test('should omit size but not sort', () => {
       searchSource.setField('highlightAll', true);
       searchSource.setField('from', 123456);
       searchSource.setField('sort', { field: SortDirection.asc });
       searchSource.setField('size', 200);
       const { searchSourceJSON } = searchSource.serialize();
-      expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from']);
+      expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from', 'sort']);
     });
 
     test('should serialize filters', () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -356,8 +357,13 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the data visualizer table');
             await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-            await ml.testExecution.logTestStep('should display the actions panel with cards');
+            await ml.testExecution.logTestStep(
+              'should display the actions panel with Discover card'
+            );
             await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+            await ml.dataVisualizerIndexBased.assertViewInDiscoverCardExists();
+
+            await ml.testExecution.logTestStep('should display job cards');
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
             await ml.dataVisualizerIndexBased.assertRecognizerCardExists(ecExpectedModuleId);
           });

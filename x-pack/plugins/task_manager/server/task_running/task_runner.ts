@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -200,10 +201,10 @@ export class TaskManagerRunner implements TaskRunner {
     });
 
     const stopTaskTimer = startTaskTimer();
-    const apmTrans = apm.startTransaction(
-      `taskManager run ${this.instance.taskType}`,
-      'taskManager'
-    );
+    const apmTrans = apm.startTransaction(`taskManager run`, 'taskManager');
+    apmTrans?.addLabels({
+      taskType: this.taskType,
+    });
     try {
       this.task = this.definition.createTaskRunner(modifiedContext);
       const result = await this.task.run();
@@ -231,10 +232,11 @@ export class TaskManagerRunner implements TaskRunner {
   public async markTaskAsRunning(): Promise<boolean> {
     performance.mark('markTaskAsRunning_start');
 
-    const apmTrans = apm.startTransaction(
-      `taskManager markTaskAsRunning ${this.instance.taskType}`,
-      'taskManager'
-    );
+    const apmTrans = apm.startTransaction(`taskManager markTaskAsRunning`, 'taskManager');
+
+    apmTrans?.addLabels({
+      taskType: this.taskType,
+    });
 
     const now = new Date();
     try {

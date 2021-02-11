@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
@@ -19,18 +20,33 @@ export const useSelectedCells = (
   const timeBounds = timeFilter.getBounds();
 
   // keep swimlane selection, restore selectedCells from AppState
-  const selectedCells = useMemo(() => {
-    return appState?.mlExplorerSwimlane?.selectedType !== undefined
-      ? {
-          type: appState.mlExplorerSwimlane.selectedType,
-          lanes: appState.mlExplorerSwimlane.selectedLanes!,
-          times: appState.mlExplorerSwimlane.selectedTimes!,
-          showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
-          viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
-        }
-      : undefined;
+  const selectedCells: AppStateSelectedCells | undefined = useMemo(() => {
+    if (!appState?.mlExplorerSwimlane?.selectedType) {
+      return;
+    }
+
+    let times =
+      appState.mlExplorerSwimlane.selectedTimes ?? appState.mlExplorerSwimlane.selectedTime!;
+    if (typeof times === 'number' && bucketIntervalInSeconds) {
+      times = [times, times + bucketIntervalInSeconds];
+    }
+
+    let lanes =
+      appState.mlExplorerSwimlane.selectedLanes ?? appState.mlExplorerSwimlane.selectedLane!;
+
+    if (typeof lanes === 'string') {
+      lanes = [lanes];
+    }
+
+    return {
+      type: appState.mlExplorerSwimlane.selectedType,
+      lanes,
+      times,
+      showTopFieldValues: appState.mlExplorerSwimlane.showTopFieldValues,
+      viewByFieldName: appState.mlExplorerSwimlane.viewByFieldName,
+    } as AppStateSelectedCells;
     // TODO fix appState to use memoization
-  }, [JSON.stringify(appState?.mlExplorerSwimlane)]);
+  }, [JSON.stringify(appState?.mlExplorerSwimlane), bucketIntervalInSeconds]);
 
   const setSelectedCells = useCallback(
     (swimlaneSelectedCells?: AppStateSelectedCells) => {

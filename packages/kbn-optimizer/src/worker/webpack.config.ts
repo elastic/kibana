@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Path from 'path';
@@ -19,6 +19,9 @@ import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
+import { BundleMetricsPlugin } from './bundle_metrics_plugin';
+import { EmitStatsPlugin } from './emit_stats_plugin';
+import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
@@ -67,6 +70,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     plugins: [
       new CleanWebpackPlugin(),
       new BundleRefsPlugin(bundle, bundleRefs),
+      new PopulateBundleCachePlugin(worker, bundle),
+      new BundleMetricsPlugin(bundle),
+      ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
@@ -216,7 +222,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
       alias: {
-        tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       },
     },

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   ElasticsearchClient,
   KibanaRequest,
@@ -23,6 +25,7 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
 } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { IngestManagerError, ingestErrorToResponseOptions } from '../errors';
 import {
   NewPackagePolicy,
   UpdatePackagePolicy,
@@ -61,15 +64,20 @@ class PackagePolicyService {
     const parentAgentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id);
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
-    } else {
-      if (
-        (parentAgentPolicy.package_policies as PackagePolicy[]).find(
-          (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
-        )
-      ) {
-        throw new Error('There is already a package with the same name on this agent policy');
-      }
     }
+    if (parentAgentPolicy.is_managed) {
+      throw new IngestManagerError(
+        `Cannot add integrations to managed policy ${parentAgentPolicy.id}`
+      );
+    }
+    if (
+      (parentAgentPolicy.package_policies as PackagePolicy[]).find(
+        (siblingPackagePolicy) => siblingPackagePolicy.name === packagePolicy.name
+      )
+    ) {
+      throw new Error('There is already a package with the same name on this agent policy');
+    }
+
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
     let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
@@ -283,6 +291,9 @@ class PackagePolicyService {
     if (!parentAgentPolicy) {
       throw new Error('Agent policy not found');
     } else {
+      if (parentAgentPolicy.is_managed) {
+        throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
+      }
       if (
         (parentAgentPolicy.package_policies as PackagePolicy[]).find(
           (siblingPackagePolicy) =>
@@ -293,7 +304,7 @@ class PackagePolicyService {
       }
     }
 
-    let inputs = await restOfPackagePolicy.inputs.map((input) =>
+    let inputs = restOfPackagePolicy.inputs.map((input) =>
       assignStreamIdToInput(oldPackagePolicy.id, input)
     );
 
@@ -361,10 +372,11 @@ class PackagePolicyService {
           name: packagePolicy.name,
           success: true,
         });
-      } catch (e) {
+      } catch (error) {
         result.push({
           id,
           success: false,
+          ...ingestErrorToResponseOptions(error),
         });
       }
     }

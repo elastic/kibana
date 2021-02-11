@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -12,9 +12,9 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { ValueAxis } from '../../../../../vis_type_xy/public';
 import {
-  VisOptionsProps,
   BasicOptions,
   SelectOption,
   SwitchOption,
@@ -27,9 +27,12 @@ import {
 
 import { HeatmapVisParams } from '../../../heatmap';
 import { LabelsPanel } from './labels_panel';
+import { getHeatmapCollections } from './../../collections';
 
-function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
-  const { stateParams, vis, uiState, setValue, setValidity, setTouched } = props;
+const heatmapCollections = getHeatmapCollections();
+
+function HeatmapOptions(props: VisEditorOptionsProps<HeatmapVisParams>) {
+  const { stateParams, uiState, setValue, setValidity, setTouched } = props;
   const [valueAxis] = stateParams.valueAxes;
   const isColorsNumberInvalid = stateParams.colorsNumber < 2 || stateParams.colorsNumber > 10;
   const [isColorRangesValid, setIsColorRangesValid] = useState(false);
@@ -65,7 +68,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <BasicOptions {...props} />
+        <BasicOptions {...props} legendPositions={heatmapCollections.legendPositions} />
 
         <SwitchOption
           label={i18n.translate('visTypeVislib.editors.heatmap.highlightLabel', {
@@ -96,7 +99,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
 
         <ColorSchemaOptions
           colorSchema={stateParams.colorSchema}
-          colorSchemas={vis.type.editorConfig.collections.colorSchemas}
+          colorSchemas={heatmapCollections.colorSchemas}
           invertColors={stateParams.invertColors}
           uiState={uiState}
           setValue={setValue as SetColorSchemaOptionsValue}
@@ -107,7 +110,7 @@ function HeatmapOptions(props: VisOptionsProps<HeatmapVisParams>) {
           label={i18n.translate('visTypeVislib.controls.heatmapOptions.colorScaleLabel', {
             defaultMessage: 'Color scale',
           })}
-          options={vis.type.editorConfig.collections.scales}
+          options={heatmapCollections.scales}
           paramName="type"
           value={valueAxis.scale.type}
           setValue={setValueAxisScale}

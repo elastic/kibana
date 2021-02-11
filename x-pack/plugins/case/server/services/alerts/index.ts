@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -16,6 +17,24 @@ interface UpdateAlertsStatusArgs {
   ids: string[];
   status: CaseStatuses;
   index: string;
+}
+
+interface GetAlertsArgs {
+  request: KibanaRequest;
+  ids: string[];
+  index: string;
+}
+
+interface Alert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+interface AlertsResponse {
+  hits: {
+    hits: Alert[];
+  };
 }
 
 export class AlertService {
@@ -53,5 +72,31 @@ export class AlertService {
     });
 
     return result;
+  }
+
+  public async getAlerts({ request, ids, index }: GetAlertsArgs): Promise<AlertsResponse> {
+    if (!this.isInitialized) {
+      throw new Error('AlertService not initialized');
+    }
+
+    // The above check makes sure that esClient is defined.
+    const result = await this.esClient!.asScoped(request).asCurrentUser.search<AlertsResponse>({
+      index,
+      body: {
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                should: ids.map((_id) => ({ match: { _id } })),
+                minimum_should_match: 1,
+              },
+            },
+          },
+        },
+      },
+      ignore_unavailable: true,
+    });
+
+    return result.body;
   }
 }

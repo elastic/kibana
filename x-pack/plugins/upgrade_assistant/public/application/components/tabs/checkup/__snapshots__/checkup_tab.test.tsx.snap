@@ -6,7 +6,9 @@ exports[`CheckupTab render with deprecations 1`] = `
   <EuiText
     grow={false}
   >
-    <p>
+    <p
+      data-test-subj="upgradeAssistantIndexTabDetail"
+    >
       <FormattedMessage
         defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
@@ -40,7 +42,8 @@ exports[`CheckupTab render with deprecations 1`] = `
         values={
           Object {
             "snapshotRestoreDocsButton": <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+              external={true}
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html"
               target="_blank"
             >
               <FormattedMessage
@@ -287,7 +290,9 @@ exports[`CheckupTab render with error 1`] = `
   <EuiText
     grow={false}
   >
-    <p>
+    <p
+      data-test-subj="upgradeAssistantIndexTabDetail"
+    >
       <FormattedMessage
         defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
@@ -321,7 +326,8 @@ exports[`CheckupTab render with error 1`] = `
         values={
           Object {
             "snapshotRestoreDocsButton": <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+              external={true}
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html"
               target="_blank"
             >
               <FormattedMessage
@@ -352,7 +358,9 @@ exports[`CheckupTab render without deprecations 1`] = `
   <EuiText
     grow={false}
   >
-    <p>
+    <p
+      data-test-subj="upgradeAssistantIndexTabDetail"
+    >
       <FormattedMessage
         defaultMessage="These {strongCheckupLabel} issues need your attention. Resolve them before upgrading to Elasticsearch {nextEsVersion}."
         id="xpack.upgradeAssistant.checkupTab.tabDetail"
@@ -386,7 +394,8 @@ exports[`CheckupTab render without deprecations 1`] = `
         values={
           Object {
             "snapshotRestoreDocsButton": <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+              external={true}
+              href="https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html"
               target="_blank"
             >
               <FormattedMessage

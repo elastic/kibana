@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory, RequestHandler, SavedObject } from 'src/core/server';
@@ -39,13 +40,13 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     const savedObject = (mockCases.find(
       (s) => s.id === 'mock-id-1'
     ) as unknown) as SavedObject<ESCaseAttributes>;
@@ -70,13 +71,13 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(404);
     expect(response.payload.isBoom).toEqual(true);
@@ -94,14 +95,14 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
     expect(response.payload.comments).toHaveLength(5);
@@ -119,13 +120,13 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCasesErrorTriggerData,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(400);
   });
@@ -142,13 +143,13 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({
@@ -171,14 +172,14 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
         caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({
@@ -201,14 +202,14 @@ describe('GET case', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({

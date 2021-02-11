@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { warnAndSkipTest } from '../../helpers';
 
@@ -36,6 +37,52 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId });
+    });
+
+    it('should fail for managed agent policies', async function () {
+      if (server.enabled) {
+        // get a managed policy
+        const {
+          body: { item: managedPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Managed policy from ${Date.now()}`,
+            namespace: 'default',
+            is_managed: true,
+          });
+
+        // try to add an integration to the managed policy
+        const { body } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'filetest-1',
+            description: '',
+            namespace: 'default',
+            policy_id: managedPolicy.id,
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(400);
+
+        expect(body.statusCode).to.be(400);
+        expect(body.message).to.contain('Cannot add integrations to managed policy');
+
+        // delete policy we just made
+        await supertest.post(`/api/fleet/agent_policies/delete`).set('kbn-xsrf', 'xxxx').send({
+          agentPolicyId: managedPolicy.id,
+        });
+      } else {
+        warnAndSkipTest(this, log);
+      }
     });
 
     it('should work with valid values', async function () {

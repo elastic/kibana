@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -18,7 +18,6 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   log.info(
     `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
   );
-
   const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.version}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);

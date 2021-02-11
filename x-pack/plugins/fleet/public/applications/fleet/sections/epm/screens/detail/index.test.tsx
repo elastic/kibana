@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
@@ -27,7 +28,7 @@ import { act, cleanup } from '@testing-library/react';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
-  const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey });
+  const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey });
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
@@ -99,7 +100,7 @@ describe('when on integration detail', () => {
     it('should redirect if custom url is accessed', () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       expect(testRenderer.history.location.pathname).toEqual(detailPageUrlPath);
@@ -147,7 +148,7 @@ describe('when on integration detail', () => {
     it('should display custom content when tab is clicked', async () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       await lazyComponentWasRendered;
@@ -172,14 +173,14 @@ describe('when on integration detail', () => {
         onCancelNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
-        onCancelUrl: '#/integrations/detail/nginx-0.3.7',
+        onCancelUrl: '#/integrations/detail/nginx-0.3.7/overview',
         onSaveNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
       });
@@ -187,7 +188,7 @@ describe('when on integration detail', () => {
   });
 
   describe('and on the Policies Tab', () => {
-    const policiesTabURLPath = pagePathGetters.integration_details({ pkgkey, panel: 'policies' });
+    const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey });
     beforeEach(() => {
       testRenderer.history.push(policiesTabURLPath);
       render();
@@ -686,6 +687,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
           'e8a37031-2907-44f6-89d2-98bd493f60dc',
         ],
         is_default: true,
+        is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 6,
         updated_at: '2020-12-09T13:46:31.840Z',
@@ -700,6 +702,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         status: 'active',
         package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
         is_default: false,
+        is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 2,
         updated_at: '2020-12-09T13:46:31.840Z',

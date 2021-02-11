@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
+import { RouteDependencies } from '../../plugin';
 
 interface EnginesResponse {
   results: object[];
@@ -55,7 +56,7 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/details`,
+      path: '/as/engines/:name/details',
     })
   );
   router.get(
@@ -68,7 +69,7 @@ export function registerEnginesRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:name/overview_metrics`,
+      path: '/as/engines/:name/overview_metrics',
     })
   );
 }

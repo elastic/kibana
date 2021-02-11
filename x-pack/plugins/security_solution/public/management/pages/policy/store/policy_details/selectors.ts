@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
@@ -16,7 +17,7 @@ import {
   PolicyData,
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
-import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
+import { policyFactory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
 import { MANAGEMENT_ROUTING_POLICY_DETAILS_PATH } from '../../../../common/constants';
 import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 
@@ -32,10 +33,26 @@ export const licensedPolicy: (
   licenseState,
   (policyData, license) => {
     if (policyData) {
-      unsetPolicyFeaturesAboveLicenseLevel(
-        policyData?.inputs[0]?.config.policy.value,
+      const policyValue = unsetPolicyFeaturesAboveLicenseLevel(
+        policyData.inputs[0].config.policy.value,
         license as ILicense
       );
+      const newPolicyData: Immutable<PolicyData> = {
+        ...policyData,
+        inputs: [
+          {
+            ...policyData.inputs[0],
+            config: {
+              ...policyData.inputs[0].config,
+              policy: {
+                ...policyData.inputs[0].config.policy,
+                value: policyValue,
+              },
+            },
+          },
+        ],
+      };
+      return newPolicyData;
     }
     return policyData;
   }
@@ -167,6 +184,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: windows.advanced,
         events: windows.events,
         malware: windows.malware,
+        ransomware: windows.ransomware,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
       },
@@ -174,6 +192,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        ransomware: mac.ransomware,
         popup: mac.popup,
       },
       linux: {

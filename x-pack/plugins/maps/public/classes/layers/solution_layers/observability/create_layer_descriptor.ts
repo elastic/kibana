@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid/v4';
@@ -30,11 +31,9 @@ import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DISPLAY } from './display_select';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import { EMSFileSource } from '../../../sources/ems_file_source';
-// @ts-ignore
 import { ESGeoGridSource } from '../../../sources/es_geo_grid_source';
-import { VectorLayer } from '../../vector_layer/vector_layer';
-// @ts-ignore
-import { HeatmapLayer } from '../../heatmap_layer/heatmap_layer';
+import { VectorLayer } from '../../vector_layer';
+import { HeatmapLayer } from '../../heatmap_layer';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 
 // redefining APM constant to avoid making maps app depend on APM plugin

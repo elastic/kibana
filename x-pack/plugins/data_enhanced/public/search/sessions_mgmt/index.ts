@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -33,7 +34,7 @@ export interface AppDependencies {
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   i18n: I18nStart;
-  config: SessionsMgmtConfigSchema;
+  config: SessionsConfigSchema;
 }
 
 export const APP = {
@@ -44,11 +45,11 @@ export const APP = {
     }),
 };
 
-export type SessionsMgmtConfigSchema = ConfigSchema['search']['sessions']['management'];
+export type SessionsConfigSchema = ConfigSchema['search']['sessions'];
 
 export function registerSearchSessionsMgmt(
   coreSetup: CoreSetup<DataEnhancedStartDependencies>,
-  config: SessionsMgmtConfigSchema,
+  config: SessionsConfigSchema,
   services: IManagementSectionsPluginsSetup
 ) {
   services.management.sections.section.kibana.registerApp({

@@ -1,23 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import moment from 'moment';
 import { useValues, useActions } from 'kea';
+import moment from 'moment';
 
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ContentSection } from '../../components/shared/content_section';
-import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { TelemetryLogic } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
+import { ContentSection } from '../../components/shared/content_section';
+import { RECENT_ACTIVITY_TITLE } from '../../constants';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
-import { AppLogic } from '../../app_logic';
 import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
@@ -38,15 +40,7 @@ export const RecentActivity: React.FC = () => {
   const { activityFeed } = useValues(OverviewLogic);
 
   return (
-    <ContentSection
-      title={
-        <FormattedMessage
-          id="xpack.enterpriseSearch.workplaceSearch.recentActivity.title"
-          defaultMessage="Recent activity"
-        />
-      }
-      headerSpacer="m"
-    >
+    <ContentSection title={RECENT_ACTIVITY_TITLE} headerSpacer="m">
       <EuiPanel>
         {activityFeed.length > 0 ? (
           <>

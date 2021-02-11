@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { fullContentSources, contentItems } from '../../../__mocks__/content_sources.mock';
+import { meta } from '../../../__mocks__/meta.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import {
@@ -20,12 +24,9 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { mockMeta } from '../../../__mocks__/meta.mock';
-import { fullContentSources } from '../../../__mocks__/content_sources.mock';
-
 import { DEFAULT_META } from '../../../../shared/constants';
+import { Loading } from '../../../../shared/loading';
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { Loading } from '../../../../../applications/shared/loading';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 
 import { SourceContent } from './source_content';
@@ -38,17 +39,8 @@ describe('SourceContent', () => {
 
   const mockValues = {
     contentSource: fullContentSources[0],
-    contentMeta: mockMeta,
-    contentItems: [
-      {
-        id: '1234',
-        last_updated: '2021-01-21',
-      },
-      {
-        id: '1235',
-        last_updated: '2021-01-20',
-      },
-    ],
+    contentMeta: meta,
+    contentItems,
     contentFilterValue: '',
     dataLoading: false,
     sectionLoading: false,
