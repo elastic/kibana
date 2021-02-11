@@ -7,18 +7,15 @@
 
 import { EuiHealth } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import {
-  formatAnomalyScore,
-  getSeverityCategoryForScore,
-  ML_SEVERITY_COLORS,
-} from '../../../../common/log_analysis';
+import { getFormattedSeverityScore } from '../../../../../ml/public';
+import { getSeverityCategoryForScore, ML_SEVERITY_COLORS } from '../../../../common/log_analysis';
 
 export const AnomalySeverityIndicator: React.FunctionComponent<{
   anomalyScore: number;
 }> = ({ anomalyScore }) => {
   const severityColor = useMemo(() => getColorForAnomalyScore(anomalyScore), [anomalyScore]);
 
-  return <EuiHealth color={severityColor}>{formatAnomalyScore(anomalyScore)}</EuiHealth>;
+  return <EuiHealth color={severityColor}>{getFormattedSeverityScore(anomalyScore)}</EuiHealth>;
 };
 
 const getColorForAnomalyScore = (anomalyScore: number) => {

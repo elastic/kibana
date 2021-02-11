@@ -109,7 +109,7 @@ export class CiStatsReporter {
           },
         });
 
-        return;
+        return true;
       } catch (error) {
         if (!error?.request) {
           // not an axios error, must be a usage error that we should notify user about
