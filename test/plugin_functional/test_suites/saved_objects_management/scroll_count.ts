@@ -15,18 +15,18 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 
   describe('scroll_count', () => {
-    before(() =>
-      esArchiver.load(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
-    );
-    after(() =>
-      esArchiver.unload(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
-      )
-    );
-
     describe('saved objects with hidden type', () => {
+      before(() =>
+        esArchiver.load(
+          '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        )
+      );
+
       it('only counts hidden types that are importableAndExportable', async () => {
         const res = await supertest
           .post(apiUrl)
