@@ -194,3 +194,22 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5e694159d909d9d99b5e12d1",
+    "index": "histogram-test",
+    "source": {
+      "histogram-title": "single value",
+      "histogram-content": {
+        "values": [
+          1
+        ],
+        "counts": [
+          1
+        ]
+      }
+    }
+  }
+}

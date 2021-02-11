@@ -376,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
                 key: 0.47000000000000003,
               },
               {
-                count: 556,
+                count: 454,
                 key: 0.9400000000000001,
               },
               {
@@ -396,7 +396,7 @@ export default ({ getService }: FtrProviderContext) => {
                 key: 2.8200000000000003,
               },
               {
-                count: 596,
+                count: 391,
                 key: 3.29,
               },
               {
@@ -408,15 +408,39 @@ export default ({ getService }: FtrProviderContext) => {
                 key: 4.23,
               },
               {
-                count: 639,
+                count: 628,
                 key: 4.7,
               },
             ],
           },
           sampledDocuments: 7,
-          sampledValues: 4151,
+          sampledValues: 3833,
           totalDocuments: 7,
-          topValues: [],
+          topValues: { buckets: [] },
+        });
+      });
+
+      it('should return a single-value histogram when filtering a precalculated histogram', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/histogram-test/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match: { 'histogram-title': 'single value' } },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            field: {
+              name: 'histogram-content',
+              type: 'histogram',
+            },
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          histogram: { buckets: [{ count: 1, key: 1 }] },
+          sampledDocuments: 1,
+          sampledValues: 1,
+          totalDocuments: 1,
+          topValues: { buckets: [] },
         });
       });
 

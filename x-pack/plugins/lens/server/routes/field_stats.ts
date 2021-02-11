@@ -187,7 +187,12 @@ export async function getNumberHistogram(
       sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues: topValuesBuckets,
-      histogram: { buckets: [] },
+      histogram: useTopHits
+        ? { buckets: [] }
+        : {
+            // Insert a fake bucket for a single-value histogram
+            buckets: [{ count: minMaxResult.aggregations!.sample.doc_count, key: minValue }],
+          },
     };
   }
 
