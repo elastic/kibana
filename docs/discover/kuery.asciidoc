@@ -1,55 +1,64 @@
 [[kuery-query]]
 === Kibana Query Language
 
-The Kibana Query Language (KQL) makes it easy to find
-the fields and syntax for your {es} query. If you have the
-https://www.elastic.co/subscriptions[Basic tier] or above,
-simply place your cursor in the *Search* field. As you type, you’ll get suggestions for fields,
-values, and operators.
+The Kibana Query Language (KQL) is a simple syntax for filtering {es} data using
+free text search or field-based search. It is only used for filtering data, and has
+no role in sorting or aggregating the data.
+
+KQL is able to suggest field names, values, and operators as you type, if you have the
+https://www.elastic.co/subscriptions[Basic tier] or above. The performance of the suggestions
+are controlled by <<settings, {kib} settings>>:
 
 [role="screenshot"]
 image::images/kql-autocomplete.png[Autocomplete in Search bar]
 
-If you prefer to use Kibana’s legacy query language, based on the
-<<lucene-query, Lucene query syntax>>, click *KQL* next to the *Search* field, and then turn off KQL.
+KQL has a different set of features than the <<lucene-query>>. KQL is able to query
+nested fields and <<scripted-fields, scripted fields>>. KQL does not support regular expressions
+or searching with fuzzy terms. To use the legacy Lucene syntax click *KQL* next to the *Search* field,
+and then turn off KQL.
 
 [discrete]
 === Terms query
 
-A terms query matches documents that contain one or more *exact* terms in a field.
+A terms query uses *exact search terms*. Spaces separate each search term, and only one term
+is required to match the document. Use quotation marks to indicate a *phrase match*.
 
-To match documents where the response field is `200`:
-
-[source,yaml]
--------------------
-response:200
--------------------
-
-To match documents with the phrase "quick brown fox" in the `message` field.
+To query using *exact search terms*, type the field name followed by `:` and
+then the values with spaces separating:
 
 [source,yaml]
 -------------------
-message:"quick brown fox"
+http.response.status_code:400 401 404
 -------------------
 
-Without the quotes,
-the query matches documents regardless of the order in which
-they appear. Documents with "quick brown fox" match,
-and so does "quick fox brown".
+For text fields this will match any value regardless of order:
 
-NOTE: Terms without fields are matched against the default field in your index settings.
-If a default field is not
-set, terms are matched against all fields. For example, a query
-for `response:200` searches for the value 200
-in the response field, but a query for just `200` searches for 200
-across all fields in your index.
+[source,yaml]
+-------------------
+http.response.body.content.text:quick brown fox
+-------------------
 
+To query for an *exact phrase*, use quotation marks around the values:
+
+[source,yaml]
+-------------------
+http.response.body.content.text:"quick brown fox"
+-------------------
+
+Field names are not required by KQL. When a field name is not provided, terms
+will be matched by the default fields in your index settings. To search across fields:
+
+[source,yaml]
+-------------------
+"quick brown fox"
+-------------------
 
 [discrete]
 === Boolean queries
 
 KQL supports `or`, `and`, and `not`. By default, `and` has a higher precedence than `or`.
-To override the default precedence, group operators in parentheses.
+To override the default precedence, group operators in parentheses. These operators can
+be upper or lower case.
 
 To match documents where response is `200`, extension is `php`, or both:
 
@@ -143,7 +152,7 @@ but in some cases you might need to search on dates. Include the date range in q
 [discrete]
 === Exist queries
 
-An exist query matches documents that contain a value for a field, in this case,
+An exist query matches documents that contain any value for a field, in this case,
 response:
 
 [source,yaml]
@@ -151,10 +160,16 @@ response:
 response:*
 -------------------
 
+Existence is defined by {es} and includes all values, including empty text.
+
 [discrete]
 === Wildcard queries
 
-To match documents where machine.os starts with `win`, such
+Wildcards queries can be used to *search by a term prefix* or to *search multiple fields*.
+The default settings of {kib} *prevent leading wildcards* for performance reasons,
+but this can be allowed with an <<query-allowleadingwildcards, advanced setting>>.
+
+To match documents where `machine.os` starts with `win`, such
 as "windows 7" and "windows 10":
 
 [source,yaml]

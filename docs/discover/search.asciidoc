@@ -53,36 +53,55 @@ include::kuery.asciidoc[]
 
 [[lucene-query]]
 === Lucene query syntax
-Kibana's legacy query language was based on the Lucene query syntax. For the time being this syntax
-is still available under the options menu in the Query Bar and in Advanced Settings. The following
-are some tips that can help get you started.
+Lucene query syntax is available to {kib} users who opt out of the <<kuery-query>>.
+Full documentation for this syntax is available as part of {es}
+{ref}/query-dsl-query-string-query.html#query-string-syntax[query string syntax].
 
-* To perform a free text search, simply enter a text string. For example, if
+The main reason to use the Lucene query syntax in {kib} is for advanced
+Lucene features such as regular expressions or fuzzy term matching. However,
+Lucene syntax is not able to search nested objects or scripted fields.
+
+To perform a free text search, simply enter a text string. For example, if
 you're searching web server logs, you could enter `safari` to search all
-fields for the term `safari`.
+fields:
 
-* To search for a value in a specific field, prefix the value with the name
-of the field. For example, you could enter `status:200` to find all of
-the entries that contain the value `200` in the `status` field.
+[source,yaml]
+-------------------
+safari
+-------------------
 
-* To search for a range of values, you can use the bracketed range syntax,
+To search for a value in a specific field, prefix the value with the name
+of the field:
+
+[source,yaml]
+-------------------
+status:200
+-------------------
+
+To search for a range of values, use the bracketed range syntax,
 `[START_VALUE TO END_VALUE]`. For example, to find entries that have 4xx
 status codes, you could enter `status:[400 TO 499]`.
 
-* To specify more complex search criteria, you can use the Boolean operators
+[source,yaml]
+-------------------
+status:[400 TO 499]
+-------------------
+
+For an open range, use a wildcard:
+
+[source,yaml]
+-------------------
+status:[400 TO *]
+-------------------
+
+To specify more complex search criteria, use the boolean operators
 `AND`, `OR`, and `NOT`. For example, to find entries that have 4xx status
-codes and have an extension of `php` or `html`, you could enter `status:[400 TO
-499] AND (extension:php OR extension:html)`.
+codes and have an extension of `php` or `html`:
 
-IMPORTANT: When you use the Lucene Query Syntax in the *KQL* search bar, {kib} is unable to search on nested objects and perform aggregations across fields that contain nested objects.
-Using `include_in_parent` or `copy_to` as a workaround can cause {kib} to fail.
-
-For more detailed information about the Lucene query syntax, see the
-{ref}/query-dsl-query-string-query.html#query-string-syntax[Query String Query]
-docs.
-
-NOTE: These examples use the Lucene query syntax. When lucene is selected as your
-query language you can also submit queries using the {ref}/query-dsl.html[Elasticsearch Query DSL].
+[source,yaml]
+-------------------
+status:[400 TO 499] AND (extension:php OR extension:html)
+-------------------
 
 
 [[save-open-search]]
