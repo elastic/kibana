@@ -447,7 +447,6 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     setKeyboardMode(false);
   };
 
-  // const shouldShowGhost =  isActiveDropTarget && dropType !== 'reorder';
   const ghost =
     isActiveDropTarget && dropType !== 'reorder' && dragging?.ghost ? dragging.ghost : undefined;
 
