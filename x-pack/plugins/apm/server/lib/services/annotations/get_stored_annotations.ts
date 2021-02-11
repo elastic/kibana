@@ -6,7 +6,11 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { unwrapEsResponse } from '../../../../../observability/server';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import {
+  unwrapEsResponse,
+  WrappedElasticsearchClientError,
+} from '../../../../../observability/server';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
@@ -70,15 +74,22 @@ export async function getStoredAnnotations({
   } catch (error) {
     // index is only created when an annotation has been indexed,
     // so we should handle this error gracefully
-    if (error.body?.error?.type === 'index_not_found_exception') {
-      return [];
-    }
+    if (
+      error instanceof WrappedElasticsearchClientError &&
+      error.originalError instanceof ResponseError
+    ) {
+      const type = error.originalError.body.error.type;
 
-    if (error.body?.error?.type === 'security_exception') {
-      logger.warn(
-        `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`
-      );
-      return [];
+      if (type === 'index_not_found_exception') {
+        return [];
+      }
+
+      if (type === 'security_exception') {
+        logger.warn(
+          `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`
+        );
+        return [];
+      }
     }
 
     throw error;
