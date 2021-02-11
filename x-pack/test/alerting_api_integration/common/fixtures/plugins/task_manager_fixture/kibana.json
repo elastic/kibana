@@ -1,5 +1,5 @@
 {
-  "id": "task_manager_fixture",
+  "id": "taskManagerFixture",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
