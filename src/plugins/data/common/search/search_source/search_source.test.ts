@@ -52,6 +52,11 @@ describe('SearchSource', () => {
   let searchSource: SearchSource;
 
   beforeEach(() => {
+    const getConfigMock = jest
+      .fn()
+      .mockImplementation((param) => param === 'metaFields' && ['_type', '_source'])
+      .mockName('getConfig');
+
     mockSearchMethod = jest
       .fn()
       .mockReturnValue(
@@ -62,7 +67,7 @@ describe('SearchSource', () => {
       );
 
     searchSourceDependencies = {
-      getConfig: jest.fn(),
+      getConfig: getConfigMock,
       search: mockSearchMethod,
       onResponse: (req, res) => res,
       legacy: {

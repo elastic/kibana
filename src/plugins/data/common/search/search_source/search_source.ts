@@ -100,8 +100,6 @@ export interface SearchSourceDependencies extends FetchHandlers {
   search: ISearchGeneric;
 }
 
-const META_FIELDS = ['_type', '_source'];
-
 /** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
@@ -503,9 +501,8 @@ export class SearchSource {
     }
   }
 
-  private checkMatch(sourceFilters: string[], field: string) {
-    return sourceFilters.some((sourceFilter) => field.match(sourceFilter));
-  }
+  private readonly getFieldName = (fld: string | Record<string, any>): string =>
+    typeof fld === 'string' ? fld : fld.field;
 
   private getFieldsWithoutSourceFilters(
     index: IndexPattern | undefined,
@@ -519,42 +516,33 @@ export class SearchSource {
     if (!sourceFilters || sourceFilters.excludes?.length === 0 || bodyFields.length === 0) {
       return bodyFields;
     }
+    const metaFields = this.dependencies.getConfig(UI_SETTINGS.META_FIELDS);
     const sourceFiltersValues = sourceFilters.excludes;
     const wildcardField = bodyFields.find(
       (el: SearchFieldValue) => el === '*' || (el as Record<string, string>).field === '*'
     );
+    const filterSourceFields = (fieldName: string) => {
+      return (
+        fieldName &&
+        !sourceFiltersValues.some((sourceFilter) => fieldName.match(sourceFilter)) &&
+        !metaFields.includes(fieldName)
+      );
+    };
     if (!wildcardField) {
       // we already have an explicit list of fields, so we just remove source filters from that list
-      return bodyFields.filter((fld: SearchFieldValue) => {
-        if (typeof fld === 'string') {
-          return !this.checkMatch(sourceFiltersValues, fld) && !META_FIELDS.includes(fld);
-        }
-        if (!fld.hasOwnProperty('field')) {
-          return false;
-        }
-        const searchFieldValue = fld as Record<string, string>;
-        return (
-          !this.checkMatch(sourceFiltersValues, searchFieldValue.field) &&
-          !META_FIELDS.includes(searchFieldValue.field)
-        );
-      });
+      return bodyFields.filter((fld: SearchFieldValue) =>
+        filterSourceFields(this.getFieldName(fld))
+      );
     }
     // we need to get the list of fields from an index pattern
-    const fieldsToInclude = fields.filter((field: IndexPatternField) => {
-      return !this.checkMatch(sourceFiltersValues, field.name) && !META_FIELDS.includes(field.name);
-    });
-    return fieldsToInclude.map((fld: IndexPatternField) => {
-      const fieldToInclude: Record<string, string> = {
+    return fields
+      .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
+      .map((fld: IndexPatternField) => ({
         field: fld.name,
-      };
-      if (wildcardField && wildcardField.hasOwnProperty('include_unmapped')) {
-        fieldToInclude.include_unmapped = (wildcardField as Record<
-          string,
-          string
-        >).include_unmapped;
-      }
-      return fieldToInclude;
-    });
+        ...((wildcardField as Record<string, string>)?.include_unmapped && {
+          include_unmapped: (wildcardField as Record<string, string>).include_unmapped,
+        }),
+      }));
   }
 
   private flatten() {
@@ -573,10 +561,7 @@ export class SearchSource {
           storedFields: ['*'],
           runtimeFields: {},
         };
-
     const fieldListProvided = !!body.fields;
-    const getFieldName = (fld: string | Record<string, any>): string =>
-      typeof fld === 'string' ? fld : fld.field;
 
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
@@ -595,26 +580,22 @@ export class SearchSource {
       if (!body.hasOwnProperty('_source')) {
         body._source = sourceFilters;
       }
-      if (body._source) {
-        const filter = fieldWildcardFilter(
-          body._source.excludes,
-          getConfig(UI_SETTINGS.META_FIELDS)
-        );
-        // also apply filters to provided fields & default docvalueFields
-        body.fields = body.fields.filter((fld: SearchFieldValue) => filter(getFieldName(fld)));
-        fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
-          filter(getFieldName(fld))
-        );
-        filteredDocvalueFields = filteredDocvalueFields.filter((fld: SearchFieldValue) =>
-          filter(getFieldName(fld))
-        );
-      }
+
+      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
+      // also apply filters to provided fields & default docvalueFields
+      body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
+      fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
+        filter(this.getFieldName(fld))
+      );
+      filteredDocvalueFields = filteredDocvalueFields.filter((fld: SearchFieldValue) =>
+        filter(this.getFieldName(fld))
+      );
     }
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
       const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
-        getFieldName(field)
+        this.getFieldName(field)
       );
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
@@ -656,10 +637,10 @@ export class SearchSource {
           ...body.fields,
           ...filteredDocvalueFields.filter((fld: SearchFieldValue) => {
             return (
-              fieldsFromSource.includes(getFieldName(fld)) &&
+              fieldsFromSource.includes(this.getFieldName(fld)) &&
               !(body.docvalue_fields || [])
-                .map((d: string | Record<string, any>) => getFieldName(d))
-                .includes(getFieldName(fld))
+                .map((d: string | Record<string, any>) => this.getFieldName(d))
+                .includes(this.getFieldName(fld))
             );
           }),
         ];
@@ -673,21 +654,22 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
-        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields);
-        body.fields = body.fields.map((fld: SearchFieldValue) => {
-          const fieldName = getFieldName(fld);
-          if (Object.keys(docvaluesIndex).includes(fieldName)) {
-            // either provide the field object from computed docvalues,
-            // or merge the user-provided field with the one in docvalues
-            return typeof fld === 'string'
-              ? docvaluesIndex[fld]
-              : {
-                  ...docvaluesIndex[fieldName],
-                  ...fld,
-                };
+        body.fields = this.getFieldsWithoutSourceFilters(index, body.fields).map(
+          (fld: SearchFieldValue) => {
+            const fieldName = this.getFieldName(fld);
+            if (Object.keys(docvaluesIndex).includes(fieldName)) {
+              // either provide the field object from computed docvalues,
+              // or merge the user-provided field with the one in docvalues
+              return typeof fld === 'string'
+                ? docvaluesIndex[fld]
+                : {
+                    ...docvaluesIndex[fieldName],
+                    ...fld,
+                  };
+            }
+            return fld;
           }
-          return fld;
-        });
+        );
       }
     } else {
       body.fields = filteredDocvalueFields;
