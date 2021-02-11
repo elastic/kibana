@@ -210,6 +210,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const columns = buildColumns(handleExport, handleDelete);
 
   return (
+    <>
       <EuiModal onClose={onClose} maxWidth={800}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
@@ -253,6 +254,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         name={exportDownload.name}
         onDownload={() => setExportDownload({})}
       />
+    </>
   );
 };
 
