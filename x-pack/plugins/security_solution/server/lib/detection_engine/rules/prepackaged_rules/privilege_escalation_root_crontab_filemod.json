@@ -10,7 +10,7 @@
   ],
   "language": "kuery",
   "license": "Elastic License",
-  "name": "Potential Privilege Escalation via Root Crontab File Modification",
+  "name": "Privilege Escalation via Root Crontab File Modification",
   "query": "event.category:file and not event.type:deletion and file.path:/private/var/at/tabs/root and not process.executable:/usr/bin/crontab",
   "references": [
     "https://phoenhex.re/2017-06-09/pwn2own-diskarbitrationd-privesc",

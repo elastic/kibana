@@ -3,9 +3,6 @@
     "Elastic"
   ],
   "description": "Adversaries may create or modify the Sublime application plugins or scripts to execute a malicious payload each time the Sublime application is started.",
-  "false_positives": [
-    "Legitimate Sublime plugins or application updates"
-  ],
   "from": "now-9m",
   "index": [
     "auditbeat-*",

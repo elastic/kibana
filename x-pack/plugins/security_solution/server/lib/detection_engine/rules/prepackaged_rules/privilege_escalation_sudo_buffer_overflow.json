@@ -4,7 +4,7 @@
   ],
   "description": "Identifies the attempted use of a heap-based buffer overflow vulnerability for the Sudo binary in Unix-like systems (CVE-2021-3156). Successful exploitation allows an unprivileged user to escalate to the root user.",
   "false_positives": [
-    "This rule could generate false positives if the process arguments leveraged by the expoit are shared by custom scripts using the Sudo or Sudoedit binaries. Only Sudo versions 1.8.2 through 1.8.31p2 and 1.9.0 through 1.9.5p1 are affected; if those versions are not present on the endpoint, this could be a false positive."
+    "This rule could generate false positives if the process arguments leveraged by the exploit are shared by custom scripts using the Sudo or Sudoedit binaries. Only Sudo versions 1.8.2 through 1.8.31p2 and 1.9.0 through 1.9.5p1 are affected; if those versions are not present on the endpoint, this could be a false positive."
   ],
   "from": "now-9m",
   "index": [

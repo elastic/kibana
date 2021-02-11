@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Suspicious JAR Child Process",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"java\" and\n  process.name : (\"sh\", \"bash\", \"dash\", \"ksh\", \"tcsh\", \"zsh\", \"curl\", \"wget\") and\n  process.args : \"-jar\" and process.args : \"*.jar\" and\n  /* Add any FP's here */\n  not process.executable : \"/Users/*/.sdkman/*\" and\n  not process.args : (\"/usr/local/*\", \"/Users/*/github.com/*\", \"/Users/*/src/*\")\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"java\" and\n  process.name : (\"sh\", \"bash\", \"dash\", \"ksh\", \"tcsh\", \"zsh\", \"curl\", \"wget\") and\n  process.args : \"-jar\" and process.args : \"*.jar\" and\n  /* Add any FP's here */\n  not process.executable : (\"/Users/*/.sdkman/*\", \"/Library/Java/JavaVirtualMachines/*\") and\n  not process.args : (\"/usr/local/*\", \"/Users/*/github.com/*\", \"/Users/*/src/*\")\n",
   "risk_score": 47,
   "rule_id": "8acb7614-1d92-4359-bfcf-478b6d9de150",
   "severity": "medium",

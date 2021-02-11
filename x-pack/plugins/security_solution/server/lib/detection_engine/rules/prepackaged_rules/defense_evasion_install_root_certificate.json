@@ -4,7 +4,7 @@
   ],
   "description": "Adversaries may install a root certificate on a compromised system to avoid warnings when connecting to their command and control servers. Root certificates are used in public key cryptography to identify a root certificate authority (CA). When a root certificate is installed, the system or application will trust certificates in the root's chain of trust that have been signed by the root certificate.",
   "false_positives": [
-    "Trusted Root Certificate Install"
+    "Certain applications may install root certificates for the purpose of inspecting SSL traffic."
   ],
   "from": "now-9m",
   "index": [
