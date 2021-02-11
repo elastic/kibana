@@ -68,12 +68,12 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
 
     const handle = core.overlays.openFlyout(
       toMountPoint(
-        <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-          onClose={() => handle.close()}
-          viewMode={'manage'}
+        <plugins.uiActionsEnhanced.DrilldownManager
+          tab={'manage'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
+          onClose={() => handle.close()}
         />
       ),
       {

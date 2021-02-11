@@ -57,7 +57,7 @@ export interface StartContract
       | 'extract'
       | 'inject'
     > {
-  FlyoutManageDrilldowns: PublicDrilldownManagerComponent;
+  DrilldownManager: PublicDrilldownManagerComponent;
 }
 
 export class AdvancedUiActionsPublicPlugin
@@ -118,7 +118,7 @@ export class AdvancedUiActionsPublicPlugin
     return {
       ...uiActions,
       ...this.enhancements!,
-      FlyoutManageDrilldowns: createPublicDrilldownManager({
+      DrilldownManager: createPublicDrilldownManager({
         actionFactories: this.enhancements!.getActionFactories(),
         getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
         storage: new Storage(window?.localStorage),

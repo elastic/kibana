@@ -35,9 +35,9 @@ export interface PublicDrilldownManagerProps {
   tab: 'create' | 'manage';
 
   /**
-   * Callback called to close drilldowns flyout.
+   * Callback called when drilldown flyout should be closed.
    */
-  close: () => void;
+  onClose: () => void;
 
   /**
    * List of possible triggers in current context
