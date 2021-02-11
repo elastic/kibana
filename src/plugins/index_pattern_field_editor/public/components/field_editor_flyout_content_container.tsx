@@ -142,7 +142,7 @@ export const FieldEditorFlyoutContentContainer = ({
           indexPattern.deleteFieldFormat(updatedField.name);
         }
 
-        indexPatternService.updateSavedObject(indexPattern).then(() => {
+        await indexPatternService.updateSavedObject(indexPattern).then(() => {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
             defaultMessage: "Saved '{fieldName}'",
             values: { fieldName: updatedField.name },

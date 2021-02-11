@@ -8,6 +8,8 @@
 
 import React, { useCallback } from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { NotificationsStart } from 'src/core/public';
 import { IndexPattern, UsageCollectionStart } from '../../shared_imports';
 import { pluginName } from '../../constants';
 import { DeleteRuntimeFieldProvider, Props as DeleteProviderProps } from './delete_field_provider';
@@ -20,7 +22,8 @@ export interface Props extends Omit<DeleteProviderProps, 'onConfirmDelete'> {
 
 export const getDeleteProvider = (
   indexPatternService: DataPublicPluginStart['indexPatterns'],
-  usageCollection: UsageCollectionStart
+  usageCollection: UsageCollectionStart,
+  notifications: NotificationsStart
 ): React.FunctionComponent<Props> => {
   return React.memo(({ indexPattern, children, onDelete }: Props) => {
     const deleteFields = useCallback(
@@ -38,7 +41,14 @@ export const getDeleteProvider = (
           // eslint-disable-next-line no-empty
         } catch {}
 
-        await indexPatternService.updateSavedObject(indexPattern);
+        try {
+          await indexPatternService.updateSavedObject(indexPattern);
+        } catch (e) {
+          const title = i18n.translate('indexPatternFieldEditor.save.deleteErrorTitle', {
+            defaultMessage: 'Failed to save field removal',
+          });
+          notifications.toasts.addError(e, { title });
+        }
 
         if (onDelete) {
           onDelete(fieldNames);
