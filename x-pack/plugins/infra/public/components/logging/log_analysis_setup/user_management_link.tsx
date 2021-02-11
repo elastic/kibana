@@ -9,12 +9,23 @@ import { EuiButton, EuiButtonProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { useLinkProps } from '../../../hooks/use_link_props';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (props) => {
+  const {
+    services: {
+      application: { capabilities },
+    },
+  } = useKibanaContextForPlugin();
+  const canAccessUserManagement = capabilities?.management?.security?.users;
+
   const linkProps = useLinkProps({
     app: 'management',
     pathname: '/security/users',
   });
+
+  if (!canAccessUserManagement) return null;
+
   return (
     <EuiButton color="primary" fill {...linkProps} {...props}>
       <FormattedMessage
