@@ -28,6 +28,13 @@ export const ALERT_STATUS_ERROR = i18n.translate(
   }
 );
 
+export const ALERT_STATUS_LICENSE_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsList.alertStatusLicenseError',
+  {
+    defaultMessage: 'License Error',
+  }
+);
+
 export const ALERT_STATUS_PENDING = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsList.alertStatusPending',
   {
