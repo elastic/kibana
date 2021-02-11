@@ -11,7 +11,7 @@ Retrieve a paginated set of {kib} alerts by various conditions.
 
 `GET <kibana host>:<port>/api/alerts/_find`
 
-[[saved-objects-api-find-query-params]]
+[[alerts-api-find-query-params]]
 ==== Query Parameters
 
 `per_page`::

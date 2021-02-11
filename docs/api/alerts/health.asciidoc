@@ -6,12 +6,12 @@
 
 Retrieve the alert framework health status.
 
-[[alerts-api-get-request]]
+[[alerts-api-health-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/alerts/_health`
 
-[[alerts-api-get-codes]]
+[[alerts-api-health-codes]]
 ==== Response code
 
 `200`::
