@@ -60,8 +60,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Data" section with index management', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
-        expect(sections[0]).to.eql({
+        expect(sections).to.have.length(2);
+        expect(sections.find((s) => s.sectionId === 'data')).to.eql({
           sectionId: 'data',
           sectionLinks: ['index_management', 'transform'],
         });
