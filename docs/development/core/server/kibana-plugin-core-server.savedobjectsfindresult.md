@@ -16,4 +16,5 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [score](./kibana-plugin-core-server.savedobjectsfindresult.score.md) | <code>number</code> | The Elasticsearch <code>_score</code> of this result. |
+|  [sort](./kibana-plugin-core-server.savedobjectsfindresult.sort.md) | <code>unknown[]</code> | The Elasticsearch <code>sort</code> value of this result. |
 
