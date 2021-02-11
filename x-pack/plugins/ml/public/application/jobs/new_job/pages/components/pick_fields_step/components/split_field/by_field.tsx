@@ -25,9 +25,11 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const { categoryFields: originalCategoryFields } = newJobCapsService;
-  const runtimeCategoryFields = filterCategoryFields(jobCreator.runtimeFields);
-  const allCategoryFields = [...originalCategoryFields, ...runtimeCategoryFields];
+  const [runtimeCategoryFields] = useState(filterCategoryFields(jobCreator.runtimeFields));
+  const [allCategoryFields] = useState([
+    ...newJobCapsService.categoryFields,
+    ...runtimeCategoryFields,
+  ]);
 
   const [byField, setByField] = useState(jobCreator.getByField(detectorIndex));
   const categoryFields = useFilteredCategoryFields(

@@ -36,8 +36,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const { fields: originalFields } = newJobCapsService;
-  const fields = [...originalFields, ...jobCreator.runtimeFields];
+  const [fields] = useState([...newJobCapsService.fields, ...jobCreator.runtimeFields]);
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs

@@ -26,9 +26,11 @@ export const SplitFieldSelector: FC = () => {
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
   const canClearSelection = isMultiMetricJobCreator(jc);
 
-  const runtimeCategoryFields = filterCategoryFields(jobCreator.runtimeFields);
-  const { categoryFields: originalCategoryFields } = newJobCapsService;
-  const categoryFields = [...originalCategoryFields, ...runtimeCategoryFields];
+  const [runtimeCategoryFields] = useState(filterCategoryFields(jobCreator.runtimeFields));
+  const [categoryFields] = useState([
+    ...newJobCapsService.categoryFields,
+    ...runtimeCategoryFields,
+  ]);
   const [splitField, setSplitField] = useState(jobCreator.splitField);
 
   useEffect(() => {

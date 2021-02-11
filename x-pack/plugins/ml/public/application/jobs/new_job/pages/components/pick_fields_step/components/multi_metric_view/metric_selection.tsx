@@ -33,8 +33,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   const jobCreator = jc as MultiMetricJobCreator;
 
-  const { fields: originalFields } = newJobCapsService;
-  const fields = [...originalFields, ...jobCreator.runtimeFields];
+  const [fields] = useState([...newJobCapsService.fields, ...jobCreator.runtimeFields]);
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs

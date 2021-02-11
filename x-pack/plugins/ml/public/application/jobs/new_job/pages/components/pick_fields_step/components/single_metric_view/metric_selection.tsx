@@ -32,8 +32,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
 
-  const { fields: originalFields } = newJobCapsService;
-  const fields = [...originalFields, ...jobCreator.runtimeFields];
+  const [fields] = useState([...newJobCapsService.fields, ...jobCreator.runtimeFields]);
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>(
     jobCreator.aggFieldPair !== null ? [{ label: createLabel(jobCreator.aggFieldPair) }] : []
   );
