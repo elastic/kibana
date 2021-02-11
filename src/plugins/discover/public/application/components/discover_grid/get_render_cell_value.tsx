@@ -54,8 +54,9 @@ export const getRenderCellValueFn = (
 
   if (field && field.type === '_source') {
     if (isDetails) {
+      const source = row.fields ? row.fields : row[columnId];
       // nicely formatted JSON for the expanded view
-      return <span>{JSON.stringify(row[columnId], null, 2)}</span>;
+      return <span>{JSON.stringify(source, null, 2)}</span>;
     }
     const formatted = indexPattern.formatHit(row);
 
@@ -81,14 +82,39 @@ export const getRenderCellValueFn = (
   }
 
   if (field?.type === 'geo_point' && rowFlattened && rowFlattened[columnId]) {
-    const valueFormatted = rowFlattened[columnId] as { lat: number; lon: number };
+    const valueFormatted = rowFlattened[columnId] as {
+      lat?: number;
+      lon?: number;
+      coordinates?: number[];
+      type?: 'string';
+    };
+    const getLatLon = () => {
+      if (typeof valueFormatted.lat === 'number' && typeof valueFormatted.lon === 'number') {
+        return {
+          lat: valueFormatted.lat,
+          lon: valueFormatted.lon,
+        };
+      }
+      if (valueFormatted.coordinates && typeof valueFormatted.type) {
+        return {
+          lat: valueFormatted.coordinates[0],
+          lon: valueFormatted.coordinates[1],
+        };
+      }
+      return {
+        lat: valueFormatted.lat,
+        lon: valueFormatted.lon,
+      };
+    };
+    const { lat, lon } = getLatLon();
+
     return (
       <div>
         {i18n.translate('discover.latitudeAndLongitude', {
           defaultMessage: 'Lat: {lat} Lon: {lon}',
           values: {
-            lat: valueFormatted?.lat,
-            lon: valueFormatted?.lon,
+            lat,
+            lon,
           },
         })}
       </div>
