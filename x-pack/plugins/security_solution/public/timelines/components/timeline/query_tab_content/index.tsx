@@ -46,12 +46,12 @@ import { timelineDefaults } from '../../../../timelines/store/timeline/defaults'
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
-import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { HideShowContainer } from '../styles';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import { ToggleExpandedEvent } from '../../../store/timeline/actions';
+import { ToggleDetailPanel } from '../../../store/timeline/actions';
+import { DetailsPanel } from '../../side_panel';
 
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
@@ -139,7 +139,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   dataProviders,
   end,
   eventType,
-  expandedEvent,
+  expandedDetail,
   filters,
   timelineId,
   isLive,
@@ -150,7 +150,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   onEventClosed,
   show,
   showCallOutUnauthorizedMsg,
-  showEventDetails,
+  showExpandedDetails,
   start,
   status,
   sort,
@@ -245,16 +245,17 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const handleOnEventClosed = useCallback(() => {
+  const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, timelineId });
 
-    if (timelineId === TimelineId.active) {
-      activeTimeline.toggleExpandedEvent({
-        eventId: expandedEvent.eventId!,
-        indexName: expandedEvent.indexName!,
-      });
+    if (
+      expandedDetail[TimelineTabs.query]?.panelView &&
+      timelineId === TimelineId.active &&
+      showExpandedDetails
+    ) {
+      activeTimeline.toggleExpandedDetail({});
     }
-  }, [timelineId, onEventClosed, expandedEvent.eventId, expandedEvent.indexName]);
+  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
@@ -350,16 +351,16 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutFooter>
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
-        {showEventDetails && (
+        {showExpandedDetails && (
           <>
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
-              <EventDetails
+              <DetailsPanel
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                handleOnPanelClosed={handleOnPanelClosed}
                 tabType={TimelineTabs.query}
                 timelineId={timelineId}
-                handleOnEventClosed={handleOnEventClosed}
               />
             </ScrollableFlexItem>
           </>
@@ -382,7 +383,7 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       eventType,
-      expandedEvent,
+      expandedDetail,
       filters,
       itemsPerPage,
       itemsPerPageOptions,
@@ -406,7 +407,7 @@ const makeMapStateToProps = () => {
       dataProviders,
       eventType: eventType ?? 'raw',
       end: input.timerange.to,
-      expandedEvent: expandedEvent[TimelineTabs.query] ?? {},
+      expandedDetail,
       filters: timelineFilter,
       timelineId,
       isLive: input.policy.kind === 'interval',
@@ -415,8 +416,9 @@ const makeMapStateToProps = () => {
       kqlMode,
       kqlQueryExpression,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
-      showEventDetails: !!expandedEvent[TimelineTabs.query]?.eventId,
       show,
+      showExpandedDetails:
+        !!expandedDetail[TimelineTabs.query] && !!expandedDetail[TimelineTabs.query]?.panelView,
       sort,
       start: input.timerange.from,
       status,
@@ -437,8 +439,8 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
       })
     );
   },
-  onEventClosed: (args: ToggleExpandedEvent) => {
-    dispatch(timelineActions.toggleExpandedEvent(args));
+  onEventClosed: (args: ToggleDetailPanel) => {
+    dispatch(timelineActions.toggleDetailPanel(args));
   },
 });
 
@@ -460,7 +462,7 @@ const QueryTabContent = connector(
       prevProps.onEventClosed === nextProps.onEventClosed &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.showEventDetails === nextProps.showEventDetails &&
+      prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
       prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
