@@ -96,8 +96,6 @@ export class FormatSelectEditor extends PureComponent<
         fieldFormats
       ),
       format,
-      fieldFormatId: value?.id,
-      fieldFormatParams: value?.params,
       kbnType,
     };
   }
@@ -135,10 +133,12 @@ export class FormatSelectEditor extends PureComponent<
   };
 
   render() {
-    const { fieldFormatEditors, onError } = this.props;
+    const { fieldFormatEditors, onError, value } = this.props;
+    const fieldFormatId = value?.id;
+    const fieldFormatParams = value?.params;
     const { kbnType } = this.state;
 
-    const { fieldTypeFormats, format, fieldFormatId, fieldFormatParams } = this.state;
+    const { fieldTypeFormats, format } = this.state;
 
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
@@ -157,7 +157,7 @@ export class FormatSelectEditor extends PureComponent<
       <>
         <EuiFormRow label={label}>
           <EuiSelect
-            value={fieldFormatId}
+            value={fieldFormatId || ''}
             options={fieldTypeFormats.map((fmt) => {
               return { value: fmt.id || '', text: fmt.title };
             })}
