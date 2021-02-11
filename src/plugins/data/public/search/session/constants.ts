@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { SessionService, ISessionService, SearchSessionInfoProvider } from './session_service';
-export { SearchSessionState } from './search_session_state';
-export { SessionsClient, ISessionsClient } from './sessions_client';
-export { noSearchSessionStorageCapabilityMessage } from './i18n';
-export { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+export const SEARCH_SESSIONS_MANAGEMENT_ID = 'search_sessions';
