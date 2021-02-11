@@ -52,8 +52,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
         >
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.lambdaInputAriaLabel', {
-              defaultMessage:
-                'A multiplier of leaf weights in loss calculations.',
+              defaultMessage: 'A multiplier of leaf weights in loss calculations.',
             })}
             data-test-subj="mlAnalyticsCreateJobFlyoutLambdaInput"
             onChange={(e) =>
@@ -109,8 +108,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
         >
           <EuiFieldNumber
             aria-label={i18n.translate('xpack.ml.dataframe.analytics.create.gammaInputAriaLabel', {
-              defaultMessage:
-                'A multiplier of the tree size in loss calculations.',
+              defaultMessage: 'A multiplier of the tree size in loss calculations.',
             })}
             data-test-subj="mlAnalyticsCreateJobWizardGammaInput"
             onChange={(e) =>
@@ -192,8 +190,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             defaultMessage: 'Randomize seed',
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedText', {
-            defaultMessage:
-              'The seed for the random generator that picks training data.',
+            defaultMessage: 'The seed for the random generator that picks training data.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED]}
@@ -202,8 +199,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.randomizeSeedInputAriaLabel',
               {
-                defaultMessage:
-                  'The seed to the random generator that picks training data.',
+                defaultMessage: 'The seed to the random generator that picks training data.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardRandomizeSeedInput"
@@ -374,7 +370,8 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.softTreeDepthLimitInputAriaLabel',
               {
-                defaultMessage: 'Decision trees that exceed this depth are penalized in loss calculations.',
+                defaultMessage:
+                  'Decision trees that exceed this depth are penalized in loss calculations.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardSoftTreeDepthLimitInput"
@@ -410,7 +407,8 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceInputAriaLabel',
               {
-                defaultMessage: 'Decision trees that exceed this depth are penalized in loss calculations.',
+                defaultMessage:
+                  'Decision trees that exceed this depth are penalized in loss calculations.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardSoftTreeDepthToleranceInput"
