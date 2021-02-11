@@ -8,17 +8,21 @@
 import React, { useMemo } from 'react';
 import { DiscoverProps } from './types';
 import { getTopNavLinks } from './top_nav/get_top_nav_links';
+import { Query, TimeRange } from '../../../../data/common/query';
 
-export type DiscoverTopNavProps = Pick<
-  DiscoverProps,
-  'indexPattern' | 'updateQuery' | 'state' | 'opts'
-> & { onOpenInspector: () => void };
+export type DiscoverTopNavProps = Pick<DiscoverProps, 'indexPattern' | 'opts'> & {
+  onOpenInspector: () => void;
+  query?: Query;
+  savedQuery?: string;
+  updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+};
 
 export const DiscoverTopNav = ({
   indexPattern,
   opts,
   onOpenInspector,
-  state,
+  query,
+  savedQuery,
   updateQuery,
 }: DiscoverTopNavProps) => {
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
@@ -58,9 +62,9 @@ export const DiscoverTopNav = ({
       indexPatterns={[indexPattern]}
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
-      query={state.query}
+      query={query}
       setMenuMountPoint={opts.setHeaderActionMenu}
-      savedQueryId={state.savedQuery}
+      savedQueryId={savedQuery}
       screenTitle={opts.savedSearch.title}
       showDatePicker={showDatePicker}
       showSaveQuery={!!opts.services.capabilities.discover.saveQuery}

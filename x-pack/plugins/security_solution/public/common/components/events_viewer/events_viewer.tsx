@@ -117,7 +117,7 @@ interface Props {
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
-  id: string;
+  id: TimelineId;
   indexNames: string[];
   indexPattern: IIndexPattern;
   isLive: boolean;
