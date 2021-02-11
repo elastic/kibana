@@ -13,8 +13,6 @@ import { PointSeriesOptions } from './point_series';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { ChartType } from '../../../../../common';
-import { ValidationVisOptionsProps } from '../../common';
-import { VisParams } from '../../../../types';
 import { getAggs, getVis, getStateParams } from './point_series.mocks';
 
 jest.mock('../../../../services', () => ({
