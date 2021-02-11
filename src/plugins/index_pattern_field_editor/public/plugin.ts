@@ -46,7 +46,11 @@ export class IndexPatternFieldEditorPlugin
           return capabilities.management.kibana.indexPatterns;
         },
       },
-      DeleteRuntimeFieldProvider: getDeleteProvider(data.indexPatterns, usageCollection),
+      DeleteRuntimeFieldProvider: getDeleteProvider(
+        data.indexPatterns,
+        usageCollection,
+        core.notifications
+      ),
     };
   }
 
