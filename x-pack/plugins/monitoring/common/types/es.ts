@@ -154,6 +154,7 @@ export interface ElasticsearchLegacySource {
   };
   cluster_state?: {
     status?: string;
+    state_uuid?: string;
     nodes?: {
       [nodeUuid: string]: {
         ephemeral_id?: string;
@@ -312,12 +313,25 @@ export interface ElasticsearchMetricbeatNode {
 export interface ElasticsearchMetricbeatSource {
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
+    index?: {
+      name?: string;
+    };
+    node?: {
+      name?: string;
+    };
+    shard?: ElasticsearchLegacySource['shard'];
     cluster?: {
       name?: string;
       id?: string;
       stats?: {
         license?: ElasticsearchLegacySource['license'];
-        state?: {};
+        state?: {
+          state_uuid?: string;
+          master_node?: string;
+          nodes?: {
+            [uuid: string]: {};
+          };
+        };
         status?: string;
         version?: string;
         indices?: {

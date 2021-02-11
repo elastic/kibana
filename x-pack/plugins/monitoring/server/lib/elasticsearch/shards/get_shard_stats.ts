@@ -6,12 +6,20 @@
  */
 
 import { get } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../../error_missing_required';
+// @ts-ignore
 import { createQuery } from '../../create_query';
+// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
+// @ts-ignore
 import { normalizeIndexShards, normalizeNodeShards } from './normalize_shard_objects';
+// @ts-ignore
 import { getShardAggs } from './get_shard_stat_aggs';
+// @ts-ignore
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
+import { LegacyRequest } from '../../../types';
+import { ElasticsearchModifiedSource } from '../../../../common/types/es';
 
 export function handleResponse(resp, includeNodes, includeIndices, cluster) {
   let indices;
@@ -37,21 +45,37 @@ export function handleResponse(resp, includeNodes, includeIndices, cluster) {
 }
 
 export function getShardStats(
-  req,
-  esIndexPattern,
-  cluster,
+  req: LegacyRequest,
+  esIndexPattern: string,
+  cluster: ElasticsearchModifiedSource,
   { includeNodes = false, includeIndices = false, indexName = null, nodeUuid = null } = {}
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardStats');
 
   const config = req.server.config();
   const metric = ElasticsearchMetric.getMetricFields();
-  const filters = [{ term: { state_uuid: get(cluster, 'cluster_state.state_uuid') } }];
+  const filters = [];
+  if (cluster.cluster_state?.state_uuid) {
+    filters.push({ term: { state_uuid: cluster.cluster_state.state_uuid } });
+  } else if (cluster.elasticsearch?.cluster?.stats?.state?.state_uuid) {
+    filters.push({
+      term: {
+        'elasticsearch.cluster.state.id': cluster.elasticsearch.cluster.stats.state.state_uuid,
+      },
+    });
+  }
   if (indexName) {
-    filters.push({ term: { 'shard.index': indexName } });
+    filters.push(
+      ...[
+        { term: { 'shard.index': indexName } },
+        { term: { 'elasticsearch.index.name': indexName } },
+      ]
+    );
   }
   if (nodeUuid) {
-    filters.push({ term: { 'shard.node': nodeUuid } });
+    filters.push(
+      ...[{ term: { 'shard.node': nodeUuid } }, { term: { 'elasticsearch.node.name': nodeUuid } }]
+    );
   }
   const params = {
     index: esIndexPattern,
@@ -60,8 +84,8 @@ export function getShardStats(
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        type: 'shards',
-        clusterUuid: cluster.cluster_uuid,
+        types: ['shard', 'shards'],
+        clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,
       }),

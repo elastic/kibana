@@ -23,13 +23,18 @@ export function handleResponse(response: ElasticsearchResponse) {
   // deduplicate any shards from earlier days with the same cluster state state_uuid
   const uniqueShards = new Set<string>();
 
-  // map into object with shard and source properties
+  // map into object with shard and source propertiesd
   return hits.reduce((shards: Array<ElasticsearchLegacySource['shard']>, hit) => {
-    const shard = hit._source.shard;
+    const shard = hit._source.shard ?? hit._source.elasticsearch;
 
     if (shard) {
+      const index = shard.index?.name ?? shard.index;
+      const shardNumber = shard.shard?.number ?? shard.shard;
+      const primary = shard.shard?.primary ?? shard.primary;
+      const relocatingNode = shard.shard?.relocating_node?.uuid ?? shard.relocating_node;
+      const node = shard.node?.name ?? shard.node;
       // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
-      const shardId = `${shard.index}-${shard.shard}-${shard.primary}-${shard.relocating_node}-${shard.node}`;
+      const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
 
       if (!uniqueShards.has(shardId)) {
         shards.push(shard);
@@ -52,10 +57,34 @@ export function getShardAllocation(
 ) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getShardAllocation');
 
-  const filters = [{ term: { state_uuid: stateUuid } }, shardFilter];
+  const filters = [
+    {
+      bool: {
+        should: [
+          {
+            term: {
+              state_uuid: stateUuid,
+            },
+          },
+          {
+            term: {
+              'elasticsearch.cluster.state.id': stateUuid,
+            },
+          },
+        ],
+      },
+    },
+    shardFilter,
+  ];
+
   if (!showSystemIndices) {
     filters.push({
-      bool: { must_not: [{ prefix: { 'shard.index': '.' } }] },
+      bool: {
+        must_not: [
+          { prefix: { 'shard.index': '.' } },
+          { prefix: { 'elasticsearch.index.name': '.' } },
+        ],
+      },
     });
   }
 
@@ -67,7 +96,7 @@ export function getShardAllocation(
     size: config.get('monitoring.ui.max_bucket_size'),
     ignoreUnavailable: true,
     body: {
-      query: createQuery({ type: 'shards', clusterUuid, metric, filters }),
+      query: createQuery({ types: ['shard', 'shards'], clusterUuid, metric, filters }),
     },
   };
 
