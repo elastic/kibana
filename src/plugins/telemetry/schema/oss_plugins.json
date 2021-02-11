@@ -3702,7 +3702,7 @@
                         "type": "long"
                       },
                       "alias": {
-                        "type": "text"
+                        "type": "keyword"
                       },
                       "primaryStoreSizeBytes": {
                         "type": "long"
