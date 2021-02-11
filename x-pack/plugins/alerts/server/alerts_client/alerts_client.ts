@@ -462,6 +462,70 @@ export class AlertsClient {
     })[0];
   }
 
+  public async getAlertsInstanceSummaryFromEventLog(
+    alerts: Array<SanitizedAlert<{ bar: boolean }>>,
+    dateStart?: string,
+    dateEnd?: string
+  ): Promise<AlertInstanceSummary[]> {
+    const alertsIds = alerts.map((alert) => alert.id);
+    const eventLogClient = await this.getEventLogClient();
+    const dateNow = new Date();
+    const minDate = new Date('0001-01-01T00:00:00Z');
+    this.logger.debug(
+      `getAlertsInstanceSummaryFromEventLog(): search the event log for alerts by ids=[${alertsIds.join(
+        ','
+      )}]`
+    );
+    let instancesLatestStateSummaries: Array<{
+      savedObjectId: string;
+      summary: RawEventLogAlertsSummary;
+    }> = [];
+    try {
+      instancesLatestStateSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+        instances: Record<string, unknown>;
+        last_execution_state: Record<string, unknown>;
+        errors_state: Record<string, unknown>;
+      }>(
+        'alert',
+        alertsIds,
+        alertActiveAndResolvedInstancesSummaryQueryAggregation,
+        dateStart,
+        dateEnd
+      );
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertsInstanceSummaryFromEventLog(): error searching event log latest instances state for alerts by ids=[${alertsIds.join(
+          ','
+        )}]: ${err.message}`
+      );
+    }
+
+    let instancesCreatedSummaries: Array<{
+      savedObjectId: string;
+      summary: Pick<RawEventLogAlertsSummary, 'instances'>;
+    }> = [];
+    try {
+      instancesCreatedSummaries = await eventLogClient.getEventsSummaryBySavedObjectIds<{
+        instances: Record<string, unknown>;
+        last_execution_state: Record<string, unknown>;
+      }>('alert', alertsIds, alertInstanceCreatedQueryAggregation);
+    } catch (err) {
+      this.logger.debug(
+        `alertsClient.getAlertsInstanceSummaryFromEventLog(): error searching event log instances created for alert alerts by ids=[${alertsIds.join(
+          ','
+        )}]: ${err.message}`
+      );
+    }
+
+    return alertsInstanceSummaryFromEventLog({
+      alerts,
+      instancesLatestStateSummaries,
+      instancesCreatedSummaries,
+      dateStart: dateStart ?? minDate.toISOString(),
+      dateEnd: dateEnd ?? dateNow.toISOString(),
+    });
+  }
+
   public async find<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
   }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {

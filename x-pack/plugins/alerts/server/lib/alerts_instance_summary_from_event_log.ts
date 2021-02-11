@@ -147,34 +147,53 @@ export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
       size: MAX_BUCKETS_LIMIT,
     },
     aggs: {
-      last_state: {
+      last_active_state: {
         filter: {
-          bool: {
-            should: [
-              { term: { 'event.action': 'active-instance' } },
-              { term: { 'event.action': 'new-instance' } },
-              { term: { 'event.action': 'recovered-instance' } },
-            ],
-          },
+          term: { 'event.action': 'active-instance' },
         },
         aggs: {
-          action: {
-            top_hits: {
-              sort: [
-                {
-                  '@timestamp': {
-                    order: 'desc',
-                  },
-                },
-              ],
-              _source: {
-                includes: [
-                  '@timestamp',
-                  'event.action',
-                  'kibana.alerting.action_group_id',
-                  'kibana.alerting.action_subgroup',
-                ],
-              },
+          max_timestamp: { max: { field: '@timestamp' } },
+        },
+      },
+      last_new_state: {
+        filter: {
+          term: { 'event.action': 'new-instance' },
+        },
+        aggs: {
+          max_timestamp: { max: { field: '@timestamp' } },
+        },
+      },
+      last_recovered_state: {
+        filter: {
+          term: { 'event.action': 'new-instance' },
+        },
+        aggs: {
+          max_timestamp: { max: { field: '@timestamp' } },
+        },
+      },
+      last_action_group_id: {
+        filter: {
+          exists: { field: 'kibana.alerting.action_group_id' },
+        },
+        aggs: {
+          action_group_id: {
+            top_metrics: {
+              metrics: { field: 'kibana.alerting.action_group_id' },
+              sort: { '@timestamp': 'desc' },
+              size: 1,
+            },
+          },
+        },
+      },
+      last_action_subgroup: {
+        filter: {
+          exists: { field: 'kibana.alerting.action_subgroup' },
+        },
+        aggs: {
+          action_subgroup: {
+            top_metrics: {
+              metrics: { field: 'kibana.alerting.action_subgroup' },
+              sort: { '@timestamp': 'desc' },
               size: 1,
             },
           },
@@ -190,17 +209,10 @@ export const alertActiveAndResolvedInstancesSummaryQueryAggregation = {
     },
     aggs: {
       action: {
-        top_hits: {
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-          _source: {
-            includes: ['@timestamp', 'error.message'],
-          },
+        top_metrics: {
+          metrics: { field: 'error.message' },
+          sort: { '@timestamp': 'desc' },
+          size: 1,
         },
       },
     },

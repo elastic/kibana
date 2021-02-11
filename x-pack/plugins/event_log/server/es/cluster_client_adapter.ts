@@ -409,6 +409,7 @@ export class ClusterClientAdapter {
         index,
         body,
       });
+      console.log(JSON.stringify(result));
       return result.body.aggregations.saved_objects.saved_object.ids.buckets.map(
         (savedObject: Record<string, unknown>) => ({
           savedObjectId: savedObject.key,
