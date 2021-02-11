@@ -363,7 +363,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.softTreeDepthLimitText', {
             defaultMessage:
-              'Tree depth limit that increases regularized loss when exceeded. Must be greater than or equal to 0. ',
+              'Decision trees that exceed this depth are penalized in loss calculations. Must be greater than or equal to 0. ',
           })}
           isInvalid={
             advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.SOFT_TREE_DEPTH_LIMIT] !== undefined
@@ -374,7 +374,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.softTreeDepthLimitInputAriaLabel',
               {
-                defaultMessage: 'Tree depth limit that increases regularized loss when exceeded',
+                defaultMessage: 'Decision trees that exceed this depth are penalized in loss calculations.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardSoftTreeDepthLimitInput"
@@ -398,7 +398,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceText',
             {
               defaultMessage:
-                'Controls how quickly the regularized loss increases when the tree depth exceeds soft_tree_depth_limit. Must be greater than or equal to 0.01. ',
+                'Controls how quickly the loss increases when tree depths exceed soft limits. Must be greater than or equal to 0.01. ',
             }
           )}
           isInvalid={
@@ -410,7 +410,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.softTreeDepthToleranceInputAriaLabel',
               {
-                defaultMessage: 'Tree depth limit that increases regularized loss when exceeded',
+                defaultMessage: 'Decision trees that exceed this depth are penalized in loss calculations.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardSoftTreeDepthToleranceInput"
