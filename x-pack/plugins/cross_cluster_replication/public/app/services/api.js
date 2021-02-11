@@ -100,7 +100,8 @@ export const resumeAutoFollowPattern = (id) => {
 };
 
 /* Follower Index */
-export const loadFollowerIndices = () => httpClient.get(`${API_BASE_PATH}/follower_indices`);
+export const loadFollowerIndices = (asSystemRequest) =>
+  httpClient.get(`${API_BASE_PATH}/follower_indices`, { asSystemRequest });
 
 export const getFollowerIndex = (id) =>
   httpClient.get(`${API_BASE_PATH}/follower_indices/${encodeURIComponent(id)}`);
