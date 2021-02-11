@@ -325,7 +325,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               <EuiIconTip
                 color="subdued"
                 content={i18n.translate('xpack.lens.indexPattern.terms.orderByHelp', {
-                  defaultMessage: `Specifies the function that retrieves the top values.`,
+                  defaultMessage: `Specifies the dimension the top values are ranked by.`,
                 })}
                 iconProps={{
                   className: 'eui-alignTop',
