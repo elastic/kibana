@@ -13,8 +13,12 @@ import { installTemplate } from './install';
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix not set', async () => {
   const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation((_, params) => {
-    if (params.method === 'GET' && params.path === '/_index_template/metrics-package.dataset') {
+  callCluster.mockImplementation(async (_, params) => {
+    if (
+      params &&
+      params.method === 'GET' &&
+      params.path === '/_index_template/metrics-package.dataset'
+    ) {
       return { index_templates: [] };
     }
   });
@@ -51,8 +55,12 @@ test('tests installPackage to use correct priority and index_patterns for data s
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to false', async () => {
   const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation((_, params) => {
-    if (params.method === 'GET' && params.path === '/_index_template/metrics-package.dataset') {
+  callCluster.mockImplementation(async (_, params) => {
+    if (
+      params &&
+      params.method === 'GET' &&
+      params.path === '/_index_template/metrics-package.dataset'
+    ) {
       return { index_templates: [] };
     }
   });
@@ -90,8 +98,12 @@ test('tests installPackage to use correct priority and index_patterns for data s
 
 test('tests installPackage to use correct priority and index_patterns for data stream with dataset_is_prefix set to true', async () => {
   const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation((_, params) => {
-    if (params.method === 'GET' && params.path === '/_index_template/metrics-package.dataset') {
+  callCluster.mockImplementation(async (_, params) => {
+    if (
+      params &&
+      params.method === 'GET' &&
+      params.path === '/_index_template/metrics-package.dataset'
+    ) {
       return { index_templates: [] };
     }
   });
@@ -129,8 +141,12 @@ test('tests installPackage to use correct priority and index_patterns for data s
 
 test('tests installPackage remove the aliases property if the property existed', async () => {
   const callCluster = elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser;
-  callCluster.mockImplementation((_, params) => {
-    if (params.method === 'GET' && params.path === '/_index_template/metrics-package.dataset') {
+  callCluster.mockImplementation(async (_, params) => {
+    if (
+      params &&
+      params.method === 'GET' &&
+      params.path === '/_index_template/metrics-package.dataset'
+    ) {
       return {
         index_templates: [
           {
