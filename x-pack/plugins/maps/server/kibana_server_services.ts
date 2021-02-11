@@ -23,8 +23,10 @@ export const setIndexPatternsService = async (
   indexPatternsServiceFactory: IndexPatternsServiceStart['indexPatternsServiceFactory'],
   elasticsearchClient: ElasticsearchClient
 ) => {
-  const savedObjectsClient = getInternalRepository();
-  // @ts-ignore
-  indexPatternsService = await indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient);
+  indexPatternsService = await indexPatternsServiceFactory(
+    // @ts-expect-error
+    getInternalRepository(),
+    elasticsearchClient
+  );
 };
 export const getIndexPatternsService = () => indexPatternsService;
