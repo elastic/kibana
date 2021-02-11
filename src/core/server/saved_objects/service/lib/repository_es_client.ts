@@ -14,11 +14,13 @@ import { decorateEsError } from './decorate_es_error';
 
 const methods = [
   'bulk',
+  'closePointInTime',
   'create',
   'delete',
   'get',
   'index',
   'mget',
+  'openPointInTime',
   'search',
   'update',
   'updateByQuery',

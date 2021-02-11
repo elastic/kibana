@@ -8,7 +8,8 @@
 
 import React, { useCallback } from 'react';
 
-import { IndexPattern } from '../../shared_imports';
+import { IndexPattern, UsageCollectionStart } from '../../shared_imports';
+import { pluginName } from '../../constants';
 import { DeleteRuntimeFieldProvider, Props as DeleteProviderProps } from './delete_field_provider';
 import { DataPublicPluginStart } from '../../../../data/public';
 
@@ -18,7 +19,8 @@ export interface Props extends Omit<DeleteProviderProps, 'onConfirmDelete'> {
 }
 
 export const getDeleteProvider = (
-  indexPatternService: DataPublicPluginStart['indexPatterns']
+  indexPatternService: DataPublicPluginStart['indexPatterns'],
+  usageCollection: UsageCollectionStart
 ): React.FunctionComponent<Props> => {
   return React.memo(({ indexPattern, children, onDelete }: Props) => {
     const deleteFields = useCallback(
@@ -26,6 +28,15 @@ export const getDeleteProvider = (
         fieldNames.forEach((fieldName) => {
           indexPattern.removeRuntimeField(fieldName);
         });
+
+        try {
+          usageCollection.reportUiCounter(
+            pluginName,
+            usageCollection.METRIC_TYPE.COUNT,
+            'delete_runtime'
+          );
+          // eslint-disable-next-line no-empty
+        } catch {}
 
         await indexPatternService.updateSavedObject(indexPattern);
 

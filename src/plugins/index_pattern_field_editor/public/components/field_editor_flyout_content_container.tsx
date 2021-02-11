@@ -15,8 +15,10 @@ import {
   IndexPattern,
   DataPublicPluginStart,
   RuntimeType,
+  UsageCollectionStart,
 } from '../shared_imports';
 import { Field, PluginStart, InternalFieldType } from '../types';
+import { pluginName } from '../constants';
 import { deserializeField, getRuntimeFieldValidator } from '../lib';
 import { Props as FieldEditorProps } from './field_editor/field_editor';
 import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
@@ -61,6 +63,7 @@ export interface Props {
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
   fieldFormats: DataPublicPluginStart['fieldFormats'];
   uiSettings: CoreStart['uiSettings'];
+  usageCollection: UsageCollectionStart;
 }
 
 /**
@@ -81,6 +84,7 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormatEditors,
   fieldFormats,
   uiSettings,
+  usageCollection,
 }: Props) => {
   const fieldToEdit = deserializeField(indexPattern, field);
   const [Editor, setEditor] = useState<React.ComponentType<FieldEditorProps> | null>(null);
@@ -93,6 +97,14 @@ export const FieldEditorFlyoutContentContainer = ({
       const { script } = updatedField;
 
       if (fieldTypeToProcess === 'runtime') {
+        try {
+          usageCollection.reportUiCounter(
+            pluginName,
+            usageCollection.METRIC_TYPE.COUNT,
+            'save_runtime'
+          );
+          // eslint-disable-next-line no-empty
+        } catch {}
         // rename an existing runtime field
         if (field?.name && field.name !== updatedField.name) {
           indexPattern.removeRuntimeField(field.name);
@@ -102,6 +114,15 @@ export const FieldEditorFlyoutContentContainer = ({
           type: updatedField.type as RuntimeType,
           script,
         });
+      } else {
+        try {
+          usageCollection.reportUiCounter(
+            pluginName,
+            usageCollection.METRIC_TYPE.COUNT,
+            'save_concrete'
+          );
+          // eslint-disable-next-line no-empty
+        } catch {}
       }
 
       const editedField = indexPattern.getFieldByName(updatedField.name);
@@ -138,7 +159,15 @@ export const FieldEditorFlyoutContentContainer = ({
         setIsSaving(false);
       }
     },
-    [onSave, indexPattern, indexPatternService, notifications, fieldTypeToProcess, field?.name]
+    [
+      onSave,
+      indexPattern,
+      indexPatternService,
+      notifications,
+      fieldTypeToProcess,
+      field?.name,
+      usageCollection,
+    ]
   );
 
   const validateRuntimeField = useMemo(() => getRuntimeFieldValidator(indexPattern.title, search), [

@@ -24,7 +24,6 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const browser = getService('browser');
 
   return {
     async assertJobTypeSelectExists() {
@@ -273,45 +272,11 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
-    async setTrainingPercent(trainingPercent: string) {
-      const slider = await testSubjects.find('mlAnalyticsCreateJobWizardTrainingPercentSlider');
-
-      let currentValue = await slider.getAttribute('value');
-      let currentDiff = +currentValue - +trainingPercent;
-
-      await retry.tryForTime(60 * 1000, async () => {
-        if (currentDiff === 0) {
-          return true;
-        } else {
-          if (currentDiff > 0) {
-            if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_DOWN);
-            } else {
-              slider.type(browser.keys.ARROW_LEFT);
-            }
-          } else {
-            if (Math.abs(currentDiff) >= 10) {
-              slider.type(browser.keys.PAGE_UP);
-            } else {
-              slider.type(browser.keys.ARROW_RIGHT);
-            }
-          }
-          await retry.tryForTime(1000, async () => {
-            const newValue = await slider.getAttribute('value');
-            if (newValue !== currentValue) {
-              currentValue = newValue;
-              currentDiff = +currentValue - +trainingPercent;
-              return true;
-            } else {
-              throw new Error(`slider value should have changed, but is still ${currentValue}`);
-            }
-          });
-
-          throw new Error(`slider value should be '${trainingPercent}' (got '${currentValue}')`);
-        }
-      });
-
-      await this.assertTrainingPercentValue(trainingPercent);
+    async setTrainingPercent(trainingPercent: number) {
+      await mlCommonUI.setSliderValue(
+        'mlAnalyticsCreateJobWizardTrainingPercentSlider',
+        trainingPercent
+      );
     },
 
     async assertConfigurationStepActive() {
