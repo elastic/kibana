@@ -13,11 +13,9 @@ import { TaskStatus } from './task';
 
 describe('Buffered Task Store', () => {
   test('proxies the TaskStore for `maxAttempts` and `remove`', async () => {
-    const taskStore = taskStoreMock.create({ maxAttempts: 10 });
+    const taskStore = taskStoreMock.create();
     taskStore.bulkUpdate.mockResolvedValue([]);
     const bufferedStore = new BufferedTaskStore(taskStore, {});
-
-    expect(bufferedStore.maxAttempts).toEqual(10);
 
     bufferedStore.remove('1');
     expect(taskStore.remove).toHaveBeenCalledWith('1');
@@ -25,7 +23,7 @@ describe('Buffered Task Store', () => {
 
   describe('update', () => {
     test("proxies the TaskStore's `bulkUpdate`", async () => {
-      const taskStore = taskStoreMock.create({ maxAttempts: 10 });
+      const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
       const task = mockTask();
@@ -37,7 +35,7 @@ describe('Buffered Task Store', () => {
     });
 
     test('handles partially successfull bulkUpdates resolving each call appropriately', async () => {
-      const taskStore = taskStoreMock.create({ maxAttempts: 10 });
+      const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
       const tasks = [mockTask(), mockTask(), mockTask()];
@@ -61,7 +59,7 @@ describe('Buffered Task Store', () => {
     });
 
     test('handles multiple items with the same id', async () => {
-      const taskStore = taskStoreMock.create({ maxAttempts: 10 });
+      const taskStore = taskStoreMock.create();
       const bufferedStore = new BufferedTaskStore(taskStore, {});
 
       const duplicateIdTask = mockTask();
