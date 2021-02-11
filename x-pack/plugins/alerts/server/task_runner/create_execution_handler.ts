@@ -161,7 +161,7 @@ export function createExecutionHandler<
         apiKey: apiKey ?? null,
         source: asSavedObjectExecutionSource({
           id: alertId,
-          type: 'alert',
+          type: 'rule',
         }),
       });
 
@@ -176,7 +176,7 @@ export function createExecutionHandler<
             action_subgroup: actionSubgroup,
           },
           saved_objects: [
-            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
+            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'rule', id: alertId, ...namespace },
             { type: 'action', id: action.id, ...namespace },
           ],
         },

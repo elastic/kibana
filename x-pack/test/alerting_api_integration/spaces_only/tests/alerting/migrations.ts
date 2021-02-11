@@ -14,7 +14,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('migrations', () => {
+  describe.only('migrations', () => {
     before(async () => {
       await esArchiver.load('alerts');
     });

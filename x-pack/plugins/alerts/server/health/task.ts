@@ -72,7 +72,7 @@ export function healthCheckTaskRunner(
       async run() {
         try {
           const alertingHealthStatus = await getHealth(
-            (await coreStartServices)[0].savedObjects.createInternalRepository(['alert'])
+            (await coreStartServices)[0].savedObjects.createInternalRepository(['rule'])
           );
           return {
             state: {

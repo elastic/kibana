@@ -98,7 +98,7 @@ export class AlertsClientFactory {
       alertTypeRegistry: this.alertTypeRegistry,
       unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
         excludedWrappers: ['security'],
-        includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
+        includedHiddenTypes: ['rule', 'api_key_pending_invalidation'],
       }),
       authorization,
       actionsAuthorization: actions.getActionsAuthorizationWithRequest(request),

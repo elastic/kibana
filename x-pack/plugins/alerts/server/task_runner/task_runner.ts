@@ -110,7 +110,7 @@ export class TaskRunner<
     const {
       attributes: { apiKey },
     } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
-      'alert',
+      'rule',
       alertId,
       { namespace }
     );
@@ -460,7 +460,7 @@ export class TaskRunner<
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
+            type: 'rule',
             id: alertId,
             namespace,
           },
@@ -629,7 +629,7 @@ function generateNewAndRecoveredInstanceEvents<
         saved_objects: [
           {
             rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
+            type: 'rule',
             id: alertId,
             namespace,
           },

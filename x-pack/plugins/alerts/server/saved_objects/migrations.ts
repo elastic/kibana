@@ -41,14 +41,24 @@ export function getMigrations(
     RawAlert,
     RawAlert
   >(
-    // migrate all documents in 7.11 in order to add the "updatedAt" and "notifyWhen" fields
+    // migrate all documents in 7.12 in order to add the "updatedAt" and "notifyWhen" fields
     (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
     pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
+  );
+
+  const migrationAlertToRule = encryptedSavedObjects.createMigration<
+    RawAlert,
+    RawAlert
+  >(
+    // migrate all documents in 7.12 in order to turn them into rules
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => true,
+    convertAlertIntoRule
   );
 
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
+    '7.12.0': executeMigrationWithErrorHandling(migrationAlertToRule, '7.12.0'),
   };
 }
 
@@ -92,6 +102,20 @@ const setNotifyWhen = (
       ...doc.attributes,
       notifyWhen,
     },
+  };
+};
+
+const convertAlertIntoRule = (
+  { migrationVersion, ...doc}: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> => {
+  console.log(`=-=-=-=-=-=-=-=-=-=-=-`)
+  console.log(`=-=-=-=-=-=-=-=-=-=-=-`)
+  console.log(JSON.stringify(doc))
+  console.log(`=-=-=-=-=-=-=-=-=-=-=-`)
+  console.log(`=-=-=-=-=-=-=-=-=-=-=-`)
+  return {
+    ...doc,
+    type: 'rule'
   };
 };
 

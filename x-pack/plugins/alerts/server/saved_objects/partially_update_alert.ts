@@ -43,7 +43,7 @@ export async function partiallyUpdateAlert(
   const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version', 'refresh');
 
   try {
-    await savedObjectsClient.update<RawAlert>('alert', id, attributeUpdates, updateOptions);
+    await savedObjectsClient.update<RawAlert>('rule', id, attributeUpdates, updateOptions);
   } catch (err) {
     if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return;

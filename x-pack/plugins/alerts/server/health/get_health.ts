@@ -27,9 +27,9 @@ export const getHealth = async (
   };
 
   const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
+    filter: `rule.attributes.executionStatus.status:error and rule.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
     fields: ['executionStatus'],
-    type: 'alert',
+    type: 'rule',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
@@ -44,9 +44,9 @@ export const getHealth = async (
   }
 
   const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
+    filter: `rule.attributes.executionStatus.status:error and rule.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
     fields: ['executionStatus'],
-    type: 'alert',
+    type: 'rule',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
@@ -61,9 +61,9 @@ export const getHealth = async (
   }
 
   const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
+    filter: `rule.attributes.executionStatus.status:error and rule.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
     fields: ['executionStatus'],
-    type: 'alert',
+    type: 'rule',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
@@ -78,9 +78,9 @@ export const getHealth = async (
   }
 
   const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: 'not alert.attributes.executionStatus.status:error',
+    filter: 'not rule.attributes.executionStatus.status:error',
     fields: ['executionStatus'],
-    type: 'alert',
+    type: 'rule',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
   });

@@ -44,6 +44,12 @@ export function setupSavedObjects(
     migrations: getMigrations(encryptedSavedObjects),
     mappings: mappings.alert,
   });
+  savedObjects.registerType({
+    name: 'rule',
+    hidden: true,
+    namespaceType: 'single',
+    mappings: mappings.alert,
+  });
 
   savedObjects.registerType({
     name: 'api_key_pending_invalidation',
