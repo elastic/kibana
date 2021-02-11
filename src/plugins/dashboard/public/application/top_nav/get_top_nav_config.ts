@@ -147,7 +147,7 @@ function getCancelConfig(action: NavAction) {
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Exit edit mode',
     }),
-    testId: 'dashboardViewOnlyMode',
+    testId: 'dashboardCancelMenuItem',
     run: action,
   };
 }

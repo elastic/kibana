@@ -238,14 +238,9 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return await testSubjects.exists('dashboardEditMode');
     }
 
-    public async clickCancelOutOfEditMode() {
-      log.debug('clickCancelOutOfEditMode');
-      await testSubjects.click('dashboardViewOnlyMode');
-    }
-
-    public async clickDiscardChanges() {
-      log.debug('clickDiscardChanges');
-      await testSubjects.click('dashboardDiscardChanges');
+    public async clickCancel() {
+      log.debug('clickCancel');
+      await testSubjects.click('dashboardCancelMenuItem');
     }
 
     public async clickQuickSave() {

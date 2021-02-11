@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('create new dashboard opens in edit mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.clickCancelOutOfEditMode();
+      await PageObjects.dashboard.clickCancel();
     });
 
     it('existing dashboard opens in view mode', async function () {
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickCancel();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.setQuery(`${originalQuery}and extra stuff`);
           await queryBar.submitQuery();
 
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickCancel();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(false);
 
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickCancel();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             redirectToOrigin: true,
           });
 
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickCancel();
           // for this sleep see https://github.com/elastic/kibana/issues/22299
           await PageObjects.common.sleep(500);
 
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
 
           await dashboardAddPanel.addVisualization('new viz panel');
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickCancel();
 
           // confirm lose changes
           await PageObjects.common.clickConfirmOnModal();
@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2015 @ 06:31:44.000',
             'Sep 19, 2015 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.clickDiscardChanges();
+          await PageObjects.dashboard.clickCancel();
 
           await PageObjects.common.clickCancelOnModal();
           await PageObjects.dashboard.saveDashboard(dashboardName, {
@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const newTime = await PageObjects.timePicker.getTimeConfig();
 
-        await PageObjects.dashboard.clickDiscardChanges();
+        await PageObjects.dashboard.clickCancel();
 
         await PageObjects.common.clickCancelOnModal();
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Oct 19, 2014 @ 06:31:44.000',
           'Dec 19, 2014 @ 06:31:44.000'
         );
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.dashboard.clickCancel();
 
         await PageObjects.common.expectConfirmModalOpenState(false);
       });
@@ -235,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const originalQuery = await queryBar.getQueryString();
         await queryBar.setQuery(`${originalQuery}extra stuff`);
 
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.dashboard.clickCancel();
 
         await PageObjects.common.expectConfirmModalOpenState(false);
 
