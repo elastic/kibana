@@ -234,6 +234,7 @@ export class TaskRunner<
       (rawAlertInstance) => new AlertInstance<InstanceState, InstanceContext>(rawAlertInstance)
     );
     const originalAlertInstances = cloneDeep(alertInstances);
+    const originalAlertInstanceIds = new Set(Object.keys(alertRawInstances));
 
     const eventLogger = this.context.eventLogger;
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
@@ -282,8 +283,8 @@ export class TaskRunner<
     );
     const recoveredAlertInstances = pickBy(
       alertInstances,
-      (alertInstance: AlertInstance<InstanceState, InstanceContext>) =>
-        !alertInstance.hasScheduledActions()
+      (alertInstance: AlertInstance<InstanceState, InstanceContext>, id) =>
+        !alertInstance.hasScheduledActions() && originalAlertInstanceIds.has(id)
     );
 
     logActiveAndRecoveredInstances({
