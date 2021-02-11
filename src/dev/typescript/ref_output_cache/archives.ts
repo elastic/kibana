@@ -14,6 +14,7 @@ import { pipeline } from 'stream';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import Axios from 'axios';
+import del from 'del';
 
 // https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
@@ -56,7 +57,7 @@ export class Archives {
       const sha = name.replace('.zip', '');
       log.verbose('identified archive for', sha);
       const s = await Fs.stat(path);
-      const time = Math.max(s.atimeMs, s.ctimeMs, s.mtimeMs);
+      const time = Math.max(s.atimeMs, s.mtimeMs);
       bySha.set(sha, {
         path,
         time,
@@ -81,15 +82,16 @@ export class Archives {
     return this.bySha.get(sha);
   }
 
-  async cleanup() {
-    // sort archives by time desc
-    const archives = Array.from(this.bySha.values()).sort((a, b) => b.time - a.time);
-
-    // delete the 11th+ archive
-    for (const { sha, path } of archives.slice(10)) {
-      await Fs.unlink(path);
+  async delete(sha: string) {
+    const archive = this.get(sha);
+    if (archive) {
+      await Fs.unlink(archive.path);
       this.bySha.delete(sha);
     }
+  }
+
+  *[Symbol.iterator]() {
+    yield* this.bySha.values();
   }
 
   /**
@@ -106,9 +108,11 @@ export class Archives {
     const url = `https://ts-refs-cache.kibana.dev/${sha}.zip`;
     this.log.debug('attempting to download cache for', sha, 'from', url);
 
+    const filename = `${sha}.zip`;
+    const target = Path.resolve(this.workDir, 'archives', `${filename}`);
+    const tmpTarget = `${target}.tmp`;
+
     try {
-      const filename = `${sha}.zip`;
-      const target = Path.resolve(this.workDir, 'archives', `${filename}`);
       const resp = await Axios.request({
         url,
         responseType: 'stream',
@@ -116,10 +120,10 @@ export class Archives {
       });
 
       await Fs.mkdir(Path.dirname(target), { recursive: true });
-      await asyncPipeline(resp.data, createWriteStream(`${target}.tmp`));
+      await asyncPipeline(resp.data, createWriteStream(tmpTarget));
       this.log.debug('download complete, renaming tmp');
 
-      await Fs.rename(`${target}.tmp`, target);
+      await Fs.rename(tmpTarget, target);
       this.bySha.set(sha, {
         sha,
         path: target,
@@ -129,8 +133,10 @@ export class Archives {
       this.log.debug('download of cache for', sha, 'complete');
       return true;
     } catch (error) {
+      await del(tmpTarget, { force: true });
+
       if (!error.response) {
-        this.log.debug(`failed to download cache, ignoring error`, error);
+        this.log.debug(`failed to download cache, ignoring error:`, error.message);
         return false;
       }
 

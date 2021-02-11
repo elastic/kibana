@@ -8,44 +8,17 @@
 
 import Path from 'path';
 import Fs from 'fs/promises';
-import { createWriteStream } from 'fs';
-import { promisify } from 'util';
-import { pipeline } from 'stream';
 
-import { ToolingLog, kibanaPackageJson, REPO_ROOT } from '@kbn/dev-utils';
-import execa from 'execa';
+import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
 import del from 'del';
-import archiver from 'archiver';
 import tempy from 'tempy';
-import extractZip from 'extract-zip';
 
 import { Archives } from './archives';
+import { unzip, zip } from './zip';
 import { concurrentMap } from '../concurrent_map';
+import { RepoInfo } from './repo_info';
 
-const asyncPipeline = promisify(pipeline);
-const OUTDIR_MERGE_BASE_FILENAME = '.ts-ref-cache-merge-base';
-
-export async function getRecentShasFrom(sha: string, size: number) {
-  const proc = await execa('git', ['log', '--pretty=%P', `-n`, `${size}`, sha]);
-  return proc.stdout
-    .trim()
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
-}
-
-export async function getMergeBase(log: ToolingLog, upstreamBranch: string) {
-  log.info('ensuring we have the latest changelog from upstream', upstreamBranch);
-  await execa('git', ['fetch', 'https://github.com/elastic/kibana.git', upstreamBranch]);
-
-  log.info('determining merge base with upstream');
-  const proc = await execa('git', ['merge-base', 'HEAD', 'FETCH_HEAD']);
-
-  const mergeBase = proc.stdout.trim();
-  log.info('merge base with', upstreamBranch, 'is', mergeBase);
-
-  return mergeBase;
-}
+export const OUTDIR_MERGE_BASE_FILENAME = '.ts-ref-cache-merge-base';
 
 export async function matchMergeBase(outDir: string, sha: string) {
   try {
@@ -72,47 +45,27 @@ export async function isDir(path: string) {
   }
 }
 
-export async function zip(
-  dirs: Array<[string, string]>,
-  files: Array<[string, string]>,
-  outputPath: string
-) {
-  const archive = archiver('zip', {
-    zlib: {
-      level: 9,
-    },
-  });
-
-  for (const [absolute, relative] of dirs) {
-    archive.directory(absolute, relative);
-  }
-
-  for (const [absolute, relative] of files) {
-    archive.file(absolute, {
-      name: relative,
-    });
-  }
-
-  // ensure output dir exists
-  await Fs.mkdir(Path.dirname(outputPath), { recursive: true });
-
-  // await the promise from the pipeline and archive.finalize()
-  await Promise.all([asyncPipeline(archive, createWriteStream(outputPath)), archive.finalize()]);
-}
-
 export class RefOutputCache {
-  static async create(log: ToolingLog, workingDir: string, outDirs: string[]) {
-    const archives = await Archives.create(log, workingDir);
+  static async create(options: {
+    log: ToolingLog;
+    workingDir: string;
+    outDirs: string[];
+    repoRoot: string;
+    upstreamUrl: string;
+  }) {
+    const repoInfo = new RepoInfo(options.log, options.repoRoot, options.upstreamUrl);
+    const archives = await Archives.create(options.log, options.workingDir);
 
     const upstreamBranch: string = kibanaPackageJson.branch;
-    const mergeBase = await getMergeBase(log, upstreamBranch);
+    const mergeBase = await repoInfo.getMergeBase('HEAD', upstreamBranch);
 
-    return new RefOutputCache(log, archives, outDirs, mergeBase);
+    return new RefOutputCache(options.log, repoInfo, archives, options.outDirs, mergeBase);
   }
 
   constructor(
     private readonly log: ToolingLog,
-    private readonly archives: Archives,
+    private readonly repo: RepoInfo,
+    public readonly archives: Archives,
     private readonly outDirs: string[],
     private readonly mergeBase: string
   ) {}
@@ -122,7 +75,7 @@ export class RefOutputCache {
       this.archives.get(this.mergeBase) ??
       (await this.archives.getFirstAvailable([
         this.mergeBase,
-        ...(await getRecentShasFrom(this.mergeBase, 5)),
+        ...(await this.repo.getRecentShasFrom(this.mergeBase, 5)),
       ]));
 
     if (!archive) {
@@ -146,17 +99,17 @@ export class RefOutputCache {
     const tmpDir = tempy.directory();
     this.log.debug(
       'extracting',
-      archive.path,
+      this.repo.getRelative(archive.path),
       'to rebuild caches in',
       outdatedOutDirs.length,
       'outDirs'
     );
-    await extractZip(archive.path, { dir: tmpDir });
+    await unzip(archive.path, tmpDir);
 
     const cacheNames = await Fs.readdir(tmpDir);
 
     await concurrentMap(50, outdatedOutDirs, async (outDir) => {
-      const relative = Path.relative(REPO_ROOT, outDir);
+      const relative = this.repo.getRelative(outDir);
       const cacheName = `${relative.split(Path.sep).join('__')}.zip`;
 
       if (!cacheNames.includes(cacheName)) {
@@ -173,25 +126,24 @@ export class RefOutputCache {
 
       this.log.debug(`[${relative}] clearing outDir and replacing with cache`);
       await del(outDir);
-      await extractZip(Path.resolve(tmpDir, cacheName), {
-        dir: outDir,
-      });
+      await unzip(Path.resolve(tmpDir, cacheName), outDir);
       await Fs.writeFile(Path.resolve(outDir, OUTDIR_MERGE_BASE_FILENAME), archive.sha);
     });
   }
 
   async captureCache(outputDir: string) {
     const tmpDir = tempy.directory();
-    const currentSha = (await execa('git', ['rev-parse', 'HEAD'])).stdout.trim();
+    const currentSha = await this.repo.getHeadSha();
     const outputPath = Path.resolve(outputDir, `${currentSha}.zip`);
+    const relativeOutputPath = this.repo.getRelative(outputPath);
 
-    this.log.info('writing ts-ref cache to', outputPath);
+    this.log.debug('writing ts-ref cache to', relativeOutputPath);
 
     const subZips: Array<[string, string]> = [];
 
     await Promise.all(
       this.outDirs.map(async (absolute) => {
-        const relative = Path.relative(REPO_ROOT, absolute);
+        const relative = this.repo.getRelative(absolute);
         const subZipName = `${relative.split(Path.sep).join('__')}.zip`;
         const subZipPath = Path.resolve(tmpDir, subZipName);
         await zip([[absolute, '/']], [], subZipPath);
@@ -201,6 +153,16 @@ export class RefOutputCache {
 
     await zip([], subZips, outputPath);
     await del(tmpDir, { force: true });
-    this.log.success('wrote archive to', outputPath);
+    this.log.success('wrote archive to', relativeOutputPath);
+  }
+
+  async cleanup() {
+    // sort archives by time desc
+    const archives = [...this.archives].sort((a, b) => b.time - a.time);
+
+    // delete the 11th+ archive
+    for (const { sha } of archives.slice(10)) {
+      await this.archives.delete(sha);
+    }
   }
 }

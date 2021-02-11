@@ -30,14 +30,25 @@ export async function runBuildRefsCli() {
 
       let outputCache;
       if (flags.cache) {
-        outputCache = await RefOutputCache.create(log, CACHE_WORKING_DIR, outDirs);
+        outputCache = await RefOutputCache.create({
+          log,
+          outDirs,
+          repoRoot: REPO_ROOT,
+          workingDir: CACHE_WORKING_DIR,
+          upstreamUrl: 'https://github.com/elastic/kibana.git',
+        });
+
         await outputCache.initCaches();
       }
 
       await buildAllTsRefs(log);
 
-      if (outputCache && process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true') {
-        await outputCache.captureCache(Path.resolve(REPO_ROOT, 'target/ts_refs_cache'));
+      if (outputCache) {
+        if (process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true') {
+          await outputCache.captureCache(Path.resolve(REPO_ROOT, 'target/ts_refs_cache'));
+        }
+
+        await outputCache.cleanup();
       }
     },
     {
