@@ -57,6 +57,7 @@ export const networkItems: NetworkItems = [
       validTo: 1617883200000,
       subjectName: '*.elastic.co',
     },
+    ip: '104.18.8.22',
   },
   {
     timestamp: '2021-01-05T19:22:28.928Z',
@@ -578,6 +579,10 @@ describe('getSeriesAndDomain', () => {
                 "name": "Bytes downloaded",
                 "value": undefined,
               },
+              Object {
+                "name": "IP",
+                "value": undefined,
+              },
             ],
             "requestHeaders": undefined,
             "responseHeaders": undefined,
@@ -646,6 +651,7 @@ describe('getSeriesAndDomain', () => {
     [FriendlyTimingLabels[Timings.Wait], '34.578 ms'],
     [FriendlyTimingLabels[Timings.Receive], '0.552 ms'],
     [FriendlyFlyoutLabels[Metadata.BytesDownloaded], '1.000 KB'],
+    [FriendlyFlyoutLabels[Metadata.IP], '104.18.8.22'],
   ])('handles metadata details formatting', (name, value) => {
     const { metadata } = getSeriesAndDomain(networkItems);
     const metadataEntry = metadata[0];

@@ -238,7 +238,15 @@ const formatMetadata = ({
   index: number;
   requestStart: number;
 }) => {
-  const { bytesDownloaded, mimeType, url, requestHeaders, responseHeaders, certificates } = item;
+  const {
+    bytesDownloaded,
+    certificates,
+    ip,
+    mimeType,
+    requestHeaders,
+    responseHeaders,
+    url,
+  } = item;
   const { dns, connect, ssl, wait, receive, total } = item.timings || {};
   const contentDownloaded = receive && receive > 0 ? receive : total;
   return {
@@ -303,6 +311,10 @@ const formatMetadata = ({
           value: bytesDownloaded ? bytesDownloaded / 1000 : undefined,
           postFix: 'KB',
         }),
+      },
+      {
+        name: FriendlyFlyoutLabels[Metadata.IP],
+        value: ip,
       },
     ],
   };

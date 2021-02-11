@@ -77,6 +77,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
           : undefined,
         requestHeaders: event._source.synthetics.payload.request?.headers,
         responseHeaders: event._source.synthetics.payload.response?.headers,
+        ip: event._source.synthetics.payload.response?.remote_i_p_address,
       };
     }),
   };

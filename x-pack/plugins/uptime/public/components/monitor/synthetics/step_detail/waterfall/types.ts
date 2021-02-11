@@ -24,6 +24,7 @@ export enum Metadata {
   CertificateIssueDate = 'certificateIssueDate',
   CertificateExpiryDate = 'certificateExpiryDate',
   CertificateSubject = 'certificateSubject',
+  IP = 'ip',
   MimeType = 'mimeType',
   RequestStart = 'requestStart',
 }
@@ -104,6 +105,9 @@ export const FriendlyFlyoutLabels = {
       defaultMessage: 'Common name',
     }
   ),
+  [Metadata.IP]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metadata.ip', {
+    defaultMessage: 'IP',
+  }),
 };
 
 export const TIMING_ORDER = [

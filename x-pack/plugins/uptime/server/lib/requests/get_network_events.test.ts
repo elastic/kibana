@@ -246,6 +246,7 @@ describe('getNetworkEvents', () => {
               "validFrom": 1606694400000,
               "validTo": 1638230399000,
             },
+            "ip": "104.244.42.200",
             "loadEndTime": 3287298.251,
             "method": "GET",
             "mimeType": "image/gif",
