@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './drilldown_definition';
-export * from './components';
-export * from './connected_components';
+export * from './drilldown_manager';
+export * from './create_public_drilldown_manager';

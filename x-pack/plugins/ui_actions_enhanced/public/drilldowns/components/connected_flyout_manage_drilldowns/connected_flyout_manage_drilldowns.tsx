@@ -8,15 +8,22 @@
 import React, { useState, useMemo } from 'react';
 import { ToastsStart } from 'kibana/public';
 import { intersection } from 'lodash';
+import { EuiButton } from '@elastic/eui';
 import {
   DrilldownWizardState,
-  FlyoutDrilldownWizard,
   FlyoutDrilldownWizardProps,
+  FlyoutDrilldownWizard,
 } from '../flyout_drilldown_wizard';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
-import { txtDrilldowns, insufficientLicenseLevel, invalidDrilldownType } from './i18n';
+import {
+  txtDrilldowns,
+  insufficientLicenseLevel,
+  invalidDrilldownType,
+  txtCreateDrilldownButtonLabel,
+  txtEditDrilldownButtonLabel,
+} from './i18n';
 import {
   ActionFactory,
   BaseActionConfig,
@@ -110,6 +117,7 @@ export function createFlyoutManageDrilldowns({
      * Skip rendering until it is resolved
      */
     if (!actionFactories) return null;
+
     /**
      * Drilldowns are not fetched yet or error happened during fetching
      * In case of error user is notified with toast
@@ -235,27 +243,69 @@ export function createFlyoutManageDrilldowns({
       setCurrentEditId(null);
     };
 
-    return (
-      <FlyoutDrilldownWizard
-        docsLink={docsLink}
-        triggerPickerDocsLink={triggerPickerDocsLink}
-        showWelcomeMessage={shouldShowWelcomeMessage}
-        onWelcomeHideClick={onHideWelcomeMessage}
-        drilldownActionFactories={actionFactories}
-        onClose={props.onClose}
-        mode={route === Routes.Create ? 'create' : 'edit'}
-        onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
-        onSubmit={handleSubmit}
-        onDelete={() => {
-          deleteDrilldown(currentEditId!);
-          setRoute(Routes.Manage);
-          setCurrentEditId(null);
+    // const isActionValid = (
+    //   config: DrilldownWizardState
+    // ): config is Required<DrilldownWizardState> => {
+    //   if (!wizardConfig.name) return false;
+    //   if (!wizardConfig.actionFactory) return false;
+    //   if (!wizardConfig.actionConfig) return false;
+    //   if (!wizardConfig.selectedTriggers || wizardConfig.selectedTriggers.length === 0)
+    //     return false;
+
+    //   return wizardConfig.actionFactory.isConfigValid(
+    //     wizardConfig.actionConfig,
+    //     actionFactoryContext
+    //   );
+    // };
+
+    const footer = (
+      <EuiButton
+        onClick={() => {
+          // if (isActionValid(wizardConfig)) {
+          //   onSubmit(wizardConfig);
+          // }
         }}
-        actionFactoryPlaceContext={props.placeContext}
-        initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
-        supportedTriggers={props.triggers}
-        getTrigger={getTrigger}
-      />
+        fill
+        // isDisabled={!isActionValid(wizardConfig)}
+        data-test-subj={'drilldownWizardSubmit'}
+      >
+        {route === Routes.Create ? txtCreateDrilldownButtonLabel : txtEditDrilldownButtonLabel}
+      </EuiButton>
+    );
+
+    return (
+      <FlyoutFrame
+        title={txtDrilldowns}
+        footer={footer}
+        onClose={props.onClose}
+        onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
+        banner={
+          shouldShowWelcomeMessage && (
+            <DrilldownHelloBar docsLink={docsLink} onHideClick={onHideWelcomeMessage} />
+          )
+        }
+      >
+        <FlyoutDrilldownWizard
+          docsLink={docsLink}
+          triggerPickerDocsLink={triggerPickerDocsLink}
+          showWelcomeMessage={shouldShowWelcomeMessage}
+          onWelcomeHideClick={onHideWelcomeMessage}
+          drilldownActionFactories={actionFactories}
+          onClose={props.onClose}
+          mode={route === Routes.Create ? 'create' : 'edit'}
+          onBack={isCreateOnly ? undefined : () => setRoute(Routes.Manage)}
+          onSubmit={handleSubmit}
+          onDelete={() => {
+            deleteDrilldown(currentEditId!);
+            setRoute(Routes.Manage);
+            setCurrentEditId(null);
+          }}
+          actionFactoryPlaceContext={props.placeContext}
+          initialDrilldownWizardConfig={resolveInitialDrilldownWizardConfig()}
+          supportedTriggers={props.triggers}
+          getTrigger={getTrigger}
+        />
+      </FlyoutFrame>
     );
   };
 }

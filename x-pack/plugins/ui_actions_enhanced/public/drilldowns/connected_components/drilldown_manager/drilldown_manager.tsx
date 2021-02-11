@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export * from './drilldown_definition';
-export * from './components';
-export * from './connected_components';
+import * as React from 'react';
+import { useDrilldownManager } from '../context';
+
+export const DrilldownManager: React.FC = ({}) => {
+  const manager = useDrilldownManager();
+
+  return <div>This is drilldown manager...{manager.drilldownName}</div>;
+};

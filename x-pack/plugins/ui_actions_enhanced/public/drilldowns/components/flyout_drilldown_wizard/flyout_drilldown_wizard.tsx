@@ -8,15 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
-import { FlyoutFrame } from '../flyout_frame';
-import {
-  txtCreateDrilldownButtonLabel,
-  txtCreateDrilldownTitle,
-  txtDeleteDrilldownButtonLabel,
-  txtEditDrilldownButtonLabel,
-  txtEditDrilldownTitle,
-} from './i18n';
-import { DrilldownHelloBar } from '../drilldown_hello_bar';
+import { txtDeleteDrilldownButtonLabel } from './i18n';
 import {
   ActionFactory,
   BaseActionConfig,
@@ -66,17 +58,11 @@ export interface FlyoutDrilldownWizardProps<
 export function FlyoutDrilldownWizard<
   CurrentActionConfig extends BaseActionConfig = BaseActionConfig
 >({
-  onClose,
-  onBack,
-  onSubmit = () => {},
   initialDrilldownWizardConfig,
   mode = 'create',
   onDelete = () => {},
-  showWelcomeMessage = true,
-  onWelcomeHideClick,
   drilldownActionFactories,
   actionFactoryPlaceContext,
-  docsLink,
   triggerPickerDocsLink,
   getTrigger,
   supportedTriggers,
@@ -97,47 +83,8 @@ export function FlyoutDrilldownWizard<
     [actionFactoryPlaceContext, wizardConfig.selectedTriggers]
   );
 
-  const isActionValid = (
-    config: DrilldownWizardState
-  ): config is Required<DrilldownWizardState> => {
-    if (!wizardConfig.name) return false;
-    if (!wizardConfig.actionFactory) return false;
-    if (!wizardConfig.actionConfig) return false;
-    if (!wizardConfig.selectedTriggers || wizardConfig.selectedTriggers.length === 0) return false;
-
-    return wizardConfig.actionFactory.isConfigValid(
-      wizardConfig.actionConfig,
-      actionFactoryContext
-    );
-  };
-
-  const footer = (
-    <EuiButton
-      onClick={() => {
-        if (isActionValid(wizardConfig)) {
-          onSubmit(wizardConfig);
-        }
-      }}
-      fill
-      isDisabled={!isActionValid(wizardConfig)}
-      data-test-subj={'drilldownWizardSubmit'}
-    >
-      {mode === 'edit' ? txtEditDrilldownButtonLabel : txtCreateDrilldownButtonLabel}
-    </EuiButton>
-  );
-
   return (
-    <FlyoutFrame
-      title={mode === 'edit' ? txtEditDrilldownTitle : txtCreateDrilldownTitle}
-      footer={footer}
-      onClose={onClose}
-      onBack={onBack}
-      banner={
-        showWelcomeMessage && (
-          <DrilldownHelloBar docsLink={docsLink} onHideClick={onWelcomeHideClick} />
-        )
-      }
-    >
+    <>
       <FormDrilldownWizard
         name={wizardConfig.name}
         onNameChange={setName}
@@ -160,6 +107,6 @@ export function FlyoutDrilldownWizard<
           </EuiButton>
         </>
       )}
-    </FlyoutFrame>
+    </>
   );
 }

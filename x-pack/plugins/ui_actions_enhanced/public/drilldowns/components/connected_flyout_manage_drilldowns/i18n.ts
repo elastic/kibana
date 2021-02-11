@@ -34,3 +34,17 @@ export const invalidDrilldownType = (type: string) =>
       },
     }
   );
+
+export const txtCreateDrilldownButtonLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.createDrilldownButtonLabel',
+  {
+    defaultMessage: 'Create drilldown',
+  }
+);
+
+export const txtEditDrilldownButtonLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.editDrilldownButtonLabel',
+  {
+    defaultMessage: 'Save',
+  }
+);

@@ -21,20 +21,6 @@ export const txtEditDrilldownTitle = i18n.translate(
   }
 );
 
-export const txtCreateDrilldownButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.createDrilldownButtonLabel',
-  {
-    defaultMessage: 'Create drilldown',
-  }
-);
-
-export const txtEditDrilldownButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.editDrilldownButtonLabel',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
 export const txtDeleteDrilldownButtonLabel = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.deleteDrilldownButtonLabel',
   {

@@ -26,7 +26,7 @@ import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
 import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { createFlyoutManageDrilldowns } from './drilldowns';
+import { createPublicDrilldownManager, PublicDrilldownManagerComponent } from './drilldowns';
 import { createStartServicesGetter, Storage } from '../../../../src/plugins/kibana_utils/public';
 import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
@@ -57,7 +57,7 @@ export interface StartContract
       | 'extract'
       | 'inject'
     > {
-  FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
+  FlyoutManageDrilldowns: PublicDrilldownManagerComponent;
 }
 
 export class AdvancedUiActionsPublicPlugin
@@ -118,7 +118,7 @@ export class AdvancedUiActionsPublicPlugin
     return {
       ...uiActions,
       ...this.enhancements!,
-      FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
+      FlyoutManageDrilldowns: createPublicDrilldownManager({
         actionFactories: this.enhancements!.getActionFactories(),
         getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
         storage: new Storage(window?.localStorage),
