@@ -47,7 +47,7 @@ export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
 
   return (
     <EuiPage className="enterpriseSearchLayout privateSourcesLayout">
-      <EuiPageSideBar className={'enterpriseSearchLayout__sideBar privateSourcesLayout__sideBar'}>
+      <EuiPageSideBar className="enterpriseSearchLayout__sideBar privateSourcesLayout__sideBar">
         <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
       </EuiPageSideBar>
       <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
