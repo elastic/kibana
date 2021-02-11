@@ -13,7 +13,7 @@ import getopts from 'getopts';
 
 import { execInProjects } from './exec_in_projects';
 import { filterProjectsByFlag } from './projects';
-import { buildAllRefs } from './build_refs';
+import { buildAllTsRefs } from './build_ts_refs';
 
 export async function runTypeCheckCli() {
   const extraFlags: string[] = [];
@@ -69,7 +69,7 @@ export async function runTypeCheckCli() {
     process.exit();
   }
 
-  await buildAllRefs(log);
+  await buildAllTsRefs(log);
 
   const tscArgs = [
     // composite project cannot be used with --noEmit
