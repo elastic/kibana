@@ -32,10 +32,7 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
   const trustedAppsListUrlPath = getTrustedAppsListPath();
 
   const trustedAppRouteState = useMemo<TrustedAppsListPageRouteState>(() => {
-    const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details({
-      pkgkey,
-      panel: 'custom',
-    })}`;
+    const fleetPackageCustomUrlPath = `#${pagePathGetters.integration_details_custom({ pkgkey })}`;
     return {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonLabel',

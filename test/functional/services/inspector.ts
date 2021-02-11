@@ -241,7 +241,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         request = await browser.execute(
-          () => (window as any).monaco.editor.getModels()[0].getValue() as string
+          () => (window as any).MonacoEnvironment.monaco.editor.getModels()[0].getValue() as string
         );
       });
 
