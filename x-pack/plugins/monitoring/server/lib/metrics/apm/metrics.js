@@ -40,32 +40,32 @@ export const metrics = {
     ),
     field: 'beats_stats.metrics.beat.cpu.total.value',
   }),
-  apm_cgroup_cpu: new QuotaMetric(
-    new ApmMetric({
-      fieldSource: 'beats_stats.metrics.beat.cgroup',
-      usageField: 'cpuacct.total.ns',
-      periodsField: 'cpu.stats.periods',
-      quotaField: 'cpu.cfs.quota.us',
-      field: 'beats_stats.metrics.beat.cpu.total.value', // backup field if quota is not configured
-      title: i18n.translate('xpack.monitoring.metrics.apmInstance.cpuUtilizationTitle', {
-        defaultMessage: 'CPU Utilization',
-      }),
-      label: i18n.translate(
-        'xpack.monitoring.metrics.apmInstance.cpuUtilization.cgroupCpuUtilizationLabel',
-        {
-          defaultMessage: 'Cgroup CPU Utilization',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.monitoring.metrics.apmInstance.cpuUtilization.cgroupCpuUtilizationDescription',
-        {
-          defaultMessage:
-            'CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.',
-        }
-      ),
-      type: 'node',
-    })
-  ),
+  apm_cgroup_cpu: new QuotaMetric({
+    app: 'apm',
+    ...ApmMetric.getMetricFields(),
+    fieldSource: 'beats_stats.metrics.beat.cgroup',
+    usageField: 'cpuacct.total.ns',
+    periodsField: 'cpu.stats.periods',
+    quotaField: 'cpu.cfs.quota.us',
+    field: 'beats_stats.metrics.beat.cpu.total.value', // backup field if quota is not configured
+    title: i18n.translate('xpack.monitoring.metrics.apmInstance.cpuUtilizationTitle', {
+      defaultMessage: 'CPU Utilization',
+    }),
+    label: i18n.translate(
+      'xpack.monitoring.metrics.apmInstance.cpuUtilization.cgroupCpuUtilizationLabel',
+      {
+        defaultMessage: 'Cgroup CPU Utilization',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.apmInstance.cpuUtilization.cgroupCpuUtilizationDescription',
+      {
+        defaultMessage:
+          'CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.',
+      }
+    ),
+    type: 'node',
+  }),
   apm_system_os_load_1: new ApmMetric({
     field: 'beats_stats.metrics.system.load.1',
     label: i18n.translate('xpack.monitoring.metrics.apmInstance.systemLoad.last1MinuteLabel', {
