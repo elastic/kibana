@@ -43,7 +43,6 @@ export const xpackMocks = {
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
-
 export const createPackagePolicyServiceMock = () => {
   return {
     compilePackagePolicyInputs: jest.fn(),
