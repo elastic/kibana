@@ -215,7 +215,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       return;
     }
     explorerService.setSelectedCells(selectedCells);
-  }, [JSON.stringify(selectedCells)]);
+  }, [JSON.stringify(selectedCells), explorerState?.swimlaneBucketInterval?.asSeconds()]);
 
   const loadExplorerDataConfig =
     explorerState !== undefined
