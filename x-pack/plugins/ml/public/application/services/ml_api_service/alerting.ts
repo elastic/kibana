@@ -16,6 +16,7 @@ export const alertingApiProvider = (httpService: HttpService) => {
     preview(params: {
       alertParams: MlAnomalyDetectionAlertParams;
       timeRange: string;
+      sampleSize?: number;
     }): Promise<PreviewResponse> {
       const body = JSON.stringify(params);
       return httpService.http<PreviewResponse>({

@@ -45,3 +45,5 @@ export const ML_ALERT_TYPES_CONFIG: Record<
     producer: PLUGIN_ID,
   },
 };
+
+export const ALERT_PREVIEW_SAMPLE_SIZE = 5;

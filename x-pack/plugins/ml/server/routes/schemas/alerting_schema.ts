@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
 
 export const mlAnomalyDetectionAlertParams = schema.object({
   jobSelection: schema.object(
@@ -34,6 +35,10 @@ export const mlAnomalyDetectionAlertPreviewRequest = schema.object({
    * Relative time range to look back from now, e.g. 1y, 8m, 15d
    */
   timeRange: schema.string(),
+  /**
+   * Number of top hits to return
+   */
+  sampleSize: schema.number({ defaultValue: ALERT_PREVIEW_SAMPLE_SIZE, min: 0 }),
 });
 
 export type MlAnomalyDetectionAlertParams = TypeOf<typeof mlAnomalyDetectionAlertParams>;

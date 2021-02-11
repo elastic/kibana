@@ -499,6 +499,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
     preview: async ({
       alertParams,
       timeRange,
+      sampleSize,
     }: MlAnomalyDetectionAlertPreviewRequest): Promise<PreviewResponse> => {
       const res = await fetchAnomalies(alertParams, timeRange);
 
@@ -507,9 +508,9 @@ export function alertingServiceProvider(mlClient: MlClient) {
       }
 
       return {
-        // sum of all anomalies within the time range
+        // sum of all alert responses within the time range
         count: res.reduce((acc, curr) => acc + curr.count, 0),
-        results: res,
+        results: res.slice(0, sampleSize),
       };
     },
   };

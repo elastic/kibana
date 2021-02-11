@@ -28,6 +28,7 @@ import { MlAnomalyDetectionAlertParams, PreviewResponse } from '../../common/typ
 import { composeValidators } from '../../common';
 import { requiredValidator, timeIntervalInputValidator } from '../../common/util/validators';
 import { invalidTimeIntervalMessage } from '../application/jobs/new_job/common/job_validator/util';
+import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../common/constants/alerts';
 
 export interface PreviewAlertConditionProps {
   alertingApiService: AlertingApiService;
@@ -105,6 +106,8 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   alertingApiService,
   alertParams,
 }) => {
+  const sampleSize = ALERT_PREVIEW_SAMPLE_SIZE;
+
   const [lookBehindInterval, setLookBehindInterval] = useState<string>();
   const [areResultsVisible, setAreResultVisible] = useState<boolean>(true);
   const [previewError, setPreviewError] = useState<Error | undefined>();
@@ -129,6 +132,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       const response = await alertingApiService.preview({
         alertParams,
         timeRange: lookBehindInterval!,
+        sampleSize,
       });
       setPreviewResponse(response);
       setPreviewError(undefined);
@@ -138,13 +142,10 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
     }
   }, [alertParams, lookBehindInterval]);
 
-  /**
-   * Sample of the 5 results from the top hits
-   */
   const sampleHits = useMemo(() => {
     if (!previewResponse) return;
 
-    return previewResponse.results.slice(0, 5);
+    return previewResponse.results;
   }, [previewResponse]);
 
   const isReady =
@@ -268,6 +269,22 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                   );
                 })}
               </ul>
+              {previewResponse.count > sampleSize ? (
+                <>
+                  <EuiSpacer size={'m'} />
+                  <EuiText size={'xs'}>
+                    <b>
+                      <FormattedMessage
+                        id="xpack.ml.previewAlert.otherValuesLabel"
+                        defaultMessage="and {count, plural, one {# other} other {# others}}"
+                        values={{
+                          count: previewResponse.count - sampleSize,
+                        }}
+                      />
+                    </b>
+                  </EuiText>
+                </>
+              ) : null}
             </EuiPanel>
           ) : null}
         </>
