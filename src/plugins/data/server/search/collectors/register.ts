@@ -13,7 +13,7 @@ import { fetchProvider } from './fetch';
 export interface Usage {
   successCount: number;
   errorCount: number;
-  averageDuration: number | null;
+  totalDuration: number;
 }
 
 export async function registerUsageCollector(
@@ -28,7 +28,7 @@ export async function registerUsageCollector(
       schema: {
         successCount: { type: 'long' },
         errorCount: { type: 'long' },
-        averageDuration: { type: 'float' },
+        totalDuration: { type: 'long' },
       },
     });
     usageCollection.registerCollector(collector);
