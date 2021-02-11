@@ -21,7 +21,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { TimelineExpandedEventType, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
   EventDetails,
@@ -36,7 +36,7 @@ export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
-  event: TimelineExpandedEventType;
+  event: { eventId: string; indexName: string };
   isAlert: boolean;
   loading: boolean;
   messageHeight?: number;
