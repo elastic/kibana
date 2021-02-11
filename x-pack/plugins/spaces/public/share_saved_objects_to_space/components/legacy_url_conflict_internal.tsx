@@ -67,13 +67,13 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
       title={
         <FormattedMessage
           id="xpack.spaces.shareToSpace.legacyUrlConflictTitle"
-          defaultMessage="Legacy URL conflict"
+          defaultMessage="2 objects are associated with this URL"
         />
       }
     >
       <FormattedMessage
         id="xpack.spaces.shareToSpace.legacyUrlConflictBody"
-        defaultMessage="This page is showing {objectNoun} [id={currentObjectId}]. There is also a legacy URL for this page that points to another {objectNoun} [id={otherObjectId}]. Its URL changed in Kibana 8.0, you can access it below."
+        defaultMessage="You're currently looking at {objectNoun} [id={currentObjectId}]. A legacy URL for this page shows a different {objectNoun} [id={otherObjectId}]."
         values={{ objectNoun, currentObjectId, otherObjectId }}
       />
 

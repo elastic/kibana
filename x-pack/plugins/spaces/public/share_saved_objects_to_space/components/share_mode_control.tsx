@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -21,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ALL_SPACES_ID } from '../../../common/constants';
+import { DocumentationLinksService } from '../../lib';
+import { useSpaces } from '../../spaces_context';
 import { ShareToSpaceTarget } from '../../types';
 import { ShareOptions } from '../types';
 
@@ -75,6 +78,8 @@ export const ShareModeControl = (props: Props) => {
     enableCreateNewSpaceLink,
     enableSpaceAgnosticBehavior,
   } = props;
+  const { services } = useSpaces();
+  const { docLinks } = services;
 
   if (spaces.length === 0) {
     return <EuiLoadingSpinner />;
@@ -129,6 +134,10 @@ export const ShareModeControl = (props: Props) => {
       return null;
     }
 
+    const kibanaPrivilegesUrl = new DocumentationLinksService(
+      docLinks!
+    ).getKibanaPrivilegesDocUrl();
+
     return (
       <>
         <EuiCallOut
@@ -144,8 +153,18 @@ export const ShareModeControl = (props: Props) => {
         >
           <FormattedMessage
             id="xpack.spaces.shareToSpace.privilegeWarningBody"
-            defaultMessage="To edit the spaces for this {objectNoun}, you need privileges to modify it in all spaces. Contact your system administrator for more information."
-            values={{ objectNoun }}
+            defaultMessage="To edit the spaces for this {objectNoun}, you need {readAndWritePrivilegesLink} in all spaces."
+            values={{
+              objectNoun,
+              readAndWritePrivilegesLink: (
+                <EuiLink href={kibanaPrivilegesUrl}>
+                  <FormattedMessage
+                    id="xpack.spaces.shareToSpace.privilegeWarningLink"
+                    defaultMessage="read and write privileges"
+                  />
+                </EuiLink>
+              ),
+            }}
           />
         </EuiCallOut>
 

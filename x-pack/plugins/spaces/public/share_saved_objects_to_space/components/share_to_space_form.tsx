@@ -48,21 +48,20 @@ export const ShareToSpaceForm = (props: Props) => {
         title={
           <FormattedMessage
             id="xpack.spaces.shareToSpace.shareWarningTitle"
-            defaultMessage="Changes will be synchronized across spaces"
+            defaultMessage="Changes are synchronized across spaces"
           />
         }
         color="warning"
       >
         <FormattedMessage
           id="xpack.spaces.shareToSpace.shareWarningBody"
-          defaultMessage="If you choose multiple spaces for this {objectNoun}, any changes will affect it in each space. If you don't want this to happen, {makeACopyLink} instead."
+          defaultMessage="Your changes appear in each space you select. {makeACopyLink} if you don't want to synchronize your changes."
           values={{
-            objectNoun,
             makeACopyLink: (
               <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
                 <FormattedMessage
                   id="xpack.spaces.shareToSpace.shareWarningLink"
-                  defaultMessage="make a copy"
+                  defaultMessage="Make a copy"
                 />
               </EuiLink>
             ),
