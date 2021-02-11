@@ -20,6 +20,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiSpacer,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -83,6 +84,12 @@ export function Correlations() {
                   {i18n.translate('xpack.apm.correlations.title', {
                     defaultMessage: 'Correlations',
                   })}
+                  &nbsp;
+                  <EuiBetaBadge
+                    label="Beta"
+                    title="Correlations"
+                    tooltipContent="Correlations is not GA. Please help us by reporting any bugs."
+                  />
                 </h2>
               </EuiTitle>
             </EuiFlyoutHeader>
@@ -111,26 +118,6 @@ export function Correlations() {
                   <EuiSpacer />
                 </>
               ) : null}
-
-              <EuiCallOut
-                size="s"
-                title={i18n.translate(
-                  'xpack.apm.correlations.experimentalWarning.title',
-                  { defaultMessage: 'Experimental' }
-                )}
-                color="warning"
-                iconType="alert"
-              >
-                <p>
-                  {i18n.translate(
-                    'xpack.apm.correlations.experimentalWarning.text',
-                    {
-                      defaultMessage:
-                        'Correlations is an experimental feature and in active development. Bugs and surprises are to be expected but let us know your feedback so we can improve it.',
-                    }
-                  )}
-                </p>
-              </EuiCallOut>
 
               <EuiSpacer />
               <EuiTabs>
