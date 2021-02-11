@@ -54,15 +54,14 @@ export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
             {errors ? (
               <>
                 <p>{errors[0].longMessage}</p>
-                <p>
-                  <FormattedMessage
-                    id="xpack.lens.embeddable.moreErrors"
-                    defaultMessage="Edit in Lens editor {errors, plural, one {to address it} other {to see more errors} }"
-                    values={{
-                      errors: errors.length,
-                    }}
-                  />
-                </p>
+                {errors.length > 1 ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.moreErrors"
+                      defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
               </>
             ) : (
               <p>
