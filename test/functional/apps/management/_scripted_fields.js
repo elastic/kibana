@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('discover');
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({});
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
     });
 
     after(async function afterAll() {

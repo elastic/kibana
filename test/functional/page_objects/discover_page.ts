@@ -185,8 +185,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async getDocTableRows() {
       await header.waitUntilLoadingHasFinished();
-      const rows = await testSubjects.findAll('docTableRow');
-      return rows;
+      return await testSubjects.findAll('docTableRow');
     }
 
     public async getDocTableIndex(index: number) {
@@ -224,10 +223,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async getMarks() {
       const table = await docTable.getTable();
-      const $ = await table.parseDomContent();
-      return $('mark')
-        .toArray()
-        .map((mark) => $(mark).text());
+      const marks = await table.findAllByTagName('mark');
+      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
     }
 
     public async toggleSidebarCollapse() {
