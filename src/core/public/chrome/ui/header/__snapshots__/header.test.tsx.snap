@@ -5169,8 +5169,11 @@ exports[`Header renders 1`] = `
                       </button>
                     </div>
                     <div
+                      aria-labelledby="mockId"
                       className="euiAccordion__childWrapper"
                       id="mockId"
+                      role="region"
+                      tabIndex={-1}
                     >
                       <EuiResizeObserver
                         onResize={[Function]}

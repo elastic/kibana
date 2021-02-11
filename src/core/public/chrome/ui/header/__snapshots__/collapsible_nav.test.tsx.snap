@@ -715,8 +715,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                   </button>
                 </div>
                 <div
+                  aria-labelledby="mockId"
                   className="euiAccordion__childWrapper"
                   id="mockId"
+                  role="region"
+                  tabIndex={-1}
                 >
                   <EuiResizeObserver
                     onResize={[Function]}
@@ -986,8 +989,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       </button>
                     </div>
                     <div
+                      aria-labelledby="mockId"
                       className="euiAccordion__childWrapper"
                       id="mockId"
+                      role="region"
+                      tabIndex={-1}
                     >
                       <EuiResizeObserver
                         onResize={[Function]}
@@ -1276,8 +1282,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       </button>
                     </div>
                     <div
+                      aria-labelledby="mockId"
                       className="euiAccordion__childWrapper"
                       id="mockId"
+                      role="region"
+                      tabIndex={-1}
                     >
                       <EuiResizeObserver
                         onResize={[Function]}
@@ -1527,8 +1536,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       </button>
                     </div>
                     <div
+                      aria-labelledby="mockId"
                       className="euiAccordion__childWrapper"
                       id="mockId"
+                      role="region"
+                      tabIndex={-1}
                     >
                       <EuiResizeObserver
                         onResize={[Function]}
@@ -1739,8 +1751,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       </button>
                     </div>
                     <div
+                      aria-labelledby="mockId"
                       className="euiAccordion__childWrapper"
                       id="mockId"
+                      role="region"
+                      tabIndex={-1}
                     >
                       <EuiResizeObserver
                         onResize={[Function]}
@@ -2967,8 +2982,11 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                   </button>
                 </div>
                 <div
+                  aria-labelledby="mockId"
                   className="euiAccordion__childWrapper"
                   id="mockId"
+                  role="region"
+                  tabIndex={-1}
                 >
                   <EuiResizeObserver
                     onResize={[Function]}
