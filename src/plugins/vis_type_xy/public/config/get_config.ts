@@ -98,10 +98,6 @@ const shouldEnableHistogramMode = (
     );
   });
 
-  if (bars.length === 1) {
-    return true;
-  }
-
   const groupIds = [
     ...bars.reduce<Set<string>>((acc, { valueAxis: groupId, mode }) => {
       acc.add(groupId);
@@ -113,11 +109,9 @@ const shouldEnableHistogramMode = (
     return false;
   }
 
-  const test = bars.every(({ valueAxis: groupId, mode }) => {
+  return bars.every(({ valueAxis: groupId, mode }) => {
     const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
 
     return mode === 'stacked' || yAxisScale?.mode === 'percentage';
   });
-
-  return test;
 };
