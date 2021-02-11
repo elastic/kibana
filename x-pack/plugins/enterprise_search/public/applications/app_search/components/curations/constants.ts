@@ -11,3 +11,12 @@ export const CURATIONS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.title',
   { defaultMessage: 'Curations' }
 );
+
+export const DELETE_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.deleteConfirmation',
+  { defaultMessage: 'Are you sure you want to remove this curation?' }
+);
+export const SUCCESS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
+  { defaultMessage: 'Successfully removed curation.' }
+);
