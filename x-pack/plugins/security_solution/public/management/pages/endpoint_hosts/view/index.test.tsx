@@ -647,6 +647,9 @@ describe('when on the list page', () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Success');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(109\, 204\, 177\)\;/
+      );
     });
 
     it('should display Warning overall policy status', async () => {
@@ -654,6 +657,9 @@ describe('when on the list page', () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Warning');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(241\, 216\, 111\)\;/
+      );
     });
 
     it('should display Failed overall policy status', async () => {
@@ -661,6 +667,9 @@ describe('when on the list page', () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Failed');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(255\, 126\, 98\)\;/
+      );
     });
 
     it('should display Unknown overall policy status', async () => {
@@ -668,6 +677,9 @@ describe('when on the list page', () => {
       const renderResult = await renderAndWaitForData();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusBadge.textContent).toEqual('Unknown');
+      expect(policyStatusBadge.getAttribute('style')).toMatch(
+        /background-color\: rgb\(211\, 218\, 230\)\;/
+      );
     });
 
     it('should include the link to reassignment in Ingest', async () => {

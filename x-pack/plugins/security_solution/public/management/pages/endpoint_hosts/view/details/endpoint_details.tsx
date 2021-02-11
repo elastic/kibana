@@ -215,6 +215,10 @@ export const EndpointDetails = memo(
               data-test-subj="policyStatusValue"
               href={policyResponseUri}
               onClick={policyStatusClickHandler}
+              onClickAriaLabel={i18n.translate(
+                'xpack.securitySolution.endpoint.details.policyStatus',
+                { defaultMessage: 'Policy Response' }
+              )}
             >
               <EuiText size="m">
                 <FormattedMessage
