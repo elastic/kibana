@@ -47,7 +47,7 @@ const SCORE_BUFFER_AMOUNT = 50;
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
-    defaultMessage: 'Policy Summary',
+    defaultMessage: 'Policy summary',
   }),
   description: i18n.translate('xpack.indexLifecycleMgmt.timeline.description', {
     defaultMessage: 'This policy moves data through the following phases.',

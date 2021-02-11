@@ -189,27 +189,27 @@ export const i18nTexts = {
         defaultMessage: 'Cold phase',
       }),
       delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
-        defaultMessage: 'Delete Data',
+        defaultMessage: 'Delete data',
       }),
     },
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
         defaultMessage:
-          'You actively store and query data in the hot phase. All policies have a hot phase.',
+          'You store and query your data on hot nodes, your most performant hardware. Highest search speed for the biggest cost.',
       }),
       warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
         defaultMessage:
-          'You are still querying your index, but it is read-only. You can allocate shards to less performant hardware. For faster searches, you can reduce the number of shards and force merge segments.',
+          'Your data is read-only and you query it on warm nodes, less performant hardware. Slightly slower search for the smaller cost.',
       }),
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescription', {
         defaultMessage:
-          'You are querying your index less frequently, so you can allocate shards on significantly less performant hardware. Because your queries are slower, you can reduce the number of replicas.',
+          'You query your data less frequently and move it to cold nodes, your significantly less performant hardware. Slower search for the cheapest cost.',
       }),
       delete: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
         {
           defaultMessage:
-            'You no longer need your index.  You can define when it is safe to delete it.',
+            'You no longer need your data. You can define when it is safe to delete it.',
         }
       ),
     },

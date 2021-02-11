@@ -34,10 +34,10 @@ export const PhaseFooter: FunctionComponent<Props> = ({ phase }) => {
 
   const phaseDescription = isDeletePhaseEnabled
     ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseTiming.beforeDeleteDescription', {
-        defaultMessage: 'Data will be deleted after this phase',
+        defaultMessage: 'Policy deletes data after this phase',
       })
     : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.phaseTiming.foreverTimingDescription', {
-        defaultMessage: 'Data will remain in this phase forever',
+        defaultMessage: 'Data remains in this phase forever',
       });
 
   const selectedButton = isDeletePhaseEnabled
