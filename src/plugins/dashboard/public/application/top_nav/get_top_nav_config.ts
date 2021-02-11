@@ -57,6 +57,18 @@ export function getTopNavConfig(
   }
 }
 
+function getSaveButtonLabel() {
+  return i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
+    defaultMessage: 'save',
+  });
+}
+
+function getSaveAsButtonLabel() {
+  return i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
+    defaultMessage: 'save as',
+  });
+}
+
 function getFullScreenConfig(action: NavAction) {
   return {
     id: 'full-screen',
@@ -100,9 +112,7 @@ function getQuickSave(action: NavAction) {
   return {
     id: 'quick-save',
     emphasize: true,
-    label: i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
-      defaultMessage: 'save',
-    }),
+    label: getSaveButtonLabel(),
     description: i18n.translate('dashboard.topNave.saveConfigDescription', {
       defaultMessage: 'Quick save your dashboard without any prompts',
     }),
@@ -114,18 +124,16 @@ function getQuickSave(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getSaveConfig(action: NavAction, emphasize = false) {
+function getSaveConfig(action: NavAction, isNewDashboard = false) {
   return {
     id: 'save',
-    label: i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
-      defaultMessage: 'save as',
-    }),
+    label: isNewDashboard ? getSaveButtonLabel() : getSaveAsButtonLabel(),
     description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
     }),
     testId: 'dashboardSaveMenuItem',
     run: action,
-    emphasize,
+    emphasize: isNewDashboard,
   };
 }
 
