@@ -9,6 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { shouldHandleLinkEvent } from '../../../hooks/use_link_props';
 
 export const AnalyzeInMlButton: React.FunctionComponent<{
   href?: string;
@@ -17,10 +18,13 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
     services: { application },
   } = useKibanaContextForPlugin();
 
-  const handleClick = useCallback(() => {
-    if (!href) return;
-    application.navigateToUrl(href);
-  }, [href, application]);
+  const handleClick = useCallback(
+    (e) => {
+      if (!href || !shouldHandleLinkEvent(e)) return;
+      application.navigateToUrl(href);
+    },
+    [href, application]
+  );
 
   return (
     <EuiButton fill={false} size="s" onClick={handleClick}>

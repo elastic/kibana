@@ -27,7 +27,7 @@ import {
   LogColumnHeadersWrapper,
   LogColumnHeader,
 } from '../../../../../components/logging/log_text_stream/column_headers';
-import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useLinkProps, shouldHandleLinkEvent } from '../../../../../hooks/use_link_props';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { LogEntryExample, isCategoryAnomaly } from '../../../../../../common/log_analysis';
@@ -134,10 +134,13 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
     },
   });
 
-  const handleMlLinkClick = useCallback(() => {
-    if (!viewAnomalyInMachineLearningLink) return;
-    application.navigateToUrl(viewAnomalyInMachineLearningLink);
-  }, [viewAnomalyInMachineLearningLink, application]);
+  const handleMlLinkClick = useCallback(
+    (e) => {
+      if (!viewAnomalyInMachineLearningLink || !shouldHandleLinkEvent(e)) return;
+      application.navigateToUrl(viewAnomalyInMachineLearningLink);
+    },
+    [viewAnomalyInMachineLearningLink, application]
+  );
 
   const menuItems = useMemo(() => {
     if (!viewInStreamLinkProps.onClick || !viewAnomalyInMachineLearningLink) {

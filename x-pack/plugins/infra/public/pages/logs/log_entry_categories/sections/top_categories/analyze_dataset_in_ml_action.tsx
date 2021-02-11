@@ -13,6 +13,7 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { useMlHref, ML_PAGES } from '../../../../../../../ml/public';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
+import { shouldHandleLinkEvent } from '../../../../../hooks/use_link_props';
 
 export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   categorizationJobId: string;
@@ -40,10 +41,13 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
     },
   });
 
-  const handleClick = useCallback(() => {
-    if (!viewAnomalyInMachineLearningLink) return;
-    application.navigateToUrl(viewAnomalyInMachineLearningLink);
-  }, [application, viewAnomalyInMachineLearningLink]);
+  const handleClick = useCallback(
+    (e) => {
+      if (!viewAnomalyInMachineLearningLink || !shouldHandleLinkEvent(e)) return;
+      application.navigateToUrl(viewAnomalyInMachineLearningLink);
+    },
+    [application, viewAnomalyInMachineLearningLink]
+  );
 
   return (
     <EuiToolTip content={analyseCategoryDatasetInMlTooltipDescription} delay="long">
