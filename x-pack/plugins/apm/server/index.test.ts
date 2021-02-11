@@ -44,7 +44,7 @@ describe('mergeConfigs', () => {
       spanIndices: 'apm-*-span-*',
       errorIndices: 'apm-*-error-*',
       metricsIndices: 'apm-*-metric-*',
-      fleet: true,
+      fleetMode: true,
     } as APMOSSConfig;
 
     const apmConfig = { ui: {} } as APMXPackConfig;
@@ -63,7 +63,7 @@ describe('mergeConfigs', () => {
       spanIndices: 'apm-*-span-*',
       errorIndices: 'apm-*-error-*',
       metricsIndices: 'apm-*-metric-*',
-      fleet: false,
+      fleetMode: false,
     } as APMOSSConfig;
 
     const apmConfig = { ui: {} } as APMXPackConfig;
