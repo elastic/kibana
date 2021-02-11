@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(statusBody[body.id].current_status.status).to.eql('warning');
-          expect(statusBody[body.id].current_status.last_failure_message).to.eql(
+          expect(statusBody[body.id].current_status.last_success_message).to.eql(
             'The following index patterns did not match any indices: ["does-not-exist-*"]'
           );
         });
