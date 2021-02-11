@@ -15,7 +15,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -211,7 +210,6 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const columns = buildColumns(handleExport, handleDelete);
 
   return (
-    <EuiOverlayMask onClick={onClose}>
       <EuiModal onClose={onClose} maxWidth={800}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
@@ -255,7 +253,6 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         name={exportDownload.name}
         onDownload={() => setExportDownload({})}
       />
-    </EuiOverlayMask>
   );
 };
 

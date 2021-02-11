@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiListGroup, EuiListGroupItem, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 
@@ -59,27 +59,25 @@ export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = 
   }
 
   return (
-    <EuiOverlayMask onClick={onClose}>
-      <EuiConfirmModal
-        maxWidth={460}
-        title={titleText}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        cancelButtonText={cancelText}
-        confirmButtonText={confirmText}
-        buttonColor="danger"
-        defaultFocusedButton="confirm"
-      >
-        <p>{contentText}</p>
-        <MarkdownContainer>
-          <EuiListGroup gutterSize="none" showToolTips>
-            {references.map((r, index) => (
-              <EuiListGroupItem key={`${index}-${r}`} label={r} />
-            ))}
-          </EuiListGroup>
-        </MarkdownContainer>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      maxWidth={460}
+      title={titleText}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={cancelText}
+      confirmButtonText={confirmText}
+      buttonColor="danger"
+      defaultFocusedButton="confirm"
+    >
+      <p>{contentText}</p>
+      <MarkdownContainer>
+        <EuiListGroup gutterSize="none" showToolTips>
+          {references.map((r, index) => (
+            <EuiListGroupItem key={`${index}-${r}`} label={r} />
+          ))}
+        </EuiListGroup>
+      </MarkdownContainer>
+    </EuiConfirmModal>
   );
 };
 
