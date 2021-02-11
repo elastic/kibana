@@ -646,7 +646,6 @@
     "dashboard.savedDashboard.newDashboardTitle": "新規ダッシュボード",
     "dashboard.stateManager.timeNotSavedWithDashboardErrorMessage": "このダッシュボードに時刻が保存されていないため、同期できません。",
     "dashboard.strings.dashboardEditTitle": "{title}を編集中",
-    "dashboard.strings.dashboardUnsavedEditTitle": "{title}を編集中（未保存）",
     "dashboard.topNav.cloneModal.cancelButtonLabel": "キャンセル",
     "dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle": "ダッシュボードのクローンを作成",
     "dashboard.topNav.cloneModal.confirmButtonLabel": "クローンの確認",
