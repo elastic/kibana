@@ -58,6 +58,10 @@ describe('alertType', () => {
             "name": "esQuery",
           },
           Object {
+            "description": "The number of hits to retrieve for each query.",
+            "name": "size",
+          },
+          Object {
             "description": "An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one.",
             "name": "threshold",
           },
@@ -75,6 +79,7 @@ describe('alertType', () => {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: '<',
@@ -92,6 +97,7 @@ describe('alertType', () => {
       index: ['index-name'],
       timeField: 'time-field',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
       thresholdComparator: 'between',

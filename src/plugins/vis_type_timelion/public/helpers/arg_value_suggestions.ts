@@ -9,37 +9,19 @@
 import { get } from 'lodash';
 import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
+import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
 import {
   IndexPatternField,
   indexPatterns as indexPatternsUtils,
   KBN_FIELD_TYPES,
 } from '../../../data/public';
 
-export interface Location {
-  min: number;
-  max: number;
-}
-
-export interface FunctionArg {
-  function: string;
-  location: Location;
-  name: string;
-  text: string;
-  type: string;
-  value: {
-    location: Location;
-    text: string;
-    type: string;
-    value: string;
-  };
-}
-
 const isRuntimeField = (field: IndexPatternField) => Boolean(field.runtimeField);
 
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
 
-  async function getIndexPattern(functionArgs: FunctionArg[]) {
+  async function getIndexPattern(functionArgs: TimelionExpressionFunction[]) {
     const indexPatternArg = functionArgs.find(({ name }) => name === 'index');
     if (!indexPatternArg) {
       // index argument not provided
@@ -61,7 +43,7 @@ export function getArgValueSuggestions() {
 
   // Argument value suggestion handlers requiring custom client side code
   // Could not put with function definition since functions are defined on server
-  const customHandlers = {
+  const customHandlers: Record<string, any> = {
     es: {
       async index(partial: string) {
         const search = partial ? `${partial}*` : '*';
@@ -71,7 +53,7 @@ export function getArgValueSuggestions() {
           name: title,
         }));
       },
-      async metric(partial: string, functionArgs: FunctionArg[]) {
+      async metric(partial: string, functionArgs: TimelionExpressionFunction[]) {
         if (!partial || !partial.includes(':')) {
           return [
             { name: 'avg:' },
@@ -101,7 +83,7 @@ export function getArgValueSuggestions() {
           )
           .map((field) => ({ name: `${valueSplit[0]}:${field.name}`, help: field.type }));
       },
-      async split(partial: string, functionArgs: FunctionArg[]) {
+      async split(partial: string, functionArgs: TimelionExpressionFunction[]) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];
@@ -125,7 +107,7 @@ export function getArgValueSuggestions() {
           )
           .map((field) => ({ name: field.name, help: field.type }));
       },
-      async timefield(partial: string, functionArgs: FunctionArg[]) {
+      async timefield(partial: string, functionArgs: TimelionExpressionFunction[]) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];
@@ -150,10 +132,7 @@ export function getArgValueSuggestions() {
      * @param {string} argName - user provided argument name
      * @return {boolean} true when dynamic suggestion handler provided for function argument
      */
-    hasDynamicSuggestionsForArgument: <T extends keyof typeof customHandlers>(
-      functionName: T,
-      argName: keyof typeof customHandlers[T]
-    ) => {
+    hasDynamicSuggestionsForArgument: (functionName: string, argName: string) => {
       return customHandlers[functionName] && customHandlers[functionName][argName];
     },
 
@@ -164,10 +143,10 @@ export function getArgValueSuggestions() {
      * @param {string} partial - user provided argument value
      * @return {array} array of dynamic suggestions matching partial
      */
-    getDynamicSuggestionsForArgument: async <T extends keyof typeof customHandlers>(
-      functionName: T,
-      argName: keyof typeof customHandlers[T],
-      functionArgs: FunctionArg[],
+    getDynamicSuggestionsForArgument: async (
+      functionName: string,
+      argName: string,
+      functionArgs: TimelionExpressionArgument[],
       partialInput = ''
     ) => {
       // @ts-ignore

@@ -8,15 +8,18 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 
-import { ApiToken } from '../types';
-import { ApiTokenTypes } from '../constants';
-
 import { HiddenText } from '../../../../shared/hidden_text';
+import { ApiTokenTypes } from '../constants';
+import { ApiToken } from '../types';
+
 import { Key } from './key';
-import { CredentialsList } from './credentials_list';
+
+import { CredentialsList } from './';
 
 describe('Credentials', () => {
   const apiToken: ApiToken = {

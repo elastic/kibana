@@ -248,6 +248,11 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('dashboardDiscardChanges');
     }
 
+    public async clickQuickSave() {
+      log.debug('clickQuickSave');
+      await testSubjects.click('dashboardQuickSaveMenuItem');
+    }
+
     public async clickNewDashboard(continueEditing = false) {
       await listingTable.clickNewButton('createDashboardPromptButton');
       if (await testSubjects.exists('dashboardCreateConfirm')) {
@@ -581,6 +586,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async expectMissingSaveOption() {
       await testSubjects.missingOrFail('dashboardSaveMenuItem');
+    }
+
+    public async expectMissingQuickSaveOption() {
+      await testSubjects.missingOrFail('dashboardQuickSaveMenuItem');
+    }
+    public async expectExistsQuickSaveOption() {
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
     }
 
     public async getNotLoadedVisualizations(vizList: string[]) {

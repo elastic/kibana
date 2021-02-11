@@ -58,6 +58,18 @@ export const choices = [
     value: 'inbound_ddos',
     element: 'subcategory',
   },
+  {
+    dependent_value: '',
+    label: 'Software',
+    value: 'software',
+    element: 'category',
+  },
+  {
+    dependent_value: 'software',
+    label: 'Operation System',
+    value: 'os',
+    element: 'subcategory',
+  },
   ...['severity', 'urgency', 'impact', 'priority']
     .map((element) => [
       {
