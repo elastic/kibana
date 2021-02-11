@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters } from 'kibana/public';
+import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -80,6 +81,13 @@ export async function renderApp({
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
+    if (!mapboxgl.supported()) {
+      const mapboxNotSupported = i18n.translate('xpack.maps.renderApp.webGlNotDetected', {
+        defaultMessage: 'WebGL is required to run the Maps app',
+      });
+      window.location.href = window.location.origin;
+      return alert(mapboxNotSupported);
+    }
     const { embeddableId, originatingApp, valueInput } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
