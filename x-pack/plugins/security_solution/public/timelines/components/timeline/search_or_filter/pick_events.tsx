@@ -140,10 +140,10 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     SourcererScopeSelector
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
   const [selectedOptions, setSelectedOptions] = useState<ComboOptions>(
-    sourcererScope.selectedPatterns.map(({ title: indexSelected, id: key }) => ({
+    sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
       label: indexSelected,
-      value: indexSelected,
-      key,
+      value: id,
+      key: `${id}-${i}`,
     }))
   );
   const configAsSelectable: SelectablePatterns = useMemo(
@@ -157,9 +157,9 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         ...configAsSelectable,
         ...kibanaIndexPatterns,
         { title: signalIndexName, id: SourcererPatternType.detections },
-      ].reduce<ComboOptions>((acc, { title: index, id: key }) => {
-        if (index != null && !acc.some((o) => o.label.includes(index))) {
-          return [...acc, { label: index, value: index, key }];
+      ].reduce<ComboOptions>((acc, { title: index, id }, i) => {
+        if (index != null) {
+          return [...acc, { label: index, value: id, key: `${id}-${i}` }];
         }
         return acc;
       }, []),
@@ -167,16 +167,15 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   );
 
   const renderOption = useCallback(
-    (option) => {
-      const { value } = option;
-      if (kibanaIndexPatterns.some((kip) => kip.title === value)) {
+    ({ label }) => {
+      if (kibanaIndexPatterns.some((kip) => kip.title === label)) {
         return (
           <>
-            <EuiIcon type="logoKibana" size="s" /> {value}
+            <EuiIcon type="logoKibana" size="s" /> {label}
           </>
         );
       }
-      return <>{value}</>;
+      return <>{label}</>;
     },
     [kibanaIndexPatterns]
   );
@@ -210,34 +209,33 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           [
             ...configAsSelectable,
             { title: signalIndexName ?? '', id: SourcererPatternType.detections },
-          ].map(({ title: indexSelected, id: key }) => ({
+          ].map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
-            value: indexSelected,
-            key,
+            value: id,
+            key: `${id}-${i}`,
           }))
         );
       } else if (filter === 'raw') {
         setSelectedOptions(
-          configAsSelectable.map(({ title: indexSelected, id: key }) => ({
+          configAsSelectable.map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
-            value: indexSelected,
-            key,
+            value: id,
+            key: `${id}-${i}`,
           }))
         );
       } else if (filter === 'alert') {
         setSelectedOptions([
           {
             label: signalIndexName ?? '',
-            value: signalIndexName ?? '',
-            key: SourcererPatternType.detections,
+            value: SourcererPatternType.detections,
           },
         ]);
       } else if (filter === 'kibana') {
         setSelectedOptions(
-          kibanaIndexPatterns.map((kip) => ({
-            label: kip.title,
-            value: kip.title,
-            key: kip.id,
+          kibanaIndexPatterns.map(({ title, id }, i) => ({
+            label: title,
+            value: id,
+            key: `${id}-${i}`,
           }))
         );
       }
@@ -262,10 +260,10 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   const resetDataSources = useCallback(() => {
     setSelectedOptions(
-      sourcererScope.selectedPatterns.map(({ title: indexSelected, id: key }) => ({
+      sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
         label: indexSelected,
-        value: indexSelected,
-        key,
+        value: id,
+        key: `${id}-${i}`,
       }))
     );
     setFilterEventType(eventType);
@@ -319,8 +317,8 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   }, [eventType, sourcererScope.loading, togglePopover]);
 
   const tooltipContent = useMemo(
-    () => (isPopoverOpen ? null : sourcererScope.selectedPatterns.sort().join(', ')),
-    [isPopoverOpen, sourcererScope.selectedPatterns]
+    () => (isPopoverOpen ? null : sourcererScope.indexNames.sort().join(', ')),
+    [isPopoverOpen, sourcererScope.indexNames]
   );
 
   const ButtonContent = useMemo(
@@ -336,10 +334,10 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
 
   useEffect(() => {
     const newSelectedOptions = sourcererScope.selectedPatterns.map(
-      ({ title: indexSelected, id: key }) => ({
+      ({ title: indexSelected, id }, i) => ({
         label: indexSelected,
-        value: indexSelected,
-        key,
+        value: id,
+        key: `${id}-${i}`,
       })
     );
     setSelectedOptions((prevSelectedOptions) => {

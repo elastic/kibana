@@ -59,9 +59,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { selectedPatterns, loading } = sourcererScope;
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<ComboBoxOptions>(
-    selectedPatterns.map(({ title, id }) => ({
+    selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
+      key: `${id}-${i}`,
     }))
   );
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
@@ -138,9 +139,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const resetDataSources = useCallback(() => {
     setSelectedOptions(
-      configIndexPatterns.map((indexSelected) => ({
+      configIndexPatterns.map((indexSelected, i) => ({
         label: indexSelected,
         value: SourcererPatternType.config,
+        key: `${indexSelected}-${i}`,
       }))
     );
   }, [configIndexPatterns]);
@@ -162,9 +164,9 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const indexPatternOptions = useMemo(
     () =>
       [...configAsSelectable, ...kibanaIndexPatterns].reduce<ComboBoxOptions>(
-        (acc, { title: index, id: key }) => {
+        (acc, { title: index, id }, i) => {
           if (index != null) {
-            return [...acc, { label: index, value: key }];
+            return [...acc, { label: index, value: id, key: `${id}-${i}` }];
           }
           return acc;
         },
@@ -208,9 +210,10 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   useEffect(() => {
-    const newSelectedOptions = selectedPatterns.map(({ title, id }) => ({
+    const newSelectedOptions = selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
+      key: `${id}-${i}`,
     }));
     setSelectedOptions((prevSelectedOptions) => {
       if (!deepEqual(newSelectedOptions, prevSelectedOptions)) {
@@ -221,14 +224,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, [selectedPatterns]);
 
   const tooltipContent = useMemo(
-    () =>
-      isPopoverOpen
-        ? null
-        : sourcererScope.selectedPatterns
-            .map(({ title }) => title)
-            .sort()
-            .join(', '),
-    [isPopoverOpen, sourcererScope.selectedPatterns]
+    () => (isPopoverOpen ? null : sourcererScope.indexNames.sort().join(', ')),
+    [isPopoverOpen, sourcererScope.indexNames]
   );
 
   return (
