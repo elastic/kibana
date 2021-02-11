@@ -6,7 +6,6 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getLatestTransformConfig } from './index';
 import {
   isLatestTransform,
   isPivotTransform,
@@ -48,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
-    const transformConfigWithLatest = getLatestTransformConfig();
+    // const transformConfigWithLatest = getLatestTransformConfig();
 
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
@@ -57,10 +56,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithPivot.id,
         transformConfigWithPivot
       );
-      await transform.api.createAndRunTransform(
-        transformConfigWithLatest.id,
-        transformConfigWithLatest
-      );
+      // await transform.api.createAndRunTransform(
+      //   transformConfigWithLatest.id,
+      //   transformConfigWithLatest
+      // );
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -68,9 +67,9 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
 
@@ -109,23 +108,33 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       },
-      {
-        type: 'latest' as const,
-        suiteTitle: 'clone transform with latest function',
-        originalConfig: transformConfigWithLatest,
-        transformId: `clone_${transformConfigWithLatest.id}`,
-        transformDescription: `a cloned transform`,
-        get destinationIndex(): string {
-          return `user-${this.transformId}`;
-        },
-        expected: {
-          indexPreview: {
-            columns: 10,
-            rows: 5,
-          },
-          // TODO: Add assertion on transformPreview
-        },
-      },
+      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
+      // {
+      //   type: 'latest' as const,
+      //   suiteTitle: 'clone transform with latest function',
+      //   originalConfig: transformConfigWithLatest,
+      //   transformId: `clone_${transformConfigWithLatest.id}`,
+      //   transformDescription: `a cloned transform`,
+      //   get destinationIndex(): string {
+      //     return `user-${this.transformId}`;
+      //   },
+      //   expected: {
+      //     indexPreview: {
+      //       columns: 10,
+      //       rows: 5,
+      //     },
+      //     transformPreview: {
+      //       column: 0,
+      //       values: [
+      //         'July 12th 2019, 22:16:19',
+      //         'July 12th 2019, 22:50:53',
+      //         'July 12th 2019, 23:06:43',
+      //         'July 12th 2019, 23:15:22',
+      //         'July 12th 2019, 23:31:12',
+      //       ],
+      //     },
+      //   },
+      // },
     ];
 
     for (const testData of testDataList) {
