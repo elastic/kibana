@@ -452,6 +452,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
                 ...(isInfluencerResult
                   ? { viewByFieldName: r.topInfluencers![0].influencer_field_name }
                   : {}),
+                ...(isInfluencerResult ? {} : { showTopFieldValues: true }),
               }
             : {}),
         },

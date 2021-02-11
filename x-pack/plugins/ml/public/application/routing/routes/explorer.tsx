@@ -181,6 +181,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
 
   /** Sync URL state with {@link explorerService} state */
   useEffect(() => {
+    if (!explorerState?.swimlaneBucketInterval?.asSeconds()) {
+      // it means the page is not ready yet...
+      return;
+    }
     const replaceState = explorerUrlState?.mlExplorerSwimlane?.viewByFieldName === undefined;
     if (explorerAppState?.mlExplorerSwimlane?.viewByFieldName !== undefined) {
       setExplorerUrlState(explorerAppState, replaceState);
@@ -206,6 +210,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   );
 
   useEffect(() => {
+    if (!explorerState?.swimlaneBucketInterval?.asSeconds()) {
+      // it means the page is not ready yet...
+      return;
+    }
     explorerService.setSelectedCells(selectedCells);
   }, [JSON.stringify(selectedCells)]);
 

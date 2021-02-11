@@ -28,6 +28,12 @@ export const useSelectedCells = (
     let times =
       appState.mlExplorerSwimlane.selectedTimes ?? appState.mlExplorerSwimlane.selectedTime!;
     if (typeof times === 'number') {
+      if (!bucketIntervalInSeconds) {
+        // we can't resolve the time range for a single point
+        // without a bucket span.
+        return;
+      }
+
       times = [times, times + bucketIntervalInSeconds!];
     }
 
