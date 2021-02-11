@@ -60,12 +60,7 @@ describe('PointSeries Editor', function () {
     const areaVisProps = ({
       ...props,
       stateParams: getStateParams(ChartType.Area, false),
-    } as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+    } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...areaVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'showValuesOnChart').length).toBe(0);
@@ -84,12 +79,7 @@ describe('PointSeries Editor', function () {
     const newVisProps = ({
       ...props,
       vis: getVis('terms'),
-    } as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+    } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'addTimeMarker').length).toBe(0);
@@ -110,12 +100,7 @@ describe('PointSeries Editor', function () {
       extraProps: {
         showElasticChartsOptions: true,
       },
-    } as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+    } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'detailedTooltip').length).toBe(1);
@@ -128,12 +113,7 @@ describe('PointSeries Editor', function () {
       extraProps: {
         showElasticChartsOptions: true,
       },
-    } as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+    } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'fittingFunction').length).toBe(0);
@@ -147,12 +127,7 @@ describe('PointSeries Editor', function () {
       extraProps: {
         showElasticChartsOptions: true,
       },
-    } as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+    } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'fittingFunction').length).toBe(1);
@@ -165,12 +140,7 @@ describe('PointSeries Editor', function () {
       extraProps: {
         showElasticChartsOptions: true,
       },
-    } as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+    } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'showValuesOnChart').length).toBe(1);
@@ -188,12 +158,7 @@ describe('PointSeries Editor', function () {
     const newVisProps = ({
       ...props,
       stateParams: getStateParams(ChartType.Histogram, true),
-    } as unknown) as ValidationVisOptionsProps<
-      VisParams,
-      {
-        showElasticChartsOptions: boolean;
-      }
-    >;
+    } as unknown) as PointSeriesOptionsProps;
     component = mountWithIntl(<PointSeriesOptions {...newVisProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'thresholdValueInputOption').length).toBe(1);
