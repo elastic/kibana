@@ -53,6 +53,8 @@ const ServiceNowFieldsSchema = schema.object({
   impact: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
   urgency: schema.nullable(schema.string()),
+  category: schema.nullable(schema.string()),
+  subcategory: schema.nullable(schema.string()),
 });
 
 const NoneFieldsSchema = schema.nullable(schema.object({}));

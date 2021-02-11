@@ -62,7 +62,7 @@ import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { ArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
-import { registerDownloadExceptionListRoute } from './endpoint/routes/artifacts';
+import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
@@ -130,7 +130,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private policyWatcher?: PolicyWatcher;
 
   private manifestTask: ManifestTask | undefined;
-  private exceptionsCache: LRU<string, Buffer>;
+  private artifactsCache: LRU<string, Buffer>;
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -138,7 +138,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.config = createConfig(context);
     this.appClientFactory = new AppClientFactory();
     // Cache up to three artifacts with a max retention of 5 mins each
-    this.exceptionsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
 
     this.logger.debug('plugin initialized');
@@ -192,7 +192,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerResolverRoutes(router, endpointContext);
     registerPolicyRoutes(router, endpointContext);
     registerTrustedAppsRoutes(router, endpointContext);
-    registerDownloadExceptionListRoute(router, endpointContext, this.exceptionsCache);
+    registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
@@ -219,6 +219,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               'cases-comments',
               'cases-configure',
               'cases-user-actions',
+              'exception-list',
+              'exception-list-agnostic',
               ...savedObjectTypes,
             ],
             read: ['config'],
@@ -243,6 +245,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               'cases-comments',
               'cases-configure',
               'cases-user-actions',
+              'exception-list',
+              'exception-list-agnostic',
               ...savedObjectTypes,
             ],
           },
@@ -337,7 +341,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger: this.logger,
-        cache: this.exceptionsCache,
+        cache: this.artifactsCache,
       });
 
       if (this.manifestTask) {
