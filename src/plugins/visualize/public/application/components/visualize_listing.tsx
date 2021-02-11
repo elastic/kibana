@@ -186,7 +186,7 @@ export const VisualizeListing = () => {
         // for data exploration purposes
         createItem={createNewVis}
         tableCaption={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualizations',
+          defaultMessage: 'Visualize Library',
         })}
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
@@ -204,7 +204,7 @@ export const VisualizeListing = () => {
           defaultMessage: 'visualizations',
         })}
         tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualizations',
+          defaultMessage: 'Visualize Library',
         })}
         toastNotifications={toastNotifications}
         searchFilters={searchFilters}
