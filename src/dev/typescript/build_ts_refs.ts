@@ -17,8 +17,12 @@ export async function buildAllTsRefs(log: ToolingLog) {
   for (const path of REF_CONFIG_PATHS) {
     const relative = Path.relative(REPO_ROOT, path);
     log.debug(`Building TypeScript projects refs for ${relative}...`);
-    await execa(require.resolve('typescript/bin/tsc'), ['-b', relative, '--pretty'], {
-      cwd: REPO_ROOT,
-    });
+    await execa(
+      'node',
+      ['--preserve-symlinks', require.resolve('typescript/bin/tsc'), '-b', relative, '--pretty'],
+      {
+        cwd: REPO_ROOT,
+      }
+    );
   }
 }
