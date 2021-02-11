@@ -221,7 +221,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
-            all: ['alert', ...caseSavedObjects, ...savedObjectTypes],
+            all: [
+              'alert',
+              ...caseSavedObjects,
+              'exception-list',
+              'exception-list-agnostic',
+              ...savedObjectTypes,
+            ],
             read: ['config'],
           },
           alerting: {
@@ -238,7 +244,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           api: ['securitySolution', 'lists-read'],
           savedObject: {
             all: [],
-            read: ['config', ...caseSavedObjects, ...savedObjectTypes],
+            read: [
+              'config',
+              ...caseSavedObjects,
+              'exception-list',
+              'exception-list-agnostic',
+              ...savedObjectTypes,
+            ],
           },
           alerting: {
             read: [SIGNALS_ID, NOTIFICATIONS_ID],
