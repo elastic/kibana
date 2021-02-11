@@ -7,7 +7,11 @@
 
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import {
+  AggFieldNamePair,
+  EVENT_RATE_FIELD_ID,
+  RuntimeMappings,
+} from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 type DtrIndex = number;
@@ -34,7 +38,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
     query: object,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
-    splitFieldValue: string | null
+    splitFieldValue: string | null,
+    runtimeMappings: RuntimeMappings | undefined
   ) {
     const json: object = getSearchJsonFromConfig(
       indexPatternTitle,
@@ -45,7 +50,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
       query,
       aggFieldNamePairs,
       splitFieldName,
-      splitFieldValue
+      splitFieldValue,
+      runtimeMappings
     );
 
     const { body } = await asCurrentUser.search(json);
@@ -103,9 +109,10 @@ function getSearchJsonFromConfig(
   query: any,
   aggFieldNamePairs: AggFieldNamePair[],
   splitFieldName: string | null,
-  splitFieldValue: string | null
+  splitFieldValue: string | null,
+  runtimeMappings: RuntimeMappings | undefined
 ): object {
-  const json = {
+  const json: any = {
     index: indexPatternTitle,
     size: 0,
     track_total_hits: true,
@@ -171,6 +178,10 @@ function getSearchJsonFromConfig(
   });
 
   json.body.aggs.times.aggs = aggs;
+
+  if (runtimeMappings !== undefined) {
+    json.body.runtime_mappings = runtimeMappings;
+  }
 
   return json;
 }

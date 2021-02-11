@@ -36,7 +36,8 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const { fields } = newJobCapsService;
+  const { fields: originalFields } = newJobCapsService;
+  const fields = [...originalFields, ...jobCreator.runtimeFields];
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs
@@ -155,7 +156,8 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           jobCreator.end,
           aggFieldPairList,
           jobCreator.splitField,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings
         );
 
         setLineChartsData(resp);
@@ -175,7 +177,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           (async (index: number, field: Field) => {
             return {
               index,
-              fields: await chartLoader.loadFieldExampleValues(field),
+              fields: await chartLoader.loadFieldExampleValues(field, jobCreator.runtimeMappings),
             };
           })(i, af.by.field)
         );

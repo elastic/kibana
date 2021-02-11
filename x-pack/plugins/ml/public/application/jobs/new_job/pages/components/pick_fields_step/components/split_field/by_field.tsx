@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field } from '../../../../../../../../../common/types/fields';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import {
+  newJobCapsService,
+  filterCategoryFields,
+} from '../../../../../../../services/new_job_capabilities_service';
 import { MultiMetricJobCreator, PopulationJobCreator } from '../../../../../common/job_creator';
 
 interface Props {
@@ -22,7 +25,9 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const { categoryFields: allCategoryFields } = newJobCapsService;
+  const { categoryFields: originalCategoryFields } = newJobCapsService;
+  const runtimeCategoryFields = filterCategoryFields(jobCreator.runtimeFields);
+  const allCategoryFields = [...originalCategoryFields, ...runtimeCategoryFields];
 
   const [byField, setByField] = useState(jobCreator.getByField(detectorIndex));
   const categoryFields = useFilteredCategoryFields(

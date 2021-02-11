@@ -24,7 +24,11 @@ import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import { MLHttpFetchError, MLResponseError } from '../../../../../../../common/util/errors';
+import {
+  MLHttpFetchError,
+  MLResponseError,
+  extractErrorMessage,
+} from '../../../../../../../common/util/errors';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { JobCreator } from '../job_creator';
 
@@ -121,8 +125,7 @@ export const useModelMemoryEstimator = (
           title: i18n.translate('xpack.ml.newJob.wizard.estimateModelMemoryError', {
             defaultMessage: 'Model memory limit could not be calculated',
           }),
-          text:
-            error.body.attributes?.body.error.caused_by?.reason || error.body.message || undefined,
+          text: extractErrorMessage(error),
         });
       })
     );

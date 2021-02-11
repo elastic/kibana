@@ -32,7 +32,8 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
 
-  const { fields } = newJobCapsService;
+  const { fields: originalFields } = newJobCapsService;
+  const fields = [...originalFields, ...jobCreator.runtimeFields];
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>(
     jobCreator.aggFieldPair !== null ? [{ label: createLabel(jobCreator.aggFieldPair) }] : []
   );
@@ -88,7 +89,8 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
           [aggFieldPair],
           null,
           null,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings
         );
         if (resp[DTR_IDX] !== undefined) {
           setLineChartData(resp);

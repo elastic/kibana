@@ -18,7 +18,7 @@ import {
   Datafeed,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../common/types/audit_message';
-import { AggFieldNamePair } from '../../../../common/types/fields';
+import { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
 import { ExistingJobsAndGroups } from '../job_service';
 import {
   CategorizationAnalyzer,
@@ -188,7 +188,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
-    splitFieldValue: string | null
+    splitFieldValue: string | null,
+    runtimeMappings?: RuntimeMappings
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -200,6 +201,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       aggFieldNamePairs,
       splitFieldName,
       splitFieldValue,
+      runtimeMappings,
     });
     return httpService.http<any>({
       path: `${basePath()}/jobs/new_job_line_chart`,
@@ -216,7 +218,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     intervalMs: number,
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
-    splitFieldName: string
+    splitFieldName: string,
+    runtimeMappings?: RuntimeMappings
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -227,6 +230,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       query,
       aggFieldNamePairs,
       splitFieldName,
+      runtimeMappings,
     });
     return httpService.http<any>({
       path: `${basePath()}/jobs/new_job_population_chart`,
@@ -263,7 +267,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     timeField: string,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings?: RuntimeMappings
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -274,6 +279,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       start,
       end,
       analyzer,
+      runtimeMappings,
     });
     return httpService.http<{
       examples: CategoryFieldExample[];

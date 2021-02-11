@@ -41,7 +41,10 @@ export const MultiMetricDetectorsSummary: FC = () => {
     (async () => {
       if (jobCreator.splitField !== null) {
         try {
-          const tempFieldValues = await chartLoader.loadFieldExampleValues(jobCreator.splitField);
+          const tempFieldValues = await chartLoader.loadFieldExampleValues(
+            jobCreator.splitField,
+            jobCreator.runtimeMappings
+          );
           setFieldValues(tempFieldValues);
         } catch (error) {
           getToastNotificationService().displayErrorToast(error);
@@ -72,7 +75,8 @@ export const MultiMetricDetectorsSummary: FC = () => {
           jobCreator.aggFieldPairs,
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
-          cs.intervalMs
+          cs.intervalMs,
+          jobCreator.runtimeMappings
         );
         setLineChartsData(resp);
       } catch (error) {

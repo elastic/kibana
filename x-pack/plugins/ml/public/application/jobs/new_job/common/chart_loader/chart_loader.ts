@@ -8,12 +8,17 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { Field, SplitField, AggFieldPair } from '../../../../../../common/types/fields';
+import {
+  Field,
+  SplitField,
+  AggFieldPair,
+  RuntimeMappings,
+} from '../../../../../../common/types/fields';
 import { ml } from '../../../../services/ml_api_service';
 import { mlResultsService } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { IndexPattern } from '../../../../../../../../../src/plugins/data/common';
 
 type DetectorIndex = number;
 export interface LineChartPoint {
@@ -50,7 +55,8 @@ export class ChartLoader {
     aggFieldPairs: AggFieldPair[],
     splitField: SplitField,
     splitFieldValue: SplitFieldValue,
-    intervalMs: number
+    intervalMs: number,
+    runtimeMappings: RuntimeMappings | null
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
@@ -70,7 +76,8 @@ export class ChartLoader {
         this._query,
         aggFieldPairNames,
         splitFieldName,
-        splitFieldValue
+        splitFieldValue,
+        runtimeMappings ?? undefined
       );
 
       return resp.results;
@@ -83,7 +90,8 @@ export class ChartLoader {
     end: number,
     aggFieldPairs: AggFieldPair[],
     splitField: SplitField,
-    intervalMs: number
+    intervalMs: number,
+    runtimeMappings: RuntimeMappings | null
   ): Promise<LineChartData> {
     if (this._timeFieldName !== '') {
       if (aggFieldPairsCanBeCharted(aggFieldPairs) === false) {
@@ -102,7 +110,8 @@ export class ChartLoader {
         intervalMs,
         this._query,
         aggFieldPairNames,
-        splitFieldName
+        splitFieldName,
+        runtimeMappings ?? undefined
       );
 
       return resp.results;
@@ -136,12 +145,16 @@ export class ChartLoader {
     return [];
   }
 
-  async loadFieldExampleValues(field: Field): Promise<string[]> {
+  async loadFieldExampleValues(
+    field: Field,
+    runtimeMappings: RuntimeMappings | null
+  ): Promise<string[]> {
     const { results } = await getCategoryFields(
       this._indexPatternTitle,
       field.name,
       10,
-      this._query
+      this._query,
+      runtimeMappings ?? undefined
     );
     return results;
   }
@@ -159,3 +172,16 @@ export function getAggFieldPairNames(af: AggFieldPair) {
     by,
   };
 }
+
+// export function getRuntimeMappings(runtimeFields: Field[]): RuntimeMappings | undefined {
+//   let match = false;
+//   const rf = runtimeFields.reduce((acc, field) => {
+//     if (field.runtimeField !== undefined) {
+//       acc[field.id] = field.runtimeField;
+//       match = true;
+//     }
+//     return acc;
+//   }, {} as RuntimeMappings);
+
+//   return match ? rf : undefined;
+// }

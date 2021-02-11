@@ -9,7 +9,10 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import {
+  newJobCapsService,
+  filterCategoryFields,
+} from '../../../../../../../services/new_job_capabilities_service';
 import { Description } from './description';
 import {
   MultiMetricJobCreator,
@@ -23,7 +26,9 @@ export const SplitFieldSelector: FC = () => {
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
   const canClearSelection = isMultiMetricJobCreator(jc);
 
-  const { categoryFields } = newJobCapsService;
+  const runtimeCategoryFields = filterCategoryFields(jobCreator.runtimeFields);
+  const { categoryFields: originalCategoryFields } = newJobCapsService;
+  const categoryFields = [...originalCategoryFields, ...runtimeCategoryFields];
   const [splitField, setSplitField] = useState(jobCreator.splitField);
 
   useEffect(() => {

@@ -50,7 +50,8 @@ export class CategorizationExamplesLoader {
       this._timeFieldName,
       this._jobCreator.start,
       this._jobCreator.end,
-      analyzer
+      analyzer,
+      this._jobCreator.runtimeMappings ?? undefined
     );
     return resp;
   }
