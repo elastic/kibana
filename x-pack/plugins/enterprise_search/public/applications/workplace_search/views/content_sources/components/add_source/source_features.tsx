@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';

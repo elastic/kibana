@@ -7,17 +7,31 @@
 
 export type BoostType = 'value' | 'functional' | 'proximity';
 
-export interface Boost {
-  type: BoostType;
+export interface BaseBoost {
   operation?: string;
   function?: string;
+}
+
+// A boost that comes from the server, before we normalize it has a much looser schema
+export interface RawBoost extends BaseBoost {
+  type: BoostType;
   newBoost?: boolean;
   center?: string | number;
-  value?: string | number | string[] | number[];
+  value?: string | number | boolean | object | Array<string | number | boolean | object>;
   factor: number;
 }
 
+// We normalize raw boosts to make them safer and easier to work with
+export interface Boost extends RawBoost {
+  value?: string[];
+}
 export interface SearchSettings {
   boosts: Record<string, Boost[]>;
-  search_fields: object;
+  search_fields: Record<
+    string,
+    {
+      weight: number;
+    }
+  >;
+  result_fields?: object;
 }
