@@ -73,6 +73,8 @@ export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
+export const CLOSE_OPEN_TIMELINE_MODAL_BTN = `${OPEN_TIMELINE_MODAL} > button`;
+
 export const OPEN_TIMELINE_TEMPLATE_ICON =
   '[data-test-subj="open-timeline-modal-body-filter-template"]';
 
@@ -147,6 +149,8 @@ export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"
 export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
+
+export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
