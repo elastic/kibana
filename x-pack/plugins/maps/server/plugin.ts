@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { take } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
@@ -134,12 +133,11 @@ export class MapsPlugin implements Plugin {
   }
 
   // @ts-ignore
-  async setup(core: CoreSetup, plugins: SetupDeps) {
+  setup(core: CoreSetup, plugins: SetupDeps) {
     const { usageCollection, home, licensing, features, mapsLegacy } = plugins;
-    // @ts-ignore
+    const mapsLegacyConfig = mapsLegacy.config;
     const config$ = this._initializerContext.config.create();
-    const mapsLegacyConfig = await mapsLegacy.config$.pipe(take(1)).toPromise();
-    const currentConfig = await config$.pipe(take(1)).toPromise();
+    const currentConfig = this._initializerContext.config.get();
 
     // @ts-ignore
     const mapsEnabled = currentConfig.enabled;
@@ -179,6 +177,7 @@ export class MapsPlugin implements Plugin {
       catalogue: [APP_ID],
       privileges: {
         all: {
+          api: ['fileUpload:import'],
           app: [APP_ID, 'kibana'],
           catalogue: [APP_ID],
           savedObject: {

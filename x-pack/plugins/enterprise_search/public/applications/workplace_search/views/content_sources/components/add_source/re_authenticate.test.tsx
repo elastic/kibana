@@ -9,6 +9,7 @@ import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { ReAuthenticate } from './re_authenticate';

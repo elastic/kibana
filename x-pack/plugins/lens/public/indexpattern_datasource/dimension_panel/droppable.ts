@@ -12,39 +12,46 @@ import {
   DraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertOrReplaceColumn } from '../operations';
+import { insertOrReplaceColumn, deleteColumn, getOperationTypesForField } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
-import { IndexPatternPrivateState, IndexPatternField } from '../types';
+import { IndexPatternPrivateState, IndexPatternField, DraggedField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { getOperationSupportMatrix, OperationSupportMatrix } from './operation_support';
 
-type DropHandlerProps<T = DraggedOperation> = Pick<
-  DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>,
-  'columnId' | 'setState' | 'state' | 'layerId' | 'droppedItem'
-> & {
+type DropHandlerProps<T> = DatasourceDimensionDropHandlerProps<IndexPatternPrivateState> & {
   droppedItem: T;
-  operationSupportMatrix: OperationSupportMatrix;
 };
 
-export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPrivateState>) {
-  const operationSupportMatrix = getOperationSupportMatrix(props);
-
+export function getDropTypes(
+  props: DatasourceDimensionDropProps<IndexPatternPrivateState> & { groupId: string }
+) {
   const { dragging } = props.dragDropContext;
+  if (!dragging) {
+    return;
+  }
+
   const layerIndexPatternId = props.state.layers[props.layerId].indexPatternId;
 
   function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationSupportMatrix.operationByField[field.name]);
+    const operationsForNewField = getOperationTypesForField(field, props.filterOperations);
+    return !!operationsForNewField.length;
   }
 
+  const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
   if (isDraggedField(dragging)) {
-    const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
-    return Boolean(
-      layerIndexPatternId === dragging.indexPatternId &&
-        Boolean(hasOperationForField(dragging.field)) &&
-        (!currentColumn ||
-          (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name))
-    );
+    if (
+      !!(layerIndexPatternId === dragging.indexPatternId && hasOperationForField(dragging.field))
+    ) {
+      if (!currentColumn) {
+        return 'field_add';
+      } else if (
+        (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name) ||
+        !hasField(currentColumn)
+      ) {
+        return 'field_replace';
+      }
+    }
+    return;
   }
 
   if (
@@ -52,11 +59,71 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
     dragging.layerId === props.layerId &&
     props.columnId !== dragging.columnId
   ) {
-    const op = props.state.layers[props.layerId].columns[dragging.columnId];
-    return props.filterOperations(op);
+    // same group
+    if (props.groupId === dragging.groupId) {
+      if (currentColumn) {
+        return 'reorder';
+      }
+      return 'duplicate_in_group';
+    }
+
+    // compatible group
+    const op = props.state.layers[dragging.layerId].columns[dragging.columnId];
+    if (
+      !op ||
+      (currentColumn &&
+        hasField(currentColumn) &&
+        hasField(op) &&
+        currentColumn.sourceField === op.sourceField)
+    ) {
+      return;
+    }
+    if (props.filterOperations(op)) {
+      if (currentColumn) {
+        return 'replace_compatible'; // in the future also 'swap_compatible' and 'duplicate_compatible'
+      } else {
+        return 'move_compatible'; // in the future also 'duplicate_compatible'
+      }
+    }
+
+    // suggest
+    const field =
+      hasField(op) && props.state.indexPatterns[layerIndexPatternId].getFieldByName(op.sourceField);
+    if (field && hasOperationForField(field)) {
+      if (currentColumn) {
+        return 'replace_incompatible'; // in the future also 'swap_incompatible', 'duplicate_incompatible'
+      } else {
+        return 'move_incompatible'; // in the future also 'duplicate_incompatible'
+      }
+    }
   }
-  return false;
 }
+
+export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
+  const { droppedItem, dropType } = props;
+
+  if (dropType === 'field_add' || dropType === 'field_replace') {
+    return operationOnDropMap[dropType]({
+      ...props,
+      droppedItem: droppedItem as DraggedField,
+    });
+  }
+  return operationOnDropMap[dropType]({
+    ...props,
+    droppedItem: droppedItem as DraggedOperation,
+  });
+}
+
+const operationOnDropMap = {
+  field_add: onFieldDrop,
+  field_replace: onFieldDrop,
+  reorder: onReorderDrop,
+  duplicate_in_group: onSameGroupDuplicateDrop,
+  move_compatible: onMoveDropToCompatibleGroup,
+  replace_compatible: onMoveDropToCompatibleGroup,
+  move_incompatible: onMoveDropToNonCompatibleGroup,
+  replace_incompatible: onMoveDropToNonCompatibleGroup,
+};
 
 function reorderElements(items: string[], dest: string, src: string) {
   const result = items.filter((c) => c !== src);
@@ -69,7 +136,13 @@ function reorderElements(items: string[], dest: string, src: string) {
   return result;
 }
 
-const onReorderDrop = ({ columnId, setState, state, layerId, droppedItem }: DropHandlerProps) => {
+function onReorderDrop({
+  columnId,
+  setState,
+  state,
+  layerId,
+  droppedItem,
+}: DropHandlerProps<DraggedOperation>) {
   setState(
     mergeLayer({
       state,
@@ -85,15 +158,97 @@ const onReorderDrop = ({ columnId, setState, state, layerId, droppedItem }: Drop
   );
 
   return true;
-};
+}
 
-const onMoveDropToCompatibleGroup = ({
+function onMoveDropToNonCompatibleGroup(props: DropHandlerProps<DraggedOperation>) {
+  const { columnId, setState, state, layerId, droppedItem } = props;
+
+  const layer = state.layers[layerId];
+  const op = { ...layer.columns[droppedItem.columnId] };
+  const field =
+    hasField(op) && state.indexPatterns[layer.indexPatternId].getFieldByName(op.sourceField);
+  if (!field) {
+    return false;
+  }
+
+  const operationsForNewField = getOperationTypesForField(field, props.filterOperations);
+
+  if (!operationsForNewField.length) {
+    return false;
+  }
+
+  const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
+
+  const newLayer = insertOrReplaceColumn({
+    layer: deleteColumn({
+      layer,
+      columnId: droppedItem.columnId,
+      indexPattern: currentIndexPattern,
+    }),
+    columnId,
+    indexPattern: currentIndexPattern,
+    op: operationsForNewField[0],
+    field,
+  });
+
+  trackUiEvent('drop_onto_dimension');
+  setState(
+    mergeLayer({
+      state,
+      layerId,
+      newLayer: {
+        ...newLayer,
+      },
+    })
+  );
+
+  return { deleted: droppedItem.columnId };
+}
+
+function onSameGroupDuplicateDrop({
   columnId,
   setState,
   state,
   layerId,
   droppedItem,
-}: DropHandlerProps) => {
+}: DropHandlerProps<DraggedOperation>) {
+  const layer = state.layers[layerId];
+
+  const op = { ...layer.columns[droppedItem.columnId] };
+  const newColumns = {
+    ...layer.columns,
+    [columnId]: op,
+  };
+
+  const newColumnOrder = [...layer.columnOrder];
+  // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
+  // TODO this logic does not take into account groups - we probably need to pass the current
+  // group config to this position to place the column right
+  const insertionIndex = op.isBucketed
+    ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
+    : newColumnOrder.length;
+  newColumnOrder.splice(insertionIndex, 0, columnId);
+  // Time to replace
+  setState(
+    mergeLayer({
+      state,
+      layerId,
+      newLayer: {
+        columnOrder: newColumnOrder,
+        columns: newColumns,
+      },
+    })
+  );
+  return true;
+}
+
+function onMoveDropToCompatibleGroup({
+  columnId,
+  setState,
+  state,
+  layerId,
+  droppedItem,
+}: DropHandlerProps<DraggedOperation>) {
   const layer = state.layers[layerId];
   const op = { ...layer.columns[droppedItem.columnId] };
   const newColumns = { ...layer.columns };
@@ -122,30 +277,18 @@ const onMoveDropToCompatibleGroup = ({
     })
   );
   return { deleted: droppedItem.columnId };
-};
+}
 
-const onFieldDrop = ({
-  columnId,
-  setState,
-  state,
-  layerId,
-  droppedItem,
-  operationSupportMatrix,
-}: DropHandlerProps<unknown>) => {
-  function hasOperationForField(field: IndexPatternField) {
-    return Boolean(operationSupportMatrix.operationByField[field.name]);
-  }
+function onFieldDrop(props: DropHandlerProps<DraggedField>) {
+  const { columnId, setState, state, layerId, droppedItem } = props;
 
-  if (!isDraggedField(droppedItem) || !hasOperationForField(droppedItem.field)) {
+  const operationsForNewField = getOperationTypesForField(
+    droppedItem.field,
+    props.filterOperations
+  );
+
+  if (!isDraggedField(droppedItem) || !operationsForNewField.length) {
     // TODO: What do we do if we couldn't find a column?
-    return false;
-  }
-
-  // dragged field, not operation
-
-  const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
-
-  if (!operationsForNewField || operationsForNewField.size === 0) {
     return false;
   }
 
@@ -156,18 +299,13 @@ const onFieldDrop = ({
 
   // Detects if we can change the field only, otherwise change field + operation
   const fieldIsCompatibleWithCurrent =
-    selectedColumn &&
-    operationSupportMatrix.operationByField[droppedItem.field.name]?.has(
-      selectedColumn.operationType
-    );
+    selectedColumn && operationsForNewField.includes(selectedColumn.operationType);
 
   const newLayer = insertOrReplaceColumn({
     layer,
     columnId,
     indexPattern: currentIndexPattern,
-    op: fieldIsCompatibleWithCurrent
-      ? selectedColumn.operationType
-      : operationsForNewField.values().next().value,
+    op: fieldIsCompatibleWithCurrent ? selectedColumn.operationType : operationsForNewField[0],
     field: droppedItem.field,
   });
 
@@ -176,55 +314,4 @@ const onFieldDrop = ({
   trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
   setState(mergeLayer({ state, layerId, newLayer }));
   return true;
-};
-
-export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
-  const operationSupportMatrix = getOperationSupportMatrix(props);
-  const { setState, state, droppedItem, columnId, layerId, groupId, isNew } = props;
-
-  if (!isDraggedOperation(droppedItem)) {
-    return onFieldDrop({
-      columnId,
-      setState,
-      state,
-      layerId,
-      droppedItem,
-      operationSupportMatrix,
-    });
-  }
-  const isExistingFromSameGroup =
-    droppedItem.groupId === groupId && droppedItem.columnId !== columnId && !isNew;
-
-  // reorder in the same group
-  if (isExistingFromSameGroup) {
-    return onReorderDrop({
-      columnId,
-      setState,
-      state,
-      layerId,
-      droppedItem,
-      operationSupportMatrix,
-    });
-  }
-
-  // replace or move to compatible group
-  const isFromOtherGroup = droppedItem.groupId !== groupId && droppedItem.layerId === layerId;
-
-  if (isFromOtherGroup) {
-    const layer = state.layers[layerId];
-    const op = { ...layer.columns[droppedItem.columnId] };
-
-    if (props.filterOperations(op)) {
-      return onMoveDropToCompatibleGroup({
-        columnId,
-        setState,
-        state,
-        layerId,
-        droppedItem,
-        operationSupportMatrix,
-      });
-    }
-  }
-
-  return false;
 }
