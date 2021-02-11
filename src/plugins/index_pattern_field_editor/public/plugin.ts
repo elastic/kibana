@@ -30,8 +30,7 @@ export class IndexPatternFieldEditorPlugin
     const {
       application: { capabilities },
     } = core;
-    const { data } = plugins;
-
+    const { data, usageCollection } = plugins;
     return {
       fieldFormatEditors,
       openEditor: getFieldEditorOpener({
@@ -40,13 +39,14 @@ export class IndexPatternFieldEditorPlugin
         fieldFormats: data.fieldFormats,
         fieldFormatEditors,
         search: data.search,
+        usageCollection,
       }),
       userPermissions: {
         editIndexPattern: () => {
           return capabilities.management.kibana.indexPatterns;
         },
       },
-      DeleteRuntimeFieldProvider: getDeleteProvider(data.indexPatterns),
+      DeleteRuntimeFieldProvider: getDeleteProvider(data.indexPatterns, usageCollection),
     };
   }
 
