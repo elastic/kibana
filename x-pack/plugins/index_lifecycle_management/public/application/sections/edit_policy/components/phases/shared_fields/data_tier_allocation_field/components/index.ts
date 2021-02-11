@@ -15,7 +15,7 @@ export { DefaultAllocationNotice } from './default_allocation_notice';
 
 export { NoNodeAttributesWarning } from './no_node_attributes_warning';
 
-export { CloudMissingColdTierCallout } from './cloud_missing_cold_tier_callout';
+export { MissingColdTierCallout } from './missing_cold_tier_callout';
 
 export { CloudDataTierCallout } from './cloud_data_tier_callout';
 

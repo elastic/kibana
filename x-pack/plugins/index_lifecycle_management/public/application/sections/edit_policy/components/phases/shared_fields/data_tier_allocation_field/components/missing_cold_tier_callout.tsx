@@ -31,9 +31,7 @@ interface Props {
  * This may need to be change when we have autoscaling enabled on a cluster because nodes may not
  * yet exist, but will automatically be provisioned.
  */
-export const CloudMissingColdTierCallout: FunctionComponent<Props> = ({
-  linkToCloudDeployment,
-}) => {
+export const MissingColdTierCallout: FunctionComponent<Props> = ({ linkToCloudDeployment }) => {
   return (
     <EuiCallOut title={i18nTexts.title} data-test-subj="cloudMissingColdTierCallout">
       {i18nTexts.body}

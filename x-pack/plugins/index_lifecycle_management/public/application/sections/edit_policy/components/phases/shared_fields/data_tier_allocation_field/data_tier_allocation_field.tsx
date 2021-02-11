@@ -26,7 +26,7 @@ import {
   DataTierAllocation,
   DefaultAllocationNotice,
   NoNodeAttributesWarning,
-  CloudMissingColdTierCallout,
+  MissingColdTierCallout,
   CloudDataTierCallout,
   LoadingError,
 } from './components';
@@ -79,7 +79,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
             return (
               <>
                 <EuiSpacer size="s" />
-                <CloudMissingColdTierCallout linkToCloudDeployment={cloudDeploymentUrl} />
+                <MissingColdTierCallout linkToCloudDeployment={cloudDeploymentUrl} />
               </>
             );
           }
