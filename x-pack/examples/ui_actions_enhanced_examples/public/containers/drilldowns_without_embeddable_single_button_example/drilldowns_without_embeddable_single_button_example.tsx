@@ -50,11 +50,11 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
 
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
-          <plugins.uiActionsEnhanced.FlyoutManageDrilldowns
-            onClose={() => setShowManager(false)}
-            viewMode={viewRef.current}
+          <plugins.uiActionsEnhanced.DrilldownManager
+            tab={viewRef.current}
             dynamicActionManager={managerWithoutEmbeddableSingleButton}
             triggers={[SAMPLE_APP2_CLICK_TRIGGER]}
+            onClose={() => setShowManager(false)}
           />
         </EuiFlyout>
       )}
