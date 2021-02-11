@@ -54,10 +54,6 @@
   margin-left: $euiSizeL + $euiSizeXS;
 }
 
-.dshCopyToParagraph {
-  margin-bottom: $euiSizeL !important;
-}
-
 @include euiBreakpoint('xs', 's') {
   .dshUnsavedListingItem {
     margin-top: $euiSize;

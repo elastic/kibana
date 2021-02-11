@@ -74,9 +74,10 @@ export function CopyToDashboardModal({
 
       <EuiModalBody>
         <>
-          <EuiText className="dshCopyToParagraph">
+          <EuiText>
             <p>{dashboardCopyToDashboardAction.getDescription()}</p>
           </EuiText>
+          <EuiSpacer />
           <EuiFormRow hasChildLabel={false}>
             <EuiPanel color="subdued" hasShadow={false} data-test-subj="add-to-dashboard-options">
               <div>
