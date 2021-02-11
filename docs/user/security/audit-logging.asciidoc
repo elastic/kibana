@@ -85,6 +85,10 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is creating a saved object.
 | `failure` | User is not authorized to create a saved object.
 
+.2+| `saved_object_open_point_in_time`
+| `unknown` | User is creating a Point In Time to use when querying saved objects.
+| `failure` | User is not authorized to create a Point In Time for the provided saved object types.
+
 .2+| `connector_create`
 | `unknown` | User is creating a connector.
 | `failure` | User is not authorized to create a connector.
@@ -170,6 +174,10 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `saved_object_delete`
 | `unknown` | User is deleting a saved object.
 | `failure` | User is not authorized to delete a saved object.
+
+.2+| `saved_object_close_point_in_time`
+| `unknown` | User is deleting a Point In Time that was used to query saved objects.
+| `failure` | User is not authorized to delete a Point In Time.
 
 .2+| `connector_delete`
 | `unknown` | User is deleting a connector.
