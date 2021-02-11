@@ -24,8 +24,7 @@
         "ml": ["read"],
         "siem": ["read"],
         "actions": ["read"],
-        "builtInAlerts": ["read"],
-        "savedObjectsManagement": ["read"]
+        "builtInAlerts": ["read"]
       },
       "spaces": ["*"]
     }

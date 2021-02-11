@@ -77,6 +77,7 @@ async function copySourceAndBabelify() {
           '**/public/**/*.{js,ts,tsx,json}',
           '**/{__tests__,__mocks__,__snapshots__}/**',
           'plugins/canvas/shareable_runtime/test/**',
+          'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
         ],
         allowEmpty: true,
       }
