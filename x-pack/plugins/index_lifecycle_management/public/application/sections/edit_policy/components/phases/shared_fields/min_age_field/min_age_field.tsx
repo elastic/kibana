@@ -17,11 +17,12 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { getFieldValidityAndErrorMessage } from '../../../../../../../shared_imports';
 
-import { UseField } from '../../../../form';
+import { UseField, useConfigurationIssues } from '../../../../form';
 
 import { getUnitsAriaLabelForPhase, getTimingLabelForPhase } from './util';
 
@@ -62,6 +63,13 @@ const i18nTexts = {
       defaultMessage: 'nanoseconds',
     }
   ),
+  rolloverToolTipDescription: i18n.translate(
+    'xpack.indexLifecycleMgt.editPolicy.minimumAge.rolloverToolTipDescription',
+    {
+      defaultMessage:
+        'Data age is calculated as time from rollover. Rollover is configured in the hot phase.',
+    }
+  ),
 };
 
 interface Props {
@@ -69,6 +77,7 @@ interface Props {
 }
 
 export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
+  const { isUsingRollover } = useConfigurationIssues();
   return (
     <UseField path={`phases.${phase}.min_age`}>
       {(field) => {
@@ -110,6 +119,23 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                         const { isInvalid: isUnitFieldInvalid } = getFieldValidityAndErrorMessage(
                           unitField
                         );
+                        const selectAppendValue: Array<string | React.ReactElement> = [
+                          i18n.translate(
+                            'xpack.indexLifecycleMgt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
+                            { defaultMessage: 'old' }
+                          ),
+                        ].concat(
+                          isUsingRollover
+                            ? [
+                                <EuiIconTip
+                                  data-test-subj="rolloverMinAgeInputIconTip"
+                                  type="iInCircle"
+                                  aria-label={i18nTexts.rolloverToolTipDescription}
+                                  content={i18nTexts.rolloverToolTipDescription}
+                                />,
+                              ]
+                            : ([] as any[])
+                        );
                         return (
                           <EuiSelect
                             compressed
@@ -118,7 +144,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                               unitField.setValue(e.target.value);
                             }}
                             isInvalid={isUnitFieldInvalid}
-                            append={'old'}
+                            append={selectAppendValue}
                             data-test-subj={`${phase}-selectedMinimumAgeUnits`}
                             aria-label={getUnitsAriaLabelForPhase(phase)}
                             options={[
