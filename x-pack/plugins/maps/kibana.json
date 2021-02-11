@@ -11,7 +11,7 @@
     "features",
     "inspector",
     "data",
-    "mapsFileUpload",
+    "fileUpload",
     "uiActions",
     "navigation",
     "visualizations",
@@ -25,7 +25,8 @@
   ],
   "optionalPlugins": [
     "home",
-    "savedObjectsTagging"
+    "savedObjectsTagging",
+    "charts"
   ],
   "ui": true,
   "server": true,

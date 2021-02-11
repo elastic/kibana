@@ -17,7 +17,7 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
@@ -78,8 +78,10 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
+  palettes: PaletteRegistry;
   documentToExpression: (
-    doc: Document
+    doc: Document,
+    palettes: PaletteRegistry
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
   editable: boolean;
   indexPatternService: IndexPatternsContract;
@@ -229,7 +231,7 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
-    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
+    const { ast, errors } = await this.deps.documentToExpression(this.savedVis, this.deps.palettes);
     this.errors = errors;
     this.expression = ast ? toExpression(ast) : null;
     await this.initializeOutput();

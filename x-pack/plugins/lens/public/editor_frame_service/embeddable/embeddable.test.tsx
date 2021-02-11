@@ -23,6 +23,7 @@ import { AttributeService, ViewMode } from '../../../../../../src/plugins/embedd
 import { LensAttributeService } from '../../lens_attribute_service';
 import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -125,6 +126,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       {} as LensEmbeddableInput
     );
@@ -157,6 +159,7 @@ describe('embeddable', () => {
             },
             errors: [{ shortMessage: '', longMessage: 'my validation error' }],
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       {} as LensEmbeddableInput
     );
@@ -197,6 +200,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       {} as LensEmbeddableInput
     );
@@ -232,6 +236,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -273,6 +278,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -309,6 +315,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -359,6 +366,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       input
     );
@@ -409,6 +417,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       input
     );
@@ -458,6 +467,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       input
     );
@@ -496,6 +506,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -534,6 +545,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -572,6 +584,7 @@ describe('embeddable', () => {
             },
             errors: undefined,
           }),
+        palettes: chartPluginMock.createPaletteRegistry(),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
