@@ -1485,7 +1485,6 @@
     "discover.docTable.tableRow.viewSingleDocumentLinkText": "単一のドキュメントを表示",
     "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "周りのドキュメントを表示",
     "discover.documentsAriaLabel": "ドキュメント",
-    "discover.docViews.json.codeEditorAriaLabel": "Elasticsearch ドキュメントの JSON ビューのみを読み込む",
     "discover.docViews.json.jsonTitle": "JSON",
     "discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedAriaLabel": "警告",
     "discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip": "{underscoreSign} で始まるフィールド名はサポートされません",

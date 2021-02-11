@@ -1485,7 +1485,6 @@
     "discover.docTable.tableRow.viewSingleDocumentLinkText": "查看单个文档",
     "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "查看周围文档",
     "discover.documentsAriaLabel": "文档",
-    "discover.docViews.json.codeEditorAriaLabel": "Elasticsearch 文档的只读 JSON 视图",
     "discover.docViews.json.jsonTitle": "JSON",
     "discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedAriaLabel": "警告",
     "discover.docViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip": "不支持以 {underscoreSign} 开头的字段名称",
