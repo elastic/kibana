@@ -264,6 +264,16 @@ export const enrichNewExceptionItemsWithComments = (
   });
 };
 
+export const buildGetAlertByIdQuery = (id: string | undefined) => ({
+  query: {
+    match: {
+      _id: {
+        query: id || '',
+      },
+    },
+  },
+});
+
 /**
  * Adds new and existing comments to exceptionItem
  * @param exceptionItem existing ExceptionItem
@@ -389,16 +399,16 @@ export const getCodeSignatureValue = (
 ): Array<{ subjectName: string; trusted: string }> => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     return codeSignature.map((signature) => ({
-      subjectName: (signature.subject_name && signature.subject_name[0]) ?? '',
-      trusted: (signature.trusted && signature.trusted[0]) ?? '',
+      subjectName: (signature.subject_name && signature.subject_name) ?? '',
+      trusted: (signature.trusted && signature.trusted) ?? '',
     }));
   } else {
     const signature: CodeSignature | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
     const subjectName: string | undefined =
-      signature && signature.subject_name && signature.subject_name[0];
-    const trusted: string | undefined = signature && signature.trusted && signature.trusted[0];
+      signature && signature.subject_name && signature.subject_name;
+    const trusted: string | undefined = signature && signature.trusted && signature.trusted;
 
     return [
       {
@@ -582,16 +592,16 @@ export const defaultEndpointExceptionItems = (
   alertEcsData: Ecs
 ): ExceptionsBuilderExceptionItem[] => {
   const { file, process, Ransomware, event: alertEvent } = alertEcsData;
-  const eventCode = alertEvent && alertEvent.code ? alertEvent.code[0] : '';
+  const eventCode = alertEvent && alertEvent.code ? alertEvent.code : '';
 
   if (eventCode === 'ransomware') {
     return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
       getPrepopulatedRansomwareException({
         listId,
         ruleName,
-        sha256Hash: process && process.hash && process.hash.sha256 ? process.hash.sha256[0] : '',
-        executable: process && process.executable ? process.executable[0] : '',
-        ransomwareFeature: Ransomware && Ransomware.feature ? Ransomware.feature[0] : '',
+        sha256Hash: process && process.hash && process.hash.sha256 ? process.hash.sha256 : '',
+        executable: process && process.executable ? process.executable : '',
+        ransomwareFeature: Ransomware && Ransomware.feature ? Ransomware.feature : '',
         eventCode,
         codeSignature,
       })
@@ -603,8 +613,8 @@ export const defaultEndpointExceptionItems = (
     getPrepopulatedEndpointException({
       listId,
       ruleName,
-      filePath: file && file.path ? file.path[0] : '',
-      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256[0] : '',
+      filePath: file && file.path ? file.path : '',
+      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256 : '',
       eventCode,
       codeSignature,
     })

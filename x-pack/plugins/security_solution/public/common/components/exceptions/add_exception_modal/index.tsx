@@ -23,6 +23,7 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
+import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
@@ -51,6 +52,7 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
+  buildGetAlertByIdQuery,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { ExceptionsBuilderExceptionItem } from '../types';
@@ -62,7 +64,7 @@ export interface AddExceptionModalProps {
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  alertData?: Ecs;
+  ecsData?: Ecs;
   alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
@@ -97,12 +99,24 @@ const ModalBodySection = styled.section`
   `}
 `;
 
+interface EcsHit {
+  _id: string;
+  _index: string;
+  _source: {
+    '@timestamp': string;
+  } & Omit<Ecs, '_id' | '_index'>;
+}
+
+export type Alert = {
+  '@timestamp': string;
+} & Ecs;
+
 export const AddExceptionModal = memo(function AddExceptionModal({
   ruleName,
   ruleId,
   ruleIndices,
   exceptionListType,
-  alertData,
+  ecsData,
   onCancel,
   onConfirm,
   onRuleChange,
@@ -127,6 +141,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
     memoSignalIndexName
   );
+
+  const { loading: isLoadingAlertData, data: alertData } = useQueryAlerts<EcsHit, {}>(
+    buildGetAlertByIdQuery(ecsData?._id),
+    signalIndexName
+  );
+
+  const alert = useMemo(() => {
+    if (isLoadingAlertData === false) {
+      const { _id, _index, _source } = alertData?.hits.hits[0] || {};
+      return { _id, _index, ..._source };
+    }
+  }, [alertData?.hits.hits, isLoadingAlertData]);
 
   const memoMlJobIds = useMemo(
     () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
@@ -234,12 +260,12 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   });
 
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
-    if (exceptionListType === 'endpoint' && alertData != null && ruleExceptionList) {
-      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alertData);
+    if (exceptionListType === 'endpoint' && alert != null && ruleExceptionList) {
+      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alert);
     } else {
       return [];
     }
-  }, [alertData, exceptionListType, ruleExceptionList, ruleName]);
+  }, [exceptionListType, ruleExceptionList, ruleName, alert]);
 
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
@@ -286,15 +312,15 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
     const osDefaults: OsTypeArray = ['windows', 'macos'];
-    if (alertData != null) {
-      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
+    if (ecsData != null) {
+      const osTypes = ecsData.host && ecsData.host.os && ecsData.host.os.family;
       if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
         return osTypes;
       }
       return osDefaults;
     }
     return osDefaults;
-  }, [alertData]);
+  }, [ecsData]);
 
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -313,7 +339,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems != null) {
-      const alertIdToClose = shouldCloseAlert && alertData ? alertData._id : undefined;
+      const alertIdToClose = shouldCloseAlert && ecsData ? ecsData._id : undefined;
       const bulkCloseIndex =
         shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
@@ -324,7 +350,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     enrichExceptionItems,
     shouldCloseAlert,
     shouldBulkCloseAlert,
-    alertData,
+    ecsData,
     signalIndexName,
   ]);
 
@@ -372,6 +398,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         (isLoadingExceptionList ||
           isIndexPatternLoading ||
           isSignalIndexLoading ||
+          isLoadingAlertData ||
           isSignalIndexPatternLoading) && (
           <Loader data-test-subj="loadingAddExceptionModal" size="xl" />
         )}
@@ -382,6 +409,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         !isIndexPatternLoading &&
         !isRuleLoading &&
         !mlJobLoading &&
+        !isLoadingAlertData &&
         ruleExceptionList && (
           <>
             <ModalBodySection className="builder-section">
