@@ -18,6 +18,7 @@ import { CoreStart as CoreStart_2 } from 'src/core/server';
 import { Datatable } from 'src/plugins/expressions';
 import { Datatable as Datatable_2 } from 'src/plugins/expressions/common';
 import { DatatableColumn } from 'src/plugins/expressions';
+import { DatatableColumnType } from 'src/plugins/expressions/common';
 import { Duration } from 'moment';
 import { ElasticsearchClient } from 'src/core/server';
 import { ElasticsearchClient as ElasticsearchClient_2 } from 'kibana/server';
