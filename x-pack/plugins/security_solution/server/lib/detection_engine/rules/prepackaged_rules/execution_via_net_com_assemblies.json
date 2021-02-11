@@ -6,7 +6,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -56,5 +57,5 @@
     }
   ],
   "type": "query",
-  "version": 5
+  "version": 6
 }

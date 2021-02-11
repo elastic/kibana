@@ -2,16 +2,16 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies execution of the security_authtrampoline process via the Apple script interpreter (osascript). This occurs when programs use AuthorizationExecute-WithPrivileges from the Security.framework to run another program with root privileges. It should not be run by itself, as this is a sign of execution with explicit logon credentials.",
+  "description": "Identifies execution of the security_authtrampoline process via a scripting interpreter. This occurs when programs use AuthorizationExecute-WithPrivileges from the Security.framework to run another program with root privileges. It should not be run by itself, as this is a sign of execution with explicit logon credentials.",
   "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "eql",
+  "language": "kuery",
   "license": "Elastic License",
-  "name": "Execution with Explicit Credentials via Apple Scripting",
-  "query": "sequence by host.id with maxspan=5s\n [process where event.type in (\"start\", \"process_started\", \"info\") and process.name == \"osascript\"] by process.pid\n [process where event.type in (\"start\", \"process_started\") and process.name == \"security_authtrampoline\"] by process.ppid\n",
+  "name": "Execution with Explicit Credentials via Scripting",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:\"security_authtrampoline\" and process.parent.name:(osascript or com.apple.automator.runner or sh or bash or dash or zsh or python* or perl* or php* or ruby or pwsh)",
   "references": [
     "https://objectivebythesea.com/v2/talks/OBTS_v2_Thomas.pdf",
     "https://www.manpagez.com/man/8/security_authtrampoline/"
@@ -59,6 +59,6 @@
       ]
     }
   ],
-  "type": "eql",
-  "version": 1
+  "type": "query",
+  "version": 2
 }

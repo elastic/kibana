@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "An adversary may add the setgid bit to a file or directory in order to run a file with the privileges of the owning group. An adversary can take advantage of this to either do a shell escape or exploit a vulnerability in an application with the setgid bit to get code running in a different user\u2019s context. Additionally, adversaries can use this mechanism on their own malware to make sure they're able to execute in elevated contexts in the future.",
+  "description": "An adversary may add the setuid or setgid bit to a file or directory in order to run a file with the privileges of the owning user or group. An adversary can take advantage of this to either do a shell escape or exploit a vulnerability in an application with the setuid or setgid bit to get code running in a different user\u2019s context. Additionally, adversaries can use this mechanism on their own malware to make sure they're able to execute in elevated contexts in the future.",
   "from": "now-9m",
   "index": [
     "auditbeat-*",
@@ -11,15 +11,16 @@
   "language": "lucene",
   "license": "Elastic License",
   "max_signals": 33,
-  "name": "Setgid Bit Set via chmod",
-  "query": "event.category:process AND event.type:(start or process_started) AND process.name:chmod AND process.args:(g+s OR /2[0-9]{3}/) AND NOT user.name:root",
+  "name": "Setuid / Setgid Bit Set via chmod",
+  "query": "event.category:process AND event.type:(start OR process_started) AND process.name:chmod AND process.args:(\"+s\" OR \"u+s\" OR /4[0-9]{3}/ OR g+s OR /2[0-9]{3}/)",
   "risk_score": 21,
-  "rule_id": "3a86e085-094c-412d-97ff-2439731e59cb",
+  "rule_id": "8a1b0278-0f9a-487d-96bd-d4833298e87a",
   "severity": "low",
   "tags": [
     "Elastic",
     "Host",
     "Linux",
+    "macOS",
     "Threat Detection",
     "Privilege Escalation"
   ],
@@ -57,5 +58,5 @@
     }
   ],
   "type": "query",
-  "version": 5
+  "version": 6
 }

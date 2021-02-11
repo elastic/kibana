@@ -5,7 +5,8 @@
   "description": "Discovery of remote system information using built-in commands, which may be used to mover laterally.",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -39,5 +40,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

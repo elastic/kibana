@@ -5,7 +5,8 @@
   "description": "Identifies instances of lower privilege accounts enumerating Administrator accounts or groups using built-in Windows tools.",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -44,5 +45,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

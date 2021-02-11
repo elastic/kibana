@@ -5,7 +5,8 @@
   "description": "Enumeration or discovery of the Windows registry using reg.exe. This information can be used to perform follow-on activities.",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -39,5 +40,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

@@ -5,7 +5,8 @@
   "description": "Identifies use of the Windows file system utility (fsutil.exe ) to gather information about attached peripheral devices and components connected to a computer system.",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -39,5 +40,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

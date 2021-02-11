@@ -7,7 +7,8 @@
   "index": [
     "auditbeat-*",
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -43,5 +44,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

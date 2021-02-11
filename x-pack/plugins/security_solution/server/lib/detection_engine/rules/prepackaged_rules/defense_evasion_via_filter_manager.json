@@ -5,7 +5,8 @@
   "description": "The Filter Manager Control Program (fltMC.exe) binary may be abused by adversaries to unload a filter driver and evade defenses.",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -39,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

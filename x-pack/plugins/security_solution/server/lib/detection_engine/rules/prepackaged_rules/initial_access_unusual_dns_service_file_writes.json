@@ -5,7 +5,8 @@
   "description": "Identifies an unexpected file being modified by dns.exe, the process responsible for Windows DNS Server services, which may indicate activity related to remote code execution or other forms of exploitation.",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -44,5 +45,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

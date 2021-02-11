@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Windows Suspicious Script Object Execution",
-  "query": "/* add winlogbeat-* when process.code_signature.* fields are populated */\n\nsequence by process.entity_id with maxspan=2m\n  [process where event.type in (\"start\", \"process_started\") and\n     /* uncomment once in winlogbeat */\n     /* process.code_signature.subject_name == \"Microsoft Corporation\" and process.code_signature.trusted == true and */\n     not (process.name : \"cscript.exe\" or\n          process.name : \"iexplore.exe\" or\n          process.name : \"MicrosoftEdge.exe\" or\n          process.name : \"msiexec.exe\" or\n          process.name : \"smartscreen.exe\" or\n          process.name : \"taskhostw.exe\" or\n          process.name : \"w3wp.exe\" or\n          process.name : \"wscript.exe\")]\n  [library where event.type == \"start\" and file.name : \"scrobj.dll\"]\n",
+  "query": "/* add winlogbeat-* when process.code_signature.* fields are populated */\n\nsequence by process.entity_id with maxspan = 2m\n  [process where event.type in (\"start\", \"process_started\") and\n     /* uncomment once in winlogbeat */\n     /* process.code_signature.subject_name : \"Microsoft Corporation\" and process.code_signature.trusted : true and */\n     not process.name : (\n       \"cscript.exe\",\n       \"iexplore.exe\",\n       \"MicrosoftEdge.exe\",\n       \"msiexec.exe\",\n       \"smartscreen.exe\",\n       \"taskhostw.exe\",\n       \"w3wp.exe\",\n       \"wscript.exe\")]\n  [library where event.type == \"start\" and dll.name : \"scrobj.dll\"]\n",
   "risk_score": 21,
   "rule_id": "4ed678a9-3a4f-41fb-9fea-f85a6e0a0dff",
   "severity": "medium",
@@ -34,5 +35,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

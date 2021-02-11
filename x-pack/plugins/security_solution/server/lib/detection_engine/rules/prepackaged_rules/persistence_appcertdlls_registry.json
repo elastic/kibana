@@ -5,7 +5,8 @@
   "description": "Detects attempts to maintain persistence by creating registry keys using AppCert DLLs. AppCert DLLs are loaded by every process using the common API functions to create processes.",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -46,5 +47,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

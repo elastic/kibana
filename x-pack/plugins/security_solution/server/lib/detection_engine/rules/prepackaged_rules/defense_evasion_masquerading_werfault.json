@@ -9,7 +9,8 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
@@ -48,5 +49,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

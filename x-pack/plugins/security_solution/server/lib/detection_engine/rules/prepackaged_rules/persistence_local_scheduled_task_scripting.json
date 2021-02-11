@@ -9,14 +9,15 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Scheduled Task Created by a Windows Script",
   "note": "Decode the base64 encoded Tasks Actions registry value to investigate the task's configured action.",
-  "query": "sequence by host.id with maxspan = 30s\n  [library where file.name : \"taskschd.dll\" and process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\")]\n  [registry where registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\TaskCache\\\\Tasks\\\\*\\\\Actions\"]\n",
-  "risk_score": 43,
+  "query": "sequence by host.id with maxspan = 30s\n  [library where dll.name : \"taskschd.dll\" and process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\")]\n  [registry where registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\TaskCache\\\\Tasks\\\\*\\\\Actions\"]\n",
+  "risk_score": 47,
   "rule_id": "689b9d57-e4d5-4357-ad17-9c334609d79a",
   "severity": "medium",
   "tags": [
@@ -44,5 +45,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

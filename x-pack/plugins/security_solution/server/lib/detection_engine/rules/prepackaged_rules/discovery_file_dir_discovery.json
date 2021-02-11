@@ -5,12 +5,13 @@
   "description": "Enumeration of files and directories using built-in tools. Adversaries may use the information discovered to plan follow-on activity.",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "File and Directory Discovery",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and\n  process.args : (\"dir\", \"tree\")\n\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"cmd.exe\" or process.pe.original_file_name == \"Cmd.Exe\") and\n  process.args : (\"dir\", \"tree\")\n",
   "risk_score": 21,
   "rule_id": "7b08314d-47a0-4b71-ae4e-16544176924f",
   "severity": "low",
@@ -39,5 +40,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

@@ -5,12 +5,13 @@
   "description": "An adversary can use Windows Management Instrumentation (WMI) to install event filters, providers, consumers, and bindings that execute code when a defined event occurs. Adversaries may use the capabilities of WMI to subscribe to an event and execute arbitrary code when that event occurs, providing persistence on a system.",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
   "license": "Elastic License",
   "name": "Persistence via WMI Event Subscription",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n  process.args : \"create\" and\n  process.args : (\"ActiveScriptEventConsumer\", \"CommandLineEventConsumer\")\n\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"wmic.exe\" or process.pe.original_file_name == \"wmic.exe\") and\n  process.args : \"create\" and\n  process.args : (\"ActiveScriptEventConsumer\", \"CommandLineEventConsumer\")\n",
   "risk_score": 21,
   "rule_id": "9b6813a1-daf1-457e-b0e6-0bb4e55b8a4c",
   "severity": "low",
@@ -39,5 +40,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }
