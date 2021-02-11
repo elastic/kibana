@@ -43,12 +43,8 @@ export const sourceNameForIndex = (indexName: string): string => {
   const internal = matches[1] || '';
   const baseName = matches[2];
 
-  // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
-  // avoid conflicts with index patterns/templates/etc
-  const reindexedMatcher = new RegExp(
-    `(-reindexed-v5$|reindexed-v${versionService.getPrevMajorVersion()}-)`,
-    'g'
-  );
+  // in 6.7+ we prepend to avoid conflicts with index patterns/templates/etc
+  const reindexedMatcher = new RegExp(`reindexed-v${versionService.getPrevMajorVersion()}-`, 'g');
 
   const cleanBaseName = baseName.replace(reindexedMatcher, '');
   return `${internal}${cleanBaseName}`;
@@ -86,13 +82,12 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.uuid',
     'index.blocks.write',
     'index.creation_date',
-    'index.legacy',
-    'index.mapping.single_type',
     'index.provided_name',
     'index.routing.allocation.initial_recovery._id',
     'index.version.created',
-    'index.version.upgraded',
     'index.verified_before_close',
+    // Below settings are deprecated in 9.0
+    'index.version.upgraded',
   ]);
 
 // Use `flow` to pipe the settings through each function.

@@ -41,8 +41,6 @@ describe('transformFlatSettings', () => {
           'index.uuid': 'i66b9149a-00ee-42d9-8ca1-85ae927924bf',
           'index.blocks.write': 'true',
           'index.creation_date': '1547052614626',
-          'index.legacy': '6',
-          'index.mapping.single_type': 'true',
           'index.provided_name': 'test1',
           'index.routing.allocation.initial_recovery._id': '1',
           'index.version.created': '123123',
@@ -73,11 +71,6 @@ describe('sourceNameForIndex', () => {
     expect(sourceNameForIndex('myIndex')).toEqual('myIndex');
   });
 
-  it('excludes appended v5 reindexing string from newIndexName', () => {
-    expect(sourceNameForIndex('myIndex-reindexed-v5')).toEqual('myIndex');
-    expect(sourceNameForIndex('.myInternalIndex-reindexed-v5')).toEqual('.myInternalIndex');
-  });
-
   it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in newIndexName`, () => {
     expect(sourceNameForIndex(`reindexed-v${prevMajor}-myIndex`)).toEqual('myIndex');
     expect(sourceNameForIndex(`.reindexed-v${prevMajor}-myInternalIndex`)).toEqual(
@@ -99,16 +92,6 @@ describe('generateNewIndexName', () => {
 
   it('parses non-internal indices', () => {
     expect(generateNewIndexName('myIndex')).toEqual(`reindexed-v${currentMajor}-myIndex`);
-  });
-
-  it('excludes appended v5 reindexing string from generateNewIndexName', () => {
-    expect(generateNewIndexName('myIndex-reindexed-v5')).toEqual(
-      `reindexed-v${currentMajor}-myIndex`
-    );
-
-    expect(generateNewIndexName('.myInternalIndex-reindexed-v5')).toEqual(
-      `.reindexed-v${currentMajor}-myInternalIndex`
-    );
   });
 
   it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor} in generateNewIndexName`, () => {

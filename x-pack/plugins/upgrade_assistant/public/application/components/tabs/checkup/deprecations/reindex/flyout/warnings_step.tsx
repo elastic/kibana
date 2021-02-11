@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -103,10 +102,8 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
   const { docLinks } = useAppContext();
   const { ELASTIC_WEBSITE_URL } = docLinks;
-  const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
   const observabilityDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/observability`;
 
-  // TODO: Revisit warnings returned for 8.0 upgrade; many of these are likely obselete now
   return (
     <>
       <EuiFlyoutBody>
@@ -131,35 +128,6 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         <EuiSpacer />
 
-        {warnings.includes(ReindexWarning.allField) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.allField}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningTitle"
-                defaultMessage="{allField} will be removed"
-                values={{
-                  allField: <EuiCode>_all</EuiCode>,
-                }}
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningDetail"
-                defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes
-                      the {allField} field in the new index. Ensure that no application code or scripts reply on
-                      this field."
-                values={{
-                  allField: <EuiCode>_all</EuiCode>,
-                }}
-              />
-            }
-            documentationUrl={`${esDocBasePath}/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default`}
-          />
-        )}
-
         {warnings.includes(ReindexWarning.apmReindex) && (
           <WarningCheckbox
             checkedIds={checkedIds}
@@ -179,37 +147,6 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
               />
             }
             documentationUrl={`${observabilityDocBasePath}/master/whats-new.html`}
-          />
-        )}
-
-        {warnings.includes(ReindexWarning.booleanFields) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.booleanFields}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningTitle"
-                defaultMessage="Boolean data in {_source} might change"
-                values={{ _source: <EuiCode>_source</EuiCode> }}
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningDetail"
-                defaultMessage="If a document contain a boolean field that is neither {true} or {false}
-                   (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}.
-                   Ensure that no application code or scripts rely on boolean fields in the deprecated format."
-                values={{
-                  true: <EuiCode>true</EuiCode>,
-                  false: <EuiCode>false</EuiCode>,
-                  yes: <EuiCode>&quot;yes&quot;</EuiCode>,
-                  on: <EuiCode>&quot;on&quot;</EuiCode>,
-                  one: <EuiCode>1</EuiCode>,
-                }}
-              />
-            }
-            documentationUrl={`${esDocBasePath}/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_field`}
           />
         )}
       </EuiFlyoutBody>
