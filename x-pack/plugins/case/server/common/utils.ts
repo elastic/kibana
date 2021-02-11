@@ -96,13 +96,15 @@ export const groupTotalAlertsByID = ({
   comments: SavedObjectsFindResponse<CommentAttributes>;
 }): Map<string, number> => {
   return comments.saved_objects.reduce((acc, alertsInfo) => {
+    const alertTotalForComment = countAlerts(alertsInfo);
     for (const alert of alertsInfo.references) {
       if (alert.id) {
         const totalAlerts = acc.get(alert.id);
+
         if (totalAlerts !== undefined) {
-          acc.set(alert.id, totalAlerts + countAlerts(alertsInfo));
+          acc.set(alert.id, totalAlerts + alertTotalForComment);
         } else {
-          acc.set(alert.id, countAlerts(alertsInfo));
+          acc.set(alert.id, alertTotalForComment);
         }
       }
     }

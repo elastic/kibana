@@ -34,7 +34,7 @@ import {
   AlertService,
   AlertServiceContract,
 } from './services';
-import { CaseClientImpl, createExternalCaseClient } from './client';
+import { CaseClientHandler, createExternalCaseClient } from './client';
 import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 
@@ -169,7 +169,7 @@ export class CasePlugin {
       const user = await caseService.getUser({ request });
       return {
         getCaseClient: () => {
-          return new CaseClientImpl({
+          return new CaseClientHandler({
             scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,

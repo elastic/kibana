@@ -37,7 +37,7 @@ import {
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase } from '../../common';
-import { CaseClientImpl } from '..';
+import { CaseClientHandler } from '..';
 
 async function getSubCase({
   caseService,
@@ -83,7 +83,7 @@ async function getSubCase({
 }
 
 interface AddCommentFromRuleArgs {
-  caseClient: CaseClientImpl;
+  caseClient: CaseClientHandler;
   caseId: string;
   comment: CommentRequestAlertType;
   savedObjectsClient: SavedObjectsClientContract;
@@ -224,7 +224,7 @@ async function getCombinedCase(
 }
 
 interface AddCommentArgs {
-  caseClient: CaseClientImpl;
+  caseClient: CaseClientHandler;
   caseId: string;
   comment: CommentRequest;
   savedObjectsClient: SavedObjectsClientContract;

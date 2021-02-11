@@ -8,7 +8,7 @@
 import { CaseClientFactoryArguments, CaseClient } from './types';
 import { CaseClientHandler } from './client';
 
-export { CaseClientHandler as CaseClientImpl } from './client';
+export { CaseClientHandler } from './client';
 export { CaseClient } from './types';
 
 /**

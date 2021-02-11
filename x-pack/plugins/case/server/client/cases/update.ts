@@ -51,7 +51,7 @@ import {
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
 } from '../../saved_object_types';
-import { CaseClientImpl } from '..';
+import { CaseClientHandler } from '..';
 import { addAlertInfoToStatusMap } from '../../common';
 
 /**
@@ -259,7 +259,7 @@ async function updateAlerts({
   casesMap: Map<string, SavedObject<ESCaseAttributes>>;
   caseService: CaseServiceSetup;
   client: SavedObjectsClientContract;
-  caseClient: CaseClientImpl;
+  caseClient: CaseClientHandler;
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -323,7 +323,7 @@ interface UpdateArgs {
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
   user: User;
-  caseClient: CaseClientImpl;
+  caseClient: CaseClientHandler;
   cases: CasesPatchRequest;
 }
 
