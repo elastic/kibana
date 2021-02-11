@@ -509,7 +509,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
 
       return {
         // sum of all alert responses within the time range
-        count: res.reduce((acc, curr) => acc + curr.count, 0),
+        count: res.length,
         results: res.slice(0, sampleSize),
       };
     },
