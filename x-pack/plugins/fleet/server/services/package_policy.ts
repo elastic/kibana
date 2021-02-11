@@ -565,3 +565,5 @@ async function _compilePackageStream(
 
 export type PackagePolicyServiceInterface = PackagePolicyService;
 export const packagePolicyService = new PackagePolicyService();
+
+export type { PackagePolicyService };
