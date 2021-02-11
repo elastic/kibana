@@ -69,6 +69,7 @@
     { "path": "../plugins/licensing/tsconfig.json" },
     { "path": "../plugins/ml/tsconfig.json" },
     { "path": "../plugins/observability/tsconfig.json" },
+    { "path": "../plugins/osquery/tsconfig.json" },
     { "path": "../plugins/painless_lab/tsconfig.json" },
     { "path": "../plugins/runtime_fields/tsconfig.json" },
     { "path": "../plugins/saved_objects_tagging/tsconfig.json" },
