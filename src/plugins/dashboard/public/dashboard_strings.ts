@@ -25,9 +25,16 @@ export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: bool
     : dashboardTitle;
 }
 
-export const getUnsavedChangesBadgeText = () =>
-  i18n.translate('dashboard.unsavedChangesBadge', {
-    defaultMessage: 'Unsaved changes',
+export const unsavedChangesBadge = {
+  getUnsavedChangedBadgeText: () =>
+    i18n.translate('dashboard.unsavedChangesBadge', {
+      defaultMessage: 'Unsaved changes',
+    }),
+};
+
+export const getMigratedToastText = () =>
+  i18n.translate('dashboard.migratedChanges', {
+    defaultMessage: 'Some panels have been successfully updated to the latest version.',
   });
 
 /*

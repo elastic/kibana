@@ -45,7 +45,7 @@ import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
-import { getNewDashboardTitle, getUnsavedChangesBadgeText } from '../../dashboard_strings';
+import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
 
@@ -431,7 +431,7 @@ export function DashboardTopNav({
       ? [
           {
             'data-test-subj': 'dashboardUnsavedChangesBadge',
-            badgeText: getUnsavedChangesBadgeText(),
+            badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
             color: 'secondary',
           },
         ]

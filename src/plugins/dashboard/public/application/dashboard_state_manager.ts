@@ -43,6 +43,8 @@ import {
   syncState,
 } from '../services/kibana_utils';
 import { STATE_STORAGE_KEY } from '../url_generator';
+import { NotificationsStart } from '../services/core';
+import { getMigratedToastText } from '../dashboard_strings';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -59,10 +61,12 @@ export class DashboardStateManager {
     query: Query;
   };
   private stateDefaults: DashboardAppStateDefaults;
+  private toasts: NotificationsStart['toasts'];
   private hideWriteControls: boolean;
   private kibanaVersion: string;
   public isDirty: boolean;
   private changeListeners: Array<(status: { dirty: boolean }) => void>;
+  private hasShownMigrationToast = false;
 
   public get appState(): DashboardAppState {
     return this.stateContainer.get();
@@ -93,6 +97,7 @@ export class DashboardStateManager {
    * @param
    */
   constructor({
+    toasts,
     history,
     kibanaVersion,
     savedDashboard,
@@ -108,11 +113,13 @@ export class DashboardStateManager {
     hideWriteControls: boolean;
     allowByValueEmbeddables: boolean;
     savedDashboard: DashboardSavedObject;
+    toasts: NotificationsStart['toasts'];
     usageCollection?: UsageCollectionSetup;
     kbnUrlStateStorage: IKbnUrlStateStorage;
     dashboardPanelStorage?: DashboardPanelStorage;
     hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard;
   }) {
+    this.toasts = toasts;
     this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
@@ -283,6 +290,10 @@ export class DashboardStateManager {
     if (dirty) {
       this.stateContainer.transitions.set('panels', Object.values(convertedPanelStateMap));
       if (dirtyBecauseOfInitialStateMigration) {
+        if (this.getIsEditMode() && !this.hasShownMigrationToast) {
+          this.toasts.addSuccess(getMigratedToastText());
+          this.hasShownMigrationToast = true;
+        }
         this.saveState({ replace: true });
       }
 
