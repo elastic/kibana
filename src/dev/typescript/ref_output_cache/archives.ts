@@ -148,25 +148,39 @@ export class Archives {
     }
   }
 
+  /**
+   * Iterate through a list of shas, which represent commits
+   * on our upstreamBranch, and look for caches which are
+   * already downloaded, or try to download them. If the cache
+   * for that commit is not available for any reason the next
+   * sha will be tried.
+   *
+   * If we reach the end of the list without any caches being
+   * available undefined is returned.
+   *
+   * @param shas shas for commits to try and find caches for
+   */
   async getFirstAvailable(shas: string[]): Promise<Archive | undefined> {
     if (!shas.length) {
       throw new Error('no possible shas to pick archive from');
     }
 
-    const [sha, ...otherShas] = shas;
-    let archive = this.bySha.get(sha);
+    for (const sha of shas) {
+      let archive = this.bySha.get(sha);
 
-    // try to download the top sha in the list
-    if (!archive && (await this.attemptToDownload(sha))) {
-      archive = this.bySha.get(sha);
+      // if we don't have one locally try to download one
+      if (!archive && (await this.attemptToDownload(sha))) {
+        archive = this.bySha.get(sha);
+      }
+
+      // if we found the archive return it
+      if (archive) {
+        return archive;
+      }
+
+      this.log.debug('no archive available for', sha);
     }
 
-    if (archive) {
-      return archive;
-    }
-
-    // try the next sha in the list or give up
-    this.log.debug('no archive available for', sha);
-    return otherShas.length ? this.getFirstAvailable(otherShas) : undefined;
+    return undefined;
   }
 }

@@ -70,6 +70,11 @@ export class RefOutputCache {
     private readonly mergeBase: string
   ) {}
 
+  /**
+   * Find the most recent cache/archive of the outDirs and replace the outDirs
+   * on disk with the files in the cache if the outDir has an outdated merge-base
+   * written to the directory.
+   */
   async initCaches() {
     const archive =
       this.archives.get(this.mergeBase) ??
@@ -131,6 +136,13 @@ export class RefOutputCache {
     });
   }
 
+  /**
+   * Iterate through the outDirs, zip them up, and then zip up those zips
+   * into a single file which we can upload/download/extract just a portion
+   * of the archive.
+   *
+   * @param outputDir directory that the {HEAD}.zip file should be written to
+   */
   async captureCache(outputDir: string) {
     const tmpDir = tempy.directory();
     const currentSha = await this.repo.getHeadSha();
@@ -156,6 +168,11 @@ export class RefOutputCache {
     this.log.success('wrote archive to', relativeOutputPath);
   }
 
+  /**
+   * Cleanup the downloaded cache files, keeping the 10 newest files. Each file
+   * is about 25-30MB, so 10 downloads is a a decent amount of disk space for
+   * caches but we could potentially increase this number in the future if we like
+   */
   async cleanup() {
     // sort archives by time desc
     const archives = [...this.archives].sort((a, b) => b.time - a.time);
