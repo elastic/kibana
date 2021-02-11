@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/*
+ * It's a JS file because we cannot use Jest types in here because of a clash in the `expect` types
+ */
+
 import { flatKeys } from './flat_keys';
 
 describe(`flatKeys`, () => {
