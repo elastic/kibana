@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, isEmpty, isNumber, isObject, isString } from 'lodash/fp';
@@ -50,16 +51,8 @@ export const getDataFromSourceHits = (
         {
           category: fieldCategory,
           field,
-          values: Array.isArray(item)
-            ? item.map((value) => {
-                if (isObject(value)) {
-                  return JSON.stringify(value);
-                }
-
-                return value;
-              })
-            : [item],
-          originalValue: item,
+          values: toStringArray(item),
+          originalValue: toStringArray(item),
         } as TimelineEventsDetailsItem,
       ];
     } else if (isObject(item)) {

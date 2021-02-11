@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import axios from 'axios';
@@ -11,6 +12,7 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { actionsConfigMock } from '../../actions_config.mock';
 import { serviceNowCommonFields } from './mocks';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -27,6 +29,7 @@ jest.mock('../lib/axios_utils', () => {
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const patchMock = utils.patch as jest.Mock;
+const configurationUtilities = actionsConfigMock.create();
 
 describe('ServiceNow service', () => {
   let service: ExternalService;
@@ -39,7 +42,8 @@ describe('ServiceNow service', () => {
         config: { apiUrl: 'https://dev102283.service-now.com/' },
         secrets: { username: 'admin', password: 'admin' },
       },
-      logger
+      logger,
+      configurationUtilities
     );
   });
 
@@ -55,7 +59,8 @@ describe('ServiceNow service', () => {
             config: { apiUrl: null },
             secrets: { username: 'admin', password: 'admin' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -67,7 +72,8 @@ describe('ServiceNow service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: 'admin' },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -79,7 +85,8 @@ describe('ServiceNow service', () => {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: undefined },
           },
-          logger
+          logger,
+          configurationUtilities
         )
       ).toThrow();
     });
@@ -103,6 +110,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
       });
     });
@@ -147,6 +155,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident',
         method: 'post',
         data: { short_description: 'title', description: 'desc' },
@@ -200,6 +209,7 @@ describe('ServiceNow service', () => {
       expect(patchMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url: 'https://dev102283.service-now.com/api/now/v2/table/incident/1',
         data: { short_description: 'title', description: 'desc' },
       });
@@ -248,6 +258,7 @@ describe('ServiceNow service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         logger,
+        configurationUtilities,
         url:
           'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
       });

@@ -3963,9 +3963,6 @@
         "query:queryString:options": {
           "type": "keyword"
         },
-        "pageNavigation": {
-          "type": "keyword"
-        },
         "metrics:max_buckets": {
           "type": "long"
         },

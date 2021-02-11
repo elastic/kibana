@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -18,6 +19,7 @@ import {
   Operation,
   DatasourceLayerPanelProps,
   PublicAPIProps,
+  InitializationOptions,
 } from '../types';
 import {
   loadInitialState,
@@ -110,7 +112,8 @@ export function getIndexPatternDatasource({
     async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
-      initialContext?: VisualizeFieldContext
+      initialContext?: VisualizeFieldContext,
+      options?: InitializationOptions
     ) {
       return loadInitialState({
         persistedState,
@@ -120,6 +123,7 @@ export function getIndexPatternDatasource({
         storage,
         indexPatternsService,
         initialContext,
+        options,
       });
     },
 

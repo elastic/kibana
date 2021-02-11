@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
@@ -246,6 +247,11 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: SignalHit[];
   errors: string[];
+  totalToFromTuples?: Array<{
+    to: Moment | undefined;
+    from: Moment | undefined;
+    maxSignals: number;
+  }>;
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {

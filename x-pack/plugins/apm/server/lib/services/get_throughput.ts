@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ESFilter } from '../../../../../typings/elasticsearch';
@@ -27,12 +28,17 @@ interface Options {
 
 type ESResponse = PromiseReturnType<typeof fetcher>;
 
-function transform(response: ESResponse) {
+function transform(response: ESResponse, options: Options) {
+  const { end, start } = options.setup;
+  const deltaAsMinutes = (end - start) / 1000 / 60;
   if (response.hits.total.value === 0) {
     return [];
   }
   const buckets = response.aggregations?.throughput.buckets ?? [];
-  return buckets.map(({ key: x, doc_count: y }) => ({ x, y }));
+  return buckets.map(({ key: x, doc_count: y }) => ({
+    x,
+    y: y / deltaAsMinutes,
+  }));
 }
 
 async function fetcher({
@@ -82,6 +88,6 @@ async function fetcher({
 
 export async function getThroughput(options: Options) {
   return {
-    throughput: transform(await fetcher(options)),
+    throughput: transform(await fetcher(options), options),
   };
 }
