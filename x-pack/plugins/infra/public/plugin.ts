@@ -10,6 +10,7 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { createInventoryMetricAlertType } from './alerting/inventory';
+import { createMetricAnomalyAlertType } from './alerting/metric_anomaly';
 import { getAlertType as getLogsAlertType } from './alerting/log_threshold';
 import { registerFeatures } from './register_feature';
 import {
@@ -35,6 +36,7 @@ export class Plugin implements InfraClientPluginClass {
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createInventoryMetricAlertType());
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(getLogsAlertType());
     pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricThresholdAlertType());
+    pluginsSetup.triggersActionsUi.alertTypeRegistry.register(createMetricAnomalyAlertType());
 
     if (pluginsSetup.observability) {
       pluginsSetup.observability.dashboard.register({
