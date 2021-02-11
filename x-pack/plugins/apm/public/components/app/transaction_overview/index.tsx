@@ -21,7 +21,6 @@ import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
-import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
