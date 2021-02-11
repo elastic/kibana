@@ -100,6 +100,7 @@ export const createThreatSignals = async ({
     services,
     threatFilters,
     threatIndex,
+    threatIndicatorPath,
     threatLanguage,
     threatQuery,
   });
