@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ScaleContinuousType } from '@elastic/charts/dist/scales';
+import { ScaleContinuousType } from '@elastic/charts';
 
 import { Datatable } from '../../../expressions/public';
 import { BUCKET_TYPES } from '../../../data/public';
