@@ -82,6 +82,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
         />
       ),
       {
+        maxWidth: 400,
         'data-test-subj': 'copyToDashboardPanel',
       }
     );

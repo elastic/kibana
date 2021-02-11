@@ -98,8 +98,7 @@ export const dashboardCopyToDashboardAction = {
     }),
   getDescription: () =>
     i18n.translate('dashboard.panel.copyToDashboard.description', {
-      defaultMessage:
-        "Select where to copy the panel. You're navigated to the copy in the destination dashboard.",
+      defaultMessage: "Select where to copy the panel. You're navigated to destination dashboard.",
     }),
 };
 
