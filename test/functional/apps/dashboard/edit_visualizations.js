@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualizationAndReturn();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize Library');
       await PageObjects.common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
