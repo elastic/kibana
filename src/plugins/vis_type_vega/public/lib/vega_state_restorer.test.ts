@@ -37,14 +37,14 @@ describe('extractIndexPatternsFromSpec', () => {
   });
 
   test('should restore of "data" if "restoreData" is true', () => {
-    const vegaStateRestorer = createVegaStateRestorer({ restoreData: true });
+    const vegaStateRestorer = createVegaStateRestorer();
 
     vegaStateRestorer.save({
       signals: { foo: 'foo' },
       data: { test: 'test' },
     });
 
-    expect(vegaStateRestorer.restore()).toMatchInlineSnapshot(`
+    expect(vegaStateRestorer.restore(true)).toMatchInlineSnapshot(`
       Object {
         "data": Object {
           "test": "test",
@@ -57,7 +57,7 @@ describe('extractIndexPatternsFromSpec', () => {
   });
 
   test('should clear saved state', () => {
-    const vegaStateRestorer = createVegaStateRestorer({ restoreData: true });
+    const vegaStateRestorer = createVegaStateRestorer();
 
     vegaStateRestorer.save({
       signals: { foo: 'foo' },
@@ -65,7 +65,7 @@ describe('extractIndexPatternsFromSpec', () => {
     });
     vegaStateRestorer.clear();
 
-    expect(vegaStateRestorer.restore()).toMatchInlineSnapshot(`null`);
+    expect(vegaStateRestorer.restore(true)).toMatchInlineSnapshot(`null`);
   });
 
   test('should omit signals', () => {
