@@ -86,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
         const { message } = await toasts.getErrorToast();
+        await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
         expect(message).to.contain(expectedError);
         await toasts.dismissToast();
       });
