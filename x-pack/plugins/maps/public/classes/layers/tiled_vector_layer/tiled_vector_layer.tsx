@@ -15,7 +15,7 @@ import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
-import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
+import { VectorLayer, VectorLayerArguments } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
 import { DataRequestContext } from '../../../actions';
 import {

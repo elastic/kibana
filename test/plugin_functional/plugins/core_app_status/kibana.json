@@ -1,5 +1,5 @@
 {
-  "id": "core_app_status",
+  "id": "coreAppStatus",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["core_app_status"],

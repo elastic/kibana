@@ -28,3 +28,8 @@ Because by default tasks are polled at 3 second intervals and only 10 tasks can 
 For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
 
 ==============================================
+
+[float]
+=== Deployment considerations
+
+{es} and {kib} instances use the system clock to determine the current time. To ensure schedules are triggered when expected, you should synchronize the clocks of all nodes in the cluster using a time service such as http://www.ntp.org/[Network Time Protocol].

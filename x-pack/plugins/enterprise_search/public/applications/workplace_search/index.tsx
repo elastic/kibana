@@ -20,6 +20,7 @@ import { NotFound } from '../shared/not_found';
 import { AppLogic } from './app_logic';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 import {
+  ALPHA_PATH,
   GROUPS_PATH,
   SETUP_GUIDE_PATH,
   SOURCES_PATH,
@@ -34,6 +35,7 @@ import { ErrorState } from './views/error_state';
 import { GroupsRouter } from './views/groups';
 import { GroupSubNav } from './views/groups/components/group_sub_nav';
 import { Overview } from './views/overview';
+import { Overview as OverviewMVP } from './views/overview_mvp';
 import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
 import { SettingsSubNav } from './views/settings/components/settings_sub_nav';
@@ -79,7 +81,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <SetupGuide />
       </Route>
       <Route exact path="/">
-        {errorConnecting ? <ErrorState /> : <Overview />}
+        {errorConnecting ? <ErrorState /> : <OverviewMVP />}
       </Route>
       <Route path={PERSONAL_SOURCES_PATH}>
         <PrivateSourcesLayout restrictWidth readOnlyMode={readOnlyMode}>
@@ -93,6 +95,11 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           readOnlyMode={readOnlyMode}
         >
           <SourcesRouter />
+        </Layout>
+      </Route>
+      <Route path={ALPHA_PATH}>
+        <Layout navigation={<WorkplaceSearchNav />} restrictWidth readOnlyMode={readOnlyMode}>
+          <Overview />
         </Layout>
       </Route>
       <Route path={GROUPS_PATH}>
