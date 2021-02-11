@@ -190,7 +190,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             defaultMessage: 'Randomize seed',
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.randomizeSeedText', {
-            defaultMessage: 'The seed for the random generator that picks training data.',
+            defaultMessage: 'The seed for the random generator used to pick training data.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.RANDOMIZE_SEED]}
