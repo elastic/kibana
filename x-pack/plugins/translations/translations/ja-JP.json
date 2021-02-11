@@ -9474,7 +9474,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError": "セグメント数の評価が必要です。",
     "xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage": "このページのエラーを修正してください。",
     "xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto": "リクエストを非表示",
-    "xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent": "現在のインデックスが定義された条件のいずれかを満たすときに、新しいインデックスにロールオーバーします。",
     "xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText": "詳細",
     "xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent": "インデックスが 30 日経過するか、50 GB に達したらロールオーバーします。",
     "xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage": "効率的なストレージと高いパフォーマンスのための時系列データの自動ロールアウト。",

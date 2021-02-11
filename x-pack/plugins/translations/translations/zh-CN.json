@@ -9498,7 +9498,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError": "必须指定分段数的值。",
     "xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage": "请修复此页面上的错误。",
     "xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto": "隐藏请求",
-    "xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent": "在当前索引满足定义的条件之一时，滚动更新到新索引。",
     "xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText": "了解详情",
     "xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDefaultsTipContent": "当索引已存在 30 天或达到 50 GB 时滚动更新。",
     "xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage": "自动滚动更新时间序列数据，以实现高效存储和更高性能。",
