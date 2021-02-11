@@ -55,8 +55,6 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     threshold,
   } = params as MetricAnomalyParams;
 
-  const alertInstance = services.alertInstanceFactory(`${nodeType}-${metric}`);
-
   const bucketInterval = getIntervalInSeconds('15m') * 1000;
   const alertIntervalInMs = getIntervalInSeconds(alertInterval ?? '1m') * 1000;
 
@@ -86,6 +84,7 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     const { startTime: anomalyStartTime, anomalyScore, actual, typical, influencers } = first(
       data as MappedAnomalyHit[]
     )!;
+    const alertInstance = services.alertInstanceFactory(`${nodeType}-${metric}`);
 
     alertInstance.scheduleActions(FIRED_ACTIONS_ID, {
       alertState: stateToAlertMessage[AlertStates.ALERT],
