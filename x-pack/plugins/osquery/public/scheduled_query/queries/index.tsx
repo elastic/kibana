@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiButton, EuiButtonIcon, EuiCodeBlock } from '@elastic/eui';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiButtonIcon,
+  EuiCodeBlock,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQuery } from 'react-query';
 import { useHistory } from 'react-router-dom';
