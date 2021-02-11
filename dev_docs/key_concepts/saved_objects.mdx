@@ -58,10 +58,6 @@ By default all saved object types go into a single index. If you expect your sav
 to be many of them, you can have your objects go in a separate index by using the `indexPattern` field. Reporting and task manager are two 
 examples of features that use this capability.
 
-No matter which index your saved objects are stored in, we recommend no more than 10,000 saved
-objects of any given type exist at a given time. This is because the `SavedObjectsClient.find` function does not at the moment
-support paging past 10k saved-objects.
-
 ## Searchability
 
 Because saved objects are stored in system indices, they cannot be searched like other data can. If you see the phrase “[X] as data” it is 
