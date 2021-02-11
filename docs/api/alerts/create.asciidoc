@@ -1,0 +1,161 @@
+[[alerts-api-create]]
+=== Create alert API
+++++
+<titleabbrev>Create alert</titleabbrev>
+++++
+
+Create {kib} alerts.
+
+[[alerts-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/alerts/alert`
+
+[[alerts-api-create-request-body]]
+==== Request body
+
+`name`::
+  (Required, string) A name to reference and search in the future.
+
+`tags`::
+  (Optional, string array) A list of keywords to reference and search in the future.
+
+`alertTypeId`::
+  (Required, string) The id value of the alert type you want to call when the alert is scheduled to execute.
+
+`schedule`::
+  (Required, object) The schedule specifying when this alert should be run, using one of the available schedule formats specified under _Schedule Formats_ below.
+
+`throttle`::
+  (Optional, string) A Duration specifying how often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications over this period.
+
+`notifyWhen`::
+  (Required, string) Defines the conditions for notifications thottling from the three available option types 'onActionGroupChange', 'onActiveAlert', 'onThrottleInterval'.
+
+`enabled`::
+  (Optional, boolean) Indicate if you want the alert to start executing on an interval basis after it has been created.
+
+`consumer`::
+  (Required, string) A name of the application which owns the alert.
+
+`params`::
+  (Required, object) The parameters to pass in to the alert type executor `params` value. This will also validate against the alert type params validator if defined.
+
+`actions`::
+  (Optional, object array) Array of the following:<br> - `group` (string): We support grouping actions in the scenario of escalations or different types of alert instances. If you don't need this, feel free to use `default` as a value.<br>- `id` (string): The id of the action saved object to execute.<br>- `params` (object): The map to the `params` the action type will receive. In order to help apply context to strings, we handle them as mustache templates and pass in a default set of context. (see templating actions).
+
+[[alerts-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[alerts-api-create-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/alerts/alert  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "params":{
+      "aggType":"avg",
+      "termSize":6,
+      "thresholdComparator":">",
+      "timeWindowSize":5,
+      "timeWindowUnit":"m",
+      "groupBy":"top",
+      "threshold":[
+         1000
+      ],
+      "index":[
+         ".test-index"
+      ],
+      "timeField":"@timestamp",
+      "aggField":"sheet.version",
+      "termField":"name.keyword"
+   },
+   "consumer":"alerts",
+   "alertTypeId":".index-threshold",
+   "schedule":{
+      "interval":"1m"
+   },
+   "actions":[
+      {
+         "id":"dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+         "actionTypeId":".server-log",
+         "group":"threshold met",
+         "params":{
+            "level":"info",
+            "message":"alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+         }
+      }
+   ],
+   "tags":[
+      "cpu"
+   ],
+   "notifyWhen":"onActionGroupChange",
+   "name":"my alert"
+}'
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "41893910-6bca-11eb-9e0d-85d233e3ee35",
+  "notifyWhen": "onActionGroupChange",
+  "params": {
+    "aggType": "avg",
+    "termSize": 6,
+    "thresholdComparator": ">",
+    "timeWindowSize": 5,
+    "timeWindowUnit": "m",
+    "groupBy": "top",
+    "threshold": [
+      1000
+    ],
+    "index": [
+      ".kibana"
+    ],
+    "timeField": "@timestamp",
+    "aggField": "sheet.version",
+    "termField": "name.keyword"
+  },
+  "consumer": "alerts",
+  "alertTypeId": ".index-threshold",
+  "schedule": {
+    "interval": "1m"
+  },
+  "actions": [
+    {
+      "actionTypeId": ".server-log",
+      "group": "threshold met",
+      "params": {
+        "level": "info",
+        "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+      },
+      "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+    }
+  ],
+  "tags": [
+    "cpu"
+  ],
+  "name": "my alert",
+  "enabled": true,
+  "throttle": null,
+  "apiKeyOwner": "elastic",
+  "createdBy": "elastic",
+  "updatedBy": "elastic",
+  "muteAll": false,
+  "mutedInstanceIds": [],
+  "updatedAt": "2021-02-10T18:03:19.961Z",
+  "createdAt": "2021-02-10T18:03:19.961Z",
+  "scheduledTaskId": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
+  "executionStatus": {
+    "lastExecutionDate": "2021-02-10T18:03:19.966Z",
+    "status": "pending"
+  }
+}
+--------------------------------------------------

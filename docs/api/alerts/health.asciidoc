@@ -1,0 +1,85 @@
+[[alerts-api-health]]
+=== Get alert framework health API
+++++
+<titleabbrev>Get alert framework health</titleabbrev>
+++++
+
+Retrieve the alert framework health status.
+
+[[alerts-api-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/alerts/_health`
+
+[[alerts-api-get-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[alerts-api-health-example]]
+==== Example
+
+Retrieve the alert framework health status:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/alerts/_health
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+   "isSufficientlySecure":true,
+   "hasPermanentEncryptionKey":true,
+   "alertingFrameworkHeath":{
+      "decryptionHealth":{
+         "status":"ok",
+         "timestamp":"2021-02-10T23:35:04.949Z"
+      },
+      "executionHealth":{
+         "status":"ok",
+         "timestamp":"2021-02-10T23:35:04.949Z"
+      },
+      "readHealth":{
+         "status":"ok",
+         "timestamp":"2021-02-10T23:35:04.949Z"
+      }
+   }
+}
+--------------------------------------------------
+
+Health API response contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `isSufficientlySecure`
+| Return the state false if the security is enabled but TLS is not.
+
+| `hasPermanentEncryptionKey`
+| Return the state true if Encryption Saved Object plugin has a permanent encryption Key
+
+| `alertingFrameworkHeath`
+| This state property includes three different substates: `decryptionHealth`, `executionHealth`, `readHealth` which identify the alerting framework API health.
+
+|===
+
+alertingFrameworkHeath itself consists from the next properties:
+
+[cols="2*<"]
+|===
+
+| `decryptionHealth`
+| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts have the decryption errors.
+
+| `executionHealth`
+| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts executions have results with the errors.
+
+| `readHealth`
+| Return the latest status `ok`, `warn` or `error` with the timestamp, which identify if the alerts read events have any errors.
+
+|===

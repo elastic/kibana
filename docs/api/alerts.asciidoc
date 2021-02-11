@@ -1,0 +1,45 @@
+[[alerts-api]]
+== Alerts APIs
+
+Manage {kib} alerts.
+The following alerts APIs are available:
+
+* <<alerts-api-create, Create alert API>> to create {kib} alert
+
+* <<alerts-api-update, Update alert API>> to update the attributes for existing {kib} alerts
+
+* <<alerts-api-get, Get object API>> to retrieve a single {kib} alert by ID
+
+* <<alerts-api-delete, Delete alert API>> to remove {kib} alert
+
+* <<alerts-api-find, Find alerts API>> to retrieve a paginated set of {kib} alerts by various conditions
+
+* <<alerts-api-list, List all alert types API>> to retrieve a list of all {kib} alert types
+
+* <<alerts-api-enable, Enable alert API>> to enable a single {kib} alert by ID
+
+* <<alerts-api-disable, Disable alert API>> to disable a single {kib} alert by ID
+
+* <<alerts-api-mute-all, Mute all alert instances API>> to mute all alert instances for a single {kib} alert by ID
+
+* <<alerts-api-mute, Mute alert instance API>> to mute alert instance for a single {kib} alert by ID
+
+* <<alerts-api-unmute-all, Unmute all alert instances API>> to unmute all alert instances for a single {kib} alert by ID
+
+* <<alerts-api-unmute, Unmute alert instance API>> to unmute alert instance for a single {kib} alert by ID
+
+* <<alerts-api-health, Get framework health API>> to retrieve a {kib} alerts framework health
+
+include::alerts/get.asciidoc[]
+include::alerts/list.asciidoc[]
+include::alerts/find.asciidoc[]
+include::alerts/create.asciidoc[]
+include::alerts/enable.asciidoc[]
+include::alerts/update.asciidoc[]
+include::alerts/delete.asciidoc[]
+include::alerts/disable.asciidoc[]
+include::alerts/mute.asciidoc[]
+include::alerts/unmute.asciidoc[]
+include::alerts/mute_all.asciidoc[]
+include::alerts/unmute_all.asciidoc[]
+include::alerts/health.asciidoc[]
