@@ -866,6 +866,419 @@ exports[`Field for boolean setting should render user value if there is user val
 </EuiDescribedFormGroup>
 `;
 
+exports[`Field for color setting should render as read only if saving is disabled 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color=""
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={true}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render as read only with help text if overridden 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiText
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+          id="advancedSettings.field.helpText"
+          values={Object {}}
+        />
+      </EuiText>
+    }
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color="#FACF0C"
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={true}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render custom setting icon if it is custom 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      <EuiIconTip
+        aria-label="Custom setting"
+        color="primary"
+        content={
+          <FormattedMessage
+            defaultMessage="Custom setting"
+            id="advancedSettings.field.customSettingTooltip"
+            values={Object {}}
+          />
+        }
+        type="asterisk"
+      />
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color=""
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render default value if there is no user value set 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color=""
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render unsaved value if there are unsaved changes 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field mgtAdvancedSettings__field--unsaved"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      <EuiIconTip
+        aria-label="Custom setting"
+        color="primary"
+        content={
+          <FormattedMessage
+            defaultMessage="Custom setting"
+            id="advancedSettings.field.customSettingTooltip"
+            values={Object {}}
+          />
+        }
+        type="asterisk"
+      />
+      <EuiIconTip
+        anchorClassName="mgtAdvancedSettings__fieldTitleUnsavedIcon"
+        aria-label="Unsaved"
+        color="warning"
+        content="Unsaved"
+        type="dot"
+      />
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={null}
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-describedby="color:test:setting-group color:test:setting-unsaved"
+      aria-label="color test setting"
+      color="#FF00CC"
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+    <EuiScreenReaderOnly>
+      <p
+        id="color:test:setting-unsaved"
+      >
+        Setting is currently not saved.
+      </p>
+    </EuiScreenReaderOnly>
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
+exports[`Field for color setting should render user value if there is user value is set 1`] = `
+<EuiDescribedFormGroup
+  className="mgtAdvancedSettings__field"
+  description={
+    <React.Fragment>
+      <div
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "Description for Color test setting",
+          }
+        }
+      />
+      <React.Fragment>
+        <EuiSpacer
+          size="s"
+        />
+        <EuiText
+          size="xs"
+        >
+          <React.Fragment>
+            <FormattedMessage
+              defaultMessage="Default: {value}"
+              id="advancedSettings.field.defaultValueText"
+              values={
+                Object {
+                  "value": <EuiCode>
+                    null
+                  </EuiCode>,
+                }
+              }
+            />
+          </React.Fragment>
+        </EuiText>
+      </React.Fragment>
+    </React.Fragment>
+  }
+  fullWidth={true}
+  id="color:test:setting-group"
+  title={
+    <h3>
+      <span
+        className="mgtAdvancedSettings__fieldTitle"
+      >
+        Color test setting
+      </span>
+      
+      
+    </h3>
+  }
+>
+  <EuiFormRow
+    className="mgtAdvancedSettings__fieldRow"
+    describedByIds={Array []}
+    display="row"
+    fullWidth={true}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <span>
+        <span>
+          <EuiLink
+            aria-label="Reset color test setting to default"
+            data-test-subj="advancedSetting-resetField-color:test:setting"
+            onClick={[Function]}
+          >
+            <FormattedMessage
+              defaultMessage="Reset to default"
+              id="advancedSettings.field.resetToDefaultLinkText"
+              values={Object {}}
+            />
+          </EuiLink>
+             
+        </span>
+      </span>
+    }
+    label="color:test:setting"
+    labelType="label"
+  >
+    <EuiColorPicker
+      aria-label="color test setting"
+      color="#FACF0C"
+      data-test-subj="advancedSetting-editField-color:test:setting"
+      disabled={false}
+      format="hex"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiDescribedFormGroup>
+`;
+
 exports[`Field for image setting should render as read only if saving is disabled 1`] = `
 <EuiDescribedFormGroup
   className="mgtAdvancedSettings__field"
