@@ -13,11 +13,14 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export const SavedObjectsProvider = ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const log = getService('log');
+  // @ts-ignore
   const supertest = getService('supertest');
   const dataDir = config.get('savedObjects.directory');
 
   return {
+    // @ts-ignore
     fetch: fetchSavedObjects(dataDir)(log)(supertest),
+    // @ts-ignore
     import: importSavedObjects(dataDir)(log)(supertest),
   };
 };
