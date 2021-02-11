@@ -245,11 +245,11 @@ export class MapEmbeddable
         timeFilters: this.input.timeRange,
         forceRefresh,
         searchSessionId: this.input.searchSessionId,
-        searchSessionMapBuffer: getSearchService().session.getSearchOptions(
-          this.input.searchSessionId
-        ).isRestore
-          ? this.input.mapBuffer
-          : undefined,
+        searchSessionMapBuffer:
+          this.input.searchSessionId &&
+          getSearchService().session.getSearchOptions(this.input.searchSessionId).isRestore
+            ? this.input.mapBuffer
+            : undefined,
       })
     );
   }
