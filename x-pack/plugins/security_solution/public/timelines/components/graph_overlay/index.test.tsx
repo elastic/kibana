@@ -29,7 +29,6 @@ jest.mock('../../../common/containers/use_full_screen', () => ({
 
 jest.mock('../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../../resolver/view/use_state_syncing_actions');
-jest.mock('../../../resolver/view/use_sync_selected_node');
 
 describe('GraphOverlay', () => {
   beforeEach(() => {
