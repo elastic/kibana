@@ -44,7 +44,10 @@ export class SettingsChecker {
 
   async executeCheck() {
     try {
-      const { data } = await this.$http.get(this.getApi());
+      console.log('EXECUTE CHECK');
+      const { data } = await this.$http.get(this.getApi(), {
+        headers: { 'kbn-system-request': 'true' },
+      });
       const { found, reason } = data;
 
       return { found, reason };
