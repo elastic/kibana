@@ -229,9 +229,7 @@ export const isFetchingEditTrustedAppItem: (
 export const editTrustedAppFetchError: (
   state: Immutable<TrustedAppsListPageState>
 ) => ServerApiError | undefined = createSelector(editItemState, (itemForEditState) => {
-  if (itemForEditState && isFailedResourceState(itemForEditState)) {
-    return itemForEditState.error;
-  }
+  return itemForEditState && getCurrentResourceError(itemForEditState);
 });
 
 export const editingTrustedApp: (
