@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+import stubbedLogstashFields from './logstash_fields';
+import { getKbnFieldType } from '../../../data/common';
 
-import { getKbnFieldType } from '../plugins/data/common';
-import { getStubIndexPattern } from '../plugins/data/public/test_utils';
-import { uiSettingsServiceMock } from '../core/public/ui_settings/ui_settings_service.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getStubIndexPattern } from '../../../data/public/test_utils';
+import { uiSettingsServiceMock } from '../../../../core/public/mocks';
 
 const uiSettingSetupMock = uiSettingsServiceMock.createSetupContract();
 uiSettingSetupMock.get.mockImplementation((item, defaultValue) => {
