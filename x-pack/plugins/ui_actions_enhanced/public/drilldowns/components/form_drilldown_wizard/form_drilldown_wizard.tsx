@@ -120,7 +120,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         actionFactories={actionFactories}
         currentActionFactory={currentActionFactory}
         config={actionConfig}
-        onActionFactoryChange={(actionFactory) => onActionFactoryChange(actionFactory)}
+        onActionFactoryChange={onActionFactoryChange}
         onConfigChange={(config) => onActionConfigChange(config)}
         context={actionFactoryContext}
         onSelectedTriggersChange={onSelectedTriggersChange}

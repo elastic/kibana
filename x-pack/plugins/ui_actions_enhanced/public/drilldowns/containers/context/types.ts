@@ -10,6 +10,7 @@ import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/p
 import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import {
   ActionFactory,
+  BaseActionConfig,
   BaseActionFactoryContext,
   DynamicActionManager,
 } from '../../../dynamic_actions';
@@ -94,5 +95,62 @@ export interface DrilldownManagerDependencies {
 export interface DrilldownManagerContextValue
   extends PublicDrilldownManagerProps,
     DrilldownManagerDependencies {
+  /**
+   * Keeps track of the current view to display to the user.
+   */
+  currentTab: 'create' | 'edit' | 'list';
+
+  /**
+   * Whether a drilldowns welcome message should be displayed to the user at
+   * the very top of the drilldowns manager flyout.
+   */
+  showWelcomeMessage: boolean;
+
+  /**
+   * Callback called to hide drilldowns welcome message, and remember in local
+   * storage that user opted to hide this message.
+   */
+  hideWelcomeMessage: () => void;
+
+  /**
+   * Name of the drilldown which is being currently created.
+   */
   drilldownName: string;
+
+  /**
+   * Change the name of the currently created drilldown.
+   */
+  setDrilldownName: (name: string) => void;
+
+  /**
+   * Currently selected action factory (drilldown type).
+   */
+  actionFactory: undefined | ActionFactory;
+
+  /**
+   * Select a different action factory.
+   */
+  setActionFactory: (actionFactory: undefined | ActionFactory) => void;
+
+  /**
+   * Current action factory configuration, i.e. drilldown configuration object,
+   * which is serializable and persisted in storage.
+   */
+  actionConfig: undefined | BaseActionConfig;
+
+  /**
+   * Update the current drilldown configuration.
+   */
+  setActionConfig: (actionConfig: undefined | BaseActionConfig) => void;
+
+  /**
+   * Currently selected triggers, normally a single trigger selected by the user,
+   * in case multiple triggers are possible for location/drilldown combination.
+   */
+  selectedTriggers: undefined | string[];
+
+  /**
+   * Set currently selected triggers.
+   */
+  setSelectedTriggers: (triggers: undefined | string[]) => void;
 }

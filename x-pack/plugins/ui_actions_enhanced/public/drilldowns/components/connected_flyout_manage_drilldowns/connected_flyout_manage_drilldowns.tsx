@@ -113,14 +113,14 @@ export function createFlyoutManageDrilldowns({
     } = useDrilldownsStateManager(props.dynamicActionManager, toastService);
 
     /**
-     * isCompatible promise is not yet resolved.
-     * Skip rendering until it is resolved
+     * `isCompatible` promise is not yet resolved.
+     * Skip rendering until it is resolved.
      */
     if (!actionFactories) return null;
 
     /**
-     * Drilldowns are not fetched yet or error happened during fetching
-     * In case of error user is notified with toast
+     * Drilldowns are not fetched yet or error happened during fetching.
+     * In case of error, user is notified with a toast.
      */
     if (!drilldowns) return null;
 
