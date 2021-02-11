@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiPageHeader, EuiTitle, EuiSpacer } from '@elastic/eui';
-
-import { EngineOverviewLogic } from './';
+import { i18n } from '@kbn/i18n';
 
 import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
+
+import { EngineOverviewLogic } from './';
 
 export const EngineOverviewMetrics: React.FC = () => {
   const { apiLogsUnavailable } = useValues(EngineOverviewLogic);
