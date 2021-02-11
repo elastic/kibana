@@ -20,7 +20,7 @@ import {
 import { FieldFormatter, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
-import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer';
 
 export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions> {
   private readonly _isSymbolizedAsIcon: boolean;

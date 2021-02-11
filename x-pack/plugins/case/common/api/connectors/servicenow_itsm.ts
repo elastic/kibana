@@ -7,10 +7,13 @@
 
 import * as rt from 'io-ts';
 
+// New fields should also be added at: x-pack/plugins/case/server/connectors/case/schema.ts
 export const ServiceNowITSMFieldsRT = rt.type({
   impact: rt.union([rt.string, rt.null]),
   severity: rt.union([rt.string, rt.null]),
   urgency: rt.union([rt.string, rt.null]),
+  category: rt.union([rt.string, rt.null]),
+  subcategory: rt.union([rt.string, rt.null]),
 });
 
 export type ServiceNowITSMFieldsType = rt.TypeOf<typeof ServiceNowITSMFieldsRT>;

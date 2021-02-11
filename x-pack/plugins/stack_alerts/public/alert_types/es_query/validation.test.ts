@@ -13,6 +13,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams = {
       index: [],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 1,
       timeWindowUnit: 's',
       threshold: [0],
@@ -25,6 +26,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 1,
       timeWindowUnit: 's',
       threshold: [0],
@@ -37,6 +39,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
+      size: 100,
       timeWindowSize: 1,
       timeWindowUnit: 's',
       threshold: [0],
@@ -49,6 +52,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams = {
       index: ['test'],
       esQuery: `{\n  \"aggs\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       timeWindowSize: 1,
       timeWindowUnit: 's',
       threshold: [0],
@@ -61,6 +65,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       threshold: [],
       timeWindowSize: 1,
       timeWindowUnit: 's',
@@ -74,6 +79,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       threshold: [1],
       timeWindowSize: 1,
       timeWindowUnit: 's',
@@ -87,6 +93,7 @@ describe('expression params validation', () => {
     const initialParams: EsQueryAlertParams = {
       index: ['test'],
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
       threshold: [10, 1],
       timeWindowSize: 1,
       timeWindowUnit: 's',
@@ -95,6 +102,36 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe(
       'Threshold 1 must be > Threshold 0.'
+    );
+  });
+
+  test('if size property is < 0 should return proper error message', () => {
+    const initialParams: EsQueryAlertParams = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
+      size: -1,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.size[0]).toBe(
+      'Size must be between 0 and 10,000.'
+    );
+  });
+
+  test('if size property is > 10000 should return proper error message', () => {
+    const initialParams: EsQueryAlertParams = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n`,
+      size: 25000,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+    };
+    expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.size[0]).toBe(
+      'Size must be between 0 and 10,000.'
     );
   });
 });

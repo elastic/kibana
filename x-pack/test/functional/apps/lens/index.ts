@@ -29,6 +29,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       this.tags(['ciGroup4', 'skipFirefox']);
 
       loadTestFile(require.resolve('./smokescreen'));
+      loadTestFile(require.resolve('./add_to_dashboard'));
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./persistent_context'));

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiPageContentBody } from '@elastic/eui';
 
 import { Settings } from './settings';

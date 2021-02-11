@@ -10,6 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { HttpLogic } from '../../../shared/http';
 
 import { IIndexingStatus } from '../../../shared/types';
+
 import { EngineDetails } from './types';
 
 interface EngineValues {

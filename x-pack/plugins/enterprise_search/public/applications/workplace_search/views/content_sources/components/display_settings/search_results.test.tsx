@@ -8,16 +8,15 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../../__mocks__';
-import { shallow } from 'enzyme';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
-
-import { ExampleSearchResultGroup } from './example_search_result_group';
-import { ExampleStandoutResult } from './example_standout_result';
+import { shallow } from 'enzyme';
 
 import { LEAVE_UNASSIGNED_FIELD } from './constants';
+import { ExampleSearchResultGroup } from './example_search_result_group';
+import { ExampleStandoutResult } from './example_standout_result';
 import { SearchResults } from './search_results';
 
 describe('SearchResults', () => {
