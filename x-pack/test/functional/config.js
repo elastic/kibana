@@ -90,10 +90,10 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
-        // Disable monitoring plugin's email notifications, otherwise the
+        // Configure monitoring plugin's email notifications, otherwise the
         // monitoring plugin tries to read UiSettings while esArchiver is
-        // loading data causing the test Kibana server to crash
-        '--monitoring.cluster_alerts.email_notifications.enabled=false',
+        // deleting/migrating indices causing the test Kibana server to crash
+        '--monitoring.cluster_alerts.email_notifications.enabled=true',
         '--monitoring.cluster_alerts.email_notifications.email_address=e',
         '--logging.verbose=true',
         '--elasticsearch.logQueries=true',
