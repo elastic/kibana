@@ -58,7 +58,20 @@ export const settingsSchema = schema.object({
 });
 
 export const sourceSchema = schema.object({
-  runtime_mappings: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  runtime_mappings: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.object({
+        type: schema.string(),
+        script: schema.maybe(schema.string()),
+        source: schema.maybe(
+          schema.object({
+            script: schema.string(),
+          })
+        ),
+      })
+    )
+  ),
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
   query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
