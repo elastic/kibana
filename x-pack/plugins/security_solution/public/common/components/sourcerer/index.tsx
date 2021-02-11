@@ -163,8 +163,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     () =>
       [...configAsSelectable, ...kibanaIndexPatterns].reduce<ComboBoxOptions>(
         (acc, { title: index, id: key }) => {
-          // probably wrong, revisit
-          if (index != null && !acc.some((o) => o.label.includes(index))) {
+          if (index != null) {
             return [...acc, { label: index, value: key }];
           }
           return acc;
@@ -197,12 +196,12 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     () => (
       <EuiComboBox
         data-test-subj="indexPattern-switcher"
-        placeholder={i18n.PICK_INDEX_PATTERNS}
         fullWidth
-        options={indexPatternOptions}
-        selectedOptions={selectedOptions}
         onChange={onChangeCombo}
+        options={indexPatternOptions}
+        placeholder={i18n.PICK_INDEX_PATTERNS}
         renderOption={renderOption}
+        selectedOptions={selectedOptions}
       />
     ),
     [indexPatternOptions, onChangeCombo, renderOption, selectedOptions]
