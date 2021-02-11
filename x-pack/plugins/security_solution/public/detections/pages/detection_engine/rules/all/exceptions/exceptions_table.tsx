@@ -235,14 +235,14 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
         queryText,
       }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
         const filterOptions = {
-          'name.text': null,
+          name: null,
           list_id: null,
           created_by: null,
           type: null,
           tags: null,
         };
         const searchTerms = getSearchFilters({
-          defaultSearchTerm: 'name.text',
+          defaultSearchTerm: 'name',
           filterOptions,
           query,
           searchValue: queryText,

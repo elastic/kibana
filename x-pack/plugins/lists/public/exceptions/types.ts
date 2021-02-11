@@ -125,7 +125,7 @@ export interface UseExceptionListsSuccess {
 }
 
 export interface ExceptionListFilter {
-  'name.text'?: string | null;
+  name?: string | null;
   list_id?: string | null;
   created_by?: string | null;
   type?: string | null;
