@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
-<form
-  onSubmit={[Function]}
+<EuiModal
+  className="kbnSavedObjectSaveModal"
+  data-test-subj="savedObjectSaveModal"
+  onClose={[Function]}
 >
-  <EuiModal
-    className="kbnSavedObjectSaveModal"
-    data-test-subj="savedObjectSaveModal"
-    onClose={[Function]}
+  <form
+    onSubmit={[Function]}
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
@@ -92,18 +92,18 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         Save
       </EuiButton>
     </EuiModalFooter>
-  </EuiModal>
-</form>
+  </form>
+</EuiModal>
 `;
 
 exports[`SavedObjectSaveModal should render matching snapshot when custom isValid is set 1`] = `
-<form
-  onSubmit={[Function]}
+<EuiModal
+  className="kbnSavedObjectSaveModal"
+  data-test-subj="savedObjectSaveModal"
+  onClose={[Function]}
 >
-  <EuiModal
-    className="kbnSavedObjectSaveModal"
-    data-test-subj="savedObjectSaveModal"
-    onClose={[Function]}
+  <form
+    onSubmit={[Function]}
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
@@ -188,18 +188,18 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         Save
       </EuiButton>
     </EuiModalFooter>
-  </EuiModal>
-</form>
+  </form>
+</EuiModal>
 `;
 
 exports[`SavedObjectSaveModal should render matching snapshot when custom isValid is set 2`] = `
-<form
-  onSubmit={[Function]}
+<EuiModal
+  className="kbnSavedObjectSaveModal"
+  data-test-subj="savedObjectSaveModal"
+  onClose={[Function]}
 >
-  <EuiModal
-    className="kbnSavedObjectSaveModal"
-    data-test-subj="savedObjectSaveModal"
-    onClose={[Function]}
+  <form
+    onSubmit={[Function]}
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
@@ -284,18 +284,18 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
         Save
       </EuiButton>
     </EuiModalFooter>
-  </EuiModal>
-</form>
+  </form>
+</EuiModal>
 `;
 
 exports[`SavedObjectSaveModal should render matching snapshot when given options 1`] = `
-<form
-  onSubmit={[Function]}
+<EuiModal
+  className="kbnSavedObjectSaveModal kbnSavedObjectsSaveModal--wide"
+  data-test-subj="savedObjectSaveModal"
+  onClose={[Function]}
 >
-  <EuiModal
-    className="kbnSavedObjectSaveModal kbnSavedObjectsSaveModal--wide"
-    data-test-subj="savedObjectSaveModal"
-    onClose={[Function]}
+  <form
+    onSubmit={[Function]}
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
@@ -394,6 +394,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
         Save
       </EuiButton>
     </EuiModalFooter>
-  </EuiModal>
-</form>
+  </form>
+</EuiModal>
 `;

@@ -122,14 +122,12 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     );
 
     return (
-      <form onSubmit={this.onFormSubmit}>
-        <EuiModal
-          data-test-subj="savedObjectSaveModal"
-          className={`kbnSavedObjectSaveModal${
-            hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''
-          }`}
-          onClose={this.props.onClose}
-        >
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        className={`kbnSavedObjectSaveModal${hasColumns ? ' kbnSavedObjectsSaveModal--wide' : ''}`}
+        onClose={this.props.onClose}
+      >
+        <form onSubmit={this.onFormSubmit}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
@@ -164,8 +162,8 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
             {this.renderConfirmButton()}
           </EuiModalFooter>
-        </EuiModal>
-      </form>
+        </form>
+      </EuiModal>
     );
   }
 
