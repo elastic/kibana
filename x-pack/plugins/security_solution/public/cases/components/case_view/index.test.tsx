@@ -615,7 +615,7 @@ describe('CaseView ', () => {
         type: 'x-pack/security_solution/local/timeline/CREATE_TIMELINE',
         payload: {
           columns: [],
-          expandedEvent: {},
+          expandedDetail: {},
           id: 'timeline-case',
           indexNames: [],
           show: false,
@@ -661,9 +661,10 @@ describe('CaseView ', () => {
         .first()
         .simulate('click');
       expect(mockDispatch).toHaveBeenCalledWith({
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
         payload: {
-          event: { eventId: 'alert-id-1', indexName: 'alert-index-1' },
+          panelView: 'eventDetail',
+          params: { eventId: 'alert-id-1', indexName: 'alert-index-1' },
           timelineId: 'timeline-case',
         },
       });
