@@ -351,7 +351,7 @@
     "@cypress/webpack-preprocessor": "^5.5.0",
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/apm-rum-react": "^1.2.5",
-    "@elastic/charts": "24.4.0",
+    "@elastic/charts": "24.5.1",
     "@elastic/eslint-config-kibana": "link:packages/elastic-eslint-config-kibana",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
