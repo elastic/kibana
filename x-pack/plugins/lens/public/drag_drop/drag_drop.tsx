@@ -321,7 +321,7 @@ const DragInner = memo(function DragInner({
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
             if (isDragging) {
-              // dragEnd();
+              dragEnd();
             }
           }}
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -463,7 +463,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
       })}
       {ghost
         ? React.cloneElement(ghost.children, {
-            className: 'lnsDragDrop_ghost',
+            className: classNames(ghost.children.props.className, 'lnsDragDrop_ghost'),
             style: ghost.style,
           })
         : null}
