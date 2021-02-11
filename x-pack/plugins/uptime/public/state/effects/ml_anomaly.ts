@@ -44,14 +44,15 @@ export function* fetchMLJobEffect() {
   );
 
   yield takeLatest(String(deleteMLJobAction.get), function* (action: Action<MonitorIdParam>) {
+    const { payload } = action;
     try {
-      const response = yield call(deleteMLJob, action.payload);
+      const response = yield call(deleteMLJob, payload);
       yield put(deleteMLJobAction.success(response));
 
       // let's delete alert as well if it's there
       const { data: anomalyAlert } = yield select(anomalyAlertSelector);
       if (anomalyAlert) {
-        const { monitorId } = action.payload;
+        const { monitorId } = payload;
         yield put(deleteAlertAction.get({ alertId: anomalyAlert.id as string, monitorId }));
       }
     } catch (err) {
