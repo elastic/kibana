@@ -10,6 +10,9 @@ import {
   loggingSystemMock,
   savedObjectsServiceMock,
 } from 'src/core/server/mocks';
+import { coreMock } from '../../../../src/core/server/mocks';
+import { licensingMock } from '../../../plugins/licensing/server/mocks';
+
 import { FleetAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
@@ -28,6 +31,18 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     kibanaBranch: 'master',
   };
 };
+
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+export const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
+};
+
 
 export const createPackagePolicyServiceMock = () => {
   return {
