@@ -22,7 +22,8 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
 export const JsonCodeEditor = (value: any) => {
   const jsonValue = JSON.stringify(value, null, 2);
 
-  const setCalculatedLinesHeight = useCallback((editor) => {
+  // setting editor height based on lines height and count to stretch and fit its content
+  const setEditorCalculatedHeight = useCallback((editor) => {
     const editorElement = editor.getDomNode();
 
     if (!editorElement) {
@@ -56,7 +57,7 @@ export const JsonCodeEditor = (value: any) => {
           languageId={XJsonLang.ID}
           value={jsonValue}
           onChange={() => {}}
-          editorDidMount={setCalculatedLinesHeight}
+          editorDidMount={setEditorCalculatedHeight}
           aria-label={codeEditorAriaLabel}
           options={{
             automaticLayout: true,
