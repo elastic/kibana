@@ -41,7 +41,7 @@ import {
   AlertInfo,
   escapeHatch,
   flattenSubCaseSavedObject,
-  isGenOrAlertCommentAttributes,
+  isCommentRequestTypeAlertOrGenAlert,
   wrapError,
 } from '../../utils';
 import { getCaseToUpdate } from '../helpers';
@@ -85,7 +85,7 @@ function checkNonExistingOrConflict(
 
   if (conflictedSubCases.length > 0) {
     throw Boom.conflict(
-      `These cases ${conflictedSubCases
+      `These sub cases ${conflictedSubCases
         .map((c) => c.id)
         .join(', ')} has been updated. Please refresh before saving additional updates.`
     );
@@ -216,23 +216,25 @@ async function updateAlerts({
   caseService,
   client,
   caseClient,
-  subCasesMap,
 }: {
   subCasesToSync: SubCasePatchRequest[];
   caseService: CaseServiceSetup;
   client: SavedObjectsClientContract;
   caseClient: CaseClient;
-  subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
 }) {
+  const subCasesToSyncMap = subCasesToSync.reduce((acc, subCase) => {
+    acc.set(subCase.id, subCase);
+    return acc;
+  }, new Map<string, SubCasePatchRequest>());
   // get all the alerts for all sub cases that need to be synced
   const totalAlerts = await getAlertComments({ caseService, client, subCasesToSync });
   // create a map of the status (open, closed, etc) to alert info that needs to be updated
   const alertsToUpdate = totalAlerts.saved_objects.reduce((acc, alertComment) => {
-    if (isGenOrAlertCommentAttributes(alertComment.attributes)) {
+    if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
       const id = getID(alertComment);
       const status =
         id !== undefined
-          ? subCasesMap.get(id)?.attributes.status ?? CaseStatuses.open
+          ? subCasesToSyncMap.get(id)?.status ?? CaseStatuses.open
           : CaseStatuses.open;
 
       addAlertInfoToStatusMap({ comment: alertComment.attributes, statusMap: acc, status });
@@ -349,7 +351,6 @@ async function update({
     client,
     caseClient,
     subCasesToSync: subCasesToSyncAlertsFor,
-    subCasesMap,
   });
 
   const returnUpdatedSubCases = updatedCases.saved_objects.reduce<SubCaseResponse[]>(

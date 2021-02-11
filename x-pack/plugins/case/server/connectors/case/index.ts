@@ -8,9 +8,14 @@
 import { curry } from 'lodash';
 
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import { CasePatchRequest, CasePostRequest } from '../../../common/api';
+import {
+  CasePatchRequest,
+  CasePostRequest,
+  CommentRequest,
+  CommentType,
+} from '../../../common/api';
 import { createExternalCaseClient } from '../../client';
-import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
+import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
   CaseExecutorResponse,
   ExecutorSubActionAddCommentParams,
@@ -19,7 +24,7 @@ import {
 } from './types';
 import * as i18n from './translations';
 
-import { GetActionTypeParams } from '..';
+import { GetActionTypeParams, isCommentGeneratedAlert } from '..';
 import { nullUser } from '../../common';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
@@ -107,8 +112,34 @@ async function executor(
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment({ caseId, comment });
+    const formattedComment = transformConnectorComment(comment);
+    data = await caseClient.addComment({ caseId, comment: formattedComment });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
 }
+
+/**
+ * This converts a connector style generated alert ({_id: string} | {_id: string}[]) to the expected format of addComment.
+ */
+export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
+  if (isCommentGeneratedAlert(comment)) {
+    const alertId: string[] = [];
+    if (Array.isArray(comment.alerts)) {
+      alertId.push(
+        ...comment.alerts.map((alert: { _id: string }) => {
+          return alert._id;
+        })
+      );
+    } else {
+      alertId.push(comment.alerts._id);
+    }
+    return {
+      type: CommentType.generatedAlert,
+      alertId,
+      index: comment.index,
+    };
+  } else {
+    return comment;
+  }
+};

@@ -850,7 +850,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert_request]`,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
             retry: false,
           });
         }

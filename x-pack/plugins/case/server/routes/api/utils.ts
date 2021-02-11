@@ -37,16 +37,9 @@ import {
   AssociationType,
   SubCaseAttributes,
   SubCaseResponse,
-  CommentRequestGeneratedAlertType,
-  GeneratedAlertCommentRequestRt,
   SubCasesFindResponse,
-  AttributesTypeAlerts,
   User,
-  GeneratedAlertRequestTypeField,
   AlertCommentRequestRt,
-  CommentPatchRequestTypes,
-  AlertCommentAttributesRt,
-  AttributesTypeAlertsWithoutBasic,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -109,8 +102,8 @@ type NewCommentArgs = CommentRequest & {
 /**
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
  */
-export const getAlertIdsFromAttributes = (comment: CommentAttributes): string[] => {
-  if (isGenOrAlertCommentAttributes(comment)) {
+export const getAlertIds = (comment: CommentRequest): string[] => {
+  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
   }
   return [];
@@ -125,8 +118,8 @@ export interface AlertInfo {
 }
 
 const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
-  if (isGenOrAlertCommentAttributes(comment)) {
-    acc.ids.push(...getAlertIdsFromAttributes(comment));
+  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+    acc.ids.push(...getAlertIds(comment));
     acc.indices.add(comment.index);
   }
   return acc;
@@ -166,31 +159,6 @@ export const getAlertIndicesAndIDsFromSO = (
   );
 };
 
-/**
- * Return the IDs from the comment.
- *
- * @param comment the comment from the add comment request or stored within a case
- */
-export const getAlertIdsFromRequest = (comment: CommentRequest): string[] => {
-  if (isCommentRequestTypeGenAlert(comment)) {
-    const ids: string[] = [];
-    if (Array.isArray(comment.alerts)) {
-      ids.push(
-        ...comment.alerts.map((alert: { _id: string }) => {
-          return alert._id;
-        })
-      );
-    } else {
-      ids.push(comment.alerts._id);
-    }
-    return ids;
-  } else if (isCommentRequestTypeAlert(comment)) {
-    return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-  } else {
-    return [];
-  }
-};
-
 export const transformNewComment = ({
   associationType,
   createdDate,
@@ -200,33 +168,16 @@ export const transformNewComment = ({
   username,
   ...comment
 }: NewCommentArgs): CommentAttributes => {
-  if (isCommentRequestTypeGenAlert(comment)) {
-    const ids = getAlertIdsFromRequest(comment);
-
-    return {
-      associationType,
-      alertId: ids,
-      index: comment.index,
-      type: CommentType.generatedAlert,
-      created_at: createdDate,
-      created_by: { email, full_name, username },
-      pushed_at: null,
-      pushed_by: null,
-      updated_at: null,
-      updated_by: null,
-    };
-  } else {
-    return {
-      associationType,
-      ...comment,
-      created_at: createdDate,
-      created_by: { email, full_name, username },
-      pushed_at: null,
-      pushed_by: null,
-      updated_at: null,
-      updated_by: null,
-    };
-  }
+  return {
+    associationType,
+    ...comment,
+    created_at: createdDate,
+    created_by: { email, full_name, username },
+    pushed_at: null,
+    pushed_by: null,
+    updated_at: null,
+    updated_by: null,
+  };
 };
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
@@ -379,7 +330,7 @@ export const escapeHatch = schema.object({}, { unknowns: 'allow' });
  * A type narrowing function for user comments. Exporting so integration tests can use it.
  */
 export const isCommentRequestTypeUser = (
-  context: CommentRequest | CommentPatchRequestTypes
+  context: CommentRequest
 ): context is CommentRequestUserType => {
   return context.type === CommentType.user;
 };
@@ -387,15 +338,9 @@ export const isCommentRequestTypeUser = (
 /**
  * A type narrowing function for alert comments. Exporting so integration tests can use it.
  */
-export const isCommentRequestTypeAlert = (
-  context: CommentRequest | CommentPatchRequestTypes
+export const isCommentRequestTypeAlertOrGenAlert = (
+  context: CommentRequest
 ): context is CommentRequestAlertType => {
-  return context.type === CommentType.alert;
-};
-
-const isPatchRequestTypeAlertOrGenAlert = (
-  context: CommentPatchRequestTypes
-): context is AttributesTypeAlertsWithoutBasic => {
   return context.type === CommentType.alert || context.type === CommentType.generatedAlert;
 };
 
@@ -408,40 +353,14 @@ const isPatchRequestTypeAlertOrGenAlert = (
  */
 export const isCommentRequestTypeGenAlert = (
   context: CommentRequest
-): context is CommentRequestGeneratedAlertType => {
-  return context.type === GeneratedAlertRequestTypeField;
-};
-
-/**
- * Returns true if the comment attribute is of type generated alert or alert.
- */
-export const isGenOrAlertCommentAttributes = (
-  comment: CommentAttributes
-): comment is AttributesTypeAlerts => {
-  return comment.type === CommentType.generatedAlert || comment.type === CommentType.alert;
+): context is CommentRequestAlertType => {
+  return context.type === CommentType.generatedAlert;
 };
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isCommentRequestTypeAlert(comment)) {
+  } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isCommentRequestTypeGenAlert(comment)) {
-    pipe(
-      excess(GeneratedAlertCommentRequestRt).decode(comment),
-      fold(throwErrors(badRequest), identity)
-    );
-  }
-};
-
-/**
- * This is used to decode a patch request. The patch comment is different from a comment request because it only allows
- * a user, alert, or generated alert to be patched. It does not allow a generated alert using the {_id: string} format.
- */
-export const decodeCommentPatch = (comment: CommentPatchRequestTypes) => {
-  if (isCommentRequestTypeUser(comment)) {
-    pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isPatchRequestTypeAlertOrGenAlert(comment)) {
-    pipe(excess(AlertCommentAttributesRt).decode(comment), fold(throwErrors(badRequest), identity));
   }
 };

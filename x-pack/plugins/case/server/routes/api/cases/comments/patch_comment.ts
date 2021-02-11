@@ -18,7 +18,7 @@ import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, decodeCommentPatch } from '../../utils';
+import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { CaseServiceSetup } from '../../../../services';
 
@@ -81,7 +81,7 @@ export function initPatchCommentApi({
         );
 
         const { id: queryCommentId, version: queryCommentVersion, ...queryRestAttributes } = query;
-        decodeCommentPatch(queryRestAttributes);
+        decodeCommentRequest(queryRestAttributes);
 
         const commentableCase = await getCommentableCase({
           service: caseService,

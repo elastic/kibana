@@ -6,6 +6,12 @@
  */
 
 import {
+  CommentSchemaType,
+  ContextTypeGeneratedAlertType,
+  isCommentGeneratedAlert,
+  transformConnectorComment,
+} from '../../../../plugins/case/server/connectors';
+import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
@@ -17,19 +23,13 @@ import {
   CaseStatuses,
   CaseType,
   CaseClientPostRequest,
-  CommentRequestGeneratedAlertType,
   SubCaseResponse,
-  CommentRequest,
   AssociationType,
   CollectionWithSubCaseResponse,
   SubCasesFindResponse,
-  GeneratedAlertRequestTypeField,
+  CommentRequest,
 } from '../../../../plugins/case/common/api';
-import {
-  getAlertIdsFromRequest,
-  isCommentRequestTypeGenAlert,
-  isCommentRequestTypeAlert,
-} from '../../../../plugins/case/server/routes/api/utils';
+
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
@@ -73,10 +73,10 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   type: CommentType.alert,
 };
 
-export const postCommentGenAlertReq: CommentRequestGeneratedAlertType = {
+export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
   alerts: [{ _id: 'test-id' }, { _id: 'test-id2' }],
   index: 'test-index',
-  type: GeneratedAlertRequestTypeField,
+  type: CommentType.generatedAlert,
 };
 
 export const postCaseResp = (
@@ -98,7 +98,7 @@ export const postCaseResp = (
 
 interface CommentRequestWithID {
   id: string;
-  comment: CommentRequest;
+  comment: CommentSchemaType | CommentRequest;
 }
 
 export const commentsResp = ({
@@ -116,18 +116,11 @@ export const commentsResp = ({
       pushed_by: null,
       updated_by: null,
     };
-    if (isCommentRequestTypeGenAlert(comment)) {
+
+    if (isCommentGeneratedAlert(comment)) {
       return {
         associationType,
-        alertId: getAlertIdsFromRequest(comment),
-        index: comment.index,
-        type: CommentType.generatedAlert,
-        ...baseFields,
-      };
-    } else if (isCommentRequestTypeAlert(comment)) {
-      return {
-        associationType,
-        ...comment,
+        ...transformConnectorComment(comment),
         ...baseFields,
       };
     } else {

@@ -13,7 +13,7 @@ import { identity } from 'fp-ts/lib/function';
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import {
   decodeCommentRequest,
-  getAlertIdsFromRequest,
+  getAlertIds,
   isCommentRequestTypeGenAlert,
 } from '../../routes/api/utils';
 
@@ -26,10 +26,9 @@ import {
   SubCaseAttributes,
   CommentRequest,
   CollectionWithSubCaseResponse,
-  GeneratedAlertCommentRequestRt,
-  CommentRequestGeneratedAlertType,
   User,
-  GeneratedAlertRequestTypeField,
+  CommentRequestAlertType,
+  AlertCommentRequestRt,
 } from '../../../common/api';
 import {
   buildCaseUserActionItem,
@@ -86,7 +85,7 @@ async function getSubCase({
 interface AddCommentFromRuleArgs {
   caseClient: CaseClientImpl;
   caseId: string;
-  comment: CommentRequestGeneratedAlertType;
+  comment: CommentRequestAlertType;
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
@@ -101,11 +100,16 @@ const addGeneratedAlerts = async ({
   comment,
 }: AddCommentFromRuleArgs): Promise<CollectionWithSubCaseResponse> => {
   const query = pipe(
-    GeneratedAlertCommentRequestRt.decode(comment),
+    AlertCommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
   decodeCommentRequest(comment);
+
+  // This function only supports adding generated alerts
+  if (comment.type !== CommentType.generatedAlert) {
+    throw Boom.internal('Attempting to add a non generated alert in the wrong context');
+  }
   const createdDate = new Date().toISOString();
 
   const caseInfo = await caseService.getCase({
@@ -114,7 +118,7 @@ const addGeneratedAlerts = async ({
   });
 
   if (
-    query.type === GeneratedAlertRequestTypeField &&
+    query.type === CommentType.generatedAlert &&
     caseInfo.attributes.type !== CaseType.collection
   ) {
     throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
@@ -152,7 +156,7 @@ const addGeneratedAlerts = async ({
       newComment.attributes.type === CommentType.generatedAlert) &&
     caseInfo.attributes.settings.syncAlerts
   ) {
-    const ids = getAlertIdsFromRequest(query);
+    const ids = getAlertIds(query);
     await caseClient.updateAlertsStatus({
       ids,
       status: subCase.attributes.status,
@@ -274,7 +278,7 @@ export const addComment = async ({
   });
 
   if (newComment.attributes.type === CommentType.alert && updatedCase.settings.syncAlerts) {
-    const ids = getAlertIdsFromRequest(query);
+    const ids = getAlertIds(query);
     await caseClient.updateAlertsStatus({
       ids,
       status: updatedCase.status,

@@ -19,7 +19,7 @@ import {
 import {
   AlertInfo,
   flattenCaseSavedObject,
-  isGenOrAlertCommentAttributes,
+  isCommentRequestTypeAlertOrGenAlert,
 } from '../../routes/api/utils';
 
 import {
@@ -192,7 +192,7 @@ async function getSubCasesToStatus({
 }): Promise<Map<string, CaseStatuses>> {
   const subCasesToRetrieve = totalAlerts.saved_objects.reduce((acc, alertComment) => {
     if (
-      isGenOrAlertCommentAttributes(alertComment.attributes) &&
+      isCommentRequestTypeAlertOrGenAlert(alertComment.attributes) &&
       alertComment.attributes.associationType === AssociationType.subCase
     ) {
       const id = getID(alertComment, SUB_CASE_SAVED_OBJECT);
@@ -293,7 +293,7 @@ async function updateAlerts({
   // This allows us to make at most 3 calls to ES, one for each status type that we need to update
   // One potential improvement here is to do a tick (set timeout) to reduce the memory footprint if that becomes an issue
   const alertsToUpdate = totalAlerts.saved_objects.reduce((acc, alertComment) => {
-    if (isGenOrAlertCommentAttributes(alertComment.attributes)) {
+    if (isCommentRequestTypeAlertOrGenAlert(alertComment.attributes)) {
       const status = getSyncStatusForComment({
         alertComment,
         casesToSyncToStatus,

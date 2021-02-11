@@ -78,7 +78,7 @@ export const push = async ({
 
   try {
     [theCase, connector, userActions] = await Promise.all([
-      caseClient.get({ id: caseId, includeComments: true }),
+      caseClient.get({ id: caseId, includeComments: true, includeSubCaseComments: true }),
       actionsClient.get({ id: connectorId }),
       caseClient.getUserActions({ caseId }),
     ]);

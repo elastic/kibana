@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentType, GeneratedAlertRequestTypeField } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import { validateConnector } from './validators';
 
 // Reserved for future implementation
@@ -25,10 +25,12 @@ const AlertIDSchema = schema.object(
 );
 
 const ContextTypeAlertGroupSchema = schema.object({
-  type: schema.literal(GeneratedAlertRequestTypeField),
+  type: schema.literal(CommentType.generatedAlert),
   alerts: schema.oneOf([schema.arrayOf(AlertIDSchema), AlertIDSchema]),
   index: schema.string(),
 });
+
+export type ContextTypeGeneratedAlertType = typeof ContextTypeAlertGroupSchema.type;
 
 const ContextTypeAlertSchema = schema.object({
   type: schema.literal(CommentType.alert),
@@ -37,11 +39,15 @@ const ContextTypeAlertSchema = schema.object({
   index: schema.string(),
 });
 
+export type ContextTypeAlertSchemaType = typeof ContextTypeAlertSchema.type;
+
 export const CommentSchema = schema.oneOf([
   ContextTypeUserSchema,
   ContextTypeAlertSchema,
   ContextTypeAlertGroupSchema,
 ]);
+
+export type CommentSchemaType = typeof CommentSchema.type;
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),
