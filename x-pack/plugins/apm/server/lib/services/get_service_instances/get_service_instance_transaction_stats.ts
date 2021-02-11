@@ -21,6 +21,7 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getServiceInstanceTransactionStats({
   setup,
@@ -30,120 +31,122 @@ export async function getServiceInstanceTransactionStats({
   searchAggregatedTransactions,
   numBuckets,
 }: ServiceInstanceParams) {
-  const { apmEventClient, start, end, esFilter } = setup;
+  return withApmSpan('get_service_instance_transacion_stats', async () => {
+    const { apmEventClient, start, end, esFilter } = setup;
 
-  const { intervalString, bucketSize } = getBucketSize({
-    start,
-    end,
-    numBuckets,
-  });
+    const { intervalString, bucketSize } = getBucketSize({
+      start,
+      end,
+      numBuckets,
+    });
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+    const field = getTransactionDurationFieldForAggregatedTransactions(
+      searchAggregatedTransactions
+    );
 
-  const subAggs = {
-    avg_transaction_duration: {
-      avg: {
-        field,
-      },
-    },
-    failures: {
-      filter: {
-        term: {
-          [EVENT_OUTCOME]: EventOutcome.failure,
+    const subAggs = {
+      avg_transaction_duration: {
+        avg: {
+          field,
         },
       },
-    },
-  };
-
-  const response = await apmEventClient.search({
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { range: rangeFilter(start, end) },
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            ...esFilter,
-          ],
-        },
-      },
-      aggs: {
-        [SERVICE_NODE_NAME]: {
-          terms: {
-            field: SERVICE_NODE_NAME,
-            missing: SERVICE_NODE_NAME_MISSING,
-            size,
+      failures: {
+        filter: {
+          term: {
+            [EVENT_OUTCOME]: EventOutcome.failure,
           },
-          aggs: {
-            ...subAggs,
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: start,
-                  max: end,
+        },
+      },
+    };
+
+    const response = await apmEventClient.search({
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { range: rangeFilter(start, end) },
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              ...esFilter,
+            ],
+          },
+        },
+        aggs: {
+          [SERVICE_NODE_NAME]: {
+            terms: {
+              field: SERVICE_NODE_NAME,
+              missing: SERVICE_NODE_NAME_MISSING,
+              size,
+            },
+            aggs: {
+              ...subAggs,
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: intervalString,
+                  min_doc_count: 0,
+                  extended_bounds: {
+                    min: start,
+                    max: end,
+                  },
                 },
-              },
-              aggs: {
-                ...subAggs,
+                aggs: {
+                  ...subAggs,
+                },
               },
             },
           },
         },
       },
-    },
+    });
+
+    const bucketSizeInMinutes = bucketSize / 60;
+
+    return (
+      response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
+        (serviceNodeBucket) => {
+          const {
+            doc_count: count,
+            avg_transaction_duration: avgTransactionDuration,
+            key,
+            failures,
+            timeseries,
+          } = serviceNodeBucket;
+
+          return {
+            serviceNodeName: String(key),
+            errorRate: {
+              value: failures.doc_count / count,
+              timeseries: timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: dateBucket.failures.doc_count / dateBucket.doc_count,
+              })),
+            },
+            throughput: {
+              value: calculateThroughput({ start, end, value: count }),
+              timeseries: timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: dateBucket.doc_count / bucketSizeInMinutes,
+              })),
+            },
+            latency: {
+              value: avgTransactionDuration.value,
+              timeseries: timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: dateBucket.avg_transaction_duration.value,
+              })),
+            },
+          };
+        }
+      ) ?? []
+    );
   });
-
-  const bucketSizeInMinutes = bucketSize / 60;
-
-  return (
-    response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
-      (serviceNodeBucket) => {
-        const {
-          doc_count: count,
-          avg_transaction_duration: avgTransactionDuration,
-          key,
-          failures,
-          timeseries,
-        } = serviceNodeBucket;
-
-        return {
-          serviceNodeName: String(key),
-          errorRate: {
-            value: failures.doc_count / count,
-            timeseries: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.failures.doc_count / dateBucket.doc_count,
-            })),
-          },
-          throughput: {
-            value: calculateThroughput({ start, end, value: count }),
-            timeseries: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.doc_count / bucketSizeInMinutes,
-            })),
-          },
-          latency: {
-            value: avgTransactionDuration.value,
-            timeseries: timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              y: dateBucket.avg_transaction_duration.value,
-            })),
-          },
-        };
-      }
-    ) ?? []
-  );
 }

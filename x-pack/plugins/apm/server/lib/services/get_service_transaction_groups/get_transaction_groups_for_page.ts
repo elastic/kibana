@@ -28,6 +28,7 @@ import {
   getLatencyValue,
 } from '../../helpers/latency_aggregation_type';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -40,7 +41,7 @@ export type TransactionGroupWithoutTimeseriesData = ValuesType<
   PromiseReturnType<typeof getTransactionGroupsForPage>['transactionGroups']
 >;
 
-export async function getTransactionGroupsForPage({
+export function getTransactionGroupsForPage({
   apmEventClient,
   searchAggregatedTransactions,
   serviceName,
@@ -67,99 +68,104 @@ export async function getTransactionGroupsForPage({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+  return withApmSpan(
+    'get_service_overview_transaction_groups_for_page',
+    async () => {
+      const field = getTransactionDurationFieldForAggregatedTransactions(
+        searchAggregatedTransactions
+      );
 
-  const response = await apmEventClient.search({
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { range: rangeFilter(start, end) },
-            ...esFilter,
+      const response = await apmEventClient.search({
+        apm: {
+          events: [
+            getProcessorEventForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
           ],
         },
-      },
-      aggs: {
-        transaction_groups: {
-          terms: {
-            field: TRANSACTION_NAME,
-            size: 500,
-            order: { _count: 'desc' },
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { term: { [SERVICE_NAME]: serviceName } },
+                { term: { [TRANSACTION_TYPE]: transactionType } },
+                { range: rangeFilter(start, end) },
+                ...esFilter,
+              ],
+            },
           },
           aggs: {
-            ...getLatencyAggregation(latencyAggregationType, field),
-            [EVENT_OUTCOME]: {
-              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+            transaction_groups: {
+              terms: {
+                field: TRANSACTION_NAME,
+                size: 500,
+                order: { _count: 'desc' },
+              },
+              aggs: {
+                ...getLatencyAggregation(latencyAggregationType, field),
+                [EVENT_OUTCOME]: {
+                  filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+                },
+              },
             },
           },
         },
-      },
-    },
-  });
+      });
 
-  const transactionGroups =
-    response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate =
-        bucket.doc_count > 0
-          ? bucket[EVENT_OUTCOME].doc_count / bucket.doc_count
-          : null;
+      const transactionGroups =
+        response.aggregations?.transaction_groups.buckets.map((bucket) => {
+          const errorRate =
+            bucket.doc_count > 0
+              ? bucket[EVENT_OUTCOME].doc_count / bucket.doc_count
+              : null;
+
+          return {
+            name: bucket.key as string,
+            latency: getLatencyValue({
+              latencyAggregationType,
+              aggregation: bucket.latency,
+            }),
+            throughput: calculateThroughput({
+              start,
+              end,
+              value: bucket.doc_count,
+            }),
+            errorRate,
+          };
+        }) ?? [];
+
+      const totalDurationValues = transactionGroups.map(
+        (group) => (group.latency ?? 0) * group.throughput
+      );
+
+      const minTotalDuration = Math.min(...totalDurationValues);
+      const maxTotalDuration = Math.max(...totalDurationValues);
+
+      const transactionGroupsWithImpact = transactionGroups.map((group) => ({
+        ...group,
+        impact:
+          (((group.latency ?? 0) * group.throughput - minTotalDuration) /
+            (maxTotalDuration - minTotalDuration)) *
+          100,
+      }));
+
+      // Sort transaction groups first, and only get timeseries for data in view.
+      // This is to limit the possibility of creating too many buckets.
+
+      const sortedAndSlicedTransactionGroups = orderBy(
+        transactionGroupsWithImpact,
+        sortField,
+        [sortDirection]
+      ).slice(pageIndex * size, pageIndex * size + size);
 
       return {
-        name: bucket.key as string,
-        latency: getLatencyValue({
-          latencyAggregationType,
-          aggregation: bucket.latency,
-        }),
-        throughput: calculateThroughput({
-          start,
-          end,
-          value: bucket.doc_count,
-        }),
-        errorRate,
+        transactionGroups: sortedAndSlicedTransactionGroups,
+        totalTransactionGroups: transactionGroups.length,
+        isAggregationAccurate:
+          (response.aggregations?.transaction_groups.sum_other_doc_count ??
+            0) === 0,
       };
-    }) ?? [];
-
-  const totalDurationValues = transactionGroups.map(
-    (group) => (group.latency ?? 0) * group.throughput
+    }
   );
-
-  const minTotalDuration = Math.min(...totalDurationValues);
-  const maxTotalDuration = Math.max(...totalDurationValues);
-
-  const transactionGroupsWithImpact = transactionGroups.map((group) => ({
-    ...group,
-    impact:
-      (((group.latency ?? 0) * group.throughput - minTotalDuration) /
-        (maxTotalDuration - minTotalDuration)) *
-      100,
-  }));
-
-  // Sort transaction groups first, and only get timeseries for data in view.
-  // This is to limit the possibility of creating too many buckets.
-
-  const sortedAndSlicedTransactionGroups = orderBy(
-    transactionGroupsWithImpact,
-    sortField,
-    [sortDirection]
-  ).slice(pageIndex * size, pageIndex * size + size);
-
-  return {
-    transactionGroups: sortedAndSlicedTransactionGroups,
-    totalTransactionGroups: transactionGroups.length,
-    isAggregationAccurate:
-      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
-      0,
-  };
 }

@@ -6,6 +6,7 @@
  */
 
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getTimeseriesDataForTransactionGroups } from './get_timeseries_data_for_transaction_groups';
 import {
@@ -37,53 +38,55 @@ export async function getServiceTransactionGroups({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const { apmEventClient, start, end, esFilter } = setup;
+  return withApmSpan('get_service_overview_transaction_groups', async () => {
+    const { apmEventClient, start, end, esFilter } = setup;
 
-  const {
-    transactionGroups,
-    totalTransactionGroups,
-    isAggregationAccurate,
-  } = await getTransactionGroupsForPage({
-    apmEventClient,
-    start,
-    end,
-    serviceName,
-    esFilter,
-    pageIndex,
-    sortField,
-    sortDirection,
-    size,
-    searchAggregatedTransactions,
-    transactionType,
-    latencyAggregationType,
-  });
-
-  const transactionNames = transactionGroups.map((group) => group.name);
-
-  const timeseriesData = await getTimeseriesDataForTransactionGroups({
-    apmEventClient,
-    start,
-    end,
-    esFilter,
-    numBuckets,
-    searchAggregatedTransactions,
-    serviceName,
-    size,
-    transactionNames,
-    transactionType,
-    latencyAggregationType,
-  });
-
-  return {
-    transactionGroups: mergeTransactionGroupData({
+    const {
       transactionGroups,
-      timeseriesData,
+      totalTransactionGroups,
+      isAggregationAccurate,
+    } = await getTransactionGroupsForPage({
+      apmEventClient,
       start,
       end,
-      latencyAggregationType,
+      serviceName,
+      esFilter,
+      pageIndex,
+      sortField,
+      sortDirection,
+      size,
+      searchAggregatedTransactions,
       transactionType,
-    }),
-    totalTransactionGroups,
-    isAggregationAccurate,
-  };
+      latencyAggregationType,
+    });
+
+    const transactionNames = transactionGroups.map((group) => group.name);
+
+    const timeseriesData = await getTimeseriesDataForTransactionGroups({
+      apmEventClient,
+      start,
+      end,
+      esFilter,
+      numBuckets,
+      searchAggregatedTransactions,
+      serviceName,
+      size,
+      transactionNames,
+      transactionType,
+      latencyAggregationType,
+    });
+
+    return {
+      transactionGroups: mergeTransactionGroupData({
+        transactionGroups,
+        timeseriesData,
+        start,
+        end,
+        latencyAggregationType,
+        transactionType,
+      }),
+      totalTransactionGroups,
+      isAggregationAccurate,
+    };
+  });
 }

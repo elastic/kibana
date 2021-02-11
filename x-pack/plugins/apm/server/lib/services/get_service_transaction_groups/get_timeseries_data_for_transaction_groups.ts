@@ -25,12 +25,13 @@ import {
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getLatencyAggregation } from '../../helpers/latency_aggregation_type';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export type TransactionGroupTimeseriesData = PromiseReturnType<
   typeof getTimeseriesDataForTransactionGroups
 >;
 
-export async function getTimeseriesDataForTransactionGroups({
+export function getTimeseriesDataForTransactionGroups({
   apmEventClient,
   start,
   end,
@@ -55,65 +56,72 @@ export async function getTimeseriesDataForTransactionGroups({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  return withApmSpan(
+    'get_service_overview_transaction_groups_timeseries_data',
+    async () => {
+      const { intervalString } = getBucketSize({ start, end, numBuckets });
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+      const field = getTransactionDurationFieldForAggregatedTransactions(
+        searchAggregatedTransactions
+      );
 
-  const timeseriesResponse = await apmEventClient.search({
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { terms: { [TRANSACTION_NAME]: transactionNames } },
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { range: rangeFilter(start, end) },
-            ...getDocumentTypeFilterForAggregatedTransactions(
+      const timeseriesResponse = await apmEventClient.search({
+        apm: {
+          events: [
+            getProcessorEventForAggregatedTransactions(
               searchAggregatedTransactions
             ),
-            ...esFilter,
           ],
         },
-      },
-      aggs: {
-        transaction_groups: {
-          terms: {
-            field: TRANSACTION_NAME,
-            size,
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                { terms: { [TRANSACTION_NAME]: transactionNames } },
+                { term: { [SERVICE_NAME]: serviceName } },
+                { term: { [TRANSACTION_TYPE]: transactionType } },
+                { range: rangeFilter(start, end) },
+                ...getDocumentTypeFilterForAggregatedTransactions(
+                  searchAggregatedTransactions
+                ),
+                ...esFilter,
+              ],
+            },
           },
           aggs: {
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: start,
-                  max: end,
-                },
+            transaction_groups: {
+              terms: {
+                field: TRANSACTION_NAME,
+                size,
               },
               aggs: {
-                ...getLatencyAggregation(latencyAggregationType, field),
-                [EVENT_OUTCOME]: {
-                  filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: intervalString,
+                    min_doc_count: 0,
+                    extended_bounds: {
+                      min: start,
+                      max: end,
+                    },
+                  },
+                  aggs: {
+                    ...getLatencyAggregation(latencyAggregationType, field),
+                    [EVENT_OUTCOME]: {
+                      filter: {
+                        term: { [EVENT_OUTCOME]: EventOutcome.failure },
+                      },
+                    },
+                  },
                 },
               },
             },
           },
         },
-      },
-    },
-  });
+      });
 
-  return timeseriesResponse.aggregations?.transaction_groups.buckets ?? [];
+      return timeseriesResponse.aggregations?.transaction_groups.buckets ?? [];
+    }
+  );
 }
