@@ -277,6 +277,9 @@ describe('map_actions', () => {
       require('../selectors/map_selectors').getSearchSessionId = () => {
         return searchSessionId;
       };
+      require('../selectors/map_selectors').getSearchSessionMapBuffer = () => {
+        return undefined;
+      };
       require('../selectors/map_selectors').getMapSettings = () => {
         return {
           autoFitToDataBounds: false,
