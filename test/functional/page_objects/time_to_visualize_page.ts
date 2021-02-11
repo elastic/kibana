@@ -24,7 +24,7 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const find = getService('find');
-  const { common } = getPageObjects(['common']);
+  const { common, dashboard } = getPageObjects(['common', 'dashboard']);
 
   class TimeToVisualizePage {
     public async ensureSaveModalIsOpen() {
@@ -36,6 +36,12 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
       await dashboardSelector.findByCssSelector(`input[id="new-dashboard-option"]:disabled`);
       await dashboardSelector.findByCssSelector(`input[id="existing-dashboard-option"]:disabled`);
       await dashboardSelector.findByCssSelector(`input[id="add-to-library-option"]:disabled`);
+    }
+
+    public async resetNewDashboard() {
+      await common.navigateToApp('dashboard');
+      await dashboard.gotoDashboardLandingPage(true);
+      await dashboard.clickNewDashboard(false);
     }
 
     public async setSaveModalValues(
@@ -88,7 +94,6 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click('confirmSaveSavedObjectButton');
 
       await common.waitForSaveModalToClose();
-      log.debug('FINISHED SAVE FROM MODAL');
     }
   }
 

@@ -25,6 +25,7 @@ import { VisualizePageProvider } from './visualize_page';
 import { VisualizeEditorPageProvider } from './visualize_editor_page';
 import { VisualizeChartPageProvider } from './visualize_chart_page';
 import { TileMapPageProvider } from './tile_map_page';
+import { TimeToVisualizePageProvider } from './time_to_visualize_page';
 import { TagCloudPageProvider } from './tag_cloud_page';
 import { VegaChartPageProvider } from './vega_chart_page';
 import { SavedObjectsPageProvider } from './management/saved_objects_page';
