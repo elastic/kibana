@@ -45,7 +45,7 @@ describe('ExecutedStep', () => {
       },
     };
 
-    const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
+    const { getByText } = render(<ExecutedStep index={3} step={step} />);
 
     expect(getByText('Script executed at this step'));
     expect(getByText(`const someVar = "the var"`));
@@ -59,10 +59,22 @@ describe('ExecutedStep', () => {
       },
     };
 
-    const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
+    const { getByText } = render(<ExecutedStep index={3} step={step} />);
 
     expect(getByText('Error message'));
     expect(getByText('There was an error executing the step.'));
     expect(getByText('some.stack.trace.string'));
+  });
+
+  it('renders accordions for console output', () => {
+    const browserConsole =
+      "Refused to execute script from because its MIME type ('image/gif') is not executable";
+
+    const { getByText } = render(
+      <ExecutedStep browserConsole={browserConsole} index={3} step={step} />
+    );
+
+    expect(getByText('Console output'));
+    expect(getByText(browserConsole));
   });
 });

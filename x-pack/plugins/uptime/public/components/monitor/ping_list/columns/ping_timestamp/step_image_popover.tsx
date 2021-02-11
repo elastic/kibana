@@ -52,6 +52,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
       />
     }
     isOpen={isImagePopoverOpen}
+    closePopover={() => {}}
   >
     <EuiImage
       alt={fullSizeImageAlt}

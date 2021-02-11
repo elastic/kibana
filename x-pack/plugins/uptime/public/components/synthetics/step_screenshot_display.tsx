@@ -14,6 +14,7 @@ import useIntersection from 'react-use/lib/useIntersection';
 import { UptimeSettingsContext, UptimeThemeContext } from '../../contexts';
 
 interface StepScreenshotDisplayProps {
+  srcPath?: string;
   screenshotExists?: boolean;
   checkGroup?: string;
   stepIndex?: number;
@@ -39,6 +40,7 @@ const StepImage = styled(EuiImage)`
 `;
 
 export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
+  srcPath,
   checkGroup,
   screenshotExists,
   stepIndex,
@@ -69,7 +71,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   }, [hasIntersected, isIntersecting, setHasIntersected]);
 
   let content: JSX.Element | null = null;
-  const imgSrc = basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
+  const imgSrc = srcPath || basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
 
   if (hasIntersected && screenshotExists) {
     content = (

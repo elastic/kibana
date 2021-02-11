@@ -17,6 +17,7 @@ describe('getJourneySteps request module', () => {
           "stderr",
           "cmd/status",
           "step/screenshot",
+          "journey/browserconsole",
         ]
       `);
     });
@@ -124,6 +125,7 @@ describe('getJourneySteps request module', () => {
               "stderr",
               "cmd/status",
               "step/screenshot",
+              "journey/browserconsole",
             ],
           },
         }

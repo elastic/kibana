@@ -11,11 +11,19 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { ExecutedStep } from '../executed_step';
 
-export const toggleExpand = (
-  ping: Ping,
-  expandedRows: Record<string, JSX.Element>,
-  setExpandedRows: (update: Record<string, JSX.Element>) => any
-) => {
+interface Props {
+  ping: Ping;
+  browserConsole?: string;
+  expandedRows: Record<string, JSX.Element>;
+  setExpandedRows: (val: Record<string, JSX.Element>) => void;
+}
+
+export const toggleExpand = ({
+  ping,
+  browserConsole = '',
+  expandedRows,
+  setExpandedRows,
+}: Props) => {
   // If already expanded, collapse
   if (expandedRows[ping.docId]) {
     delete expandedRows[ping.docId];
@@ -29,31 +37,26 @@ export const toggleExpand = (
     [ping.docId]: (
       <ExecutedStep
         step={ping}
-        checkGroup={ping.monitor.check_group!}
+        browserConsole={browserConsole}
         index={ping.synthetics?.step!.index!}
       />
     ),
   });
 };
 
-interface Props {
-  item: Ping;
-  expandedRows: Record<string, JSX.Element>;
-  setExpandedRows: (val: Record<string, JSX.Element>) => void;
-}
-export const ExpandRowColumn = ({ item, expandedRows, setExpandedRows }: Props) => {
+export const ExpandRowColumn = ({ ping, browserConsole, expandedRows, setExpandedRows }: Props) => {
   return (
     <EuiButtonIcon
       data-test-subj="uptimeStepListExpandBtn"
-      onClick={() => toggleExpand(item, expandedRows, setExpandedRows)}
+      onClick={() => toggleExpand({ ping, browserConsole, expandedRows, setExpandedRows })}
       aria-label={
-        expandedRows[item.docId]
+        expandedRows[ping.docId]
           ? i18n.translate('xpack.uptime.stepList.collapseRow', {
               defaultMessage: 'Collapse',
             })
           : i18n.translate('xpack.uptime.stepList.expandRow', { defaultMessage: 'Expand' })
       }
-      iconType={expandedRows[item.docId] ? 'arrowUp' : 'arrowDown'}
+      iconType={expandedRows[ping.docId] ? 'arrowUp' : 'arrowDown'}
     />
   );
 };

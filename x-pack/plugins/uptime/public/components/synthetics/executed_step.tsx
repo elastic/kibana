@@ -9,16 +9,16 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeBlockAccordion } from './code_block_accordion';
-import { StepScreenshotDisplay } from './step_screenshot_display';
 import { Ping } from '../../../common/runtime_types/ping';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { StepScreenshots } from './check_steps/step_expanded_row/step_screenshots';
 
 const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 
 interface ExecutedStepProps {
   step: Ping;
   index: number;
-  checkGroup: string;
+  browserConsole?: string;
 }
 
 const Label = euiStyled.div`
@@ -33,10 +33,10 @@ const Message = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.paddingSizes.m};
 `;
 
-export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup }) => {
+export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsole = '' }) => {
   return (
     <>
-      <div style={{ padding: '8px' }}>
+      <div style={{ padding: '8px', maxWidth: 1000 }}>
         <EuiSpacer size="s" />
         {step.synthetics?.error?.message && (
           <EuiText>
@@ -62,15 +62,29 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, checkGroup })
           initialIsOpen={true}
         >
           {step.synthetics?.payload?.source}
+        </CodeBlockAccordion>{' '}
+        <EuiSpacer />
+        <CodeBlockAccordion
+          id={step.synthetics?.step?.name + String(index)}
+          buttonContent={i18n.translate(
+            'xpack.uptime.synthetics.executedStep.consoleOutput.label',
+            {
+              defaultMessage: 'Console output',
+            }
+          )}
+          overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+          language="javascript"
+          initialIsOpen={true}
+        >
+          {browserConsole}
         </CodeBlockAccordion>
         <EuiSpacer />
-        <StepScreenshotDisplay
-          allowPopover={false}
-          checkGroup={step.monitor.check_group}
-          screenshotExists={step.synthetics?.screenshotExists}
-          stepIndex={step.synthetics?.step?.index}
-          stepName={step.synthetics?.step?.name}
-        />
+        <Label>
+          {i18n.translate('xpack.uptime.synthetics.executedStep.screenshot', {
+            defaultMessage: 'Screenshot',
+          })}
+        </Label>
+        <StepScreenshots step={step} />
         <EuiSpacer />
         <CodeBlockAccordion
           id={`${step.synthetics?.step?.name}_stack`}

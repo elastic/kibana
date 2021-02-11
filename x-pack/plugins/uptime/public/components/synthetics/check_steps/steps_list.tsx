@@ -147,7 +147,14 @@ export const StepsList = ({ data, error, loading }: Props) => {
       render: (item: Ping) => {
         return (
           <ExpandRowColumn
-            item={item}
+            ping={item}
+            browserConsole={
+              data.find(
+                (step) =>
+                  step.synthetics.type === 'journey/browserconsole' &&
+                  step.synthetics?.step?.index! === item.synthetics?.step?.index
+              )?.synthetics?.payload?.text
+            }
             expandedRows={expandedRows}
             setExpandedRows={setExpandedRows}
           />
@@ -166,7 +173,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
 
         // we dont want to capture image click event
         if (targetElem.tagName !== 'IMG') {
-          toggleExpand(item, expandedRows, setExpandedRows);
+          toggleExpand({ ping: item, expandedRows, setExpandedRows });
         }
       },
     };
