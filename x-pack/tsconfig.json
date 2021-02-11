@@ -112,7 +112,7 @@
     { "path": "./plugins/remote_clusters/tsconfig.json" },
     { "path": "./plugins/cross_cluster_replication/tsconfig.json"},
     { "path": "./plugins/index_lifecycle_management/tsconfig.json"},
-    { "path": "./plugins/uptime/tsconfig.json" }
+    { "path": "./plugins/uptime/tsconfig.json" },
     { "path": "./plugins/xpack_legacy/tsconfig.json" }
   ]
 }
