@@ -48,7 +48,7 @@ export const useLogEntriesBeforeRequest = ({
     requests$: logEntriesBeforeSearchRequests$,
   } = useDataSearch({
     getRequest: useCallback(
-      (cursor: LogEntryBeforeCursor['before'], size: number) => {
+      (cursor: LogEntryBeforeCursor['before'], params: { size: number; extendTo?: number }) => {
         return !!sourceId
           ? {
               request: {
@@ -58,9 +58,9 @@ export const useLogEntriesBeforeRequest = ({
                   endTimestamp,
                   highlightPhrase,
                   query,
-                  size,
+                  size: params.size,
                   sourceId,
-                  startTimestamp,
+                  startTimestamp: params.extendTo ?? startTimestamp,
                 }),
               },
               options: { strategy: LOG_ENTRIES_SEARCH_STRATEGY },
