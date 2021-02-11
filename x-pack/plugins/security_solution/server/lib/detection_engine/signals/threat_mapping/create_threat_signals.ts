@@ -8,11 +8,10 @@
 import chunk from 'lodash/fp/chunk';
 import { getThreatList, getThreatListCount } from './get_threat_list';
 
-import { CreateThreatSignalsOptions, GetMatchedThreats } from './types';
+import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
-import { SearchAfterAndBulkCreateReturnType, SignalSearchResponse } from '../types';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { combineConcurrentResults } from './utils';
-import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
