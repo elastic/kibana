@@ -155,23 +155,6 @@ function getCancelConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getDiscardConfig(action: NavAction) {
-  return {
-    id: 'discard',
-    label: i18n.translate('dashboard.topNave.discardlButtonAriaLabel', {
-      defaultMessage: 'discard',
-    }),
-    description: i18n.translate('dashboard.topNave.discardConfigDescription', {
-      defaultMessage: 'Discard unsaved changes',
-    }),
-    testId: 'dashboardDiscardChanges',
-    run: action,
-  };
-}
-
-/**
- * @returns {kbnTopNavConfig}
- */
 function getCloneConfig(action: NavAction) {
   return {
     id: 'clone',
