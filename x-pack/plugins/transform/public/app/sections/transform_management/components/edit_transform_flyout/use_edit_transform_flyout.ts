@@ -25,21 +25,23 @@ import { getNestedProperty, setNestedProperty } from '../../../../../../common/u
 // The outer most level reducer defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final request object will be nested.
 // For example, `destinationIndex` and `destinationPipeline` will later be nested under `dest`.
-interface EditTransformFlyoutFieldsState {
-  [key: string]: FormField;
-  description: FormField;
-  destinationIndex: FormField;
-  destinationPipeline: FormField;
-  frequency: FormField;
-  docsPerSecond: FormField;
-}
+type EditTransformFormFields =
+  | 'description'
+  | 'destinationIndex'
+  | 'destinationPipeline'
+  | 'frequency'
+  | 'docsPerSecond'
+  | 'maxPageSearchSize'
+  | 'retentionPolicyField'
+  | 'retentionPolicyMaxAge';
+type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
 // The inner reducers apply validation based on supplied attributes of each field.
 export interface FormField {
   formFieldName: string;
   configFieldName: string;
   defaultValue: string;
-  dependsOn: string[];
+  dependsOn: EditTransformFormFields[];
   errorMessages: string[];
   isNullable: boolean;
   isOptional: boolean;
@@ -166,7 +168,7 @@ const validate = {
 } as const;
 
 export const initializeField = (
-  formFieldName: string,
+  formFieldName: EditTransformFormFields,
   configFieldName: string,
   config: TransformConfigUnion,
   overloads?: Partial<FormField>
@@ -199,7 +201,7 @@ export interface EditTransformFlyoutState {
 // This is not a redux type action,
 // since for now we only have one action type.
 interface Action {
-  field: keyof EditTransformFlyoutFieldsState;
+  field: EditTransformFormFields;
   value: string;
 }
 
@@ -207,7 +209,7 @@ interface Action {
 // of the expected final configuration request object.
 // Considers options like if a value is nullable or optional.
 const getUpdateValue = (
-  attribute: keyof EditTransformFlyoutFieldsState,
+  attribute: EditTransformFormFields,
   config: TransformConfigUnion,
   formState: EditTransformFlyoutFieldsState,
   enforceFormValue = false
@@ -251,7 +253,7 @@ export const applyFormFieldsToTransformConfig = (
 ): PostTransformsUpdateRequestSchema =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
-  Object.keys(formState).reduce(
+  (Object.keys(formState) as EditTransformFormFields[]).reduce(
     (updateConfig, field) => merge({ ...updateConfig }, getUpdateValue(field, config, formState)),
     {}
   );
@@ -292,6 +294,25 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         valueParser: (v) => +v,
       }
     ),
+
+    // retention_policy.*
+    retentionPolicyField: initializeField(
+      'retentionPolicyField',
+      'retention_policy.time.field',
+      config,
+      { dependsOn: ['retentionPolicyMaxAge'], isNullable: false, isOptional: true }
+    ),
+    retentionPolicyMaxAge: initializeField(
+      'retentionPolicyMaxAge',
+      'retention_policy.time.max_age',
+      config,
+      {
+        dependsOn: ['retentionPolicyField'],
+        isNullable: false,
+        isOptional: true,
+        validator: 'frequency',
+      }
+    ),
   },
   isFormTouched: false,
   isFormValid: true,
@@ -300,7 +321,10 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
 const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
-  Object.keys(fieldsState).reduce((p, c) => p && fieldsState[c].errorMessages.length === 0, true);
+  (Object.keys(fieldsState) as EditTransformFormFields[]).reduce(
+    (p, c) => p && fieldsState[c].errorMessages.length === 0,
+    true
+  );
 
 // Updates a form field with its new value,
 // runs validation and populates

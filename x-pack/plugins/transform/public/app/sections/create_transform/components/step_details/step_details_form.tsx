@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -55,81 +55,16 @@ import {
 import { StepDefineExposedState } from '../step_define/common';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-export interface StepDetailsExposedState {
-  continuousModeDateField: string;
-  continuousModeDelay: string;
-  createIndexPattern: boolean;
-  destinationIndex: EsIndexName;
-  isContinuousModeEnabled: boolean;
-  touched: boolean;
-  transformId: TransformId;
-  transformDescription: string;
-  transformFrequency: string;
-  transformSettingsMaxPageSearchSize: number;
-  transformSettingsDocsPerSecond?: number;
-  valid: boolean;
-  indexPatternTimeField?: string | undefined;
-}
+import { getDefaultStepDetailsState, StepDetailsExposedState } from './common';
 
-const defaultContinuousModeDelay = '60s';
-const defaultTransformFrequency = '1m';
-const defaultTransformSettingsMaxPageSearchSize = 500;
-
-export function getDefaultStepDetailsState(): StepDetailsExposedState {
-  return {
-    continuousModeDateField: '',
-    continuousModeDelay: defaultContinuousModeDelay,
-    createIndexPattern: true,
-    isContinuousModeEnabled: false,
-    transformId: '',
-    transformDescription: '',
-    transformFrequency: defaultTransformFrequency,
-    transformSettingsMaxPageSearchSize: defaultTransformSettingsMaxPageSearchSize,
-    destinationIndex: '',
-    touched: false,
-    valid: false,
-    indexPatternTimeField: undefined,
-  };
-}
-
-export function applyTransformConfigToDetailsState(
-  state: StepDetailsExposedState,
-  transformConfig?: TransformPivotConfig
-): StepDetailsExposedState {
-  // apply the transform configuration to wizard DETAILS state
-  if (transformConfig !== undefined) {
-    const time = transformConfig.sync?.time;
-    if (time !== undefined) {
-      state.continuousModeDateField = time.field;
-      state.continuousModeDelay = time?.delay ?? defaultContinuousModeDelay;
-      state.isContinuousModeEnabled = true;
-    }
-    if (transformConfig.description !== undefined) {
-      state.transformDescription = transformConfig.description;
-    }
-    if (transformConfig.frequency !== undefined) {
-      state.transformFrequency = transformConfig.frequency;
-    }
-    if (transformConfig.settings) {
-      if (typeof transformConfig.settings?.max_page_search_size === 'number') {
-        state.transformSettingsMaxPageSearchSize = transformConfig.settings.max_page_search_size;
-      }
-      if (typeof transformConfig.settings?.docs_per_second === 'number') {
-        state.transformSettingsDocsPerSecond = transformConfig.settings.docs_per_second;
-      }
-    }
-  }
-  return state;
-}
-
-interface Props {
+interface StepDetailsFormProps {
   overrides?: StepDetailsExposedState;
   onChange(s: StepDetailsExposedState): void;
   searchItems: SearchItems;
   stepDefineState: StepDefineExposedState;
 }
 
-export const StepDetailsForm: FC<Props> = React.memo(
+export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
   ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
     const deps = useAppDependencies();
     const toastNotifications = useToastNotifications();
@@ -174,6 +109,10 @@ export const StepDetailsForm: FC<Props> = React.memo(
     // Continuous mode state
     const [isContinuousModeEnabled, setContinuousModeEnabled] = useState(
       defaults.isContinuousModeEnabled
+    );
+    // Retention policy state
+    const [isRetentionPolicyEnabled, setRetentionPolicyEnabled] = useState(
+      defaults.isRetentionPolicyEnabled
     );
 
     const api = useApi();
@@ -268,12 +207,24 @@ export const StepDetailsForm: FC<Props> = React.memo(
       .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
       .map((f) => f.name)
       .sort();
+
+    // Continuous Mode
     const isContinuousModeAvailable = dateFieldNames.length > 0;
     const [continuousModeDateField, setContinuousModeDateField] = useState(
       isContinuousModeAvailable ? dateFieldNames[0] : ''
     );
     const [continuousModeDelay, setContinuousModeDelay] = useState(defaults.continuousModeDelay);
     const isContinuousModeDelayValid = continuousModeDelayValidator(continuousModeDelay);
+
+    // Retention Policy
+    const isRetentionPolicyAvailable = dateFieldNames.length > 0;
+    const [retentionPolicyDateField, setRetentionPolicyDateField] = useState(
+      isRetentionPolicyAvailable ? dateFieldNames[0] : ''
+    );
+    const [retentionPolicyMaxAge, setRetentionPolicyMaxAge] = useState(
+      defaults.retentionPolicyMaxAge
+    );
+    const isRetentionPolicyMaxAgeValid = continuousModeDelayValidator(continuousModeDelay);
 
     const transformIdExists = transformIds.some((id) => transformId === id);
     const transformIdEmpty = transformId === '';
@@ -305,7 +256,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
       !indexNameEmpty &&
       indexNameValid &&
       (!indexPatternTitleExists || !createIndexPattern) &&
-      (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid));
+      (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid)) &&
+      (!isRetentionPolicyAvailable || (isRetentionPolicyAvailable && isRetentionPolicyMaxAgeValid));
 
     // expose state to wizard
     useEffect(() => {
@@ -314,6 +266,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
         continuousModeDelay,
         createIndexPattern,
         isContinuousModeEnabled,
+        isRetentionPolicyEnabled,
+        retentionPolicyDateField,
+        retentionPolicyMaxAge,
         transformId,
         transformDescription,
         transformFrequency,
@@ -331,6 +286,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
       continuousModeDelay,
       createIndexPattern,
       isContinuousModeEnabled,
+      isRetentionPolicyEnabled,
+      retentionPolicyDateField,
+      retentionPolicyMaxAge,
       transformId,
       transformDescription,
       transformFrequency,
@@ -417,7 +375,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
             error={
               !indexNameEmpty &&
               !indexNameValid && [
-                <Fragment>
+                <>
                   {i18n.translate('xpack.transform.stepDetailsForm.destinationIndexInvalidError', {
                     defaultMessage: 'Invalid destination index name.',
                   })}
@@ -430,7 +388,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                       }
                     )}
                   </EuiLink>
-                </Fragment>,
+                </>,
               ]
             }
           >
@@ -502,6 +460,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 onTimeFieldChanged={onTimeFieldChanged}
               />
             )}
+
+          {/* Continuous mode */}
           <EuiFormRow
             helpText={
               isContinuousModeAvailable === false
@@ -524,7 +484,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
             />
           </EuiFormRow>
           {isContinuousModeEnabled && (
-            <Fragment>
+            <>
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.transform.stepDetailsForm.continuousModeDateFieldLabel',
@@ -580,7 +540,92 @@ export const StepDetailsForm: FC<Props> = React.memo(
                   data-test-subj="transformContinuousDelayInput"
                 />
               </EuiFormRow>
-            </Fragment>
+            </>
+          )}
+
+          {/* Retention policy */}
+          <EuiFormRow
+            helpText={
+              isRetentionPolicyAvailable === false
+                ? i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyError', {
+                    defaultMessage:
+                      'Retention policy settings are not available for indices without date fields.',
+                  })
+                : ''
+            }
+          >
+            <EuiSwitch
+              name="transformRetentionPolicy"
+              label={i18n.translate('xpack.transform.stepCreateForm.retentionPolicyLabel', {
+                defaultMessage: 'Retention policy',
+              })}
+              checked={isRetentionPolicyEnabled === true}
+              onChange={() => setRetentionPolicyEnabled(!isRetentionPolicyEnabled)}
+              disabled={isRetentionPolicyAvailable === false}
+              data-test-subj="transformRetentionPolicySwitch"
+            />
+          </EuiFormRow>
+          {isRetentionPolicyEnabled && (
+            <>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.retentionPolicyDateFieldLabel',
+                  {
+                    defaultMessage: 'Date field for retention policy',
+                  }
+                )}
+                helpText={i18n.translate(
+                  'xpack.transform.stepDetailsForm.retentionPolicyDateFieldHelpText',
+                  {
+                    defaultMessage:
+                      'Select the date field that can be used to identify out of date documents.',
+                  }
+                )}
+              >
+                <EuiSelect
+                  options={dateFieldNames.map((text: string) => ({ text }))}
+                  value={retentionPolicyDateField}
+                  onChange={(e) => setRetentionPolicyDateField(e.target.value)}
+                  data-test-subj="transformRetentionPolicyDateFieldSelect"
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeLabel',
+                  {
+                    defaultMessage: 'Max age',
+                  }
+                )}
+                isInvalid={!isRetentionPolicyMaxAgeValid}
+                error={
+                  !isRetentionPolicyMaxAgeValid && [
+                    i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyMaxAgeError', {
+                      defaultMessage: 'Invalid max age format',
+                    }),
+                  ]
+                }
+                helpText={i18n.translate(
+                  'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeHelpText',
+                  {
+                    defaultMessage: 'Maximum age of documents to be considered outdated.',
+                  }
+                )}
+              >
+                <EuiFieldText
+                  placeholder="max_age"
+                  value={retentionPolicyMaxAge}
+                  onChange={(e) => setRetentionPolicyMaxAge(e.target.value)}
+                  aria-label={i18n.translate(
+                    'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeAriaLabel',
+                    {
+                      defaultMessage: 'Choose a max age.',
+                    }
+                  )}
+                  isInvalid={!isRetentionPolicyMaxAgeValid}
+                  data-test-subj="transformRetentionPolicyMaxAgeInput"
+                />
+              </EuiFormRow>
+            </>
           )}
 
           <EuiSpacer size="l" />
