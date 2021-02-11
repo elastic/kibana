@@ -52,6 +52,7 @@ const LinkToExternalApp = styled.div`
   margin-top: ${(props) => props.theme.eui.ruleMargins.marginMedium};
   .linkToAppIcon {
     margin-right: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
+    vertical-align: top;
   }
   .linkToAppPopoutIcon {
     margin-left: ${(props) => props.theme.eui.ruleMargins.marginXSmall};
@@ -282,6 +283,7 @@ export const EndpointDetails = memo(
             onClick={handleReassignEndpointsClick}
             data-test-subj="endpointDetailsLinkToIngest"
           >
+            <EuiIcon type="managementApp" className="linkToAppIcon" />
             <FormattedMessage
               id="xpack.securitySolution.endpoint.details.linkToIngestTitle"
               defaultMessage="Reassign Policy"
