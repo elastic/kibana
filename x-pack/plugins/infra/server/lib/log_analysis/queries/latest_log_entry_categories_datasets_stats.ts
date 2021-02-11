@@ -98,9 +98,12 @@ export const logEntryCategorizerStatsHitRT = rt.type({
 
 export type LogEntryCategorizerStatsHit = rt.TypeOf<typeof logEntryCategorizerStatsHitRT>;
 
-const compositeDatasetKeyRT = rt.type({
-  dataset: rt.union([rt.string, rt.null]),
-});
+const compositeDatasetKeyRT = rt.union([
+  rt.type({
+    dataset: rt.union([rt.string, rt.null]),
+  }),
+  rt.undefined,
+]);
 
 export type CompositeDatasetKey = rt.TypeOf<typeof compositeDatasetKeyRT>;
 

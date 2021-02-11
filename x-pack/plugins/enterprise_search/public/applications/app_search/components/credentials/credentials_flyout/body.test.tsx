@@ -8,12 +8,15 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiFlyoutBody, EuiForm } from '@elastic/eui';
 
 import { ApiTokenTypes } from '../constants';
 import { defaultApiToken } from '../credentials_logic';
 
+import { CredentialsFlyoutBody } from './body';
 import {
   FormKeyName,
   FormKeyType,
@@ -21,7 +24,6 @@ import {
   FormKeyEngineAccess,
   FormKeyUpdateWarning,
 } from './form_components';
-import { CredentialsFlyoutBody } from './body';
 
 describe('CredentialsFlyoutBody', () => {
   const values = {
