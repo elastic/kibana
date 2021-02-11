@@ -26,14 +26,13 @@ import {
 
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { SOURCE_STATUSES as statuses } from '../../../constants';
-import { ContentSourceDetails } from '../../../types';
 import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
   getContentSourcePath,
   getSourcesPath,
 } from '../../../routes';
-
+import { ContentSourceDetails } from '../../../types';
 import { SourceIcon } from '../source_icon';
 
 import './source_row.scss';

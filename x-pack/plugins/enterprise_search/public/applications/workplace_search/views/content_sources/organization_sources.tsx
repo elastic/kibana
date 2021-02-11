@@ -6,11 +6,16 @@
  */
 
 import React, { useEffect } from 'react';
-
-import { useActions, useValues } from 'kea';
 import { Link, Redirect } from 'react-router-dom';
 
+import { useActions, useValues } from 'kea';
+
 import { EuiButton } from '@elastic/eui';
+
+import { Loading } from '../../../shared/loading';
+import { ContentSection } from '../../components/shared/content_section';
+import { SourcesTable } from '../../components/shared/sources_table';
+import { ViewContentHeader } from '../../components/shared/view_content_header';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import {
@@ -18,14 +23,7 @@ import {
   ORG_SOURCES_HEADER_TITLE,
   ORG_SOURCES_HEADER_DESCRIPTION,
 } from './constants';
-
-import { Loading } from '../../../shared/loading';
-import { ContentSection } from '../../components/shared/content_section';
-import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-
 import { SourcesLogic } from './sources_logic';
-
 import { SourcesView } from './sources_view';
 
 export const OrganizationSources: React.FC = () => {
