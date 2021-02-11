@@ -43,8 +43,9 @@ describe('Expression', () => {
       <Expression
         alertInterval="1m"
         alertThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
         alertParams={alertParams as any}
-        errors={[]}
+        errors={{}}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
         setAlertProperty={() => {}}
         metadata={currentOptions}

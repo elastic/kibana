@@ -22,8 +22,11 @@ import {
   WhenExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
+import {
+  AlertTypeParams,
+  AlertTypeParamsExpressionProps,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../triggers_actions_ui/public/types';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
@@ -41,29 +44,32 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
 }
 
-interface Props {
-  errors: IErrorObject[];
-  alertParams: MetricAnomalyParams & {
-    sourceId: string;
-  };
-  alertInterval: string;
-  alertThrottle: string;
-  setAlertParams(key: string, value: any): void;
-  setAlertProperty(key: string, value: any): void;
-  metadata: AlertContextMeta;
-}
+type AlertParams = AlertTypeParams &
+  MetricAnomalyParams & { sourceId: string; hasInfraMLCapabilities: boolean };
+
+type Props = Omit<
+  AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+>;
 
 export const defaultExpression = {
   metric: 'memory_usage' as MetricAnomalyParams['metric'],
-  threshold: ANOMALY_THRESHOLD.MAJOR,
-  nodeType: 'hosts',
+  threshold: ANOMALY_THRESHOLD.MAJOR as MetricAnomalyParams['threshold'],
+  nodeType: 'hosts' as MetricAnomalyParams['nodeType'],
   influencerFilter: undefined,
 };
 
 export const Expression: React.FC<Props> = (props) => {
   const { hasInfraMLCapabilities, isLoading: isLoadingMLCapabilities } = useInfraMLCapabilities();
   const { http, notifications } = useKibanaContextForPlugin().services;
-  const { setAlertParams, alertParams, alertInterval, alertThrottle, metadata } = props;
+  const {
+    setAlertParams,
+    alertParams,
+    alertInterval,
+    alertThrottle,
+    alertNotifyWhen,
+    metadata,
+  } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     type: 'metrics',
@@ -97,7 +103,7 @@ export const Expression: React.FC<Props> = (props) => {
         setAlertParams('influencerFilter', {
           ...alertParams.influencerFilter,
           fieldValue: value,
-        });
+        } as MetricAnomalyParams['influencerFilter']);
       } else {
         setAlertParams('influencerFilter', undefined);
       }
@@ -118,7 +124,7 @@ export const Expression: React.FC<Props> = (props) => {
 
   const updateMetric = useCallback(
     (metric: string) => {
-      setAlertParams('metric', metric);
+      setAlertParams('metric', metric as MetricAnomalyParams['metric']);
     },
     [setAlertParams]
   );
@@ -249,6 +255,7 @@ export const Expression: React.FC<Props> = (props) => {
       <AlertPreview
         alertInterval={alertInterval}
         alertThrottle={alertThrottle}
+        alertNotifyWhen={alertNotifyWhen}
         alertType={METRIC_ANOMALY_ALERT_TYPE_ID}
         alertParams={pick(
           alertParams,
@@ -295,7 +302,9 @@ export const nodeTypes: { [key: string]: any } = {
   },
 };
 
-const getMLMetricFromInventoryMetric = (metric: SnapshotMetricType) => {
+const getMLMetricFromInventoryMetric: (
+  metric: SnapshotMetricType
+) => MetricAnomalyParams['metric'] | null = (metric) => {
   switch (metric) {
     case 'memory':
       return 'memory_usage';
@@ -308,7 +317,9 @@ const getMLMetricFromInventoryMetric = (metric: SnapshotMetricType) => {
   }
 };
 
-const getMLNodeTypeFromInventoryNodeType = (nodeType: InventoryItemType) => {
+const getMLNodeTypeFromInventoryNodeType: (
+  nodeType: InventoryItemType
+) => MetricAnomalyParams['nodeType'] | null = (nodeType) => {
   switch (nodeType) {
     case 'host':
       return 'hosts';
