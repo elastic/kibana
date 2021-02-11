@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with ingest_pipelines_user', () => {
+    describe('global dashboard read with ingest_pipelines_user', () => {
       before(async () => {
         await security.testUser.setRoles(['global_dashboard_read', 'ingest_pipelines_user'], true);
       });
