@@ -13,10 +13,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
 import { setMockValues } from './__mocks__';
 import { RecentActivity, RecentActivityItem } from './recent_activity';
@@ -62,7 +60,7 @@ describe('RecentActivity', () => {
 
     expect(wrapper.find('.activity--error')).toHaveLength(1);
     expect(wrapper.find('.activity--error__label')).toHaveLength(1);
-    expect(wrapper.find(EuiLinkTo).prop('color')).toEqual('danger');
+    expect(wrapper.find(EuiLink).prop('color')).toEqual('danger');
   });
 
   it('renders recent activity message for default org name', () => {

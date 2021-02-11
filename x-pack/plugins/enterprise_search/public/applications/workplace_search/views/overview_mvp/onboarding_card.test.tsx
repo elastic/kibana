@@ -13,9 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
-
-import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
+import { EuiEmptyPrompt, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { OnboardingCard } from './onboarding_card';
 
@@ -37,11 +35,11 @@ describe('OnboardingCard', () => {
     const wrapper = shallow(<OnboardingCard {...cardProps} actionPath="/some_path" />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive();
 
-    expect(prompt.find(EuiButtonTo)).toHaveLength(1);
-    expect(prompt.find(EuiButtonEmptyTo)).toHaveLength(0);
+    expect(prompt.find(EuiButton)).toHaveLength(1);
+    expect(prompt.find(EuiButtonEmpty)).toHaveLength(0);
 
     const button = prompt.find('[data-test-subj="actionButton"]');
-    expect(button.prop('to')).toBe('/some_path');
+    expect(button.prop('href')).toBe('http://localhost:3002/ws/some_path');
 
     button.simulate('click');
     expect(mockTelemetryActions.sendWorkplaceSearchTelemetry).toHaveBeenCalled();
@@ -51,7 +49,7 @@ describe('OnboardingCard', () => {
     const wrapper = shallow(<OnboardingCard {...cardProps} complete />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive();
 
-    expect(prompt.find(EuiButtonTo)).toHaveLength(0);
+    expect(prompt.find(EuiButton)).toHaveLength(0);
     expect(prompt.find(EuiButtonEmpty)).toHaveLength(1);
   });
 });
