@@ -5,9 +5,22 @@
  * 2.0.
  */
 
-export type BoostType = 'value' | 'functional' | 'proximity';
-export type BoostFunction = 'gaussian' | 'exponential' | 'linear';
-export type BoostOperation = 'add' | 'multiply';
+export enum BoostType {
+  Value = 'value',
+  Functional = 'functional',
+  Proximity = 'proximity',
+}
+
+export enum BoostFunction {
+  Gaussian = 'gaussian',
+  Exponential = 'exponential',
+  Linear = 'linear',
+}
+
+export enum BoostOperation {
+  Add = 'add',
+  Multiple = 'multiply',
+}
 
 export interface BaseBoost {
   operation?: BoostOperation;

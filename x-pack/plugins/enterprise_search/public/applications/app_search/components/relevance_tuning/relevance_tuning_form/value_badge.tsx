@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import classNames from 'classnames';
 
 import './value_badge.scss';

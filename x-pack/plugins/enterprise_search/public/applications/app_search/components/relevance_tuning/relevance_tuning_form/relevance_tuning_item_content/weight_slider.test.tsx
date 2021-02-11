@@ -8,7 +8,9 @@
 import { setMockActions } from '../../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiRange } from '@elastic/eui';
 
 import { WeightSlider } from './weight_slider';

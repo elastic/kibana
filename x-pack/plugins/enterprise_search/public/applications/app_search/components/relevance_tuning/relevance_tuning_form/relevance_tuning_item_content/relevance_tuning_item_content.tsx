@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
+
 import { EuiPageContent, EuiPageContentBody } from '@elastic/eui';
 
 import { SchemaTypes } from '../../../../../shared/types';
 
 import { Boost, SearchField } from '../../types';
+
+import { Boosts } from './boosts';
 import { TextSearchToggle } from './text_search_toggle';
 import { WeightSlider } from './weight_slider';
-import { Boosts } from './boosts';
 
 import './relevance_tuning_item_content.scss';
+
 interface Props {
   name: string;
   type: SchemaTypes;

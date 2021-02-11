@@ -8,11 +8,11 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { RelevanceTuningForm } from './relevance_tuning_form';
-
 import { RelevanceTuning } from './relevance_tuning';
+import { RelevanceTuningForm } from './relevance_tuning_form';
 
 describe('RelevanceTuning', () => {
   let wrapper: ShallowWrapper;

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { VALUE, PROXIMITY } from '../../../constants';
-import { Boost } from '../../../types';
+import { Boost, BoostType } from '../../../types';
 
 export const getBoostSummary = (boost: Boost): string => {
-  if (boost.type === VALUE) {
+  if (boost.type === BoostType.Value) {
     return !boost.value ? '' : boost.value.join(',');
-  } else if (boost.type === PROXIMITY) {
+  } else if (boost.type === BoostType.Proximity) {
     return boost.function || '';
   } else {
     return [boost.function || '', boost.operation || ''].join(' ').trim();

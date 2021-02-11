@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiTextColor, EuiIcon } from '@elastic/eui';
 
 import { SchemaTypes } from '../../../../shared/types';
 
-import { Boost, SearchField } from '../types';
 import { BoostIcon } from '../boost_icon';
+import { Boost, SearchField } from '../types';
+
 import { ValueBadge } from './value_badge';
 
 interface Props {

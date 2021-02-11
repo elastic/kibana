@@ -6,12 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { EuiFlexItem, EuiAccordion, EuiFlexGroup, EuiHideFor } from '@elastic/eui';
 
-import { Boost } from '../../../types';
 import { BoostIcon } from '../../../boost_icon';
 import { BOOST_TYPE_TO_DISPLAY_MAP } from '../../../constants';
+import { Boost } from '../../../types';
 import { ValueBadge } from '../../value_badge';
+
 import { getBoostSummary } from './get_boost_summary';
 
 interface Props {

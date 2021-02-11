@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { SchemaTypes } from '../../../../../shared/types';
 import { BoostType } from '../../types';
 
+import { RelevanceTuningItemContent } from './relevance_tuning_item_content';
 import { TextSearchToggle } from './text_search_toggle';
 import { WeightSlider } from './weight_slider';
-
-import { RelevanceTuningItemContent } from './relevance_tuning_item_content';
 
 describe('RelevanceTuningItemContent', () => {
   const props = {
@@ -23,7 +23,7 @@ describe('RelevanceTuningItemContent', () => {
     boosts: [
       {
         factor: 2,
-        type: 'value' as BoostType,
+        type: BoostType.Value,
       },
     ],
     field: {

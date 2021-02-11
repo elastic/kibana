@@ -39,7 +39,7 @@ describe('removeBoostStateProps', () => {
       boosts: {
         foo: [
           {
-            type: 'value' as BoostType,
+            type: BoostType.Value,
             factor: 5,
             newBoost: true,
           },
@@ -56,7 +56,7 @@ describe('removeBoostStateProps', () => {
       boosts: {
         foo: [
           {
-            type: 'value' as BoostType,
+            type: BoostType.Value,
             factor: 5,
           },
         ],
@@ -85,27 +85,27 @@ describe('normalizeBoostValues', () => {
   const boosts = {
     foo: [
       {
-        type: 'value' as BoostType,
+        type: BoostType.Value,
         factor: 9.5,
         value: 1,
       },
       {
-        type: 'value' as BoostType,
+        type: BoostType.Value,
         factor: 9.5,
         value: '1',
       },
       {
-        type: 'value' as BoostType,
+        type: BoostType.Value,
         factor: 9.5,
         value: [1],
       },
       {
-        type: 'value' as BoostType,
+        type: BoostType.Value,
         factor: 9.5,
         value: ['1'],
       },
       {
-        type: 'value' as BoostType,
+        type: BoostType.Value,
         factor: 9.5,
         value: [
           '1',
@@ -122,13 +122,13 @@ describe('normalizeBoostValues', () => {
     ],
     bar: [
       {
-        type: 'proximity' as BoostType,
+        type: BoostType.Proximity,
         factor: 9.5,
       },
     ],
     sp_def: [
       {
-        type: 'functional' as BoostType,
+        type: BoostType.Functional,
         factor: 5,
       },
     ],
@@ -136,19 +136,19 @@ describe('normalizeBoostValues', () => {
 
   it('converts all value types to string for consistency', () => {
     expect(normalizeBoostValues(boosts)).toEqual({
-      bar: [{ factor: 9.5, type: 'proximity' }],
+      bar: [{ factor: 9.5, type: BoostType.Proximity }],
       foo: [
-        { factor: 9.5, type: 'value', value: ['1'] },
-        { factor: 9.5, type: 'value', value: ['1'] },
-        { factor: 9.5, type: 'value', value: ['1'] },
-        { factor: 9.5, type: 'value', value: ['1'] },
+        { factor: 9.5, type: BoostType.Value, value: ['1'] },
+        { factor: 9.5, type: BoostType.Value, value: ['1'] },
+        { factor: 9.5, type: BoostType.Value, value: ['1'] },
+        { factor: 9.5, type: BoostType.Value, value: ['1'] },
         {
           factor: 9.5,
-          type: 'value',
+          type: BoostType.Value,
           value: ['1', '1', '2', '2', 'true', '[object Object]', '[object Object]'],
         },
       ],
-      sp_def: [{ type: 'functional', factor: 5 }],
+      sp_def: [{ type: BoostType.Functional, factor: 5 }],
     });
   });
 });

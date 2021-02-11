@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { SchemaTypes } from '../../../../shared/types';
 
-import { Boost, BoostType, SearchField } from '../types';
 import { BoostIcon } from '../boost_icon';
-import { ValueBadge } from './value_badge';
+import { Boost, BoostType, SearchField } from '../types';
 
 import { RelevanceTuningItem } from './relevance_tuning_item';
+import { ValueBadge } from './value_badge';
 
 describe('RelevanceTuningItem', () => {
   const props = {
@@ -23,7 +24,7 @@ describe('RelevanceTuningItem', () => {
     boosts: [
       {
         factor: 2,
-        type: 'value' as BoostType,
+        type: BoostType.Value,
       },
     ],
     field: {
@@ -52,17 +53,17 @@ describe('RelevanceTuningItem', () => {
         const wrapper = renderComponentWithBoostsConfig([
           {
             factor: 2,
-            type: 'value' as BoostType,
+            type: BoostType.Value,
           },
           {
             factor: 3,
-            type: 'proximity' as BoostType,
+            type: BoostType.Proximity,
           },
         ]);
         expect(wrapper.find(BoostIcon).length).toBe(2);
         expect(wrapper.find(BoostIcon).map((euiToken) => euiToken.prop('type'))).toEqual([
-          'value',
-          'proximity',
+          BoostType.Value,
+          BoostType.Proximity,
         ]);
       });
     });

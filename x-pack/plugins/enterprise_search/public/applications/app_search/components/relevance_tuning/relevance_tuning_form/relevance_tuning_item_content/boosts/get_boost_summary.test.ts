@@ -12,7 +12,7 @@ import { getBoostSummary } from './get_boost_summary';
 describe('getBoostSummary', () => {
   describe('when the boost type is "value"', () => {
     const boost: Boost = {
-      type: 'value' as BoostType,
+      type: BoostType.Value,
       value: ['1', '2'],
       factor: 5,
     };
@@ -33,7 +33,7 @@ describe('getBoostSummary', () => {
 
   describe('when the boost type is "proximity"', () => {
     const boost: Boost = {
-      type: 'proximity' as BoostType,
+      type: BoostType.Proximity,
       function: 'gaussian' as BoostFunction,
       factor: 5,
     };
@@ -54,9 +54,9 @@ describe('getBoostSummary', () => {
 
   describe('when the boost type is "functional"', () => {
     const boost: Boost = {
-      type: 'functional' as BoostType,
-      function: 'gaussian' as BoostFunction,
-      operation: 'add' as BoostOperation,
+      type: BoostType.Functional,
+      function: BoostFunction.Gaussian,
+      operation: BoostOperation.Add,
       factor: 5,
     };
 
@@ -65,8 +65,8 @@ describe('getBoostSummary', () => {
     });
 
     it('prints empty if function or operation is missing', () => {
-      expect(getBoostSummary({ ...boost, function: undefined })).toEqual('add');
-      expect(getBoostSummary({ ...boost, operation: undefined })).toEqual('gaussian');
+      expect(getBoostSummary({ ...boost, function: undefined })).toEqual(BoostOperation.Add);
+      expect(getBoostSummary({ ...boost, operation: undefined })).toEqual(BoostFunction.Gaussian);
       expect(getBoostSummary({ ...boost, function: undefined, operation: undefined })).toEqual('');
     });
   });

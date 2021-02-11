@@ -8,7 +8,9 @@
 import { setMockActions } from '../../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
+
 import { EuiSwitch } from '@elastic/eui';
 
 import { SchemaTypes } from '../../../../../shared/types';

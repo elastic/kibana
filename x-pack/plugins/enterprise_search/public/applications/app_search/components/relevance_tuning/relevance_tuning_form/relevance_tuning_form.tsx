@@ -6,6 +6,9 @@
  */
 
 import React from 'react';
+
+import { useActions, useValues } from 'kea';
+
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -15,13 +18,13 @@ import {
   EuiAccordion,
   EuiPanel,
 } from '@elastic/eui';
-import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { RelevanceTuningLogic } from '../relevance_tuning_logic';
-import { RelevanceTuningItem } from './relevance_tuning_item';
 import { FIELD_FILTER_CUTOFF } from '../constants';
+import { RelevanceTuningLogic } from '../relevance_tuning_logic';
+
+import { RelevanceTuningItem } from './relevance_tuning_item';
 import { RelevanceTuningItemContent } from './relevance_tuning_item_content';
 
 import './relevance_tuning_form.scss';
@@ -70,7 +73,7 @@ export const RelevanceTuningForm: React.FC = () => {
                   },
                 }
               )}
-              fullWidth={true}
+              fullWidth
             />
           </>
         )}

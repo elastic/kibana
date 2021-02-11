@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+
 import { useActions } from 'kea';
+
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { TEXT } from '../../../../../shared/constants/field_types';
 import { SchemaTypes } from '../../../../../shared/types';
 
-import { SearchField } from '../../types';
 import { RelevanceTuningLogic } from '../../relevance_tuning_logic';
+import { SearchField } from '../../types';
 
 interface Props {
   name: string;

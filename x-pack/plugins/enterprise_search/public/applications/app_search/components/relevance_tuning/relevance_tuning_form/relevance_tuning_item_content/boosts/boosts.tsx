@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { useActions } from 'kea';
+
 import {
   EuiPageContent,
   EuiPageContentHeader,
@@ -21,17 +23,11 @@ import { i18n } from '@kbn/i18n';
 import { TEXT } from '../../../../../../shared/constants/field_types';
 import { SchemaTypes } from '../../../../../../shared/types';
 
-import {
-  FUNCTIONAL,
-  FUNCTIONAL_DISPLAY,
-  PROXIMITY,
-  PROXIMITY_DISPLAY,
-  VALUE,
-  VALUE_DISPLAY,
-} from '../../../constants';
 import { BoostIcon } from '../../../boost_icon';
+import { FUNCTIONAL_DISPLAY, PROXIMITY_DISPLAY, VALUE_DISPLAY } from '../../../constants';
 import { RelevanceTuningLogic } from '../../../relevance_tuning_logic';
 import { Boost, BoostType } from '../../../types';
+
 import { BoostItem } from './boost_item';
 
 import './boosts.scss';
@@ -48,28 +44,28 @@ const BASE_OPTIONS = [
     disabled: true,
   },
   {
-    value: FUNCTIONAL,
+    value: BoostType.Functional,
     inputDisplay: (
       <>
-        <BoostIcon type={FUNCTIONAL} />
+        <BoostIcon type={BoostType.Functional} />
         {FUNCTIONAL_DISPLAY}
       </>
     ),
   },
   {
-    value: PROXIMITY,
+    value: BoostType.Proximity,
     inputDisplay: (
       <>
-        <BoostIcon type={PROXIMITY} />
+        <BoostIcon type={BoostType.Proximity} />
         {PROXIMITY_DISPLAY}
       </>
     ),
   },
   {
-    value: VALUE,
+    value: BoostType.Value,
     inputDisplay: (
       <>
-        <BoostIcon type={VALUE} />
+        <BoostIcon type={BoostType.Value} />
         {VALUE_DISPLAY}
       </>
     ),
@@ -78,7 +74,7 @@ const BASE_OPTIONS = [
 
 const filterInvalidOptions = (value: BoostType, type: SchemaTypes) => {
   // Proximity and Functional boost types are not valid for text fields
-  if (type === TEXT && [PROXIMITY, FUNCTIONAL].includes(value)) return false;
+  if (type === TEXT && [BoostType.Proximity, BoostType.Functional].includes(value)) return false;
   return true;
 };
 

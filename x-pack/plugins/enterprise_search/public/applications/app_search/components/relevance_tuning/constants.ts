@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { BoostType } from './types';
+
 export const FIELD_FILTER_CUTOFF = 10;
 
 export const RELEVANCE_TUNING_TITLE = i18n.translate(
@@ -39,21 +41,18 @@ export const DELETE_CONFIRMATION_MESSAGE = i18n.translate(
     defaultMessage: 'Are you sure you want to delete this boost?',
   }
 );
-export const PROXIMITY = 'proximity';
 export const PROXIMITY_DISPLAY = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.proximityDropDownOptionLabel',
   {
     defaultMessage: 'Proximity',
   }
 );
-export const FUNCTIONAL = 'functional';
 export const FUNCTIONAL_DISPLAY = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.functionalDropDownOptionLabel',
   {
     defaultMessage: 'Functional',
   }
 );
-export const VALUE = 'value';
 export const VALUE_DISPLAY = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.valueDropDownOptionLabel',
   {
@@ -61,20 +60,13 @@ export const VALUE_DISPLAY = i18n.translate(
   }
 );
 export const BOOST_TYPE_TO_DISPLAY_MAP = {
-  [PROXIMITY]: PROXIMITY_DISPLAY,
-  [FUNCTIONAL]: FUNCTIONAL_DISPLAY,
-  [VALUE]: VALUE_DISPLAY,
+  [BoostType.Proximity]: PROXIMITY_DISPLAY,
+  [BoostType.Functional]: FUNCTIONAL_DISPLAY,
+  [BoostType.Value]: VALUE_DISPLAY,
 };
 
-export const EXPONENTIAL = 'exponential';
-export const GAUSSIAN = 'gaussian';
-export const LINEAR = 'linear';
-
-export const ADD = 'add';
-export const MULTIPLY = 'multiply';
-
 export const BOOST_TYPE_TO_ICON_MAP = {
-  [VALUE]: 'tokenNumber',
-  [FUNCTIONAL]: 'tokenFunction',
-  [PROXIMITY]: 'tokenGeo',
+  [BoostType.Value]: 'tokenNumber',
+  [BoostType.Functional]: 'tokenFunction',
+  [BoostType.Proximity]: 'tokenGeo',
 };

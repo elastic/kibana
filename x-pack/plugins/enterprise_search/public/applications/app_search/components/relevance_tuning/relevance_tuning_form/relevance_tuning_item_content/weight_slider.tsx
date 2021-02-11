@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+
 import { useActions } from 'kea';
+
+import { EuiFormRow, EuiRange } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { SearchField } from '../../types';
 import { RelevanceTuningLogic } from '../../relevance_tuning_logic';
+import { SearchField } from '../../types';
 
 interface Props {
   name: string;
@@ -42,9 +44,9 @@ export const WeightSlider: React.FC<Props> = ({ name, field }) => {
             parseFloat((e as React.ChangeEvent<HTMLInputElement>).target.value)
           )
         }
-        showInput={true}
-        compressed={true}
-        fullWidth={true}
+        showInput
+        compressed
+        fullWidth
       />
     </EuiFormRow>
   );

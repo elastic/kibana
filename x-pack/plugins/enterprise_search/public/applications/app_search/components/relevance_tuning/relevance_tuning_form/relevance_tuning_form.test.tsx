@@ -8,12 +8,15 @@
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow, mount, ReactWrapper, ShallowWrapper } from 'enzyme';
+
 import { EuiFieldSearch } from '@elastic/eui';
 
-import { RelevanceTuningItem } from './relevance_tuning_item';
+import { BoostType } from '../types';
 
 import { RelevanceTuningForm } from './relevance_tuning_form';
+import { RelevanceTuningItem } from './relevance_tuning_item';
 
 describe('RelevanceTuningForm', () => {
   const values = {
@@ -29,7 +32,7 @@ describe('RelevanceTuningForm', () => {
         foo: [
           {
             factor: 2,
-            type: 'value',
+            type: BoostType.Value,
           },
         ],
       },
@@ -80,7 +83,7 @@ describe('RelevanceTuningForm', () => {
       expect(relevantTuningItems.at(0).prop('boosts')).toEqual([
         {
           factor: 2,
-          type: 'value',
+          type: BoostType.Value,
         },
       ]);
       expect(relevantTuningItems.at(1).prop('boosts')).toBeUndefined();
