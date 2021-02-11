@@ -84,3 +84,21 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "config:8.0.0",
+    "index": ".kibana",
+    "source": {
+      "config": {
+        "accessibility:disableAnimations": true,
+        "dateFormat:tz": "UTC",
+        "defaultIndex": "logstash-*"
+      },
+      "references": [],
+      "type": "config",
+      "updated_at": "2020-06-04T09:22:54.572Z"
+    }
+  }
+}
