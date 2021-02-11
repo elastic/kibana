@@ -11,6 +11,8 @@ import { SearchSessionStatus } from '../../../../plugins/data_enhanced/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
 
   describe('search session', () => {
     describe('session management', () => {
@@ -314,6 +316,122 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
         getSessionSecondTime.body.attributes.touched
       );
+    });
+
+    describe('with security', () => {
+      before(async () => {
+        await security.user.create('other_user', {
+          password: 'password',
+          roles: ['superuser'],
+          full_name: 'other user',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete('other_user');
+      });
+
+      it(`should prevent users from accessing other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .expect(404);
+      });
+
+      it(`should prevent users from deleting other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .delete(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .expect(404);
+      });
+
+      it(`should prevent users from cancelling other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .post(`/internal/session/${sessionId}/cancel`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .expect(404);
+      });
+
+      it(`should prevent users from extending other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .post(`/internal/session/${sessionId}/_extend`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .send({
+            expires: '2021-02-26T21:02:43.742Z',
+          })
+          .expect(404);
+      });
+
+      it(`should prevent unauthorized users from creating sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertestWithoutAuth
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(401);
+      });
     });
   });
 }
