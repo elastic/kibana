@@ -45,8 +45,8 @@
         "errorCount": {
           "type": "long"
         },
-        "totalDuration": {
-          "type": "long"
+        "averageDuration": {
+          "type": "float"
         }
       }
     },
