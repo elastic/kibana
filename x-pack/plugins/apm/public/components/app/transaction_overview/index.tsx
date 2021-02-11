@@ -33,7 +33,6 @@ import { TransactionTypeSelect } from '../../shared/transaction_type_select';
 import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
-import { UserExperienceCallout } from './user_experience_callout';
 import { useTransactionListFetcher } from './use_transaction_list';
 
 function getRedirectLocation({
@@ -116,13 +115,6 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
               <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          {transactionType === TRANSACTION_PAGE_LOAD && (
-            <>
-              <UserExperienceCallout serviceName={serviceName} />
-              <EuiSpacer size="s" />
-            </>
-          )}
           <TransactionCharts />
           <EuiSpacer size="s" />
           <EuiPanel>
