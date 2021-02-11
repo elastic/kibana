@@ -73,6 +73,7 @@ class CoreSavedObjectsRouteHandlerContext {
   }
 
   public getClient = (options?: SavedObjectsClientProviderOptions) => {
+    if (!options) return this.client;
     return this.savedObjectsStart.getScopedClient(this.request, options);
   };
 
