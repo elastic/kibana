@@ -195,4 +195,10 @@ fi
 echo "# Appended by $KIBANA_DIR/src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
 echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
 
+###
+### disables building TS project references on CI as part of bootstrap
+### types will still be checked with scripts/type_check
+###
+export KBN_NO_BOOTSTRAP_TS_REFS=true
+
 export CI_ENV_SETUP=true
