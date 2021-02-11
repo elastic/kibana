@@ -26,7 +26,64 @@ jest.mock('../kibana_services', () => ({
 }));
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
-import { getTimeFilters } from './map_selectors';
+import { getDataFilters, getTimeFilters } from './map_selectors';
+
+describe('getDataFilters', () => {
+  const mapExtent = {
+    maxLat: 1,
+    maxLon: 1,
+    minLat: 0,
+    minLon: 0,
+  };
+  const mapBuffer = {
+    maxLat: 1.5,
+    maxLon: 1.5,
+    minLat: -0.5,
+    minLon: -0.5,
+  };
+  const mapZoom = 4;
+  const timeFilters = { to: '2001-01-01', from: '2001-12-31' };
+  const refreshTimerLastTriggeredAt = '2001-01-01T00:00:00';
+  const query = undefined;
+  const filters = [];
+  const searchSessionId = '12345';
+  const searchSessionMapBuffer = {
+    maxLat: 1.25,
+    maxLon: 1.25,
+    minLat: -0.25,
+    minLon: -0.25,
+  };
+
+  test('should set buffer as searchSessionMapBuffer when using searchSessionId', () => {
+    const dataFilters = getDataFilters.resultFunc(
+      mapExtent,
+      mapBuffer,
+      mapZoom,
+      timeFilters,
+      refreshTimerLastTriggeredAt,
+      query,
+      filters,
+      searchSessionId,
+      searchSessionMapBuffer
+    );
+    expect(dataFilters.buffer).toEqual(searchSessionMapBuffer);
+  });
+
+  test('should fall back to screen buffer when using searchSessionId and searchSessionMapBuffer is not provided', () => {
+    const dataFilters = getDataFilters.resultFunc(
+      mapExtent,
+      mapBuffer,
+      mapZoom,
+      timeFilters,
+      refreshTimerLastTriggeredAt,
+      query,
+      filters,
+      searchSessionId,
+      undefined
+    );
+    expect(dataFilters.buffer).toEqual(mapBuffer);
+  });
+});
 
 describe('getTimeFilters', () => {
   it('should return timeFilters when contained in state', () => {
