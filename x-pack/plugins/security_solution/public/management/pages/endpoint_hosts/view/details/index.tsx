@@ -20,6 +20,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useEndpointSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
@@ -131,6 +132,14 @@ export const EndpointDetailsFlyout = memo(() => {
 
 EndpointDetailsFlyout.displayName = 'EndpointDetailsFlyout';
 
+const PolicyResponseFlyout = styled.div`
+  .endpointDetailsPolicyResponseFlyoutBody {
+    .euiFlyoutBody__overflowContent {
+      padding-top: 0;
+    }
+  }
+`;
+
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
@@ -171,12 +180,15 @@ const PolicyResponseFlyoutPanel = memo<{
   }, [backToDetailsClickHandler, detailsUri]);
 
   return (
-    <>
+    <PolicyResponseFlyout>
       <FlyoutSubHeader
         backButton={backButtonProp}
         data-test-subj="endpointDetailsPolicyResponseFlyoutHeader"
       />
-      <EuiFlyoutBody data-test-subj="endpointDetailsPolicyResponseFlyoutBody">
+      <EuiFlyoutBody
+        data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
+        className="endpointDetailsPolicyResponseFlyoutBody"
+      >
         <EuiText data-test-subj="endpointDetailsPolicyResponseFlyoutTitle">
           <h4>
             <FormattedMessage
@@ -209,7 +221,7 @@ const PolicyResponseFlyoutPanel = memo<{
           />
         )}
       </EuiFlyoutBody>
-    </>
+    </PolicyResponseFlyout>
   );
 });
 

@@ -645,49 +645,29 @@ describe('when on the list page', () => {
 
     it('should display Success overall policy status', async () => {
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Success');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="success"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Success');
     });
 
     it('should display Warning overall policy status', async () => {
       mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.warning));
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Warning');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="warning"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Warning');
     });
 
     it('should display Failed overall policy status', async () => {
       mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.failure));
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Failed');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="danger"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Failed');
     });
 
     it('should display Unknown overall policy status', async () => {
       mockEndpointListApi(createPolicyResponse('' as HostPolicyResponseActionStatus));
       const renderResult = await renderAndWaitForData();
-      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusLink.textContent).toEqual('Unknown');
-
-      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
-      expect(
-        policyStatusHealth.querySelector('[data-euiicon-type][color="subdued"]')
-      ).not.toBeNull();
+      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusBadge.textContent).toEqual('Unknown');
     });
 
     it('should include the link to reassignment in Ingest', async () => {

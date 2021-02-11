@@ -167,7 +167,7 @@ export const EndpointDetails = memo(
           }),
           description: (
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EndpointPolicyLink
                   policyId={details.Endpoint.policy.applied.id}
                   data-test-subj="policyDetailsValue"
@@ -212,7 +212,7 @@ export const EndpointDetails = memo(
             // @ts-ignore
             <EuiBadge
               color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}
-              data-test-subj="policyStatusHealth"
+              data-test-subj="policyStatusValue"
               href={policyResponseUri}
               onClick={policyStatusClickHandler}
             >
@@ -278,7 +278,6 @@ export const EndpointDetails = memo(
             onClick={handleReassignEndpointsClick}
             data-test-subj="endpointDetailsLinkToIngest"
           >
-            <EuiIcon type="savedObjectsApp" className="linkToAppIcon" />
             <FormattedMessage
               id="xpack.securitySolution.endpoint.details.linkToIngestTitle"
               defaultMessage="Reassign Policy"
