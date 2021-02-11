@@ -416,6 +416,7 @@ export default ({ getService }: FtrProviderContext) => {
           sampledDocuments: 7,
           sampledValues: 4151,
           totalDocuments: 7,
+          topValues: [],
         });
       });
 

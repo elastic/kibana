@@ -88,7 +88,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 
         if (field.type === 'histogram') {
           return res.ok({
-            body: await getNumberOnlyHistogram(search, field),
+            body: await getNumberHistogram(search, field, false),
           });
         } else if (field.type === 'number') {
           return res.ok({
@@ -124,21 +124,31 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
-  field: IFieldType
+  field: IFieldType,
+  useTopHits = true
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
 
-  const searchBody = {
+  const baseAggs = {
+    min_value: {
+      min: { field: field.name },
+    },
+    max_value: {
+      max: { field: field.name },
+    },
+    sample_count: { value_count: { ...fieldRef } },
+  };
+  const searchWithoutHits = {
+    sample: {
+      sampler: { shard_size: SHARD_SIZE },
+      aggs: { ...baseAggs },
+    },
+  };
+  const searchWithHits = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
       aggs: {
-        min_value: {
-          min: { field: field.name },
-        },
-        max_value: {
-          max: { field: field.name },
-        },
-        sample_count: { value_count: { ...fieldRef } },
+        ...baseAggs,
         top_values: {
           terms: { ...fieldRef, size: 10 },
         },
@@ -146,14 +156,18 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(searchBody)) as ESSearchResponse<
-    unknown,
-    { body: { aggs: typeof searchBody } }
-  >;
+  const minMaxResult = (await aggSearchWithBody(
+    useTopHits ? searchWithHits : searchWithoutHits
+  )) as
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
+    | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
   const maxValue = minMaxResult.aggregations!.sample.max_value.value;
-  const terms = minMaxResult.aggregations!.sample.top_values;
+  const terms =
+    'top_values' in minMaxResult.aggregations!.sample
+      ? minMaxResult.aggregations!.sample.top_values
+      : { buckets: [] };
   const topValuesBuckets = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
@@ -206,81 +220,6 @@ export async function getNumberHistogram(
       })),
     },
     topValues: topValuesBuckets,
-  };
-}
-
-export async function getNumberOnlyHistogram(
-  aggSearchWithBody: (body: unknown) => Promise<unknown>,
-  field: IFieldType
-): Promise<FieldStatsResponse> {
-  const fieldRef = getFieldRef(field);
-
-  const searchBody = {
-    sample: {
-      sampler: { shard_size: SHARD_SIZE },
-      aggs: {
-        min_value: {
-          min: { field: field.name },
-        },
-        max_value: {
-          max: { field: field.name },
-        },
-        sample_count: { value_count: { ...fieldRef } },
-      },
-    },
-  };
-
-  const minMaxResult = (await aggSearchWithBody(searchBody)) as ESSearchResponse<
-    unknown,
-    { body: { aggs: typeof searchBody } }
-  >;
-
-  const minValue = minMaxResult.aggregations!.sample.min_value.value;
-  const maxValue = minMaxResult.aggregations!.sample.max_value.value;
-
-  let histogramInterval = (maxValue! - minValue!) / 10;
-
-  if (Number.isInteger(minValue!) && Number.isInteger(maxValue!)) {
-    histogramInterval = Math.ceil(histogramInterval);
-  }
-
-  if (histogramInterval === 0) {
-    return {
-      totalDocuments: minMaxResult.hits.total.value,
-      sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
-      sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-      histogram: { buckets: [] },
-    };
-  }
-
-  const histogramBody = {
-    sample: {
-      sampler: { shard_size: SHARD_SIZE },
-      aggs: {
-        histo: {
-          histogram: {
-            field: field.name,
-            interval: histogramInterval,
-          },
-        },
-      },
-    },
-  };
-  const histogramResult = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
-    unknown,
-    { body: { aggs: typeof histogramBody } }
-  >;
-
-  return {
-    totalDocuments: minMaxResult.hits.total.value,
-    sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-    sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
-    histogram: {
-      buckets: histogramResult.aggregations!.sample.histo.buckets.map((bucket) => ({
-        count: bucket.doc_count,
-        key: bucket.key,
-      })),
-    },
   };
 }
 
