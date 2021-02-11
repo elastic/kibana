@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { xpackMocks } from '../../../../../x-pack/mocks';
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 import { appContextService } from './app_context';
 import { setupIngestManager } from './setup';
 
