@@ -302,7 +302,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
         const bodyId = body.id;
 
-        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'warning');
         await waitForSignalsToBePresent(supertest, 2, [bodyId]);
 
         const { body: statusBody } = await supertest
@@ -311,9 +311,9 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [bodyId] })
           .expect(200);
 
-        // set to "failed" for now. Will update this with a partial failure
+        // set to "failed" for now. Will update this with a warning
         // once I figure out the logic
-        expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
+        expect(statusBody[bodyId].current_status.status).to.eql('warning');
       });
     });
   });
