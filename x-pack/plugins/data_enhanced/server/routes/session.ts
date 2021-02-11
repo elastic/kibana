@@ -10,6 +10,8 @@ import { Logger } from 'src/core/server';
 import { reportServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { DataEnhancedPluginRouter } from '../type';
 
+const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;
+
 export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: Logger): void {
   router.post(
     {
@@ -24,6 +26,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           initialState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
           restoreState: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -65,6 +70,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           id: schema.string(),
         }),
       },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -95,6 +103,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
           search: schema.maybe(schema.string()),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -128,6 +139,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           id: schema.string(),
         }),
       },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -150,6 +164,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         params: schema.object({
           id: schema.string(),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {
@@ -178,6 +195,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
           expires: schema.maybe(schema.string()),
         }),
       },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
+      },
     },
     async (context, request, res) => {
       const { id } = request.params;
@@ -205,6 +225,9 @@ export function registerSessionRoutes(router: DataEnhancedPluginRouter, logger: 
         body: schema.object({
           expires: schema.string(),
         }),
+      },
+      options: {
+        tags: [STORE_SEARCH_SESSIONS_ROLE_TAG],
       },
     },
     async (context, request, res) => {
