@@ -4830,7 +4830,6 @@
     "xpack.alerts.server.healthStatus.degraded": "アラートフレームワークは劣化しました",
     "xpack.alerts.server.healthStatus.unavailable": "アラートフレームワークを使用できません",
     "xpack.alerts.serverSideErrors.expirerdLicenseErrorMessage": "{licenseType} ライセンスの期限が切れたのでアラートタイプ {alertTypeId} は無効です。",
-    "xpack.alerts.serverSideErrors.invalidLicenseErrorMessage": "アラート {alertTypeId} は無効です。Gold ライセンスが必要です。ライセンスをアップグレードするには、管理者に問い合わせてください。",
     "xpack.alerts.serverSideErrors.unavailableLicenseErrorMessage": "現時点でライセンス情報を入手できないため、アラートタイプ {alertTypeId} は無効です。",
     "xpack.alerts.serverSideErrors.unavailableLicenseInformationErrorMessage": "アラートを利用できません。現在ライセンス情報が利用できません。",
     "xpack.apm.a.thresholdMet": "しきい値一致",
