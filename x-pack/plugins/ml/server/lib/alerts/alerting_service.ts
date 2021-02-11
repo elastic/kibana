@@ -136,7 +136,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
                 score: {
                   script: {
                     lang: 'painless',
-                    source: 'Math.round(doc["influencer_score"].value)',
+                    source: 'Math.floor(doc["influencer_score"].value)',
                   },
                 },
                 unique_key: {
@@ -189,7 +189,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
                 score: {
                   script: {
                     lang: 'painless',
-                    source: 'Math.round(doc["record_score"].value)',
+                    source: 'Math.floor(doc["record_score"].value)',
                   },
                 },
                 unique_key: {
@@ -238,7 +238,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
                       score: {
                         script: {
                           lang: 'painless',
-                          source: 'Math.round(doc["anomaly_score"].value)',
+                          source: 'Math.floor(doc["anomaly_score"].value)',
                         },
                       },
                       unique_key: {
