@@ -92,6 +92,21 @@ exports[`Table should render normally 1`] = `
         "name": "",
         "width": "40px",
       },
+      Object {
+        "actions": Array [
+          Object {
+            "available": [Function],
+            "data-test-subj": "deleteField",
+            "description": "Delete",
+            "icon": "trash",
+            "name": "Delete",
+            "onClick": [Function],
+            "type": "icon",
+          },
+        ],
+        "name": "",
+        "width": "40px",
+      },
     ]
   }
   items={
@@ -101,6 +116,8 @@ exports[`Table should render normally 1`] = `
         "excluded": false,
         "format": "",
         "info": Array [],
+        "isMapped": true,
+        "kbnType": "string",
         "name": "Elastic",
         "searchable": true,
         "type": "name",
@@ -110,6 +127,8 @@ exports[`Table should render normally 1`] = `
         "excluded": false,
         "format": "YYYY-MM-DD",
         "info": Array [],
+        "isMapped": true,
+        "kbnType": "date",
         "name": "timestamp",
         "type": "date",
       },
@@ -118,8 +137,10 @@ exports[`Table should render normally 1`] = `
         "excluded": false,
         "format": "",
         "info": Array [],
+        "isMapped": true,
+        "kbnType": "conflict",
         "name": "conflictingField",
-        "type": "conflict",
+        "type": "text, long",
       },
     ]
   }
@@ -135,7 +156,14 @@ exports[`Table should render normally 1`] = `
     }
   }
   responsive={true}
-  sorting={true}
+  sorting={
+    Object {
+      "sort": Object {
+        "direction": "asc",
+        "field": "displayName",
+      },
+    }
+  }
   tableLayout="fixed"
 />
 `;

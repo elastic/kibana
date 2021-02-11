@@ -9,10 +9,11 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { SharedSourcesModal } from './shared_sources_modal';
 import { GroupManagerModal } from './group_manager_modal';
+import { SharedSourcesModal } from './shared_sources_modal';
 import { SourcesList } from './sources_list';
 
 const group = groups[0];

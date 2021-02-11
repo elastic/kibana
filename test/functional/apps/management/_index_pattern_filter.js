@@ -35,23 +35,23 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.getFieldTypes();
-      await PageObjects.settings.setFieldTypeFilter('string');
+      await PageObjects.settings.setFieldTypeFilter('keyword');
 
       await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
         expect(fieldTypes.length).to.be.above(0);
         for (const fieldType of fieldTypes) {
-          expect(fieldType).to.be('string');
+          expect(fieldType).to.be('keyword');
         }
       });
 
-      await PageObjects.settings.setFieldTypeFilter('number');
+      await PageObjects.settings.setFieldTypeFilter('long');
 
       await retry.try(async function () {
         const fieldTypes = await PageObjects.settings.getFieldTypes();
         expect(fieldTypes.length).to.be.above(0);
         for (const fieldType of fieldTypes) {
-          expect(fieldType).to.be('number');
+          expect(fieldType).to.be('long');
         }
       });
     });

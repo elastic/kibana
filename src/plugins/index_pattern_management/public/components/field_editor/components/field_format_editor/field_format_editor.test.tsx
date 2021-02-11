@@ -10,7 +10,7 @@ import React, { PureComponent } from 'react';
 import { shallow } from 'enzyme';
 
 import { FieldFormatEditor } from './field_format_editor';
-import { DefaultFormatEditor } from './editors/default';
+import type { DefaultFormatEditor } from 'src/plugins/index_pattern_field_editor/public';
 
 class TestEditor extends PureComponent {
   render() {

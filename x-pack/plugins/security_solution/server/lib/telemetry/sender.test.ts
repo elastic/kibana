@@ -47,6 +47,8 @@ describe('TelemetryEventsSender', () => {
               malware_classification: {
                 key1: 'X',
               },
+              quarantine_result: true,
+              quarantine_message: 'this file is bad',
               something_else: 'nope',
             },
           },
@@ -79,6 +81,8 @@ describe('TelemetryEventsSender', () => {
               malware_classification: {
                 key1: 'X',
               },
+              quarantine_result: true,
+              quarantine_message: 'this file is bad',
             },
           },
           host: {

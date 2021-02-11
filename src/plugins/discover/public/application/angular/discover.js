@@ -252,6 +252,12 @@ function discoverController($route, $scope, Promise) {
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
+        if (oldStatePartial.hideChart && !newStatePartial.hideChart) {
+          // in case the histogram is hidden, no data is requested
+          // so when changing this state data needs to be fetched
+          changes.push(true);
+        }
+
         if (changes.length) {
           refetch$.next();
         }
@@ -313,6 +319,8 @@ function discoverController($route, $scope, Promise) {
     setAppState,
     data,
     stateContainer,
+    searchSessionManager,
+    refetch$,
   };
 
   const inspectorAdapters = ($scope.opts.inspectorAdapters = {
@@ -411,6 +419,9 @@ function discoverController($route, $scope, Promise) {
     };
     if (savedSearch.grid) {
       defaultState.grid = savedSearch.grid;
+    }
+    if (savedSearch.hideChart) {
+      defaultState.hideChart = savedSearch.hideChart;
     }
 
     return defaultState;
@@ -563,13 +574,6 @@ function discoverController($route, $scope, Promise) {
       });
   };
 
-  $scope.handleRefresh = function (_payload, isUpdate) {
-    if (isUpdate === false) {
-      searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-      refetch$.next();
-    }
-  };
-
   function getDimensions(aggs, timeRange) {
     const [metric, agg] = aggs;
     agg.params.timeRange = timeRange;
@@ -602,7 +606,7 @@ function discoverController($route, $scope, Promise) {
   function onResults(resp) {
     inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
-    if (getTimeField()) {
+    if (getTimeField() && !$scope.state.hideChart) {
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
@@ -705,7 +709,7 @@ function discoverController($route, $scope, Promise) {
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField()) return;
+    if (!getTimeField() || $scope.state.hideChart) return;
     const { interval: histogramInterval } = $scope.state;
 
     const visStateAggs = [

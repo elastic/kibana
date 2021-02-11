@@ -18,5 +18,7 @@
     { "path": "../url_forwarding/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../es_ui_shared/tsconfig.json" },
+    { "path": "../index_pattern_field_editor/tsconfig.json" },
   ]
 }

@@ -19,7 +19,10 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'API Integration Tests',
     },
-    esTestCluster: commonConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [

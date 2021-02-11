@@ -19,6 +19,24 @@ interface UpdateAlertsStatusArgs {
   index: string;
 }
 
+interface GetAlertsArgs {
+  request: KibanaRequest;
+  ids: string[];
+  index: string;
+}
+
+interface Alert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+interface AlertsResponse {
+  hits: {
+    hits: Alert[];
+  };
+}
+
 export class AlertService {
   private isInitialized = false;
   private esClient?: IClusterClient;
@@ -54,5 +72,31 @@ export class AlertService {
     });
 
     return result;
+  }
+
+  public async getAlerts({ request, ids, index }: GetAlertsArgs): Promise<AlertsResponse> {
+    if (!this.isInitialized) {
+      throw new Error('AlertService not initialized');
+    }
+
+    // The above check makes sure that esClient is defined.
+    const result = await this.esClient!.asScoped(request).asCurrentUser.search<AlertsResponse>({
+      index,
+      body: {
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                should: ids.map((_id) => ({ match: { _id } })),
+                minimum_should_match: 1,
+              },
+            },
+          },
+        },
+      },
+      ignore_unavailable: true,
+    });
+
+    return result.body;
   }
 }

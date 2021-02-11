@@ -26,7 +26,6 @@ source src/dev/ci_setup/setup.sh;
 
 # download es snapshots
 node scripts/es snapshot --download-only;
-node scripts/es snapshot --license=oss --download-only;
 
 # download reporting browsers
 (cd "x-pack" && node ../node_modules/.bin/gulp downloadChromium);

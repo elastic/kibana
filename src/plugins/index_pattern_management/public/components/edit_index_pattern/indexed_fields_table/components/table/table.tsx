@@ -140,6 +140,18 @@ const editDescription = i18n.translate(
   { defaultMessage: 'Edit' }
 );
 
+const deleteLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+const deleteDescription = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.deleteDescription',
+  { defaultMessage: 'Delete' }
+);
+
 const labelDescription = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.customLabelTooltip',
   { defaultMessage: 'A custom label for the field.' }
@@ -149,6 +161,7 @@ interface IndexedFieldProps {
   indexPattern: IIndexPattern;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
+  deleteField: (fieldName: string) => void;
 }
 
 export class Table extends PureComponent<IndexedFieldProps> {
@@ -221,7 +234,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   render() {
-    const { items, editField } = this.props;
+    const { items, editField, deleteField } = this.props;
 
     const pagination = {
       initialPageSize: 10,
@@ -245,8 +258,8 @@ export class Table extends PureComponent<IndexedFieldProps> {
         name: typeHeader,
         dataType: 'string',
         sortable: true,
-        render: (value: string) => {
-          return this.renderFieldType(value, value === 'conflict');
+        render: (value: string, field: IndexedFieldItem) => {
+          return this.renderFieldType(value, field.kbnType === 'conflict');
         },
         'data-test-subj': 'indexedFieldType',
       },
@@ -294,10 +307,30 @@ export class Table extends PureComponent<IndexedFieldProps> {
         ],
         width: '40px',
       },
+      {
+        name: '',
+        actions: [
+          {
+            name: deleteLabel,
+            description: deleteDescription,
+            icon: 'trash',
+            onClick: (field) => deleteField(field.name),
+            type: 'icon',
+            'data-test-subj': 'deleteField',
+            available: (field) => !field.isMapped,
+          },
+        ],
+        width: '40px',
+      },
     ];
 
     return (
-      <EuiInMemoryTable items={items} columns={columns} pagination={pagination} sorting={true} />
+      <EuiInMemoryTable
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={{ sort: { field: 'displayName', direction: 'asc' } }}
+      />
     );
   }
 }
