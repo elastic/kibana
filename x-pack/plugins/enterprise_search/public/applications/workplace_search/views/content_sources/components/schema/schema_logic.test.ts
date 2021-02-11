@@ -35,7 +35,12 @@ import { SchemaLogic, dataTypeOptions } from './schema_logic';
 
 describe('SchemaLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const {
+    clearFlashMessages,
+    flashAPIErrors,
+    setSuccessMessage,
+    setErrorMessage,
+  } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(SchemaLogic);
 
   const defaultValues = {
@@ -298,23 +303,29 @@ describe('SchemaLogic', () => {
         );
         await nextTick();
 
-        expect(flashAPIErrors).toHaveBeenCalledWith({
-          error: 'this is an error',
-          message: SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
-        });
+        expect(setErrorMessage).toHaveBeenCalledWith(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       });
     });
 
-    it('addNewField', () => {
-      const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
-      SchemaLogic.actions.onInitializeSchema(serverResponse);
-      const newSchema = {
-        ...schema,
-        bar: 'number',
-      };
-      SchemaLogic.actions.addNewField('bar', 'number');
+    describe('addNewField', () => {
+      it('handles happy path', () => {
+        const setServerFieldSpy = jest.spyOn(SchemaLogic.actions, 'setServerField');
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        const newSchema = {
+          ...schema,
+          bar: 'number',
+        };
+        SchemaLogic.actions.addNewField('bar', 'number');
 
-      expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+        expect(setServerFieldSpy).toHaveBeenCalledWith(newSchema, ADD);
+      });
+
+      it('handles duplicate', () => {
+        SchemaLogic.actions.onInitializeSchema(serverResponse);
+        SchemaLogic.actions.addNewField('foo', 'number');
+
+        expect(setErrorMessage).toHaveBeenCalledWith('New field already exists: foo.');
+      });
     });
 
     it('updateExistingFieldType', () => {

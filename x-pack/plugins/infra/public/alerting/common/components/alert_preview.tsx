@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AlertNotifyWhenType } from '../../../../../alerts/common';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { FORMATTERS } from '../../../../common/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -36,8 +37,9 @@ import { getAlertPreview, PreviewableAlertTypes } from './get_alert_preview';
 interface Props {
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: AlertNotifyWhenType;
   alertType: PreviewableAlertTypes;
-  alertParams: { criteria: any[]; sourceId: string } & Record<string, any>;
+  alertParams: { criteria?: any[]; sourceId: string } & Record<string, any>;
   validate: (params: any) => ValidationResult;
   showNoDataResults?: boolean;
   groupByDisplayName?: string;
@@ -48,6 +50,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
     alertParams,
     alertInterval,
     alertThrottle,
+    alertNotifyWhen,
     alertType,
     validate,
     showNoDataResults,
@@ -78,6 +81,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
           lookback: previewLookbackInterval as 'h' | 'd' | 'w' | 'M',
           alertInterval,
           alertThrottle,
+          alertNotifyWhen,
           alertOnNoData: showNoDataResults ?? false,
         } as AlertPreviewRequestParams,
         alertType,
@@ -92,6 +96,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
     alertParams,
     alertInterval,
     alertType,
+    alertNotifyWhen,
     groupByDisplayName,
     previewLookbackInterval,
     alertThrottle,
@@ -109,6 +114,7 @@ export const AlertPreview: React.FC<Props> = (props) => {
   }, [previewLookbackInterval, alertInterval]);
 
   const isPreviewDisabled = useMemo(() => {
+    if (!alertParams.criteria) return false;
     const validationResult = validate({ criteria: alertParams.criteria } as any);
     const hasValidationErrors = Object.values(validationResult.errors).some((result) =>
       Object.values(result).some((arr) => Array.isArray(arr) && arr.length)
@@ -118,13 +124,14 @@ export const AlertPreview: React.FC<Props> = (props) => {
 
   const showNumberOfNotifications = useMemo(() => {
     if (!previewResult) return false;
+    if (alertNotifyWhen === 'onActiveAlert') return false;
     const { notifications, fired, noData, error } = previewResult.resultTotals;
     const unthrottledNotifications = fired + (showNoDataResults ? noData + error : 0);
     return unthrottledNotifications > notifications;
-  }, [previewResult, showNoDataResults]);
+  }, [previewResult, showNoDataResults, alertNotifyWhen]);
 
   const hasWarningThreshold = useMemo(
-    () => alertParams.criteria?.some((c) => Reflect.has(c, 'warningThreshold')),
+    () => alertParams.criteria?.some((c) => Reflect.has(c, 'warningThreshold')) ?? false,
     [alertParams]
   );
 
@@ -212,9 +219,17 @@ export const AlertPreview: React.FC<Props> = (props) => {
                   <EuiSpacer size={'s'} />
                   <FormattedMessage
                     id="xpack.infra.metrics.alertFlyout.alertPreviewTotalNotifications"
-                    defaultMessage='As a result, this alert would have sent {notifications} based on the selected "notify every" setting of "{alertThrottle}."'
+                    defaultMessage='As a result, this alert would have sent {notifications} based on the selected "notify" setting of "{alertThrottle}."'
                     values={{
-                      alertThrottle: previewResult.alertThrottle,
+                      alertThrottle:
+                        alertNotifyWhen === 'onThrottleInterval'
+                          ? previewResult.alertThrottle
+                          : i18n.translate(
+                              'xpack.infra.metrics.alertFlyout.alertPreviewOnlyOnStatusChange',
+                              {
+                                defaultMessage: 'Only on status change',
+                              }
+                            ),
                       notifications: (
                         <strong>
                           {i18n.translate(

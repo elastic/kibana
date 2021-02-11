@@ -34,6 +34,7 @@ interface PreviewInventoryMetricThresholdAlertParams {
   alertInterval: string;
   alertThrottle: string;
   alertOnNoData: boolean;
+  alertNotifyWhen: string;
 }
 
 export const previewInventoryMetricThresholdAlert: (
@@ -46,7 +47,8 @@ export const previewInventoryMetricThresholdAlert: (
   alertInterval,
   alertThrottle,
   alertOnNoData,
-}) => {
+  alertNotifyWhen,
+}: PreviewInventoryMetricThresholdAlertParams) => {
   const { criteria, filterQuery, nodeType } = params as InventoryMetricThresholdParams;
 
   if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
@@ -62,9 +64,7 @@ export const previewInventoryMetricThresholdAlert: (
   const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
   const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
   const throttleIntervalInSeconds = getIntervalInSeconds(alertThrottle);
-  const executionsPerThrottle = Math.floor(
-    (throttleIntervalInSeconds / alertIntervalInSeconds) * alertResultsPerExecution
-  );
+
   try {
     const results = await Promise.all(
       criteria.map((c) =>
@@ -82,9 +82,17 @@ export const previewInventoryMetricThresholdAlert: (
       let numberOfErrors = 0;
       let numberOfNotifications = 0;
       let throttleTracker = 0;
-      const notifyWithThrottle = () => {
-        if (throttleTracker === 0) numberOfNotifications++;
-        throttleTracker++;
+      let previousActionGroup: string | null = null;
+      const notifyWithThrottle = (actionGroup: string) => {
+        if (alertNotifyWhen === 'onActionGroupChange') {
+          if (previousActionGroup !== actionGroup) numberOfNotifications++;
+        } else if (alertNotifyWhen === 'onThrottleInterval') {
+          if (throttleTracker === 0) numberOfNotifications++;
+          throttleTracker += alertIntervalInSeconds;
+        } else {
+          numberOfNotifications++;
+        }
+        previousActionGroup = actionGroup;
       };
       for (let i = 0; i < numberOfExecutionBuckets; i++) {
         const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
@@ -105,23 +113,26 @@ export const previewInventoryMetricThresholdAlert: (
         if (someConditionsErrorInMappedBucket) {
           numberOfErrors++;
           if (alertOnNoData) {
-            notifyWithThrottle();
+            notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
           }
         } else if (someConditionsNoDataInMappedBucket) {
           numberOfNoDataResults++;
           if (alertOnNoData) {
-            notifyWithThrottle();
+            notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
           }
         } else if (allConditionsFiredInMappedBucket) {
           numberOfTimesFired++;
-          notifyWithThrottle();
+          notifyWithThrottle('fired');
         } else if (allConditionsWarnInMappedBucket) {
           numberOfTimesWarned++;
-          notifyWithThrottle();
-        } else if (throttleTracker > 0) {
-          throttleTracker++;
+          notifyWithThrottle('warning');
+        } else {
+          previousActionGroup = 'recovered';
+          if (throttleTracker > 0) {
+            throttleTracker += alertIntervalInSeconds;
+          }
         }
-        if (throttleTracker === executionsPerThrottle) {
+        if (throttleTracker >= throttleIntervalInSeconds) {
           throttleTracker = 0;
         }
       }

@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import * as rt from 'io-ts';
+import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { ItemTypeRT } from '../../inventory_models/types';
 
 // TODO: Have threshold and inventory alerts import these types from this file instead of from their
 // local directories
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
+export const METRIC_ANOMALY_ALERT_TYPE_ID = 'metrics.alert.anomaly';
 
 export enum Comparator {
   GT = '>',
@@ -34,6 +35,26 @@ export enum Aggregators {
   P99 = 'p99',
 }
 
+const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
+const metricAnomalyMetricRT = rt.union([
+  rt.literal('memory_usage'),
+  rt.literal('network_in'),
+  rt.literal('network_out'),
+]);
+const metricAnomalyInfluencerFilterRT = rt.type({
+  fieldName: rt.string,
+  fieldValue: rt.string,
+});
+
+export interface MetricAnomalyParams {
+  nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
+  metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
+  alertInterval?: string;
+  sourceId?: string;
+  threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
+  influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
+}
+
 // Alert Preview API
 const baseAlertRequestParamsRT = rt.intersection([
   rt.partial({
@@ -51,10 +72,10 @@ const baseAlertRequestParamsRT = rt.intersection([
       rt.literal('M'),
       rt.literal('y'),
     ]),
-    criteria: rt.array(rt.any),
     alertInterval: rt.string,
     alertThrottle: rt.string,
     alertOnNoData: rt.boolean,
+    alertNotifyWhen: rt.string,
   }),
 ]);
 
@@ -65,6 +86,7 @@ const metricThresholdAlertPreviewRequestParamsRT = rt.intersection([
   }),
   rt.type({
     alertType: rt.literal(METRIC_THRESHOLD_ALERT_TYPE_ID),
+    criteria: rt.array(rt.any),
   }),
 ]);
 export type MetricThresholdAlertPreviewRequestParams = rt.TypeOf<
@@ -76,15 +98,33 @@ const inventoryAlertPreviewRequestParamsRT = rt.intersection([
   rt.type({
     nodeType: ItemTypeRT,
     alertType: rt.literal(METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID),
+    criteria: rt.array(rt.any),
   }),
 ]);
 export type InventoryAlertPreviewRequestParams = rt.TypeOf<
   typeof inventoryAlertPreviewRequestParamsRT
 >;
 
+const metricAnomalyAlertPreviewRequestParamsRT = rt.intersection([
+  baseAlertRequestParamsRT,
+  rt.type({
+    nodeType: metricAnomalyNodeTypeRT,
+    metric: metricAnomalyMetricRT,
+    threshold: rt.number,
+    alertType: rt.literal(METRIC_ANOMALY_ALERT_TYPE_ID),
+  }),
+  rt.partial({
+    influencerFilter: metricAnomalyInfluencerFilterRT,
+  }),
+]);
+export type MetricAnomalyAlertPreviewRequestParams = rt.TypeOf<
+  typeof metricAnomalyAlertPreviewRequestParamsRT
+>;
+
 export const alertPreviewRequestParamsRT = rt.union([
   metricThresholdAlertPreviewRequestParamsRT,
   inventoryAlertPreviewRequestParamsRT,
+  metricAnomalyAlertPreviewRequestParamsRT,
 ]);
 export type AlertPreviewRequestParams = rt.TypeOf<typeof alertPreviewRequestParamsRT>;
 

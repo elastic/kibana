@@ -1757,3 +1757,65 @@ describe('#removeReferencesTo', () => {
     expect(mockBaseClient.removeReferencesTo).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('#openPointInTimeForType', () => {
+  it('redirects request to underlying base client', async () => {
+    const options = { keepAlive: '1m' };
+
+    await wrapper.openPointInTimeForType('some-type', options);
+
+    expect(mockBaseClient.openPointInTimeForType).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.openPointInTimeForType).toHaveBeenCalledWith('some-type', options);
+  });
+
+  it('returns response from underlying client', async () => {
+    const returnValue = {
+      id: 'abc123',
+    };
+    mockBaseClient.openPointInTimeForType.mockResolvedValue(returnValue);
+
+    const result = await wrapper.openPointInTimeForType('known-type');
+
+    expect(result).toBe(returnValue);
+  });
+
+  it('fails if base client fails', async () => {
+    const failureReason = new Error('Something bad happened...');
+    mockBaseClient.openPointInTimeForType.mockRejectedValue(failureReason);
+
+    await expect(wrapper.openPointInTimeForType('known-type')).rejects.toThrowError(failureReason);
+
+    expect(mockBaseClient.openPointInTimeForType).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('#closePointInTime', () => {
+  it('redirects request to underlying base client', async () => {
+    const id = 'abc123';
+    await wrapper.closePointInTime(id);
+
+    expect(mockBaseClient.closePointInTime).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.closePointInTime).toHaveBeenCalledWith(id, undefined);
+  });
+
+  it('returns response from underlying client', async () => {
+    const returnValue = {
+      succeeded: true,
+      num_freed: 1,
+    };
+    mockBaseClient.closePointInTime.mockResolvedValue(returnValue);
+
+    const result = await wrapper.closePointInTime('abc123');
+
+    expect(result).toBe(returnValue);
+  });
+
+  it('fails if base client fails', async () => {
+    const failureReason = new Error('Something bad happened...');
+    mockBaseClient.closePointInTime.mockRejectedValue(failureReason);
+
+    await expect(wrapper.closePointInTime('abc123')).rejects.toThrowError(failureReason);
+
+    expect(mockBaseClient.closePointInTime).toHaveBeenCalledTimes(1);
+  });
+});
