@@ -70,7 +70,7 @@ const i18nTexts = {
         'Data age is calculated from rollover. Rollover is configured in the hot phase.',
     }
   ),
-  ageUnitFieldSuffix: i18n.translate(
+  minAgeUnitFieldSuffix: i18n.translate(
     'xpack.indexLifecycleMgmt.editPolicy.minimumAge.minimumAgeFieldSuffixLabel',
     { defaultMessage: 'old' }
   ),
@@ -137,8 +137,8 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                         const selectAppendValue: Array<
                           string | React.ReactElement
                         > = isUsingRollover
-                          ? [i18nTexts.ageUnitFieldSuffix, icon]
-                          : [i18nTexts.ageUnitFieldSuffix];
+                          ? [i18nTexts.minAgeUnitFieldSuffix, icon]
+                          : [i18nTexts.minAgeUnitFieldSuffix];
                         return (
                           <EuiSelect
                             compressed
