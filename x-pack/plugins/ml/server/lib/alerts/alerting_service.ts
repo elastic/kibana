@@ -400,6 +400,12 @@ export function alertingServiceProvider(mlClient: MlClient) {
   const buildExplorerUrl = (r: AlertExecutionResult, type: AnomalyResultType): string => {
     const isInfluencerResult = type === ANOMALY_RESULT_TYPE.INFLUENCER;
 
+    /**
+     * Disabled until Anomaly Explorer page is fixed and properly
+     * support single point time selection
+     */
+    const highlightSwimLaneSelection = false;
+
     const globalState = {
       ml: {
         jobIds: r.jobIds,
@@ -441,8 +447,7 @@ export function alertingServiceProvider(mlClient: MlClient) {
             : {}),
         },
         mlExplorerSwimlane: {
-          // Don't highlight selection for record results
-          ...(type !== ANOMALY_RESULT_TYPE.RECORD
+          ...(highlightSwimLaneSelection
             ? {
                 selectedLanes: [
                   isInfluencerResult ? r.topInfluencers![0].influencer_field_value : 'Overall',
