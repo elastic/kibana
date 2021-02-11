@@ -44,8 +44,16 @@ interface StartDependencies {
   taskManager: TaskManagerStartContract;
 }
 
-const DEBOUNCE_UPDATE_OR_CREATE_WAIT = 300;
-const DEBOUNCE_UPDATE_OR_CREATE_MAX_WAIT = 1000;
+const DEBOUNCE_UPDATE_OR_CREATE_WAIT = 1000;
+const DEBOUNCE_UPDATE_OR_CREATE_MAX_WAIT = 5000;
+
+interface UpdateOrCreateQueueEntry {
+  deps: SearchSessionDependencies;
+  sessionId: string;
+  attributes: Partial<SearchSessionSavedObjectAttributes>;
+  resolve: () => void;
+  reject: (reason?: unknown) => void;
+}
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -53,6 +61,7 @@ function sleep(ms: number) {
 export class SearchSessionService
   implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
   private sessionConfig: SearchSessionsConfig;
+  private readonly updateOrCreateBatchQueue: UpdateOrCreateQueueEntry[] = [];
 
   constructor(private readonly logger: Logger, private readonly config: ConfigSchema) {
     this.sessionConfig = this.config.search.sessions;
@@ -82,18 +91,11 @@ export class SearchSessionService
     }
   };
 
-  private updateOrCreateBatchQueue: Array<{
-    deps: SearchSessionDependencies;
-    sessionId: string;
-    attributes: Partial<SearchSessionSavedObjectAttributes>;
-    resolve: () => void;
-    reject: (reason?: any) => void;
-  }> = [];
   private processUpdateOrCreateBatchQueue = debounce(
     () => {
       const queue = [...this.updateOrCreateBatchQueue];
-      this.updateOrCreateBatchQueue = [];
       if (queue.length === 0) return;
+      this.updateOrCreateBatchQueue.length = 0;
       const batchedSessionAttributes = queue.reduce((res, next) => {
         if (!res[next.sessionId]) {
           res[next.sessionId] = next.attributes;
@@ -131,6 +133,7 @@ export class SearchSessionService
   ): Promise<void> => {
     return new Promise((resolve, reject) => {
       this.updateOrCreateBatchQueue.push({ deps, sessionId, attributes, resolve, reject });
+      // TODO: this would be better if we'd debounce per sessionId
       this.processUpdateOrCreateBatchQueue();
     });
   };
