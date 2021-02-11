@@ -18,13 +18,13 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerts/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { BaseHit, RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { calculateThresholdSignalUuid } from './utils';
 import { BuildRuleMessage } from './rule_messages';
 import { TermAggregationBucket } from '../../types';
-import { MultiAggBucket, SignalSearchResponse } from './types';
+import { MultiAggBucket, SignalSearchResponse, SignalSource } from './types';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
@@ -60,7 +60,7 @@ const getTransformedHits = (
   ruleId: string,
   filter: unknown,
   timestampOverride: TimestampOverrideOrUndefined
-): Array<BaseHit<SignalSource>> => {
+) => {
   if (isEmpty(threshold.field)) {
     const totalResults =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
@@ -74,9 +74,17 @@ const getTransformedHits = (
       logger.warn(`No hits returned, but totalResults >= threshold.value (${threshold.value})`);
       return [];
     }
+    const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
+    if (timestampArray == null) {
+      return [];
+    }
+    const timestamp = timestampArray[0];
+    if (typeof timestamp !== 'string') {
+      return [];
+    }
 
     const source = {
-      '@timestamp': get(timestampOverride ?? '@timestamp', hit.fields),
+      '@timestamp': timestamp,
       threshold_result: {
         count: totalResults,
         value: ruleId,
@@ -126,15 +134,24 @@ const getTransformedHits = (
     }, []);
   };
 
-  return getCombinations(results.aggregations.threshold_0.buckets, 0)
-    .map((bucket) => {
+  return getCombinations(results.aggregations.threshold_0.buckets, 0).reduce(
+    (acc: Array<BaseHit<SignalSource>>, bucket) => {
       const hit = bucket.topThresholdHits?.hits.hits[0];
       if (hit == null) {
-        return null;
+        return acc;
+      }
+
+      const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
+      if (timestampArray == null) {
+        return [];
+      }
+      const timestamp = timestampArray[0];
+      if (typeof timestamp !== 'string') {
+        return [];
       }
 
       const source = {
-        '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
+        '@timestamp': timestamp,
         threshold_result: {
           count: bucket.docCount,
           value: bucket.terms,
@@ -142,7 +159,7 @@ const getTransformedHits = (
         },
       };
 
-      return {
+      acc.push({
         _index: inputIndex,
         _id: calculateThresholdSignalUuid(
           ruleId,
@@ -151,9 +168,11 @@ const getTransformedHits = (
           bucket.terms.join(',')
         ),
         _source: source,
-      };
-    })
-    .filter((bucket) => bucket != null);
+      });
+      return acc;
+    },
+    []
+  );
 };
 
 export const transformThresholdResultsToEcs = (

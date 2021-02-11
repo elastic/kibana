@@ -192,6 +192,8 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   threshold: {
     field: [''],
     value: '100',
+    cardinality_field: [''],
+    cardinality_value: 2,
   },
 });
 

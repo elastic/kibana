@@ -51,7 +51,7 @@ export interface SignalsStatusParams {
 
 export interface ThresholdResult {
   count: number;
-  value: string;
+  value: string | string[];
 }
 
 export interface SignalSource {
@@ -280,7 +280,7 @@ export interface ThresholdAggregationBucket extends TermAggregationBucket {
 
 export interface MultiAggBucket {
   terms: string[];
-  docCount?: number | undefined;
+  docCount: number;
   topThresholdHits?:
     | {
         hits: {

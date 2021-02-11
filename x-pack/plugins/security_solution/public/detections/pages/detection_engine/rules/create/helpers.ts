@@ -221,8 +221,8 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
           threshold: {
             field: ruleFields.threshold?.field ?? [],
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
-            cardinality_field: ruleFields.threshold?.cardinality_field[0] ?? '',
-            cardinality_value: parseInt(ruleFields.threshold?.cardinality_value, 10) ?? 0,
+            cardinality_field: ruleFields.threshold.cardinality_field[0] ?? '',
+            cardinality_value: ruleFields.threshold.cardinality_value,
           },
         }),
       }

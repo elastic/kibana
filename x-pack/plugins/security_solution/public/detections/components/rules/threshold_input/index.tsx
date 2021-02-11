@@ -20,7 +20,7 @@ export interface FieldValueThreshold {
   field: string[];
   value: string;
   cardinality_field: string[];
-  cardinality_value: string;
+  cardinality_value: number;
 }
 
 interface ThresholdInputProps {

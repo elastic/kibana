@@ -83,7 +83,7 @@ const stepDefineDefaultValue: DefineStepRule = {
     field: [],
     value: '200',
     cardinality_field: [],
-    cardinality_value: '2',
+    cardinality_value: 2,
   },
   timeline: {
     id: null,
