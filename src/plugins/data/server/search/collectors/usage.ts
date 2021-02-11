@@ -11,6 +11,7 @@ import type { CoreSetup, Logger } from 'kibana/server';
 import type { IEsSearchResponse } from '../../../common';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
+const MAX_RETRY_COUNT = 3;
 
 export interface SearchUsage {
   trackError(): Promise<void>;
@@ -23,9 +24,9 @@ export function usageProvider(core: CoreSetup): SearchUsage {
     return coreStart.savedObjects.createInternalRepository();
   });
 
-  return {
-    trackSuccess: async (duration: number) => {
-      const repository = await getRepository();
+  const trackSuccess = async (duration: number, retryCount = 0) => {
+    const repository = await getRepository();
+    try {
       await repository.incrementCounter(SAVED_OBJECT_ID, SAVED_OBJECT_ID, [
         { fieldName: 'successCount' },
         {
@@ -33,14 +34,27 @@ export function usageProvider(core: CoreSetup): SearchUsage {
           incrementBy: duration,
         },
       ]);
-    },
-    trackError: async () => {
-      const repository = await getRepository();
+    } catch (e) {
+      if (e.statusCode === 409 && retryCount < MAX_RETRY_COUNT) {
+        setTimeout(() => trackSuccess(duration, retryCount + 1), 1000);
+      }
+    }
+  };
+
+  const trackError = async (retryCount = 0) => {
+    const repository = await getRepository();
+    try {
       await repository.incrementCounter(SAVED_OBJECT_ID, SAVED_OBJECT_ID, [
         { fieldName: 'errorCount' },
       ]);
-    },
+    } catch (e) {
+      if (e.statusCode === 409 && retryCount < MAX_RETRY_COUNT) {
+        setTimeout(() => trackError(retryCount + 1), 1000);
+      }
+    }
   };
+
+  return { trackSuccess, trackError };
 }
 
 /**
