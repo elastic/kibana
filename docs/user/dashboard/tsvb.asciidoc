@@ -24,7 +24,9 @@ When you open *TSVB*, click *Panel options*, then verify the following:
 ==== Visualization options
 
 Time series::
-  Supports annotations based on timestamped documents in a separate {es} index.
+  The Y axis defaults to showing the full range of data, including zero. To scale the axis from
+  the minimum to maximum values of the data automatically, go to *Series > Options > Fill* and set *Fill to 0*.
+  Annotations can be added to the X axis from based on timestamped documents in a separate {es} index.
 
 All other chart types::
   *Panel options > Data timerange mode* controls the timespan used for matching documents.
