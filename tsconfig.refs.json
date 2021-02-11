@@ -113,5 +113,6 @@
     { "path": "./x-pack/plugins/cross_cluster_replication/tsconfig.json"},
     { "path": "./x-pack/plugins/index_lifecycle_management/tsconfig.json"},
     { "path": "./x-pack/plugins/uptime/tsconfig.json" },
+    { "path": "./x-pack/plugins/xpack_legacy/tsconfig.json" },
   ]
 }

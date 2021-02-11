@@ -8,8 +8,7 @@
     "plugins/case/**/*",
     "plugins/lists/**/*",
     "plugins/logstash/**/*",
-    "plugins/security_solution/**/*",
-    "plugins/xpack_legacy/**/*"
+    "plugins/security_solution/**/*"
   ],
   "exclude": [
     "test/**/*",
@@ -114,5 +113,6 @@
     { "path": "./plugins/cross_cluster_replication/tsconfig.json"},
     { "path": "./plugins/index_lifecycle_management/tsconfig.json"},
     { "path": "./plugins/uptime/tsconfig.json" }
+    { "path": "./plugins/xpack_legacy/tsconfig.json" }
   ]
 }
