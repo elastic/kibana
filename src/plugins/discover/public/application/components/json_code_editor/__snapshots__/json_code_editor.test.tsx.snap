@@ -48,7 +48,6 @@ exports[`returns the \`JsonCodeEditor\` component 1`] = `
         Object {
           "automaticLayout": true,
           "fontSize": 12,
-          "lineNumbers": "off",
           "minimap": Object {
             "enabled": false,
           },

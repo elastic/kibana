@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`returns the \`JsonCodeEditor\` component 1`] = `
+exports[`returns the \`JsonCodeBlock\` component 1`] = `
 <JsonCodeEditor
   value={
     Object {
