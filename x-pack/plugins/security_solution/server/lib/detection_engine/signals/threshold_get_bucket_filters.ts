@@ -59,6 +59,9 @@ export const getThresholdBucketFilters = async ({
     buildRuleMessage,
   });
 
+  // TODO: find latest timestamp from search result for each bucket
+  // and build filter below correctly.
+
   const filters = searchResult.aggregations.threshold.buckets.reduce(
     (acc: ESFilter[], bucket: ThresholdQueryBucket): ESFilter[] => {
       const filter = {
