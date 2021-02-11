@@ -84,6 +84,7 @@
     { "path": "./x-pack/plugins/lens/tsconfig.json" },
     { "path": "./x-pack/plugins/license_management/tsconfig.json" },
     { "path": "./x-pack/plugins/licensing/tsconfig.json" },
+    { "path": "./x-pack/plugins/logstash/tsconfig.json" },
     { "path": "./x-pack/plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./x-pack/plugins/maps/tsconfig.json" },
     { "path": "./x-pack/plugins/ml/tsconfig.json" },

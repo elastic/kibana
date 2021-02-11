@@ -67,6 +67,7 @@
     { "path": "../plugins/lens/tsconfig.json" },
     { "path": "../plugins/license_management/tsconfig.json" },
     { "path": "../plugins/licensing/tsconfig.json" },
+    { "path": "../plugins/logstash/tsconfig.json" },
     { "path": "../plugins/ml/tsconfig.json" },
     { "path": "../plugins/monitoring/tsconfig.json" },
     { "path": "../plugins/observability/tsconfig.json" },
@@ -89,7 +90,7 @@
     { "path": "../plugins/remote_clusters/tsconfig.json" },
     { "path": "../plugins/cross_cluster_replication/tsconfig.json" },
     { "path": "../plugins/index_lifecycle_management/tsconfig.json"},
-    { "path": "../plugins/uptime/tsconfig.json" }
+    { "path": "../plugins/uptime/tsconfig.json" },
     { "path": "../plugins/xpack_legacy/tsconfig.json" }
   ]
 }
