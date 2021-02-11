@@ -205,7 +205,7 @@ export const hasFilterKeyError = (
   return null;
 };
 
-export const fieldDefined = (indexMappings: IndexMapping, key: string) => {
+export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
   const potentialKey = get(indexMappings, mappingKey);
 
@@ -214,14 +214,16 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string) => {
   // such as `x.attributes.field.text` where `field` is mapped to both text
   // and keyword
   if (potentialKey == null) {
-    const indexOfLastProperties = mappingKey.lastIndexOf('properties');
+    const propertiesAttribute = 'properties';
+    const indexOfLastProperties = mappingKey.lastIndexOf(propertiesAttribute);
     const fieldMapping = mappingKey.substr(0, indexOfLastProperties);
-    // The 11 here refers to the length of `properties.`
-    const fieldType = mappingKey.substr(mappingKey.lastIndexOf('properties') + 11);
-
+    const fieldType = mappingKey.substr(
+      mappingKey.lastIndexOf(propertiesAttribute) + `${propertiesAttribute}.`.length
+    );
     const mapping = `${fieldMapping}fields.${fieldType}`;
-    return get(indexMappings, mapping) != null;
-  }
 
-  return get(indexMappings, mappingKey) != null;
+    return get(indexMappings, mapping) != null;
+  } else {
+    return true;
+  }
 };
