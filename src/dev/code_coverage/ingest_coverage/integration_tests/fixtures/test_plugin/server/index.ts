@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { Project } from './project';
-export { filterProjectsByFlag } from './projects';
-export { getTsProjectForAbsolutePath } from './get_ts_project_for_absolute_path';
-export { execInProjects } from './exec_in_projects';
-export { runTypeCheckCli } from './run_type_check_cli';
-export * from './build_ts_refs_cli';
+import { Plugin } from './plugin';
+
+export function plugin() {
+  return new Plugin();
+}

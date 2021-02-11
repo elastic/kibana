@@ -6,9 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { Project } from './project';
-export { filterProjectsByFlag } from './projects';
-export { getTsProjectForAbsolutePath } from './get_ts_project_for_absolute_path';
-export { execInProjects } from './exec_in_projects';
-export { runTypeCheckCli } from './run_type_check_cli';
-export * from './build_ts_refs_cli';
+import { CoreSetup } from 'kibana/server';
+
+export class Plugin {
+  constructor() {}
+
+  public setup(core: CoreSetup) {}
+
+  public start() {
+    // called after all plugins are set up
+  }
+
+  public stop() {
+    // called when plugin is torn down during Kibana's shutdown sequence
+  }
+}
