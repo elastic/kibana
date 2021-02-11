@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -14,10 +15,10 @@ import {
   createDatasetsFilters,
 } from './common';
 import {
-  Sort,
+  AnomaliesSort,
+  LogEntryAnomalyDatasets,
   Pagination,
-  GetLogEntryAnomaliesRequestPayload,
-} from '../../../../common/http_api/log_analysis';
+} from '../../../../common/log_analysis';
 
 // TODO: Reassess validity of this against ML docs
 const TIEBREAKER_FIELD = '_doc';
@@ -32,9 +33,9 @@ export const createLogEntryAnomaliesQuery = (
   jobIds: string[],
   startTime: number,
   endTime: number,
-  sort: Sort,
+  sort: AnomaliesSort,
   pagination: Pagination,
-  datasets: GetLogEntryAnomaliesRequestPayload['data']['datasets']
+  datasets?: LogEntryAnomalyDatasets
 ) => {
   const { field } = sort;
   const { pageSize } = pagination;
@@ -118,7 +119,7 @@ export const logEntryAnomaliesResponseRT = rt.intersection([
 
 export type LogEntryAnomaliesResponseRT = rt.TypeOf<typeof logEntryAnomaliesResponseRT>;
 
-const parsePaginationCursor = (sort: Sort, pagination: Pagination) => {
+const parsePaginationCursor = (sort: AnomaliesSort, pagination: Pagination) => {
   const { cursor } = pagination;
   const { direction } = sort;
 

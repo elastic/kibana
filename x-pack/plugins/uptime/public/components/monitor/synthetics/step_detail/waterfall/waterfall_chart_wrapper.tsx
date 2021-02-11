@@ -1,47 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiHealth } from '@elastic/eui';
+import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/public';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
-import {
-  WaterfallProvider,
-  WaterfallChart,
-  MiddleTruncatedText,
-  RenderItem,
-} from '../../waterfall';
-
-export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
-  const { status } = item;
-
-  const isErrorStatusCode = (statusCode: number) => {
-    const is400 = statusCode >= 400 && statusCode <= 499;
-    const is500 = statusCode >= 500 && statusCode <= 599;
-    const isSpecific300 = statusCode === 301 || statusCode === 307 || statusCode === 308;
-    return is400 || is500 || isSpecific300;
-  };
-
-  return (
-    <>
-      {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
-      ) : (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
-          </EuiFlexItem>
-          <EuiFlexItem component="span" grow={false}>
-            <EuiBadge color="danger">{status}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </>
-  );
-};
+import { WaterfallProvider, WaterfallChart, RenderItem } from '../../waterfall';
+import { WaterfallFilter } from './waterfall_filter';
+import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
@@ -53,23 +24,64 @@ interface Props {
 }
 
 export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
+  const [query, setQuery] = useState<string>('');
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [onlyHighlighted, setOnlyHighlighted] = useState(false);
+
   const [networkData] = useState<NetworkItems>(data);
 
-  const { series, domain } = useMemo(() => {
-    return getSeriesAndDomain(networkData);
-  }, [networkData]);
+  const hasFilters = activeFilters.length > 0;
+
+  const { series, domain, totalHighlightedRequests } = useMemo(() => {
+    return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
+  }, [networkData, query, activeFilters, onlyHighlighted]);
 
   const sidebarItems = useMemo(() => {
-    return getSidebarItems(networkData);
-  }, [networkData]);
+    return getSidebarItems(networkData, onlyHighlighted, query, activeFilters);
+  }, [networkData, query, activeFilters, onlyHighlighted]);
 
   const legendItems = getLegendItems();
+
+  const renderFilter = useCallback(() => {
+    return (
+      <WaterfallFilter
+        query={query}
+        setQuery={setQuery}
+        activeFilters={activeFilters}
+        setActiveFilters={setActiveFilters}
+        onlyHighlighted={onlyHighlighted}
+        setOnlyHighlighted={setOnlyHighlighted}
+      />
+    );
+  }, [activeFilters, setActiveFilters, onlyHighlighted, setOnlyHighlighted, query, setQuery]);
+
+  const renderSidebarItem: RenderItem<SidebarItem> = useCallback(
+    (item) => {
+      return (
+        <WaterfallSidebarItem
+          item={item}
+          renderFilterScreenReaderText={hasFilters && !onlyHighlighted}
+        />
+      );
+    },
+    [hasFilters, onlyHighlighted]
+  );
+
+  useTrackMetric({ app: 'uptime', metric: 'waterfall_chart_view', metricType: METRIC_TYPE.COUNT });
+  useTrackMetric({
+    app: 'uptime',
+    metric: 'waterfall_chart_view',
+    metricType: METRIC_TYPE.COUNT,
+    delay: 15000,
+  });
 
   return (
     <WaterfallProvider
       totalNetworkRequests={total}
       fetchedNetworkRequests={networkData.length}
+      highlightedNetworkRequests={totalHighlightedRequests}
       data={series}
+      showOnlyHighlightedNetworkRequests={onlyHighlighted}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
       renderTooltipItem={(tooltipProps) => {
@@ -80,10 +92,19 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
         tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
         domain={domain}
         barStyleAccessor={(datum) => {
+          if (!datum.datum.config.isHighlighted) {
+            return {
+              rect: {
+                fill: datum.datum.config.colour,
+                opacity: '0.1',
+              },
+            };
+          }
           return datum.datum.config.colour;
         }}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
+        renderFilter={renderFilter}
         fullHeight={true}
       />
     </WaterfallProvider>

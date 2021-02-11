@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -30,6 +31,13 @@ describe('Cases connector incident fields', () => {
   beforeEach(() => {
     cleanKibana();
     cy.intercept('GET', '/api/cases/configure/connectors/_find', mockConnectorsResponse);
+    cy.intercept('POST', `/api/actions/action/${connectorIds.sn}/_execute`, (req) => {
+      const response =
+        req.body.params.subAction === 'getChoices'
+          ? executeResponses.servicenow.choices
+          : { status: 'ok', data: [] };
+      req.reply(response);
+    });
     cy.intercept('POST', `/api/actions/action/${connectorIds.jira}/_execute`, (req) => {
       const response =
         req.body.params.subAction === 'issueTypes'

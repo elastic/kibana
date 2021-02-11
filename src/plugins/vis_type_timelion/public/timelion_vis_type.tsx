@@ -1,16 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DefaultEditorSize } from '../../vis_default_editor/public';
-import { getTimelionRequestHandler } from './helpers/timelion_request_handler';
 import { TimelionOptionsProps } from './timelion_options';
 import { TimelionVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
@@ -22,8 +21,6 @@ const TimelionOptions = lazy(() => import('./timelion_options'));
 export const TIMELION_VIS_NAME = 'timelion';
 
 export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) {
-  const timelionRequestHandler = getTimelionRequestHandler(dependencies);
-
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return {
@@ -45,9 +42,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
       ),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
-    requestHandler: timelionRequestHandler,
     toExpressionAst,
-    responseHandler: 'none',
     inspectorAdapters: {},
     getSupportedTriggers: () => {
       return [VIS_EVENT_TO_TRIGGER.applyFilter];
@@ -57,5 +52,6 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
       showQueryBar: false,
       showFilterBar: false,
     },
+    requiresSearch: true,
   };
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Crypto, EncryptOutput } from '@elastic/node-crypto';
@@ -76,7 +77,7 @@ interface EncryptedSavedObjectsServiceOptions {
   /**
    * NodeCrypto instance used for both encryption and decryption.
    */
-  primaryCrypto: Crypto;
+  primaryCrypto?: Crypto;
 
   /**
    * NodeCrypto instances used ONLY for decryption (i.e. rotated encryption keys).
@@ -292,12 +293,17 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
-      try {
-        iteratorResult = iterator.next(
-          await this.options.primaryCrypto.encrypt(attributeValue, encryptionAAD)
-        );
-      } catch (err) {
-        iterator.throw!(err);
+      // We check this inside of the iterator to throw only if we do need to encrypt anything.
+      if (this.options.primaryCrypto) {
+        try {
+          iteratorResult = iterator.next(
+            await this.options.primaryCrypto.encrypt(attributeValue, encryptionAAD)
+          );
+        } catch (err) {
+          iterator.throw!(err);
+        }
+      } else {
+        iterator.throw!(new Error('Encryption is disabled because of missing encryption key.'));
       }
     }
 
@@ -323,12 +329,17 @@ export class EncryptedSavedObjectsService {
     let iteratorResult = iterator.next();
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
-      try {
-        iteratorResult = iterator.next(
-          this.options.primaryCrypto.encryptSync(attributeValue, encryptionAAD)
-        );
-      } catch (err) {
-        iterator.throw!(err);
+      // We check this inside of the iterator to throw only if we do need to encrypt anything.
+      if (this.options.primaryCrypto) {
+        try {
+          iteratorResult = iterator.next(
+            this.options.primaryCrypto.encryptSync(attributeValue, encryptionAAD)
+          );
+        } catch (err) {
+          iterator.throw!(err);
+        }
+      } else {
+        iterator.throw!(new Error('Encryption is disabled because of missing encryption key.'));
       }
     }
 
@@ -357,7 +368,11 @@ export class EncryptedSavedObjectsService {
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
 
-      let decryptionError;
+      // We check this inside of the iterator to throw only if we do need to decrypt anything.
+      let decryptionError =
+        decrypters.length === 0
+          ? new Error('Decryption is disabled because of missing decryption keys.')
+          : undefined;
       for (const decrypter of decrypters) {
         try {
           iteratorResult = iterator.next(await decrypter.decrypt(attributeValue, encryptionAAD));
@@ -401,7 +416,11 @@ export class EncryptedSavedObjectsService {
     while (!iteratorResult.done) {
       const [attributeValue, encryptionAAD] = iteratorResult.value;
 
-      let decryptionError;
+      // We check this inside of the iterator to throw only if we do need to decrypt anything.
+      let decryptionError =
+        decrypters.length === 0
+          ? new Error('Decryption is disabled because of missing decryption keys.')
+          : undefined;
       for (const decrypter of decrypters) {
         try {
           iteratorResult = iterator.next(decrypter.decryptSync(attributeValue, encryptionAAD));
@@ -540,6 +559,9 @@ export class EncryptedSavedObjectsService {
       return this.options.decryptionOnlyCryptos;
     }
 
-    return [this.options.primaryCrypto, ...(this.options.decryptionOnlyCryptos ?? [])];
+    return [
+      ...(this.options.primaryCrypto ? [this.options.primaryCrypto] : []),
+      ...(this.options.decryptionOnlyCryptos ?? []),
+    ];
   }
 }

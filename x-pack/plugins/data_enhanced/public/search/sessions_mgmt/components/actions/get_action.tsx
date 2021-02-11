@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,37 +10,47 @@ import { IClickActionDescriptor } from '../';
 import extendSessionIcon from '../../icons/extend_session.svg';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
-import { CancelButton } from './cancel_button';
+import { DeleteButton } from './delete_button';
 import { ExtendButton } from './extend_button';
-import { ReloadButton } from './reload_button';
+import { InspectButton } from './inspect_button';
 import { ACTION, OnActionComplete } from './types';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
   actionType: string,
-  { id, name, reloadUrl }: UISession,
+  uiSession: UISession,
   onActionComplete: OnActionComplete
 ): IClickActionDescriptor | null => {
+  const { id, name, expires } = uiSession;
   switch (actionType) {
-    case ACTION.CANCEL:
+    case ACTION.INSPECT:
+      return {
+        iconType: 'document',
+        textColor: 'default',
+        label: <InspectButton searchSession={uiSession} />,
+      };
+
+    case ACTION.DELETE:
       return {
         iconType: 'crossInACircleFilled',
         textColor: 'default',
-        label: <CancelButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
-      };
-
-    case ACTION.RELOAD:
-      return {
-        iconType: 'refresh',
-        textColor: 'default',
-        label: <ReloadButton api={api} reloadUrl={reloadUrl} />,
+        label: <DeleteButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
       };
 
     case ACTION.EXTEND:
       return {
         iconType: extendSessionIcon,
         textColor: 'default',
-        label: <ExtendButton api={api} id={id} name={name} onActionComplete={onActionComplete} />,
+        label: (
+          <ExtendButton
+            api={api}
+            id={id}
+            name={name}
+            expires={expires}
+            extendBy={api.getExtendByDuration()}
+            onActionComplete={onActionComplete}
+          />
+        ),
       };
 
     default:

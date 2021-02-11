@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -10,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiFlexItem } from '@elastic/eui';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { FieldDataRowProps } from '../../types';
+import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 
 const metaTableColumns = [
   {
@@ -59,7 +61,7 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
           defaultMessage="percentage"
         />
       ),
-      value: `${(count / sampleCount) * 100}%`,
+      value: `${roundToDecimalPlace((count / sampleCount) * 100)}%`,
     },
     {
       function: 'distinctValues',

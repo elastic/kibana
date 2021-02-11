@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -60,7 +60,8 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'lodash';
-import { map } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { defer, from } from 'rxjs';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
@@ -171,7 +172,49 @@ export class SearchSource {
   /**
    * returns all search source fields
    */
-  getFields() {
+  getFields(recurse = false): SearchSourceFields {
+    let thisFilter = this.fields.filter; // type is single value, array, or function
+    if (thisFilter) {
+      if (typeof thisFilter === 'function') {
+        thisFilter = thisFilter() || []; // type is single value or array
+      }
+
+      if (Array.isArray(thisFilter)) {
+        thisFilter = [...thisFilter];
+      } else {
+        thisFilter = [thisFilter];
+      }
+    } else {
+      thisFilter = [];
+    }
+
+    if (recurse) {
+      const parent = this.getParent();
+      if (parent) {
+        const parentFields = parent.getFields(recurse);
+
+        let parentFilter = parentFields.filter; // type is single value, array, or function
+        if (parentFilter) {
+          if (typeof parentFilter === 'function') {
+            parentFilter = parentFilter() || []; // type is single value or array
+          }
+
+          if (Array.isArray(parentFilter)) {
+            thisFilter.push(...parentFilter);
+          } else {
+            thisFilter.push(parentFilter);
+          }
+        }
+
+        // add combined filters to the fields
+        const thisFields = {
+          ...this.fields,
+          filter: thisFilter,
+        };
+
+        return { ...parentFields, ...thisFields };
+      }
+    }
     return { ...this.fields };
   }
 
@@ -244,30 +287,35 @@ export class SearchSource {
   }
 
   /**
-   * Fetch this source and reject the returned Promise on error
-   *
-   * @async
+   * Fetch this source from Elasticsearch, returning an observable over the response(s)
+   * @param options
    */
-  async fetch(options: ISearchOptions = {}) {
+  fetch$(options: ISearchOptions = {}) {
     const { getConfig } = this.dependencies;
-    await this.requestIsStarting(options);
+    return defer(() => this.requestIsStarting(options)).pipe(
+      switchMap(() => {
+        const searchRequest = this.flatten();
+        this.history = [searchRequest];
 
-    const searchRequest = await this.flatten();
-    this.history = [searchRequest];
+        return getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)
+          ? from(this.legacyFetch(searchRequest, options))
+          : this.fetchSearch$(searchRequest, options);
+      }),
+      tap((response) => {
+        // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
+        if ((response as any).error) {
+          throw new RequestFailure(null, response);
+        }
+      })
+    );
+  }
 
-    let response;
-    if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
-      response = await this.legacyFetch(searchRequest, options);
-    } else {
-      response = await this.fetchSearch(searchRequest, options);
-    }
-
-    // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-    if ((response as any).error) {
-      throw new RequestFailure(null, response);
-    }
-
-    return response;
+  /**
+   * Fetch this source and reject the returned Promise on error
+   * @deprecated Use fetch$ instead
+   */
+  fetch(options: ISearchOptions = {}) {
+    return this.fetch$(options).toPromise();
   }
 
   /**
@@ -305,16 +353,16 @@ export class SearchSource {
    * Run a search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
-  private fetchSearch(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options)
-      .pipe(map(({ rawResponse }) => onResponse(searchRequest, rawResponse)))
-      .toPromise();
+    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+      map(({ rawResponse }) => onResponse(searchRequest, rawResponse))
+    );
   }
 
   /**
@@ -599,9 +647,8 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields() {
-    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
-      'sort',
+  public getSerializedFields(recurse = false) {
+    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(recurse), [
       'size',
     ]);
     let serializedSearchSourceFields: SearchSourceFields = {

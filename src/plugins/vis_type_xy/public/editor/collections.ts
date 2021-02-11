@@ -1,9 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * and the Server Side Public License, v 1; you may not use this file except in
- * compliance with, at your election, the Elastic License or the Server Side
- * Public License, v 1.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -143,39 +143,38 @@ export const getRotateOptions = () => [
   },
 ];
 
-export const getFittingFunctions = () =>
-  [
-    {
-      value: Fit.None,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.none', {
-        defaultMessage: 'Hide (Do not fill gaps)',
-      }),
-    },
-    {
-      value: Fit.Zero,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.zero', {
-        defaultMessage: 'Zero (Fill gaps with zeros)',
-      }),
-    },
-    {
-      value: Fit.Linear,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.linear', {
-        defaultMessage: 'Linear (Fill gaps with a line)',
-      }),
-    },
-    {
-      value: Fit.Carry,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.carry', {
-        defaultMessage: 'Last (Fill gaps with the last value)',
-      }),
-    },
-    {
-      value: Fit.Lookahead,
-      text: i18n.translate('visTypeXy.fittingFunctionsTitle.lookahead', {
-        defaultMessage: 'Next (Fill gaps with the next value)',
-      }),
-    },
-  ] as const;
+export const getFittingFunctions = () => [
+  {
+    value: Fit.None,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.none', {
+      defaultMessage: 'Hide (Do not fill gaps)',
+    }),
+  },
+  {
+    value: Fit.Zero,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.zero', {
+      defaultMessage: 'Zero (Fill gaps with zeros)',
+    }),
+  },
+  {
+    value: Fit.Linear,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.linear', {
+      defaultMessage: 'Linear (Fill gaps with a line)',
+    }),
+  },
+  {
+    value: Fit.Carry,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.carry', {
+      defaultMessage: 'Last (Fill gaps with the last value)',
+    }),
+  },
+  {
+    value: Fit.Lookahead,
+    text: i18n.translate('visTypeXy.fittingFunctionsTitle.lookahead', {
+      defaultMessage: 'Next (Fill gaps with the next value)',
+    }),
+  },
+];
 
 export const getConfigCollections = () => ({
   legendPositions: getPositions(),

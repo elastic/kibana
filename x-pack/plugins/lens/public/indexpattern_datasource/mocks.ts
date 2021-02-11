@@ -1,12 +1,89 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DragContextState } from '../drag_drop';
 import { getFieldByNameFactory } from './pure_helpers';
-import type { IndexPattern } from './types';
+import type { IndexPattern, IndexPatternField } from './types';
+
+export const createMockedIndexPatternWithoutType = (
+  typeToFilter: IndexPatternField['type']
+): IndexPattern => {
+  const fields = [
+    {
+      name: 'timestamp',
+      displayName: 'timestampLabel',
+      type: 'date',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'start_date',
+      displayName: 'start_date',
+      type: 'date',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'bytes',
+      displayName: 'bytes',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'memory',
+      displayName: 'memory',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'source',
+      displayName: 'source',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
+      name: 'unsupported',
+      displayName: 'unsupported',
+      type: 'geo',
+      aggregatable: true,
+      searchable: true,
+    },
+    {
+      name: 'dest',
+      displayName: 'dest',
+      type: 'string',
+      aggregatable: true,
+      searchable: true,
+      esTypes: ['keyword'],
+    },
+    {
+      name: 'scripted',
+      displayName: 'Scripted',
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+      scripted: true,
+      lang: 'painless',
+      script: '1234',
+    },
+  ].filter(({ type }) => type !== typeToFilter);
+  return {
+    id: '1',
+    title: 'my-fake-index-pattern',
+    timeFieldName: 'timestamp',
+    hasRestrictions: false,
+    fields,
+    getFieldByName: getFieldByNameFactory(fields),
+  };
+};
 
 export const createMockedIndexPattern = (): IndexPattern => {
   const fields = [
@@ -171,5 +248,11 @@ export function createMockedDragDropContext(): jest.Mocked<DragContextState> {
   return {
     dragging: undefined,
     setDragging: jest.fn(),
+    activeDropTarget: undefined,
+    setActiveDropTarget: jest.fn(),
+    keyboardMode: false,
+    setKeyboardMode: jest.fn(),
+    setA11yMessage: jest.fn(),
+    registerDropTarget: jest.fn(),
   };
 }

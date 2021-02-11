@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
@@ -41,7 +43,7 @@ export function PackageCard({
       title={title || ''}
       description={description}
       icon={<PackageIcon icons={icons} packageName={name} version={version} size="xl" />}
-      href={getHref('integration_details', { pkgkey: `${name}-${urlVersion}` })}
+      href={getHref('integration_details_overview', { pkgkey: `${name}-${urlVersion}` })}
       betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
       betaBadgeTooltipContent={
         release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined

@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { LogEntryCategory } from '../../../../../../common/http_api/log_analysis';
-import { TimeRange } from '../../../../../../common/http_api/shared';
+import { LogEntryCategory } from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time';
 import { BetaBadge } from '../../../../../components/beta_badge';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 import { RecreateJobButton } from '../../../../../components/logging/log_analysis_setup/create_job_button';

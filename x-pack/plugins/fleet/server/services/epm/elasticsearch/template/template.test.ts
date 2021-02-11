@@ -1,14 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 import path from 'path';
+import { RegistryDataStream } from '../../../../types';
 import { Field, processFields } from '../../fields/field';
-import { generateMappings, getTemplate } from './template';
+import {
+  generateMappings,
+  getTemplate,
+  getTemplatePriority,
+  generateTemplateIndexPattern,
+} from './template';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({
@@ -22,16 +29,17 @@ expect.addSnapshotSerializer({
 });
 
 test('get template', () => {
-  const templateName = 'logs-nginx-access-abcd';
+  const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
   const template = getTemplate({
     type: 'logs',
-    templateName,
+    templateIndexPattern,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
+    templatePriority: 200,
   });
-  expect(template.index_patterns).toStrictEqual([`${templateName}-*`]);
+  expect(template.index_patterns).toStrictEqual([templateIndexPattern]);
 });
 
 test('adds composed_of correctly', () => {
@@ -39,10 +47,11 @@ test('adds composed_of correctly', () => {
 
   const template = getTemplate({
     type: 'logs',
-    templateName: 'name',
+    templateIndexPattern: 'name-*',
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates,
+    templatePriority: 200,
   });
   expect(template.composed_of).toStrictEqual(composedOfTemplates);
 });
@@ -52,35 +61,36 @@ test('adds empty composed_of correctly', () => {
 
   const template = getTemplate({
     type: 'logs',
-    templateName: 'name',
+    templateIndexPattern: 'name-*',
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates,
+    templatePriority: 200,
   });
   expect(template.composed_of).toStrictEqual(composedOfTemplates);
 });
 
 test('adds hidden field correctly', () => {
-  const templateWithHiddenName = 'logs-nginx-access-abcd';
+  const templateIndexPattern = 'logs-nginx.access-abcd-*';
 
   const templateWithHidden = getTemplate({
     type: 'logs',
-    templateName: templateWithHiddenName,
+    templateIndexPattern,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
+    templatePriority: 200,
     hidden: true,
   });
   expect(templateWithHidden.data_stream.hidden).toEqual(true);
 
-  const templateWithoutHiddenName = 'logs-nginx-access-efgh';
-
   const templateWithoutHidden = getTemplate({
     type: 'logs',
-    templateName: templateWithoutHiddenName,
+    templateIndexPattern,
     packageName: 'nginx',
     mappings: { properties: {} },
     composedOfTemplates: [],
+    templatePriority: 200,
   });
   expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
 });
@@ -94,10 +104,11 @@ test('tests loading base.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'logs',
-    templateName: 'foo',
+    templateIndexPattern: 'foo-*',
     packageName: 'nginx',
     mappings,
     composedOfTemplates: [],
+    templatePriority: 200,
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -112,10 +123,11 @@ test('tests loading coredns.logs.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'logs',
-    templateName: 'foo',
+    templateIndexPattern: 'foo-*',
     packageName: 'coredns',
     mappings,
     composedOfTemplates: [],
+    templatePriority: 200,
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -130,10 +142,11 @@ test('tests loading system.yml', () => {
   const mappings = generateMappings(processedFields);
   const template = getTemplate({
     type: 'metrics',
-    templateName: 'whatsthis',
+    templateIndexPattern: 'whatsthis-*',
     packageName: 'system',
     mappings,
     composedOfTemplates: [],
+    templatePriority: 200,
   });
 
   expect(template).toMatchSnapshot(path.basename(ymlPath));
@@ -518,4 +531,63 @@ test('tests constant_keyword field type handling', () => {
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
   expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+});
+
+test('tests priority and index pattern for data stream without dataset_is_prefix', () => {
+  const dataStreamDatasetIsPrefixUnset = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixUnset = 'metrics-package.dataset-*';
+  const templatePriorityDatasetIsPrefixUnset = 200;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixUnset);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixUnset);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixUnset);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixUnset);
+});
+
+test('tests priority and index pattern for data stream with dataset_is_prefix set to false', () => {
+  const dataStreamDatasetIsPrefixFalse = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+    dataset_is_prefix: false,
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixFalse = 'metrics-package.dataset-*';
+  const templatePriorityDatasetIsPrefixFalse = 200;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixFalse);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixFalse);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixFalse);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixFalse);
+});
+
+test('tests priority and index pattern for data stream with dataset_is_prefix set to true', () => {
+  const dataStreamDatasetIsPrefixTrue = {
+    type: 'metrics',
+    dataset: 'package.dataset',
+    title: 'test data stream',
+    release: 'experimental',
+    package: 'package',
+    path: 'path',
+    ingest_pipeline: 'default',
+    dataset_is_prefix: true,
+  } as RegistryDataStream;
+  const templateIndexPatternDatasetIsPrefixTrue = 'metrics-package.dataset.*-*';
+  const templatePriorityDatasetIsPrefixTrue = 150;
+  const templateIndexPattern = generateTemplateIndexPattern(dataStreamDatasetIsPrefixTrue);
+  const templatePriority = getTemplatePriority(dataStreamDatasetIsPrefixTrue);
+
+  expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
+  expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
 });

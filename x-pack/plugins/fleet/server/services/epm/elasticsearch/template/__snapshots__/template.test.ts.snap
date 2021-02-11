@@ -95,8 +95,7 @@ exports[`tests loading base.yml: base.yml 1`] = `
         "managed_by": "ingest-manager",
         "managed": true
       }
-    },
-    "aliases": {}
+    }
   },
   "data_stream": {},
   "composed_of": [],
@@ -205,8 +204,7 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
         "managed_by": "ingest-manager",
         "managed": true
       }
-    },
-    "aliases": {}
+    }
   },
   "data_stream": {},
   "composed_of": [],
@@ -1699,8 +1697,7 @@ exports[`tests loading system.yml: system.yml 1`] = `
         "managed_by": "ingest-manager",
         "managed": true
       }
-    },
-    "aliases": {}
+    }
   },
   "data_stream": {},
   "composed_of": [],

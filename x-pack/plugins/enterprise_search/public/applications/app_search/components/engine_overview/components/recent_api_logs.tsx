@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -16,9 +17,9 @@ import {
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_API_LOGS_PATH } from '../../../routes';
+import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { generateEnginePath } from '../../engine';
 
-import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { VIEW_API_LOGS } from '../constants';
 
 export const RecentApiLogs: React.FC = () => {

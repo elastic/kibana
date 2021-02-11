@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
-import { formatApiName } from '../../utils/format_api_name';
-import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
-
-import { HttpLogic } from '../../../shared/http';
+import { Meta } from '../../../../../common/types';
 import {
   clearFlashMessages,
   setSuccessMessage,
   flashAPIErrors,
 } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
-
-import { Meta } from '../../../../../common/types';
 import { Engine } from '../../types';
+import { formatApiName } from '../../utils/format_api_name';
+
+import { ApiTokenTypes, CREATE_MESSAGE, UPDATE_MESSAGE, DELETE_MESSAGE } from './constants';
+
 import { ApiToken, CredentialsDetails, TokenReadWrite } from './types';
 
 export const defaultApiToken: ApiToken = {

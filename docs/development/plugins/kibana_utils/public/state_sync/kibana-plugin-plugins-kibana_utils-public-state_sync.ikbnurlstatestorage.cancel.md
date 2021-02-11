@@ -4,7 +4,7 @@
 
 ## IKbnUrlStateStorage.cancel property
 
-cancels any pending url updates
+Cancels any pending url updates
 
 <b>Signature:</b>
 

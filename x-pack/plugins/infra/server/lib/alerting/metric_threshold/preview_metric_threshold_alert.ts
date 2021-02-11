@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { first, zip } from 'lodash';
@@ -13,6 +14,7 @@ import {
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { PreviewResult } from '../common/types';
 import { MetricExpressionParams } from './types';
 import { evaluateAlert } from './lib/evaluate_alert';
 
@@ -38,7 +40,7 @@ export const previewMetricThresholdAlert: (
   params: PreviewMetricThresholdAlertParams,
   iterations?: number,
   precalculatedNumberOfGroups?: number
-) => Promise<number[][]> = async (
+) => Promise<PreviewResult[]> = async (
   {
     callCluster,
     params,
@@ -97,6 +99,7 @@ export const previewMetricThresholdAlert: (
           numberOfResultBuckets / alertResultsPerExecution
         );
         let numberOfTimesFired = 0;
+        let numberOfTimesWarned = 0;
         let numberOfNoDataResults = 0;
         let numberOfErrors = 0;
         let numberOfNotifications = 0;
@@ -110,6 +113,9 @@ export const previewMetricThresholdAlert: (
           const allConditionsFiredInMappedBucket = alertResults.every(
             (alertResult) => alertResult[group].shouldFire[mappedBucketIndex]
           );
+          const allConditionsWarnInMappedBucket =
+            !allConditionsFiredInMappedBucket &&
+            alertResults.every((alertResult) => alertResult[group].shouldWarn[mappedBucketIndex]);
           const someConditionsNoDataInMappedBucket = alertResults.some((alertResult) => {
             const hasNoData = alertResult[group].isNoData as boolean[];
             return hasNoData[mappedBucketIndex];
@@ -130,6 +136,9 @@ export const previewMetricThresholdAlert: (
           } else if (allConditionsFiredInMappedBucket) {
             numberOfTimesFired++;
             notifyWithThrottle();
+          } else if (allConditionsWarnInMappedBucket) {
+            numberOfTimesWarned++;
+            notifyWithThrottle();
           } else if (throttleTracker > 0) {
             throttleTracker += alertIntervalInSeconds;
           }
@@ -137,7 +146,13 @@ export const previewMetricThresholdAlert: (
             throttleTracker = 0;
           }
         }
-        return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors, numberOfNotifications];
+        return {
+          fired: numberOfTimesFired,
+          warning: numberOfTimesWarned,
+          noData: numberOfNoDataResults,
+          error: numberOfErrors,
+          notifications: numberOfNotifications,
+        };
       })
     );
     return previewResults;
@@ -198,7 +213,12 @@ export const previewMetricThresholdAlert: (
           .reduce((a, b) => {
             if (!a) return b;
             if (!b) return a;
-            return [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]];
+            const res = { ...a };
+            const entries = (Object.entries(b) as unknown) as Array<[keyof PreviewResult, number]>;
+            for (const [key, value] of entries) {
+              res[key] += value;
+            }
+            return res;
           })
       );
       return zippedResult;

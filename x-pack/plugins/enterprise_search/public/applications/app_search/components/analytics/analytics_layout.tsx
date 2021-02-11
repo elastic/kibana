@@ -1,21 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+
 import { useValues, useActions } from 'kea';
 
-import { KibanaLogic } from '../../../shared/kibana';
+import { EuiSpacer } from '@elastic/eui';
+
 import { FlashMessages } from '../../../shared/flash_messages';
+import { KibanaLogic } from '../../../shared/kibana';
 import { Loading } from '../../../shared/loading';
 
 import { LogRetentionCallout, LogRetentionOptions } from '../log_retention';
 
-import { AnalyticsLogic } from './';
 import { AnalyticsHeader, AnalyticsUnavailable } from './components';
+
+import { AnalyticsLogic } from './';
 
 interface Props {
   title: string;
@@ -47,6 +52,7 @@ export const AnalyticsLayout: React.FC<Props> = ({
       <FlashMessages />
       <LogRetentionCallout type={LogRetentionOptions.Analytics} />
       {children}
+      <EuiSpacer />
     </>
   );
 };
