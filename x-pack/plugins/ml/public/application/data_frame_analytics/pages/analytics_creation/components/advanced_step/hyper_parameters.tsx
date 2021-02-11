@@ -199,7 +199,7 @@ export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.randomizeSeedInputAriaLabel',
               {
-                defaultMessage: 'The seed to the random generator that picks training data.',
+                defaultMessage: 'The seed for the random generator used to pick training data.',
               }
             )}
             data-test-subj="mlAnalyticsCreateJobWizardRandomizeSeedInput"
