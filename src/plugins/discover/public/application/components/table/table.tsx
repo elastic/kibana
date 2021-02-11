@@ -123,7 +123,7 @@ export function DocViewTable({
                     data-test-subj={`tableDocViewRow-multifieldsTitle-${field}`}
                   >
                     <td className="kbnDocViewer__field">&nbsp;</td>
-                    <td className="kbnDocViewer__multifield_title">
+                    <td className="kbnDocViewer__multifield_title" colSpan={2}>
                       <b>
                         {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
                           defaultMessage: 'Multi fields',
@@ -134,6 +134,17 @@ export function DocViewTable({
                 ) : null}
                 {multiFields[field]
                   ? multiFields[field].map((multiField) => {
+                      const toggleColumnMulti =
+                        onRemoveColumn && onAddColumn && Array.isArray(columns)
+                          ? () => {
+                              if (columns.includes(multiField)) {
+                                onRemoveColumn(multiField);
+                              } else {
+                                onAddColumn(multiField);
+                              }
+                            }
+                          : undefined;
+
                       return (
                         <DocViewTableRow
                           key={multiField}
@@ -142,10 +153,12 @@ export function DocViewTable({
                           displayUnderscoreWarning={displayUnderscoreWarning}
                           isCollapsed={isCollapsed}
                           isCollapsible={isCollapsible}
-                          isColumnActive={Array.isArray(columns) && columns.includes(field)}
+                          isColumnActive={Array.isArray(columns) && columns.includes(multiField)}
                           onFilter={filter}
-                          onToggleCollapse={() => toggleValueCollapse(field)}
-                          onToggleColumn={toggleColumn}
+                          onToggleCollapse={() => {
+                            toggleValueCollapse(multiField);
+                          }}
+                          onToggleColumn={toggleColumnMulti}
                           value={value}
                           valueRaw={valueRaw}
                         />
