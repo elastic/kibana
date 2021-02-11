@@ -91,7 +91,7 @@ class TableVis extends Component {
       <tr key={row.key}>
         <td>
           {rowDisplay ||
-            i18n.translate('visTypeTimeseries.emptyTextColumnValue', {
+            i18n.translate('visTypeTimeseries.emptyTextValue', {
               defaultMessage: '(empty)',
             })}
         </td>

@@ -191,7 +191,7 @@ export const TimeSeries = ({
                 seriesGroupId={groupId}
                 name={
                   seriesName ||
-                  i18n.translate('visTypeTimeseries.emptyTextColumnValue', {
+                  i18n.translate('visTypeTimeseries.emptyTextValue', {
                     defaultMessage: '(empty)',
                   })
                 }
@@ -221,7 +221,7 @@ export const TimeSeries = ({
                 seriesGroupId={groupId}
                 name={
                   seriesName ||
-                  i18n.translate('visTypeTimeseries.emptyTextColumnValue', {
+                  i18n.translate('visTypeTimeseries.emptyTextValue', {
                     defaultMessage: '(empty)',
                   })
                 }

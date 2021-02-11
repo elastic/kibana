@@ -131,7 +131,7 @@ export class TopN extends Component {
         <tr key={key} onClick={this.handleClick({ lastValue, ...item })} style={styles.row}>
           <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
             {label ||
-              i18n.translate('visTypeTimeseries.emptyTextColumnValue', {
+              i18n.translate('visTypeTimeseries.emptyTextValue', {
                 defaultMessage: '(empty)',
               })}
           </td>
