@@ -32,31 +32,3 @@ it('deletes invalid files', async () => {
   expect(archives.size()).toBe(2);
   expect(Fs.existsSync(path)).toBe(false);
 });
-
-it('opens the first archive in the list of options', async () => {
-  expect.assertions(2);
-
-  const archives = await Archives.create(log, TMP);
-
-  await archives.extractMostRecent(['1234', '5678'], async (dir) => {
-    expect(Fs.readFileSync(Path.resolve(dir, 'foo/bar.txt'), 'utf8')).toMatchInlineSnapshot(
-      `"commit 1234"`
-    );
-  });
-
-  await archives.extractMostRecent(['5678', '1234'], async (dir) => {
-    expect(Fs.readFileSync(Path.resolve(dir, 'foo/bar.txt'), 'utf8')).toMatchInlineSnapshot(
-      `"commit 5678"`
-    );
-  });
-});
-
-it(`opens the second sha if the first sha isn't available`, async () => {
-  const archives = await Archives.create(log, TMP);
-
-  await archives.extractMostRecent(['foo', '1234'], async (dir) => {
-    expect(Fs.readFileSync(Path.resolve(dir, 'foo/bar.txt'), 'utf8')).toMatchInlineSnapshot(
-      `"commit 1234"`
-    );
-  });
-});
