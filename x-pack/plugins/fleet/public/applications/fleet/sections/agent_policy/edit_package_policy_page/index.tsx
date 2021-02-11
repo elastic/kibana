@@ -246,9 +246,8 @@ export const EditPackagePolicyForm = memo<{
   const cancelUrl = useMemo((): string => {
     if (packageInfo && policyId) {
       return from === 'package-edit'
-        ? getHref('integration_details', {
+        ? getHref('integration_details_policies', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-            panel: 'policies',
           })
         : getHref('policy_details', { policyId });
     }
@@ -258,9 +257,8 @@ export const EditPackagePolicyForm = memo<{
   const successRedirectPath = useMemo(() => {
     if (packageInfo && policyId) {
       return from === 'package-edit'
-        ? getPath('integration_details', {
+        ? getPath('integration_details_policies', {
             pkgkey: pkgKeyFromPackageInfo(packageInfo!),
-            panel: 'policies',
           })
         : getPath('policy_details', { policyId });
     }

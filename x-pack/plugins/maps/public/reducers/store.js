@@ -15,6 +15,7 @@ import { MAP_DESTROYED } from '../actions';
 export const DEFAULT_MAP_STORE_STATE = {
   ui: { ...DEFAULT_MAP_UI_STATE },
   map: { ...DEFAULT_MAP_STATE },
+  nonSerializableInstances: {},
 };
 
 export function createMapStore() {
@@ -35,5 +36,6 @@ export function createMapStore() {
   };
 
   const storeConfig = {};
-  return createStore(rootReducer, storeConfig, compose(...enhancers));
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  return createStore(rootReducer, storeConfig, composeEnhancers(...enhancers));
 }
