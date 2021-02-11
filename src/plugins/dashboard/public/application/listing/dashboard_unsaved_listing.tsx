@@ -136,14 +136,13 @@ export const DashboardUnsavedListing = ({
 
   const onDiscard = useCallback(
     (id?: string) => {
-      confirmDiscardUnsavedChanges(
-        overlays,
-        () => {
+      confirmDiscardUnsavedChanges(overlays, {
+        discardCallback: () => {
           dashboardPanelStorage.clearPanels(id);
           refreshUnsavedDashboards();
         },
-        createConfirmStrings.getCancelButtonText()
-      );
+        cancelButtonText: createConfirmStrings.getCancelButtonText(),
+      });
     },
     [overlays, refreshUnsavedDashboards, dashboardPanelStorage]
   );

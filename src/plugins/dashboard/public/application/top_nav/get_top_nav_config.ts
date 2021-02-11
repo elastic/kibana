@@ -40,15 +40,13 @@ export function getTopNavConfig(
         ? [
             getOptionsConfig(actions[TopNavIds.OPTIONS]),
             getShareConfig(actions[TopNavIds.SHARE]),
-            getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-            getDiscardConfig(actions[TopNavIds.DISCARD_CHANGES]),
+            getCancelConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
             getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard),
           ]
         : [
             getOptionsConfig(actions[TopNavIds.OPTIONS]),
             getShareConfig(actions[TopNavIds.SHARE]),
-            getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-            getDiscardConfig(actions[TopNavIds.DISCARD_CHANGES]),
+            getCancelConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
             getSaveConfig(actions[TopNavIds.SAVE]),
             getQuickSave(actions[TopNavIds.QUICK_SAVE]),
           ];
@@ -140,14 +138,14 @@ function getSaveConfig(action: NavAction, isNewDashboard = false) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getViewConfig(action: NavAction) {
+function getCancelConfig(action: NavAction) {
   return {
     id: 'cancel',
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
       defaultMessage: 'cancel',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
-      defaultMessage: 'Switch to view-only mode',
+      defaultMessage: 'Exit edit mode',
     }),
     testId: 'dashboardViewOnlyMode',
     run: action,

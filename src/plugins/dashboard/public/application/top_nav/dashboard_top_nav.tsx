@@ -152,23 +152,6 @@ export function DashboardTopNav({
     }
   }, [state.addPanelOverlay]);
 
-  const onDiscardChanges = useCallback(() => {
-    function revertChangesAndExitEditMode() {
-      dashboardStateManager.resetState();
-      dashboardStateManager.clearUnsavedPanels();
-
-      // We need to do a hard reset of the timepicker. appState will not reload like
-      // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-      // reload will cause it not to sync.
-      if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-        dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
-        dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
-      }
-      dashboardStateManager.switchViewMode(ViewMode.VIEW);
-    }
-    confirmDiscardUnsavedChanges(core.overlays, revertChangesAndExitEditMode);
-  }, [core.overlays, dashboardStateManager, timefilter]);
-
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
       clearAddPanel();
@@ -187,6 +170,26 @@ export function DashboardTopNav({
       chrome.recentlyAccessed,
     ]
   );
+
+  const onDiscardChanges = useCallback(() => {
+    function revertChangesAndExitEditMode() {
+      dashboardStateManager.resetState();
+      dashboardStateManager.clearUnsavedPanels();
+
+      // We need to do a hard reset of the timepicker. appState will not reload like
+      // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
+      // reload will cause it not to sync.
+      if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+        dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+        dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+      }
+      dashboardStateManager.switchViewMode(ViewMode.VIEW);
+    }
+    confirmDiscardUnsavedChanges(core.overlays, {
+      discardCallback: revertChangesAndExitEditMode,
+      keepChangesCallBack: () => onChangeViewMode(ViewMode.VIEW),
+    });
+  }, [core.overlays, dashboardStateManager, timefilter, onChangeViewMode]);
 
   /**
    * Saves the dashboard.
@@ -379,9 +382,9 @@ export function DashboardTopNav({
       [TopNavIds.FULL_SCREEN]: () => {
         dashboardStateManager.setFullScreenMode(true);
       },
-      [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
+      [TopNavIds.EXIT_EDIT_MODE]: () =>
+        dashboardStateManager.isDirty ? onDiscardChanges() : onChangeViewMode(ViewMode.VIEW),
       [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
-      [TopNavIds.DISCARD_CHANGES]: onDiscardChanges,
       [TopNavIds.SAVE]: runSave,
       [TopNavIds.QUICK_SAVE]: runQuickSave,
       [TopNavIds.CLONE]: runClone,

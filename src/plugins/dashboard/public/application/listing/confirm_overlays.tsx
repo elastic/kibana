@@ -15,7 +15,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
-  EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
 import React from 'react';
 import { OverlayStart } from '../../../../../core/public';
@@ -24,22 +23,79 @@ import { toMountPoint } from '../../services/kibana_react';
 
 export const confirmDiscardUnsavedChanges = (
   overlays: OverlayStart,
-  discardCallback: () => void,
-  cancelButtonText = leaveConfirmStrings.getCancelButtonText()
-) =>
-  overlays
-    .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
-      confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
-      cancelButtonText,
-      buttonColor: 'danger',
-      defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-      title: leaveConfirmStrings.getDiscardTitle(),
-    })
-    .then((isConfirmed) => {
-      if (isConfirmed) {
-        discardCallback();
-      }
-    });
+  options: {
+    discardCallback: () => void;
+    cancelButtonText?: string;
+    keepChangesCallBack?: () => void;
+  }
+) => {
+  const {
+    discardCallback,
+    cancelButtonText = leaveConfirmStrings.getCancelButtonText(),
+    keepChangesCallBack,
+  } = options;
+
+  const session = overlays.openModal(
+    toMountPoint(
+      <EuiModal onClose={() => session.close()}>
+        <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
+          <EuiModalHeaderTitle>{leaveConfirmStrings.getDiscardTitle()}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <EuiText>{leaveConfirmStrings.getDiscardSubtitle()}</EuiText>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty
+            data-test-subj="dashboardDiscardConfirmCancel"
+            onClick={() => session.close()}
+          >
+            {cancelButtonText}
+          </EuiButtonEmpty>
+          {keepChangesCallBack ? (
+            <EuiButtonEmpty
+              data-test-subj="dashboardDiscardConfirmKeepChanges"
+              onClick={() => {
+                keepChangesCallBack();
+                session.close();
+              }}
+            >
+              {leaveConfirmStrings.getKeepChangesButtonText()}
+            </EuiButtonEmpty>
+          ) : null}
+          <EuiButton
+            fill
+            color="danger"
+            data-test-subj="dashboardDiscardConfirmDiscardChanges"
+            onClick={() => {
+              discardCallback();
+              session.close();
+            }}
+          >
+            {leaveConfirmStrings.getConfirmButtonText()}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    ),
+    {
+      'data-test-subj': 'dashboardCreateConfirmModal',
+    }
+  );
+};
+// .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
+//   confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
+//   cancelButtonText,
+//   buttonColor: 'danger',
+//   defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+//   title: leaveConfirmStrings.getDiscardTitle(),
+// }
+// )
+// .then((isConfirmed) => {
+//   if (isConfirmed) {
+//     discardCallback();
+//   }
+// });
 
 export const confirmCreateWithUnsaved = (
   overlays: OverlayStart,

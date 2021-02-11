@@ -242,6 +242,10 @@ export const leaveConfirmStrings = {
     i18n.translate('dashboard.changeViewModeConfirmModal.cancelButtonLabel', {
       defaultMessage: 'Continue editing',
     }),
+  getKeepChangesButtonText: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.keepChangesButtonLabel', {
+      defaultMessage: 'Keep changes',
+    }),
 };
 
 export const createConfirmStrings = {
