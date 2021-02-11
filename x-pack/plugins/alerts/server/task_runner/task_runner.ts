@@ -234,7 +234,7 @@ export class TaskRunner<
       (rawAlertInstance) => new AlertInstance<InstanceState, InstanceContext>(rawAlertInstance)
     );
     const originalAlertInstances = cloneDeep(alertInstances);
-    const originalAlertInstanceIds = new Set(Object.keys(alertRawInstances));
+    const originalAlertInstanceIds = new Set(Object.keys(originalAlertInstances));
 
     const eventLogger = this.context.eventLogger;
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
