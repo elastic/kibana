@@ -17,18 +17,6 @@
 * Tasks are run on the {kib} server. 
 * In the case of alerts which are recurring background checks, upon completion the task is scheduled again according to the <<defining-alerts-general-details, check interval>>.
 
-[IMPORTANT]
-==============================================
-Because by default tasks are polled at 3 second intervals and only 10 tasks can run concurrently per {kib} instance, it is possible for alert and action tasks to be run late. This can happen if: 
-
-* Alerts use a small *check interval*. The lowest interval possible is 3 seconds, though intervals of 30 seconds or higher are recommended.
-* Many alerts or actions must be *run at once*. In this case pending tasks will queue in {es}, and be pulled 10 at a time from the queue at 3 second intervals. 
-* *Long running tasks* occupy slots for an extended time, leaving fewer slots for other tasks. 
-
-For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
-
-==============================================
-
 [float]
 === Deployment considerations
 
@@ -48,8 +36,9 @@ Or post in the https://discuss.elastic.co/[Elastic forum].
 ==============================================
 The most common problems encountered by customers can be addressed by tweaking the {kib} Task Manager or adjusting the cluster scaling strategy to better suit their unique use case.
 
-For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
-For details on diagnosing issues using the Task Manager Health endpoint, see {task-manager-health-endpoint}.
+For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings, Task Manager Settings>>.
+
+For details on diagnosing issues using the Task Manager Health endpoint, see <<task-manager-health-endpoint, Task Manager Health Monitoring>>.
 
 ==============================================
 
@@ -87,11 +76,11 @@ There are several options for addressing this sort of delay, each with their own
 Tweak the Task Manager *Max Workers*, which would allow each {kib} to pull a higher numebr of tasks per interval, but keep in mind that this could impact the performance of each {kib} instance as their workload would be higher.
 Tweak the Task Manager *Poll Interval*, which would allow each {kib} to pull scheduled tasks aty a higher rate, but keep in mind that this could impact the performance of the {es} cluster as their workload would be higher.
 
-For details on the settings that can influence the performance and throughput of Task Manager, see {task-manager-settings}.
+For details on the settings that can influence the performance and throughput of Task Manager, see <<task-manager-settings, Task Manager Settings>>.
 
 *Resolution #2*:
 An additional possible cause for delays is that *Long running tasks* may occupy slots for an extended time, leaving fewer slots for other tasks.
 
 Diagnosing such a scenario is possible by using the Task Manager Health endpoint to identify long running tasks, which could then be addressed by reconfiguring those alerts to address their extended duration on a case by case basis.
 
-For details on identifying long running tasks using the Task Manager Health endpoint, see {task-manager-health-endpoint}.
+For details on identifying long running tasks using the Task Manager Health endpoint, see <<task-manager-health-endpoint, Task Manager Health Monitoring>>.
