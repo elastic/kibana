@@ -26,7 +26,7 @@ export const DrilldownManagerProvider: React.FC<DrilldownManagerProviderProps> =
 }) => {
   const contextValue: DrilldownManagerContextValue = {
     ...rest,
-    drilldownName: '...',
+    drilldownName: 'Test',
   };
 
   return <context.Provider value={contextValue}>{children}</context.Provider>;
