@@ -37,7 +37,7 @@ import {
  * Part of context scope extracted from an embeddable
  * Expose on the scope as: `{{context.panel.id}}`, `{{context.panel.filters.[0]}}`
  */
-interface EmbeddableUrlDrilldownContextScope extends EmbeddableInput {
+export interface EmbeddableUrlDrilldownContextScope extends EmbeddableInput {
   /**
    * ID of the embeddable panel.
    */

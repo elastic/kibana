@@ -10,8 +10,7 @@
     "plugins/logstash/**/*",
     "plugins/monitoring/**/*",
     "plugins/security_solution/**/*",
-    "plugins/xpack_legacy/**/*",
-    "plugins/drilldowns/url_drilldown/**/*"
+    "plugins/xpack_legacy/**/*"
   ],
   "exclude": [
     "test/**/*",
@@ -70,6 +69,7 @@
     { "path": "./plugins/data_enhanced/tsconfig.json" },
     { "path": "./plugins/dashboard_mode/tsconfig.json" },
     { "path": "./plugins/discover_enhanced/tsconfig.json" },
+    { "path": "./plugins/drilldowns/url_drilldown/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./plugins/encrypted_saved_objects/tsconfig.json" },
     { "path": "./plugins/enterprise_search/tsconfig.json" },

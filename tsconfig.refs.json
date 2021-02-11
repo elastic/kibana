@@ -66,6 +66,7 @@
     { "path": "./x-pack/plugins/data_enhanced/tsconfig.json" },
     { "path": "./x-pack/plugins/dashboard_mode/tsconfig.json" },
     { "path": "./x-pack/plugins/discover_enhanced/tsconfig.json" },
+    { "path": "./x-pack/plugins/drilldowns/url_drilldown/tsconfig.json" },
     { "path": "./x-pack/plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./x-pack/plugins/encrypted_saved_objects/tsconfig.json" },
     { "path": "./x-pack/plugins/enterprise_search/tsconfig.json" },
