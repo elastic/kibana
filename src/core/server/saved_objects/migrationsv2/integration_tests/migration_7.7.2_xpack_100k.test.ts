@@ -48,7 +48,7 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
           appenders: {
             file: {
               type: 'file',
-              path: join(__dirname, 'migration_test_kibana.log'),
+              fileName: join(__dirname, 'migration_test_kibana.log'),
               layout: {
                 type: 'json',
               },
@@ -56,7 +56,7 @@ describe.skip('migration from 7.7.2-xpack with 100k objects', () => {
           },
           loggers: [
             {
-              context: 'root',
+              name: 'root',
               appenders: ['file'],
             },
           ],

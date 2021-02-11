@@ -38,7 +38,7 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
       },
       loggers: [
         {
-          context: 'test-file',
+          name: 'test-file',
           appenders: ['test-console'],
           level: 'info',
         },

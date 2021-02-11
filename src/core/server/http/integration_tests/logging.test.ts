@@ -59,7 +59,7 @@ describe('request logging', () => {
             },
             loggers: [
               {
-                context: 'http.server.response',
+                name: 'http.server.response',
                 appenders: ['test-console'],
                 level: 'debug',
               },
@@ -105,7 +105,7 @@ describe('request logging', () => {
           },
           loggers: [
             {
-              context: 'http.server.response',
+              name: 'http.server.response',
               appenders: ['test-console'],
               level: 'debug',
             },
