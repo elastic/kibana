@@ -239,7 +239,7 @@ const formatMetadata = ({
   requestStart: number;
 }) => {
   const {
-    bytesDownloaded,
+    bytesDownloadedCompressed,
     certificates,
     ip,
     mimeType,
@@ -306,9 +306,9 @@ const formatMetadata = ({
         }),
       },
       {
-        name: FriendlyFlyoutLabels[Metadata.BytesDownloaded],
+        name: FriendlyFlyoutLabels[Metadata.BytesDownloadedCompressed],
         value: getFriendlyMetadataValue({
-          value: bytesDownloaded ? bytesDownloaded / 1000 : undefined,
+          value: bytesDownloadedCompressed ? bytesDownloadedCompressed / 1000 : undefined,
           postFix: 'KB',
         }),
       },

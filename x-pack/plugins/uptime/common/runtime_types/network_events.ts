@@ -35,7 +35,7 @@ const NetworkEventType = t.intersection([
     url: t.string,
   }),
   t.partial({
-    bytesDownloaded: t.number,
+    bytesDownloadedCompressed: t.number,
     certificates: CertificateDataType,
     ip: t.string,
     method: t.string,

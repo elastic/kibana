@@ -57,7 +57,7 @@ describe('Component', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
-  it('renders a button when onClick function is passed', () => {
+  it('renders a button when onClick function is passed', async () => {
     const handleClick = jest.fn();
     const { getByTestId } = render(
       <MiddleTruncatedText
@@ -70,7 +70,7 @@ describe('Component', () => {
     const button = getByTestId('middleTruncatedTextButton');
     fireEvent.click(button);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(handleClick).toBeCalled();
     });
   });

@@ -44,7 +44,7 @@ export const networkItems: NetworkItems = [
       ssl: 55.38700000033714,
       dns: 3.559999997378327,
     },
-    bytesDownloaded: 1000,
+    bytesDownloadedCompressed: 1000,
     requestHeaders: {
       sample_request_header: 'sample request header',
     },
@@ -576,7 +576,7 @@ describe('getSeriesAndDomain', () => {
                 "value": undefined,
               },
               Object {
-                "name": "Bytes downloaded",
+                "name": "Bytes downloaded (Compressed)",
                 "value": undefined,
               },
               Object {
@@ -650,7 +650,7 @@ describe('getSeriesAndDomain', () => {
     [FriendlyTimingLabels[Timings.Ssl], '55.387 ms'],
     [FriendlyTimingLabels[Timings.Wait], '34.578 ms'],
     [FriendlyTimingLabels[Timings.Receive], '0.552 ms'],
-    [FriendlyFlyoutLabels[Metadata.BytesDownloaded], '1.000 KB'],
+    [FriendlyFlyoutLabels[Metadata.BytesDownloadedCompressed], '1.000 KB'],
     [FriendlyFlyoutLabels[Metadata.IP], '104.18.8.22'],
   ])('handles metadata details formatting', (name, value) => {
     const { metadata } = getSeriesAndDomain(networkItems);

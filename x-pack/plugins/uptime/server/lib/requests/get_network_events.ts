@@ -62,7 +62,7 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
         requestStartTime,
         loadEndTime,
         timings: event._source.synthetics.payload.timings,
-        bytesDownloaded: event._source.synthetics.payload.response?.encoded_data_length,
+        bytesDownloadedCompressed: event._source.synthetics.payload.response?.encoded_data_length,
         certificates: securityDetails
           ? {
               issuer: securityDetails.issuer,

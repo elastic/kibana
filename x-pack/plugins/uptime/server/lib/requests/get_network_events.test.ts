@@ -239,7 +239,7 @@ describe('getNetworkEvents', () => {
       Object {
         "events": Array [
           Object {
-            "bytesDownloaded": 337,
+            "bytesDownloadedCompressed": 337,
             "certificates": Object {
               "issuer": "DigiCert TLS RSA SHA256 2020 CA1",
               "subjectName": "syndication.twitter.com",

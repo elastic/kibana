@@ -19,7 +19,7 @@ export enum Timings {
 }
 
 export enum Metadata {
-  BytesDownloaded = 'bytesDownloaded',
+  BytesDownloadedCompressed = 'bytesDownloadedCompressed',
   CertificateIssuer = 'certificateIssuer',
   CertificateIssueDate = 'certificateIssueDate',
   CertificateExpiryDate = 'certificateExpiryDate',
@@ -75,10 +75,10 @@ export const FriendlyFlyoutLabels = {
       defaultMessage: 'Request start',
     }
   ),
-  [Metadata.BytesDownloaded]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloaded',
+  [Metadata.BytesDownloadedCompressed]: i18n.translate(
+    'xpack.uptime.synthetics.waterfallChart.labels.metadata.bytesDownloadedCompressed',
     {
-      defaultMessage: 'Bytes downloaded',
+      defaultMessage: 'Bytes downloaded (Compressed)',
     }
   ),
   [Metadata.CertificateIssuer]: i18n.translate(
