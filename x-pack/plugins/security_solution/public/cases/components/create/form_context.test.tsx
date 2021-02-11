@@ -20,6 +20,7 @@ import { connectorsMock } from '../../containers/configure/mock';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetFieldsByIssueType } from '../connectors/jira/use_get_fields_by_issue_type';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import {
@@ -30,6 +31,7 @@ import {
   useGetSeverityResponse,
   useGetIssueTypesResponse,
   useGetFieldsByIssueTypeResponse,
+  useGetChoicesResponse,
 } from './mock';
 import { FormContext } from './form_context';
 import { CreateCaseForm } from './form';
@@ -49,6 +51,7 @@ jest.mock('../connectors/jira/use_get_issue_types');
 jest.mock('../connectors/jira/use_get_fields_by_issue_type');
 jest.mock('../connectors/jira/use_get_single_issue');
 jest.mock('../connectors/jira/use_get_issues');
+jest.mock('../connectors/servicenow/use_get_choices');
 
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
@@ -58,6 +61,7 @@ const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
+const useGetChoicesMock = useGetChoices as jest.Mock;
 const postCase = jest.fn();
 const pushCaseToExternalService = jest.fn();
 
@@ -109,6 +113,7 @@ describe('Create case', () => {
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
+    useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
       tags: sampleTags,
@@ -219,6 +224,8 @@ describe('Create case', () => {
               impact: null,
               severity: null,
               urgency: null,
+              category: null,
+              subcategory: null,
             },
             id: 'servicenow-1',
             name: 'My Connector',
@@ -399,7 +406,7 @@ describe('Create case', () => {
       });
     });
 
-    it(`it should submit and push to servicenow connector`, async () => {
+    it(`it should submit and push to servicenow itsm connector`, async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
@@ -415,10 +422,14 @@ describe('Create case', () => {
       );
 
       fillForm(wrapper);
-      expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeFalsy();
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeFalsy();
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
-      expect(wrapper.find(`[data-test-subj="connector-fields-sn"]`).exists()).toBeTruthy();
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find(`[data-test-subj="connector-fields-sn-itsm"]`).exists()).toBeTruthy();
+      });
 
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
         wrapper
@@ -429,6 +440,20 @@ describe('Create case', () => {
           });
       });
 
+      wrapper
+        .find('select[data-test-subj="categorySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: 'software' },
+        });
+
+      wrapper
+        .find('select[data-test-subj="subcategorySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: 'os' },
+        });
+
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
       await waitFor(() => {
@@ -438,7 +463,13 @@ describe('Create case', () => {
             id: 'servicenow-1',
             name: 'My Connector',
             type: '.servicenow',
-            fields: { impact: '2', severity: '2', urgency: '2' },
+            fields: {
+              impact: '2',
+              severity: '2',
+              urgency: '2',
+              category: 'software',
+              subcategory: 'os',
+            },
           },
         });
 
@@ -448,7 +479,110 @@ describe('Create case', () => {
             id: 'servicenow-1',
             name: 'My Connector',
             type: '.servicenow',
-            fields: { impact: '2', severity: '2', urgency: '2' },
+            fields: {
+              impact: '2',
+              severity: '2',
+              urgency: '2',
+              category: 'software',
+              subcategory: 'os',
+            },
+          },
+        });
+
+        expect(onFormSubmitSuccess).toHaveBeenCalledWith({
+          id: sampleId,
+          ...sampleData,
+        });
+      });
+    });
+
+    it(`it should submit and push to servicenow sir connector`, async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseForm />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      fillForm(wrapper);
+      expect(wrapper.find(`[data-test-subj="connector-fields-sn-sir"]`).exists()).toBeFalsy();
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-sir"]`).simulate('click');
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find(`[data-test-subj="connector-fields-sn-sir"]`).exists()).toBeTruthy();
+      });
+
+      wrapper
+        .find('[data-test-subj="destIpCheckbox"] input')
+        .first()
+        .simulate('change', { target: { checked: false } });
+
+      wrapper
+        .find('select[data-test-subj="prioritySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '1' },
+        });
+
+      wrapper
+        .find('select[data-test-subj="categorySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: 'Denial of Service' },
+        });
+
+      wrapper
+        .find('select[data-test-subj="subcategorySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '26' },
+        });
+
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+      await waitFor(() => {
+        expect(postCase).toBeCalledWith({
+          ...sampleData,
+          connector: {
+            id: 'servicenow-sir',
+            name: 'My Connector SIR',
+            type: '.servicenow-sir',
+            fields: {
+              destIp: false,
+              sourceIp: true,
+              malwareHash: true,
+              malwareUrl: true,
+              priority: '1',
+              category: 'Denial of Service',
+              subcategory: '26',
+            },
+          },
+        });
+
+        expect(pushCaseToExternalService).toHaveBeenCalledWith({
+          caseId: sampleId,
+          connector: {
+            id: 'servicenow-sir',
+            name: 'My Connector SIR',
+            type: '.servicenow-sir',
+            fields: {
+              destIp: false,
+              sourceIp: true,
+              malwareHash: true,
+              malwareUrl: true,
+              priority: '1',
+              category: 'Denial of Service',
+              subcategory: '26',
+            },
           },
         });
 

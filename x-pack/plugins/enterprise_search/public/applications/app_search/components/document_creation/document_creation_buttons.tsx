@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
+
 import { useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiText,
   EuiCode,
@@ -20,6 +19,8 @@ import {
   EuiCard,
   EuiIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiCardTo } from '../../../shared/react_router_helpers';
 import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';

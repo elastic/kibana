@@ -67,7 +67,11 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
@@ -200,7 +204,11 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",
@@ -553,7 +561,11 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "dashboard",
@@ -686,7 +698,11 @@ Array [
       "catalogue": Array [
         "discover",
       ],
-      "management": Object {},
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "search",
