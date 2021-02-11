@@ -61,6 +61,7 @@ import {
   getCoreI18n,
   getHttp,
   getChartsPaletteServiceGetColor,
+  getSearchService,
 } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -244,7 +245,11 @@ export class MapEmbeddable
         timeFilters: this.input.timeRange,
         forceRefresh,
         searchSessionId: this.input.searchSessionId,
-        searchSessionMapBuffer: this.input.mapBuffer,
+        searchSessionMapBuffer: getSearchService().session.getSearchOptions(
+          this.input.searchSessionId
+        ).isRestore
+          ? this.input.mapBuffer
+          : undefined,
       })
     );
   }
