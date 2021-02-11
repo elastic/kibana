@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { LicensingLogic } from '../../../../../../applications/shared/licensing';
+import { LicensingLogic } from '../../../../../shared/licensing';
 import { ApiKey } from '../../../../components/shared/api_key';
 import {
   PUBLIC_KEY_LABEL,
