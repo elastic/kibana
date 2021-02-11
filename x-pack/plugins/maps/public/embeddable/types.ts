@@ -25,6 +25,7 @@ interface MapEmbeddableState {
   isLayerTOCOpen?: boolean;
   openTOCDetails?: string[];
   mapCenter?: MapCenterAndZoom;
+  mapBuffer?: MapExtent;
   mapSettings?: Partial<MapSettings>;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;

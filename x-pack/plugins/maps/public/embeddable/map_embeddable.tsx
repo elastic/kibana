@@ -43,6 +43,7 @@ import {
 } from '../reducers/non_serializable_instances';
 import {
   getMapCenter,
+  getMapBuffer,
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
@@ -140,11 +141,7 @@ export class MapEmbeddable
     store.dispatch(disableScrollZoom());
 
     this._dispatchSetQuery({
-      query: this.input.query,
-      timeRange: this.input.timeRange,
-      filters: this.input.filters,
       forceRefresh: false,
-      searchSessionId: this.input.searchSessionId,
     });
     if (this.input.refreshConfig) {
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
@@ -219,11 +216,7 @@ export class MapEmbeddable
       this.input.searchSessionId !== this._prevSearchSessionId
     ) {
       this._dispatchSetQuery({
-        query: this.input.query,
-        timeRange: this.input.timeRange,
-        filters: this.input.filters,
         forceRefresh: false,
-        searchSessionId: this.input.searchSessionId,
       });
     }
 
@@ -236,30 +229,22 @@ export class MapEmbeddable
     }
   }
 
-  _dispatchSetQuery({
-    query,
-    timeRange,
-    filters = [],
-    forceRefresh,
-    searchSessionId,
-  }: {
-    query?: Query;
-    timeRange?: TimeRange;
-    filters?: Filter[];
-    forceRefresh: boolean;
-    searchSessionId?: string;
-  }) {
-    this._prevTimeRange = timeRange;
-    this._prevQuery = query;
-    this._prevFilters = filters;
-    this._prevSearchSessionId = searchSessionId;
+  _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
+    this._prevTimeRange = this.input.timeRange;
+    this._prevQuery = this.input.query;
+    this._prevFilters = this.input.filters;
+    this._prevSearchSessionId = this.input.searchSessionId;
+    const enabledFilters = this.input.filters
+      ? this.input.filters.filter((filter) => !filter.meta.disabled)
+      : [];
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters: filters.filter((filter) => !filter.meta.disabled),
-        query,
-        timeFilters: timeRange,
+        filters: enabledFilters,
+        query: this.input.query,
+        timeFilters: this.input.timeRange,
         forceRefresh,
-        searchSessionId,
+        searchSessionId: this.input.searchSessionId,
+        searchSessionMapBuffer: this.input.mapBuffer,
       })
     );
   }
@@ -410,11 +395,7 @@ export class MapEmbeddable
 
   reload() {
     this._dispatchSetQuery({
-      query: this.input.query,
-      timeRange: this.input.timeRange,
-      filters: this.input.filters,
       forceRefresh: true,
-      searchSessionId: this.input.searchSessionId,
     });
   }
 
@@ -435,6 +416,7 @@ export class MapEmbeddable
           lon: center.lon,
           zoom,
         },
+        mapBuffer: getMapBuffer(this._savedMap.getStore().getState()),
       });
     }
 
