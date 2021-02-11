@@ -69,9 +69,9 @@ export const flushSavedObjects = (dest: string) => (log: ToolingLog) => (payload
     }
   );
 
-export const fetchSavedObjects = (dataDir: string) => (appName: string) => (
-  log: ToolingLog
-) => async (supertest: SuperTest<any>) => {
+export const fetchSavedObjects = (dataDir: string) => (log: ToolingLog) => (
+  supertest: SuperTest<any>
+) => async (appName: string) => {
   const joined = join(dataDir, appName);
   const [destDir, destFilePath] = finalDirAndFile(joined)();
 

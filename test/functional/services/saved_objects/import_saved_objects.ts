@@ -28,9 +28,9 @@ export const importData = (srcFilePath: string) => async (
       log.debug(`${mark} caught error - import response: \n\t${JSON.stringify(err, null, 2)}`)
     );
 
-export const importSavedObjects = (dataDir: string) => (appName: string) => (
-  log: ToolingLog
-) => async (supertest: SuperTest<any>) => {
+export const importSavedObjects = (dataDir: string) => (log: ToolingLog) => (
+  supertest: SuperTest<any>
+) => async (appName: string) => {
   const from = join(dataDir, appName);
   const [, inputFilePath] = finalDirAndFile(from)();
 
