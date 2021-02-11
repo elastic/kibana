@@ -68,6 +68,7 @@
     { "path": "../plugins/license_management/tsconfig.json" },
     { "path": "../plugins/licensing/tsconfig.json" },
     { "path": "../plugins/ml/tsconfig.json" },
+    { "path": "../plugins/monitoring/tsconfig.json" },
     { "path": "../plugins/observability/tsconfig.json" },
     { "path": "../plugins/osquery/tsconfig.json" },
     { "path": "../plugins/painless_lab/tsconfig.json" },

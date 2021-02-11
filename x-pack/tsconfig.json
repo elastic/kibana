@@ -8,7 +8,6 @@
     "plugins/case/**/*",
     "plugins/lists/**/*",
     "plugins/logstash/**/*",
-    "plugins/monitoring/**/*",
     "plugins/security_solution/**/*",
     "plugins/xpack_legacy/**/*"
   ],
@@ -90,6 +89,7 @@
     { "path": "./plugins/maps_legacy_licensing/tsconfig.json" },
     { "path": "./plugins/maps/tsconfig.json" },
     { "path": "./plugins/ml/tsconfig.json" },
+    { "path": "./plugins/monitoring/tsconfig.json" },
     { "path": "./plugins/observability/tsconfig.json" },
     { "path": "./plugins/osquery/tsconfig.json" },
     { "path": "./plugins/painless_lab/tsconfig.json" },

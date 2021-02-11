@@ -1,0 +1,36 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/home/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_legacy/tsconfig.json" },
+    { "path": "../../../src/plugins/navigation/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../alerts/tsconfig.json" },
+    { "path": "../actions/tsconfig.json" },
+    { "path": "../cloud/tsconfig.json" },
+    { "path": "../encrypted_saved_objects/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
+    { "path": "../infra/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../license_management/tsconfig.json" },
+    { "path": "../observability/tsconfig.json" },
+    { "path": "../telemetry_collection_xpack/tsconfig.json" },
+    { "path": "../triggers_actions_ui/tsconfig.json" },
+  ]
+}
