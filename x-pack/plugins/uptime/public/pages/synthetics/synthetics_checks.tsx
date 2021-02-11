@@ -29,7 +29,7 @@ export const SyntheticsCheckSteps: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle>
-            <h1>{details?.journey?.monitor.name}</h1>
+            <h1>{details?.journey?.monitor.name || details?.journey?.monitor.id}</h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

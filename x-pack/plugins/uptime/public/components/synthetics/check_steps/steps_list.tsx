@@ -24,19 +24,21 @@ import { StepImage } from './step_image';
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
 `;
+
 interface Props {
   data: Ping[];
   error?: Error;
   loading: boolean;
 }
 
-function isStepEnd(step: Ping) {
-  return step.synthetics?.type === 'step/end';
-}
 interface StepStatusCount {
   failed: number;
   skipped: number;
   succeeded: number;
+}
+
+function isStepEnd(step: Ping) {
+  return step.synthetics?.type === 'step/end';
 }
 
 function statusMessage(count: StepStatusCount) {

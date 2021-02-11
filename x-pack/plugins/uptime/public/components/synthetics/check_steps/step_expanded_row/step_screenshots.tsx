@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import moment from 'moment';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { UptimeSettingsContext } from '../../../../contexts';
+import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useFetcher } from '../../../../../../observability/public';
+import { fetchLastSuccessfulStep } from '../../../../state/api/journey';
 
 const Label = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
@@ -24,7 +27,19 @@ interface Props {
 }
 
 export const StepScreenshots = ({ step }: Props) => {
-  const { basePath } = useContext(UptimeSettingsContext);
+  const [dateFormat] = useUiSetting$<string>('dateFormat');
+
+  const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
+
+  const { data: lastSuccessfulStep } = useFetcher(() => {
+    if (!isSucceeded) {
+      return fetchLastSuccessfulStep({
+        timestamp: step.timestamp,
+        monitorId: step.monitor.id,
+        stepIndex: step.synthetics?.step?.index!,
+      });
+    }
+  }, [step.docId]);
 
   return (
     <EuiFlexGroup>
@@ -50,8 +65,10 @@ export const StepScreenshots = ({ step }: Props) => {
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
         />
+        <EuiSpacer size="xs" />
+        <Label>{moment(step.timestamp).format(dateFormat)}</Label>
       </EuiFlexItem>
-      {step.synthetics?.payload?.status !== 'succeeded' && (
+      {!isSucceeded && lastSuccessfulStep && (
         <EuiFlexItem>
           <Label>
             <FormattedMessage
@@ -60,16 +77,14 @@ export const StepScreenshots = ({ step }: Props) => {
             />
           </Label>
           <StepScreenshotDisplay
-            srcPath={
-              basePath +
-              `/api/uptime/step/screenshot/${step.monitor.id}/${step.synthetics?.step?.index}?timestamp=${step.timestamp}&_debug=true`
-            }
             allowPopover={false}
-            checkGroup={step.monitor.check_group}
-            screenshotExists={step.synthetics?.screenshotExists}
-            stepIndex={step.synthetics?.step?.index}
-            stepName={step.synthetics?.step?.name}
+            checkGroup={lastSuccessfulStep.monitor.check_group}
+            screenshotExists={true}
+            stepIndex={lastSuccessfulStep.synthetics?.step?.index}
+            stepName={lastSuccessfulStep.synthetics?.step?.name}
           />
+          <EuiSpacer size="xs" />
+          <Label>{moment(lastSuccessfulStep.timestamp).format(dateFormat)}</Label>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -14,7 +14,7 @@ export interface GetStepScreenshotParams {
   stepIndex: number;
 }
 
-export const getStepLastSuccessfulScreenshot: UMElasticsearchQueryFn<
+export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
   GetStepScreenshotParams,
   any
 > = async ({ uptimeEsClient, monitorId, stepIndex, timestamp }) => {
@@ -60,7 +60,6 @@ export const getStepLastSuccessfulScreenshot: UMElasticsearchQueryFn<
         ],
       },
     },
-    _source: ['monitor'],
   };
 
   const { body: result } = await uptimeEsClient.search({ body: lastSuccessCheckParams });
@@ -69,40 +68,10 @@ export const getStepLastSuccessfulScreenshot: UMElasticsearchQueryFn<
     return null;
   }
 
-  const stepHit = result?.hits.hits[0]._source as Ping;
-
-  const lastSucessedCheckScreenshot = {
-    size: 1,
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              'monitor.check_group': stepHit.monitor.check_group,
-            },
-          },
-          {
-            term: {
-              'synthetics.type': 'step/screenshot',
-            },
-          },
-          {
-            term: {
-              'synthetics.step.index': stepIndex,
-            },
-          },
-        ],
-      },
-    },
-    _source: ['synthetics.blob', 'synthetics.step.name'],
-  };
-
-  const { body: result1 } = await uptimeEsClient.search({ body: lastSucessedCheckScreenshot });
-
-  const stepScreenshotHit = result1?.hits.hits[0]._source as Ping;
+  const step = result?.hits.hits[0]._source as Ping & { '@timestamp': string };
 
   return {
-    blob: stepScreenshotHit.synthetics?.blob ?? null,
-    stepName: stepScreenshotHit?.synthetics?.step?.name ?? '',
+    ...step,
+    timestamp: step['@timestamp'],
   };
 };

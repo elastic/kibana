@@ -37,64 +37,56 @@ export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsol
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
   return (
-    <>
-      <div style={{ padding: '8px', maxWidth: 1000 }}>
-        <EuiSpacer size="s" />
-        {step.synthetics?.error?.message && (
-          <EuiText>
-            <Label>
-              {i18n.translate('xpack.uptime.synthetics.executedStep.errorHeading', {
-                defaultMessage: 'Error message',
-              })}
-            </Label>
-            <Message>{step.synthetics?.error?.message}</Message>
-          </EuiText>
-        )}
-        <EuiSpacer />
-        <CodeBlockAccordion
-          id={step.synthetics?.step?.name + String(index)}
-          buttonContent={i18n.translate(
-            'xpack.uptime.synthetics.executedStep.scriptHeading.label',
-            {
-              defaultMessage: 'Script executed at this step',
-            }
-          )}
-          overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-          language="javascript"
-          initialIsOpen={!isSucceeded}
-        >
-          {step.synthetics?.payload?.source}
-        </CodeBlockAccordion>{' '}
-        <EuiSpacer />
-        <CodeBlockAccordion
-          id={step.synthetics?.step?.name + String(index)}
-          buttonContent={i18n.translate(
-            'xpack.uptime.synthetics.executedStep.consoleOutput.label',
-            {
-              defaultMessage: 'Console output',
-            }
-          )}
-          overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-          language="javascript"
-          initialIsOpen={!isSucceeded}
-        >
-          {browserConsole}
-        </CodeBlockAccordion>
-        <EuiSpacer />
-        <StepScreenshots step={step} />
-        <EuiSpacer />
-        <CodeBlockAccordion
-          id={`${step.synthetics?.step?.name}_stack`}
-          buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.stackTrace', {
-            defaultMessage: 'Stack trace',
-          })}
-          language="html"
-          overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-          initialIsOpen={!isSucceeded}
-        >
-          {step.synthetics?.error?.stack}
-        </CodeBlockAccordion>
-      </div>
-    </>
+    <div style={{ padding: '8px', maxWidth: 1000 }}>
+      <EuiSpacer size="s" />
+      {step.synthetics?.error?.message && (
+        <EuiText>
+          <Label>
+            {i18n.translate('xpack.uptime.synthetics.executedStep.errorHeading', {
+              defaultMessage: 'Error message',
+            })}
+          </Label>
+          <Message>{step.synthetics?.error?.message}</Message>
+        </EuiText>
+      )}
+      <EuiSpacer />
+      <CodeBlockAccordion
+        id={step.synthetics?.step?.name + String(index)}
+        buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.scriptHeading.label', {
+          defaultMessage: 'Script executed at this step',
+        })}
+        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+        language="javascript"
+        initialIsOpen={!isSucceeded}
+      >
+        {step.synthetics?.payload?.source}
+      </CodeBlockAccordion>{' '}
+      <EuiSpacer />
+      <CodeBlockAccordion
+        id={step.synthetics?.step?.name + String(index)}
+        buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.consoleOutput.label', {
+          defaultMessage: 'Console output',
+        })}
+        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+        language="javascript"
+        initialIsOpen={!isSucceeded}
+      >
+        {browserConsole}
+      </CodeBlockAccordion>
+      <EuiSpacer />
+      <StepScreenshots step={step} />
+      <EuiSpacer />
+      <CodeBlockAccordion
+        id={`${step.synthetics?.step?.name}_stack`}
+        buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.stackTrace', {
+          defaultMessage: 'Stack trace',
+        })}
+        language="html"
+        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+        initialIsOpen={!isSucceeded}
+      >
+        {step.synthetics?.error?.stack}
+      </CodeBlockAccordion>
+    </div>
   );
 };
