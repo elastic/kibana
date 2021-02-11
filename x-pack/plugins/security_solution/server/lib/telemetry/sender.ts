@@ -320,6 +320,8 @@ const allowlistEventFields: AllowlistFields = {
     Ext: {
       code_signature: true,
       malware_classification: true,
+      quarantine_result: true,
+      quarantine_message: true,
     },
   },
   host: {
