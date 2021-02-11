@@ -969,6 +969,8 @@ export interface OverlayModalOpenOptions {
     className?: string;
     // (undocumented)
     closeButtonAriaLabel?: string;
+    // (undocumented)
+    maxWidth?: boolean | number | string;
 }
 
 // @public
