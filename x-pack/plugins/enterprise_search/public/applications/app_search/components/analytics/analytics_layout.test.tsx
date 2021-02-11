@@ -11,14 +11,15 @@ import { mockKibanaValues, setMockValues, setMockActions, rerender } from '../..
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
+
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../shared/loading';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { Loading } from '../../../shared/loading';
 import { LogRetentionCallout } from '../log_retention';
-import { AnalyticsHeader, AnalyticsUnavailable } from './components';
 
 import { AnalyticsLayout } from './analytics_layout';
+import { AnalyticsHeader, AnalyticsUnavailable } from './components';
 
 describe('AnalyticsLayout', () => {
   const { history } = mockKibanaValues;

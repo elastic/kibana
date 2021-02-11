@@ -11,6 +11,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 import { Discover } from './discover';
 import { esHits } from '../../__mocks__/es_hits';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { DiscoverServices } from '../../build_services';
 import { GetStateReturn } from '../angular/discover_state';
 import { savedSearchMock } from '../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
@@ -24,6 +25,8 @@ import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_wit
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { DiscoverProps } from './types';
 import { RequestAdapter } from '../../../../inspector/common';
+import { Subject } from 'rxjs';
+import { DiscoverSearchSessionManager } from '../angular/discover_search_session';
 
 const mockNavigation = navigationPluginMock.createStartContract();
 
@@ -46,7 +49,14 @@ jest.mock('../../kibana_services', () => {
 
 function getProps(indexPattern: IndexPattern): DiscoverProps {
   const searchSourceMock = createSearchSourceMock({});
-  const state = ({} as unknown) as GetStateReturn;
+  const services = ({
+    capabilities: {
+      discover: {
+        save: true,
+      },
+    },
+    uiSettings: mockUiSettings,
+  } as unknown) as DiscoverServices;
 
   return {
     fetch: jest.fn(),
@@ -56,14 +66,7 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
     hits: esHits.length,
     indexPattern,
     minimumVisibleRows: 10,
-    onAddColumn: jest.fn(),
-    onAddFilter: jest.fn(),
-    onChangeInterval: jest.fn(),
-    onMoveColumn: jest.fn(),
-    onRemoveColumn: jest.fn(),
-    onSetColumns: jest.fn(),
     onSkipBottomButtonClick: jest.fn(),
-    onSort: jest.fn(),
     opts: {
       config: mockUiSettings,
       data: dataPluginMock.createStartContract(),
@@ -72,22 +75,21 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
       indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
       inspectorAdapters: { requests: {} as RequestAdapter },
       navigateTo: jest.fn(),
+      refetch$: {} as Subject<undefined>,
       sampleSize: 10,
       savedSearch: savedSearchMock,
-      setAppState: jest.fn(),
+      searchSessionManager: {} as DiscoverSearchSessionManager,
       setHeaderActionMenu: jest.fn(),
-      stateContainer: state,
       timefield: indexPattern.timeFieldName || '',
+      setAppState: jest.fn(),
+      services,
+      stateContainer: {} as GetStateReturn,
     },
     resetQuery: jest.fn(),
     resultState: 'ready',
     rows: esHits,
     searchSource: searchSourceMock,
-    setIndexPattern: jest.fn(),
     state: { columns: [] },
-    timefilterUpdateHandler: jest.fn(),
-    updateQuery: jest.fn(),
-    updateSavedQueryId: jest.fn(),
   };
 }
 

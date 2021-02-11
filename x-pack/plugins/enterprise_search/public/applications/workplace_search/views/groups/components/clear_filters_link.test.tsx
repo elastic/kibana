@@ -8,11 +8,12 @@
 import { setMockActions } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { ClearFiltersLink } from './clear_filters_link';
-
 import { EuiLink } from '@elastic/eui';
+
+import { ClearFiltersLink } from './clear_filters_link';
 
 describe('ClearFiltersLink', () => {
   const resetGroupsFilters = jest.fn();
