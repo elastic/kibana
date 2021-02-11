@@ -83,7 +83,7 @@ export const useDashboardContainer = ({
 
     // when dashboard state manager initially loads, determine whether or not there are unsaved changes
     setUnsavedChanges?.(
-      Boolean(incomingEmbeddable) || dashboardStateManager.getIsDirty(timeFilter, true)
+      Boolean(incomingEmbeddable) || dashboardStateManager.hasUnsavedPanelState()
     );
 
     let canceled = false;

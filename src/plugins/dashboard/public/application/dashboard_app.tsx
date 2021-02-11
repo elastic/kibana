@@ -206,9 +206,7 @@ export function DashboardApp({
     );
 
     dashboardStateManager.registerChangeListener(() => {
-      setUnsavedChanges(
-        Boolean(dashboardStateManager?.getIsDirty(data.query.timefilter.timefilter, true))
-      );
+      setUnsavedChanges(dashboardStateManager?.hasUnsavedPanelState());
       // we aren't checking dirty state because there are changes the container needs to know about
       // that won't make the dashboard "dirty" - like a view mode change.
       triggerRefresh$.next();
