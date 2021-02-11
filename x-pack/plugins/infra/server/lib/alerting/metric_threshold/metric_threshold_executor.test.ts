@@ -6,7 +6,7 @@
  */
 
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import { Comparator, AlertStates } from './types';
+import { Comparator } from './types';
 import * as mocks from './test_mocks';
 // import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
