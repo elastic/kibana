@@ -9,7 +9,7 @@
 
 import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMXPackConfig } from '.';
-import { mergeConfigs } from './config';
+import { mergeConfigs } from './index';
 
 describe('mergeConfigs', () => {
   it('merges the configs', () => {
