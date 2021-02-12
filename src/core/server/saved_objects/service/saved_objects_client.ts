@@ -129,6 +129,35 @@ export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
    * The Elasticsearch `_score` of this result.
    */
   score: number;
+  /**
+   * The Elasticsearch `sort` value of this result.
+   *
+   * @remarks
+   * This can be passed directly to the `searchAfter` param in the {@link SavedObjectsFindOptions}
+   * in order to page through large numbers of hits. It is recommended you use this alongside
+   * a Point In Time (PIT) that was opened with {@link SavedObjectsClient.openPointInTimeForType}.
+   *
+   * @example
+   * ```ts
+   * const { id } = await savedObjectsClient.openPointInTimeForType('visualization');
+   * const page1 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id },
+   * });
+   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+   * const page2 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id: page1.pit_id },
+   *   searchAfter: lastHit.sort,
+   * });
+   * await savedObjectsClient.closePointInTime(page2.pit_id);
+   * ```
+   */
+  sort?: unknown[];
 }
 
 /**
@@ -144,6 +173,7 @@ export interface SavedObjectsFindResponse<T = unknown> {
   total: number;
   per_page: number;
   page: number;
+  pit_id?: string;
 }
 
 /**
@@ -313,6 +343,50 @@ export interface SavedObjectsResolveResponse<T = unknown> {
    * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
    */
   aliasTargetId?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeOptions extends SavedObjectsBaseOptions {
+  /**
+   * Optionally specify how long ES should keep the PIT alive until the next request. Defaults to `5m`.
+   */
+  keepAlive?: string;
+  /**
+   * An optional ES preference value to be used for the query.
+   */
+  preference?: string;
+}
+
+/**
+ * @public
+ */
+export interface SavedObjectsOpenPointInTimeResponse {
+  /**
+   * PIT ID returned from ES.
+   */
+  id: string;
+}
+
+/**
+ * @public
+ */
+export type SavedObjectsClosePointInTimeOptions = SavedObjectsBaseOptions;
+
+/**
+ * @public
+ */
+export interface SavedObjectsClosePointInTimeResponse {
+  /**
+   * If true, all search contexts associated with the PIT id are
+   * successfully closed.
+   */
+  succeeded: boolean;
+  /**
+   * The number of search contexts that have been successfully closed.
+   */
+  num_freed: number;
 }
 
 /**
@@ -507,5 +581,26 @@ export class SavedObjectsClient {
     options?: SavedObjectsRemoveReferencesToOptions
   ) {
     return await this._repository.removeReferencesTo(type, id, options);
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to {@link SavedObjectsClient.find} to search
+   * against that PIT.
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    return await this._repository.openPointInTimeForType(type, options);
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES via the
+   * Elasticsearch client, and is included in the Saved Objects Client as a convenience
+   * for consumers who are using {@link SavedObjectsClient.openPointInTimeForType}.
+   */
+  async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this._repository.closePointInTime(id, options);
   }
 }

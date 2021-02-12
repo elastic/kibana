@@ -104,7 +104,7 @@ describe('embeddable', () => {
     mountpoint.remove();
   });
 
-  it('should render expression with expression renderer', async () => {
+  it('should render expression once with expression renderer', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -123,10 +123,17 @@ describe('embeddable', () => {
             ],
           }),
       },
-      {} as LensEmbeddableInput
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
     );
-    await embeddable.initializeSavedVis({} as LensEmbeddableInput);
     embeddable.render(mountpoint);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
     expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my

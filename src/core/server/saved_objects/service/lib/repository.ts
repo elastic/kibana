@@ -36,6 +36,10 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsClosePointInTimeResponse,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsOpenPointInTimeResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsBulkUpdateObject,
@@ -708,11 +712,13 @@ export class SavedObjectsRepository {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
+   * @property {Array<unknown>} [options.searchAfter]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
+   * @property {string} [options.pit]
    * @property {string} [options.preference]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
@@ -726,6 +732,8 @@ export class SavedObjectsRepository {
       hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
       perPage = FIND_DEFAULT_PER_PAGE,
+      pit,
+      searchAfter,
       sortField,
       sortOrder,
       fields,
@@ -751,6 +759,10 @@ export class SavedObjectsRepository {
     } else if ((!namespaces || namespaces?.length) && typeToNamespacesMap) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         'options.namespaces must be an empty array when options.typeToNamespacesMap is used'
+      );
+    } else if (preference?.length && pit) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.preference must be excluded when options.pit is used'
       );
     }
 
@@ -787,20 +799,24 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      index: this.getIndicesForTypes(allowedTypes),
-      size: perPage,
-      from: perPage * (page - 1),
+      // If `pit` is provided, we drop the `index`, otherwise ES returns 400.
+      ...(pit ? {} : { index: this.getIndicesForTypes(allowedTypes) }),
+      // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
+      ...(searchAfter ? {} : { from: perPage * (page - 1) }),
       _source: includedFields(type, fields),
-      rest_total_hits_as_int: true,
       preference,
+      rest_total_hits_as_int: true,
+      size: perPage,
       body: {
         seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
           searchFields,
+          pit,
           rootSearchFields,
           type: allowedTypes,
+          searchAfter,
           sortField,
           sortOrder,
           namespaces,
@@ -834,8 +850,10 @@ export class SavedObjectsRepository {
         (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
           ...this._rawToSavedObject(hit),
           score: (hit as any)._score,
+          ...((hit as any).sort && { sort: (hit as any).sort }),
         })
       ),
+      ...(body.pit_id && { pit_id: body.pit_id }),
     } as SavedObjectsFindResponse<T>;
   }
 
@@ -1764,6 +1782,118 @@ export class SavedObjectsRepository {
       version: encodeHitVersion(body),
       attributes: body.get._source[type],
     };
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   *
+   * @example
+   * ```ts
+   * const { id } = await savedObjectsClient.openPointInTimeForType(
+   *   type: 'visualization',
+   *   { keepAlive: '5m' },
+   * );
+   * const page1 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id, keepAlive: '2m' },
+   * });
+   * const lastHit = page1.saved_objects[page1.saved_objects.length - 1];
+   * const page2 = await savedObjectsClient.find({
+   *   type: 'visualization',
+   *   sortField: 'updated_at',
+   *   sortOrder: 'asc',
+   *   pit: { id: page1.pit_id },
+   *   searchAfter: lastHit.sort,
+   * });
+   * await savedObjectsClient.closePointInTime(page2.pit_id);
+   * ```
+   *
+   * @param {string|Array<string>} type
+   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
+   * @property {string} [options.keepAlive]
+   * @property {string} [options.preference]
+   * @returns {promise} - { id: string }
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    { keepAlive = '5m', preference }: SavedObjectsOpenPointInTimeOptions = {}
+  ): Promise<SavedObjectsOpenPointInTimeResponse> {
+    const types = Array.isArray(type) ? type : [type];
+    const allowedTypes = types.filter((t) => this._allowedTypes.includes(t));
+    if (allowedTypes.length === 0) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    const esOptions = {
+      index: this.getIndicesForTypes(allowedTypes),
+      keep_alive: keepAlive,
+      ...(preference ? { preference } : {}),
+    };
+
+    const {
+      body,
+      statusCode,
+    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(esOptions, {
+      ignore: [404],
+    });
+    if (statusCode === 404) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError();
+    }
+
+    return {
+      id: body.id,
+    };
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   *
+   * @remarks
+   * While the `keepAlive` that is provided will cause a PIT to automatically close,
+   * it is highly recommended to explicitly close a PIT when you are done with it
+   * in order to avoid consuming unneeded resources in Elasticsearch.
+   *
+   * @example
+   * ```ts
+   * const repository = coreStart.savedObjects.createInternalRepository();
+   *
+   * const { id } = await repository.openPointInTimeForType(
+   *   type: 'index-pattern',
+   *   { keepAlive: '2m' },
+   * );
+   *
+   * const response = await repository.find({
+   *   type: 'index-pattern',
+   *   search: 'foo*',
+   *   sortField: 'name',
+   *   sortOrder: 'desc',
+   *   pit: {
+   *     id: 'abc123',
+   *     keepAlive: '2m',
+   *   },
+   *   searchAfter: [1234, 'abcd'],
+   * });
+   *
+   * await repository.closePointInTime(response.pit_id);
+   * ```
+   *
+   * @param {string} id
+   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
+   * @returns {promise} - {@link SavedObjectsClosePointInTimeResponse}
+   */
+  async closePointInTime(
+    id: string,
+    options?: SavedObjectsClosePointInTimeOptions
+  ): Promise<SavedObjectsClosePointInTimeResponse> {
+    const { body } = await this.client.closePointInTime<SavedObjectsClosePointInTimeResponse>({
+      body: { id },
+    });
+    return body;
   }
 
   /**

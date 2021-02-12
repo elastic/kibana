@@ -45,6 +45,7 @@ import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewe
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
+import { MachineLearningAlertingProvider } from './alerting';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -95,10 +96,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
+  const alerting = MachineLearningAlertingProvider(context, commonUI);
 
   return {
     anomaliesTable,
     anomalyExplorer,
+    alerting,
     api,
     commonAPI,
     commonConfig,
