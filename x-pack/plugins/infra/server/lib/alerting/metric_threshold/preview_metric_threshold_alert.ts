@@ -31,6 +31,7 @@ interface PreviewMetricThresholdAlertParams {
   lookback: Unit;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: string;
   alertOnNoData: boolean;
   end?: number;
   overrideLookbackIntervalInSeconds?: number;
@@ -48,6 +49,7 @@ export const previewMetricThresholdAlert: (
     lookback,
     alertInterval,
     alertThrottle,
+    alertNotifyWhen,
     alertOnNoData,
     end = Date.now(),
     overrideLookbackIntervalInSeconds,
@@ -104,9 +106,17 @@ export const previewMetricThresholdAlert: (
         let numberOfErrors = 0;
         let numberOfNotifications = 0;
         let throttleTracker = 0;
-        const notifyWithThrottle = () => {
-          if (throttleTracker === 0) numberOfNotifications++;
-          throttleTracker += alertIntervalInSeconds;
+        let previousActionGroup: string | null = null;
+        const notifyWithThrottle = (actionGroup: string) => {
+          if (alertNotifyWhen === 'onActionGroupChange') {
+            if (previousActionGroup !== actionGroup) numberOfNotifications++;
+            previousActionGroup = actionGroup;
+          } else if (alertNotifyWhen === 'onThrottleInterval') {
+            if (throttleTracker === 0) numberOfNotifications++;
+            throttleTracker += alertIntervalInSeconds;
+          } else {
+            numberOfNotifications++;
+          }
         };
         for (let i = 0; i < numberOfExecutionBuckets; i++) {
           const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
@@ -126,21 +136,24 @@ export const previewMetricThresholdAlert: (
           if (someConditionsErrorInMappedBucket) {
             numberOfErrors++;
             if (alertOnNoData) {
-              notifyWithThrottle();
+              notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
             }
           } else if (someConditionsNoDataInMappedBucket) {
             numberOfNoDataResults++;
             if (alertOnNoData) {
-              notifyWithThrottle();
+              notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
             }
           } else if (allConditionsFiredInMappedBucket) {
             numberOfTimesFired++;
-            notifyWithThrottle();
+            notifyWithThrottle('fired');
           } else if (allConditionsWarnInMappedBucket) {
             numberOfTimesWarned++;
-            notifyWithThrottle();
-          } else if (throttleTracker > 0) {
-            throttleTracker += alertIntervalInSeconds;
+            notifyWithThrottle('warning');
+          } else {
+            previousActionGroup = 'recovered';
+            if (throttleTracker > 0) {
+              throttleTracker += alertIntervalInSeconds;
+            }
           }
           if (throttleTracker >= throttleIntervalInSeconds) {
             throttleTracker = 0;
@@ -168,6 +181,7 @@ export const previewMetricThresholdAlert: (
         alertInterval,
         alertThrottle,
         alertOnNoData,
+        alertNotifyWhen,
       };
       const { maxBuckets } = e;
       // If this is still the first iteration, try to get the number of groups in order to

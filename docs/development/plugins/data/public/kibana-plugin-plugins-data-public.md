@@ -126,6 +126,7 @@
 |  [noSearchSessionStorageCapabilityMessage](./kibana-plugin-plugins-data-public.nosearchsessionstoragecapabilitymessage.md) | Message to display in case storing session session is disabled due to turned off capability |
 |  [parseSearchSourceJSON](./kibana-plugin-plugins-data-public.parsesearchsourcejson.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
+|  [SEARCH\_SESSIONS\_MANAGEMENT\_ID](./kibana-plugin-plugins-data-public.search_sessions_management_id.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |
 |  [SearchBar](./kibana-plugin-plugins-data-public.searchbar.md) |  |
 |  [syncQueryStateWithUrl](./kibana-plugin-plugins-data-public.syncquerystatewithurl.md) | Helper to setup syncing of global data with the URL |

@@ -239,11 +239,43 @@ describe('getNetworkEvents', () => {
       Object {
         "events": Array [
           Object {
+            "bytesDownloadedCompressed": 337,
+            "certificates": Object {
+              "issuer": "DigiCert TLS RSA SHA256 2020 CA1",
+              "subjectName": "syndication.twitter.com",
+              "validFrom": 1606694400000,
+              "validTo": 1638230399000,
+            },
+            "ip": "104.244.42.200",
             "loadEndTime": 3287298.251,
             "method": "GET",
             "mimeType": "image/gif",
+            "requestHeaders": Object {
+              "referer": "www.test.com",
+              "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/88.0.4324.0 Safari/537.36",
+            },
             "requestSentTime": 3287154.973,
             "requestStartTime": 3287155.502,
+            "responseHeaders": Object {
+              "cache_control": "no-cache, no-store, must-revalidate, pre-check=0, post-check=0",
+              "content_encoding": "gzip",
+              "content_length": "65",
+              "content_type": "image/gif;charset=utf-8",
+              "date": "Mon, 14 Dec 2020 10:46:39 GMT",
+              "expires": "Tue, 31 Mar 1981 05:00:00 GMT",
+              "last_modified": "Mon, 14 Dec 2020 10:46:39 GMT",
+              "pragma": "no-cache",
+              "server": "tsa_f",
+              "status": "200 OK",
+              "strict_transport_security": "max-age=631138519",
+              "x_connection_hash": "cb6fe99b8676f4e4b827cc3e6512c90d",
+              "x_content_type_options": "nosniff",
+              "x_frame_options": "SAMEORIGIN",
+              "x_response_time": "108",
+              "x_transaction": "008fff3d00a1e64c",
+              "x_twitter_response_tags": "BouncerCompliant",
+              "x_xss_protection": "0",
+            },
             "status": 200,
             "timestamp": "2020-12-14T10:46:39.183Z",
             "timings": Object {
