@@ -14,6 +14,7 @@ import {
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { rangeFilter } from '../../../common/utils/range_filter';
+import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -47,96 +48,98 @@ export async function getServiceTransactionGroups({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
 }) {
-  const { apmEventClient, start, end, esFilter } = setup;
+  return withApmSpan('get_service_transaction_groups', async () => {
+    const { apmEventClient, start, end, esFilter } = setup;
 
-  const field = getTransactionDurationFieldForAggregatedTransactions(
-    searchAggregatedTransactions
-  );
+    const field = getTransactionDurationFieldForAggregatedTransactions(
+      searchAggregatedTransactions
+    );
 
-  const response = await apmEventClient.search({
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { range: rangeFilter(start, end) },
-            ...getDocumentTypeFilterForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
-            ...esFilter,
-          ],
-        },
+    const response = await apmEventClient.search({
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
       },
-      aggs: {
-        total_duration: { sum: { field } },
-        transaction_groups: {
-          terms: {
-            field: TRANSACTION_NAME,
-            size: 500,
-            order: { _count: 'desc' },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              { range: rangeFilter(start, end) },
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+              ...esFilter,
+            ],
           },
-          aggs: {
-            transaction_group_total_duration: {
-              sum: { field },
+        },
+        aggs: {
+          total_duration: { sum: { field } },
+          transaction_groups: {
+            terms: {
+              field: TRANSACTION_NAME,
+              size: 500,
+              order: { _count: 'desc' },
             },
-            ...getLatencyAggregation(latencyAggregationType, field),
-            [EVENT_OUTCOME]: {
-              terms: {
-                field: EVENT_OUTCOME,
-                include: [EventOutcome.failure, EventOutcome.success],
+            aggs: {
+              transaction_group_total_duration: {
+                sum: { field },
+              },
+              ...getLatencyAggregation(latencyAggregationType, field),
+              [EVENT_OUTCOME]: {
+                terms: {
+                  field: EVENT_OUTCOME,
+                  include: [EventOutcome.failure, EventOutcome.success],
+                },
               },
             },
           },
         },
       },
-    },
+    });
+
+    const totalDuration = response.aggregations?.total_duration.value;
+
+    const transactionGroups =
+      response.aggregations?.transaction_groups.buckets.map((bucket) => {
+        const errorRate = calculateTransactionErrorPercentage(
+          bucket[EVENT_OUTCOME]
+        );
+
+        const transactionGroupTotalDuration =
+          bucket.transaction_group_total_duration.value || 0;
+
+        return {
+          name: bucket.key as string,
+          latency: getLatencyValue({
+            latencyAggregationType,
+            aggregation: bucket.latency,
+          }),
+          throughput: calculateThroughput({
+            start,
+            end,
+            value: bucket.doc_count,
+          }),
+          errorRate,
+          impact: totalDuration
+            ? (transactionGroupTotalDuration * 100) / totalDuration
+            : 0,
+        };
+      }) ?? [];
+
+    return {
+      transactionGroups: transactionGroups.map((transactionGroup) => ({
+        ...transactionGroup,
+        transactionType,
+      })),
+      isAggregationAccurate:
+        (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
+        0,
+    };
   });
-
-  const totalDuration = response.aggregations?.total_duration.value;
-
-  const transactionGroups =
-    response.aggregations?.transaction_groups.buckets.map((bucket) => {
-      const errorRate = calculateTransactionErrorPercentage(
-        bucket[EVENT_OUTCOME]
-      );
-
-      const transactionGroupTotalDuration =
-        bucket.transaction_group_total_duration.value || 0;
-
-      return {
-        name: bucket.key as string,
-        latency: getLatencyValue({
-          latencyAggregationType,
-          aggregation: bucket.latency,
-        }),
-        throughput: calculateThroughput({
-          start,
-          end,
-          value: bucket.doc_count,
-        }),
-        errorRate,
-        impact: totalDuration
-          ? (transactionGroupTotalDuration * 100) / totalDuration
-          : 0,
-      };
-    }) ?? [];
-
-  return {
-    transactionGroups: transactionGroups.map((transactionGroup) => ({
-      ...transactionGroup,
-      transactionType,
-    })),
-    isAggregationAccurate:
-      (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) ===
-      0,
-  };
 }
