@@ -14,6 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
+import uuid from 'uuid';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -29,6 +30,7 @@ interface Props {
 const INITIAL_STATE = {
   transactionGroups: [],
   isAggregationAccurate: true,
+  requestId: '',
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
@@ -77,6 +79,11 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
             latencyAggregationType,
           },
         },
+      }).then((response) => {
+        return {
+          requestId: uuid(),
+          ...response,
+        };
       });
     },
     [
@@ -89,7 +96,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     ]
   );
 
-  const { transactionGroups } = data;
+  const { transactionGroups, requestId } = data;
   const currentPageTransactionGroups = orderBy(
     transactionGroups,
     sort.field,
@@ -127,19 +134,22 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               transactionNames,
             },
           },
+          isCachable: true,
+        }).then((result) => {
+          return { [requestId]: result };
         });
       }
     },
-    // only fetches statistics when transaction names changes
+    // only fetches statistics when requestId changes or transaction names changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [transactionNames],
-    { preservePreviousData: false }
+    [requestId, transactionNames]
   );
 
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionGroupComparisonStatistics,
+    transactionGroupComparisonStatistics:
+      transactionGroupComparisonStatistics?.[requestId],
   });
 
   const isLoading =
