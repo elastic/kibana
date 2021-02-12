@@ -190,6 +190,15 @@ export interface AggregationOptionsByType {
     gap_policy?: 'skip' | 'insert_zeros';
     format?: string;
   };
+  rate: {
+    unit: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+  } & (
+    | {
+        field: string;
+        mode: 'sum' | 'value_count';
+      }
+    | {}
+  );
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -407,6 +416,9 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
     ];
   };
   avg_bucket: {
+    value: number | null;
+  };
+  rate: {
     value: number | null;
   };
 }
