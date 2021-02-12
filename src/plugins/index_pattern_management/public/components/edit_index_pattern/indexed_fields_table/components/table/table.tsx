@@ -142,7 +142,7 @@ const runtimeLabel = i18n.translate(
 
 const runtimeDescription = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.runtimeDescription',
-  { defaultMessage: 'These fields are created a runtime' }
+  { defaultMessage: 'Fields that have a runtime script' }
 );
 
 const isRuntimeAriaLabel = i18n.translate(
