@@ -85,6 +85,7 @@ export interface BrowserField {
   format: string;
   indexes: string[];
   name: string;
+  readFromDocValues: boolean;
   searchable: boolean;
   type: string;
 }

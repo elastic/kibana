@@ -26,7 +26,6 @@ export const createDefaultIndexPatterns = ({
   selectedPatterns,
   state,
 }: Args): { selectedPatterns: SelectablePatterns; indexNames: string[] } => {
-  console.log('createDefaultIndexPatterns', { eventType, id, selectedPatterns, state });
   const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
   const newSelectedPatterns = selectedPatterns.filter(
     ({ title: sp }) =>
@@ -81,8 +80,6 @@ export const defaultIndexPatternByEventType = ({
         id: SourcererPatternType.detections,
       },
     ];
-  } else if (eventType === 'raw') {
-    defaultIndexPatterns = defaultIndexPatterns;
   } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
     defaultIndexPatterns = [
       {

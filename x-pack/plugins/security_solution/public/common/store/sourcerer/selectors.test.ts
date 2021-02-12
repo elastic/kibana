@@ -11,62 +11,60 @@ import { SourcererScopeName } from './model';
 import { getSourcererScopeSelector } from './selectors';
 import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 
-describe('Sourcerer selectors', () => {
-  describe('getSourcererScopeSelector', () => {
-    it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', () => {
-      const mapStateToProps = getSourcererScopeSelector();
-      expect(
-        mapStateToProps(mockGlobalState, SourcererScopeName.default).selectedPatterns
-      ).toEqual([
-        'apm-*-transaction*',
-        'auditbeat-*',
-        'endgame-*',
-        'filebeat-*',
-        'logs-*',
-        'packetbeat-*',
-        'winlogbeat-*',
-        '-*elastic-cloud-logs-*',
-      ]);
-    });
+describe('getSourcererScopeSelector', () => {
+  it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', () => {
+    const mapStateToProps = getSourcererScopeSelector();
+    expect(mapStateToProps(mockGlobalState, SourcererScopeName.default).indexNames).toEqual([
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'logs-*',
+      'packetbeat-*',
+      'winlogbeat-*',
+      '-*elastic-cloud-logs-*',
+    ]);
+  });
 
-    it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', () => {
-      const mapStateToProps = getSourcererScopeSelector();
-      const myMockGlobalState = cloneDeep(mockGlobalState);
-      myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns.filter(
+  it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', () => {
+    const mapStateToProps = getSourcererScopeSelector();
+    const myMockGlobalState = cloneDeep(mockGlobalState);
+    myMockGlobalState.sourcerer.sourcererScopes.default.indexNames = myMockGlobalState.sourcerer.sourcererScopes.default.indexNames.filter(
+      (title) => !title.includes('logs-*')
+    );
+    expect(mapStateToProps(myMockGlobalState, SourcererScopeName.default).indexNames).toEqual([
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'packetbeat-*',
+      'winlogbeat-*',
+    ]);
+  });
+
+  it('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', () => {
+    const mapStateToProps = getSourcererScopeSelector();
+    const myMockGlobalState = cloneDeep(mockGlobalState);
+    myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
+      ...myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns.filter(
         ({ title }) => !title.includes('logs-*')
-      );
-      expect(
-        mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns
-      ).toEqual([
-        'apm-*-transaction*',
-        'auditbeat-*',
-        'endgame-*',
-        'filebeat-*',
-        'packetbeat-*',
-        'winlogbeat-*',
-      ]);
-    });
-
-    it('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', () => {
-      const mapStateToProps = getSourcererScopeSelector();
-      const myMockGlobalState = cloneDeep(mockGlobalState);
-      myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns = [
-        ...myMockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns.filter(
-          ({ title }) => !title.includes('logs-*')
-        ),
-        { id: SourcererPatternType.config, title: 'logs-endpoint.event-*' },
-      ];
-      expect(
-        mapStateToProps(myMockGlobalState, SourcererScopeName.default).selectedPatterns
-      ).toEqual([
-        'apm-*-transaction*',
-        'auditbeat-*',
-        'endgame-*',
-        'filebeat-*',
-        'logs-endpoint.event-*',
-        'packetbeat-*',
-        'winlogbeat-*',
-      ]);
-    });
+      ),
+      { id: SourcererPatternType.config, title: 'logs-endpoint.event-*' },
+    ];
+    myMockGlobalState.sourcerer.sourcererScopes.default.indexNames = [
+      ...myMockGlobalState.sourcerer.sourcererScopes.default.indexNames.filter(
+        (title) => !title.includes('logs-*')
+      ),
+      'logs-endpoint.event-*',
+    ];
+    expect(mapStateToProps(myMockGlobalState, SourcererScopeName.default).indexNames).toEqual([
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'logs-endpoint.event-*',
+      'packetbeat-*',
+      'winlogbeat-*',
+    ]);
   });
 });

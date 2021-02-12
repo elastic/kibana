@@ -6,63 +6,24 @@
  */
 
 import React from 'react';
-import {
-  EuiComboBoxOptionOption,
-  EuiHealth,
-  EuiHighlight,
-  euiPaletteColorBlindBehindText,
-} from '@elastic/eui';
-import styled from 'styled-components';
-import {
-  SelectablePatternId,
-  SourcererPatternType,
-} from '../../../../common/search_strategy/index_fields';
-const visColorsBehindText = euiPaletteColorBlindBehindText();
+import { EuiComboBoxOptionOption, EuiIcon, EuiHighlight } from '@elastic/eui';
+import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 
-export const patternColors = {
-  kip: visColorsBehindText[0], // green
-  detections: visColorsBehindText[7], // orangey brown
-};
-
-export const getPatternColor = (patternType: SelectablePatternId) => {
-  switch (patternType) {
-    case SourcererPatternType.detections:
-      return patternColors.detections;
-    case SourcererPatternType.config:
-      return undefined; // undefined for white
-    default:
-      return patternColors.kip;
-  }
-};
-
-export const OutlineEuiHealth = styled(EuiHealth)`
-  // margin + width/height + margin; 4 + 8 + 4 = 16; size of .euiIcon--medium
-  svg.euiIcon--medium {
-    width: 8px;
-    height: 8px;
-    margin: 4px;
-    background: ${(props) => props.theme.eui.euiColorMediumShade};
-    border-radius: 50%;
-  }
-  circle {
-    r: 7;
-  }
-`;
 export const renderPatternOption = (
   { value, label }: EuiComboBoxOptionOption<string>,
   searchValue: string
-) => {
-  const dotColor = value ? getPatternColor(value) : value;
-  return dotColor ? (
-    <EuiHealth color={dotColor}>
+) =>
+  value !== SourcererPatternType.config && value !== SourcererPatternType.detections ? (
+    <span data-test-subj="kip-option">
+      <EuiIcon type="logoKibana" size="s" />{' '}
       <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-    </EuiHealth>
+    </span>
   ) : (
-    <OutlineEuiHealth color={'ghost'}>
+    <span data-test-subj="config-option">
       <EuiHighlight search={searchValue}>{label}</EuiHighlight>
-    </OutlineEuiHealth>
+    </span>
   );
-};
+
 export const filterKipAsSoloPattern = (
   selectedOptions: Array<EuiComboBoxOptionOption<string>>,
   newSelectedOptions: Array<EuiComboBoxOptionOption<string>>

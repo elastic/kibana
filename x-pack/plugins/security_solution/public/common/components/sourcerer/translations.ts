@@ -15,6 +15,13 @@ export const ALL_DEFAULT = i18n.translate('xpack.securitySolution.indexPatterns.
   defaultMessage: 'All default',
 });
 
+export const MORE_INFORMATION = i18n.translate(
+  'xpack.securitySolution.indexPatterns.moreInformation',
+  {
+    defaultMessage: 'More information',
+  }
+);
+
 export const SELECT_INDEX_PATTERNS = i18n.translate('xpack.securitySolution.indexPatterns.help', {
   defaultMessage: 'Data sources selection',
 });

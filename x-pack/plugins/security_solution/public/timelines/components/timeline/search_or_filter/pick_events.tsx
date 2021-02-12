@@ -38,10 +38,10 @@ import {
 } from '../../../../../common/search_strategy/index_fields';
 import {
   filterKipAsSoloPattern,
-  getPatternColor,
   renderPatternOption,
 } from '../../../../common/components/sourcerer/helpers';
-import { ColorKey } from '../../../../common/components/sourcerer/color_key';
+import { IndexPatternInfo } from '../../../../common/components/sourcerer/index_pattern_info';
+import * as i18nSourcerer from '../../../../common/components/sourcerer/translations';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -147,7 +147,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
   const [selectedOptions, setSelectedOptions] = useState<ComboOptions>(
     sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
-      color: getPatternColor(id),
       key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
       label: indexSelected,
       value: id,
@@ -169,7 +168,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           return [
             ...acc,
             {
-              color: getPatternColor(id),
               key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
               label: index,
               value: id,
@@ -212,7 +210,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             { title: signalIndexName ?? '', id: SourcererPatternType.detections },
           ].map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
-            color: getPatternColor(id),
             value: id,
             key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
           }))
@@ -221,7 +218,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setSelectedOptions(
           configAsSelectable.map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
-            color: getPatternColor(id),
             value: id,
             key: `${id}-${i}`,
           }))
@@ -230,7 +226,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setSelectedOptions([
           {
             label: signalIndexName ?? '',
-            color: getPatternColor(SourcererPatternType.detections),
             value: SourcererPatternType.detections,
             key: SourcererPatternType.detections,
           },
@@ -239,7 +234,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
         setSelectedOptions(
           kibanaIndexPatterns.map(({ title, id }, i) => ({
             label: title,
-            color: getPatternColor(id),
             value: id,
             key: `${id}-${i}`,
           }))
@@ -268,7 +262,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     setSelectedOptions(
       sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
         label: indexSelected,
-        color: getPatternColor(id),
         value: id,
         key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
       }))
@@ -342,7 +335,6 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
     const newSelectedOptions = sourcererScope.selectedPatterns.map(
       ({ title: indexSelected, id }, i) => ({
         label: indexSelected,
-        color: getPatternColor(id),
         value: id,
         key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
       })
@@ -386,9 +378,12 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
             >
               <>
                 <EuiSpacer size="s" />
+                <EuiText color="default">
+                  {i18nSourcerer.INDEX_PATTERNS_SELECTION_LABEL} <IndexPatternInfo />
+                </EuiText>
+                <EuiSpacer size="xs" />
                 {comboBox}
                 <EuiSpacer size="s" />
-                <ColorKey includeDetections />
               </>
             </EuiAccordion>
             {!showAdvanceSettings && (

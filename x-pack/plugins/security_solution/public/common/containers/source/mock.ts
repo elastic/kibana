@@ -301,6 +301,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'agent.ephemeral_id': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'agent',
         description:
           'Ephemeral identifier of this agent (if one exists). This id normally changes across restarts, but `agent.id` does not.',
@@ -312,6 +313,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'agent.hostname': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'agent',
         description: null,
         example: null,
@@ -322,6 +324,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'agent.id': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'agent',
         description:
           'Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.',
@@ -333,6 +336,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'agent.name': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'agent',
         description:
           'Name of the agent. This is a name that can be given to an agent. This can be helpful if for example two Filebeat instances are running on the same host but a human readable separation is needed on which Filebeat instance data is coming from. If no name is given, the name is often left empty.',
@@ -348,6 +352,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'auditd.data.a0': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'auditd',
         description: null,
         example: null,
@@ -358,6 +363,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'auditd.data.a1': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'auditd',
         description: null,
         example: null,
@@ -368,6 +374,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'auditd.data.a2': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'auditd',
         description: null,
         example: null,
@@ -382,6 +389,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       '@timestamp': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'base',
         description:
           'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
@@ -397,6 +405,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'client.address': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'client',
         description:
           'Some event client addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field. Then it should be duplicated to `.ip` or `.domain`, depending on which one it is.',
@@ -408,6 +417,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'client.bytes': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'client',
         description: 'Bytes sent from the client to the server.',
         example: '184',
@@ -418,6 +428,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'client.domain': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'client',
         description: 'Client domain.',
         example: null,
@@ -428,6 +439,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'client.geo.country_iso_code': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'client',
         description: 'Country ISO code.',
         example: 'CA',
@@ -442,6 +454,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'cloud.account.id': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'cloud',
         description:
           'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
@@ -453,6 +466,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'cloud.availability_zone': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'cloud',
         description: 'Availability zone in which this host is running.',
         example: 'us-east-1c',
@@ -467,6 +481,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'container.id': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'container',
         description: 'Unique container id.',
         example: null,
@@ -477,6 +492,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'container.image.name': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'container',
         description: 'Name of the image the container was built on.',
         example: null,
@@ -487,6 +503,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'container.image.tag': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'container',
         description: 'Container image tag.',
         example: null,
@@ -501,6 +518,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'destination.address': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'destination',
         description:
           'Some event destination addresses are defined ambiguously. The event will sometimes list an IP, a domain or a unix socket.  You should always store the raw address in the `.address` field. Then it should be duplicated to `.ip` or `.domain`, depending on which one it is.',
@@ -512,6 +530,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.bytes': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'destination',
         description: 'Bytes sent from the destination to the source.',
         example: '184',
@@ -522,6 +541,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.domain': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'destination',
         description: 'Destination domain.',
         example: null,
@@ -532,6 +552,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.ip': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'destination',
         description:
           'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
@@ -543,6 +564,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'destination.port': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'destination',
         description: 'Port of the destination.',
         example: '',
@@ -565,6 +587,7 @@ export const mockBrowserFields: BrowserFields = {
         searchable: true,
         type: 'date',
         aggregatable: true,
+        readFromDocValues: true,
       },
     },
   },
@@ -572,6 +595,7 @@ export const mockBrowserFields: BrowserFields = {
     fields: {
       'source.ip': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'source',
         description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
         example: '',
@@ -582,6 +606,7 @@ export const mockBrowserFields: BrowserFields = {
       },
       'source.port': {
         aggregatable: true,
+        readFromDocValues: true,
         category: 'source',
         description: 'Port of the source.',
         example: '',

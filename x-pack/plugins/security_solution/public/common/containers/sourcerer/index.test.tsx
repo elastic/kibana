@@ -29,6 +29,7 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererPatternType } from '../../../../common/search_strategy/index_fields';
 const mockSourceDefaults = mockSource;
 
 const mockRouteSpy: RouteSpyState = {
@@ -167,7 +168,10 @@ describe('Sourcerer Hooks', () => {
       });
       expect(mockDispatch.mock.calls[3][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
-        payload: { id: 'timeline', selectedPatterns: ['signals-*'] },
+        payload: {
+          id: 'timeline',
+          selectedPatterns: [{ id: SourcererPatternType.detections, title: 'signals-*' }],
+        },
       });
     });
   });
@@ -188,7 +192,10 @@ describe('Sourcerer Hooks', () => {
       rerender();
       expect(mockDispatch.mock.calls[1][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS',
-        payload: { id: 'detections', selectedPatterns: ['signals-*'] },
+        payload: {
+          id: 'detections',
+          selectedPatterns: [{ id: SourcererPatternType.detections, title: 'signals-*' }],
+        },
       });
     });
   });

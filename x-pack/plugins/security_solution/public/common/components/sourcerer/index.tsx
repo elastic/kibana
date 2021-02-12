@@ -32,8 +32,8 @@ import {
   SelectablePatterns,
   SourcererPatternType,
 } from '../../../../common/search_strategy/index_fields';
-import { filterKipAsSoloPattern, getPatternColor, renderPatternOption } from './helpers';
-import { ColorKey } from './color_key';
+import { filterKipAsSoloPattern, renderPatternOption } from './helpers';
+import { IndexPatternInfo } from './index_pattern_info';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -63,7 +63,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
-      color: getPatternColor(id),
       key: `${id}-${i}`,
     }))
   );
@@ -119,10 +118,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       [...configAsSelectable, ...kibanaIndexPatterns].reduce<ComboBoxOptions>(
         (acc, { title: index, id }, i) => {
           if (index != null) {
-            return [
-              ...acc,
-              { label: index, value: id, color: getPatternColor(id), key: `${id}-${i}` },
-            ];
+            return [...acc, { label: index, value: id, key: `${id}-${i}` }];
           }
           return acc;
         },
@@ -169,7 +165,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     const newSelectedOptions = selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
-      color: getPatternColor(id),
       key: `${id}-${i}`,
     }));
     setSelectedOptions((prevSelectedOptions) => {
@@ -198,15 +193,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         ownFocus
       >
         <PopoverContent>
-          <EuiPopoverTitle>
-            <>{i18n.SELECT_INDEX_PATTERNS}</>
-          </EuiPopoverTitle>
+          <EuiPopoverTitle>{i18n.SELECT_INDEX_PATTERNS}</EuiPopoverTitle>
           <EuiSpacer size="s" />
-          <EuiText color="default">{i18n.INDEX_PATTERNS_SELECTION_LABEL}</EuiText>
+          <EuiText color="default">
+            {i18n.INDEX_PATTERNS_SELECTION_LABEL} <IndexPatternInfo />
+          </EuiText>
           <EuiSpacer size="xs" />
           {comboBox}
           <EuiSpacer size="s" />
-          <ColorKey />
           <EuiPopoverFooter>
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem>

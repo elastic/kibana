@@ -42,7 +42,13 @@ describe('createDefaultIndexPatterns', () => {
         });
         it('Selected patterns', () => {
           const result = createDefaultIndexPatterns(defaultArgs);
-          expect(result).toEqual(['auditbeat-*', 'packetbeat-*']);
+          expect(result).toEqual({
+            indexNames: ['auditbeat-*', 'packetbeat-*'],
+            selectedPatterns: [
+              { id: SourcererPatternType.config, title: 'auditbeat-*' },
+              { id: SourcererPatternType.config, title: 'packetbeat-*' },
+            ],
+          });
         });
         it('No selected patterns', () => {
           const newArgs = {
@@ -54,11 +60,29 @@ describe('createDefaultIndexPatterns', () => {
             id === SourcererScopeName.detections ||
             (id === SourcererScopeName.timeline && (et === 'alert' || et === 'signal'))
           ) {
-            expect(result).toEqual(['signals-*']);
+            expect(result).toEqual({
+              indexNames: ['signals-*'],
+              selectedPatterns: [{ id: SourcererPatternType.detections, title: 'signals-*' }],
+            });
           } else if (id === SourcererScopeName.timeline && et === 'all') {
-            expect(result).toEqual(['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'signals-*']);
+            expect(result).toEqual({
+              indexNames: ['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'signals-*'],
+              selectedPatterns: [
+                { id: SourcererPatternType.config, title: 'filebeat-*' },
+                { id: SourcererPatternType.config, title: 'auditbeat-*' },
+                { id: SourcererPatternType.config, title: 'packetbeat-*' },
+                { id: SourcererPatternType.detections, title: 'signals-*' },
+              ],
+            });
           } else {
-            expect(result).toEqual(['filebeat-*', 'auditbeat-*', 'packetbeat-*']);
+            expect(result).toEqual({
+              indexNames: ['filebeat-*', 'auditbeat-*', 'packetbeat-*'],
+              selectedPatterns: [
+                { id: SourcererPatternType.config, title: 'filebeat-*' },
+                { id: SourcererPatternType.config, title: 'auditbeat-*' },
+                { id: SourcererPatternType.config, title: 'packetbeat-*' },
+              ],
+            });
           }
         });
       });

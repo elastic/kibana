@@ -258,6 +258,7 @@ export const mockGlobalState: State = {
       ...initialSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
+        indexNames: DEFAULT_INDEX_PATTERN,
         selectedPatterns: defaultPatternsAsSelectable,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
@@ -266,6 +267,7 @@ export const mockGlobalState: State = {
       },
       [SourcererScopeName.timeline]: {
         ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
+        indexNames: DEFAULT_INDEX_PATTERN,
         selectedPatterns: defaultPatternsAsSelectable,
         browserFields: mockBrowserFields,
         indexPattern: mockIndexPattern,
