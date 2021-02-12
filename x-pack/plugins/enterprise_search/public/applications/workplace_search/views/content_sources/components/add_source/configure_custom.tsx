@@ -50,6 +50,7 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
   return (
     <div className="custom-api-step-1">
       {header}
+      <EuiSpacer />
       <form onSubmit={handleFormSubmit}>
         <EuiForm>
           <EuiText grow={false}>
