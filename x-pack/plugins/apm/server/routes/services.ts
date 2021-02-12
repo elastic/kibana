@@ -26,6 +26,7 @@ import { getThroughput } from '../lib/services/get_throughput';
 import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
 import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
+import { withApmSpan } from '../utils/with_apm_span';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -179,14 +180,17 @@ export const serviceAnnotationsRoute = createRoute({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
+    const { observability } = context.plugins;
+
     const [
       annotationsClient,
       searchAggregatedTransactions,
     ] = await Promise.all([
-      context.plugins.observability?.getScopedAnnotationsClient(
-        context,
-        request
-      ),
+      observability
+        ? withApmSpan('get_scoped_annotations_client', () =>
+            observability.getScopedAnnotationsClient(context, request)
+          )
+        : undefined,
       getSearchAggregatedTransactions(setup),
     ]);
 
@@ -230,10 +234,13 @@ export const serviceAnnotationsCreateRoute = createRoute({
     ]),
   }),
   handler: async ({ request, context }) => {
-    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
-      context,
-      request
-    );
+    const { observability } = context.plugins;
+
+    const annotationsClient = observability
+      ? await withApmSpan('get_scoped_annotations_client', () =>
+          observability.getScopedAnnotationsClient(context, request)
+        )
+      : undefined;
 
     if (!annotationsClient) {
       throw Boom.notFound();
@@ -241,19 +248,21 @@ export const serviceAnnotationsCreateRoute = createRoute({
 
     const { body, path } = context.params;
 
-    return annotationsClient.create({
-      message: body.service.version,
-      ...body,
-      '@timestamp': new Date(body['@timestamp']).toISOString(),
-      annotation: {
-        type: 'deployment',
-      },
-      service: {
-        ...body.service,
-        name: path.serviceName,
-      },
-      tags: uniq(['apm'].concat(body.tags ?? [])),
-    });
+    return withApmSpan('create_annotation', () =>
+      annotationsClient.create({
+        message: body.service.version,
+        ...body,
+        '@timestamp': new Date(body['@timestamp']).toISOString(),
+        annotation: {
+          type: 'deployment',
+        },
+        service: {
+          ...body.service,
+          name: path.serviceName,
+        },
+        tags: uniq(['apm'].concat(body.tags ?? [])),
+      })
+    );
   },
 });
 

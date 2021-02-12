@@ -17,6 +17,7 @@ import {
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { Setup } from '../helpers/setup_request';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
   searchAggregatedTransactions: boolean;
@@ -59,7 +60,7 @@ function fetcher({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        transactions: {
+        timeseries: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: intervalString,
@@ -81,15 +82,17 @@ function fetcher({
   return apmEventClient.search(params);
 }
 
-export async function getThroughput(options: Options) {
-  const response = await fetcher(options);
+export function getThroughput(options: Options) {
+  return withApmSpan('get_throughput_for_service', async () => {
+    const response = await fetcher(options);
 
-  return (
-    response.aggregations?.transactions.buckets.map((bucket) => {
-      return {
-        x: bucket.key,
-        y: bucket.throughput.value,
-      };
-    }) ?? []
-  );
+    return (
+      response.aggregations?.timeseries.buckets.map((bucket) => {
+        return {
+          x: bucket.key,
+          y: bucket.throughput.value,
+        };
+      }) ?? []
+    );
+  });
 }
