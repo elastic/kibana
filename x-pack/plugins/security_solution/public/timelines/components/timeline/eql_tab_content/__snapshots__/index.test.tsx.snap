@@ -2,7 +2,7 @@
 
 exports[`Timeline rendering renders correctly against snapshot 1`] = `
 <EqlTabContentComponent
-  activeTab="query"
+  activeTab="eql"
   columns={
     Array [
       Object {
@@ -129,7 +129,7 @@ In other use cases the message field can be used to concatenate different values
   end="2018-03-24T03:33:52.253Z"
   eqlOptions={Object {}}
   eventType="all"
-  expandedEvent={Object {}}
+  expandedDetail={Object {}}
   isLive={false}
   itemsPerPage={5}
   itemsPerPageOptions={
@@ -140,7 +140,7 @@ In other use cases the message field can be used to concatenate different values
     ]
   }
   onEventClosed={[MockFunction]}
-  showEventDetails={false}
+  showExpandedDetails={false}
   start="2018-03-23T18:49:23.132Z"
   timelineId="test"
   timerangeKind="absolute"

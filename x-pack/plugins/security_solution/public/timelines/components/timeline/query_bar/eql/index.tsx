@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, isEqual } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -61,6 +61,7 @@ const HiddenUseField = styled(UseField)`
 
 export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string }) => {
   const dispatch = useDispatch();
+  const isInit = useRef(true);
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isQueryBarValidating, setIsQueryBarValidating] = useState(false);
   const getOptionsSelected = useMemo(() => getEqlOptions(), []);
@@ -136,17 +137,26 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   useEffect(() => {
     const { eqlQueryBar } = getFields();
-    const formQuery = ((eqlQueryBar as unknown) as FieldValueQueryBar)?.query?.query ?? '';
-    if (formQuery.trim() !== (optionsSelected.query ?? '').trim()) {
+    if (isInit.current) {
+      isInit.current = false;
+      setIsQueryBarValidating(true);
       eqlQueryBar.setValue({
         ...defaultValues.eqlQueryBar,
         query: { query: optionsSelected.query ?? '', language: 'eql' },
       });
     }
+    return () => {
+      isInit.current = true;
+    };
   }, [getFields, optionsSelected.query]);
 
   useEffect(() => {
-    if (formEqlQueryBar != null && !isEmpty() && isQueryBarValid && !isQueryBarValidating) {
+    if (
+      formEqlQueryBar != null &&
+      !isEmpty(formEqlQueryBar.query.query) &&
+      isQueryBarValid &&
+      !isQueryBarValidating
+    ) {
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,

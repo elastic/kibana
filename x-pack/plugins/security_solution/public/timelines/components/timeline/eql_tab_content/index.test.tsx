@@ -87,18 +87,18 @@ describe('Timeline', () => {
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
-      expandedEvent: {},
+      expandedDetail: {},
       eventType: 'all',
-      showEventDetails: false,
       timelineId: TimelineId.test,
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       onEventClosed: jest.fn(),
+      showExpandedDetails: false,
       start: startDate,
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
-      activeTab: TimelineTabs.query,
+      activeTab: TimelineTabs.eql,
     };
   });
 

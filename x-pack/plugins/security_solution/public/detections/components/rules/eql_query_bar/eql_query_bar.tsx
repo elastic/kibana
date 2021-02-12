@@ -84,7 +84,9 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       const newQuery = e.target.value;
-
+      if (onValiditingChange) {
+        onValiditingChange(true);
+      }
       setErrorMessages([]);
       setValue({
         filters: [],
@@ -94,7 +96,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         },
       });
     },
-    [setValue]
+    [setValue, onValiditingChange]
   );
 
   return (

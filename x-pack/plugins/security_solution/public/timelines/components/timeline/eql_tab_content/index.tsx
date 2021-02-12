@@ -43,12 +43,12 @@ import { timelineDefaults } from '../../../../timelines/store/timeline/defaults'
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useEqlEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import { TimelineModel } from '../../../../timelines/store/timeline/model';
-import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { HideShowContainer } from '../styles';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import { ToggleExpandedEvent } from '../../../store/timeline/actions';
+import { ToggleDetailPanel } from '../../../store/timeline/actions';
+import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
 import { Sort } from '../body/sort';
 
@@ -140,13 +140,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   end,
   eqlOptions,
   eventType,
-  expandedEvent,
+  expandedDetail,
   timelineId,
   isLive,
   itemsPerPage,
   itemsPerPageOptions,
   onEventClosed,
-  showEventDetails,
+  showExpandedDetails,
   start,
   timerangeKind,
   updateEventTypeAndIndexesName,
@@ -202,16 +202,17 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const handleOnEventClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.query, timelineId });
+  const handleOnPanelClosed = useCallback(() => {
+    onEventClosed({ tabType: TimelineTabs.eql, timelineId });
 
-    if (timelineId === TimelineId.active) {
-      activeTimeline.toggleExpandedEvent({
-        eventId: expandedEvent.eventId!,
-        indexName: expandedEvent.indexName!,
-      });
+    if (
+      expandedDetail[TimelineTabs.eql]?.panelView &&
+      timelineId === TimelineId.active &&
+      showExpandedDetails
+    ) {
+      activeTimeline.toggleExpandedDetail({});
     }
-  }, [timelineId, onEventClosed, expandedEvent.eventId, expandedEvent.indexName]);
+  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
@@ -260,7 +261,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody
-              data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
+              data-test-subj={`${TimelineTabs.eql}-tab-flyout-body`}
               className="timeline-flyout-body"
             >
               <StatefulBody
@@ -279,7 +280,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutBody>
 
             <StyledEuiFlyoutFooter
-              data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
+              data-test-subj={`${TimelineTabs.eql}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
               {!isBlankTimeline && (
@@ -301,16 +302,16 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutFooter>
           </EventDetailsWidthProvider>
         </ScrollableFlexItem>
-        {showEventDetails && (
+        {showExpandedDetails && (
           <>
             <VerticalRule />
             <ScrollableFlexItem grow={1}>
-              <EventDetails
+              <DetailsPanel
                 browserFields={browserFields}
                 docValueFields={docValueFields}
-                tabType={TimelineTabs.query}
+                tabType={TimelineTabs.eql}
                 timelineId={timelineId}
-                handleOnEventClosed={handleOnEventClosed}
+                handleOnPanelClosed={handleOnPanelClosed}
               />
             </ScrollableFlexItem>
           </>
@@ -331,7 +332,7 @@ const makeMapStateToProps = () => {
       columns,
       eqlOptions,
       eventType,
-      expandedEvent,
+      expandedDetail,
       itemsPerPage,
       itemsPerPageOptions,
     } = timeline;
@@ -342,12 +343,14 @@ const makeMapStateToProps = () => {
       eqlOptions,
       eventType: eventType ?? 'raw',
       end: input.timerange.to,
-      expandedEvent: expandedEvent[TimelineTabs.query] ?? {},
+      expandedDetail,
       timelineId,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
-      showEventDetails: !!expandedEvent[TimelineTabs.query]?.eventId,
+      showExpandedDetails:
+        !!expandedDetail[TimelineTabs.eql] && !!expandedDetail[TimelineTabs.eql]?.panelView,
+
       start: input.timerange.from,
       timerangeKind: input.timerange.kind,
     };
@@ -366,8 +369,8 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
       })
     );
   },
-  onEventClosed: (args: ToggleExpandedEvent) => {
-    dispatch(timelineActions.toggleExpandedEvent(args));
+  onEventClosed: (args: ToggleDetailPanel) => {
+    dispatch(timelineActions.toggleDetailPanel(args));
   },
 });
 
@@ -386,7 +389,7 @@ const EqlTabContent = connector(
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
-      prevProps.showEventDetails === nextProps.showEventDetails &&
+      prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.timelineId === nextProps.timelineId &&
       prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
       deepEqual(prevProps.columns, nextProps.columns) &&
