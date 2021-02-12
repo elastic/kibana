@@ -39,6 +39,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
 |  [AppMeta](./kibana-plugin-core-public.appmeta.md) | Input type for meta data for an application.<!-- -->Meta fields include <code>keywords</code> and <code>searchDeepLinks</code> Keywords is an array of string with which to associate the app, must include at least one unique string as an array. <code>searchDeepLinks</code> is an array of links that represent secondary in-app locations for the app. |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
+|  [AsyncPlugin](./kibana-plugin-core-public.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
 |  [ChromeBadge](./kibana-plugin-core-public.chromebadge.md) |  |
 |  [ChromeBrand](./kibana-plugin-core-public.chromebrand.md) |  |
@@ -55,6 +56,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeRecentlyAccessed](./kibana-plugin-core-public.chromerecentlyaccessed.md) | [APIs](./kibana-plugin-core-public.chromerecentlyaccessed.md) for recently accessed history. |
 |  [ChromeRecentlyAccessedHistoryItem](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.md) |  |
 |  [ChromeStart](./kibana-plugin-core-public.chromestart.md) | ChromeStart allows plugins to customize the global chrome header UI and enrich the UX with additional information about the current location of the browser. |
+|  [ChromeUserBanner](./kibana-plugin-core-public.chromeuserbanner.md) |  |
 |  [CoreSetup](./kibana-plugin-core-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |

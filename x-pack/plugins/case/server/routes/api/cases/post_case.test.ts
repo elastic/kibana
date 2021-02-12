@@ -49,13 +49,13 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.id).toEqual('mock-it');
     expect(response.payload.status).toEqual('open');
@@ -88,14 +88,14 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.connector).toEqual({
       id: '123',
@@ -121,13 +121,13 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
   });
 
@@ -146,13 +146,13 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(400);
     expect(response.payload.isBoom).toEqual(true);
   });
@@ -179,7 +179,7 @@ describe('POST cases', () => {
       },
     });
 
-    const theContext = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
@@ -187,37 +187,44 @@ describe('POST cases', () => {
       true
     );
 
-    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual({
-      closed_at: null,
-      closed_by: null,
-      comments: [],
-      connector: {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      },
-      created_at: '2019-11-25T21:54:48.952Z',
-      created_by: {
-        email: null,
-        full_name: null,
-        username: null,
-      },
-      description: 'This is a brand new case of a bad meanie defacing data',
-      external_service: null,
-      id: 'mock-it',
-      status: CaseStatuses.open,
-      tags: ['defacement'],
-      title: 'Super Bad Security Issue',
-      totalComment: 0,
-      updated_at: null,
-      updated_by: null,
-      version: 'WzksMV0=',
-      settings: {
-        syncAlerts: true,
-      },
-    });
+    expect(response.payload).toMatchInlineSnapshot(`
+      Object {
+        "closed_at": null,
+        "closed_by": null,
+        "comments": Array [],
+        "connector": Object {
+          "fields": null,
+          "id": "none",
+          "name": "none",
+          "type": ".none",
+        },
+        "created_at": "2019-11-25T21:54:48.952Z",
+        "created_by": Object {
+          "email": null,
+          "full_name": null,
+          "username": null,
+        },
+        "description": "This is a brand new case of a bad meanie defacing data",
+        "external_service": null,
+        "id": "mock-it",
+        "settings": Object {
+          "syncAlerts": true,
+        },
+        "status": "open",
+        "subCases": undefined,
+        "tags": Array [
+          "defacement",
+        ],
+        "title": "Super Bad Security Issue",
+        "totalAlerts": 0,
+        "totalComment": 0,
+        "type": "individual",
+        "updated_at": null,
+        "updated_by": null,
+        "version": "WzksMV0=",
+      }
+    `);
   });
 });

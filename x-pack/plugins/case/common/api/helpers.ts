@@ -10,11 +10,21 @@ import {
   CASE_COMMENTS_URL,
   CASE_USER_ACTIONS_URL,
   CASE_COMMENT_DETAILS_URL,
-  CASE_CONFIGURE_PUSH_URL,
+  SUB_CASE_DETAILS_URL,
+  SUB_CASES_URL,
+  CASE_PUSH_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
   return CASE_DETAILS_URL.replace('{case_id}', id);
+};
+
+export const getSubCasesUrl = (caseID: string): string => {
+  return SUB_CASES_URL.replace('{case_id}', caseID);
+};
+
+export const getSubCaseDetailsUrl = (caseID: string, subCaseID: string): string => {
+  return SUB_CASE_DETAILS_URL.replace('{case_id}', caseID).replace('{sub_case_id}', subCaseID);
 };
 
 export const getCaseCommentsUrl = (id: string): string => {
@@ -28,6 +38,6 @@ export const getCaseCommentDetailsUrl = (caseId: string, commentId: string): str
 export const getCaseUserActionUrl = (id: string): string => {
   return CASE_USER_ACTIONS_URL.replace('{case_id}', id);
 };
-export const getCaseConfigurePushUrl = (id: string): string => {
-  return CASE_CONFIGURE_PUSH_URL.replace('{connector_id}', id);
+export const getCasePushUrl = (caseId: string, connectorId: string): string => {
+  return CASE_PUSH_URL.replace('{case_id}', caseId).replace('{connector_id}', connectorId);
 };

@@ -124,20 +124,18 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
               groupIds,
             },
           },
-          isCachable: true,
-        }).then((response) => {
-          return { [requestId]: response };
         });
       }
     },
     // only fetches agg results when requestId changes or group ids change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, groupIds]
+    [requestId, groupIds],
+    { preservePreviousData: false }
   );
 
   const columns = getColumns({
     serviceName,
-    errorGroupComparisonStatistics: errorGroupComparisonStatistics?.[requestId],
+    errorGroupComparisonStatistics: errorGroupComparisonStatistics ?? {},
   });
 
   return (

@@ -63,7 +63,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./transactions/latency'));
     loadTestFile(require.resolve('./transactions/throughput'));
     loadTestFile(require.resolve('./transactions/top_transaction_groups'));
-    loadTestFile(require.resolve('./transactions/transactions_groups_overview'));
+    loadTestFile(require.resolve('./transactions/transactions_groups_primary_statistics'));
+    loadTestFile(require.resolve('./transactions/transactions_groups_comparison_statistics'));
 
     loadTestFile(require.resolve('./feature_controls'));
 

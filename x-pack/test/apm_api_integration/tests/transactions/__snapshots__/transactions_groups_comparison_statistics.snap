@@ -1,0 +1,517 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct data 1`] = `
+Array [
+  Object {
+    "x": 1607435820000,
+    "y": null,
+  },
+  Object {
+    "x": 1607435880000,
+    "y": 69429,
+  },
+  Object {
+    "x": 1607435940000,
+    "y": 8071285,
+  },
+  Object {
+    "x": 1607436000000,
+    "y": 31949,
+  },
+  Object {
+    "x": 1607436060000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436120000,
+    "y": 47755,
+  },
+  Object {
+    "x": 1607436180000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436240000,
+    "y": 35403,
+  },
+  Object {
+    "x": 1607436300000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436360000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436420000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436480000,
+    "y": 48137,
+  },
+  Object {
+    "x": 1607436540000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436600000,
+    "y": 35457,
+  },
+  Object {
+    "x": 1607436660000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436720000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436780000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436840000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436900000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436960000,
+    "y": 30501,
+  },
+  Object {
+    "x": 1607437020000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437080000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437140000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437200000,
+    "y": 46937.5,
+  },
+  Object {
+    "x": 1607437260000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437320000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437380000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437440000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437500000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437560000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437620000,
+    "y": null,
+  },
+]
+`;
+
+exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct data 2`] = `
+Array [
+  Object {
+    "x": 1607435820000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607435880000,
+    "y": 1,
+  },
+  Object {
+    "x": 1607435940000,
+    "y": 2,
+  },
+  Object {
+    "x": 1607436000000,
+    "y": 1,
+  },
+  Object {
+    "x": 1607436060000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436120000,
+    "y": 1,
+  },
+  Object {
+    "x": 1607436180000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436240000,
+    "y": 4,
+  },
+  Object {
+    "x": 1607436300000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436360000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436420000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436480000,
+    "y": 2,
+  },
+  Object {
+    "x": 1607436540000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436600000,
+    "y": 1,
+  },
+  Object {
+    "x": 1607436660000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436720000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436780000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436840000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436900000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436960000,
+    "y": 2,
+  },
+  Object {
+    "x": 1607437020000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437080000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437140000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437200000,
+    "y": 2,
+  },
+  Object {
+    "x": 1607437260000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437320000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437380000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437440000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437500000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437560000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437620000,
+    "y": 0,
+  },
+]
+`;
+
+exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct data 3`] = `
+Array [
+  Object {
+    "x": 1607435820000,
+    "y": null,
+  },
+  Object {
+    "x": 1607435880000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607435940000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436000000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436060000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436120000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436180000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436240000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436300000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436360000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436420000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436480000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436540000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436600000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607436660000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436720000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436780000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436840000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436900000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436960000,
+    "y": 0,
+  },
+  Object {
+    "x": 1607437020000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437080000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437140000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437200000,
+    "y": 0.5,
+  },
+  Object {
+    "x": 1607437260000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437320000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437380000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437440000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437500000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437560000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437620000,
+    "y": null,
+  },
+]
+`;
+
+exports[`APM API tests basic apm_8.0.0 Transaction groups comparison statistics when data is loaded returns the correct for latency aggregation 99th percentile 1`] = `
+Array [
+  Object {
+    "x": 1607435820000,
+    "y": null,
+  },
+  Object {
+    "x": 1607435880000,
+    "y": 69429,
+  },
+  Object {
+    "x": 1607435940000,
+    "y": 8198285,
+  },
+  Object {
+    "x": 1607436000000,
+    "y": 31949,
+  },
+  Object {
+    "x": 1607436060000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436120000,
+    "y": 47755,
+  },
+  Object {
+    "x": 1607436180000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436240000,
+    "y": 73411,
+  },
+  Object {
+    "x": 1607436300000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436360000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436420000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436480000,
+    "y": 55116,
+  },
+  Object {
+    "x": 1607436540000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436600000,
+    "y": 35457,
+  },
+  Object {
+    "x": 1607436660000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436720000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436780000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436840000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436900000,
+    "y": null,
+  },
+  Object {
+    "x": 1607436960000,
+    "y": 46040,
+  },
+  Object {
+    "x": 1607437020000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437080000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437140000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437200000,
+    "y": 82486,
+  },
+  Object {
+    "x": 1607437260000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437320000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437380000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437440000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437500000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437560000,
+    "y": null,
+  },
+  Object {
+    "x": 1607437620000,
+    "y": null,
+  },
+]
+`;

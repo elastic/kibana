@@ -62,9 +62,10 @@ import {
   transactionChartsDistributionRoute,
   transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionGroupsOverviewRoute,
+  transactionGroupsPrimaryStatisticsRoute,
   transactionLatencyChatsRoute,
   transactionThroughputChatsRoute,
+  transactionGroupsComparisonStatisticsRoute,
 } from './transactions';
 import {
   rumOverviewLocalFiltersRoute,
@@ -166,9 +167,10 @@ const createApmApi = () => {
     .add(transactionChartsDistributionRoute)
     .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsOverviewRoute)
+    .add(transactionGroupsPrimaryStatisticsRoute)
     .add(transactionLatencyChatsRoute)
     .add(transactionThroughputChatsRoute)
+    .add(transactionGroupsComparisonStatisticsRoute)
 
     // UI filters
     .add(uiFiltersEnvironmentsRoute)

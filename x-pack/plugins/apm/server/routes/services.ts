@@ -8,8 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
-import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
-import { jsonRt } from '../../common/runtime_types/json_rt';
+import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -17,8 +16,8 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_group_primary_statistics';
-import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_group_comparison_statistics';
+import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
+import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
@@ -26,7 +25,10 @@ import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadat
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { getThroughput } from '../lib/services/get_throughput';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
+import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
+import { withApmSpan } from '../utils/with_apm_span';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -180,14 +182,17 @@ export const serviceAnnotationsRoute = createRoute({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
+    const { observability } = context.plugins;
+
     const [
       annotationsClient,
       searchAggregatedTransactions,
     ] = await Promise.all([
-      context.plugins.observability?.getScopedAnnotationsClient(
-        context,
-        request
-      ),
+      observability
+        ? withApmSpan('get_scoped_annotations_client', () =>
+            observability.getScopedAnnotationsClient(context, request)
+          )
+        : undefined,
       getSearchAggregatedTransactions(setup),
     ]);
 
@@ -214,7 +219,7 @@ export const serviceAnnotationsCreateRoute = createRoute({
     }),
     body: t.intersection([
       t.type({
-        '@timestamp': dateAsStringRt,
+        '@timestamp': isoToEpochRt,
         service: t.intersection([
           t.type({
             version: t.string,
@@ -231,10 +236,13 @@ export const serviceAnnotationsCreateRoute = createRoute({
     ]),
   }),
   handler: async ({ request, context }) => {
-    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
-      context,
-      request
-    );
+    const { observability } = context.plugins;
+
+    const annotationsClient = observability
+      ? await withApmSpan('get_scoped_annotations_client', () =>
+          observability.getScopedAnnotationsClient(context, request)
+        )
+      : undefined;
 
     if (!annotationsClient) {
       throw Boom.notFound();
@@ -242,18 +250,21 @@ export const serviceAnnotationsCreateRoute = createRoute({
 
     const { body, path } = context.params;
 
-    return annotationsClient.create({
-      message: body.service.version,
-      ...body,
-      annotation: {
-        type: 'deployment',
-      },
-      service: {
-        ...body.service,
-        name: path.serviceName,
-      },
-      tags: uniq(['apm'].concat(body.tags ?? [])),
-    });
+    return withApmSpan('create_annotation', () =>
+      annotationsClient.create({
+        message: body.service.version,
+        ...body,
+        '@timestamp': new Date(body['@timestamp']).toISOString(),
+        annotation: {
+          type: 'deployment',
+        },
+        service: {
+          ...body.service,
+          name: path.serviceName,
+        },
+        tags: uniq(['apm'].concat(body.tags ?? [])),
+      })
+    );
   },
 });
 
@@ -333,23 +344,56 @@ export const serviceThroughputRoute = createRoute({
       t.type({ transactionType: t.string }),
       uiFiltersRt,
       rangeRt,
+      comparisonRangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const { transactionType } = context.params.query;
+    const {
+      transactionType,
+      comparisonStart,
+      comparisonEnd,
+    } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    return getThroughput({
+    const { start, end } = setup;
+
+    const commonProps = {
       searchAggregatedTransactions,
       serviceName,
       setup,
       transactionType,
-    });
+    };
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getThroughput({
+        ...commonProps,
+        start,
+        end,
+      }),
+      comparisonStart && comparisonEnd
+        ? getThroughput({
+            ...commonProps,
+            start: comparisonStart,
+            end: comparisonEnd,
+          }).then((coordinates) =>
+            offsetPreviousPeriodCoordinates({
+              currentPeriodStart: start,
+              previousPeriodStart: comparisonStart,
+              previousPeriodTimeseries: coordinates,
+            })
+          )
+        : [],
+    ]);
+
+    return {
+      currentPeriod,
+      previousPeriod,
+    };
   },
 });
 

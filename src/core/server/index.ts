@@ -235,6 +235,7 @@ export {
 export {
   DiscoveredPlugin,
   Plugin,
+  AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
@@ -259,6 +260,8 @@ export {
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsClosePointInTimeResponse,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportResultDetails,
@@ -276,6 +279,8 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsOpenPointInTimeResponse,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
@@ -372,6 +377,7 @@ export {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsPitParams,
   SavedObjectsMigrationVersion,
 } from './types';
 

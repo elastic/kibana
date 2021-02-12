@@ -19,6 +19,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
 import { processSignificantTermAggs } from '../process_significant_term_aggs';
 import { getLatencyDistribution } from './get_latency_distribution';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getCorrelationsForSlowTransactions({
   serviceName,
@@ -35,75 +36,79 @@ export async function getCorrelationsForSlowTransactions({
   fieldNames: string[];
   setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, esFilter, apmEventClient } = setup;
+  return withApmSpan('get_correlations_for_slow_transactions', async () => {
+    const { start, end, esFilter, apmEventClient } = setup;
 
-  const backgroundFilters: ESFilter[] = [
-    ...esFilter,
-    { range: rangeFilter(start, end) },
-  ];
+    const backgroundFilters: ESFilter[] = [
+      ...esFilter,
+      { range: rangeFilter(start, end) },
+    ];
 
-  if (serviceName) {
-    backgroundFilters.push({ term: { [SERVICE_NAME]: serviceName } });
-  }
+    if (serviceName) {
+      backgroundFilters.push({ term: { [SERVICE_NAME]: serviceName } });
+    }
 
-  if (transactionType) {
-    backgroundFilters.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
+    if (transactionType) {
+      backgroundFilters.push({ term: { [TRANSACTION_TYPE]: transactionType } });
+    }
 
-  if (transactionName) {
-    backgroundFilters.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
+    if (transactionName) {
+      backgroundFilters.push({ term: { [TRANSACTION_NAME]: transactionName } });
+    }
 
-  const durationForPercentile = await getDurationForPercentile({
-    durationPercentile,
-    backgroundFilters,
-    setup,
-  });
+    const durationForPercentile = await getDurationForPercentile({
+      durationPercentile,
+      backgroundFilters,
+      setup,
+    });
 
-  const params = {
-    apm: { events: [ProcessorEvent.transaction] },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          // foreground filters
-          filter: [
-            ...backgroundFilters,
-            {
-              range: { [TRANSACTION_DURATION]: { gte: durationForPercentile } },
-            },
-          ],
-        },
-      },
-      aggs: fieldNames.reduce((acc, fieldName) => {
-        return {
-          ...acc,
-          [fieldName]: {
-            significant_terms: {
-              size: 10,
-              field: fieldName,
-              background_filter: { bool: { filter: backgroundFilters } },
+    const response = await withApmSpan('get_significant_terms', () => {
+      const params = {
+        apm: { events: [ProcessorEvent.transaction] },
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              // foreground filters
+              filter: [
+                ...backgroundFilters,
+                {
+                  range: {
+                    [TRANSACTION_DURATION]: { gte: durationForPercentile },
+                  },
+                },
+              ],
             },
           },
-        };
-      }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
-    },
-  };
+          aggs: fieldNames.reduce((acc, fieldName) => {
+            return {
+              ...acc,
+              [fieldName]: {
+                significant_terms: {
+                  size: 10,
+                  field: fieldName,
+                  background_filter: { bool: { filter: backgroundFilters } },
+                },
+              },
+            };
+          }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
+        },
+      };
+      return apmEventClient.search(params);
+    });
+    if (!response.aggregations) {
+      return {};
+    }
 
-  const response = await apmEventClient.search(params);
+    const topSigTerms = processSignificantTermAggs({
+      sigTermAggs: response.aggregations,
+      thresholdPercentage: 100 - durationPercentile,
+    });
 
-  if (!response.aggregations) {
-    return {};
-  }
-
-  const topSigTerms = processSignificantTermAggs({
-    sigTermAggs: response.aggregations,
-    thresholdPercentage: 100 - durationPercentile,
-  });
-
-  return getLatencyDistribution({
-    setup,
-    backgroundFilters,
-    topSigTerms,
+    return getLatencyDistribution({
+      setup,
+      backgroundFilters,
+      topSigTerms,
+    });
   });
 }
