@@ -32,7 +32,7 @@ export function SearchBar({ prepend, showTimeComparison = false }: Props) {
   const { isMedium, isLarge } = useBreakPoints();
   const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
   return (
-    <SearchBarFlexGroup gutterSize="s" direction={getRowDirection(isLarge)}>
+    <SearchBarFlexGroup gutterSize="m" direction={getRowDirection(isLarge)}>
       <EuiFlexItem>
         <KueryBar prepend={prepend} />
       </EuiFlexItem>

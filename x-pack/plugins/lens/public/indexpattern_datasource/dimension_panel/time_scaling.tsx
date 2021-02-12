@@ -90,7 +90,7 @@ export function TimeScaling({
               iconSide="right"
               data-test-subj="indexPattern-time-scaling-popover"
               onClick={() => {
-                setPopoverOpen(true);
+                setPopoverOpen(!popoverOpen);
               }}
             >
               {i18n.translate('xpack.lens.indexPattern.timeScale.advancedSettings', {

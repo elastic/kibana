@@ -56,7 +56,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         }
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
 
         const updateDate = new Date().toISOString();
 
@@ -73,7 +73,6 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           try {
             mappings = await caseClient.getMappings({
               actionsClient,
-              caseClient,
               connectorId: connector.id,
               connectorType: connector.type,
             });
