@@ -101,6 +101,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                   management: {
                     kibana: ['search_sessions'],
                   },
+                  api: ['store_search_session'],
                 },
               ],
             },
@@ -272,6 +273,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                   management: {
                     kibana: ['search_sessions'],
                   },
+                  api: ['store_search_session'],
                 },
               ],
             },
