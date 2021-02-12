@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -33,7 +34,7 @@ type SignificantTerm = NonNullable<
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
-  cardinalityColumnName: string;
+  percentageColumnName: string;
   setSelectedSignificantTerm: (term: T | null) => void;
   onFilter: () => void;
 }
@@ -41,7 +42,7 @@ interface Props<T> {
 export function CorrelationsTable<T extends SignificantTerm>({
   significantTerms,
   status,
-  cardinalityColumnName,
+  percentageColumnName,
   setSelectedSignificantTerm,
   onFilter,
 }: Props<T>) {
@@ -68,11 +69,19 @@ export function CorrelationsTable<T extends SignificantTerm>({
       },
     },
     {
-      field: 'cardinality',
-      name: cardinalityColumnName,
+      field: 'percentage',
+      name: percentageColumnName,
       render: (_: any, term: T) => {
-        const matches = asPercent(term.fgCount, term.bgCount);
-        return `${asInteger(term.fgCount)} (${matches})`;
+        return (
+          <EuiToolTip
+            position="right"
+            content={`${asInteger(term.valueCount)} / ${asInteger(
+              term.fieldCount
+            )}`}
+          >
+            <>{asPercent(term.valueCount, term.fieldCount)}</>
+          </EuiToolTip>
+        );
       },
     },
     {

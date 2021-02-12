@@ -122,9 +122,9 @@ export function ErrorCorrelations({ onClose }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <CorrelationsTable
-            cardinalityColumnName={i18n.translate(
-              'xpack.apm.correlations.error.cardinalityColumnName',
-              { defaultMessage: '# of failed transactions' }
+            percentageColumnName={i18n.translate(
+              'xpack.apm.correlations.error.percentageColumnName',
+              { defaultMessage: '% of failed transactions' }
             )}
             significantTerms={data?.significantTerms}
             status={status}

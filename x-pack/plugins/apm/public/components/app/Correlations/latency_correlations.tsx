@@ -132,9 +132,9 @@ export function LatencyCorrelations({ onClose }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <CorrelationsTable
-            cardinalityColumnName={i18n.translate(
-              'xpack.apm.correlations.latency.cardinalityColumnName',
-              { defaultMessage: '# of slow transactions' }
+            percentageColumnName={i18n.translate(
+              'xpack.apm.correlations.latency.percentageColumnName',
+              { defaultMessage: '% of slow transactions' }
             )}
             significantTerms={data?.significantTerms}
             status={status}

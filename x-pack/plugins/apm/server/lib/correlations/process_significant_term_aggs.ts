@@ -12,12 +12,12 @@ import {
 } from '../../../../../typings/elasticsearch/aggregations';
 
 export interface TopSigTerm {
-  bgCount: number;
-  fgCount: number;
   fieldName: string;
   fieldValue: string | number;
   score: number;
   impact: number;
+  fieldCount: number;
+  valueCount: number;
 }
 
 type SigTermAgg = AggregationResultOf<
@@ -46,18 +46,16 @@ function getMaxImpactScore(scores: number[]) {
 
 export function processSignificantTermAggs({
   sigTermAggs,
-  thresholdPercentage,
 }: {
   sigTermAggs: Record<string, SigTermAgg>;
-  thresholdPercentage: number;
 }) {
   const significantTerms = Object.entries(sigTermAggs).flatMap(
     ([fieldName, agg]) => {
       return agg.buckets.map((bucket) => ({
         fieldName,
         fieldValue: bucket.key,
-        bgCount: bucket.bg_count,
-        fgCount: bucket.doc_count,
+        fieldCount: agg.doc_count,
+        valueCount: bucket.doc_count,
         score: bucket.score,
       }));
     }
@@ -73,10 +71,6 @@ export function processSignificantTermAggs({
       ...significantTerm,
       impact: significantTerm.score / maxImpactScore,
     }))
-    .filter(({ bgCount, fgCount }) => {
-      // only include results that are above the threshold
-      return Math.floor((fgCount / bgCount) * 100) > thresholdPercentage;
-    })
     .slice(0, 10);
   return topSigTerms;
 }
