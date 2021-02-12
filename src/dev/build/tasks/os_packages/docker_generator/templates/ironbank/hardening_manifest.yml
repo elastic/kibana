@@ -1,0 +1,58 @@
+---
+apiVersion: v1
+
+# The repository name in registry1, excluding /ironbank/
+name: 'elastic/kibana/kibana'
+
+# List of tags to push for the repository in registry1
+# The most specific version should be the first tag and will be shown
+# on ironbank.dsop.io
+tags:
+  - '{{version}}'
+  - 'latest'
+
+# Build args passed to Dockerfile ARGs
+args:
+  BASE_IMAGE: 'redhat/ubi/ubi8'
+  BASE_TAG: '8.3'
+
+# Docker image labels
+labels:
+  org.opencontainers.image.title: 'kibana'
+  org.opencontainers.image.description: 'Your window into the Elastic Stack.'
+  org.opencontainers.image.licenses: 'Elastic License'
+  org.opencontainers.image.url: 'https://www.elastic.co/products/kibana'
+  org.opencontainers.image.vendor: 'Elastic'
+  org.opencontainers.image.version: '{{version}}'
+  # mil.dso.ironbank.image.keywords: ""
+  # mil.dso.ironbank.image.type: "commercial"
+  mil.dso.ironbank.product.name: 'Kibana'
+
+# List of resources to make available to the offline build context
+resources:
+  - filename: kibana-{{version}}-linux-x86_64.tar.gz
+    url: <artifact_path>/kibana-{{version}}-linux-x86_64.tar.gz
+    validation:
+      type: sha512
+      value: aa68f850cc09cf5dcb7c0b48bb8df788ca58eaad38d96141b8e59917fd38b42c728c0968f7cb2c8132c5aaeb595525cdde0859554346c496f53c569e03abe412
+  - filename: tini
+    url: https://github.com/krallin/tini/releases/download/v0.19.0/tini-amd64
+    validation:
+      type: sha512
+      value: 8053cc21a3a9bdd6042a495349d1856ae8d3b3e7664c9654198de0087af031f5d41139ec85a2f5d7d2febd22ec3f280767ff23b9d5f63d490584e2b7ad3c218c
+  - filename: NotoSansCJK-Regular.ttc
+    url: https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
+    validation:
+      type: sha512
+      value: 0ce56bde1853fed3e53282505bac65707385275a27816c29712ab04c187aa249797c82c58759b2b36c210d4e2683eda92359d739a8045cb8385c2c34d37cc9e1
+
+# List of project maintainers
+maintainers:
+  - email: 'tyler.smalley@elastic.co'
+    name: 'Tyler Smalley'
+    username: 'tylersmalley'
+    cht_member: false
+  - email: 'klepal_alexander@bah.com'
+    name: 'Alexander Klepal'
+    username: 'alexander.klepal'
+    cht_member: true
