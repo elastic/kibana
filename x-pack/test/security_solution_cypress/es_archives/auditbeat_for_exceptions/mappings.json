@@ -2279,14 +2279,6 @@
             }
           }
         },
-        "nestedField": {
-          "type": "nested",
-          "properties": {
-            "child": {
-              "type": "keyword"
-            }
-          }
-        },
         "related": {
           "properties": {
             "ip": {

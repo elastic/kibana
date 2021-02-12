@@ -64,7 +64,7 @@ export interface FormattedBuilderEntry {
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
-  parent: { parent: EntryNested; parentIndex: number } | undefined;
+  parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
   correspondingKeywordField: IFieldType | undefined;
 }
 
@@ -88,10 +88,28 @@ export interface EmptyNestedEntry {
   id: string;
   field: string | undefined;
   type: OperatorTypeEnum.NESTED;
-  entries: Array<EmptyEntry | EntryMatch | EntryMatchAny | EntryExists>;
+  entries: Array<
+    | (EntryMatch & { id?: string })
+    | (EntryMatchAny & { id?: string })
+    | (EntryExists & { id?: string })
+  >;
 }
 
-export type BuilderEntry = Entry | EmptyListEntry | EmptyEntry | EntryNested | EmptyNestedEntry;
+export type BuilderEntry =
+  | (Entry & { id?: string })
+  | EmptyListEntry
+  | EmptyEntry
+  | BuilderEntryNested
+  | EmptyNestedEntry;
+
+export type BuilderEntryNested = Omit<EntryNested, 'entries'> & {
+  id?: string;
+  entries: Array<
+    | (EntryMatch & { id?: string })
+    | (EntryMatchAny & { id?: string })
+    | (EntryExists & { id?: string })
+  >;
+};
 
 export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entries'> & {
   entries: BuilderEntry[];

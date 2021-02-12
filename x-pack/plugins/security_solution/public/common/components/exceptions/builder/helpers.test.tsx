@@ -28,7 +28,15 @@ import {
 } from '../../autocomplete/operators';
 import { BuilderEntry, ExceptionsBuilderExceptionItem, FormattedBuilderEntry } from '../types';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { Entry, EntryMatch, EntryNested } from '../../../../lists_plugin_deps';
+import {
+  EntryMatch,
+  EntryMatchAny,
+  EntryNested,
+  EntryList,
+  EntryExists,
+  OperatorTypeEnum,
+  OperatorEnum,
+} from '../../../../shared_imports';
 
 import {
   getEntryFromOperator,
@@ -453,8 +461,8 @@ describe('Exception builder helpers', () => {
             id: '123',
             entries: [{ ...payloadItem }],
             field: 'nestedField',
-            type: 'nested',
-          } as EntryNested & { id: string },
+            type: OperatorTypeEnum.NESTED,
+          },
           parentIndex: 1,
         },
         value: 'some host name',
@@ -662,14 +670,14 @@ describe('Exception builder helpers', () => {
                 {
                   id: '123',
                   field: 'child',
-                  operator: 'included',
-                  type: 'match',
+                  operator: OperatorEnum.INCLUDED,
+                  type: OperatorTypeEnum.MATCH,
                   value: 'some host name',
-                } as EntryMatch & { id: string },
+                },
               ],
               field: 'nestedField',
-              type: 'nested',
-            } as EntryNested & { id: string },
+              type: OperatorTypeEnum.NESTED,
+            },
             parentIndex: 1,
           },
           value: 'some host name',
@@ -693,8 +701,8 @@ describe('Exception builder helpers', () => {
           {
             id: '123',
             field: 'some.not.nested.field',
-            operator: 'included',
-            type: 'match',
+            operator: OperatorEnum.INCLUDED,
+            type: OperatorTypeEnum.MATCH,
             value: 'some value',
           },
         ],
@@ -749,11 +757,11 @@ describe('Exception builder helpers', () => {
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryMatch & { id?: string } = {
         id: '123',
         field: 'ip',
         operator: 'excluded',
-        type: 'match',
+        type: OperatorTypeEnum.MATCH,
         value: 'I should stay the same',
       };
       expect(output).toEqual(expected);
@@ -767,11 +775,11 @@ describe('Exception builder helpers', () => {
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryMatch & { id?: string } = {
         id: '123',
         field: 'ip',
-        operator: 'included',
-        type: 'match',
+        operator: OperatorEnum.INCLUDED,
+        type: OperatorTypeEnum.MATCH,
         value: 'I should stay the same',
       };
       expect(output).toEqual(expected);
@@ -785,11 +793,11 @@ describe('Exception builder helpers', () => {
         value: ['I should stay the same'],
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryMatch & { id?: string } = {
         id: '123',
         field: 'ip',
-        operator: 'included',
-        type: 'match',
+        operator: OperatorEnum.INCLUDED,
+        type: OperatorTypeEnum.MATCH,
         value: '',
       };
       expect(output).toEqual(expected);
@@ -803,11 +811,11 @@ describe('Exception builder helpers', () => {
         value: ['I should stay the same'],
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryMatchAny & { id?: string } = {
         id: '123',
         field: 'ip',
         operator: 'excluded',
-        type: 'match_any',
+        type: OperatorTypeEnum.MATCH_ANY,
         value: ['I should stay the same'],
       };
       expect(output).toEqual(expected);
@@ -821,11 +829,11 @@ describe('Exception builder helpers', () => {
         value: ['I should stay the same'],
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryMatchAny & { id?: string } = {
         id: '123',
         field: 'ip',
-        operator: 'included',
-        type: 'match_any',
+        operator: OperatorEnum.INCLUDED,
+        type: OperatorTypeEnum.MATCH_ANY,
         value: ['I should stay the same'],
       };
       expect(output).toEqual(expected);
@@ -839,11 +847,11 @@ describe('Exception builder helpers', () => {
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryMatchAny & { id?: string } = {
         id: '123',
         field: 'ip',
-        operator: 'included',
-        type: 'match_any',
+        operator: OperatorEnum.INCLUDED,
+        type: OperatorTypeEnum.MATCH_ANY,
         value: [],
       };
       expect(output).toEqual(expected);
@@ -856,7 +864,7 @@ describe('Exception builder helpers', () => {
         operator: existsOperator,
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryExists & { id?: string } = {
         id: '123',
         field: 'ip',
         operator: 'excluded',
@@ -872,10 +880,10 @@ describe('Exception builder helpers', () => {
         operator: doesNotExistOperator,
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryExists & { id?: string } = {
         id: '123',
         field: 'ip',
-        operator: 'included',
+        operator: OperatorEnum.INCLUDED,
         type: 'exists',
       };
       expect(output).toEqual(expected);
@@ -889,10 +897,10 @@ describe('Exception builder helpers', () => {
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryExists & { id?: string } = {
         id: '123',
         field: 'ip',
-        operator: 'included',
+        operator: OperatorEnum.INCLUDED,
         type: 'exists',
       };
       expect(output).toEqual(expected);
@@ -906,10 +914,10 @@ describe('Exception builder helpers', () => {
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
-      const expected: Entry = {
+      const expected: EntryList & { id?: string } = {
         id: '123',
         field: 'ip',
-        operator: 'included',
+        operator: OperatorEnum.INCLUDED,
         type: 'list',
         list: { id: '', type: 'ip' },
       };
@@ -1004,13 +1012,21 @@ describe('Exception builder helpers', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
       const payloadIFieldType: IFieldType = getField('nestedField.child');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
-          entries: [{ id: '123', field: 'child', operator: 'included', type: 'match', value: '' }],
+          entries: [
+            {
+              id: '123',
+              field: 'child',
+              operator: OperatorEnum.INCLUDED,
+              type: OperatorTypeEnum.MATCH,
+              value: '',
+            },
+          ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1033,16 +1049,22 @@ describe('Exception builder helpers', () => {
       };
       const payloadIFieldType: IFieldType = getField('nestedField.child');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
           entries: [
-            { id: '123', field: 'child', operator: 'included', type: 'match', value: '' },
+            {
+              id: '123',
+              field: 'child',
+              operator: OperatorEnum.INCLUDED,
+              type: OperatorTypeEnum.MATCH,
+              value: '',
+            },
             getEntryMatchAnyWithIdMock(),
           ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1052,13 +1074,13 @@ describe('Exception builder helpers', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const payloadIFieldType: IFieldType = getField('ip');
       const output = getEntryOnFieldChange(payloadItem, payloadIFieldType);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
           field: 'ip',
-          operator: 'included',
-          type: 'match',
+          operator: OperatorEnum.INCLUDED,
+          type: OperatorTypeEnum.MATCH,
           value: '',
         },
       };
@@ -1071,11 +1093,11 @@ describe('Exception builder helpers', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const payloadOperator: OperatorOption = isNotOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: 'ip',
-          type: 'match',
+          type: OperatorTypeEnum.MATCH,
           value: 'some value',
           operator: 'excluded',
         },
@@ -1088,13 +1110,13 @@ describe('Exception builder helpers', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const payloadOperator: OperatorOption = isOneOfOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: 'ip',
-          type: 'match_any',
+          type: OperatorTypeEnum.MATCH_ANY,
           value: [],
-          operator: 'included',
+          operator: OperatorEnum.INCLUDED,
         },
         index: 0,
       };
@@ -1105,7 +1127,7 @@ describe('Exception builder helpers', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
       const payloadOperator: OperatorOption = isNotOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
@@ -1113,13 +1135,13 @@ describe('Exception builder helpers', () => {
             {
               id: '123',
               field: 'child',
-              operator: 'excluded',
-              type: 'match',
+              operator: OperatorEnum.EXCLUDED,
+              type: OperatorTypeEnum.MATCH,
               value: 'some value',
             },
           ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1129,7 +1151,7 @@ describe('Exception builder helpers', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
       const payloadOperator: OperatorOption = isOneOfOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
@@ -1137,13 +1159,13 @@ describe('Exception builder helpers', () => {
             {
               id: '123',
               field: 'child',
-              operator: 'included',
-              type: 'match_any',
+              operator: OperatorEnum.INCLUDED,
+              type: OperatorTypeEnum.MATCH_ANY,
               value: [],
             },
           ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1154,13 +1176,13 @@ describe('Exception builder helpers', () => {
     test('it returns entry with updated value', () => {
       const payload: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getEntryOnMatchChange(payload, 'jibber jabber');
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: 'ip',
-          type: 'match',
+          type: OperatorTypeEnum.MATCH,
           value: 'jibber jabber',
-          operator: 'included',
+          operator: OperatorEnum.INCLUDED,
         },
         index: 0,
       };
@@ -1170,13 +1192,13 @@ describe('Exception builder helpers', () => {
     test('it returns entry with updated value and "field" of empty string if entry does not have a "field" defined', () => {
       const payload: FormattedBuilderEntry = { ...getMockBuilderEntry(), field: undefined };
       const output = getEntryOnMatchChange(payload, 'jibber jabber');
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: '',
-          type: 'match',
+          type: OperatorTypeEnum.MATCH,
           value: 'jibber jabber',
-          operator: 'included',
+          operator: OperatorEnum.INCLUDED,
         },
         index: 0,
       };
@@ -1186,7 +1208,7 @@ describe('Exception builder helpers', () => {
     test('it returns nested entry with updated value', () => {
       const payload: FormattedBuilderEntry = getMockNestedBuilderEntry();
       const output = getEntryOnMatchChange(payload, 'jibber jabber');
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
@@ -1194,13 +1216,13 @@ describe('Exception builder helpers', () => {
             {
               id: '123',
               field: 'child',
-              operator: 'included',
-              type: 'match',
+              operator: OperatorEnum.INCLUDED,
+              type: OperatorTypeEnum.MATCH,
               value: 'jibber jabber',
             },
           ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1209,7 +1231,7 @@ describe('Exception builder helpers', () => {
     test('it returns nested entry with updated value and "field" of empty string if entry does not have a "field" defined', () => {
       const payload: FormattedBuilderEntry = { ...getMockNestedBuilderEntry(), field: undefined };
       const output = getEntryOnMatchChange(payload, 'jibber jabber');
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
@@ -1217,13 +1239,13 @@ describe('Exception builder helpers', () => {
             {
               id: '123',
               field: '',
-              operator: 'included',
-              type: 'match',
+              operator: OperatorEnum.INCLUDED,
+              type: OperatorTypeEnum.MATCH,
               value: 'jibber jabber',
             },
           ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1238,13 +1260,13 @@ describe('Exception builder helpers', () => {
         value: ['some value'],
       };
       const output = getEntryOnMatchAnyChange(payload, ['jibber jabber']);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: 'ip',
-          type: 'match_any',
+          type: OperatorTypeEnum.MATCH_ANY,
           value: ['jibber jabber'],
-          operator: 'included',
+          operator: OperatorEnum.INCLUDED,
         },
         index: 0,
       };
@@ -1259,13 +1281,13 @@ describe('Exception builder helpers', () => {
         field: undefined,
       };
       const output = getEntryOnMatchAnyChange(payload, ['jibber jabber']);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: '',
-          type: 'match_any',
+          type: OperatorTypeEnum.MATCH_ANY,
           value: ['jibber jabber'],
-          operator: 'included',
+          operator: OperatorEnum.INCLUDED,
         },
         index: 0,
       };
@@ -1285,7 +1307,7 @@ describe('Exception builder helpers', () => {
         },
       };
       const output = getEntryOnMatchAnyChange(payload, ['jibber jabber']);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
@@ -1293,13 +1315,13 @@ describe('Exception builder helpers', () => {
             {
               id: '123',
               field: 'child',
-              operator: 'included',
-              type: 'match_any',
+              type: OperatorTypeEnum.MATCH_ANY,
               value: ['jibber jabber'],
+              operator: OperatorEnum.INCLUDED,
             },
           ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1319,7 +1341,7 @@ describe('Exception builder helpers', () => {
         },
       };
       const output = getEntryOnMatchAnyChange(payload, ['jibber jabber']);
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
         updatedEntry: {
           id: '123',
@@ -1327,13 +1349,13 @@ describe('Exception builder helpers', () => {
             {
               id: '123',
               field: '',
-              operator: 'included',
-              type: 'match_any',
+              operator: OperatorEnum.INCLUDED,
+              type: OperatorTypeEnum.MATCH_ANY,
               value: ['jibber jabber'],
             },
           ],
           field: 'nestedField',
-          type: 'nested',
+          type: OperatorTypeEnum.NESTED,
         },
       };
       expect(output).toEqual(expected);
@@ -1348,13 +1370,13 @@ describe('Exception builder helpers', () => {
         value: '1234',
       };
       const output = getEntryOnListChange(payload, getListResponseMock());
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: 'ip',
           type: 'list',
           list: { id: 'some-list-id', type: 'ip' },
-          operator: 'included',
+          operator: OperatorEnum.INCLUDED,
         },
         index: 0,
       };
@@ -1369,13 +1391,13 @@ describe('Exception builder helpers', () => {
         field: undefined,
       };
       const output = getEntryOnListChange(payload, getListResponseMock());
-      const expected: { updatedEntry: BuilderEntry & { id: string }; index: number } = {
+      const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         updatedEntry: {
           id: '123',
           field: '',
           type: 'list',
           list: { id: 'some-list-id', type: 'ip' },
-          operator: 'included',
+          operator: OperatorEnum.INCLUDED,
         },
         index: 0,
       };

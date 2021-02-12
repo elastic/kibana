@@ -39,13 +39,13 @@ describe('Exceptions modal', () => {
 
     cy.get(RULE_STATUS).should('have.text', '—');
 
-    esArchiverLoad('auditbeat_for_exceptions');
+    esArchiverLoad('exceptions');
 
     goToExceptionsTab();
   });
 
   after(() => {
-    esArchiverUnload('auditbeat_for_exceptions');
+    esArchiverUnload('exceptions');
   });
 
   it('Does not overwrite invalid values and-ed together', () => {
