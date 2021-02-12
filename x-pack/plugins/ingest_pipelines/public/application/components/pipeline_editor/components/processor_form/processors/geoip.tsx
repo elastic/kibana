@@ -31,8 +31,8 @@ const fieldsConfig: FieldsConfig = {
         id="xpack.ingestPipelines.pipelineEditor.geoIPForm.databaseFileHelpText"
         defaultMessage="GeoIP2 database file in the {ingestGeoIP} configuration directory. Defaults to {databaseFile}."
         values={{
-          databaseFile: <EuiCode inline>{'GeoLite2-City.mmdb'}</EuiCode>,
-          ingestGeoIP: <EuiCode inline>{'ingest-geoip'}</EuiCode>,
+          databaseFile: <EuiCode>{'GeoLite2-City.mmdb'}</EuiCode>,
+          ingestGeoIP: <EuiCode>{'ingest-geoip'}</EuiCode>,
         }}
       />
     ),

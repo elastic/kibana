@@ -168,7 +168,7 @@ export const Inference: FunctionComponent = () => {
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.inferenceForm.targetFieldHelpText"
             defaultMessage="Field used to contain inference processor results. Defaults to {targetField}."
-            values={{ targetField: <EuiCode inline>{'ml.inference.<processor_tag>'}</EuiCode> }}
+            values={{ targetField: <EuiCode>{'ml.inference.<processor_tag>'}</EuiCode> }}
           />
         }
       />

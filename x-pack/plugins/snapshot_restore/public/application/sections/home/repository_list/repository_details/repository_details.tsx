@@ -281,7 +281,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           </EuiTitle>
           <EuiSpacer size="s" />
           {verification ? (
-            <EuiCodeBlock language="json" inline={false} data-test-subj="verificationCodeBlock">
+            <EuiCodeBlock language="json" data-test-subj="verificationCodeBlock">
               {JSON.stringify(
                 verification.valid ? verification.response : verification.error,
                 null,
@@ -350,7 +350,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
                   />
                 </h4>
               </EuiTitle>
-              <EuiCodeBlock language="json" inline={false} data-test-subj="cleanupCodeBlock">
+              <EuiCodeBlock language="json" data-test-subj="cleanupCodeBlock">
                 {JSON.stringify(cleanup.response, null, 2)}
               </EuiCodeBlock>
             </div>

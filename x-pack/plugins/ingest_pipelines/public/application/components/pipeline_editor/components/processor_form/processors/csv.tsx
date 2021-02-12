@@ -85,7 +85,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.separatorHelpText"
         defaultMessage="Delimiter used in the CSV data. Defaults to {value}."
-        values={{ value: <EuiCode inline>{','}</EuiCode> }}
+        values={{ value: <EuiCode>{','}</EuiCode> }}
       />
     ),
   },
@@ -104,7 +104,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.quoteHelpText"
         defaultMessage="Escape character used in the CSV data. Defaults to {value}."
-        values={{ value: <EuiCode inline>{'"'}</EuiCode> }}
+        values={{ value: <EuiCode>{'"'}</EuiCode> }}
       />
     ),
   },
