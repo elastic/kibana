@@ -31,8 +31,8 @@ import { CREATED_BY, NOTES } from '../../notes/translations';
 import { PARTICIPANTS } from '../../../../cases/translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
-import { EventDetails } from '../event_details';
 import { getTimelineNoteSelector } from './selectors';
+import { DetailsPanel } from '../../side_panel';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -125,7 +125,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
   const {
     createdBy,
-    expandedEvent,
+    expandedDetail,
     eventIdToNoteIds,
     noteIds,
     status: timelineStatus,
@@ -162,22 +162,22 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     [dispatch, timelineId]
   );
 
-  const handleOnEventClosed = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ tabType: TimelineTabs.notes, timelineId }));
+  const handleOnPanelClosed = useCallback(() => {
+    dispatch(timelineActions.toggleDetailPanel({ tabType: TimelineTabs.notes, timelineId }));
   }, [dispatch, timelineId]);
 
-  const EventDetailsContent = useMemo(
+  const DetailsPanelContent = useMemo(
     () =>
-      expandedEvent != null && expandedEvent.eventId != null ? (
-        <EventDetails
+      expandedDetail[TimelineTabs.notes]?.panelView ? (
+        <DetailsPanel
           browserFields={browserFields}
           docValueFields={docValueFields}
-          handleOnEventClosed={handleOnEventClosed}
+          handleOnPanelClosed={handleOnPanelClosed}
           tabType={TimelineTabs.notes}
           timelineId={timelineId}
         />
       ) : null,
-    [browserFields, docValueFields, expandedEvent, handleOnEventClosed, timelineId]
+    [browserFields, docValueFields, expandedDetail, handleOnPanelClosed, timelineId]
   );
 
   const SidebarContent = useMemo(
@@ -216,7 +216,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
         </StyledPanel>
       </ScrollableFlexItem>
       <VerticalRule />
-      <ScrollableFlexItem grow={1}>{EventDetailsContent ?? SidebarContent}</ScrollableFlexItem>
+      <ScrollableFlexItem grow={1}>{DetailsPanelContent ?? SidebarContent}</ScrollableFlexItem>
     </FullWidthFlexGroup>
   );
 };
