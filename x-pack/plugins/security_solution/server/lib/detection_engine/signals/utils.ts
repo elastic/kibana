@@ -875,7 +875,7 @@ export const getThresholdAggregationParts = (
     }
   | undefined => {
   const idx = index != null ? index.toString() : '\\d';
-  const pattern = `threshold_(?<index>${idx}):(?<name>\\w+)`;
+  const pattern = `threshold_(?<index>${idx}):(?<name>.*)`;
   for (const key of Object.keys(data)) {
     const matches = key.match(pattern);
     if (matches != null && matches.groups?.name != null && matches.groups?.index != null) {

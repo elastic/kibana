@@ -6,7 +6,7 @@
  */
 
 import crypto from 'crypto';
-import { get, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 
 import { Filter } from 'src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
@@ -62,10 +62,20 @@ export const getThresholdBucketFilters = async ({
 
   const thresholdSignalHistory = searchResult.hits.hits.reduce<ThresholdSignalHistory>(
     (acc, hit) => {
+      if (!hit._source) {
+        return acc;
+      }
+
       const terms = bucketByFields.map((field) => {
+        const result = hit._source.signal?.threshold_result?.terms?.filter((resultField) => {
+          return resultField.field === field;
+        });
+        if (result == null) {
+          throw new Error('bad things happened');
+        }
         return {
           field,
-          value: get(hit._source, field),
+          value: result[0].value,
         };
       });
 
@@ -81,22 +91,24 @@ export const getThresholdBucketFilters = async ({
         .digest('hex');
 
       const existing = acc[hash];
-      if (existing != null && hit._source) {
-        if (hit._source.original_time && hit._source.original_time > existing.lastSignalTimestamp) {
-          acc[hash].lastSignalTimestamp = hit._source.original_time as number;
-        } else {
-          acc[hash] = {
-            terms,
-            lastSignalTimestamp: hit._source.original_time as number,
-          };
+      if (existing != null) {
+        if (
+          hit._source.signal?.original_time &&
+          hit._source.signal?.original_time > existing.lastSignalTimestamp
+        ) {
+          acc[hash].lastSignalTimestamp = hit._source.signal?.original_time as number;
         }
+      } else {
+        acc[hash] = {
+          terms,
+          lastSignalTimestamp: hit._source.signal?.original_time as number,
+        };
       }
       return acc;
     },
     {}
   );
 
-  // const filters = searchResult.aggregations.threshold.buckets.reduce(
   const filters = Object.values(thresholdSignalHistory).reduce(
     (acc: ESFilter[], bucket: ThresholdSignalHistoryRecord): ESFilter[] => {
       const filter = {

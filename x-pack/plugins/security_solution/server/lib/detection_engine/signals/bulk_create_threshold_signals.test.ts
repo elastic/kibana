@@ -106,10 +106,12 @@ describe('transformThresholdResultsToEcs', () => {
                     value: 'garden-gnomes',
                   },
                 ],
-                cardinality: {
-                  field: 'destination.ip',
-                  value: 7,
-                },
+                cardinality: [
+                  {
+                    field: 'destination.ip',
+                    value: 7,
+                  },
+                ],
                 count: 12,
               },
             },

@@ -118,7 +118,7 @@ const getTransformedHits = (
         if (nextLevelAggParts == null) {
           throw new Error('Something went horribly wrong');
         }
-        const nextLevelPath = `${nextLevelAggParts.name}.buckets`;
+        const nextLevelPath = `['${nextLevelAggParts.name}']['buckets']`;
         const nextBuckets = get(nextLevelPath, bucket);
         const combinations = getCombinations(nextBuckets, nextLevelIdx, nextLevelAggParts.field);
         combinations.forEach((val) => {
@@ -205,7 +205,7 @@ const getTransformedHits = (
           ruleId,
           startedAt,
           threshold.field as string[],
-          bucket.terms.join(',')
+          bucket.terms.map((term) => term.value).join(',')
         ),
         _source: source,
       });
