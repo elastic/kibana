@@ -121,15 +121,12 @@ export async function sendUpgradeAgentsActions(
     fields: ['is_managed'],
   });
 
-  // create a Set of ids for agents in managed policies
-  const managedPolicyIds = new Set(
-    agentPolicies.filter((p) => p.is_managed === true).map((p) => p.id)
-  );
-
-  // only update agents which aren't in managed policies
-  const agentsToUpdate = upgradeableAgents.filter(
-    (agent) => agent.policy_id && !managedPolicyIds.has(agent.policy_id)
-  );
+  // throw if any of those agent policies are managed
+  for (const policy of agentPolicies) {
+    if (policy.is_managed) {
+      throw new IngestManagerError(`Cannot update agent in managed policy ${policy.id}`);
+    }
+  }
 
   // Create upgrade action for each agent
   const now = new Date().toISOString();
@@ -141,7 +138,7 @@ export async function sendUpgradeAgentsActions(
   await bulkCreateAgentActions(
     soClient,
     esClient,
-    agentsToUpdate.map((agent) => ({
+    upgradeableAgents.map((agent) => ({
       agent_id: agent.id,
       created_at: now,
       data,
@@ -153,7 +150,7 @@ export async function sendUpgradeAgentsActions(
   return await bulkUpdateAgents(
     soClient,
     esClient,
-    agentsToUpdate.map((agent) => ({
+    upgradeableAgents.map((agent) => ({
       agentId: agent.id,
       data: {
         upgraded_at: null,
