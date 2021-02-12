@@ -6,7 +6,6 @@
  */
 
 import { ESFilter } from '../../../../../typings/elasticsearch';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -17,7 +16,6 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
-import { calculateThroughput } from '../helpers/calculate_throughput';
 import { Setup } from '../helpers/setup_request';
 
 interface Options {
@@ -29,21 +27,7 @@ interface Options {
   end: number;
 }
 
-type ESResponse = PromiseReturnType<typeof fetcher>;
-
-function transform(options: Options, response: ESResponse) {
-  if (response.hits.total.value === 0) {
-    return [];
-  }
-  const { start, end } = options;
-  const buckets = response.aggregations?.throughput.buckets ?? [];
-  return buckets.map(({ key: x, doc_count: value }) => ({
-    x,
-    y: calculateThroughput({ start, end, value }),
-  }));
-}
-
-async function fetcher({
+function fetcher({
   searchAggregatedTransactions,
   serviceName,
   setup,
@@ -75,12 +59,19 @@ async function fetcher({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        throughput: {
+        transactions: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: intervalString,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end },
+          },
+          aggs: {
+            throughput: {
+              rate: {
+                unit: 'minute' as const,
+              },
+            },
           },
         },
       },
@@ -91,5 +82,14 @@ async function fetcher({
 }
 
 export async function getThroughput(options: Options) {
-  return transform(options, await fetcher(options));
+  const response = await fetcher(options);
+
+  return (
+    response.aggregations?.transactions.buckets.map((bucket) => {
+      return {
+        x: bucket.key,
+        y: bucket.throughput.value,
+      };
+    }) ?? []
+  );
 }

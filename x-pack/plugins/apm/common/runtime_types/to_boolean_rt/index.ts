@@ -7,12 +7,18 @@
 
 import * as t from 'io-ts';
 
-export const toNumberRt = new t.Type<number, unknown, unknown>(
-  'ToNumber',
-  t.number.is,
-  (input, context) => {
-    const number = Number(input);
-    return !isNaN(number) ? t.success(number) : t.failure(input, context);
+export const toBooleanRt = new t.Type<boolean, unknown, unknown>(
+  'ToBoolean',
+  t.boolean.is,
+  (input) => {
+    let value: boolean;
+    if (typeof input === 'string') {
+      value = input === 'true';
+    } else {
+      value = !!input;
+    }
+
+    return t.success(value);
   },
   t.identity
 );

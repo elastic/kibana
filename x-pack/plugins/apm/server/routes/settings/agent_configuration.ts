@@ -22,7 +22,6 @@ import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { jsonRt } from '../../../common/runtime_types/json_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 
 // get list of configurations
@@ -103,7 +102,7 @@ export const createOrUpdateAgentConfigurationRoute = createRoute({
     tags: ['access:apm', 'access:apm_write'],
   },
   params: t.intersection([
-    t.partial({ query: t.partial({ overwrite: jsonRt.pipe(t.boolean) }) }),
+    t.partial({ query: t.partial({ overwrite: t.boolean }) }),
     t.type({ body: agentConfigurationIntakeRt }),
   ]),
   handler: async ({ context, request }) => {
