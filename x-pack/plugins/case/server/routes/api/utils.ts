@@ -18,7 +18,6 @@ import {
 } from 'kibana/server';
 
 import {
-  CasePostRequest,
   CaseResponse,
   CasesFindResponse,
   CommentResponse,
@@ -28,17 +27,41 @@ import {
   ESCaseAttributes,
   CommentRequest,
   ContextTypeUserRt,
-  ContextTypeAlertRt,
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentType,
   excess,
   throwErrors,
   CaseStatuses,
+  CaseClientPostRequest,
+  AssociationType,
+  SubCaseAttributes,
+  SubCaseResponse,
+  SubCasesFindResponse,
+  User,
+  AlertCommentRequestRt,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
-import { SortFieldCase, TotalCommentByCase } from './types';
+import { SortFieldCase } from './types';
+
+export const transformNewSubCase = ({
+  createdAt,
+  createdBy,
+}: {
+  createdAt: string;
+  createdBy: User;
+}): SubCaseAttributes => {
+  return {
+    closed_at: null,
+    closed_by: null,
+    created_at: createdAt,
+    created_by: createdBy,
+    status: CaseStatuses.open,
+    updated_at: null,
+    updated_by: null,
+  };
+};
 
 export const transformNewCase = ({
   connector,
@@ -53,7 +76,7 @@ export const transformNewCase = ({
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
-  newCase: CasePostRequest;
+  newCase: CaseClientPostRequest;
   username?: string | null;
 }): ESCaseAttributes => ({
   ...newCase,
@@ -69,28 +92,93 @@ export const transformNewCase = ({
 });
 
 type NewCommentArgs = CommentRequest & {
+  associationType: AssociationType;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
 };
 
+/**
+ * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
+ */
+export const getAlertIds = (comment: CommentRequest): string[] => {
+  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+    return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
+  }
+  return [];
+};
+
+/**
+ * This structure holds the alert IDs and indices found from multiple alert comments
+ */
+export interface AlertInfo {
+  ids: string[];
+  indices: Set<string>;
+}
+
+const accumulateIndicesAndIDs = (comment: CommentAttributes, acc: AlertInfo): AlertInfo => {
+  if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+    acc.ids.push(...getAlertIds(comment));
+    acc.indices.add(comment.index);
+  }
+  return acc;
+};
+
+/**
+ * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alerts.
+ */
+export const getAlertIndicesAndIDs = (comments: CommentAttributes[] | undefined): AlertInfo => {
+  if (comments === undefined) {
+    return { ids: [], indices: new Set<string>() };
+  }
+
+  return comments.reduce(
+    (acc: AlertInfo, comment) => {
+      return accumulateIndicesAndIDs(comment, acc);
+    },
+    { ids: [], indices: new Set<string>() }
+  );
+};
+
+/**
+ * Builds an AlertInfo object accumulating the alert IDs and indices for the passed in alert saved objects.
+ */
+export const getAlertIndicesAndIDsFromSO = (
+  comments: SavedObjectsFindResponse<CommentAttributes> | undefined
+): AlertInfo => {
+  if (comments === undefined) {
+    return { ids: [], indices: new Set<string>() };
+  }
+
+  return comments.saved_objects.reduce(
+    (acc: AlertInfo, comment) => {
+      return accumulateIndicesAndIDs(comment.attributes, acc);
+    },
+    { ids: [], indices: new Set<string>() }
+  );
+};
+
 export const transformNewComment = ({
+  associationType,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   full_name,
   username,
   ...comment
-}: NewCommentArgs): CommentAttributes => ({
-  ...comment,
-  created_at: createdDate,
-  created_by: { email, full_name, username },
-  pushed_at: null,
-  pushed_by: null,
-  updated_at: null,
-  updated_by: null,
-});
+}: NewCommentArgs): CommentAttributes => {
+  return {
+    associationType,
+    ...comment,
+    created_at: createdDate,
+    created_by: { email, full_name, username },
+    pushed_at: null,
+    pushed_by: null,
+    updated_at: null,
+    updated_by: null,
+  };
+};
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
   const options = { statusCode: error.statusCode ?? 500 };
@@ -102,52 +190,99 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   };
 }
 
-export const transformCases = (
-  cases: SavedObjectsFindResponse<ESCaseAttributes>,
-  countOpenCases: number,
-  countInProgressCases: number,
-  countClosedCases: number,
-  totalCommentByCase: TotalCommentByCase[]
-): CasesFindResponse => ({
-  page: cases.page,
-  per_page: cases.per_page,
-  total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase),
+export const transformCases = ({
+  casesMap,
+  countOpenCases,
+  countInProgressCases,
+  countClosedCases,
+  page,
+  perPage,
+  total,
+}: {
+  casesMap: Map<string, CaseResponse>;
+  countOpenCases: number;
+  countInProgressCases: number;
+  countClosedCases: number;
+  page: number;
+  perPage: number;
+  total: number;
+}): CasesFindResponse => ({
+  page,
+  per_page: perPage,
+  total,
+  cases: Array.from(casesMap.values()),
   count_open_cases: countOpenCases,
   count_in_progress_cases: countInProgressCases,
   count_closed_cases: countClosedCases,
 });
 
-export const flattenCaseSavedObjects = (
-  savedObjects: Array<SavedObject<ESCaseAttributes>>,
-  totalCommentByCase: TotalCommentByCase[]
-): CaseResponse[] =>
-  savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<ESCaseAttributes>) => {
-    return [
-      ...acc,
-      flattenCaseSavedObject({
-        savedObject,
-        totalComment:
-          totalCommentByCase.find((tc) => tc.caseId === savedObject.id)?.totalComments ?? 0,
-      }),
-    ];
-  }, []);
+export const transformSubCases = ({
+  subCasesMap,
+  open,
+  inProgress,
+  closed,
+  page,
+  perPage,
+  total,
+}: {
+  subCasesMap: Map<string, SubCaseResponse[]>;
+  open: number;
+  inProgress: number;
+  closed: number;
+  page: number;
+  perPage: number;
+  total: number;
+}): SubCasesFindResponse => ({
+  page,
+  per_page: perPage,
+  total,
+  // Squish all the entries in the map together as one array
+  subCases: Array.from(subCasesMap.values()).flat(),
+  count_open_cases: open,
+  count_in_progress_cases: inProgress,
+  count_closed_cases: closed,
+});
 
 export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = comments.length,
+  totalAlerts = 0,
+  subCases,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
+  totalAlerts?: number;
+  subCases?: SubCaseResponse[];
 }): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
+  totalAlerts,
   ...savedObject.attributes,
   connector: transformESConnectorToCaseConnector(savedObject.attributes.connector),
+  subCases,
+});
+
+export const flattenSubCaseSavedObject = ({
+  savedObject,
+  comments = [],
+  totalComment = comments.length,
+  totalAlerts = 0,
+}: {
+  savedObject: SavedObject<SubCaseAttributes>;
+  comments?: Array<SavedObject<CommentAttributes>>;
+  totalComment?: number;
+  totalAlerts?: number;
+}): SubCaseResponse => ({
+  id: savedObject.id,
+  version: savedObject.version ?? '0',
+  comments: flattenCommentSavedObjects(comments),
+  totalComment,
+  totalAlerts,
+  ...savedObject.attributes,
 });
 
 export const transformComments = (
@@ -174,7 +309,7 @@ export const flattenCommentSavedObject = (
   ...savedObject.attributes,
 });
 
-export const sortToSnake = (sortField: string): SortFieldCase => {
+export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
@@ -191,18 +326,41 @@ export const sortToSnake = (sortField: string): SortFieldCase => {
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
-export const isUserContext = (context: CommentRequest): context is CommentRequestUserType => {
+/**
+ * A type narrowing function for user comments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeUser = (
+  context: CommentRequest
+): context is CommentRequestUserType => {
   return context.type === CommentType.user;
 };
 
-export const isAlertContext = (context: CommentRequest): context is CommentRequestAlertType => {
-  return context.type === CommentType.alert;
+/**
+ * A type narrowing function for alert comments. Exporting so integration tests can use it.
+ */
+export const isCommentRequestTypeAlertOrGenAlert = (
+  context: CommentRequest
+): context is CommentRequestAlertType => {
+  return context.type === CommentType.alert || context.type === CommentType.generatedAlert;
 };
 
-export const decodeComment = (comment: CommentRequest) => {
-  if (isUserContext(comment)) {
+/**
+ * This is used to test if the posted comment is an generated alert. A generated alert will have one or many alerts.
+ * An alert is essentially an object with a _id field. This differs from a regular attached alert because the _id is
+ * passed directly in the request, it won't be in an object. Internally case will strip off the outer object and store
+ * both a generated and user attached alert in the same structure but this function is useful to determine which
+ * structure the new alert in the request has.
+ */
+export const isCommentRequestTypeGenAlert = (
+  context: CommentRequest
+): context is CommentRequestAlertType => {
+  return context.type === CommentType.generatedAlert;
+};
+
+export const decodeCommentRequest = (comment: CommentRequest) => {
+  if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
-  } else if (isAlertContext(comment)) {
-    pipe(excess(ContextTypeAlertRt).decode(comment), fold(throwErrors(badRequest), identity));
+  } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
+    pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
   }
 };
