@@ -81,6 +81,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     storage: localStorage,
     embeddable: deps.embeddable,
     maps: deps.maps,
+    triggersActionsUi: deps.triggersActionsUi,
     ...coreStart,
   };
 

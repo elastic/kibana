@@ -28,7 +28,6 @@ import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
-import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
@@ -40,6 +39,7 @@ import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
 let deletingJobsRefreshTimeout = null;
 
@@ -67,7 +67,7 @@ export class JobsListView extends Component {
     this.showEditJobFlyout = () => {};
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
-    this.showCreateWatchFlyout = () => {};
+    this.showCreateAlertFlyout = () => {};
     // work around to keep track of whether the component is mounted
     // used to block timeouts for results polling
     // which can run after unmounting
@@ -206,14 +206,14 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
   };
 
-  setShowCreateWatchFlyoutFunction = (func) => {
-    this.showCreateWatchFlyout = func;
+  setShowCreateAlertFlyoutFunction = (func) => {
+    this.showCreateAlertFlyout = func;
   };
-  unsetShowCreateWatchFlyoutFunction = () => {
-    this.showCreateWatchFlyout = () => {};
+  unsetShowCreateAlertFlyoutFunction = () => {
+    this.showCreateAlertFlyout = () => {};
   };
-  getShowCreateWatchFlyoutFunction = () => {
-    return this.showCreateWatchFlyout;
+  getShowCreateAlertFlyoutFunction = () => {
+    return this.showCreateAlertFlyout;
   };
 
   selectJobChange = (selectedJobs) => {
@@ -514,12 +514,12 @@ export class JobsListView extends Component {
               <StartDatafeedModal
                 setShowFunction={this.setShowStartDatafeedModalFunction}
                 unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-                getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
+                getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
               />
-              <CreateWatchFlyout
-                setShowFunction={this.setShowCreateWatchFlyoutFunction}
-                unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
+              <JobListMlAnomalyAlertFlyout
+                setShowFunction={this.setShowCreateAlertFlyoutFunction}
+                unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
               />
             </div>
           </EuiPageContent>

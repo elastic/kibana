@@ -39,7 +39,7 @@ export class StartDatafeedModal extends Component {
       isModalVisible: false,
       startTime: now,
       endTime: now,
-      createWatch: false,
+      createAlert: false,
       allowCreateWatch: false,
       initialSpecifiedStartTime: now,
       now,
@@ -48,7 +48,7 @@ export class StartDatafeedModal extends Component {
 
     this.initialSpecifiedStartTime = now;
     this.refreshJobs = this.props.refreshJobs;
-    this.getShowCreateWatchFlyoutFunction = this.props.getShowCreateWatchFlyoutFunction;
+    this.getShowCreateAlertFlyoutFunction = this.props.getShowCreateAlertFlyoutFunction;
   }
 
   componentDidMount() {
@@ -71,8 +71,8 @@ export class StartDatafeedModal extends Component {
     this.setState({ endTime: time });
   };
 
-  setCreateWatch = (e) => {
-    this.setState({ createWatch: e.target.checked });
+  setCreateAlert = (e) => {
+    this.setState({ createAlert: e.target.checked });
   };
 
   closeModal = () => {
@@ -97,7 +97,7 @@ export class StartDatafeedModal extends Component {
       initialSpecifiedStartTime,
       showCreateWatchFlyout,
       allowCreateWatch,
-      createWatch: false,
+      createAlert: false,
       now,
     });
   };
@@ -112,9 +112,9 @@ export class StartDatafeedModal extends Component {
       : this.state.endTime;
 
     forceStartDatafeeds(jobs, start, end, () => {
-      if (this.state.createWatch && jobs.length === 1) {
+      if (this.state.createAlert && jobs.length === 1) {
         const jobId = jobs[0].id;
-        this.getShowCreateWatchFlyoutFunction()(jobId);
+        this.getShowCreateAlertFlyoutFunction()(jobId);
       }
       this.refreshJobs();
     });
@@ -127,7 +127,7 @@ export class StartDatafeedModal extends Component {
       initialSpecifiedStartTime,
       startTime,
       endTime,
-      createWatch,
+      createAlert,
       now,
       timeRangeValid,
     } = this.state;
@@ -172,15 +172,15 @@ export class StartDatafeedModal extends Component {
                 <div className="create-watch">
                   <EuiHorizontalRule />
                   <EuiCheckbox
-                    id="createWatch"
+                    id="createAlert"
                     label={
                       <FormattedMessage
-                        id="xpack.ml.jobsList.startDatafeedModal.createWatchDescription"
-                        defaultMessage="Create watch after datafeed has started"
+                        id="xpack.ml.jobsList.startDatafeedModal.createAlertDescription"
+                        defaultMessage="Create alert after datafeed has started"
                       />
                     }
-                    checked={createWatch}
-                    onChange={this.setCreateWatch}
+                    checked={createAlert}
+                    onChange={this.setCreateAlert}
                   />
                 </div>
               )}
