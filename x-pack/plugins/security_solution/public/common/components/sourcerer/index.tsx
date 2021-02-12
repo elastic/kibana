@@ -94,7 +94,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       configIndexPatterns.map((indexSelected, i) => ({
         label: indexSelected,
         value: SourcererPatternType.config,
-        key: `${indexSelected}-${i}`,
+        key: `${SourcererPatternType.config}-${i}`,
       }))
     );
   }, [configIndexPatterns]);

@@ -177,8 +177,8 @@ describe('Sourcerer component', () => {
       })
     );
   });
-  // TO DO fix before merging
-  it.skip('resets to config index patterns', async () => {
+
+  it('resets to config index patterns', async () => {
     store = createStore(
       {
         ...state,
