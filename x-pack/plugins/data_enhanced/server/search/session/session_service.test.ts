@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -46,7 +45,7 @@ describe('SearchSessionService', () => {
 
   beforeEach(async () => {
     savedObjectsClient = savedObjectsClientMock.create();
-    const config$ = new BehaviorSubject<ConfigSchema>({
+    const config: ConfigSchema = {
       search: {
         sessions: {
           enabled: true,
@@ -59,13 +58,13 @@ describe('SearchSessionService', () => {
           management: {} as any,
         },
       },
-    });
+    };
     const mockLogger: any = {
       debug: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
     };
-    service = new SearchSessionService(mockLogger, config$);
+    service = new SearchSessionService(mockLogger, config);
     const coreStart = coreMock.createStart();
     const mockTaskManager = taskManagerMock.createStart();
     await flushPromises();
@@ -317,6 +316,76 @@ describe('SearchSessionService', () => {
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(MAX_UPDATE_RETRIES);
+    });
+
+    it('batches updates for the same session', async () => {
+      const sessionId1 = 'sessiondId1';
+      const sessionId2 = 'sessiondId2';
+
+      const searchRequest1 = { params: { 1: '1' } };
+      const requestHash1 = createRequestHash(searchRequest1.params);
+      const searchId1 = 'searchId1';
+
+      const searchRequest2 = { params: { 2: '2' } };
+      const requestHash2 = createRequestHash(searchRequest2.params);
+      const searchId2 = 'searchId1';
+
+      const searchRequest3 = { params: { 3: '3' } };
+      const requestHash3 = createRequestHash(searchRequest3.params);
+      const searchId3 = 'searchId3';
+
+      const mockUpdateSavedObject = {
+        ...mockSavedObject,
+        attributes: {},
+      };
+      savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+
+      await Promise.all([
+        service.trackId({ savedObjectsClient }, searchRequest1, searchId1, {
+          sessionId: sessionId1,
+          strategy: MOCK_STRATEGY,
+        }),
+        service.trackId({ savedObjectsClient }, searchRequest2, searchId2, {
+          sessionId: sessionId1,
+          strategy: MOCK_STRATEGY,
+        }),
+        service.trackId({ savedObjectsClient }, searchRequest3, searchId3, {
+          sessionId: sessionId2,
+          strategy: MOCK_STRATEGY,
+        }),
+      ]);
+
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(2); // 3 trackIds calls batched into 2 update calls (2 different sessions)
+      expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+      const [type1, id1, callAttributes1] = savedObjectsClient.update.mock.calls[0];
+      expect(type1).toBe(SEARCH_SESSION_TYPE);
+      expect(id1).toBe(sessionId1);
+      expect(callAttributes1).toHaveProperty('idMapping', {
+        [requestHash1]: {
+          id: searchId1,
+          status: SearchSessionStatus.IN_PROGRESS,
+          strategy: MOCK_STRATEGY,
+        },
+        [requestHash2]: {
+          id: searchId2,
+          status: SearchSessionStatus.IN_PROGRESS,
+          strategy: MOCK_STRATEGY,
+        },
+      });
+      expect(callAttributes1).toHaveProperty('touched');
+
+      const [type2, id2, callAttributes2] = savedObjectsClient.update.mock.calls[1];
+      expect(type2).toBe(SEARCH_SESSION_TYPE);
+      expect(id2).toBe(sessionId2);
+      expect(callAttributes2).toHaveProperty('idMapping', {
+        [requestHash3]: {
+          id: searchId3,
+          status: SearchSessionStatus.IN_PROGRESS,
+          strategy: MOCK_STRATEGY,
+        },
+      });
+      expect(callAttributes2).toHaveProperty('touched');
     });
   });
 

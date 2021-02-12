@@ -44,7 +44,7 @@ import {
 } from '../configure_cases/utils';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
-import { EventDetailsFlyout } from '../../../common/components/events_viewer/event_details_flyout';
+import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -297,7 +297,6 @@ export const CaseComponent = React.memo<CaseProps>(
       updateCase: handleUpdateCase,
       userCanCrud,
       isValidConnector: isLoadingConnectors ? true : isValidConnector,
-      alerts,
     });
 
     const onSubmitConnector = useCallback(
@@ -369,9 +368,10 @@ export const CaseComponent = React.memo<CaseProps>(
     const showAlert = useCallback(
       (alertId: string, index: string) => {
         dispatch(
-          timelineActions.toggleExpandedEvent({
+          timelineActions.toggleDetailPanel({
+            panelView: 'eventDetail',
             timelineId: TimelineId.casePage,
-            event: {
+            params: {
               eventId: alertId,
               indexName: index,
             },
@@ -391,13 +391,12 @@ export const CaseComponent = React.memo<CaseProps>(
             id: TimelineId.casePage,
             columns: [],
             indexNames: [],
-            expandedEvent: {},
+            expandedDetail: {},
             show: false,
           })
         );
       }
     }, [dispatch]);
-
     return (
       <>
         <HeaderWrapper>
@@ -502,9 +501,10 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
-        <EventDetailsFlyout
+        <DetailsPanel
           browserFields={browserFields}
           docValueFields={docValueFields}
+          isFlyoutView
           timelineId={TimelineId.casePage}
         />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />

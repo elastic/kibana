@@ -18,7 +18,6 @@ import { LatencyChart } from '../../shared/charts/latency_chart';
 import { TransactionBreakdownChart } from '../../shared/charts/transaction_breakdown_chart';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { SearchBar } from '../../shared/search_bar';
-import { UserExperienceCallout } from '../transaction_overview/user_experience_callout';
 import { ServiceOverviewDependenciesTable } from './service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from './service_overview_instances_chart_and_table';
@@ -65,11 +64,6 @@ export function ServiceOverview({
         />
         <EuiPage>
           <EuiFlexGroup direction="column" gutterSize="s">
-            {isRumAgent && (
-              <EuiFlexItem>
-                <UserExperienceCallout serviceName={serviceName} />
-              </EuiFlexItem>
-            )}
             <EuiFlexItem>
               <EuiPanel>
                 <LatencyChart height={200} />

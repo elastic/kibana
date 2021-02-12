@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 import { px, unit } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
@@ -19,7 +19,7 @@ import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_con
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { useLicenseContext } from '../../context/license/use_license_context';
 
-const SearchBarFlexGroup = styled(EuiFlexGroup)`
+const SearchBarFlexGroup = euiStyled(EuiFlexGroup)`
   margin: ${({ theme }) =>
     `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} -${theme.eui.gutterTypes.gutterMedium} ${theme.eui.euiSizeS}`};
 `;
@@ -48,7 +48,7 @@ export function SearchBar({
   const itemsStyle = { marginBottom: isLarge ? px(unit) : 0 };
 
   return (
-    <SearchBarFlexGroup gutterSize="s" direction={getRowDirection(isLarge)}>
+    <SearchBarFlexGroup gutterSize="m" direction={getRowDirection(isLarge)}>
       <EuiFlexItem>
         <KueryBar prepend={prepend} />
       </EuiFlexItem>

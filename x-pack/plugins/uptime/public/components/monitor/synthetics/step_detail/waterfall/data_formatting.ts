@@ -6,20 +6,23 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
+import moment from 'moment';
 
 import {
   NetworkItems,
   NetworkItem,
+  FriendlyFlyoutLabels,
   FriendlyTimingLabels,
   FriendlyMimetypeLabels,
   MimeType,
   MimeTypesMap,
   Timings,
+  Metadata,
   TIMING_ORDER,
   SidebarItems,
   LegendItems,
 } from './types';
-import { WaterfallData } from '../../waterfall';
+import { WaterfallData, WaterfallMetadata } from '../../waterfall';
 import { NetworkEvent } from '../../../../../../common/runtime_types';
 
 export const extractItems = (data: NetworkEvent[]): NetworkItems => {
@@ -55,59 +58,112 @@ const getFriendlyTooltipValue = ({
   }
   return `${label}: ${formatValueForDisplay(value)}ms`;
 };
+export const isHighlightedItem = (
+  item: NetworkItem,
+  query?: string,
+  activeFilters: string[] = []
+) => {
+  if (!query && activeFilters?.length === 0) {
+    return true;
+  }
 
-export const getSeriesAndDomain = (items: NetworkItems) => {
+  const matchQuery = query ? item.url?.includes(query) : true;
+  const matchFilters =
+    activeFilters.length > 0 ? activeFilters.includes(MimeTypesMap[item.mimeType!]) : true;
+
+  return !!(matchQuery && matchFilters);
+};
+
+const getFriendlyMetadataValue = ({ value, postFix }: { value?: number; postFix?: string }) => {
+  // value === -1 indicates timing data cannot be extracted
+  if (value === undefined || value === -1) {
+    return undefined;
+  }
+
+  let formattedValue = formatValueForDisplay(value);
+
+  if (postFix) {
+    formattedValue = `${formattedValue} ${postFix}`;
+  }
+
+  return formattedValue;
+};
+
+export const getConnectingTime = (connect?: number, ssl?: number) => {
+  if (ssl && connect && ssl > 0) {
+    return connect - ssl;
+  } else {
+    return connect;
+  }
+};
+
+export const getSeriesAndDomain = (
+  items: NetworkItems,
+  onlyHighlighted = false,
+  query?: string,
+  activeFilters?: string[]
+) => {
   const getValueForOffset = (item: NetworkItem) => {
     return item.requestSentTime;
   };
-
   // The earliest point in time a request is sent or started. This will become our notion of "0".
-  const zeroOffset = items.reduce<number>((acc, item) => {
-    const offsetValue = getValueForOffset(item);
-    return offsetValue < acc ? offsetValue : acc;
-  }, Infinity);
+  let zeroOffset = Infinity;
+  items.forEach((i) => (zeroOffset = Math.min(zeroOffset, getValueForOffset(i))));
 
   const getValue = (timings: NetworkEvent['timings'], timing: Timings) => {
     if (!timings) return;
 
     // SSL is a part of the connect timing
-    if (timing === Timings.Connect && timings.ssl > 0) {
-      return timings.connect - timings.ssl;
-    } else {
-      return timings[timing];
+    if (timing === Timings.Connect) {
+      return getConnectingTime(timings.connect, timings.ssl);
     }
+    return timings[timing];
   };
 
-  const series = items.reduce<WaterfallData>((acc, item, index) => {
+  const series: WaterfallData = [];
+  const metadata: WaterfallMetadata = [];
+  let totalHighlightedRequests = 0;
+
+  items.forEach((item, index) => {
+    const mimeTypeColour = getColourForMimeType(item.mimeType);
+    const offsetValue = getValueForOffset(item);
+    let currentOffset = offsetValue - zeroOffset;
+    metadata.push(formatMetadata({ item, index, requestStart: currentOffset }));
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    if (isHighlighted) {
+      totalHighlightedRequests++;
+    }
+
     if (!item.timings) {
-      acc.push({
+      series.push({
         x: index,
         y0: 0,
         y: 0,
         config: {
+          isHighlighted,
           showTooltip: false,
         },
       });
-      return acc;
+      return;
     }
 
-    const offsetValue = getValueForOffset(item);
-    const mimeTypeColour = getColourForMimeType(item.mimeType);
-
-    let currentOffset = offsetValue - zeroOffset;
+    let timingValueFound = false;
 
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
-      const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
       if (value && value >= 0) {
+        timingValueFound = true;
+        const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
         const y = currentOffset + value;
 
-        acc.push({
+        series.push({
           x: index,
           y0: currentOffset,
           y,
           config: {
+            id: index,
             colour,
+            isHighlighted,
             showTooltip: true,
             tooltipProps: {
               value: getFriendlyTooltipValue({
@@ -126,14 +182,15 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     /* if no specific timing values are found, use the total time
      * if total time is not available use 0, set showTooltip to false,
      * and omit tooltip props */
-    if (!acc.find((entry) => entry.x === index)) {
+    if (!timingValueFound) {
       const total = item.timings.total;
       const hasTotal = total !== -1;
-      acc.push({
+      series.push({
         x: index,
         y0: hasTotal ? currentOffset : 0,
         y: hasTotal ? currentOffset + item.timings.total : 0,
         config: {
+          isHighlighted,
           colour: hasTotal ? mimeTypeColour : '',
           showTooltip: hasTotal,
           tooltipProps: hasTotal
@@ -149,19 +206,136 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         },
       });
     }
-    return acc;
-  }, []);
+  });
 
   const yValues = series.map((serie) => serie.y);
   const domain = { min: 0, max: Math.max(...yValues) };
-  return { series, domain };
+
+  let filteredSeries = series;
+  if (onlyHighlighted) {
+    filteredSeries = series.filter((item) => item.config.isHighlighted);
+  }
+
+  return { series: filteredSeries, domain, metadata, totalHighlightedRequests };
 };
 
-export const getSidebarItems = (items: NetworkItems): SidebarItems => {
-  return items.map((item) => {
+const formatHeaders = (headers?: Record<string, unknown>) => {
+  if (typeof headers === 'undefined') {
+    return undefined;
+  }
+  return Object.keys(headers).map((key) => ({
+    name: key,
+    value: `${headers[key]}`,
+  }));
+};
+
+const formatMetadata = ({
+  item,
+  index,
+  requestStart,
+}: {
+  item: NetworkItem;
+  index: number;
+  requestStart: number;
+}) => {
+  const {
+    bytesDownloadedCompressed,
+    certificates,
+    ip,
+    mimeType,
+    requestHeaders,
+    responseHeaders,
+    url,
+  } = item;
+  const { dns, connect, ssl, wait, receive, total } = item.timings || {};
+  const contentDownloaded = receive && receive > 0 ? receive : total;
+  return {
+    x: index,
+    url,
+    requestHeaders: formatHeaders(requestHeaders),
+    responseHeaders: formatHeaders(responseHeaders),
+    certificates: certificates
+      ? [
+          {
+            name: FriendlyFlyoutLabels[Metadata.CertificateIssuer],
+            value: certificates.issuer,
+          },
+          {
+            name: FriendlyFlyoutLabels[Metadata.CertificateIssueDate],
+            value: certificates.validFrom
+              ? moment(certificates.validFrom).format('L LT')
+              : undefined,
+          },
+          {
+            name: FriendlyFlyoutLabels[Metadata.CertificateExpiryDate],
+            value: certificates.validTo ? moment(certificates.validTo).format('L LT') : undefined,
+          },
+          {
+            name: FriendlyFlyoutLabels[Metadata.CertificateSubject],
+            value: certificates.subjectName,
+          },
+        ]
+      : undefined,
+    details: [
+      { name: FriendlyFlyoutLabels[Metadata.MimeType], value: mimeType },
+      {
+        name: FriendlyFlyoutLabels[Metadata.RequestStart],
+        value: getFriendlyMetadataValue({ value: requestStart, postFix: 'ms' }),
+      },
+      {
+        name: FriendlyTimingLabels[Timings.Dns],
+        value: getFriendlyMetadataValue({ value: dns, postFix: 'ms' }),
+      },
+      {
+        name: FriendlyTimingLabels[Timings.Connect],
+        value: getFriendlyMetadataValue({ value: getConnectingTime(connect, ssl), postFix: 'ms' }),
+      },
+      {
+        name: FriendlyTimingLabels[Timings.Ssl],
+        value: getFriendlyMetadataValue({ value: ssl, postFix: 'ms' }),
+      },
+      {
+        name: FriendlyTimingLabels[Timings.Wait],
+        value: getFriendlyMetadataValue({ value: wait, postFix: 'ms' }),
+      },
+      {
+        name: FriendlyTimingLabels[Timings.Receive],
+        value: getFriendlyMetadataValue({
+          value: contentDownloaded,
+          postFix: 'ms',
+        }),
+      },
+      {
+        name: FriendlyFlyoutLabels[Metadata.BytesDownloadedCompressed],
+        value: getFriendlyMetadataValue({
+          value: bytesDownloadedCompressed ? bytesDownloadedCompressed / 1000 : undefined,
+          postFix: 'KB',
+        }),
+      },
+      {
+        name: FriendlyFlyoutLabels[Metadata.IP],
+        value: ip,
+      },
+    ],
+  };
+};
+
+export const getSidebarItems = (
+  items: NetworkItems,
+  onlyHighlighted: boolean,
+  query: string,
+  activeFilters: string[]
+): SidebarItems => {
+  const sideBarItems = items.map((item, index) => {
+    const isHighlighted = isHighlightedItem(item, query, activeFilters);
+    const offsetIndex = index + 1;
     const { url, status, method } = item;
-    return { url, status, method };
+    return { url, status, method, isHighlighted, offsetIndex, index };
   });
+  if (onlyHighlighted) {
+    return sideBarItems.filter((item) => item.isHighlighted);
+  }
+  return sideBarItems;
 };
 
 export const getLegendItems = (): LegendItems => {
@@ -184,6 +358,7 @@ export const getLegendItems = (): LegendItems => {
       { name: FriendlyMimetypeLabels[mimeType], colour: MIME_TYPE_PALETTE[mimeType] },
     ];
   });
+
   return [...timingItems, ...mimeTypeItems];
 };
 

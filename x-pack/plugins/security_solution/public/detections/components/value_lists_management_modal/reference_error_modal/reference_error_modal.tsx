@@ -69,6 +69,7 @@ export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = 
         confirmButtonText={confirmText}
         buttonColor="danger"
         defaultFocusedButton="confirm"
+        data-test-subj="referenceErrorModal"
       >
         <p>{contentText}</p>
         <MarkdownContainer>

@@ -20,10 +20,9 @@ interface Props {
   columnValues: string;
   checked: boolean;
   onRowSelected: OnRowSelected;
-  expanded: boolean;
   eventId: string;
   loadingEventIds: Readonly<string[]>;
-  onEventToggled: () => void;
+  onEventDetailsPanelOpened: () => void;
   showCheckboxes: boolean;
 }
 
@@ -33,10 +32,9 @@ const ActionsComponent: React.FC<Props> = ({
   additionalActions,
   checked,
   columnValues,
-  expanded,
   eventId,
   loadingEventIds,
-  onEventToggled,
+  onEventDetailsPanelOpened,
   onRowSelected,
   showCheckboxes,
 }) => {
@@ -78,9 +76,8 @@ const ActionsComponent: React.FC<Props> = ({
             <EuiButtonIcon
               aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
               data-test-subj="expand-event"
-              disabled={expanded}
               iconType="arrowRight"
-              onClick={onEventToggled}
+              onClick={onEventDetailsPanelOpened}
             />
           </EuiToolTip>
         </EventsTdContent>
