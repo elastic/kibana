@@ -46,6 +46,7 @@ export default ({ getService, getPageObjects }) => {
           'Name',
           'Type',
           'Format',
+          'Runtime',
           'Searchable',
           'Aggregatable',
           'Excluded',
