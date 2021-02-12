@@ -21,7 +21,6 @@ import { Location } from 'history';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
-import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -33,7 +32,6 @@ import { TransactionTypeSelect } from '../../shared/transaction_type_select';
 import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
-import { UserExperienceCallout } from './user_experience_callout';
 import { useTransactionListFetcher } from './use_transaction_list';
 
 function getRedirectLocation({
@@ -116,13 +114,6 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
               <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          {transactionType === TRANSACTION_PAGE_LOAD && (
-            <>
-              <UserExperienceCallout serviceName={serviceName} />
-              <EuiSpacer size="s" />
-            </>
-          )}
           <TransactionCharts />
           <EuiSpacer size="s" />
           <EuiPanel>

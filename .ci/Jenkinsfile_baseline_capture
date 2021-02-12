@@ -12,7 +12,17 @@ kibanaPipeline(timeoutMinutes: 120) {
         ]) {
           parallel([
             'oss-baseline': {
-              workers.ci(name: 'oss-baseline', size: 'l', ramDisk: true, runErrorReporter: false) {
+              workers.ci(name: 'oss-baseline', size: 'l', ramDisk: true, runErrorReporter: false, bootstrapped: false) {
+                // bootstrap ourselves, but with the env needed to upload the ts refs cache
+                withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+                  withEnv([
+                    'BUILD_TS_REFS_CACHE_ENABLE=true',
+                    'BUILD_TS_REFS_CACHE_CAPTURE=true'
+                  ]) {
+                    kibanaPipeline.doSetup()
+                  }
+                }
+
                 kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh')()
               }
             },
