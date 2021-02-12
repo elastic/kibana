@@ -14,7 +14,6 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', () => {
     const spy = jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-      requestId: 'foo',
       data: undefined,
       status: hooks.FETCH_STATUS.LOADING,
       refetch: jest.fn(),

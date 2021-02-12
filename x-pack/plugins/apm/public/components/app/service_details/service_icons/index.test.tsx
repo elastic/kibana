@@ -54,7 +54,6 @@ describe('ServiceIcons', () => {
   describe('icons', () => {
     it('Shows loading spinner while fetching data', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data: undefined,
         status: fetcherHook.FETCH_STATUS.LOADING,
         refetch: jest.fn(),
@@ -71,7 +70,6 @@ describe('ServiceIcons', () => {
     });
     it("doesn't show any icons", () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data: {},
         status: fetcherHook.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
@@ -89,7 +87,6 @@ describe('ServiceIcons', () => {
     });
     it('shows service icon', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data: {
           agentName: 'java',
         },
@@ -109,7 +106,6 @@ describe('ServiceIcons', () => {
     });
     it('shows service and container icons', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data: {
           agentName: 'java',
           containerType: 'Kubernetes',
@@ -130,7 +126,6 @@ describe('ServiceIcons', () => {
     });
     it('shows service, container and cloud icons', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data: {
           agentName: 'java',
           containerType: 'Kubernetes',

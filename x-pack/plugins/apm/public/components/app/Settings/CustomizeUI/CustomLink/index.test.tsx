@@ -69,7 +69,6 @@ describe('CustomLink', () => {
   describe('empty prompt', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data: [],
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
@@ -94,7 +93,6 @@ describe('CustomLink', () => {
   describe('overview', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data,
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
@@ -174,7 +172,6 @@ describe('CustomLink', () => {
     beforeAll(() => {
       saveCustomLinkSpy = jest.spyOn(saveCustomLink, 'saveCustomLink');
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data,
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch,
@@ -293,7 +290,6 @@ describe('CustomLink', () => {
   describe('invalid license', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        requestId: 'foo',
         data: [],
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),

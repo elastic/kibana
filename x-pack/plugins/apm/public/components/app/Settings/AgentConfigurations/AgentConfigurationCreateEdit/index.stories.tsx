@@ -53,7 +53,6 @@ storiesOf(
         <AgentConfigurationCreateEdit
           pageStep="choose-settings-step"
           existingConfigResult={{
-            requestId: 'foo',
             status: FETCH_STATUS.SUCCESS,
             data: {
               service: { name: 'opbeans-node', environment: 'production' },

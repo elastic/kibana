@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import { IHttpFetchError } from 'src/core/public';
-import uuid from 'uuid';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import {
   callApmApi,
@@ -25,7 +24,6 @@ export enum FETCH_STATUS {
 }
 
 export interface FetcherResult<Data> {
-  requestId: string;
   data?: Data;
   status: FETCH_STATUS;
   error?: IHttpFetchError;
@@ -77,7 +75,6 @@ export function useFetcher<TReturn>(
   >({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
-    requestId: '',
   });
   const [counter, setCounter] = useState(0);
   const { rangeId } = useUrlParams();
@@ -86,7 +83,6 @@ export function useFetcher<TReturn>(
     let controller: AbortController = new AbortController();
 
     async function doFetch() {
-      const requestId = uuid();
       controller.abort();
 
       controller = new AbortController();
@@ -102,7 +98,6 @@ export function useFetcher<TReturn>(
       }
 
       setResult((prevResult) => ({
-        requestId: prevResult.requestId,
         data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
         error: undefined,
@@ -116,7 +111,6 @@ export function useFetcher<TReturn>(
         // aborted before updating the result.
         if (!signal.aborted) {
           setResult({
-            requestId,
             data,
             status: FETCH_STATUS.SUCCESS,
             error: undefined,
@@ -149,7 +143,6 @@ export function useFetcher<TReturn>(
             });
           }
           setResult({
-            requestId,
             data: undefined,
             status: FETCH_STATUS.FAILURE,
             error: e,
