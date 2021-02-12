@@ -343,35 +343,30 @@ export const serviceThroughputRoute = createRoute({
       transactionType,
     };
 
-    const currentPeriodPromise = getThroughput({
-      ...commonProps,
-      start,
-      end,
-    });
-
-    const previousPeriodPromise =
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getThroughput({
+        ...commonProps,
+        start,
+        end,
+      }),
       comparisonStart && comparisonEnd
         ? getThroughput({
             ...commonProps,
             start: comparisonStart,
             end: comparisonEnd,
-          })
-        : undefined;
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      currentPeriodPromise,
-      previousPeriodPromise,
+          }).then((coordinates) =>
+            offsetPreviousPeriodCoordinates({
+              currentPeriodStart: start,
+              previousPeriodStart: comparisonStart,
+              previousPeriodTimeseries: coordinates,
+            })
+          )
+        : [],
     ]);
-
-    const previousPeriodTimeseries = offsetPreviousPeriodCoordinates({
-      currentPeriodStart: start,
-      previousPeriodStart: comparisonStart,
-      previousPeriodTimeseries: previousPeriod,
-    });
 
     return {
       currentPeriod,
-      previousPeriod: previousPeriodTimeseries,
+      previousPeriod,
     };
   },
 });

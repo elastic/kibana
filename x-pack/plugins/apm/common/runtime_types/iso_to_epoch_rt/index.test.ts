@@ -9,21 +9,24 @@ import { isoToEpochRt } from './index';
 import { isRight } from 'fp-ts/lib/Either';
 
 describe('isoToEpochRt', () => {
-  it('validates whether a string is a valid date', () => {
-    expect(isoToEpochRt.is(1566299881499)).toBe(false);
-    expect(isoToEpochRt.is('2019-08-20T11:18:31.407Z')).toBe(true);
+  it('validates whether its input is a valid ISO timestamp', () => {
+    expect(isRight(isoToEpochRt.decode(1566299881499))).toBe(false);
+
+    expect(isRight(isoToEpochRt.decode('2019-08-20T11:18:31.407Z'))).toBe(true);
   });
 
-  it('returns the string it was given', () => {
-    const either = isoToEpochRt.decode('2019-08-20T11:18:31.407Z');
-    if (isRight(either)) {
-      expect(either.right).toBe(1566299911407);
+  it('decodes valid ISO timestamps to epoch time', () => {
+    const iso = '2019-08-20T11:18:31.407Z';
+    const result = isoToEpochRt.decode(iso);
+
+    if (isRight(result)) {
+      expect(result.right).toBe(new Date(iso).getTime());
     } else {
       fail();
     }
   });
 
-  it('encodes timestamp to ISO string', () => {
+  it('encodes epoch time to ISO string', () => {
     expect(isoToEpochRt.encode(1566299911407)).toBe('2019-08-20T11:18:31.407Z');
   });
 });
