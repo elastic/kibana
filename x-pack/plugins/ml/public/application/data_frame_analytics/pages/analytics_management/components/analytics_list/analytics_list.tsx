@@ -29,6 +29,7 @@ import {
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getTaskStateBadge, getJobTypeBadge, useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
+import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { SourceSelection } from '../source_selection';
@@ -36,8 +37,11 @@ import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
+import { PLUGIN_ID } from '../../../../../../../common/constants/app';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+
+const EmptyFunctionComponent: React.FC = ({ children }) => <>{children}</>;
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -84,7 +88,7 @@ function getItemIdToExpandedRowMap(
 interface Props {
   isManagementTable?: boolean;
   isMlEnabledInSpace?: boolean;
-  spacesEnabled?: boolean;
+  spacesApi?: SpacesPluginStart;
   blockRefresh?: boolean;
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
@@ -92,7 +96,7 @@ interface Props {
 export const DataFrameAnalyticsList: FC<Props> = ({
   isManagementTable = false,
   isMlEnabledInSpace = true,
-  spacesEnabled = false,
+  spacesApi,
   blockRefresh = false,
   pageState,
   updatePageState,
@@ -178,7 +182,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setExpandedRowItemIds,
     isManagementTable,
     isMlEnabledInSpace,
-    spacesEnabled,
+    spacesApi,
     refresh
   );
 
@@ -261,6 +265,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     filters,
   };
 
+  const ContextWrapper = spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent;
+
   return (
     <div data-test-subj="mlAnalyticsJobList">
       {modals}
@@ -284,26 +290,28 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
-        <EuiInMemoryTable<DataFrameAnalyticsListRow>
-          allowNeutralSort={false}
-          columns={columns}
-          hasActions={false}
-          isExpandable={true}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isSelectable={false}
-          items={analytics}
-          itemId={DataFrameAnalyticsListColumn.id}
-          loading={isLoading}
-          onTableChange={onTableChange}
-          pagination={pagination}
-          sorting={sorting}
-          search={search}
-          data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
-          rowProps={(item) => ({
-            'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
-          })}
-          error={searchError}
-        />
+        <ContextWrapper feature={PLUGIN_ID}>
+          <EuiInMemoryTable<DataFrameAnalyticsListRow>
+            allowNeutralSort={false}
+            columns={columns}
+            hasActions={false}
+            isExpandable={true}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            isSelectable={false}
+            items={analytics}
+            itemId={DataFrameAnalyticsListColumn.id}
+            loading={isLoading}
+            onTableChange={onTableChange}
+            pagination={pagination}
+            sorting={sorting}
+            search={search}
+            data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
+            rowProps={(item) => ({
+              'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
+            })}
+            error={searchError}
+          />
+        </ContextWrapper>
       </div>
 
       {isSourceIndexModalVisible === true && (

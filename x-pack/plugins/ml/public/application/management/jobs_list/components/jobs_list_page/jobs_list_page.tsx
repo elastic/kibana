@@ -103,7 +103,7 @@ function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | und
             <DataFrameAnalyticsList
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
-              spacesEnabled={!!spacesApi}
+              spacesApi={spacesApi}
               pageState={dfaPageState}
               updatePageState={updateDfaPageState}
             />
