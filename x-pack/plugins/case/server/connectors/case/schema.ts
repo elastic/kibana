@@ -6,37 +6,48 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CommentType } from '../../../common/api';
 import { validateConnector } from './validators';
 
 // Reserved for future implementation
 export const CaseConfigurationSchema = schema.object({});
 
 const ContextTypeUserSchema = schema.object({
-  type: schema.literal('user'),
+  type: schema.literal(CommentType.user),
   comment: schema.string(),
 });
 
-/**
- * ContextTypeAlertSchema has been deleted.
- * Comments of type alert need the siem signal index.
- * Case connector is not being passed the context which contains the
- * security solution app client which in turn provides the siem signal index.
- * For that reason, we disable comments of type alert for the case connector until
- * we figure out how to pass the security solution app client to the connector.
- * See: x-pack/plugins/case/server/connectors/case/index.ts L76.
- *
- * The schema:
- *
- * const ContextTypeAlertSchema = schema.object({
- *  type: schema.literal('alert'),
- *  alertId: schema.string(),
- *  index: schema.string(),
- * });
- *
- * Issue: https://github.com/elastic/kibana/issues/85750
- *  */
+const AlertIDSchema = schema.object(
+  {
+    _id: schema.string(),
+  },
+  { unknowns: 'ignore' }
+);
 
-export const CommentSchema = schema.oneOf([ContextTypeUserSchema]);
+const ContextTypeAlertGroupSchema = schema.object({
+  type: schema.literal(CommentType.generatedAlert),
+  alerts: schema.oneOf([schema.arrayOf(AlertIDSchema), AlertIDSchema]),
+  index: schema.string(),
+});
+
+export type ContextTypeGeneratedAlertType = typeof ContextTypeAlertGroupSchema.type;
+
+const ContextTypeAlertSchema = schema.object({
+  type: schema.literal(CommentType.alert),
+  // allowing either an array or a single value to preserve the previous API of attaching a single alert ID
+  alertId: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+  index: schema.string(),
+});
+
+export type ContextTypeAlertSchemaType = typeof ContextTypeAlertSchema.type;
+
+export const CommentSchema = schema.oneOf([
+  ContextTypeUserSchema,
+  ContextTypeAlertSchema,
+  ContextTypeAlertGroupSchema,
+]);
+
+export type CommentSchemaType = typeof CommentSchema.type;
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),
