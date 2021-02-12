@@ -77,13 +77,28 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
     const { dispose } = monaco.languages.registerCompletionItemProvider(LANG, {
       triggerCharacters: ['{', '/', '?', '&', '='],
       provideCompletionItems(model, position, context, token) {
-        const word = model.getWordUntilPosition(position);
+        const { lineNumber } = position;
+        const line = model.getLineContent(lineNumber);
+        const wordUntil = model.getWordUntilPosition(position);
+        const word = model.getWordAtPosition(position) || wordUntil;
+        const { startColumn, endColumn } = word;
         const range = {
-          startLineNumber: position.lineNumber,
-          endLineNumber: position.lineNumber,
-          startColumn: word.startColumn,
-          endColumn: word.endColumn,
+          startLineNumber: lineNumber,
+          endLineNumber: lineNumber,
+          startColumn,
+          endColumn,
         };
+
+        const leadingMustacheCount =
+          0 +
+          (line[range.startColumn - 2] === '{' ? 1 : 0) +
+          (line[range.startColumn - 3] === '{' ? 1 : 0);
+
+        const trailingMustacheCount =
+          0 +
+          (line[range.endColumn - 1] === '}' ? 1 : 0) +
+          (line[range.endColumn + 0] === '}' ? 1 : 0);
+
         return {
           suggestions: variables.map(
             ({
@@ -95,7 +110,10 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
             }) => ({
               kind,
               label,
-              insertText: '{{' + label + '}}',
+              insertText:
+                (leadingMustacheCount === 2 ? '' : leadingMustacheCount === 1 ? '{' : '{{') +
+                label +
+                (trailingMustacheCount === 2 ? '' : trailingMustacheCount === 1 ? '}' : '}}'),
               detail: title,
               documentation,
               range,
