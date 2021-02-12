@@ -118,7 +118,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly createConfig = () => ({
     url: {
-      template: 'https://example.com/?{{event.key}}={{event.value}}',
+      template: 'Example: https://example.com/?{{event.key}}={{event.value}}',
     },
     openInNewTab: true,
     encodeUrl: true,
