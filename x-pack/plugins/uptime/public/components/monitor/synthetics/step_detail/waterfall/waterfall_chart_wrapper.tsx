@@ -7,11 +7,12 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHealth } from '@elastic/eui';
-import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/public';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import { SidebarItem, LegendItem, NetworkItems } from './types';
-import { WaterfallProvider, WaterfallChart, RenderItem } from '../../waterfall';
+import { WaterfallProvider, WaterfallChart, RenderItem, useFlyout } from '../../waterfall';
+import { useTrackMetric, METRIC_TYPE } from '../../../../../../../observability/public';
 import { WaterfallFilter } from './waterfall_filter';
+import { WaterfallFlyout } from './waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 
 export const renderLegendItem: RenderItem<LegendItem> = (item) => {
@@ -32,7 +33,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
 
   const hasFilters = activeFilters.length > 0;
 
-  const { series, domain, totalHighlightedRequests } = useMemo(() => {
+  const { series, domain, metadata, totalHighlightedRequests } = useMemo(() => {
     return getSeriesAndDomain(networkData, onlyHighlighted, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
 
@@ -40,7 +41,18 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     return getSidebarItems(networkData, onlyHighlighted, query, activeFilters);
   }, [networkData, query, activeFilters, onlyHighlighted]);
 
-  const legendItems = getLegendItems();
+  const legendItems = useMemo(() => {
+    return getLegendItems();
+  }, []);
+
+  const {
+    flyoutData,
+    onBarClick,
+    onProjectionClick,
+    onSidebarClick,
+    isFlyoutVisible,
+    onFlyoutClose,
+  } = useFlyout(metadata);
 
   const renderFilter = useCallback(() => {
     return (
@@ -55,16 +67,27 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
     );
   }, [activeFilters, setActiveFilters, onlyHighlighted, setOnlyHighlighted, query, setQuery]);
 
+  const renderFlyout = useCallback(() => {
+    return (
+      <WaterfallFlyout
+        flyoutData={flyoutData}
+        onFlyoutClose={onFlyoutClose}
+        isFlyoutVisible={isFlyoutVisible}
+      />
+    );
+  }, [flyoutData, isFlyoutVisible, onFlyoutClose]);
+
   const renderSidebarItem: RenderItem<SidebarItem> = useCallback(
     (item) => {
       return (
         <WaterfallSidebarItem
           item={item}
           renderFilterScreenReaderText={hasFilters && !onlyHighlighted}
+          onClick={onSidebarClick}
         />
       );
     },
-    [hasFilters, onlyHighlighted]
+    [hasFilters, onlyHighlighted, onSidebarClick]
   );
 
   useTrackMetric({ app: 'uptime', metric: 'waterfall_chart_view', metricType: METRIC_TYPE.COUNT });
@@ -81,17 +104,21 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
       fetchedNetworkRequests={networkData.length}
       highlightedNetworkRequests={totalHighlightedRequests}
       data={series}
+      onElementClick={useCallback(onBarClick, [onBarClick])}
+      onProjectionClick={useCallback(onProjectionClick, [onProjectionClick])}
+      onSidebarClick={onSidebarClick}
       showOnlyHighlightedNetworkRequests={onlyHighlighted}
       sidebarItems={sidebarItems}
       legendItems={legendItems}
-      renderTooltipItem={(tooltipProps) => {
+      metadata={metadata}
+      renderTooltipItem={useCallback((tooltipProps) => {
         return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
-      }}
+      }, [])}
     >
       <WaterfallChart
-        tickFormat={(d: number) => `${Number(d).toFixed(0)} ms`}
+        tickFormat={useCallback((d: number) => `${Number(d).toFixed(0)} ms`, [])}
         domain={domain}
-        barStyleAccessor={(datum) => {
+        barStyleAccessor={useCallback((datum) => {
           if (!datum.datum.config.isHighlighted) {
             return {
               rect: {
@@ -101,9 +128,10 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data, total }) => {
             };
           }
           return datum.datum.config.colour;
-        }}
+        }, [])}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
+        renderFlyout={renderFlyout}
         renderFilter={renderFilter}
         fullHeight={true}
       />

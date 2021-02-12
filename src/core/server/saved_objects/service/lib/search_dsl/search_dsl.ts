@@ -9,7 +9,9 @@
 import Boom from '@hapi/boom';
 
 import { IndexMapping } from '../../../mappings';
+import { SavedObjectsPitParams } from '../../../types';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
+import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
@@ -21,9 +23,11 @@ interface GetSearchDslOptions {
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
+  searchAfter?: unknown[];
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
+  pit?: SavedObjectsPitParams;
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
@@ -41,9 +45,11 @@ export function getSearchDsl(
     defaultSearchOperator,
     searchFields,
     rootSearchFields,
+    searchAfter,
     sortField,
     sortOrder,
     namespaces,
+    pit,
     typeToNamespacesMap,
     hasReference,
     hasReferenceOperator,
@@ -72,6 +78,8 @@ export function getSearchDsl(
       hasReferenceOperator,
       kueryNode,
     }),
-    ...getSortingParams(mappings, type, sortField, sortOrder),
+    ...getSortingParams(mappings, type, sortField, sortOrder, pit),
+    ...(pit ? getPitParams(pit) : {}),
+    ...(searchAfter ? { search_after: searchAfter } : {}),
   };
 }
