@@ -15,6 +15,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
+import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getDistributionMax({
   serviceName,
@@ -29,49 +30,51 @@ export async function getDistributionMax({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, esFilter, apmEventClient } = setup;
+  return withApmSpan('get_latency_distribution_max', async () => {
+    const { start, end, esFilter, apmEventClient } = setup;
 
-  const params = {
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { term: { [TRANSACTION_NAME]: transactionName } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis',
+    const params = {
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
+      },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              { term: { [TRANSACTION_TYPE]: transactionType } },
+              { term: { [TRANSACTION_NAME]: transactionName } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                    lte: end,
+                    format: 'epoch_millis',
+                  },
                 },
               },
-            },
-            ...esFilter,
-          ],
+              ...esFilter,
+            ],
+          },
         },
-      },
-      aggs: {
-        stats: {
-          max: {
-            field: getTransactionDurationFieldForAggregatedTransactions(
-              searchAggregatedTransactions
-            ),
+        aggs: {
+          stats: {
+            max: {
+              field: getTransactionDurationFieldForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+            },
           },
         },
       },
-    },
-  };
+    };
 
-  const resp = await apmEventClient.search(params);
-  return resp.aggregations?.stats.value ?? null;
+    const resp = await apmEventClient.search(params);
+    return resp.aggregations?.stats.value ?? null;
+  });
 }
