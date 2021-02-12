@@ -32,7 +32,7 @@ import {
   UrlTemplateEditorVariable,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 
-export interface UrlDrilldownCollectConfig {
+export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;
   variables: UrlTemplateEditorVariable[];
   onConfig: (newConfig: UrlDrilldownConfig) => void;
@@ -40,7 +40,7 @@ export interface UrlDrilldownCollectConfig {
   variablesHelpDocsLink?: string;
 }
 
-export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
+export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps> = ({
   config,
   variables,
   onConfig,
