@@ -1,35 +1,32 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import dedent from 'dedent';
 import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
 
+import { runBazel } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
-  description: 'Remove the node_modules and target directories from all projects.',
+  description: 'Deletes output directories, node_modules and resets internal caches.',
   name: 'clean',
 
   async run(projects) {
+    log.warning(dedent`
+      This command is only necessary for the rare circumstance where you need to recover a consistent
+      state when problems arise. If you need to run this command often, please let us know by
+      filling out this form: https://ela.st/yarn-kbn-clean
+    `);
+
     const toDelete = [];
     for (const project of projects.values()) {
       if (await isDirectory(project.nodeModulesLocation)) {
@@ -54,6 +51,10 @@ export const CleanCommand: ICommand = {
         });
       }
     }
+
+    // Runs Bazel soft clean
+    await runBazel(['clean']);
+    log.success('Soft cleaned bazel');
 
     if (toDelete.length === 0) {
       log.success('Nothing to delete');

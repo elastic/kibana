@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,7 +11,6 @@ import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
-import { SecurityLicense } from '../../../security/public';
 import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
 import { PluginsStart } from '../plugin';
 import { SpacesManager } from '../spaces_manager';
@@ -21,12 +21,11 @@ import { Space } from '..';
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
-  securityLicense?: SecurityLicense;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, securityLicense }: CreateParams) {
+  create({ getStartServices, spacesManager }: CreateParams) {
     return {
       id: this.id,
       order: 2,
@@ -58,7 +57,6 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               getUrlForApp={application.getUrlForApp}
-              securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
         };
@@ -81,7 +79,6 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               getUrlForApp={application.getUrlForApp}
-              securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
         };
@@ -109,7 +106,6 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               history={history}
               getUrlForApp={application.getUrlForApp}
-              securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
         };

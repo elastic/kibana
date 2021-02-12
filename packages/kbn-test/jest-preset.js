@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // For a detailed explanation regarding each configuration property, visit:
@@ -30,7 +19,9 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts'],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html', 'text'],
+  coverageReporters: !!process.env.CODE_COVERAGE
+    ? [['json', { file: 'jest.json' }]]
+    : ['html', 'text'],
 
   // An array of file extensions your modules use
   moduleFileExtensions: ['js', 'mjs', 'json', 'ts', 'tsx', 'node'],
@@ -46,7 +37,6 @@ module.exports = {
     '\\.ace\\.worker.js$': '<rootDir>/packages/kbn-test/target/jest/mocks/worker_module_mock.js',
     '\\.editor\\.worker.js$': '<rootDir>/packages/kbn-test/target/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/packages/kbn-test/target/jest/mocks/file_mock.js',
-    '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '^src/core/(.*)': '<rootDir>/src/core/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
   },
@@ -102,16 +92,16 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
   collectCoverageFrom: [
     '**/*.{js,mjs,jsx,ts,tsx}',
-    '!**/{__test__,__snapshots__,__examples__,mocks,tests,test_helpers,integration_tests,types}/**/*',
+    '!**/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
     '!**/*mock*.ts',
     '!**/*.test.ts',
     '!**/*.d.ts',

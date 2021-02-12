@@ -1,15 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { Link } from 'react-router-dom';
-
 import {
-  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,9 +19,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { SourceDataItem } from '../../../../types';
 import { getSourcesPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
+
+import {
+  CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP,
+  CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP,
+  CONFIGURED_SOURCES_CONNECT_BUTTON,
+  CONFIGURED_SOURCES_EMPTY_STATE,
+  CONFIGURED_SOURCES_TITLE,
+  CONFIGURED_SOURCES_EMPTY_BODY,
+} from './constants';
 
 interface ConfiguredSourcesProps {
   sources: SourceDataItem[];
@@ -35,19 +43,22 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   isOrganization,
 }) => {
   const unConnectedTooltip = (
-    <span className="source-card-configured__not-connected-tooltip">
-      <EuiToolTip position="top" content="No connected sources">
+    <span
+      className="source-card-configured__not-connected-tooltip"
+      data-test-subj="UnConnectedTooltip"
+    >
+      <EuiToolTip position="top" content={CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP}>
         <EuiToken iconType="tokenException" color="orange" shape="circle" fill="light" />
       </EuiToolTip>
     </span>
   );
 
   const accountOnlyTooltip = (
-    <span className="source-card-configured__not-connected-tooltip">
-      <EuiToolTip
-        position="top"
-        content="Private content source. Each user must add the content source from their own personal dashboard."
-      >
+    <span
+      className="source-card-configured__not-connected-tooltip"
+      data-test-subj="AccountOnlyTooltip"
+    >
+      <EuiToolTip position="top" content={CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP}>
         <EuiToken iconType="tokenException" color="green" shape="circle" fill="light" />
       </EuiToolTip>
     </span>
@@ -90,9 +101,9 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                 </EuiFlexItem>
                 {(!isOrganization || (isOrganization && !accountContextOnly)) && (
                   <EuiFlexItem grow={false}>
-                    <Link to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-                      <EuiButtonEmpty>Connect</EuiButtonEmpty>
-                    </Link>
+                    <EuiButtonEmptyTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
+                      {CONFIGURED_SOURCES_CONNECT_BUTTON}
+                    </EuiButtonEmptyTo>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -103,15 +114,17 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
     </EuiFlexGrid>
   );
 
-  const emptyState = <p>There are no configured sources matching your query.</p>;
+  const emptyState = (
+    <p data-test-subj="ConfiguredSourceEmptyState">{CONFIGURED_SOURCES_EMPTY_STATE}</p>
+  );
 
   return (
     <>
       <EuiTitle size="s">
-        <h2>Configured content sources</h2>
+        <h2>{CONFIGURED_SOURCES_TITLE}</h2>
       </EuiTitle>
       <EuiText>
-        <p>Configured and ready for connection.</p>
+        <p>{CONFIGURED_SOURCES_EMPTY_BODY}</p>
       </EuiText>
       <EuiSpacer size="m" />
       {sources.length > 0 ? visibleSources : emptyState}

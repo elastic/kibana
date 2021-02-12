@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
@@ -15,6 +15,7 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
 import { useKibana } from '../../../../common/lib/kibana';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 type WithAlertInstanceSummaryProps = {
   alert: Alert;
@@ -52,14 +53,7 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSumma
       alertInstanceSummary={alertInstanceSummary}
     />
   ) : (
-    <div
-      style={{
-        textAlign: 'center',
-        margin: '4em 0em',
-      }}
-    >
-      <EuiLoadingSpinner size="l" />
-    </div>
+    <CenterJustifiedSpinner />
   );
 };
 

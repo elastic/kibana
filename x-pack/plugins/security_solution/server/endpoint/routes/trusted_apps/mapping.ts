@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid';
@@ -90,7 +91,7 @@ export const exceptionListItemToTrustedApp = (
   exceptionListItem: ExceptionListItemSchema
 ): TrustedApp => {
   if (exceptionListItem.os_types[0]) {
-    const os = OS_TYPE_TO_OPERATING_SYSTEM[exceptionListItem.os_types[0]];
+    const os = osFromExceptionItem(exceptionListItem);
     const grouped = entriesToConditionEntriesMap(exceptionListItem.entries);
 
     return {
@@ -119,6 +120,12 @@ export const exceptionListItemToTrustedApp = (
   } else {
     throw new Error('Unknown Operating System assigned to trusted application.');
   }
+};
+
+export const osFromExceptionItem = (
+  exceptionListItem: ExceptionListItemSchema
+): TrustedApp['os'] => {
+  return OS_TYPE_TO_OPERATING_SYSTEM[exceptionListItem.os_types[0]];
 };
 
 const hashType = (hash: string): 'md5' | 'sha256' | 'sha1' | undefined => {

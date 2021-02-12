@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -22,6 +23,7 @@ import {
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { useLayerList } from './useLayerList';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { RenderTooltipContentParams } from '../../../../../../maps/public';
 import { MapToolTip } from './MapToolTip';
 import { useMapFilters } from './useMapFilters';
@@ -50,6 +52,7 @@ interface KibanaDeps {
 }
 export function EmbeddedMapComponent() {
   const { urlParams } = useUrlParams();
+  const apmPluginContext = useApmPluginContext();
 
   const { start, end, serviceName } = urlParams;
 
@@ -151,6 +154,12 @@ export function EmbeddedMapComponent() {
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         embeddableObject.setRenderTooltipContent(renderTooltipContent);
+        const basemapLayerDescriptor = apmPluginContext.plugins.maps
+          ? await apmPluginContext.plugins.maps.createLayerDescriptors.createBasemapLayerDescriptor()
+          : null;
+        if (basemapLayerDescriptor) {
+          layerList.unshift(basemapLayerDescriptor);
+        }
         await embeddableObject.setLayerList(layerList);
       }
 

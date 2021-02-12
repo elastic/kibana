@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { IRouter } from 'src/core/server';
+
 import { SecurityPluginSetup } from '../../../security/server';
+import type { LogstashPluginRouter } from '../types';
 import { registerClusterLoadRoute } from './cluster';
 import {
   registerPipelineDeleteRoute,
@@ -12,9 +14,8 @@ import {
   registerPipelineSaveRoute,
 } from './pipeline';
 import { registerPipelinesListRoute, registerPipelinesDeleteRoute } from './pipelines';
-import { registerUpgradeRoute } from './upgrade';
 
-export function registerRoutes(router: IRouter, security?: SecurityPluginSetup) {
+export function registerRoutes(router: LogstashPluginRouter, security?: SecurityPluginSetup) {
   registerClusterLoadRoute(router);
 
   registerPipelineDeleteRoute(router);
@@ -23,6 +24,4 @@ export function registerRoutes(router: IRouter, security?: SecurityPluginSetup) 
 
   registerPipelinesListRoute(router);
   registerPipelinesDeleteRoute(router);
-
-  registerUpgradeRoute(router);
 }

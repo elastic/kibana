@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './field_select.scss';
@@ -41,6 +42,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
   fieldIsInvalid: boolean;
+  markAllFieldsCompatible?: boolean;
 }
 
 export function FieldSelect({
@@ -53,6 +55,7 @@ export function FieldSelect({
   onDeleteColumn,
   existingFields,
   fieldIsInvalid,
+  markAllFieldsCompatible,
   ...rest
 }: FieldSelectProps) {
   const { operationByField } = operationSupportMatrix;
@@ -93,7 +96,7 @@ export function FieldSelect({
                   : operationByField[field]!.values().next().value,
             },
             exists: containsData(field),
-            compatible: isCompatibleWithCurrentOperation(field),
+            compatible: markAllFieldsCompatible || isCompatibleWithCurrentOperation(field),
           };
         })
         .sort((a, b) => {
@@ -163,6 +166,7 @@ export function FieldSelect({
     currentIndexPattern,
     operationByField,
     existingFields,
+    markAllFieldsCompatible,
   ]);
 
   return (

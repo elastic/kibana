@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -75,7 +76,7 @@ describe('default_string_boolean_false', () => {
     expect(message.schema).toEqual(true);
   });
 
-  test('it should not work with a strong of junk "junk"', () => {
+  test('it should not work with a string of junk "junk"', () => {
     const payload = 'junk';
     const decoded = DefaultStringBooleanFalse.decode(payload);
     const message = pipe(decoded, foldLeftRight);

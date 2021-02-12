@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Draggable, DraggingStyle, Droppable, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -15,17 +16,21 @@ import deepEqual from 'fast-deep-equal';
 import { timelineActions } from '../../../store/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
+import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
+  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
+  getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
   IS_DRAGGING_CLASS_NAME,
-  getTimelineProviderDraggableId,
 } from '../../../../common/components/drag_and_drop/helpers';
 
 import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
 import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
+
+import * as i18n from './translations';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
@@ -150,7 +155,15 @@ interface DataProvidersGroupItem extends Omit<Props, 'dataProviders'> {
 
 export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
   ({ browserFields, group, groupIndex, dataProvider, index, timelineId }) => {
+    const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [, setClosePopOverTrigger] = useState(false);
     const dispatch = useDispatch();
+
+    const handleClosePopOverTrigger = useCallback(() => {
+      setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
+    }, []);
+
     const draggableId = useMemo(
       () =>
         getTimelineProviderDraggableId({
@@ -223,6 +236,31 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [dispatch, timelineId]
     );
 
+    const onFocus = useCallback(() => {
+      keyboardHandlerRef.current?.focus();
+    }, []);
+
+    const openPopover = useCallback(() => {
+      setIsPopoverOpen(true);
+    }, []);
+
+    const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
+      closePopover: handleClosePopOverTrigger,
+      draggableId,
+      fieldName: dataProvider.queryMatch.field,
+      keyboardHandlerRef,
+      openPopover,
+    });
+
+    const keyDownHandler = useCallback(
+      (keyboardEvent: React.KeyboardEvent<Element>) => {
+        if (keyboardHandlerRef.current === document.activeElement) {
+          onKeyDown(keyboardEvent);
+        }
+      },
+      [onKeyDown]
+    );
+
     const DraggableContent = useCallback(
       (provided, snapshot) => (
         <div
@@ -231,6 +269,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
           {...provided.dragHandleProps}
           style={getItemStyle(provided.draggableProps.style)}
           data-test-subj="providerContainer"
+          tabIndex={-1}
         >
           <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
@@ -246,6 +285,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
                 isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
                 isExcluded={index > 0 ? dataProvider.excluded : group[0].excluded}
+                isPopoverOpen={isPopoverOpen}
                 onDataProviderEdited={handleDataProviderEdited}
                 operator={
                   index > 0
@@ -255,11 +295,13 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 register={dataProvider}
                 providerId={index > 0 ? group[0].id : dataProvider.id}
                 timelineId={timelineId}
+                setIsPopoverOpen={setIsPopoverOpen}
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
                 val={getDataProviderValue(dataProvider)}
                 type={dataProvider.type}
+                wrapperRef={keyboardHandlerRef}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -285,19 +327,33 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         handleToggleExcludedProvider,
         handleToggleTypeProvider,
         index,
+        isPopoverOpen,
+        keyboardHandlerRef,
+        setIsPopoverOpen,
         timelineId,
       ]
     );
 
     return (
-      <Draggable
-        disableInteractiveElementBlocking={true}
-        draggableId={draggableId}
-        index={index}
-        key={dataProvider.id}
+      <div
+        className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
+        data-test-subj="draggableWrapperKeyboardHandler"
+        onClick={onFocus}
+        onBlur={onBlur}
+        onKeyDown={keyDownHandler}
+        ref={keyboardHandlerRef}
+        role="button"
+        tabIndex={0}
       >
-        {DraggableContent}
-      </Draggable>
+        <Draggable
+          disableInteractiveElementBlocking={true}
+          draggableId={draggableId}
+          index={index}
+          key={dataProvider.id}
+        >
+          {DraggableContent}
+        </Draggable>
+      </div>
     );
   },
   (prevProps, nextProps) =>
@@ -359,7 +415,11 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
       <>
         {groupIndex !== 0 && <EuiSpacer size="xs" />}
 
-        <EuiFlexGroup alignItems="center" gutterSize="none">
+        <EuiFlexGroup
+          aria-label={i18n.GROUP_AREA_ARIA_LABEL(groupIndex)}
+          alignItems="center"
+          gutterSize="none"
+        >
           <OrFlexItem grow={false}>
             <AndOrBadgeContainer hideBadge={groupIndex === 0}>
               <AndOrBadge type="or" />

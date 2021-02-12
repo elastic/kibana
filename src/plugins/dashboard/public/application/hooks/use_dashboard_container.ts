@@ -1,24 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useState } from 'react';
-import _ from 'lodash';
 import { History } from 'history';
 
 import { useKibana } from '../../services/kibana_react';
@@ -26,13 +14,14 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
+  ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
 } from '../../services/embeddable';
 
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashboard_app_functions';
-import { DashboardContainer, DashboardContainerInput } from '../..';
+import { DashboardConstants, DashboardContainer, DashboardContainerInput } from '../..';
 import { DashboardAppServices } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 
@@ -80,11 +69,13 @@ export const useDashboardContainer = (
     }
 
     const incomingEmbeddable = embeddable
-      .getStateTransfer(scopedHistory())
-      .getIncomingEmbeddablePackage();
+      .getStateTransfer()
+      .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, true);
 
+    let canceled = false;
+    let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
-      const newContainer = await dashboardFactory.create(
+      pendingContainer = await dashboardFactory.create(
         getDashboardContainerInput({
           dashboardCapabilities,
           dashboardStateManager,
@@ -95,12 +86,27 @@ export const useDashboardContainer = (
         })
       );
 
-      if (!newContainer || isErrorEmbeddable(newContainer)) {
+      // already new container is being created
+      // no longer interested in the pending one
+      if (canceled) {
+        try {
+          pendingContainer?.destroy();
+          pendingContainer = null;
+        } catch (e) {
+          // destroy could throw if something has already destroyed the container
+          // eslint-disable-next-line no-console
+          console.warn(e);
+        }
+
+        return;
+      }
+
+      if (!pendingContainer || isErrorEmbeddable(pendingContainer)) {
         return;
       }
 
       // inject switch view mode callback for the empty screen to use
-      newContainer.switchViewMode = (newViewMode: ViewMode) =>
+      pendingContainer.switchViewMode = (newViewMode: ViewMode) =>
         dashboardStateManager.switchViewMode(newViewMode);
 
       // If the incoming embeddable is newly created, or doesn't exist in the current panels list,
@@ -109,17 +115,28 @@ export const useDashboardContainer = (
         incomingEmbeddable &&
         (!incomingEmbeddable?.embeddableId ||
           (incomingEmbeddable.embeddableId &&
-            !newContainer.getInput().panels[incomingEmbeddable.embeddableId]))
+            !pendingContainer.getInput().panels[incomingEmbeddable.embeddableId]))
       ) {
         dashboardStateManager.switchViewMode(ViewMode.EDIT);
-        newContainer.addNewEmbeddable<EmbeddableInput>(
+        pendingContainer.addNewEmbeddable<EmbeddableInput>(
           incomingEmbeddable.type,
           incomingEmbeddable.input
         );
       }
-      setDashboardContainer(newContainer);
+      setDashboardContainer(pendingContainer);
     })();
-    return () => setDashboardContainer(null);
+    return () => {
+      canceled = true;
+      try {
+        pendingContainer?.destroy();
+      } catch (e) {
+        // destroy could throw if something has already destroyed the container
+        // eslint-disable-next-line no-console
+        console.warn(e);
+      }
+
+      setDashboardContainer(null);
+    };
   }, [
     dashboardCapabilities,
     dashboardStateManager,

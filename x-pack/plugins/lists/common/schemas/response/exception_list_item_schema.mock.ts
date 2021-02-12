@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   COMMENTS,
   DATE_NOW,
@@ -22,7 +24,9 @@ import {
 
 import { ExceptionListItemSchema } from './exception_list_item_schema';
 
-export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
+export const getExceptionListItemSchemaMock = (
+  overrides?: Partial<ExceptionListItemSchema>
+): ExceptionListItemSchema => ({
   _version: undefined,
   comments: COMMENTS,
   created_at: DATE_NOW,
@@ -41,6 +45,7 @@ export const getExceptionListItemSchemaMock = (): ExceptionListItemSchema => ({
   type: ITEM_TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
+  ...(overrides || {}),
 });
 
 export const getExceptionListItemSchemaXMock = (count = 1): ExceptionListItemSchema[] => {

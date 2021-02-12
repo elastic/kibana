@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import cytoscape from 'cytoscape';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   ANALYSIS_CONFIG_TYPE,
   JOB_MAP_NODE_TYPES,
 } from '../../../../../../common/constants/data_frame_analytics';
+import { EuiThemeType } from '../../../../components/color_range_legend';
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';
@@ -24,7 +25,7 @@ const MAP_SHAPES = {
 } as const;
 type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
 
-function shapeForNode(el: cytoscape.NodeSingular): MapShapes {
+function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
   const type = el.data('type');
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
@@ -55,7 +56,7 @@ function iconForNode(el: cytoscape.NodeSingular) {
   }
 }
 
-function borderColorForNode(el: cytoscape.NodeSingular) {
+function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
   if (el.selected()) {
     return theme.euiColorPrimary;
   }
@@ -76,7 +77,7 @@ function borderColorForNode(el: cytoscape.NodeSingular) {
   }
 }
 
-export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
+export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOptions => ({
   autoungrabify: true,
   boxSelectionEnabled: false,
   maxZoom: 3,
@@ -86,10 +87,10 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
       selector: 'node',
       style: {
         'background-color': (el: cytoscape.NodeSingular) =>
-          el.data('isRoot') ? theme.euiColorLightShade : theme.euiColorGhost,
+          el.data('isRoot') ? theme.euiColorWarning : theme.euiColorGhost,
         'background-height': '60%',
         'background-width': '60%',
-        'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el),
+        'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el, theme),
         'border-style': 'solid',
         // @ts-ignore
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
@@ -100,7 +101,7 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         'font-size': theme.euiFontSizeXS,
         'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
         label: 'data(label)',
-        shape: (el: cytoscape.NodeSingular) => shapeForNode(el),
+        shape: (el: cytoscape.NodeSingular) => shapeForNode(el, theme),
         'text-background-color': theme.euiColorLightestShade,
         'text-background-opacity': 0,
         'text-background-padding': theme.paddingSizes.xs,
@@ -128,4 +129,4 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
       },
     },
   ],
-};
+});

@@ -1,83 +1,55 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { connectorsConfiguration, createDefaultMapping } from '../connectors';
-
 import { FieldMapping, FieldMappingProps } from './field_mapping';
-import { mapping } from './__mock__';
-import { FieldMappingRow } from './field_mapping_row';
+import { mappings } from './__mock__';
 import { TestProviders } from '../../../common/mock';
+import { FieldMappingRowStatic } from './field_mapping_row_static';
 
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
-  const onChangeMapping = jest.fn();
   const props: FieldMappingProps = {
-    disabled: false,
-    mapping,
-    onChangeMapping,
+    isLoading: false,
+    mappings,
     connectorActionTypeId: '.servicenow',
   };
 
   beforeAll(() => {
     wrapper = mount(<FieldMapping {...props} />, { wrappingComponent: TestProviders });
   });
-
   test('it renders', () => {
     expect(
-      wrapper.find('[data-test-subj="case-configure-field-mapping-cols"]').first().exists()
+      wrapper.find('[data-test-subj="case-configure-field-mappings-row-wrapper"]').first().exists()
     ).toBe(true);
 
-    expect(
-      wrapper.find('[data-test-subj="case-configure-field-mapping-row-wrapper"]').first().exists()
-    ).toBe(true);
-
-    expect(wrapper.find(FieldMappingRow).length).toEqual(3);
+    expect(wrapper.find(FieldMappingRowStatic).length).toEqual(3);
   });
 
-  test('it shows the correct number of FieldMappingRow with default mapping', () => {
-    const newWrapper = mount(<FieldMapping {...props} mapping={null} />, {
+  test('it does not render without mappings', () => {
+    const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
       wrappingComponent: TestProviders,
     });
-
-    expect(newWrapper.find(FieldMappingRow).length).toEqual(3);
+    expect(
+      newWrapper
+        .find('[data-test-subj="case-configure-field-mappings-row-wrapper"]')
+        .first()
+        .exists()
+    ).toBe(false);
   });
 
   test('it pass the corrects props to mapping row', () => {
-    const rows = wrapper.find(FieldMappingRow);
+    const rows = wrapper.find(FieldMappingRowStatic);
     rows.forEach((row, index) => {
-      expect(row.prop('securitySolutionField')).toEqual(mapping[index].source);
-      expect(row.prop('selectedActionType')).toEqual(mapping[index].actionType);
-      expect(row.prop('selectedThirdParty')).toEqual(mapping[index].target);
+      expect(row.prop('securitySolutionField')).toEqual(mappings[index].source);
+      expect(row.prop('selectedActionType')).toEqual(mappings[index].actionType);
+      expect(row.prop('selectedThirdParty')).toEqual(mappings[index].target);
     });
-  });
-
-  test('it pass the default mapping when mapping is null', () => {
-    const newWrapper = mount(<FieldMapping {...props} mapping={null} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    const selectedConnector = connectorsConfiguration['.servicenow'];
-    const defaultMapping = createDefaultMapping(selectedConnector.fields);
-
-    const rows = newWrapper.find(FieldMappingRow);
-    rows.forEach((row, index) => {
-      expect(row.prop('securitySolutionField')).toEqual(defaultMapping[index].source);
-      expect(row.prop('selectedActionType')).toEqual(defaultMapping[index].actionType);
-      expect(row.prop('selectedThirdParty')).toEqual(defaultMapping[index].target);
-    });
-  });
-
-  test('it should show zero rows on empty array', () => {
-    const newWrapper = mount(<FieldMapping {...props} mapping={[]} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(newWrapper.find(FieldMappingRow).length).toEqual(0);
   });
 });

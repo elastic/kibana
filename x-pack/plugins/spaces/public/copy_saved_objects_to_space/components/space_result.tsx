@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './space_result.scss';
@@ -15,9 +16,9 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SpaceAvatar } from '../../space_avatar';
-import { Space } from '../../../common/model/space';
 import { CopyStatusSummaryIndicator } from './copy_status_summary_indicator';
 import { SpaceCopyResultDetails } from './space_result_details';
 import { ImportRetry } from '../types';

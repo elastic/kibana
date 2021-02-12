@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { action } from '@storybook/addon-actions';
 import React, { useRef, useEffect } from 'react';
 import { RendererFactory, RendererHandlers } from '../../../types';
@@ -12,6 +14,7 @@ export const defaultHandlers: RendererHandlers = {
   getElementId: () => 'element-id',
   getFilter: () => 'filter',
   getRenderMode: () => 'display',
+  isSyncColorsEnabled: () => false,
   onComplete: (fn) => undefined,
   onEmbeddableDestroyed: action('onEmbeddableDestroyed'),
   onEmbeddableInputChange: action('onEmbeddableInputChange'),

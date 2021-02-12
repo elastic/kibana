@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
@@ -92,9 +93,9 @@ export function APMSection({ bucketSize }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledStat
-            title={formatTpm(stats?.transactions.value)}
-            description={i18n.translate('xpack.observability.overview.apm.transactionsPerMinute', {
-              defaultMessage: 'Transactions per minute',
+            title={`${formatTpm(stats?.transactions.value)} tpm`}
+            description={i18n.translate('xpack.observability.overview.apm.throughput', {
+              defaultMessage: 'Throughput',
             })}
             isLoading={isLoading}
             color={transactionsColor}

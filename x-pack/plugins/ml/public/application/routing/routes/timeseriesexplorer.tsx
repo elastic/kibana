@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -11,7 +12,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
-import { NavigateToPath } from '../../contexts/kibana';
+import { NavigateToPath, useNotifications } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -93,6 +94,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [
     timeSeriesExplorerUrlState,
@@ -249,7 +251,12 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
       setLastRefresh(Date.now());
       appStateHandler(APP_STATE_ACTION.CLEAR);
     }
-    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
+    const validatedJobId = validateJobSelection(
+      jobsWithTimeRange,
+      selectedJobIds,
+      setGlobalState,
+      toasts
+    );
     if (typeof validatedJobId === 'string') {
       setSelectedJobId(validatedJobId);
     }

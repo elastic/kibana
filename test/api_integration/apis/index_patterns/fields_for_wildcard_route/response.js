@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -28,6 +17,55 @@ export default function ({ getService }) {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
   };
 
+  const testFields = [
+    {
+      type: 'boolean',
+      esTypes: ['boolean'],
+      searchable: true,
+      aggregatable: true,
+      name: 'bar',
+      readFromDocValues: true,
+    },
+    {
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      name: 'baz',
+      readFromDocValues: false,
+    },
+    {
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+      name: 'baz.keyword',
+      readFromDocValues: true,
+      subType: { multi: { parent: 'baz' } },
+    },
+    {
+      type: 'number',
+      esTypes: ['long'],
+      searchable: true,
+      aggregatable: true,
+      name: 'foo',
+      readFromDocValues: true,
+    },
+    {
+      aggregatable: true,
+      esTypes: ['keyword'],
+      name: 'nestedField.child',
+      readFromDocValues: true,
+      searchable: true,
+      subType: {
+        nested: {
+          path: 'nestedField',
+        },
+      },
+      type: 'string',
+    },
+  ];
+
   describe('fields_for_wildcard_route response', () => {
     before(() => esArchiver.load('index_patterns/basic_index'));
     after(() => esArchiver.unload('index_patterns/basic_index'));
@@ -37,54 +75,7 @@ export default function ({ getService }) {
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({ pattern: 'basic_index' })
         .expect(200, {
-          fields: [
-            {
-              type: 'boolean',
-              esTypes: ['boolean'],
-              searchable: true,
-              aggregatable: true,
-              name: 'bar',
-              readFromDocValues: true,
-            },
-            {
-              type: 'string',
-              esTypes: ['text'],
-              searchable: true,
-              aggregatable: false,
-              name: 'baz',
-              readFromDocValues: false,
-            },
-            {
-              type: 'string',
-              esTypes: ['keyword'],
-              searchable: true,
-              aggregatable: true,
-              name: 'baz.keyword',
-              readFromDocValues: true,
-              subType: { multi: { parent: 'baz' } },
-            },
-            {
-              type: 'number',
-              esTypes: ['long'],
-              searchable: true,
-              aggregatable: true,
-              name: 'foo',
-              readFromDocValues: true,
-            },
-            {
-              aggregatable: true,
-              esTypes: ['keyword'],
-              name: 'nestedField.child',
-              readFromDocValues: true,
-              searchable: true,
-              subType: {
-                nested: {
-                  path: 'nestedField',
-                },
-              },
-              type: 'string',
-            },
-          ],
+          fields: testFields,
         })
         .then(ensureFieldsAreSorted);
     });
@@ -173,11 +164,19 @@ export default function ({ getService }) {
         .then(ensureFieldsAreSorted);
     });
 
-    it('returns 404 when the pattern does not exist', async () => {
+    it('returns fields when one pattern exists and the other does not', async () => {
+      await supertest
+        .get('/api/index_patterns/_fields_for_wildcard')
+        .query({ pattern: 'bad_index,basic_index' })
+        .expect(200, {
+          fields: testFields,
+        });
+    });
+    it('returns 404 when no patterns exist', async () => {
       await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
-          pattern: '[non-existing-pattern]its-invalid-*',
+          pattern: 'bad_index',
         })
         .expect(404);
     });

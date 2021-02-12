@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SpacesClient } from './spaces_client';
 import { ConfigType, ConfigSchema } from '../config';
-import { GetAllSpacesPurpose } from '../../common/model/types';
 import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
+import { GetAllSpacesPurpose } from '../../common';
 
 const createMockDebugLogger = () => {
   return jest.fn();

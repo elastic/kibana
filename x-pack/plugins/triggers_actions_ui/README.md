@@ -1116,7 +1116,7 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
   validateConnector: (connector: any) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionConnectorFields: React.FunctionComponent<any> | null;
-  actionParamsFields: any;
+  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
 ```
 |Property|Description|
 |---|---|

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ValuesType } from 'utility-types';
@@ -15,6 +16,7 @@ import {
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
+  TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
@@ -32,6 +34,7 @@ export async function getServiceErrorGroups({
   pageIndex,
   sortDirection,
   sortField,
+  transactionType,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
@@ -40,6 +43,7 @@ export async function getServiceErrorGroups({
   numBuckets: number;
   sortDirection: 'asc' | 'desc';
   sortField: 'name' | 'last_seen' | 'occurrences';
+  transactionType: string;
 }) {
   const { apmEventClient, start, end, esFilter } = setup;
 
@@ -55,6 +59,7 @@ export async function getServiceErrorGroups({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
             ...esFilter,
           ],
@@ -127,6 +132,7 @@ export async function getServiceErrorGroups({
           filter: [
             { terms: { [ERROR_GROUP_ID]: sortedErrorGroupIds } },
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
             { range: rangeFilter(start, end) },
             ...esFilter,
           ],

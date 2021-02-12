@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -20,10 +21,8 @@ import {
   fetchMonitorAlertRecords,
   NewAlertParams,
 } from '../api/alerts';
-import {
-  ActionConnector as RawActionConnector,
-  Alert,
-} from '../../../../triggers_actions_ui/public';
+import { ActionConnector as RawActionConnector } from '../../../../triggers_actions_ui/public';
+import { Alert } from '../../../../alerts/common';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
@@ -31,13 +30,22 @@ import { simpleAlertEnabled } from '../../lib/alert_types/alert_messages';
 
 export type ActionConnector = Omit<RawActionConnector, 'secrets'>;
 
-export const createAlertAction = createAsyncAction<NewAlertParams, Alert | null>('CREATE ALERT');
+/**
+ * TODO: Use actual AlertType Params type that's specific to Uptime instead of `any`
+ */
+export type UptimeAlertTypeParams = Record<string, any>;
+
+export const createAlertAction = createAsyncAction<
+  NewAlertParams,
+  Alert<UptimeAlertTypeParams> | null
+>('CREATE ALERT');
 export const getConnectorsAction = createAsyncAction<{}, ActionConnector[]>('GET CONNECTORS');
 export const getMonitorAlertsAction = createAsyncAction<{}, AlertsResult | null>('GET ALERTS');
 
-export const getAnomalyAlertAction = createAsyncAction<MonitorIdParam, Alert>(
-  'GET EXISTING ALERTS'
-);
+export const getAnomalyAlertAction = createAsyncAction<
+  MonitorIdParam,
+  Alert<UptimeAlertTypeParams>
+>('GET EXISTING ALERTS');
 export const deleteAlertAction = createAsyncAction<{ alertId: string }, string | null>(
   'DELETE ALERTS'
 );
@@ -45,11 +53,11 @@ export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, a
   'DELETE ANOMALY ALERT'
 );
 
-interface AlertState {
+export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
-  newAlert: AsyncInitState<Alert>;
+  newAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
   alerts: AsyncInitState<AlertsResult>;
-  anomalyAlert: AsyncInitState<Alert>;
+  anomalyAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
   alertDeletion: AsyncInitState<string>;
   anomalyAlertDeletion: AsyncInitState<boolean>;
 }

@@ -1,17 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { first, map } from 'rxjs/operators';
-import {
-  IContextProvider,
-  KibanaRequest,
-  Logger,
-  PluginInitializerContext,
-  RequestHandler,
-} from 'kibana/server';
+import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -21,10 +15,12 @@ import { APP_ID } from '../common/constants';
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
 import {
-  caseSavedObjectType,
-  caseConfigureSavedObjectType,
   caseCommentSavedObjectType,
+  caseConfigureSavedObjectType,
+  caseConnectorMappingsSavedObjectType,
+  caseSavedObjectType,
   caseUserActionSavedObjectType,
+  subCaseSavedObjectType,
 } from './saved_object_types';
 import {
   CaseConfigureService,
@@ -33,12 +29,17 @@ import {
   CaseServiceSetup,
   CaseUserActionService,
   CaseUserActionServiceSetup,
+  ConnectorMappingsService,
+  ConnectorMappingsServiceSetup,
+  AlertService,
+  AlertServiceContract,
 } from './services';
-import { createCaseClient } from './client';
+import { CaseClientHandler, createExternalCaseClient } from './client';
 import { registerConnectors } from './connectors';
+import type { CasesRequestHandlerContext } from './types';
 
-function createConfig$(context: PluginInitializerContext) {
-  return context.config.create<ConfigType>().pipe(map((config) => config));
+function createConfig(context: PluginInitializerContext) {
+  return context.config.get<ConfigType>();
 }
 
 export interface PluginsSetup {
@@ -48,24 +49,28 @@ export interface PluginsSetup {
 
 export class CasePlugin {
   private readonly log: Logger;
-  private caseService?: CaseServiceSetup;
   private caseConfigureService?: CaseConfigureServiceSetup;
+  private caseService?: CaseServiceSetup;
+  private connectorMappingsService?: ConnectorMappingsServiceSetup;
   private userActionService?: CaseUserActionServiceSetup;
+  private alertsService?: AlertService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = await createConfig$(this.initializerContext).pipe(first()).toPromise();
+    const config = createConfig(this.initializerContext);
 
     if (!config.enabled) {
       return;
     }
 
-    core.savedObjects.registerType(caseSavedObjectType);
     core.savedObjects.registerType(caseCommentSavedObjectType);
     core.savedObjects.registerType(caseConfigureSavedObjectType);
+    core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
+    core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(subCaseSavedObjectType);
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     this.log.debug(
@@ -74,26 +79,32 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    this.caseService = await new CaseService(this.log).setup({
-      authentication: plugins.security != null ? plugins.security.authc : null,
-    });
+    this.caseService = new CaseService(
+      this.log,
+      plugins.security != null ? plugins.security.authc : undefined
+    );
     this.caseConfigureService = await new CaseConfigureService(this.log).setup();
+    this.connectorMappingsService = await new ConnectorMappingsService(this.log).setup();
     this.userActionService = await new CaseUserActionService(this.log).setup();
+    this.alertsService = new AlertService();
 
-    core.http.registerRouteHandlerContext(
+    core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'case'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
         caseService: this.caseService,
         caseConfigureService: this.caseConfigureService,
+        connectorMappingsService: this.connectorMappingsService,
         userActionService: this.userActionService,
+        alertsService: this.alertsService,
       })
     );
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<CasesRequestHandlerContext>();
     initCaseApi({
       caseService: this.caseService,
       caseConfigureService: this.caseConfigureService,
+      connectorMappingsService: this.connectorMappingsService,
       userActionService: this.userActionService,
       router,
     });
@@ -103,25 +114,34 @@ export class CasePlugin {
       logger: this.log,
       caseService: this.caseService,
       caseConfigureService: this.caseConfigureService,
+      connectorMappingsService: this.connectorMappingsService,
       userActionService: this.userActionService,
+      alertsService: this.alertsService,
     });
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
 
-    const getCaseClientWithRequest = async (request: KibanaRequest) => {
-      return createCaseClient({
+    const getCaseClientWithRequestAndContext = async (
+      context: CasesRequestHandlerContext,
+      request: KibanaRequest
+    ) => {
+      const user = await this.caseService!.getUser({ request });
+      return createExternalCaseClient({
+        scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
         savedObjectsClient: core.savedObjects.getScopedClient(request),
-        request,
+        user,
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
+        connectorMappingsService: this.connectorMappingsService!,
         userActionService: this.userActionService!,
+        alertsService: this.alertsService!,
       });
     };
 
     return {
-      getCaseClientWithRequest,
+      getCaseClientWithRequestAndContext,
     };
   }
 
@@ -133,23 +153,31 @@ export class CasePlugin {
     core,
     caseService,
     caseConfigureService,
+    connectorMappingsService,
     userActionService,
+    alertsService,
   }: {
     core: CoreSetup;
     caseService: CaseServiceSetup;
     caseConfigureService: CaseConfigureServiceSetup;
+    connectorMappingsService: ConnectorMappingsServiceSetup;
     userActionService: CaseUserActionServiceSetup;
-  }): IContextProvider<RequestHandler<unknown, unknown, unknown>, typeof APP_ID> => {
-    return async (context, request) => {
+    alertsService: AlertServiceContract;
+  }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
+    return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
+      const user = await caseService.getUser({ request });
       return {
         getCaseClient: () => {
-          return createCaseClient({
+          return new CaseClientHandler({
+            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,
             caseConfigureService,
+            connectorMappingsService,
             userActionService,
-            request,
+            alertsService,
+            user,
           });
         },
       };

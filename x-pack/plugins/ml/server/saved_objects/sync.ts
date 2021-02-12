@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -94,10 +95,14 @@ export function syncSavedObjectsFactory(
           results.savedObjectsDeleted[job.jobId] = { success: true };
         } else {
           // Delete AD saved objects for jobs which no longer exist
-          const jobId = job.jobId;
+          const { jobId, namespaces } = job;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.deleteAnomalyDetectionJob(jobId);
+              if (namespaces !== undefined && namespaces.length) {
+                await jobSavedObjectService.forceDeleteAnomalyDetectionJob(jobId, namespaces[0]);
+              } else {
+                await jobSavedObjectService.deleteAnomalyDetectionJob(jobId);
+              }
               results.savedObjectsDeleted[job.jobId] = { success: true };
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {
@@ -115,10 +120,14 @@ export function syncSavedObjectsFactory(
           results.savedObjectsDeleted[job.jobId] = { success: true };
         } else {
           // Delete DFA saved objects for jobs which no longer exist
-          const jobId = job.jobId;
+          const { jobId, namespaces } = job;
           tasks.push(async () => {
             try {
-              await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId);
+              if (namespaces !== undefined && namespaces.length) {
+                await jobSavedObjectService.forceDeleteDataFrameAnalyticsJob(jobId, namespaces[0]);
+              } else {
+                await jobSavedObjectService.deleteDataFrameAnalyticsJob(jobId);
+              }
               results.savedObjectsDeleted[job.jobId] = { success: true };
             } catch (error) {
               results.savedObjectsDeleted[job.jobId] = {

@@ -26,7 +26,7 @@ image::images/alert-flyout-general-details.png[alt='All alerts have name, tags, 
 
 Name::      The name of the alert. While this name does not have to be unique, the name can be referenced in actions and also appears in the searchable alert listing in the management UI. A distinctive name can help identify and find an alert.
 Tags::      A list of tag names that can be applied to an alert. Tags can help you organize and find alerts, because tags appear in the alert listing in the management UI which is searchable by tag.
-Check every::      This value determines how frequently the alert conditions below are checked. Note that the timing of background alert checks are not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-scale-performance>> for more information.
+Check every::      This value determines how frequently the alert conditions below are checked. Note that the timing of background alert checks are not guaranteed, particularly for intervals of less than 10 seconds. See <<alerting-production-considerations>> for more information.
 Notify every::      This value limits how often actions are repeated when an alert instance remains active across alert checks. See <<alerting-concepts-suppressing-duplicate-notifications>> for more information.
 
 [float]
@@ -59,10 +59,18 @@ Each action type exposes different properties. For example an email action allow
 [role="screenshot"]
 image::images/alert-flyout-action-details.png[UI for defining an email action]
 
-Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass alert values at the time a condition is detected to an action. Available variables differ by alert type, and a list can be accessed using the "add variable" button.
+Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass alert values at the time a condition is detected to an action. Available variables differ by alert type, and the list of available variables can be accessed using the "add variable" button.
 
 [role="screenshot"]
 image::images/alert-flyout-action-variables.png[Passing alert values to an action]
+
+Some cases exist where the variable values will be "escaped", when used in a context where escaping is needed:
+
+- For the <<email-action-type, Email>> connector, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
+- For the <<slack-action-type, Slack>> connector, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
+- For the <<webhook-action-type, Webhook>> connector, the `body` action configuration property escapes any characters that are invalid in JSON string values.
+
+Mustache also supports "triple braces" of the form `{{{variable name}}}`, which indicates no escaping should be done at all.  Care should be used when using this form, as it could end up rendering the variable content in such a way as to make the resulting parameter invalid or formatted incorrectly.
 
 You can attach more than one action. Clicking the "Add action" button will prompt you to select another alert type and repeat the above steps again.
 

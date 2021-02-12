@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { isActivePlatinumLicense } from '../../../common/service_map';
+import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { createRoute } from '../create_route';
 import { getAnomalyDetectionJobs } from '../../lib/anomaly_detection/get_anomaly_detection_jobs';

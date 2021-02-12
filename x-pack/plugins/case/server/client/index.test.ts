@@ -1,68 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
-import { createCaseClient } from '.';
 import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '../../../../../src/core/server/mocks';
+import { nullUser } from '../common';
+import {
+  connectorMappingsServiceMock,
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
+  createAlertServiceMock,
 } from '../services/mocks';
 
-import { create } from './cases/create';
-import { update } from './cases/update';
-import { addComment } from './comments/add';
+jest.mock('./client');
+import { CaseClientHandler } from './client';
+import { createExternalCaseClient } from './index';
 
-jest.mock('./cases/create');
-jest.mock('./cases/update');
-jest.mock('./comments/add');
-
-const caseService = createCaseServiceMock();
+const esClient = elasticsearchServiceMock.createElasticsearchClient();
 const caseConfigureService = createConfigureServiceMock();
-const userActionService = createUserActionServiceMock();
+const alertsService = createAlertServiceMock();
+const caseService = createCaseServiceMock();
+const connectorMappingsService = connectorMappingsServiceMock();
 const savedObjectsClient = savedObjectsClientMock.create();
-const request = {} as KibanaRequest;
+const userActionService = createUserActionServiceMock();
 
-const createMock = create as jest.Mock;
-const updateMock = update as jest.Mock;
-const addCommentMock = addComment as jest.Mock;
-
-describe('createCaseClient()', () => {
+describe('createExternalCaseClient()', () => {
   test('it creates the client correctly', async () => {
-    createCaseClient({
-      savedObjectsClient,
-      request,
+    createExternalCaseClient({
+      scopedClusterClient: esClient,
+      alertsService,
       caseConfigureService,
       caseService,
-      userActionService,
-    });
-
-    expect(createMock).toHaveBeenCalledWith({
+      connectorMappingsService,
+      user: nullUser,
       savedObjectsClient,
-      request,
-      caseConfigureService,
-      caseService,
       userActionService,
     });
-
-    expect(updateMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
-      caseConfigureService,
-      caseService,
-      userActionService,
-    });
-
-    expect(addCommentMock).toHaveBeenCalledWith({
-      savedObjectsClient,
-      request,
-      caseConfigureService,
-      caseService,
-      userActionService,
-    });
+    expect(CaseClientHandler).toHaveBeenCalledTimes(1);
   });
 });

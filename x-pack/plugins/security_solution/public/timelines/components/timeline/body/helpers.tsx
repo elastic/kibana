@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -16,12 +17,11 @@ import {
   TimelineTypeLiteral,
   TimelineType,
   TimelineId,
+  TimelineTabs,
 } from '../../../../../common/types/timeline';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ActionIconItem } from './actions/action_icon_item';
-
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../store/timeline/model';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -124,11 +124,13 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
   get(['process', 'entity_id', 0], ecsData) !== '';
 
 interface InvestigateInResolverActionProps {
+  ariaLabel?: string;
   timelineId: string;
   ecsData: Ecs;
 }
 
 const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverActionProps> = ({
+  ariaLabel = i18n.ACTION_INVESTIGATE_IN_RESOLVER,
   timelineId,
   ecsData,
 }) => {
@@ -143,7 +145,7 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
 
   return (
     <ActionIconItem
-      ariaLabel={i18n.ACTION_INVESTIGATE_IN_RESOLVER}
+      ariaLabel={ariaLabel}
       content={
         isDisabled ? i18n.INVESTIGATE_IN_RESOLVER_DISABLED : i18n.ACTION_INVESTIGATE_IN_RESOLVER
       }
@@ -158,3 +160,9 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
 InvestigateInResolverActionComponent.displayName = 'InvestigateInResolverActionComponent';
 
 export const InvestigateInResolverAction = React.memo(InvestigateInResolverActionComponent);
+
+export const ROW_RENDERER_CLASS_NAME = 'row-renderer';
+
+export const NOTES_CONTAINER_CLASS_NAME = 'notes-container';
+
+export const NOTE_CONTENT_CLASS_NAME = 'note-content';

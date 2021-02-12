@@ -1,26 +1,53 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+import { CommentType } from '../../../common/api';
 import { validateConnector } from './validators';
 
 // Reserved for future implementation
 export const CaseConfigurationSchema = schema.object({});
 
 const ContextTypeUserSchema = schema.object({
-  type: schema.literal('user'),
+  type: schema.literal(CommentType.user),
   comment: schema.string(),
 });
 
-const ContextTypeAlertSchema = schema.object({
-  type: schema.literal('alert'),
-  alertId: schema.string(),
+const AlertIDSchema = schema.object(
+  {
+    _id: schema.string(),
+  },
+  { unknowns: 'ignore' }
+);
+
+const ContextTypeAlertGroupSchema = schema.object({
+  type: schema.literal(CommentType.generatedAlert),
+  alerts: schema.oneOf([schema.arrayOf(AlertIDSchema), AlertIDSchema]),
   index: schema.string(),
 });
 
-export const CommentSchema = schema.oneOf([ContextTypeUserSchema, ContextTypeAlertSchema]);
+export type ContextTypeGeneratedAlertType = typeof ContextTypeAlertGroupSchema.type;
+
+const ContextTypeAlertSchema = schema.object({
+  type: schema.literal(CommentType.alert),
+  // allowing either an array or a single value to preserve the previous API of attaching a single alert ID
+  alertId: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+  index: schema.string(),
+});
+
+export type ContextTypeAlertSchemaType = typeof ContextTypeAlertSchema.type;
+
+export const CommentSchema = schema.oneOf([
+  ContextTypeUserSchema,
+  ContextTypeAlertSchema,
+  ContextTypeAlertGroupSchema,
+]);
+
+export type CommentSchemaType = typeof CommentSchema.type;
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),
@@ -37,6 +64,8 @@ const ServiceNowFieldsSchema = schema.object({
   impact: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
   urgency: schema.nullable(schema.string()),
+  category: schema.nullable(schema.string()),
+  subcategory: schema.nullable(schema.string()),
 });
 
 const NoneFieldsSchema = schema.nullable(schema.object({}));
@@ -80,6 +109,7 @@ const CaseBasicProps = {
   title: schema.string(),
   tags: schema.arrayOf(schema.string()),
   connector: schema.object(ConnectorProps, { validate: validateConnector }),
+  settings: schema.object({ syncAlerts: schema.boolean() }),
 };
 
 const CaseUpdateRequestProps = {
@@ -89,6 +119,7 @@ const CaseUpdateRequestProps = {
   title: schema.nullable(CaseBasicProps.title),
   tags: schema.nullable(CaseBasicProps.tags),
   connector: schema.nullable(CaseBasicProps.connector),
+  settings: schema.nullable(CaseBasicProps.settings),
   status: schema.nullable(schema.string()),
 };
 

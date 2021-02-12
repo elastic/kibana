@@ -4,6 +4,8 @@
 
 ## IndexPattern.typeMeta property
 
+Only used by rollup indices, used by rollup specific endpoint to load field list
+
 <b>Signature:</b>
 
 ```typescript

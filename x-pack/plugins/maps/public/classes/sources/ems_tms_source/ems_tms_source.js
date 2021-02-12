@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -11,12 +12,30 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { getEmsTileLayerId, getIsDarkMode } from '../../../kibana_services';
+import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
+import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
-export const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
-  defaultMessage: 'EMS Basemaps',
-});
+function getErrorInfo(emsTileLayerId) {
+  return i18n.translate('xpack.maps.source.emsTile.unableToFindTileIdErrorMessage', {
+    defaultMessage: `Unable to find EMS tile configuration for id: {id}. {info}`,
+    values: { id: emsTileLayerId, info: getEmsUnavailableMessage() },
+  });
+}
+
+export function getSourceTitle() {
+  const emsSettings = getEMSSettings();
+  if (emsSettings.isEMSUrlSet()) {
+    return i18n.translate('xpack.maps.source.emsOnPremTileTitle', {
+      defaultMessage: 'Elastic Maps Server Basemaps',
+    });
+  } else {
+    return i18n.translate('xpack.maps.source.emsTileTitle', {
+      defaultMessage: 'EMS Basemaps',
+    });
+  }
+}
 
 export class EMSTMSSource extends AbstractTMSSource {
   static createDescriptor(descriptor) {
@@ -43,10 +62,10 @@ export class EMSTMSSource extends AbstractTMSSource {
       defaultMessage: 'autoselect based on Kibana theme',
     });
 
-    return [
+    const props = [
       {
         label: getDataSourceLabel(),
-        value: sourceTitle,
+        value: getSourceTitle(),
       },
       {
         label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
@@ -55,21 +74,34 @@ export class EMSTMSSource extends AbstractTMSSource {
         value: this._descriptor.isAutoSelect ? `${displayName} - ${autoSelectMsg}` : displayName,
       },
     ];
+
+    const emsSettings = getEMSSettings();
+    if (emsSettings.isEMSUrlSet()) {
+      props.push({
+        label: i18n.translate('xpack.maps.source.emsTile.emsOnPremLabel', {
+          defaultMessage: `Elastic Maps Server`,
+        }),
+        value: emsSettings.getEMSRoot(),
+      });
+    }
+
+    return props;
   }
 
   async _getEMSTMSService() {
-    const emsTMSServices = await getEmsTmsServices();
+    let emsTMSServices;
     const emsTileLayerId = this.getTileLayerId();
-    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
-    if (!tmsService) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.emsTile.errorMessage', {
-          defaultMessage: `Unable to find EMS tile configuration for id: {id}`,
-          values: { id: emsTileLayerId },
-        })
-      );
+    try {
+      emsTMSServices = await getEmsTmsServices();
+    } catch (e) {
+      throw new Error(`${getErrorInfo(emsTileLayerId)} - ${e.message}`);
     }
-    return tmsService;
+    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
+    if (tmsService) {
+      return tmsService;
+    }
+
+    throw new Error(getErrorInfo(emsTileLayerId));
   }
 
   async getDisplayName() {
@@ -116,6 +148,11 @@ export class EMSTMSSource extends AbstractTMSSource {
 
     const emsTileLayerId = getEmsTileLayerId();
     return getIsDarkMode() ? emsTileLayerId.dark : emsTileLayerId.bright;
+  }
+
+  async getLicensedFeatures() {
+    const emsSettings = getEMSSettings();
+    return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
 

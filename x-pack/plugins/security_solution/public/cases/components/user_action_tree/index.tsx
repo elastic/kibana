@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import classNames from 'classnames';
 
 import {
@@ -22,7 +24,7 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector, CommentType } from '../../../../../case/common/api/cases';
+import { ActionConnector, CommentType } from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { Alert, OnUpdateFields } from '../case_view';
@@ -333,8 +335,15 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
+                // TODO: need to handle CommentType.generatedAlert here to
               } else if (comment != null && comment.type === CommentType.alert) {
-                const alert = alerts[comment.alertId];
+                // TODO: clean this up
+                const alertId = Array.isArray(comment.alertId)
+                  ? comment.alertId.length > 0
+                    ? comment.alertId[0]
+                    : ''
+                  : comment.alertId;
+                const alert = alerts[alertId];
                 return [...comments, getAlertComment({ action, alert, onShowAlertDetails })];
               }
             }

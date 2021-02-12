@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -14,18 +15,17 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
-  EuiFieldText,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiLink,
-  EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiCallOut,
   EuiButtonEmpty,
   EuiHealth,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -53,10 +53,15 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusValues,
   ALERTS_FEATURE_ID,
+  AlertExecutionStatusErrorReasons,
 } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
-import { alertsStatusesTranslationsMapping } from '../translations';
+import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
+import './alerts_list.scss';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { ManageLicenseModal } from './manage_license_modal';
 
 const ENTER_KEY = 13;
 
@@ -93,7 +98,11 @@ export const AlertsList: React.FunctionComponent = () => {
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
-  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
+  const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
+  const [manageLicenseModalOpts, setManageLicenseModalOpts] = useState<{
+    licenseType: string;
+    alertTypeId: string;
+  } | null>(null);
   const [alertsStatusesTotal, setAlertsStatusesTotal] = useState<Record<string, number>>(
     AlertExecutionStatusValues.reduce(
       (prev: Record<string, number>, status: string) =>
@@ -153,7 +162,15 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result.filter((actionType) => actionTypeRegistry.has(actionType.id)));
+        setActionTypes(
+          result
+            .filter(
+              // TODO: Remove "DEFAULT_HIDDEN_ACTION_TYPES" when cases connector is available across Kibana.
+              // Issue: https://github.com/elastic/kibana/issues/82502.
+              ({ id }) => actionTypeRegistry.has(id) && !DEFAULT_HIDDEN_ACTION_TYPES.includes(id)
+            )
+            .sort((a, b) => a.name.localeCompare(b.name))
+        );
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
@@ -226,25 +243,64 @@ export const AlertsList: React.FunctionComponent = () => {
     }
   }
 
+  const renderAlertExecutionStatus = (
+    executionStatus: AlertExecutionStatus,
+    item: AlertTableItem
+  ) => {
+    const healthColor = getHealthColor(executionStatus.status);
+    const tooltipMessage =
+      executionStatus.status === 'error' ? `Error: ${executionStatus?.error?.message}` : null;
+    const isLicenseError =
+      executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+    const statusMessage = isLicenseError
+      ? ALERT_STATUS_LICENSE_ERROR
+      : alertsStatusesTranslationsMapping[executionStatus.status];
+
+    const health = (
+      <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
+        {statusMessage}
+      </EuiHealth>
+    );
+
+    const healthWithTooltip = tooltipMessage ? (
+      <EuiToolTip
+        data-test-subj="alertStatus-error-tooltip"
+        position="top"
+        content={tooltipMessage}
+      >
+        {health}
+      </EuiToolTip>
+    ) : (
+      health
+    );
+
+    return (
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>{healthWithTooltip}</EuiFlexItem>
+        {isLicenseError && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              data-test-subj="alertStatus-error-license-fix"
+              onClick={() =>
+                setManageLicenseModalOpts({
+                  licenseType: alertTypesState.data.get(item.alertTypeId)?.minimumLicenseRequired!,
+                  alertTypeId: item.alertTypeId,
+                })
+              }
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.fixLicenseLink"
+                defaultMessage="Fix"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  };
+
   const alertsTableColumns = [
-    {
-      field: 'executionStatus',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
-        { defaultMessage: 'Status' }
-      ),
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'alertsTableCell-status',
-      render: (executionStatus: AlertExecutionStatus) => {
-        const healthColor = getHealthColor(executionStatus.status);
-        return (
-          <EuiHealth data-test-subj={`alertStatus-${executionStatus.status}`} color={healthColor}>
-            {alertsStatusesTranslationsMapping[executionStatus.status]}
-          </EuiHealth>
-        );
-      },
-    },
     {
       field: 'name',
       name: i18n.translate(
@@ -253,6 +309,7 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
+      width: '35%',
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
         return (
@@ -265,6 +322,20 @@ export const AlertsList: React.FunctionComponent = () => {
             {name}
           </EuiLink>
         );
+      },
+    },
+    {
+      field: 'executionStatus',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
+        { defaultMessage: 'Status' }
+      ),
+      sortable: false,
+      truncateText: false,
+      width: '150px',
+      'data-test-subj': 'alertsTableCell-status',
+      render: (executionStatus: AlertExecutionStatus, item: AlertTableItem) => {
+        return renderAlertExecutionStatus(executionStatus, item);
       },
     },
     {
@@ -381,6 +452,18 @@ export const AlertsList: React.FunctionComponent = () => {
       selectedStatuses={alertStatusesFilter}
       onChange={(ids: string[]) => setAlertStatusesFilter(ids)}
     />,
+    <EuiButtonEmpty
+      data-test-subj="refreshAlertsButton"
+      iconType="refresh"
+      onClick={loadAlertsData}
+      name="refresh"
+      color="primary"
+    >
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertsList.refreshAlertsButtonLabel"
+        defaultMessage="Refresh"
+      />
+    </EuiButtonEmpty>,
   ];
 
   const authorizedToModifySelectedAlerts = selectedIds.length
@@ -427,10 +510,10 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiFieldSearch
             fullWidth
+            isClearable
             data-test-subj="alertSearchField"
-            prepend={<EuiIcon type="search" />}
             onChange={(e) => setInputText(e.target.value)}
             onKeyUp={(e) => {
               if (e.keyCode === ENTER_KEY) {
@@ -454,7 +537,7 @@ export const AlertsList: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!dissmissAlertErrors && alertsStatusesTotal.error > 0 ? (
+      {!dismissAlertErrors && alertsStatusesTotal.error > 0 ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiCallOut
@@ -483,7 +566,7 @@ export const AlertsList: React.FunctionComponent = () => {
                   defaultMessage="View"
                 />
               </EuiButton>
-              <EuiButtonEmpty color="danger" onClick={() => setDissmissAlertErrors(true)}>
+              <EuiButtonEmpty color="danger" onClick={() => setDismissAlertErrors(true)}>
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.dismissBunnerButtonLabel"
                   defaultMessage="Dismiss"
@@ -572,11 +655,17 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         itemId="id"
         columns={alertsTableColumns}
-        rowProps={() => ({
+        rowProps={(item: AlertTableItem) => ({
           'data-test-subj': 'alert-row',
+          className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
+            ? 'actAlertsList__tableRowDisabled'
+            : '',
         })}
-        cellProps={() => ({
+        cellProps={(item: AlertTableItem) => ({
           'data-test-subj': 'cell',
+          className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
+            ? 'actAlertsList__tableCellDisabled'
+            : '',
         })}
         data-test-subj="alertsList"
         pagination={{
@@ -595,6 +684,17 @@ export const AlertsList: React.FunctionComponent = () => {
           setPage(changedPage);
         }}
       />
+      {manageLicenseModalOpts && (
+        <ManageLicenseModal
+          licenseType={manageLicenseModalOpts.licenseType}
+          alertTypeId={manageLicenseModalOpts.alertTypeId}
+          onConfirm={() => {
+            window.open(`${http.basePath.get()}/app/management/stack/license_management`, '_blank');
+            setManageLicenseModalOpts(null);
+          }}
+          onCancel={() => setManageLicenseModalOpts(null)}
+        />
+      )}
     </Fragment>
   );
 
@@ -643,24 +743,23 @@ export const AlertsList: React.FunctionComponent = () => {
       {loadedItems.length || isFilterApplied ? (
         table
       ) : alertTypesState.isLoading || alertsState.isLoading ? (
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <CenterJustifiedSpinner />
       ) : authorizedToCreateAnyAlerts ? (
         <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
       ) : (
         noPermissionPrompt
       )}
-      <AlertAdd
-        consumer={ALERTS_FEATURE_ID}
-        addFlyoutVisible={alertFlyoutVisible}
-        setAddFlyoutVisibility={setAlertFlyoutVisibility}
-        actionTypeRegistry={actionTypeRegistry}
-        alertTypeRegistry={alertTypeRegistry}
-        reloadAlerts={loadAlertsData}
-      />
+      {alertFlyoutVisible && (
+        <AlertAdd
+          consumer={ALERTS_FEATURE_ID}
+          onClose={() => {
+            setAlertFlyoutVisibility(false);
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          alertTypeRegistry={alertTypeRegistry}
+          reloadAlerts={loadAlertsData}
+        />
+      )}
     </section>
   );
 };
@@ -704,5 +803,6 @@ function convertAlertsToTableItems(
     isEditable:
       hasAllPrivilege(alert, alertTypesIndex.get(alert.alertTypeId)) &&
       (canExecuteActions || (!canExecuteActions && !alert.actions.length)),
+    enabledInLicense: !!alertTypesIndex.get(alert.alertTypeId)?.enabledInLicense,
   }));
 }

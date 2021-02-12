@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +24,6 @@ import { SpacesPluginSetup } from '../../spaces/server';
 import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
-import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './lib/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
@@ -57,6 +57,9 @@ import {
   savedObjectClientsFactory,
 } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
+import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
+import { ML_ALERT_TYPES } from '../common/constants/alerts';
+import { alertingRoutes } from './routes/alerting';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -98,6 +101,7 @@ export class MlServerPlugin
       management: {
         insightsAndAlerting: ['jobsListLink'],
       },
+      alerting: Object.values(ML_ALERT_TYPES),
       privileges: {
         all: admin,
         read: user,
@@ -123,6 +127,7 @@ export class MlServerPlugin
         ],
       },
     });
+
     registerKibanaSettings(coreSetup);
 
     this.mlLicense.setup(plugins.licensing.license$, [
@@ -188,22 +193,30 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     trainedModelsRoutes(routeInit);
+    alertingRoutes(routeInit);
 
     initMlServerLog({ log: this.log });
-    initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    return {
-      ...createSharedServices(
-        this.mlLicense,
-        getSpaces,
-        plugins.cloud,
-        plugins.security?.authz,
-        resolveMlCapabilities,
-        () => this.clusterClient,
-        () => getInternalSavedObjectsClient(),
-        () => this.isMlReady
-      ),
-    };
+    const sharedServices = createSharedServices(
+      this.mlLicense,
+      getSpaces,
+      plugins.cloud,
+      plugins.security?.authz,
+      resolveMlCapabilities,
+      () => this.clusterClient,
+      () => getInternalSavedObjectsClient(),
+      () => this.isMlReady
+    );
+
+    if (plugins.alerts) {
+      registerMlAlerts({
+        alerts: plugins.alerts,
+        mlSharedServices: sharedServices,
+        publicBaseUrl: coreSetup.http.basePath.publicBaseUrl,
+      });
+    }
+
+    return { ...sharedServices };
   }
 
   public start(coreStart: CoreStart): MlPluginStart {

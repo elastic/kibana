@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -128,6 +130,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 options={this.props.availableIndexPrivileges.map(toOption)}
                 selectedOptions={this.props.indexPrivilege.privileges.map(toOption)}
                 onChange={this.onPrivilegeChange}
+                onCreateOption={this.onCreateCustomPrivilege}
                 isDisabled={this.props.isRoleReadOnly}
               />
             </EuiFormRow>
@@ -387,6 +390,13 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     this.props.onChange({
       ...this.props.indexPrivilege,
       privileges: newPrivileges.map(fromOption),
+    });
+  };
+
+  private onCreateCustomPrivilege = (customPrivilege: string) => {
+    this.props.onChange({
+      ...this.props.indexPrivilege,
+      privileges: [...this.props.indexPrivilege.privileges, customPrivilege],
     });
   };
 

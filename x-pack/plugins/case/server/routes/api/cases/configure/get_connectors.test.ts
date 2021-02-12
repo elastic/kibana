@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
@@ -11,11 +12,13 @@ import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
+  mockCaseConfigure,
+  mockCaseMappings,
 } from '../../__fixtures__';
 
-import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initCaseConfigureGetActionConnector } from './get_connectors';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
+import { getActions } from '../../__mocks__/request_responses';
 
 describe('GET connectors', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -29,69 +32,85 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
+    );
+
+    const res = await routeHandler(context, req, kibanaResponseFactory);
+    expect(res.status).toEqual(200);
+
+    const expected = getActions();
+    // The first connector returned by getActions is of type .webhook and we expect to be filtered
+    expected.shift();
+    expect(res.payload).toEqual(expected);
+  });
+
+  it('filters out connectors that are not enabled in license', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
+      method: 'get',
+    });
+
+    const { context } = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
+      })
+    );
+
+    const actionsClient = context.actions.getActionsClient();
+    (actionsClient.listTypes as jest.Mock).mockImplementation(() =>
+      Promise.resolve([
+        {
+          id: '.servicenow',
+          name: 'ServiceNow',
+          minimumLicenseRequired: 'platinum',
+          enabled: false,
+          enabledInConfig: true,
+          // User does not have a platinum license
+          enabledInLicense: false,
+        },
+        {
+          id: '.jira',
+          name: 'Jira',
+          minimumLicenseRequired: 'gold',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+        },
+        {
+          id: '.resilient',
+          name: 'IBM Resilient',
+          minimumLicenseRequired: 'platinum',
+          enabled: false,
+          enabledInConfig: true,
+          // User does not have a platinum license
+          enabledInLicense: false,
+        },
+      ])
     );
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual([
       {
-        id: '123',
-        actionTypeId: '.servicenow',
-        name: 'ServiceNow',
+        id: '456',
+        actionTypeId: '.jira',
+        name: 'Connector without isCaseOwned',
         config: {
-          incidentConfiguration: {
-            mapping: [
-              {
-                source: 'title',
-                target: 'short_description',
-                actionType: 'overwrite',
-              },
-              {
-                source: 'description',
-                target: 'description',
-                actionType: 'overwrite',
-              },
-              {
-                source: 'comments',
-                target: 'comments',
-                actionType: 'append',
-              },
-            ],
-          },
-          apiUrl: 'https://dev102283.service-now.com',
-          isCaseOwned: true,
+          apiUrl: 'https://elastic.jira.com',
         },
         isPreconfigured: false,
         referencedByCount: 0,
       },
       {
-        id: '456',
+        id: 'for-mock-case-id-3',
         actionTypeId: '.jira',
-        name: 'Connector without isCaseOwned',
+        name: 'For mock case id 3',
         config: {
-          incidentConfiguration: {
-            mapping: [
-              {
-                source: 'title',
-                target: 'short_description',
-                actionType: 'overwrite',
-              },
-              {
-                source: 'description',
-                target: 'description',
-                actionType: 'overwrite',
-              },
-              {
-                source: 'comments',
-                target: 'comments',
-                actionType: 'append',
-              },
-            ],
-          },
           apiUrl: 'https://elastic.jira.com',
         },
         isPreconfigured: false,
@@ -106,12 +125,14 @@ describe('GET connectors', () => {
       method: 'get',
     });
 
-    const context = await createRouteContext(
+    const { context } = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
+    // @ts-expect-error
     context.actions = undefined;
 
     const res = await routeHandler(context, req, kibanaResponseFactory);

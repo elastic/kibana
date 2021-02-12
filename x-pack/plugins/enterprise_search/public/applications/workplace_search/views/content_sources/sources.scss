@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 .source-grid-configured {
@@ -19,5 +20,18 @@
       top: 3px;
       left: 4px;
     }
+  }
+}
+
+.privateSourcesLayout {
+  $sideBarWidth: $euiSize * 30;
+
+  left: $sideBarWidth;
+  width: calc(100% - #{$sideBarWidth});
+
+  &__sideBar {
+    padding: 32px 40px 40px;
+    width: $sideBarWidth;
+    margin-left: -$sideBarWidth;
   }
 }

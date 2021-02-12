@@ -1,28 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { cloneDeep, isEqual, differenceBy } from 'lodash';
 import { DropResult } from 'react-beautiful-dnd';
 
 import { kea, MakeLogicType } from 'kea';
-
-import { HttpLogic } from '../../../../../shared/http';
+import { cloneDeep, isEqual, differenceBy } from 'lodash';
 
 import {
   setSuccessMessage,
-  FlashMessagesLogic,
+  clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
-
+import { HttpLogic } from '../../../../../shared/http';
 import { AppLogic } from '../../../../app_logic';
+import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
-const SUCCESS_MESSAGE = 'Display Settings have been successfuly updated.';
-
-import { DetailField, SearchResultConfig, OptionValue, Result } from '../../../../types';
+import { LEAVE_UNASSIGNED_FIELD, SUCCESS_MESSAGE } from './constants';
 
 export interface DisplaySettingsResponseProps {
   sourceName: string;
@@ -63,7 +61,6 @@ interface DisplaySettingsActions {
   toggleSubtitleFieldHover(): void;
   toggleDescriptionFieldHover(): void;
   toggleUrlFieldHover(): void;
-  resetDisplaySettingsState(): void;
 }
 
 interface DisplaySettingsValues {
@@ -87,7 +84,7 @@ interface DisplaySettingsValues {
   unsavedChanges: boolean;
 }
 
-const defaultSearchResultConfig = {
+export const defaultSearchResultConfig = {
   titleField: '',
   subtitleField: '',
   descriptionField: '',
@@ -119,7 +116,6 @@ export const DisplaySettingsLogic = kea<
     toggleSubtitleFieldHover: () => true,
     toggleDescriptionFieldHover: () => true,
     toggleUrlFieldHover: () => true,
-    resetDisplaySettingsState: () => true,
     initializeDisplaySettings: () => true,
     setServerData: () => true,
   },
@@ -271,7 +267,10 @@ export const DisplaySettingsLogic = kea<
       () => [selectors.fieldOptions],
       (fieldOptions) => {
         const optionalFieldOptions = cloneDeep(fieldOptions);
-        optionalFieldOptions.unshift({ value: '', text: '' });
+        optionalFieldOptions.unshift({
+          value: LEAVE_UNASSIGNED_FIELD,
+          text: LEAVE_UNASSIGNED_FIELD,
+        });
         return optionalFieldOptions;
       },
     ],
@@ -329,10 +328,7 @@ export const DisplaySettingsLogic = kea<
       setSuccessMessage(SUCCESS_MESSAGE);
     },
     toggleFieldEditorModal: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
-    },
-    resetDisplaySettingsState: () => {
-      FlashMessagesLogic.actions.clearFlashMessages();
+      clearFlashMessages();
     },
   }),
 });

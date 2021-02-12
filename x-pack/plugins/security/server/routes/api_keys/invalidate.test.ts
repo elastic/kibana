@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -127,7 +128,7 @@ describe('Invalidate API keys', () => {
         isAdmin: true,
       },
       asserts: {
-        apiArguments: [{ body: { id: 'si8If24B1bKsmSLTAhJV' } }],
+        apiArguments: [{ body: { ids: ['si8If24B1bKsmSLTAhJV'] } }],
         statusCode: 200,
         result: {
           itemsInvalidated: [],
@@ -151,7 +152,7 @@ describe('Invalidate API keys', () => {
         isAdmin: true,
       },
       asserts: {
-        apiArguments: [{ body: { id: 'si8If24B1bKsmSLTAhJV' } }],
+        apiArguments: [{ body: { ids: ['si8If24B1bKsmSLTAhJV'] } }],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
@@ -167,7 +168,7 @@ describe('Invalidate API keys', () => {
         isAdmin: false,
       },
       asserts: {
-        apiArguments: [{ body: { id: 'si8If24B1bKsmSLTAhJV', owner: true } }],
+        apiArguments: [{ body: { ids: ['si8If24B1bKsmSLTAhJV'], owner: true } }],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
@@ -192,8 +193,8 @@ describe('Invalidate API keys', () => {
       },
       asserts: {
         apiArguments: [
-          { body: { id: 'si8If24B1bKsmSLTAhJV' } },
-          { body: { id: 'ab8If24B1bKsmSLTAhNC' } },
+          { body: { ids: ['si8If24B1bKsmSLTAhJV'] } },
+          { body: { ids: ['ab8If24B1bKsmSLTAhNC'] } },
         ],
         statusCode: 200,
         result: {

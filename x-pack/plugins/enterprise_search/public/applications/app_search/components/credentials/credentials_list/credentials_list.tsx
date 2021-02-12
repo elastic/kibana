@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
-import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+
 import { useActions, useValues } from 'kea';
 
+import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
+import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 
-import { CredentialsLogic } from '../credentials_logic';
-import { Key } from './key';
 import { HiddenText } from '../../../../shared/hidden_text';
-import { ApiToken } from '../types';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
-import { apiTokenSort } from '../utils/api_token_sort';
+import { CredentialsLogic } from '../credentials_logic';
+import { ApiToken } from '../types';
 import { getModeDisplayText, getEnginesDisplayText } from '../utils';
+import { apiTokenSort } from '../utils/api_token_sort';
+
+import { Key } from './key';
 
 export const CredentialsList: React.FC = () => {
   const { deleteApiKey, fetchCredentials, showCredentialsForm } = useActions(CredentialsLogic);
@@ -40,6 +43,7 @@ export const CredentialsList: React.FC = () => {
     {
       name: 'Key',
       width: '36%',
+      className: 'eui-textBreakAll',
       render: (token: ApiToken) => {
         const { key } = token;
         if (!key) return null;
@@ -59,6 +63,10 @@ export const CredentialsList: React.FC = () => {
             )}
           </EuiCopy>
         );
+      },
+      mobileOptions: {
+        // @ts-ignore - EUI's type definitions need to be updated
+        width: '100%',
       },
     },
     {

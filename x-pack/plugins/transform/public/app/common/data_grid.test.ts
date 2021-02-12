@@ -1,18 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
-
-import {
-  getPreviewTransformRequestBody,
-  PivotAggsConfig,
-  PivotGroupByConfig,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-  SimpleQuery,
-} from '../common';
+import { getPreviewTransformRequestBody, SimpleQuery } from '../common';
 
 import { getIndexDevConsoleStatement, getPivotPreviewDevConsoleStatement } from './data_grid';
 
@@ -24,24 +17,26 @@ describe('Transform: Data Grid', () => {
         default_operator: 'AND',
       },
     };
-    const groupBy: PivotGroupByConfig = {
-      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-      field: 'the-group-by-field',
-      aggName: 'the-group-by-agg-name',
-      dropDownName: 'the-group-by-drop-down-name',
-    };
-    const agg: PivotAggsConfig = {
-      agg: PIVOT_SUPPORTED_AGGS.AVG,
-      field: 'the-agg-field',
-      aggName: 'the-agg-agg-name',
-      dropDownName: 'the-agg-drop-down-name',
-    };
-    const request = getPreviewTransformRequestBody(
-      'the-index-pattern-title',
-      query,
-      [groupBy],
-      [agg]
-    );
+
+    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, {
+      pivot: {
+        group_by: {
+          'the-group-by-agg-name': {
+            terms: {
+              field: 'the-group-by-field',
+            },
+          },
+        },
+        aggregations: {
+          'the-agg-agg-name': {
+            avg: {
+              field: 'the-agg-field',
+            },
+          },
+        },
+      },
+    });
+
     const pivotPreviewDevConsoleStatement = getPivotPreviewDevConsoleStatement(request);
 
     expect(pivotPreviewDevConsoleStatement).toBe(`POST _transform/_preview

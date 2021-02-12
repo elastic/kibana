@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TypeOf } from '@kbn/config-schema';
@@ -133,10 +134,11 @@ export function dataRecognizer({ router, routeGuard }: RouteInitialization) {
    * @apiName RecognizeIndex
    * @apiDescription By supplying an index pattern, discover if any of the modules are a match for data in that index.
    * @apiSchema (params) modulesIndexPatternTitleSchema
-   * @apiSuccess {object[]} modules Array of objects describing the modules which match the index pattern.
+   * @apiSuccess {object[]} modules Array of objects describing the modules which match the index pattern, sorted by module ID.
    * @apiSuccessExample {json} Success-Response:
    * [{
    *    "id": "nginx_ecs",
+   *    "title": "Nginx access logs",
    *     "query": {
    *        "bool": {
    *          "filter": [

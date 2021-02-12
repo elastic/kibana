@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
@@ -15,13 +16,14 @@ import { addTags } from './add_tags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { InternalRuleUpdate } from '../schemas/rule_schemas';
+import { RuleTypeParams } from '../types';
 
 export const updateRules = async ({
   alertsClient,
   savedObjectsClient,
   defaultOutputIndex,
   ruleUpdate,
-}: UpdateRulesOptions): Promise<PartialAlert | null> => {
+}: UpdateRulesOptions): Promise<PartialAlert<RuleTypeParams> | null> => {
   const existingRule = await readRules({
     alertsClient,
     ruleId: ruleUpdate.rule_id,
@@ -36,7 +38,7 @@ export const updateRules = async ({
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
-    tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, false),
+    tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, existingRule.params.immutable),
     params: {
       author: ruleUpdate.author ?? [],
       buildingBlockType: ruleUpdate.building_block_type,
@@ -77,10 +79,13 @@ export const updateRules = async ({
     notifyWhen: null,
   };
 
-  const update = await alertsClient.update({
+  /**
+   * TODO: Remove this use of `as` by utilizing the proper type
+   */
+  const update = (await alertsClient.update({
     id: existingRule.id,
     data: newInternalRule,
-  });
+  })) as PartialAlert<RuleTypeParams>;
 
   if (existingRule.enabled && enabled === false) {
     await alertsClient.disable({ id: existingRule.id });

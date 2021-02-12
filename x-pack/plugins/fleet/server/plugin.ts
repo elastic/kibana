@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
+  ElasticsearchServiceStart,
   Logger,
-  Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
   HttpServiceSetup,
@@ -80,6 +83,7 @@ import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
+import { isFleetServerSetup } from './services/fleet_server_migration';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -96,7 +100,8 @@ export interface FleetStartDeps {
 }
 
 export interface FleetAppContext {
-  encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
+  elasticsearch: ElasticsearchServiceStart;
+  encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
@@ -164,7 +169,7 @@ export interface FleetStartContract {
 }
 
 export class FleetPlugin
-  implements Plugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
+  implements AsyncPlugin<FleetSetupContract, FleetStartContract, FleetSetupDeps, FleetStartDeps> {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<FleetConfigType>;
   private cloud: CloudSetup | undefined;
@@ -250,12 +255,11 @@ export class FleetPlugin
 
       // Conditional config routes
       if (config.agents.enabled) {
-        const isESOUsingEphemeralEncryptionKey =
-          deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
-        if (isESOUsingEphemeralEncryptionKey) {
+        const isESOCanEncrypt = deps.encryptedSavedObjects.canEncrypt;
+        if (!isESOCanEncrypt) {
           if (this.logger) {
             this.logger.warn(
-              'Fleet APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+              'Fleet APIs are disabled because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
             );
           }
         } else {
@@ -277,6 +281,7 @@ export class FleetPlugin
 
   public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
+      elasticsearch: core.elasticsearch,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,
@@ -291,6 +296,20 @@ export class FleetPlugin
     });
     licenseService.start(this.licensing$);
     agentCheckinState.start();
+
+    const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+    if (fleetServerEnabled) {
+      // We need licence to be initialized before using the SO service.
+      await this.licensing$.pipe(first()).toPromise();
+
+      const fleetSetup = await isFleetServerSetup();
+
+      if (!fleetSetup) {
+        this.logger?.warn(
+          'Extra setup is needed to be able to use central management for agent, please visit the Fleet app in Kibana.'
+        );
+      }
+    }
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),

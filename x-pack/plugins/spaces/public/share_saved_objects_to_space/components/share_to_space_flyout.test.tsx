@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import Boom from '@hapi/boom';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
-import { Space } from '../../../common/model/space';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { findTestSubject } from '@kbn/test/jest';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { act } from '@testing-library/react';

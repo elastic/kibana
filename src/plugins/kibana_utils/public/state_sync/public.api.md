@@ -25,11 +25,10 @@ export interface IKbnUrlStateStorage extends IStateStorage {
     cancel: () => void;
     // (undocumented)
     change$: <State = unknown>(key: string) => Observable<State | null>;
-    flush: (opts?: {
-        replace?: boolean;
-    }) => boolean;
     // (undocumented)
     get: <State = unknown>(key: string) => State | null;
+    // Warning: (ae-forgotten-export) The symbol "IKbnUrlControls" needs to be exported by the entry point index.d.ts
+    kbnUrlControls: IKbnUrlControls;
     // (undocumented)
     set: <State>(key: string, state: State, opts?: {
         replace: boolean;

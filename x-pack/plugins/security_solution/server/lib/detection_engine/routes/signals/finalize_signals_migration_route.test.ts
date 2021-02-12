@@ -1,49 +1,65 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { serverMock } from '../__mocks__';
+import { SetupPlugins } from '../../../../plugin';
 import { getFinalizeSignalsMigrationRequest } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock } from '../__mocks__';
+import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
+import { getSignalsMigrationSavedObjectMock } from '../../migrations/saved_objects_schema.mock';
 import { finalizeSignalsMigrationRoute } from './finalize_signals_migration_route';
 
-describe('query for signal', () => {
+jest.mock('../../migrations/get_migration_saved_objects_by_id');
+
+describe('finalizing signals migrations', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
 
-    // @ts-expect-error mocking the bare minimum of the response
-    // get our completed task
-    clients.newClusterClient.asCurrentUser.tasks.get.mockResolvedValueOnce({
-      body: {
-        completed: true,
-        response: {},
-        // satisfies our "is this the right task" validation
-        task: { description: 'reindexing from sourceIndex to destinationIndex' },
+    const securityMock = ({
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
       },
-    });
-
-    // @ts-expect-error mocking the bare minimum of the response
-    // count of original index
-    clients.newClusterClient.asCurrentUser.count.mockResolvedValueOnce({ body: { count: 1 } });
-    // @ts-expect-error mocking the bare minimum of the response
-    // count of migrated index
-    clients.newClusterClient.asCurrentUser.count.mockResolvedValueOnce({ body: { count: 2 } });
-
-    finalizeSignalsMigrationRoute(server.router);
+    } as unknown) as SetupPlugins['security'];
+    finalizeSignalsMigrationRoute(server.router, securityMock);
   });
 
-  test('returns an error if migration index size does not match the original index', async () => {
-    const response = await server.inject(getFinalizeSignalsMigrationRequest(), context);
-    expect(response.status).toEqual(500);
+  it('returns an empty array error if no migrations exists', async () => {
+    (getMigrationSavedObjectsById as jest.Mock).mockResolvedValue([]);
+    const response = await server.inject(getFinalizeSignalsMigrationRequest());
+    expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      message:
-        'The source and destination indexes have different document counts. Source [sourceIndex] has [1] documents, while destination [destinationIndex] has [2] documents.',
-      status_code: 500,
+      migrations: [],
+    });
+  });
+
+  it('returns an inline error if a migration failed', async () => {
+    const mockMigrations = [
+      getSignalsMigrationSavedObjectMock({ status: 'failure' }),
+      getSignalsMigrationSavedObjectMock(),
+    ];
+    (getMigrationSavedObjectsById as jest.Mock).mockResolvedValue(mockMigrations);
+
+    const response = await server.inject(getFinalizeSignalsMigrationRequest());
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({
+      migrations: [
+        expect.objectContaining({
+          id: mockMigrations[0].id,
+          error: {
+            message: 'The migration was not successful.',
+            status_code: 400,
+          },
+          status: 'failure',
+        }),
+        expect.objectContaining({
+          id: mockMigrations[1].id,
+        }),
+      ],
     });
   });
 });

@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { HomeServerPluginSetup } from 'src/plugins/home/server';
 import type { IRouter } from 'kibana/server';
 import type { CloudSetup } from '../../cloud/server';
@@ -15,6 +15,8 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
 import type { MlLicense } from '../common/license';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { RouteGuard } from './lib/route_guard';
+import type { AlertingPlugin } from '../../alerts/server';
+import type { ActionsPlugin } from '../../actions/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -43,7 +45,8 @@ export interface PluginsSetup {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
-  usageCollection: UsageCollectionSetup;
+  alerts?: AlertingPlugin['setup'];
+  actions?: ActionsPlugin['setup'];
 }
 
 export interface PluginsStart {

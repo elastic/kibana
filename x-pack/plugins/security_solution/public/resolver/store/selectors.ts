@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector, defaultMemoize } from 'reselect';
@@ -79,8 +80,13 @@ export const treeRequestParametersToAbort = composeSelectors(
  */
 export const treeParameterIndices = composeSelectors(
   dataStateSelector,
-  dataSelectors.treeParamterIndices
+  dataSelectors.treeParameterIndices
 );
+
+/**
+ * An array of indices to use for resolver panel requests.
+ */
+export const eventIndices = composeSelectors(dataStateSelector, dataSelectors.eventIndices);
 
 export const resolverComponentInstanceID = composeSelectors(
   dataStateSelector,
@@ -131,6 +137,8 @@ export const currentRelatedEventData = composeSelectors(
   dataStateSelector,
   dataSelectors.currentRelatedEventData
 );
+
+export const timeRangeFilters = composeSelectors(dataStateSelector, dataSelectors.timeRangeFilters);
 
 /**
  * Returns the id of the "current" tree node (fake-focused)

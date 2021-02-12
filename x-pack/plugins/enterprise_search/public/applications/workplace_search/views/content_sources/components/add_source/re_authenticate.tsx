@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, FormEvent } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
-import { useLocation } from 'react-router-dom';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { parseQueryParams } from '../../../../../../applications/shared/query_params';
+import { i18n } from '@kbn/i18n';
 
-import { SourceLogic } from '../../source_logic';
+import { parseQueryParams } from '../../../../../shared/query_params';
+
+import { AddSourceLogic } from './add_source_logic';
 
 interface SourceQueryParams {
   sourceId: string;
@@ -30,10 +33,10 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
   const { sourceId } = (parseQueryParams(search) as unknown) as SourceQueryParams;
   const [formLoading, setFormLoading] = useState(false);
 
-  const { getSourceReConnectData } = useActions(SourceLogic);
+  const { getSourceReConnectData } = useActions(AddSourceLogic);
   const {
     sourceConnectData: { oauthUrl },
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   useEffect(() => {
     getSourceReConnectData(sourceId);
@@ -42,7 +45,7 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
-    window.location.href = oauthUrl;
+    window.location.replace(oauthUrl);
   };
 
   return (
@@ -58,15 +61,27 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
         >
           <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
             <p>
-              Your {name} credentials are no longer valid. Please re-authenticate with the original
-              credentials to resume content syncing.
+              {i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.reAuthenticate.body',
+                {
+                  defaultMessage:
+                    'Your {name} credentials are no longer valid. Please re-authenticate with the original credentials to resume content syncing.',
+                  values: { name },
+                }
+              )}
             </p>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiFormRow>
           <EuiButton color="primary" fill type="submit" isLoading={!oauthUrl || formLoading}>
-            Re-authenticate {name}
+            {i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.reAuthenticate.button',
+              {
+                defaultMessage: 'Re-authenticate {name}',
+                values: { name },
+              }
+            )}
           </EuiButton>
         </EuiFormRow>
       </form>

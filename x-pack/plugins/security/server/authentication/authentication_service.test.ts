@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./authenticator');
@@ -25,11 +26,9 @@ import { sessionMock } from '../session_management/session.mock';
 import type {
   AuthenticationHandler,
   AuthToolkit,
-  ILegacyClusterClient,
   KibanaRequest,
   Logger,
   LoggerFactory,
-  LegacyScopedClusterClient,
   HttpServiceSetup,
   HttpServiceStart,
 } from '../../../../../src/core/server';
@@ -46,46 +45,16 @@ describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let logger: jest.Mocked<Logger>;
   let mockSetupAuthenticationParams: {
-    legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
-    audit: jest.Mocked<AuditServiceSetup>;
-    config: ConfigType;
-    loggers: LoggerFactory;
     http: jest.Mocked<HttpServiceSetup>;
-    clusterClient: jest.Mocked<ILegacyClusterClient>;
     license: jest.Mocked<SecurityLicense>;
-    getFeatureUsageService: () => jest.Mocked<SecurityFeatureUsageServiceStart>;
-    session: jest.Mocked<PublicMethodsOf<Session>>;
   };
-  let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<LegacyScopedClusterClient>>;
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
 
     mockSetupAuthenticationParams = {
-      legacyAuditLogger: securityAuditLoggerMock.create(),
-      audit: auditServiceMock.create(),
       http: coreMock.createSetup().http,
-      config: createConfig(
-        ConfigSchema.validate({
-          encryptionKey: 'ab'.repeat(16),
-          secureCookies: true,
-          cookieName: 'my-sid-cookie',
-        }),
-        loggingSystemMock.create().get(),
-        { isTLSEnabled: false }
-      ),
-      clusterClient: elasticsearchServiceMock.createLegacyClusterClient(),
       license: licenseMock.create(),
-      loggers: loggingSystemMock.create(),
-      getFeatureUsageService: jest
-        .fn()
-        .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
-      session: sessionMock.create(),
     };
-
-    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockSetupAuthenticationParams.clusterClient.asScoped.mockReturnValue(
-      (mockScopedClusterClient as unknown) as jest.Mocked<LegacyScopedClusterClient>
-    );
 
     service = new AuthenticationService(logger);
   });
@@ -101,6 +70,42 @@ describe('AuthenticationService', () => {
         expect.any(Function)
       );
     });
+  });
+
+  describe('#start()', () => {
+    let mockStartAuthenticationParams: {
+      legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
+      audit: jest.Mocked<AuditServiceSetup>;
+      config: ConfigType;
+      loggers: LoggerFactory;
+      http: jest.Mocked<HttpServiceStart>;
+      clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
+      featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
+      session: jest.Mocked<PublicMethodsOf<Session>>;
+    };
+    beforeEach(() => {
+      const coreStart = coreMock.createStart();
+      mockStartAuthenticationParams = {
+        legacyAuditLogger: securityAuditLoggerMock.create(),
+        audit: auditServiceMock.create(),
+        config: createConfig(
+          ConfigSchema.validate({
+            encryptionKey: 'ab'.repeat(16),
+            secureCookies: true,
+            cookieName: 'my-sid-cookie',
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        ),
+        http: coreStart.http,
+        clusterClient: elasticsearchServiceMock.createClusterClient(),
+        loggers: loggingSystemMock.create(),
+        featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
+        session: sessionMock.create(),
+      };
+
+      service.setup(mockSetupAuthenticationParams);
+    });
 
     describe('authentication handler', () => {
       let authHandler: AuthenticationHandler;
@@ -109,16 +114,28 @@ describe('AuthenticationService', () => {
       beforeEach(() => {
         mockAuthToolkit = httpServiceMock.createAuthToolkit();
 
-        service.setup(mockSetupAuthenticationParams);
-
-        expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
-        expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
-          expect.any(Function)
-        );
+        service.start(mockStartAuthenticationParams);
 
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
         authenticate = jest.requireMock('./authenticator').Authenticator.mock.instances[0]
           .authenticate;
+      });
+
+      it('returns error if license is not available.', async () => {
+        const mockResponse = httpServerMock.createLifecycleResponseFactory();
+
+        mockSetupAuthenticationParams.license.isLicenseAvailable.mockReturnValue(false);
+
+        await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
+
+        expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+        expect(mockResponse.customError).toHaveBeenCalledWith({
+          body: 'License is not available.',
+          statusCode: 503,
+          headers: { 'Retry-After': '30' },
+        });
+        expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
+        expect(mockAuthToolkit.redirected).not.toHaveBeenCalled();
       });
 
       it('replies with no credentials when security is disabled in elasticsearch', async () => {
@@ -243,7 +260,7 @@ describe('AuthenticationService', () => {
       it('includes `WWW-Authenticate` header if `authenticate` fails to authenticate user and provides challenges', async () => {
         const mockResponse = httpServerMock.createLifecycleResponseFactory();
         const originalError = Boom.unauthorized('some message');
-        originalError.output.headers['WWW-Authenticate'] = [
+        (originalError.output.headers as { [key: string]: string })['WWW-Authenticate'] = [
           'Basic realm="Access to prod", charset="UTF-8"',
           'Basic',
           'Negotiate',
@@ -281,63 +298,7 @@ describe('AuthenticationService', () => {
     describe('getCurrentUser()', () => {
       let getCurrentUser: (r: KibanaRequest) => AuthenticatedUser | null;
       beforeEach(async () => {
-        getCurrentUser = service.setup(mockSetupAuthenticationParams).getCurrentUser;
-      });
-
-      it('returns `null` if Security is disabled', () => {
-        mockSetupAuthenticationParams.license.isEnabled.mockReturnValue(false);
-
-        expect(getCurrentUser(httpServerMock.createKibanaRequest())).toBe(null);
-      });
-
-      it('returns user from the auth state.', () => {
-        const mockUser = mockAuthenticatedUser();
-
-        const mockAuthGet = mockSetupAuthenticationParams.http.auth.get as jest.Mock;
-        mockAuthGet.mockReturnValue({ state: mockUser });
-
-        const mockRequest = httpServerMock.createKibanaRequest();
-        expect(getCurrentUser(mockRequest)).toBe(mockUser);
-        expect(mockAuthGet).toHaveBeenCalledTimes(1);
-        expect(mockAuthGet).toHaveBeenCalledWith(mockRequest);
-      });
-
-      it('returns null if auth state is not available.', () => {
-        const mockAuthGet = mockSetupAuthenticationParams.http.auth.get as jest.Mock;
-        mockAuthGet.mockReturnValue({});
-
-        const mockRequest = httpServerMock.createKibanaRequest();
-        expect(getCurrentUser(mockRequest)).toBeNull();
-        expect(mockAuthGet).toHaveBeenCalledTimes(1);
-        expect(mockAuthGet).toHaveBeenCalledWith(mockRequest);
-      });
-    });
-  });
-
-  describe('#start()', () => {
-    let mockStartAuthenticationParams: {
-      http: jest.Mocked<HttpServiceStart>;
-      clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-    };
-    beforeEach(() => {
-      const coreStart = coreMock.createStart();
-      mockStartAuthenticationParams = {
-        http: coreStart.http,
-        clusterClient: elasticsearchServiceMock.createClusterClient(),
-      };
-      service.setup(mockSetupAuthenticationParams);
-    });
-
-    describe('getCurrentUser()', () => {
-      let getCurrentUser: (r: KibanaRequest) => AuthenticatedUser | null;
-      beforeEach(async () => {
-        getCurrentUser = (await service.start(mockStartAuthenticationParams)).getCurrentUser;
-      });
-
-      it('returns `null` if Security is disabled', () => {
-        mockSetupAuthenticationParams.license.isEnabled.mockReturnValue(false);
-
-        expect(getCurrentUser(httpServerMock.createKibanaRequest())).toBe(null);
+        getCurrentUser = service.start(mockStartAuthenticationParams).getCurrentUser;
       });
 
       it('returns user from the auth state.', () => {

@@ -12,6 +12,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
     >
       <button
         className="euiLink euiLink--primary"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -41,6 +42,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
     >
       <button
         className="euiLink euiLink--primary"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -77,6 +79,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
     >
       <button
         className="euiLink euiLink--primary"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {

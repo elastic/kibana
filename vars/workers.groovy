@@ -18,7 +18,9 @@ def label(size) {
     case 'xl-highmem':
       return 'docker && tests-xl-highmem'
     case 'xxl':
-      return 'docker && tests-xxl'
+      return 'docker && tests-xxl && gobld/machineType:custom-64-270336'
+    case 'n2-standard-16':
+      return 'docker && linux && immutable && gobld/machineType:n2-standard-16'
   }
 
   error "unknown size '${size}'"

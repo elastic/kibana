@@ -166,7 +166,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
         color="#FF0000"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="0_format"
+        label="< 10_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -177,7 +177,7 @@ exports[`renderLegendDetailRow ordinal Should render custom ordinal legend with 
         color="#00FF00"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="10_format"
+        label=">= 10_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -229,7 +229,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#ecf1f7"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="0_format"
+        label="< 13_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -240,7 +240,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#d9e3ef"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="13_format"
+        label="13_format up to 25_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -251,7 +251,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#c5d5e7"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="25_format"
+        label="25_format up to 38_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -262,7 +262,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#b2c7df"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="38_format"
+        label="38_format up to 50_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -273,7 +273,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#9eb9d8"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="50_format"
+        label="50_format up to 63_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -284,7 +284,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#8bacd0"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="63_format"
+        label="63_format up to 75_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -295,7 +295,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#769fc8"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="75_format"
+        label="75_format up to 88_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -306,7 +306,7 @@ exports[`renderLegendDetailRow ordinal Should render interpolate bands 1`] = `
         color="#6092c0"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="88_format"
+        label=">= 88_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -358,7 +358,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#e5ecf4"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="up to 50th: 5572_format"
+        label="< 50th: 5572_format"
         styleName="lineColor"
       />
     </EuiFlexItem>
@@ -413,7 +413,7 @@ exports[`renderLegendDetailRow ordinal Should render percentile bands 1`] = `
         color="#6092c0"
         isLinesOnly={false}
         isPointsOnly={true}
-        label="greater than 99th: 16857_format"
+        label=">= 99th: 16857_format"
         styleName="lineColor"
       />
     </EuiFlexItem>

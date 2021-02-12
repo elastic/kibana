@@ -2,20 +2,13 @@
 
 source test/scripts/jenkins_test_setup.sh
 
-rename_coverage_file() {
-  test -f target/kibana-coverage/jest/coverage-final.json \
-    && mv target/kibana-coverage/jest/coverage-final.json \
-    target/kibana-coverage/jest/$1-coverage-final.json
-}
-
 if [[ -z "$CODE_COVERAGE" ]] ; then
   # Lint
   ./test/scripts/lint/eslint.sh
-  ./test/scripts/lint/sasslint.sh
+  ./test/scripts/lint/stylelint.sh
 
   # Test
   ./test/scripts/test/jest_integration.sh
-  ./test/scripts/test/mocha.sh
   ./test/scripts/test/jest_unit.sh
   ./test/scripts/test/api_integration.sh
 
@@ -34,18 +27,9 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   ./test/scripts/checks/test_projects.sh
   ./test/scripts/checks/test_hardening.sh
 else
-  # echo " -> Running jest tests with coverage"
-  # node scripts/jest --ci --verbose --coverage
-  # rename_coverage_file "oss"
-  # echo ""
-  # echo ""
-  # echo " -> Running jest integration tests with coverage"
-  # node --max-old-space-size=8192 scripts/jest_integration --ci --verbose --coverage || true;
-  # rename_coverage_file "oss-integration"
-  # echo ""
-  # echo ""
-  echo " -> Running mocha tests with coverage"
-  ./test/scripts/checks/mocha_coverage.sh
-  echo ""
-  echo ""
+  echo " -> Running jest tests with coverage"
+  node scripts/jest --ci --verbose --maxWorkers=6 --coverage || true;
+
+  echo " -> Running jest integration tests with coverage"
+  node scripts/jest_integration --ci --verbose --coverage || true;
 fi

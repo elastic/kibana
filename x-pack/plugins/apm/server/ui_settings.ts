@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -19,14 +20,13 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
   [enableCorrelations]: {
     category: ['observability'],
     name: i18n.translate('xpack.apm.enableCorrelationsExperimentName', {
-      defaultMessage: 'APM Correlations',
+      defaultMessage: 'APM correlations (Platinum required)',
     }),
     value: false,
     description: i18n.translate(
       'xpack.apm.enableCorrelationsExperimentDescription',
       {
-        defaultMessage:
-          'Enable the experimental correlations UI and API endpoint in APM.',
+        defaultMessage: 'Enable the experimental correlations feature in APM',
       }
     ),
     schema: schema.boolean(),
@@ -36,7 +36,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
     name: i18n.translate('xpack.apm.enableServiceOverviewExperimentName', {
       defaultMessage: 'APM Service overview',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
       'xpack.apm.enableServiceOverviewExperimentDescription',
       {

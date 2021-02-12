@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Duration } from 'moment';
@@ -17,7 +18,6 @@ import {
   AnomaliesTableData,
   ExplorerJob,
   AppStateSelectedCells,
-  TimeRangeBounds,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
@@ -27,7 +27,6 @@ import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 
 export interface ExplorerState {
   annotations: AnnotationsTable;
-  bounds: TimeRangeBounds | undefined;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterActive: boolean;
@@ -69,7 +68,6 @@ export function getExplorerDefaultState(): ExplorerState {
       annotationsData: [],
       aggregations: {},
     },
-    bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -25,6 +26,7 @@ import {
 } from '../../../../src/plugins/kibana_utils/public';
 import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
+import { APP_ID } from '../common/constants';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -42,14 +44,14 @@ function setAppChrome() {
     });
   }
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+  const mapUrl = getDocLinks().links.maps.guide;
 
   getCoreChrome().setHelpExtension({
     appName: 'Maps',
     links: [
       {
         linkType: 'documentation',
-        href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
+        href: `${mapUrl}`,
       },
       {
         linkType: 'github',
@@ -73,15 +75,13 @@ export async function renderApp({
     ...withNotifyOnErrors(getToasts()),
   });
 
+  const stateTransfer = getEmbeddableService().getStateTransfer();
+
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const stateTransfer = getEmbeddableService()?.getStateTransfer(
-      history as AppMountParameters['history']
-    );
-
     const { embeddableId, originatingApp, valueInput } =
-      stateTransfer?.getIncomingEditorState({ keysToRemoveAfterFetch: ['originatingApp'] }) || {};
+      stateTransfer.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableInput;
     if (routeProps.match.params.savedMapId) {
@@ -121,7 +121,7 @@ export async function renderApp({
                 const newPath = hash.substr(1);
                 return <Redirect to={newPath} />;
               } else if (pathname === '/' || pathname === '') {
-                return <ListPage />;
+                return <ListPage stateTransfer={stateTransfer} />;
               } else {
                 return <Redirect to="/" />;
               }

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { PackageInfo } from '../types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
@@ -26,6 +28,15 @@ describe('Fleet - packageToPackagePolicy', () => {
         search: [],
         index_pattern: [],
         map: [],
+        lens: [],
+      },
+      elasticsearch: {
+        ingest_pipeline: [],
+        component_template: [],
+        index_template: [],
+        transform: [],
+        ilm_policy: [],
+        data_stream_ilm_policy: [],
       },
     },
     status: 'not_installed',

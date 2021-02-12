@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -21,7 +22,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
+import { ReadOnlyRulesCallOut } from '../../../components/callouts/read_only_rules_callout';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
@@ -35,7 +36,7 @@ import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
 
-type Func = (refreshPrePackagedRule?: boolean) => void;
+type Func = () => Promise<void>;
 
 const RulesPageComponent: React.FC = () => {
   const history = useHistory();
@@ -94,20 +95,22 @@ const RulesPageComponent: React.FC = () => {
 
   const handleRefreshRules = useCallback(async () => {
     if (refreshRulesData.current != null) {
-      refreshRulesData.current(true);
+      await refreshRulesData.current();
     }
   }, [refreshRulesData]);
 
   const handleCreatePrePackagedRules = useCallback(async () => {
     if (createPrePackagedRules != null) {
       await createPrePackagedRules();
-      handleRefreshRules();
+      return handleRefreshRules();
     }
   }, [createPrePackagedRules, handleRefreshRules]);
 
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
-      refetchPrePackagedRulesStatus();
+      return refetchPrePackagedRulesStatus();
+    } else {
+      return Promise.resolve();
     }
   }, [refetchPrePackagedRulesStatus]);
 
@@ -155,7 +158,7 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ReadOnlyRulesCallOut />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}

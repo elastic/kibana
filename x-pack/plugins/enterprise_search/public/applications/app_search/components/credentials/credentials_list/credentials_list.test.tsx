@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiBasicTable, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 
-import { ApiToken } from '../types';
-import { ApiTokenTypes } from '../constants';
-
 import { HiddenText } from '../../../../shared/hidden_text';
+import { ApiTokenTypes } from '../constants';
+import { ApiToken } from '../types';
+
 import { Key } from './key';
-import { CredentialsList } from './credentials_list';
+
+import { CredentialsList } from './';
 
 describe('Credentials', () => {
   const apiToken: ApiToken = {
@@ -204,7 +208,11 @@ describe('Credentials', () => {
           copy: expect.any(Function),
           toggleIsHidden: expect.any(Function),
           isHidden: expect.any(Boolean),
-          text: <span aria-label="Hidden text">•••••••</span>,
+          text: (
+            <span aria-label="Hidden text">
+              <span aria-hidden>•••••••</span>
+            </span>
+          ),
         });
       });
     });

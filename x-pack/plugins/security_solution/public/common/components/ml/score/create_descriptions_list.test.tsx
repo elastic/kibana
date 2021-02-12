@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow, mount } from 'enzyme';
@@ -10,6 +11,7 @@ import { mockAnomalies } from '../mock';
 import { createDescriptionList } from './create_description_list';
 import { EuiDescriptionList } from '@elastic/eui';
 import { Anomaly } from '../types';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('../../../lib/kibana');
 
@@ -38,7 +40,7 @@ describe('create_description_list', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('it calls the narrow date range function on click', () => {
+  test('it calls the narrow date range function on click', async () => {
     const wrapper = mount(
       <EuiDescriptionList
         listItems={createDescriptionList(
@@ -54,12 +56,12 @@ describe('create_description_list', () => {
       .find('[data-test-subj="anomaly-description-narrow-range-link"]')
       .first()
       .simulate('click');
-    wrapper.update();
+    await waitFor(() => wrapper.update());
 
     expect(narrowDateRange.mock.calls.length).toBe(1);
   });
 
-  test('it should the narrow date range with the score', () => {
+  test('it should the narrow date range with the score', async () => {
     const wrapper = mount(
       <EuiDescriptionList
         listItems={createDescriptionList(
@@ -75,7 +77,7 @@ describe('create_description_list', () => {
       .find('[data-test-subj="anomaly-description-narrow-range-link"]')
       .first()
       .simulate('click');
-    wrapper.update();
+    await waitFor(() => wrapper.update());
 
     const expected: Anomaly = {
       detectorIndex: 0,
@@ -119,7 +121,7 @@ describe('create_description_list', () => {
     expect(narrowDateRange.mock.calls[0][0]).toEqual(expected);
   });
 
-  test('it should call the narrow date range with the interval', () => {
+  test('it should call the narrow date range with the interval', async () => {
     const wrapper = mount(
       <EuiDescriptionList
         listItems={createDescriptionList(
@@ -135,8 +137,7 @@ describe('create_description_list', () => {
       .find('[data-test-subj="anomaly-description-narrow-range-link"]')
       .first()
       .simulate('click');
-    wrapper.update();
-
+    await waitFor(() => wrapper.update());
     expect(narrowDateRange.mock.calls[0][1]).toEqual('hours');
   });
 });

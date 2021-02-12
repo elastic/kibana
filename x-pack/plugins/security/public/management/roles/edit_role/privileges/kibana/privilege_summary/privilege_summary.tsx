@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, Fragment } from 'react';
@@ -9,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiOverlayMask, EuiButton } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
 import { EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiFlyoutFooter } from '@elastic/eui';
-import { Space } from '../../../../../../../../spaces/common/model/space';
+import { Space } from '../../../../../../../../spaces/public';
 import { Role } from '../../../../../../../common/model';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
 import { KibanaPrivileges } from '../../../../model';

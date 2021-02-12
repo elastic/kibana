@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TimelineFilter } from '../objects/timeline';
+import { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 
@@ -18,7 +19,7 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
-  HEADER,
+  DRAGGABLE_HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -49,6 +50,7 @@ import {
   TIMELINE_EDIT_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   QUERY_TAB_BUTTON,
+  CLOSE_OPEN_TIMELINE_MODAL_BTN,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -58,7 +60,7 @@ export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(`${description}{enter}`);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -72,8 +74,30 @@ export const addNameToTimeline = (name: string) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
+export const addNameAndDescriptionToTimeline = (timeline: Timeline) => {
+  cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
+export const goToNotesTab = () => {
+  return cy.get(NOTES_TAB_BUTTON).click({ force: true });
+};
+
+export const getNotePreviewByNoteId = (noteId: string) => {
+  return cy.get(`[data-test-subj="note-preview-${noteId}"]`);
+};
+
+export const goToQueryTab = () => {
+  cy.get(QUERY_TAB_BUTTON).click({ force: true });
+};
+
 export const addNotesToTimeline = (notes: string) => {
-  cy.get(NOTES_TAB_BUTTON).click();
+  goToNotesTab();
   cy.get(NOTES_TEXT_AREA).type(notes);
   cy.get(ADD_NOTE_BUTTON).click();
   cy.get(QUERY_TAB_BUTTON).click();
@@ -112,6 +136,10 @@ export const checkIdToggleField = () => {
   });
 };
 
+export const closeOpenTimelineModal = () => {
+  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click({ force: true });
+};
+
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click({ force: true });
 };
@@ -140,7 +168,7 @@ export const markAsFavorite = () => {
 };
 
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).click({ force: true });
+  cy.get(TIMELINE_FIELDS_BUTTON).first().click({ force: true });
 };
 
 export const openTimelineInspectButton = () => {
@@ -159,18 +187,17 @@ export const openTimelineTemplateFromSettings = (id: string) => {
   cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
 };
 
+export const openTimelineById = (timelineId: string) => {
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click({ force: true });
+};
+
 export const pinFirstEvent = () => {
   cy.get(PIN_EVENT).first().click({ force: true });
 };
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT)
-    .invoke('text')
-    .then((strCount) => {
-      const intCount = +strCount;
-      cy.wrap(intCount).should('be.above', 0);
-    });
+  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
 
 export const unpinFirstEvent = () => {
@@ -188,14 +215,17 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 
   cy.get(ID_FIELD).then((field) => drag(field));
 
-  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`).then((headersDropArea) =>
-    drop(headersDropArea)
-  );
+  cy.get(`[data-test-subj="timeline"] [data-test-subj="headers-group"]`)
+    .first()
+    .then((headersDropArea) => drop(headersDropArea));
 };
 
 export const removeColumn = (column: number) => {
-  cy.get(HEADER).eq(column).click();
-  cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
+  cy.get(DRAGGABLE_HEADER)
+    .eq(column)
+    .within(() => {
+      cy.get(REMOVE_COLUMN).click({ force: true });
+    });
 };
 
 export const resetFields = () => {
@@ -213,4 +243,8 @@ export const waitForTimelineChanges = () => {
 
 export const waitForTimelinesPanelToBeLoaded = () => {
   cy.get(TIMELINES_TABLE).should('exist');
+};
+
+export const waitForEventsPanelToBeLoaded = () => {
+  cy.get(QUERY_TAB_BUTTON).find('.euiBadge').should('exist');
 };

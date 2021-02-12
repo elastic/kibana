@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
@@ -17,7 +18,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/credentials',
-        payload: 'query',
       });
 
       registerCredentialsRoutes({
@@ -53,7 +53,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'post',
         path: '/api/app_search/credentials',
-        payload: 'body',
       });
 
       registerCredentialsRoutes({
@@ -166,7 +165,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'get',
         path: '/api/app_search/credentials/details',
-        payload: 'query',
       });
 
       registerCredentialsRoutes({
@@ -190,7 +188,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'put',
         path: '/api/app_search/credentials/{name}',
-        payload: 'body',
       });
 
       registerCredentialsRoutes({
@@ -200,16 +197,8 @@ describe('credentials routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      const mockRequest = {
-        params: {
-          name: 'abc123',
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/credentials/abc123',
+        path: '/as/credentials/:name',
       });
     });
 
@@ -311,7 +300,6 @@ describe('credentials routes', () => {
       mockRouter = new MockRouter({
         method: 'delete',
         path: '/api/app_search/credentials/{name}',
-        payload: 'params',
       });
 
       registerCredentialsRoutes({
@@ -321,16 +309,8 @@ describe('credentials routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      const mockRequest = {
-        params: {
-          name: 'abc123',
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/credentials/abc123',
+        path: '/as/credentials/:name',
       });
     });
   });

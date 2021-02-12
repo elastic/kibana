@@ -1,22 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
+import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
-
-import {
-  mockIndexNames,
-  mockIndexPattern,
-  mockTimelineData,
-  TestProviders,
-} from '../../../common/mock';
+import { TimelineId } from '../../../../common/types/timeline';
+import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
@@ -51,17 +48,28 @@ jest.mock('../../../common/containers/sourcerer', () => {
       docValueFields: mockDocValueFields,
       loading: false,
       indexPattern: mockIndexPattern,
+      pageInfo: { activePage: 0, querySize: 0 },
       selectedPatterns: mockIndexNames,
     }),
   };
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    timelineId: 'timeline-test',
+    timelineId: TimelineId.test,
   };
 
   beforeEach(() => {
-    (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
+    (useTimelineEvents as jest.Mock).mockReturnValue([
+      false,
+      {
+        events: [],
+        pageInfo: {
+          activePage: 0,
+          totalPages: 10,
+          querySize: 0,
+        },
+      },
+    ]);
   });
 
   test('renders ', () => {
@@ -76,12 +84,14 @@ describe('StatefulTimeline', () => {
   test(`it add attribute data-timeline-id in ${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`, () => {
     const wrapper = mount(
       <TestProviders>
-        <StatefulTimeline {...props} />
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <StatefulTimeline {...props} />
+        </DragDropContextWrapper>
       </TestProviders>
     );
     expect(
       wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .find(`[data-timeline-id="test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
         .first()
         .exists()
     ).toEqual(true);

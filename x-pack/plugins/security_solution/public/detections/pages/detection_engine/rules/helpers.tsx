@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import dateMath from '@elastic/datemath';
@@ -22,7 +23,6 @@ import {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
-  IMitreEnterpriseAttack,
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
@@ -30,6 +30,7 @@ import {
   SeverityMapping,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
@@ -177,7 +178,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    threat: threat as IMitreEnterpriseAttack[],
+    threat: threat as Threats,
   };
 };
 
@@ -382,6 +383,7 @@ export const getActionMessageParams = memoizeOne(
           description: 'context.results_link',
           useWithTripleBracesInTemplates: true,
         },
+        { name: 'alerts', description: 'context.alerts' },
         ...actionMessageRuleParams.map((param) => {
           const extendedParam = `rule.${param}`;
           return { name: extendedParam, description: `context.${extendedParam}` };

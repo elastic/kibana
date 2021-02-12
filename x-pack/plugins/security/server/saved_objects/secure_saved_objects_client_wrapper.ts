@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObjectsAddToNamespacesOptions,
@@ -15,6 +17,8 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
+  SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUtils,
@@ -221,6 +225,11 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         `_find across namespaces is not permitted when the Spaces plugin is disabled.`
       );
     }
+    if (options.pit && Array.isArray(options.namespaces) && options.namespaces.length > 1) {
+      throw this.errors.createBadRequestError(
+        '_find across namespaces is not permitted when using the `pit` option.'
+      );
+    }
 
     const args = { options };
     const { status, typeMap } = await this.ensureAuthorized(
@@ -333,6 +342,42 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     return await this.redactSavedObjectNamespaces(savedObject, [options.namespace]);
+  }
+
+  public async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ) {
+    try {
+      const args = { type, id, options };
+      await this.ensureAuthorized(type, 'get', options.namespace, { args, auditAction: 'resolve' });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.RESOLVE,
+          savedObject: { type, id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    const resolveResult = await this.baseClient.resolve<T>(type, id, options);
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.RESOLVE,
+        savedObject: { type, id: resolveResult.saved_object.id },
+      })
+    );
+
+    return {
+      ...resolveResult,
+      saved_object: await this.redactSavedObjectNamespaces(resolveResult.saved_object, [
+        options.namespace,
+      ]),
+    };
   }
 
   public async update<T = unknown>(
@@ -522,6 +567,57 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     );
 
     return await this.baseClient.removeReferencesTo(type, id, options);
+  }
+
+  public async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions
+  ) {
+    try {
+      const args = { type, options };
+      await this.ensureAuthorized(type, 'open_point_in_time', options?.namespace, {
+        args,
+        // Partial authorization is acceptable in this case because this method is only designed
+        // to be used with `find`, which already allows for partial authorization.
+        requireFullAuthorization: false,
+      });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.OPEN_POINT_IN_TIME,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.OPEN_POINT_IN_TIME,
+        outcome: EventOutcome.UNKNOWN,
+      })
+    );
+
+    return await this.baseClient.openPointInTimeForType(type, options);
+  }
+
+  public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    // We are intentionally omitting a call to `ensureAuthorized` here, because `closePointInTime`
+    // doesn't take in `types`, which are required to perform authorization. As there is no way
+    // to know what index/indices a PIT was created against, we have no practical means of
+    // authorizing users. We've decided we are okay with this because:
+    //   (a) Elasticsearch only requires `read` privileges on an index in order to open/close
+    //       a PIT against it, and;
+    //   (b) By the time a user is accessing this service, they are already authenticated
+    //       to Kibana, which is our closest equivalent to Elasticsearch's `read`.
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.CLOSE_POINT_IN_TIME,
+        outcome: EventOutcome.UNKNOWN,
+      })
+    );
+
+    return await this.baseClient.closePointInTime(id, options);
   }
 
   private async checkPrivileges(

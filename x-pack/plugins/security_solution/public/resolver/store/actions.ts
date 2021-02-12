@@ -1,36 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { CameraAction } from './camera';
 import { DataAction } from './data/action';
-
-/**
- * When the user wants to bring a node front-and-center on the map.
- * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
- */
-interface UserBroughtNodeIntoView {
-  /**
-   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-   */
-  readonly type: 'userBroughtNodeIntoView';
-  /**
-   * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-   */
-  readonly payload: {
-    /**
-     * Used to identify the node that should be brought into view.
-     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-     */
-    readonly nodeID: string;
-    /**
-     * The time (since epoch in milliseconds) when the action was dispatched.
-     * @deprecated Nodes are brought into view upon selection instead. See `appReceivedNewExternalProperties`
-     */
-    readonly time: number;
-  };
-}
 
 /**
  * The action dispatched when the app requests related event data for one
@@ -51,8 +27,16 @@ interface UserRequestedRelatedEventData {
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
 
-  /** focused nodeID */
-  readonly payload: string;
+  readonly payload: {
+    /**
+     * Used to identify the node that should be brought into view.
+     */
+    readonly nodeID: string;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
+  };
 }
 
 /**
@@ -63,10 +47,16 @@ interface UserFocusedOnResolverNode {
  */
 interface UserSelectedResolverNode {
   readonly type: 'userSelectedResolverNode';
-  /**
-   * The nodeID (aka entity_id) that was select.
-   */
-  readonly payload: string;
+  readonly payload: {
+    /**
+     * Used to identify the node that should be brought into view.
+     */
+    readonly nodeID: string;
+    /**
+     * The time (since epoch in milliseconds) when the action was dispatched.
+     */
+    readonly time: number;
+  };
 }
 
 /**
@@ -98,6 +88,12 @@ interface AppReceivedNewExternalProperties {
      * Indices that the backend will use to find the document.
      */
     indices: string[];
+
+    shouldUpdate: boolean;
+    filters: {
+      from?: string;
+      to?: string;
+    };
   };
 }
 
@@ -105,7 +101,6 @@ export type ResolverAction =
   | CameraAction
   | DataAction
   | AppReceivedNewExternalProperties
-  | UserBroughtNodeIntoView
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData;

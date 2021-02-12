@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
@@ -13,11 +14,14 @@ import {
   ApplyGlobalFilterActionContext,
   esFilters,
 } from '../../../../../../src/plugins/data/public';
+import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { KibanaURL } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
-export type ExploreDataChartActionContext = ApplyGlobalFilterActionContext;
+export interface ExploreDataChartActionContext extends ApplyGlobalFilterActionContext {
+  embeddable?: IEmbeddable;
+}
 
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 

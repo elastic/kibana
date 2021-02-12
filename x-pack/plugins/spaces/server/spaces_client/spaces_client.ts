@@ -1,22 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { Space } from 'src/plugins/spaces_oss/common';
+import { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../../common';
 import { isReservedSpace } from '../../common';
-import { Space } from '../../common/model/space';
 import { ConfigType } from '../config';
-import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
-
-export interface GetAllSpacesOptions {
-  purpose?: GetAllSpacesPurpose;
-  includeAuthorizedPurposes?: boolean;
-}
 
 const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
   'any',

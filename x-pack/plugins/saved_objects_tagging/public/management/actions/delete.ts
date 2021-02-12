@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -43,8 +44,7 @@ export const getDeleteAction = ({
         i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.text', {
           defaultMessage:
             'By deleting this tag, you will no longer be able to assign it to saved objects. ' +
-            'This tag will be removed from any saved objects that currently use it. ' +
-            'Are you sure you wish to proceed?',
+            'This tag will be removed from any saved objects that currently use it.',
         }),
         {
           title: i18n.translate('xpack.savedObjectsTagging.modals.confirmDelete.title', {

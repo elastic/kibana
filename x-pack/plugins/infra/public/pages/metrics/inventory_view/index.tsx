@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -22,7 +23,7 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Layout } from './components/layout';
 import { useLinkProps } from '../../../hooks/use_link_props';
-import { SavedView } from '../../../containers/saved_view/saved_view';
+import { SavedViewProvider } from '../../../containers/saved_view/saved_view';
 import { DEFAULT_WAFFLE_VIEW_STATE } from './hooks/use_waffle_view_state';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 
@@ -63,13 +64,13 @@ export const SnapshotPage = () => {
         ) : metricIndicesExist ? (
           <>
             <FilterBar />
-            <SavedView.Provider
+            <SavedViewProvider
               shouldLoadDefault={optionsSource === 'default'}
               viewType={'inventory-view'}
               defaultViewState={DEFAULT_WAFFLE_VIEW_STATE}
             >
               <Layout />
-            </SavedView.Provider>
+            </SavedViewProvider>
           </>
         ) : hasFailedLoadingSource ? (
           <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />

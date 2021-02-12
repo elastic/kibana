@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -36,7 +25,6 @@ import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
 import { Logger } from '../logging';
 
-const logger = loggingSystemMock.create();
 function createPlugin(
   id: string,
   {
@@ -45,8 +33,8 @@ function createPlugin(
     server = true,
     ui = true,
   }: { required?: string[]; optional?: string[]; server?: boolean; ui?: boolean } = {}
-) {
-  return new PluginWrapper({
+): PluginWrapper<any, any> {
+  return new PluginWrapper<any, any>({
     path: 'some-path',
     manifest: {
       id,
@@ -64,25 +52,25 @@ function createPlugin(
   });
 }
 
-let pluginsSystem: PluginsSystem;
-const configService = configServiceMock.create();
-configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
-let env: Env;
-let coreContext: CoreContext;
-
 const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
+let pluginsSystem: PluginsSystem;
+let configService: ReturnType<typeof configServiceMock.create>;
+let logger: ReturnType<typeof loggingSystemMock.create>;
+let env: Env;
+let coreContext: CoreContext;
+
 beforeEach(() => {
+  logger = loggingSystemMock.create();
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
+
+  configService = configServiceMock.create();
+  configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
   pluginsSystem = new PluginsSystem(coreContext);
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
 });
 
 test('can be setup even without plugins', async () => {
@@ -219,7 +207,7 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
         start: { 'order-2': 'started-as-2' },
       },
     ],
-  ] as Array<[PluginWrapper, Contracts]>);
+  ] as Array<[PluginWrapper<any, any>, Contracts]>);
 
   const setupContextMap = new Map();
   const startContextMap = new Map();
@@ -445,7 +433,7 @@ describe('setup', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
+  it('throws timeout error if "setup" was not completed in 10 sec.', async () => {
     const plugin: PluginWrapper = createPlugin('timeout-setup');
     jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise((i) => i));
     pluginsSystem.addPlugin(plugin);
@@ -455,7 +443,7 @@ describe('setup', () => {
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
     );
   });
 
@@ -482,8 +470,8 @@ describe('start', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
-  it('throws timeout error if "start" was not completed in 30 sec.', async () => {
-    const plugin: PluginWrapper = createPlugin('timeout-start');
+  it('throws timeout error if "start" was not completed in 10 sec.', async () => {
+    const plugin = createPlugin('timeout-start');
     jest.spyOn(plugin, 'setup').mockResolvedValue({});
     jest.spyOn(plugin, 'start').mockImplementation(() => new Promise((i) => i));
 
@@ -496,7 +484,7 @@ describe('start', () => {
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(
-      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`
     );
   });
 
@@ -514,5 +502,164 @@ describe('start', () => {
     await pluginsSystem.startPlugins(startDeps);
     const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
     expect(log.info).toHaveBeenCalledWith(`Starting [2] plugins: [order-1,order-0]`);
+  });
+});
+
+describe('asynchronous plugins', () => {
+  const runScenario = async ({
+    production,
+    asyncSetup,
+    asyncStart,
+  }: {
+    production: boolean;
+    asyncSetup: boolean;
+    asyncStart: boolean;
+  }) => {
+    env = Env.createDefault(
+      REPO_ROOT,
+      getEnvOptions({
+        cliArgs: {
+          dev: !production,
+          envName: production ? 'production' : 'development',
+        },
+      })
+    );
+    coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+    pluginsSystem = new PluginsSystem(coreContext);
+
+    const syncPlugin = createPlugin('sync-plugin');
+    jest.spyOn(syncPlugin, 'setup').mockReturnValue('setup-sync');
+    jest.spyOn(syncPlugin, 'start').mockReturnValue('start-sync');
+    pluginsSystem.addPlugin(syncPlugin);
+
+    const asyncPlugin = createPlugin('async-plugin');
+    jest
+      .spyOn(asyncPlugin, 'setup')
+      .mockReturnValue(asyncSetup ? Promise.resolve('setup-async') : 'setup-sync');
+    jest
+      .spyOn(asyncPlugin, 'start')
+      .mockReturnValue(asyncStart ? Promise.resolve('start-async') : 'start-sync');
+    pluginsSystem.addPlugin(asyncPlugin);
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    await pluginsSystem.startPlugins(startDeps);
+  };
+
+  it('logs a warning if a plugin returns a promise from its setup contract in dev mode', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: true,
+      asyncStart: false,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+
+  it('does not log warnings if a plugin returns a promise from its setup contract in prod mode', async () => {
+    await runScenario({
+      production: true,
+      asyncSetup: true,
+      asyncStart: false,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs a warning if a plugin returns a promise from its start contract in dev mode', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: false,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+
+  it('does not log warnings if a plugin returns a promise from its start contract  in prod mode', async () => {
+    await runScenario({
+      production: true,
+      asyncSetup: false,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn).not.toHaveBeenCalled();
+  });
+
+  it('logs multiple warnings if both `setup` and `start` return promises', async () => {
+    await runScenario({
+      production: false,
+      asyncSetup: true,
+      asyncStart: true,
+    });
+
+    const log = logger.get.mock.results[0].value as jest.Mocked<Logger>;
+    expect(log.warn.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Plugin async-plugin is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+        Array [
+          "Plugin async-plugin is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.",
+        ],
+      ]
+    `);
+  });
+});
+
+describe('stop', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('waits for 30 sec to finish "stop" and move on to the next plugin.', async () => {
+    const [plugin1, plugin2] = [createPlugin('timeout-stop-1'), createPlugin('timeout-stop-2')].map(
+      (plugin, index) => {
+        jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+        jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+        pluginsSystem.addPlugin(plugin);
+        return plugin;
+      }
+    );
+
+    const stopSpy1 = jest
+      .spyOn(plugin1, 'stop')
+      .mockImplementationOnce(() => new Promise((resolve) => resolve));
+    const stopSpy2 = jest.spyOn(plugin2, 'stop').mockImplementationOnce(() => Promise.resolve());
+
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const stopPromise = pluginsSystem.stopPlugins();
+
+    jest.runAllTimers();
+    await stopPromise;
+    expect(stopSpy1).toHaveBeenCalledTimes(1);
+    expect(stopSpy2).toHaveBeenCalledTimes(1);
+
+    expect(loggingSystemMock.collect(logger).warn.flat()).toEqual(
+      expect.arrayContaining([
+        `"timeout-stop-1" plugin didn't stop in 30sec., move on to the next.`,
+      ])
+    );
   });
 });

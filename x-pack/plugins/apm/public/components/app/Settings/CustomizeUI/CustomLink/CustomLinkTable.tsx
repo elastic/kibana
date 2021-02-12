@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -13,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { units, px } from '../../../../../style/variables';
 import { ManagedTable } from '../../../../shared/ManagedTable';
@@ -26,6 +29,8 @@ interface Props {
 
 export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
+  const { core } = useApmPluginContext();
+  const canSave = core.application.capabilities.apm.save;
 
   const columns = [
     {
@@ -61,22 +66,26 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       width: px(units.triple),
       name: '',
       actions: [
-        {
-          name: i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.table.editButtonLabel',
-            { defaultMessage: 'Edit' }
-          ),
-          description: i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.table.editButtonDescription',
-            { defaultMessage: 'Edit this custom link' }
-          ),
-          icon: 'pencil',
-          color: 'primary',
-          type: 'icon',
-          onClick: (customLink: CustomLink) => {
-            onCustomLinkSelected(customLink);
-          },
-        },
+        ...(canSave
+          ? [
+              {
+                name: i18n.translate(
+                  'xpack.apm.settings.customizeUI.customLink.table.editButtonLabel',
+                  { defaultMessage: 'Edit' }
+                ),
+                description: i18n.translate(
+                  'xpack.apm.settings.customizeUI.customLink.table.editButtonDescription',
+                  { defaultMessage: 'Edit this custom link' }
+                ),
+                icon: 'pencil',
+                color: 'primary',
+                type: 'icon',
+                onClick: (customLink: CustomLink) => {
+                  onCustomLinkSelected(customLink);
+                },
+              },
+            ]
+          : []),
       ],
     },
   ];

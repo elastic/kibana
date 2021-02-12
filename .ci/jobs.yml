@@ -1,8 +1,7 @@
-# This file is needed by functionalTests:ensureAllTestsInCiGroup for the list of ciGroups. That must be changed before this file can be removed
+# This file is needed by node scripts/ensure_all_tests_in_ci_group  for the list of ciGroups. That must be changed before this file can be removed
 
 JOB:
   - kibana-intake
-  - x-pack-intake
   - kibana-firefoxSmoke
   - kibana-ciGroup1
   - kibana-ciGroup2
@@ -32,6 +31,8 @@ JOB:
   - x-pack-ciGroup9
   - x-pack-ciGroup10
   - x-pack-ciGroup11
+  - x-pack-ciGroup12
+  - x-pack-ciGroup13
   - x-pack-accessibility
   - x-pack-visualRegression
 

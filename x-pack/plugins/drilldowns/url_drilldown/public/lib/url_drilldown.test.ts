@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { IExternalUrl } from 'src/core/public';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
+import { IEmbeddable, VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
+import { of } from '../../../../../../src/plugins/kibana_utils';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
-import {
-  VALUE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 const mockDataPoints = [
   {
@@ -59,13 +59,27 @@ const mockEmbeddable = ({
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 
-describe('UrlDrilldown', () => {
-  const urlDrilldown = new UrlDrilldown({
+class TextExternalUrl implements IExternalUrl {
+  constructor(private readonly isCorrect: boolean = true) {}
+
+  public validateUrl(url: string): URL | null {
+    return this.isCorrect ? new URL(url) : null;
+  }
+}
+
+const createDrilldown = (isExternalUrlValid: boolean = true) => {
+  const drilldown = new UrlDrilldown({
+    externalUrl: new TextExternalUrl(isExternalUrlValid),
     getGlobalScope: () => ({ kibanaUrl: 'http://localhost:5601/' }),
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
   });
+  return drilldown;
+};
+
+describe('UrlDrilldown', () => {
+  const urlDrilldown = createDrilldown();
 
   test('license', () => {
     expect(urlDrilldown.minimalLicense).toBe('gold');
@@ -125,6 +139,30 @@ describe('UrlDrilldown', () => {
 
       await expect(urlDrilldown.isCompatible(config, context)).resolves.toBe(false);
     });
+
+    test('not compatible if external URL is denied', async () => {
+      const drilldown1 = createDrilldown(true);
+      const drilldown2 = createDrilldown(false);
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+      };
+
+      const context: ActionContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddable,
+      };
+
+      const result1 = await drilldown1.isCompatible(config, context);
+      const result2 = await drilldown2.isCompatible(config, context);
+
+      expect(result1).toBe(true);
+      expect(result2).toBe(false);
+    });
   });
 
   describe('getHref & execute', () => {
@@ -172,6 +210,42 @@ describe('UrlDrilldown', () => {
       await expect(urlDrilldown.getHref(config, context)).rejects.toThrowError();
       await expect(urlDrilldown.execute(config, context)).rejects.toThrowError();
       expect(mockNavigateToUrl).not.toBeCalled();
+    });
+
+    test('should throw on denied external URL', async () => {
+      const drilldown1 = createDrilldown(true);
+      const drilldown2 = createDrilldown(false);
+      const config: Config = {
+        url: {
+          template: `https://elasti.co/?{{event.value}}&{{rison context.panel.query}}`,
+        },
+        openInNewTab: false,
+      };
+
+      const context: ActionContext = {
+        data: {
+          data: mockDataPoints,
+        },
+        embeddable: mockEmbeddable,
+      };
+
+      const url = await drilldown1.getHref(config, context);
+      await drilldown1.execute(config, context);
+
+      expect(url).toMatchInlineSnapshot(`"https://elasti.co/?test&(language:kuery,query:test)"`);
+      expect(mockNavigateToUrl).toBeCalledWith(url);
+
+      const [, error1] = await of(drilldown2.getHref(config, context));
+      const [, error2] = await of(drilldown2.execute(config, context));
+
+      expect(error1).toBeInstanceOf(Error);
+      expect(error1.message).toMatchInlineSnapshot(
+        `"External URL [https://elasti.co/?test&(language:kuery,query:test)] was denied by ExternalUrl service. You can configure external URL policies using \\"externalUrl.policy\\" setting in kibana.yml."`
+      );
+      expect(error2).toBeInstanceOf(Error);
+      expect(error2.message).toMatchInlineSnapshot(
+        `"External URL [https://elasti.co/?test&(language:kuery,query:test)] was denied by ExternalUrl service. You can configure external URL policies using \\"externalUrl.policy\\" setting in kibana.yml."`
+      );
     });
   });
 
@@ -368,5 +442,79 @@ describe('UrlDrilldown', () => {
         }
       });
     });
+  });
+});
+
+describe('encoding', () => {
+  const urlDrilldown = createDrilldown();
+  const context: ActionContext = {
+    data: {
+      data: mockDataPoints,
+    },
+    embeddable: mockEmbeddable,
+  };
+
+  test('encodes URL by default', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
+  });
+
+  test('encodes URL when encoding is enabled', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+      encodeUrl: true,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
+  });
+
+  test('does not encode URL when encoding is not enabled', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%26shoulders');
+  });
+
+  test('can encode URI component using "encodeURIComponent" Handlebars helper', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo={{encodeURIComponent "head%26shoulders@gmail.com"}}',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders%40gmail.com');
+  });
+
+  test('can encode URI component using "encodeURIQuery" Handlebars helper', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo={{encodeURIQuery "head%26shoulders@gmail.com"}}',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders@gmail.com');
   });
 });

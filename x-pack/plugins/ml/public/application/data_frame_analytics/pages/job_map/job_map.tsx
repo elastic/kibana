@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -13,11 +13,12 @@ import { Cytoscape, Controls, JobMapLegend } from './components';
 import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_range_legend';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 import { JobMapTitle } from './job_map_title';
 
-const cytoscapeDivStyle = {
+const getCytoscapeDivStyle = (theme: EuiThemeType) => ({
   background: `linear-gradient(
   90deg,
   ${theme.euiPageBackgroundColor}
@@ -35,7 +36,7 @@ ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
   margin: `-${theme.gutterTypes.gutterLarge}`,
   marginTop: 0,
-};
+});
 
 interface Props {
   analyticsId?: string;
@@ -64,6 +65,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
     },
   } = useMlKibana();
   const urlGenerator = useMlUrlGenerator();
+  const { euiTheme } = useCurrentEuiTheme();
 
   const redirectToAnalyticsManagementPage = async () => {
     const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
@@ -127,8 +129,10 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
 
   const { ref, width, height } = useRefDimensions();
 
+  const refreshCallback = () => fetchAndSetElementsWrapper({ analyticsId, modelId });
+
   return (
-    <>
+    <div data-test-subj="mlPageDataFrameAnalyticsMap">
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -137,7 +141,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
               <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <JobMapLegend />
+              <JobMapLegend theme={euiTheme} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -147,7 +151,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
               <EuiButtonEmpty
                 size="xs"
                 data-test-subj={`mlAnalyticsRefreshMapButton${isLoading ? ' loading' : ' loaded'}`}
-                onClick={() => fetchAndSetElementsWrapper({ analyticsId, modelId })}
+                onClick={refreshCallback}
                 isLoading={isLoading}
               >
                 <FormattedMessage
@@ -172,24 +176,28 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div style={{ height: height - parseInt(theme.gutterTypes.gutterLarge, 10) - 20 }} ref={ref}>
+      <div
+        style={{ height: height - parseInt(euiTheme.gutterTypes.gutterLarge, 10) - 20 }}
+        ref={ref}
+      >
         <Cytoscape
+          theme={euiTheme}
           height={height - 20}
           elements={elements}
           width={width}
-          style={cytoscapeDivStyle}
+          style={getCytoscapeDivStyle(euiTheme)}
           itemsDeleted={itemsDeleted}
           resetCy={resetCyToggle}
         >
           <Controls
             details={nodeDetails}
             getNodeData={fetchAndSetElementsWrapper}
-            analyticsId={analyticsId}
             modelId={modelId}
             updateElements={updateElements}
+            refreshJobsCallback={refreshCallback}
           />
         </Cytoscape>
       </div>
-    </>
+    </div>
   );
 };

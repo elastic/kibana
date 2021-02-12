@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState, ChangeEvent } from 'react';
@@ -17,29 +18,29 @@ import {
   EuiPanel,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
 
+import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
+import noSharedSourcesIcon from '../../../../assets/share_circle.svg';
 import { ContentSection } from '../../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-import { Loading } from '../../../../../../applications/shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
 import { SourceDataItem } from '../../../../types';
-
 import { SourcesLogic } from '../../sources_logic';
+
 import { AvailableSourcesList } from './available_sources_list';
 import { ConfiguredSourcesList } from './configured_sources_list';
-
-const NEW_SOURCE_DESCRIPTION =
-  'When configuring and connecting a source, you are creating distinct entities with searchable content synchronized from the content platform itself. A source can be added using one of the available source connectors or via Custom API Sources, for additional flexibility. ';
-const ORG_SOURCE_DESCRIPTION =
-  'Shared content sources are available to your entire organization or can be assigned to specific user groups.';
-const PRIVATE_SOURCE_DESCRIPTION =
-  'Connect a new source to add its content and documents to your search experience.';
-const NO_SOURCES_TITLE = 'Configure and connect your first content source';
-const ORG_SOURCES_TITLE = 'Add a shared content source';
-const PRIVATE_SOURCES_TITLE = 'Add a new content source';
-const PLACEHOLDER = 'Filter sources...';
+import {
+  ADD_SOURCE_NEW_SOURCE_DESCRIPTION,
+  ADD_SOURCE_ORG_SOURCE_DESCRIPTION,
+  ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION,
+  ADD_SOURCE_NO_SOURCES_TITLE,
+  ADD_SOURCE_ORG_SOURCES_TITLE,
+  ADD_SOURCE_PRIVATE_SOURCES_TITLE,
+  ADD_SOURCE_PLACEHOLDER,
+  ADD_SOURCE_EMPTY_TITLE,
+  ADD_SOURCE_EMPTY_BODY,
+} from './constants';
 
 export const AddSourceList: React.FC = () => {
   const { contentSources, dataLoading, availableSources, configuredSources } = useValues(
@@ -64,14 +65,16 @@ export const AddSourceList: React.FC = () => {
     ({ serviceType }) => serviceType !== CUSTOM_SERVICE_TYPE
   );
 
-  const BASE_DESCRIPTION = hasSources ? '' : NEW_SOURCE_DESCRIPTION;
+  const BASE_DESCRIPTION = hasSources ? '' : ADD_SOURCE_NEW_SOURCE_DESCRIPTION;
   const PAGE_CONTEXT_DESCRIPTION = isOrganization
-    ? ORG_SOURCE_DESCRIPTION
-    : PRIVATE_SOURCE_DESCRIPTION;
+    ? ADD_SOURCE_ORG_SOURCE_DESCRIPTION
+    : ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION;
 
   const PAGE_DESCRIPTION = BASE_DESCRIPTION + PAGE_CONTEXT_DESCRIPTION;
-  const HAS_SOURCES_TITLE = isOrganization ? ORG_SOURCES_TITLE : PRIVATE_SOURCES_TITLE;
-  const PAGE_TITLE = hasSources ? HAS_SOURCES_TITLE : NO_SOURCES_TITLE;
+  const HAS_SOURCES_TITLE = isOrganization
+    ? ADD_SOURCE_ORG_SOURCES_TITLE
+    : ADD_SOURCE_PRIVATE_SOURCES_TITLE;
+  const PAGE_TITLE = hasSources ? HAS_SOURCES_TITLE : ADD_SOURCE_NO_SOURCES_TITLE;
 
   const handleFilterChange = (e: ChangeEvent<HTMLInputElement>) => setFilterValue(e.target.value);
 
@@ -105,8 +108,8 @@ export const AddSourceList: React.FC = () => {
               data-test-subj="FilterSourcesInput"
               value={filterValue}
               onChange={handleFilterChange}
-              fullWidth={true}
-              placeholder={PLACEHOLDER}
+              fullWidth
+              placeholder={ADD_SOURCE_PLACEHOLDER}
             />
           </EuiFormRow>
           <EuiSpacer size="xxl" />
@@ -128,13 +131,8 @@ export const AddSourceList: React.FC = () => {
                 <EuiSpacer size="xxl" />
                 <EuiEmptyPrompt
                   iconType={noSharedSourcesIcon}
-                  title={<h2>No available sources</h2>}
-                  body={
-                    <p>
-                      Sources will be available for search when an administrator adds them to this
-                      organization.
-                    </p>
-                  }
+                  title={<h2>{ADD_SOURCE_EMPTY_TITLE}</h2>}
+                  body={<p>{ADD_SOURCE_EMPTY_BODY}</p>}
                 />
                 <EuiSpacer size="xxl" />
                 <EuiSpacer size="m" />

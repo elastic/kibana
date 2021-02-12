@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -43,7 +44,7 @@ import {
   timeline_id,
   timeline_title,
   type,
-  threat,
+  threats,
   threshold,
   throttle,
   job_status,
@@ -106,7 +107,7 @@ export const requiredRulesSchema = t.type({
   tags,
   to,
   type,
-  threat,
+  threat: threats,
   created_at,
   updated_at,
   created_by,

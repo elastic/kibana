@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -23,7 +24,7 @@ import {
   createRule,
   waitForSignalsToBePresent,
   getSignalsByIds,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   getRuleForSignalTesting,
 } from '../../utils';
 
@@ -79,7 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to execute and get 10 signals', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
@@ -88,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be have set the signals in an open state initially', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const everySignalOpen = signalsOpen.hits.hits.every(
@@ -104,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able to get a count of 10 closed signals when closing 10', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
@@ -131,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able close 10 signals immediately and they all should be closed', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);

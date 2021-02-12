@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
@@ -33,7 +35,7 @@ import {
   showCallOutUnauthorizedMsg,
   showTimeline,
   startTimelineSaving,
-  toggleExpandedEvent,
+  toggleDetailPanel,
   unPinEvent,
   updateAutoSaveMsg,
   updateColumns,
@@ -41,7 +43,6 @@ import {
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateDescription,
   updateEventType,
   updateIndexNames,
   updateIsFavorite,
@@ -56,7 +57,7 @@ import {
   updateSort,
   updateTimeline,
   updateTimelineGraphEventId,
-  updateTitle,
+  updateTitleAndDescription,
   upsertColumn,
   toggleModalSaveTimeline,
 } from './actions';
@@ -78,7 +79,6 @@ import {
   unPinTimelineEvent,
   updateExcludedRowRenderersIds,
   updateTimelineColumns,
-  updateTimelineDescription,
   updateTimelineIsFavorite,
   updateTimelineIsLive,
   updateTimelineItemsPerPage,
@@ -94,11 +94,12 @@ import {
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
-  updateTimelineTitle,
+  updateTimelineTitleAndDescription,
   upsertTimelineColumn,
   updateSavedQuery,
   updateGraphEventId,
   updateFilters,
+  updateTimelineDetailsPanel,
   updateTimelineEventType,
 } from './helpers';
 
@@ -130,6 +131,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         dataProviders,
         dateRange,
         excludedRowRendererIds,
+        expandedDetail = {},
         show,
         columns,
         itemsPerPage,
@@ -148,6 +150,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           dataProviders,
           dateRange,
           excludedRowRendererIds,
+          expandedDetail,
           filters,
           id,
           itemsPerPage,
@@ -178,13 +181,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, event = {} }) => ({
+  .case(toggleDetailPanel, (state, action) => ({
     ...state,
     timelineById: {
       ...state.timelineById,
-      [timelineId]: {
-        ...state.timelineById[timelineId],
-        expandedEvent: event,
+      [action.timelineId]: {
+        ...state.timelineById[action.timelineId],
+        expandedDetail: {
+          ...state.timelineById[action.timelineId].expandedDetail,
+          ...updateTimelineDetailsPanel(action),
+        },
       },
     },
   }))
@@ -354,10 +360,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(updateDescription, (state, { id, description }) => ({
-    ...state,
-    timelineById: updateTimelineDescription({ id, description, timelineById: state.timelineById }),
-  }))
   .case(updateEventType, (state, { id, eventType }) => ({
     ...state,
     timelineById: updateTimelineEventType({ id, eventType, timelineById: state.timelineById }),
@@ -374,9 +376,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
   }))
-  .case(updateTitle, (state, { id, title, disableAutoSave }) => ({
+  .case(updateTitleAndDescription, (state, { id, title, description }) => ({
     ...state,
-    timelineById: updateTimelineTitle({ id, title, timelineById: state.timelineById }),
+    timelineById: updateTimelineTitleAndDescription({
+      id,
+      title,
+      description,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(updateProviders, (state, { id, providers }) => ({
     ...state,

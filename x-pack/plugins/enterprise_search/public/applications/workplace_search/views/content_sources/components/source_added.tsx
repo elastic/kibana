@@ -1,47 +1,32 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
-import { useActions, useValues } from 'kea';
-import { Redirect, useLocation } from 'react-router-dom';
+import { useActions } from 'kea';
 
-import { setErrorMessage } from '../../../../shared/flash_messages';
+import { Loading } from '../../../../shared/loading';
 
-import { parseQueryParams } from '../../../../../applications/shared/query_params';
+import { AddSourceLogic } from './add_source/add_source_logic';
 
-import { SOURCES_PATH, getSourcesPath } from '../../../routes';
-
-import { AppLogic } from '../../../app_logic';
-import { SourcesLogic } from '../sources_logic';
-
-interface SourceQueryParams {
-  name: string;
-  hasError: boolean;
-  errorMessages?: string[];
-  serviceType: string;
-  indexPermissions: boolean;
-}
-
+/**
+ * This component merely triggers catchs the redirect from the oauth application and initializes the saving
+ * of the params the oauth plugin sends back. The logic file now redirects back to sources with either a
+ * success or error message upon completion.
+ */
 export const SourceAdded: React.FC = () => {
   const { search } = useLocation() as Location;
-  const { name, hasError, errorMessages, serviceType, indexPermissions } = (parseQueryParams(
-    search
-  ) as unknown) as SourceQueryParams;
-  const { setAddedSource } = useActions(SourcesLogic);
-  const { isOrganization } = useValues(AppLogic);
-  const decodedName = decodeURIComponent(name);
+  const { saveSourceParams } = useActions(AddSourceLogic);
 
-  if (hasError) {
-    const defaultError = `${decodedName} failed to connect.`;
-    setErrorMessage(errorMessages ? errorMessages.join(' ') : defaultError);
-  } else {
-    setAddedSource(decodedName, indexPermissions, serviceType);
-  }
+  useEffect(() => {
+    saveSourceParams(search);
+  }, []);
 
-  return <Redirect to={getSourcesPath(SOURCES_PATH, isOrganization)} />;
+  return <Loading />;
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useCallback } from 'react';
@@ -18,21 +19,21 @@ const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string 
   title: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
     {
-      defaultMessage: 'Register as anti-virus',
+      defaultMessage: 'Register as antivirus',
     }
   ),
   description: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.explanation',
     {
       defaultMessage:
-        'Toggle on to register Elastic as an official Anti-Virus solution for Windows OS. ' +
+        'Toggle on to register Elastic as an official Antivirus solution for Windows OS. ' +
         'This will also disable Windows Defender.',
     }
   ),
   label: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.toggle',
     {
-      defaultMessage: 'Register as anti-virus',
+      defaultMessage: 'Register as antivirus',
     }
   ),
 };

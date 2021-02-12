@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -388,6 +389,11 @@ const expectAssetsInstalled = ({
       id: 'sample_search',
     });
     expect(resSearch.id).equal('sample_search');
+    const resLens = await kibanaServer.savedObjects.get({
+      type: 'lens',
+      id: 'sample_lens',
+    });
+    expect(resLens.id).equal('sample_lens');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
@@ -450,6 +456,10 @@ const expectAssetsInstalled = ({
           type: 'index-pattern',
         },
         {
+          id: 'sample_lens',
+          type: 'lens',
+        },
+        {
           id: 'sample_search',
           type: 'search',
         },
@@ -459,6 +469,14 @@ const expectAssetsInstalled = ({
         },
       ],
       installed_es: [
+        {
+          id: 'logs-all_assets.test_logs-all_assets',
+          type: 'data_stream_ilm_policy',
+        },
+        {
+          id: 'metrics-all_assets.test_metrics-all_assets',
+          type: 'data_stream_ilm_policy',
+        },
         {
           id: 'logs-all_assets.test_logs',
           type: 'index_template',
@@ -496,6 +514,7 @@ const expectAssetsInstalled = ({
         { id: '96c6eb85-fe2e-56c6-84be-5fda976796db', type: 'epm-packages-assets' },
         { id: '2d73a161-fa69-52d0-aa09-1bdc691b95bb', type: 'epm-packages-assets' },
         { id: '0a00c2d2-ce63-5b9c-9aa0-0cf1938f7362', type: 'epm-packages-assets' },
+        { id: '691f0505-18c5-57a6-9f40-06e8affbdf7a', type: 'epm-packages-assets' },
         { id: 'b36e6dd0-58f7-5dd0-a286-8187e4019274', type: 'epm-packages-assets' },
         { id: 'f839c76e-d194-555a-90a1-3265a45789e4', type: 'epm-packages-assets' },
         { id: '9af7bbb3-7d8a-50fa-acc9-9dde6f5efca2', type: 'epm-packages-assets' },
@@ -506,6 +525,7 @@ const expectAssetsInstalled = ({
         { id: '60d6d054-57e4-590f-a580-52bf3f5e7cca', type: 'epm-packages-assets' },
         { id: '47758dc2-979d-5fbe-a2bd-9eded68a5a43', type: 'epm-packages-assets' },
         { id: '318959c9-997b-5a14-b328-9fc7355b4b74', type: 'epm-packages-assets' },
+        { id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197', type: 'epm-packages-assets' },
         { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
         { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
         { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },

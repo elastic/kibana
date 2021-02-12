@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EventHit } from '../../../../../../common/search_strategy';
-import { getDataFromHits } from './helpers';
+import { getDataFromFieldsHits } from './helpers';
 
-describe('#getDataFromHits', () => {
+describe('#getDataFromFieldsHits', () => {
   it('happy path', () => {
     const response: EventHit = {
       _index: 'auditbeat-7.8.0-2020.11.05-000003',
@@ -47,7 +48,7 @@ describe('#getDataFromHits', () => {
       aggregations: {},
     };
 
-    expect(getDataFromHits(response.fields)).toEqual([
+    expect(getDataFromFieldsHits(response.fields)).toEqual([
       {
         category: 'event',
         field: 'event.category',

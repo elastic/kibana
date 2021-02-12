@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, Suspense, useEffect, useState } from 'react';
@@ -22,7 +23,6 @@ import {
   EuiFormLabel,
   EuiFormControlLayout,
   EuiSuperSelect,
-  EuiLoadingSpinner,
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
@@ -204,7 +204,7 @@ export const ActionTypeForm = ({
                   >
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
-                      defaultMessage="Run When"
+                      defaultMessage="Run when"
                     />
                   </EuiFormLabel>
                 }
@@ -280,15 +280,7 @@ export const ActionTypeForm = ({
       <EuiSpacer size="xl" />
       {ParamsFieldsComponent ? (
         <EuiErrorBoundary>
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
+          <Suspense fallback={null}>
             <ParamsFieldsComponent
               actionParams={actionItem.params as any}
               index={index}

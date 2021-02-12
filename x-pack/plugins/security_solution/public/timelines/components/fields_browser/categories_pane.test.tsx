@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mount } from 'enzyme';
@@ -23,11 +24,9 @@ describe('CategoriesPane', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <CategoriesPane
-          browserFields={mockBrowserFields}
           filteredBrowserFields={mockBrowserFields}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
         />
@@ -43,11 +42,9 @@ describe('CategoriesPane', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <CategoriesPane
-          browserFields={mockBrowserFields}
           filteredBrowserFields={{}}
           width={CATEGORY_PANE_WIDTH}
           onCategorySelected={jest.fn()}
-          onUpdateColumns={jest.fn()}
           selectedCategoryId={''}
           timelineId={timelineId}
         />

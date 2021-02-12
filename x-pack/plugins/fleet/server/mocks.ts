@@ -1,10 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsServiceMock,
+} from 'src/core/server/mocks';
+import { coreMock } from '../../../../src/core/server/mocks';
+import { licensingMock } from '../../../plugins/licensing/server/mocks';
+
 import { FleetAppContext } from './plugin';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../security/server/mocks';
@@ -13,6 +21,7 @@ import { AgentPolicyServiceInterface, AgentService } from './services';
 
 export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
+    elasticsearch: elasticsearchServiceMock.createStart(),
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     security: securityMock.createStart(),
@@ -21,6 +30,17 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
     kibanaVersion: '8.0.0',
     kibanaBranch: 'master',
   };
+};
+
+function createCoreRequestHandlerContextMock() {
+  return {
+    core: coreMock.createRequestHandlerContext(),
+    licensing: licensingMock.createRequestHandlerContext(),
+  };
+}
+
+export const xpackMocks = {
+  createRequestHandlerContext: createCoreRequestHandlerContextMock,
 };
 
 export const createPackagePolicyServiceMock = () => {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -16,10 +17,21 @@ import {
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromComments,
 } from '../../../common/lib/mock';
+import {
+  createRule,
+  createSignalsIndex,
+  deleteAllAlerts,
+  deleteSignalsIndex,
+  getRuleForSignalTesting,
+  getSignalsByIds,
+  waitForRuleSuccessOrStatus,
+  waitForSignalsToBePresent,
+} from '../../../../detection_engine_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
 
   describe('case_connector', () => {
     let createdActionId = '';
@@ -391,6 +403,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 parent: null,
               },
             },
+            settings: {
+              syncAlerts: true,
+            },
           },
         };
 
@@ -442,6 +457,9 @@ export default ({ getService }: FtrProviderContext): void => {
               type: '.servicenow',
               fields: {},
             },
+            settings: {
+              syncAlerts: true,
+            },
           },
         };
 
@@ -469,6 +487,8 @@ export default ({ getService }: FtrProviderContext): void => {
               impact: null,
               severity: null,
               urgency: null,
+              category: null,
+              subcategory: null,
             },
           },
           created_by: {
@@ -673,7 +693,86 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
+      describe('adding alerts using a connector', () => {
+        beforeEach(async () => {
+          await esArchiver.load('auditbeat/hosts');
+          await createSignalsIndex(supertest);
+        });
+
+        afterEach(async () => {
+          await deleteSignalsIndex(supertest);
+          await deleteAllAlerts(supertest);
+          await esArchiver.unload('auditbeat/hosts');
+        });
+
+        it('should add a comment of type alert', async () => {
+          // TODO: don't do all this stuff
+          const rule = getRuleForSignalTesting(['auditbeat-*']);
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signals = await getSignalsByIds(supertest, [id]);
+          const alert = signals.hits.hits[0];
+
+          const { body: createdAction } = await supertest
+            .post('/api/actions/action')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A case connector',
+              actionTypeId: '.case',
+              config: {},
+            })
+            .expect(200);
+
+          createdActionId = createdAction.id;
+
+          const caseRes = await supertest
+            .post(CASES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(postCaseReq)
+            .expect(200);
+
+          const params = {
+            subAction: 'addComment',
+            subActionParams: {
+              caseId: caseRes.body.id,
+              comment: { alertId: alert._id, index: alert._index, type: CommentType.alert },
+            },
+          };
+
+          const caseConnector = await supertest
+            .post(`/api/actions/action/${createdActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({ params })
+            .expect(200);
+
+          expect(caseConnector.body.status).to.eql('ok');
+
+          const { body } = await supertest
+            .get(`${CASES_URL}/${caseRes.body.id}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+
+          const data = removeServerGeneratedPropertiesFromCase(body);
+          const comments = removeServerGeneratedPropertiesFromComments(data.comments ?? []);
+          expect({ ...data, comments }).to.eql({
+            ...postCaseResp(caseRes.body.id),
+            comments,
+            totalAlerts: 1,
+            totalComment: 1,
+            updated_by: {
+              email: null,
+              full_name: null,
+              username: null,
+            },
+          });
+        });
+      });
+
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -736,7 +835,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         };
 
-        for (const attribute of ['alertId', 'index']) {
+        for (const attribute of ['blah', 'bogus']) {
           const caseConnector = await supertest
             .post(`/api/actions/action/${createdActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
@@ -750,17 +849,18 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             })
             .expect(200);
-
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]`,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
             retry: false,
           });
         }
       });
 
-      it('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -892,7 +992,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should add a comment of type alert', async () => {
+      // TODO: Enable when the creation of comments of type alert is supported
+      // https://github.com/elastic/kibana/issues/85750
+      it.skip('should add a comment of type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')

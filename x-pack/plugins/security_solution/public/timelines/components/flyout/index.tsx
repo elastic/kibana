@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { EuiFocusTrap } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineActions } from '../../store/timeline';
-import { TimelineTabs } from '../../store/timeline/model';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
@@ -25,14 +26,14 @@ const Visible = styled.div<{ show?: boolean }>`
 Visible.displayName = 'Visible';
 
 interface OwnProps {
-  timelineId: string;
+  timelineId: TimelineId;
   onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, timelineId)
   );
 
@@ -77,15 +78,14 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
       }
     });
   }, [dispatch, onAppLeave, show, timelineStatus, updated]);
-
   return (
     <>
-      <Visible show={show}>
-        <Pane timelineId={timelineId} />
-      </Visible>
-      <Visible show={!show}>
-        <FlyoutBottomBar timelineId={timelineId} />
-      </Visible>
+      <EuiFocusTrap disabled={!show}>
+        <Visible show={show}>
+          <Pane timelineId={timelineId} />
+        </Visible>
+      </EuiFocusTrap>
+      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
     </>
   );
 };

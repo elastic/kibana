@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Subject } from 'rxjs';
@@ -24,7 +13,7 @@ import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { HttpConfigType } from '../http';
+import { HttpConfigType, InternalHttpServiceSetup } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import {
@@ -42,6 +31,7 @@ import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export interface SetupDeps {
+  http: InternalHttpServiceSetup;
   metrics: MetricsServiceSetup;
   savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
 }
@@ -67,6 +57,19 @@ export interface StartDeps {
  */
 const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
+};
+
+/**
+ * This is incredibly hacky... The config service doesn't allow you to determine
+ * whether or not a config value has been changed from the default value, and the
+ * default value is defined in legacy code.
+ *
+ * This will be going away in 8.0, so please look away for a few months
+ *
+ * @param index The `kibana.index` setting from the `kibana.yml`
+ */
+const isCustomIndex = (index: string) => {
+  return index !== '.kibana';
 };
 
 export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, CoreUsageDataStart> {
@@ -230,6 +233,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         },
 
         savedObjects: {
+          customIndex: isCustomIndex(this.kibanaConfig!.index),
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
           maxImportExportSizeBytes: this.soConfig.maxImportExportSize.getValueInBytes(),
         },
@@ -248,7 +252,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     };
   }
 
-  setup({ metrics, savedObjectsStartPromise }: SetupDeps) {
+  setup({ http, metrics, savedObjectsStartPromise }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
@@ -300,7 +304,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     const getClient = () => {
       const debugLogger = (message: string) => this.logger.debug(message);
 
-      return new CoreUsageStatsClient(debugLogger, internalRepositoryPromise);
+      return new CoreUsageStatsClient(debugLogger, http.basePath, internalRepositoryPromise);
     };
 
     this.coreUsageStatsClient = getClient();

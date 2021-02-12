@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
@@ -14,6 +15,7 @@ import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
 
 export type EmailActionType = ActionType<
   ActionTypeConfigType,
@@ -29,6 +31,8 @@ export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
 
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+
+const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
 
 const ConfigSchemaProps = {
   service: schema.nullable(schema.string()),
@@ -101,6 +105,16 @@ const ParamsSchema = schema.object(
     bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
     subject: schema.string(),
     message: schema.string(),
+    // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
+    // provide a more contextual URL in the footer (ex: URL to the alert details page)
+    kibanaFooterLink: schema.object({
+      path: schema.string({ defaultValue: '/' }),
+      text: schema.string({
+        defaultValue: i18n.translate('xpack.actions.builtin.email.kibanaFooterLinkText', {
+          defaultMessage: 'Go to Kibana',
+        }),
+      }),
+    }),
   },
   {
     validate: validateParams,
@@ -121,14 +135,16 @@ function validateParams(paramsObject: unknown): string | void {
 
 interface GetActionTypeParams {
   logger: Logger;
+  publicBaseUrl?: string;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
 // action type definition
+export const ActionTypeId = '.email';
 export function getActionType(params: GetActionTypeParams): EmailActionType {
-  const { logger, configurationUtilities } = params;
+  const { logger, publicBaseUrl, configurationUtilities } = params;
   return {
-    id: '.email',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
@@ -140,14 +156,35 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    renderParameterTemplates,
+    executor: curry(executor)({ logger, publicBaseUrl, configurationUtilities }),
+  };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  return {
+    // most of the params need no escaping
+    ...renderMustacheObject(params, variables),
+    // message however, needs to escaped as markdown
+    message: renderMustacheString(params.message, variables, 'markdown'),
   };
 }
 
 // action executor
 
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    publicBaseUrl,
+    configurationUtilities,
+  }: {
+    logger: GetActionTypeParams['logger'];
+    publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
+    configurationUtilities: ActionsConfigurationUtilities;
+  },
   execOptions: EmailActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -173,6 +210,11 @@ async function executor(
     transport.secure = getSecureValue(config.secure, config.port);
   }
 
+  const footerMessage = getFooterMessage({
+    publicBaseUrl,
+    kibanaFooterLink: params.kibanaFooterLink,
+  });
+
   const sendEmailOptions: SendEmailOptions = {
     transport,
     routing: {
@@ -183,10 +225,10 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: params.message,
+      message: `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`,
     },
-    proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
+    configurationUtilities,
   };
 
   let result;
@@ -229,4 +271,26 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
   if (secure != null) return secure;
   if (port === 465) return true;
   return false;
+}
+
+function getFooterMessage({
+  publicBaseUrl,
+  kibanaFooterLink,
+}: {
+  publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
+  kibanaFooterLink: ActionParamsType['kibanaFooterLink'];
+}) {
+  if (!publicBaseUrl) {
+    return i18n.translate('xpack.actions.builtin.email.sentByKibanaMessage', {
+      defaultMessage: 'This message was sent by Kibana.',
+    });
+  }
+
+  return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
+    defaultMessage: 'This message was sent by Kibana. [{kibanaFooterLinkText}]({link}).',
+    values: {
+      kibanaFooterLinkText: kibanaFooterLink.text,
+      link: `${publicBaseUrl}${kibanaFooterLink.path === '/' ? '' : kibanaFooterLink.path}`,
+    },
+  });
 }

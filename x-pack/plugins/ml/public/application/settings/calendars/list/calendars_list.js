@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -25,6 +26,8 @@ import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 export class CalendarsListUI extends Component {
   static propTypes = {
@@ -104,6 +107,8 @@ export class CalendarsListUI extends Component {
     const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
+    const helpLink = getDocLinks().links.ml.calendars;
+
     if (this.state.isDestroyModalVisible) {
       destroyModal = (
         <EuiOverlayMask>
@@ -168,6 +173,7 @@ export class CalendarsListUI extends Component {
             {destroyModal}
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </Fragment>
     );
   }

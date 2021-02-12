@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
@@ -9,32 +10,34 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CasesStatusResponseRt } from './status';
-import { CaseConnectorRt, ESCaseConnector, ConnectorPartialFieldsRt } from '../connectors';
+import { CasesStatusResponseRt, CaseStatusRt } from './status';
+import { CaseConnectorRt, ESCaseConnector } from '../connectors';
+import { SubCaseResponseRt } from './sub_case';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { ActionTypeExecutorResult } from '../../../../actions/server/types';
-
-export enum CaseStatuses {
-  open = 'open',
-  'in-progress' = 'in-progress',
-  closed = 'closed',
+export enum CaseType {
+  collection = 'collection',
+  individual = 'individual',
 }
 
-const CaseStatusRt = rt.union([
-  rt.literal(CaseStatuses.open),
-  rt.literal(CaseStatuses['in-progress']),
-  rt.literal(CaseStatuses.closed),
-]);
+/**
+ * Exposing the field used to define the case type so that it can be used for filtering in saved object find queries.
+ */
+export const caseTypeField = 'type';
 
-export const caseStatuses = Object.values(CaseStatuses);
+const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
+
+const SettingsRt = rt.type({
+  syncAlerts: rt.boolean,
+});
 
 const CaseBasicRt = rt.type({
-  connector: CaseConnectorRt,
   description: rt.string,
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
+  [caseTypeField]: CaseTypeRt,
+  connector: CaseConnectorRt,
+  settings: SettingsRt,
 });
 
 const CaseExternalServiceBasicRt = rt.type({
@@ -69,16 +72,35 @@ export const CaseAttributesRt = rt.intersection([
   }),
 ]);
 
-export const CasePostRequestRt = rt.type({
+const CasePostRequestNoTypeRt = rt.type({
   description: rt.string,
   tags: rt.array(rt.string),
   title: rt.string,
   connector: CaseConnectorRt,
+  settings: SettingsRt,
 });
 
-export const CaseExternalServiceRequestRt = CaseExternalServiceBasicRt;
+/**
+ * This type is used for validating a create case request. It requires that the type field be defined.
+ */
+export const CaseClientPostRequestRt = rt.type({
+  ...CasePostRequestNoTypeRt.props,
+  [caseTypeField]: CaseTypeRt,
+});
+
+/**
+ * This type is not used for validation when decoding a request because intersection does not have props defined which
+ * required for the excess function. Instead we use this as the type used by the UI. This allows the type field to be
+ * optional and the server will handle setting it to a default value before validating that the request
+ * has all the necessary fields. CaseClientPostRequestRt is used for validation.
+ */
+export const CasePostRequestRt = rt.intersection([
+  rt.partial({ type: CaseTypeRt }),
+  CasePostRequestNoTypeRt,
+]);
 
 export const CasesFindRequestRt = rt.partial({
+  type: CaseTypeRt,
   tags: rt.union([rt.array(rt.string), rt.string]),
   status: CaseStatusRt,
   reporters: rt.union([rt.array(rt.string), rt.string]),
@@ -97,9 +119,11 @@ export const CaseResponseRt = rt.intersection([
   rt.type({
     id: rt.string,
     totalComment: rt.number,
+    totalAlerts: rt.number,
     version: rt.string,
   }),
   rt.partial({
+    subCases: rt.array(SubCaseResponseRt),
     comments: rt.array(CommentResponseRt),
   }),
 ]);
@@ -122,47 +146,12 @@ export const CasePatchRequestRt = rt.intersection([
 export const CasesPatchRequestRt = rt.type({ cases: rt.array(CasePatchRequestRt) });
 export const CasesResponseRt = rt.array(CaseResponseRt);
 
-/*
- * This type are related to this file below
- * x-pack/plugins/actions/server/builtin_action_types/servicenow/schema.ts
- * why because this schema is not share in a common folder
- * so we redefine then so we can use/validate types
- */
-
-// TODO: Refactor to support multiple connectors with various fields
-
-const ServiceConnectorUserParams = rt.type({
-  fullName: rt.union([rt.string, rt.null]),
-  username: rt.string,
+export const CasePushRequestParamsRt = rt.type({
+  case_id: rt.string,
+  connector_id: rt.string,
 });
 
-export const ServiceConnectorCommentParamsRt = rt.type({
-  commentId: rt.string,
-  comment: rt.string,
-  createdAt: rt.string,
-  createdBy: ServiceConnectorUserParams,
-  updatedAt: rt.union([rt.string, rt.null]),
-  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
-});
-
-export const ServiceConnectorBasicCaseParamsRt = rt.type({
-  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
-  createdAt: rt.string,
-  createdBy: ServiceConnectorUserParams,
-  description: rt.union([rt.string, rt.null]),
-  externalId: rt.union([rt.string, rt.null]),
-  savedObjectId: rt.string,
-  title: rt.string,
-  updatedAt: rt.union([rt.string, rt.null]),
-  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
-});
-
-export const ServiceConnectorCaseParamsRt = rt.intersection([
-  ServiceConnectorBasicCaseParamsRt,
-  ConnectorPartialFieldsRt,
-]);
-
-export const ServiceConnectorCaseResponseRt = rt.intersection([
+export const ExternalServiceResponseRt = rt.intersection([
   rt.type({
     title: rt.string,
     id: rt.string,
@@ -183,17 +172,22 @@ export const ServiceConnectorCaseResponseRt = rt.intersection([
 ]);
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
+/**
+ * This field differs from the CasePostRequest in that the post request's type field can be optional. This type requires
+ * that the type field be defined. The CasePostRequest should be used in most places (the UI etc). This type is really
+ * only necessary for validation.
+ */
+export type CaseClientPostRequest = rt.TypeOf<typeof CaseClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
+export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
-export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
-export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
-export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
-export type ServiceConnectorCommentParams = rt.TypeOf<typeof ServiceConnectorCommentParamsRt>;
+export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
+export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };
 export type ESCasePatchRequest = Omit<CasePatchRequest, 'connector'> & {

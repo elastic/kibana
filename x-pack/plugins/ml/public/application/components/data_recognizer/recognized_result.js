@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiIcon, EuiFlexItem } from '@elastic/eui';
-import { CreateJobLinkCard } from '../create_job_link_card';
+import { LinkCard } from '../link_card';
 import { useMlKibana } from '../../contexts/kibana';
 
 export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
@@ -33,7 +34,7 @@ export const RecognizedResult = ({ config, indexPattern, savedSearch }) => {
 
   return (
     <EuiFlexItem>
-      <CreateJobLinkCard
+      <LinkCard
         data-test-subj={`mlRecognizerCard ${config.id}`}
         href={href}
         title={config.title}

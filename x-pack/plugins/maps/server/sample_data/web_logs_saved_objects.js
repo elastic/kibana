@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -70,6 +71,7 @@ const layerList = [
       {
         leftField: 'iso2',
         right: {
+          type: 'ES_TERM_SOURCE',
           id: '673ff994-fc75-4c67-909b-69fcb0e1060e',
           indexPatternTitle: 'kibana_sample_data_logs',
           term: 'geo.src',

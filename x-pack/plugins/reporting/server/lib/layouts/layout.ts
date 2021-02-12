@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
-import { PageSizeParams, PdfImageSize, Size } from './';
+import type { CustomPageSize, PredefinedPageSize } from 'pdfmake/interfaces';
+import type { PageSizeParams, PdfImageSize, Size } from '../../../common/types';
 
 export interface ViewZoomWidthHeight {
   zoom: number;
@@ -33,6 +34,8 @@ export abstract class Layout {
     pageSizeParams: PageSizeParams
   ): CustomPageSize | PredefinedPageSize;
 
+  // Return the dimensions unscaled dimensions (before multiplying the zoom factor)
+  // driver.setViewport() Adds a top and left margin to the viewport, and then multiplies by the scaling factor
   public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
 
   public abstract getBrowserZoom(): number;

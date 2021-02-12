@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EditorFrameProps } from './index';
@@ -54,7 +55,7 @@ export type Action =
   | {
       type: 'UPDATE_VISUALIZATION_STATE';
       visualizationId: string;
-      newState: unknown;
+      updater: unknown | ((state: unknown) => unknown);
       clearStagedPreview?: boolean;
     }
   | {
@@ -282,7 +283,10 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
         ...state,
         visualization: {
           ...state.visualization,
-          state: action.newState,
+          state:
+            typeof action.updater === 'function'
+              ? action.updater(state.visualization.state)
+              : action.updater,
         },
         stagedPreview: action.clearStagedPreview ? undefined : state.stagedPreview,
       };

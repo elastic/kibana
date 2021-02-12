@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import moment from 'moment-timezone';
 import { last } from 'lodash';
 import { LogRecord } from '@kbn/logging';
@@ -32,11 +22,14 @@ const formats = {
   UNIX_MILLIS: 'UNIX_MILLIS',
 };
 
-function formatDate(date: Date, dateFormat: string = formats.ISO8601, timezone?: string): string {
+function formatDate(
+  date: Date,
+  dateFormat: string = formats.ISO8601_TZ,
+  timezone?: string
+): string {
   const momentDate = moment(date);
-  if (timezone) {
-    momentDate.tz(timezone);
-  }
+  momentDate.tz(timezone ?? moment.tz.guess());
+
   switch (dateFormat) {
     case formats.ISO8601:
       return momentDate.toISOString();

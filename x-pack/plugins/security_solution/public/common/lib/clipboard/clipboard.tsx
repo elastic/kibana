@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
@@ -10,6 +11,8 @@ import React from 'react';
 
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
+
+export const COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME = 'copy-to-clipboard';
 
 export type OnCopy = ({
   content,
@@ -47,6 +50,7 @@ export const Clipboard = ({ children, content, onCopy, titleSummary, toastLifeTi
   return (
     <EuiButtonIcon
       aria-label={i18n.COPY_TO_THE_CLIPBOARD}
+      className={COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME}
       color="text"
       data-test-subj="clipboard"
       iconType="copyClipboard"

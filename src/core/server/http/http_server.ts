@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-import { Server } from '@hapi/hapi';
+
+import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
@@ -43,6 +33,7 @@ import {
 import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
+import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo } from './types';
 
 /** @internal */
@@ -86,6 +77,7 @@ export class HttpServer {
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
+  private handleServerResponseEvent?: (req: Request) => void;
   private stopped = false;
 
   private readonly log: Logger;
@@ -122,6 +114,7 @@ export class HttpServer {
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
+    this.setupResponseLogging();
     this.setupRequestStateAssignment(config);
 
     return {
@@ -176,12 +169,6 @@ export class HttpServer {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
         };
 
-        // To work around https://github.com/hapijs/hapi/issues/4122 until v20, set the socket
-        // timeout on the route to a fake timeout only when the payload timeout is specified.
-        // Within the onPreAuth lifecycle of the route itself, we'll override the timeout with the
-        // real socket timeout.
-        const fakeSocketTimeout = timeout?.payload ? timeout.payload + 1 : undefined;
-
         this.server.route({
           handler: route.handler,
           method: route.method,
@@ -189,41 +176,25 @@ export class HttpServer {
           options: {
             auth: this.getAuthOption(authRequired),
             app: kibanaRouteOptions,
-            ext: {
-              onPreAuth: {
-                method: (request, h) => {
-                  // At this point, the socket timeout has only been set to work-around the HapiJS bug.
-                  // We need to either set the real per-route timeout or use the default idle socket timeout
-                  if (timeout?.idleSocket) {
-                    request.raw.req.socket.setTimeout(timeout.idleSocket);
-                  } else if (fakeSocketTimeout) {
-                    // NodeJS uses a socket timeout of `0` to denote "no timeout"
-                    request.raw.req.socket.setTimeout(this.config!.socketTimeout ?? 0);
-                  }
-
-                  return h.continue;
-                },
-              },
-            },
             tags: tags ? Array.from(tags) : undefined,
             // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
             validate,
-            payload: [allow, maxBytes, output, parse, timeout?.payload].some(
-              (v) => typeof v !== 'undefined'
-            )
+            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
+            payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
               ? {
                   allow,
                   maxBytes,
                   output,
                   parse,
                   timeout: timeout?.payload,
+                  multipart: true,
                 }
               : undefined,
             timeout: {
-              socket: fakeSocketTimeout,
+              socket: timeout?.idleSocket ?? this.config!.socketTimeout,
             },
           },
         });
@@ -248,6 +219,9 @@ export class HttpServer {
     const hasStarted = this.server.info.started > 0;
     if (hasStarted) {
       this.log.debug('stopping http server');
+      if (this.handleServerResponseEvent) {
+        this.server.events.removeListener('response', this.handleServerResponseEvent);
+      }
       await this.server.stop();
     }
   }
@@ -312,6 +286,24 @@ export class HttpServer {
         return h.continue;
       });
     }
+  }
+
+  private setupResponseLogging() {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`setupResponseLogging called after stop`);
+    }
+
+    const log = this.logger.get('http', 'server', 'response');
+
+    this.handleServerResponseEvent = (request) => {
+      const { message, ...meta } = getEcsResponseLog(request, this.log);
+      log.debug(message!, meta);
+    };
+
+    this.server.events.on('response', this.handleServerResponseEvent);
   }
 
   private setupRequestStateAssignment(config: HttpConfig) {

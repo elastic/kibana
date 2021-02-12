@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -35,10 +24,7 @@ export function getDashboardTitle(
 ): string {
   const isEditMode = viewMode === ViewMode.EDIT;
   let displayTitle: string;
-  const newDashboardTitle = i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
-    defaultMessage: 'New Dashboard',
-  });
-  const dashboardTitle = isNew ? newDashboardTitle : title;
+  const dashboardTitle = isNew ? getNewDashboardTitle() : title;
 
   if (isEditMode && isDirty) {
     displayTitle = i18n.translate('dashboard.strings.dashboardUnsavedEditTitle', {
@@ -89,10 +75,37 @@ export const dashboardFeatureCatalog = {
 /*
   Actions
 */
+export const dashboardCopyToDashboardAction = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.title', {
+      defaultMessage: 'Copy to dashboard',
+    }),
+  getCancelButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.cancel', {
+      defaultMessage: 'Cancel',
+    }),
+  getAcceptButtonName: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.goToDashboard', {
+      defaultMessage: 'Copy and go to dashboard',
+    }),
+  getNewDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
+      defaultMessage: 'New dashboard',
+    }),
+  getExistingDashboardOption: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
+      defaultMessage: 'Existing dashboard',
+    }),
+  getDescription: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.description', {
+      defaultMessage: "Select where to copy the panel. You're navigated to destination dashboard.",
+    }),
+};
+
 export const dashboardAddToLibraryAction = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.AddToLibrary', {
-      defaultMessage: 'Add to library',
+      defaultMessage: 'Save to library',
     }),
   getSuccessMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.addToLibrary.successMessage', {
@@ -134,7 +147,7 @@ export const dashboardExportCsvAction = {
     }),
   getUntitledFilename: () =>
     i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {
-      defaultMessage: 'unsaved',
+      defaultMessage: 'untitled',
     }),
 };
 
@@ -187,6 +200,11 @@ export const dashboardReplacePanelAction = {
 /*
   Dashboard Editor
 */
+export const getNewDashboardTitle = () =>
+  i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
+    defaultMessage: 'New Dashboard',
+  });
+
 export const shareModalStrings = {
   getTopMenuCheckbox: () =>
     i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
@@ -253,6 +271,44 @@ export const leaveConfirmStrings = {
     }),
 };
 
+export const createConfirmStrings = {
+  getCreateTitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
+      defaultMessage: 'New dashboard already in progress',
+    }),
+  getCreateSubtitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
+      defaultMessage: 'You can continue editing or start with a blank dashboard.',
+    }),
+  getStartOverButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Start over',
+    }),
+  getContinueButtonText: () => leaveConfirmStrings.getCancelButtonText(),
+  getCancelButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+};
+
+export const panelStorageErrorStrings = {
+  getPanelsGetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.getError', {
+      defaultMessage: 'Error encountered while fetching unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsSetError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.setError', {
+      defaultMessage: 'Error encountered while setting unsaved changes: {message}',
+      values: { message },
+    }),
+  getPanelsClearError: (message: string) =>
+    i18n.translate('dashboard.panelStorageError.clearError', {
+      defaultMessage: 'Error encountered while clearing unsaved changes: {message}',
+      values: { message },
+    }),
+};
+
 /*
   Empty Screen
 */
@@ -285,25 +341,13 @@ export const emptyScreenStrings = {
     i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
       defaultMessage: 'Edit dashboard',
     }),
-  getAddExistingVisualizationLinkText: () =>
-    i18n.translate('dashboard.addExistingVisualizationLinkText', {
-      defaultMessage: 'Add an existing',
+  getEmptyWidgetTitle: () =>
+    i18n.translate('dashboard.emptyWidget.addPanelTitle', {
+      defaultMessage: 'Add your first panel',
     }),
-  getAddExistingVisualizationLinkAriaLabel: () =>
-    i18n.translate('dashboard.addVisualizationLinkAriaLabel', {
-      defaultMessage: 'Add an existing visualization',
-    }),
-  getAddNewVisualizationDescription: () =>
-    i18n.translate('dashboard.addNewVisualizationText', {
-      defaultMessage: 'or new object to this dashboard',
-    }),
-  getCreateNewVisualizationButton: () =>
-    i18n.translate('dashboard.createNewVisualizationButton', {
-      defaultMessage: 'Create new',
-    }),
-  getCreateNewVisualizationButtonAriaLabel: () =>
-    i18n.translate('dashboard.createNewVisualizationButtonAriaLabel', {
-      defaultMessage: 'Create new visualization button',
+  getEmptyWidgetDescription: () =>
+    i18n.translate('dashboard.emptyWidget.addPanelDescription', {
+      defaultMessage: 'Create content that tells a story about your data.',
     }),
 };
 
@@ -328,5 +372,39 @@ export const dashboardListingTable = {
   getDescriptionColumnName: () =>
     i18n.translate('dashboard.listing.table.descriptionColumnName', {
       defaultMessage: 'Description',
+    }),
+};
+
+export const dashboardUnsavedListingStrings = {
+  getUnsavedChangesTitle: (plural = false) =>
+    i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
+      defaultMessage: 'You have unsaved changes in the following {dash}.',
+      values: {
+        dash: plural
+          ? dashboardListingTable.getEntityNamePlural()
+          : dashboardListingTable.getEntityName(),
+      },
+    }),
+  getLoadingTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.loading', {
+      defaultMessage: 'Loading',
+    }),
+  getEditAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.editAria', {
+      defaultMessage: 'Continue editing {title}',
+      values: { title },
+    }),
+  getEditTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.editTitle', {
+      defaultMessage: 'Continue editing',
+    }),
+  getDiscardAriaLabel: (title: string) =>
+    i18n.translate('dashboard.listing.unsaved.discardAria', {
+      defaultMessage: 'Discard changes to {title}',
+      values: { title },
+    }),
+  getDiscardTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.discardTitle', {
+      defaultMessage: 'Discard changes',
     }),
 };

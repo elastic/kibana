@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -23,6 +24,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   deleteTargetIndex,
   deleteIndexPattern,
   indexPatternExists,
+  isLoading,
   item,
   toggleDeleteIndex,
   toggleDeleteIndexPattern,
@@ -58,6 +60,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
         )}
         defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         buttonColor="danger"
+        confirmButtonDisabled={isLoading}
       >
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>

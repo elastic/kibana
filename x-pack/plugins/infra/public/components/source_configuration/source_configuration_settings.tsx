@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -25,6 +26,8 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { SourceLoadingPage } from '../source_loading_page';
 import { Prompt } from '../../utils/navigation_warning_prompt';
+import { MLConfigurationPanel } from './ml_configuration_panel';
+import { useInfraMLCapabilitiesContext } from '../../containers/ml/infra_ml_capabilities';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
@@ -51,7 +54,6 @@ export const SourceConfigurationSettings = ({
     formState,
     formStateChanges,
   } = useSourceConfigurationFormState(source && source.configuration);
-
   const persistUpdates = useCallback(async () => {
     if (sourceExists) {
       await updateSourceConfiguration(formStateChanges);
@@ -72,6 +74,8 @@ export const SourceConfigurationSettings = ({
     shouldAllowEdit,
     source,
   ]);
+
+  const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
   if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
@@ -124,6 +128,18 @@ export const SourceConfigurationSettings = ({
             />
           </EuiPanel>
           <EuiSpacer />
+          {hasInfraMLCapabilities && (
+            <>
+              <EuiPanel paddingSize="l">
+                <MLConfigurationPanel
+                  isLoading={isLoading}
+                  readOnly={!isWriteable}
+                  anomalyThresholdFieldProps={indicesConfigurationProps.anomalyThreshold}
+                />
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
           {errors.length > 0 ? (
             <>
               <EuiCallOut color="danger">

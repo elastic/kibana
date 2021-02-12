@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -72,7 +73,7 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.enrollmentInstructions.moreInstructionsText"
-          defaultMessage="See the {link} for more instructions and options."
+          defaultMessage="See the {link} for RPM / DEB deploy instructions."
           values={{
             link: (
               <EuiLink

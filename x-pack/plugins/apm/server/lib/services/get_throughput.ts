@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ESFilter } from '../../../../../typings/elasticsearch';
@@ -16,6 +17,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
+import { calculateThroughput } from '../helpers/calculate_throughput';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 interface Options {
@@ -27,9 +29,16 @@ interface Options {
 
 type ESResponse = PromiseReturnType<typeof fetcher>;
 
-function transform(response: ESResponse) {
-  const buckets = response.aggregations?.throughput?.buckets ?? [];
-  return buckets.map(({ key: x, doc_count: y }) => ({ x, y }));
+function transform(options: Options, response: ESResponse) {
+  if (response.hits.total.value === 0) {
+    return [];
+  }
+  const { start, end } = options.setup;
+  const buckets = response.aggregations?.throughput.buckets ?? [];
+  return buckets.map(({ key: x, doc_count: value }) => ({
+    x,
+    y: calculateThroughput({ start, end, value }),
+  }));
 }
 
 async function fetcher({
@@ -79,6 +88,6 @@ async function fetcher({
 
 export async function getThroughput(options: Options) {
   return {
-    throughput: transform(await fetcher(options)),
+    throughput: transform(options, await fetcher(options)),
   };
 }

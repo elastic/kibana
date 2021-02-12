@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { upperFirst } from 'lodash';
@@ -14,24 +15,31 @@ import { getDiffCalculation } from '../beats/_beats_stats';
 // @ts-ignore
 import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
-import { LegacyRequest, ElasticsearchResponse } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse, apmUuid: string) {
   if (!response.hits || response.hits.hits.length === 0) {
     return {};
   }
 
-  const firstStats = response.hits.hits[0].inner_hits.first_hit.hits.hits[0]._source.beats_stats;
-  const stats = response.hits.hits[0]._source.beats_stats;
+  const firstHit = response.hits.hits[0];
 
-  if (!firstStats || !stats) {
-    return {};
+  let firstStats = null;
+  const stats = firstHit._source.beats_stats ?? {};
+
+  if (
+    firstHit.inner_hits?.first_hit?.hits?.hits &&
+    firstHit.inner_hits?.first_hit?.hits?.hits.length > 0 &&
+    firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats
+  ) {
+    firstStats = firstHit.inner_hits.first_hit.hits.hits[0]._source.beats_stats;
   }
 
-  const eventsTotalFirst = firstStats.metrics?.libbeat?.pipeline?.events?.total;
-  const eventsEmittedFirst = firstStats.metrics?.libbeat?.pipeline?.events?.published;
-  const eventsDroppedFirst = firstStats.metrics?.libbeat?.pipeline?.events?.dropped;
-  const bytesWrittenFirst = firstStats.metrics?.libbeat?.output?.write?.bytes;
+  const eventsTotalFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.total;
+  const eventsEmittedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.published;
+  const eventsDroppedFirst = firstStats?.metrics?.libbeat?.pipeline?.events?.dropped;
+  const bytesWrittenFirst = firstStats?.metrics?.libbeat?.output?.write?.bytes;
 
   const eventsTotalLast = stats.metrics?.libbeat?.pipeline?.events?.total;
   const eventsEmittedLast = stats.metrics?.libbeat?.pipeline?.events?.published;

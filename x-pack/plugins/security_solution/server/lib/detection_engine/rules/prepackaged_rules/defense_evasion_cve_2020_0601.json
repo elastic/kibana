@@ -30,13 +30,20 @@
       },
       "technique": [
         {
-          "id": "T1116",
-          "name": "Code Signing",
-          "reference": "https://attack.mitre.org/techniques/T1116/"
+          "id": "T1553",
+          "name": "Subvert Trust Controls",
+          "reference": "https://attack.mitre.org/techniques/T1553/",
+          "subtechnique": [
+            {
+              "id": "T1553.002",
+              "name": "Code Signing",
+              "reference": "https://attack.mitre.org/techniques/T1553/002/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

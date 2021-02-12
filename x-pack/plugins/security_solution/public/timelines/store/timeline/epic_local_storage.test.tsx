@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -40,7 +41,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -61,6 +62,7 @@ describe('epicLocalStorage', () => {
   const sort: Sort[] = [
     {
       columnId: '@timestamp',
+      columnType: 'number',
       sortDirection: Direction.desc,
     },
   ];
@@ -80,7 +82,7 @@ describe('epicLocalStorage', () => {
       dataProviders: mockDataProviders,
       end: endDate,
       eventType: 'all',
-      expandedEvent: {},
+      expandedDetail: {},
       filters: [],
       isLive: false,
       itemsPerPage: 5,
@@ -89,13 +91,15 @@ describe('epicLocalStorage', () => {
       kqlQueryExpression: '',
       onEventClosed: jest.fn(),
       showCallOutUnauthorizedMsg: false,
-      showEventDetails: false,
+      showExpandedDetails: false,
       start: startDate,
       status: TimelineStatus.active,
       sort,
       timelineId: 'foo',
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 
@@ -166,6 +170,7 @@ describe('epicLocalStorage', () => {
         sort: [
           {
             columnId: 'event.severity',
+            columnType: 'number',
             sortDirection: Direction.desc,
           },
         ],

@@ -1,19 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { useRouteMatch } from 'react-router-dom';
 import { UptimeDatePicker } from '../uptime_date_picker';
 import { SyntheticsCallout } from '../../overview/synthetics_callout';
 import { PageTabs } from './page_tabs';
-import { CERTIFICATES_ROUTE, MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
 import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
+import { MonitorPageTitle } from '../../monitor/monitor_title';
+
+export interface Props {
+  showCertificateRefreshBtn?: boolean;
+  showDatePicker?: boolean;
+  showMonitorTitle?: boolean;
+  showTabs?: boolean;
+}
 
 const StyledPicker = styled(EuiFlexItem)`
   &&& {
@@ -31,35 +38,31 @@ const StyledPicker = styled(EuiFlexItem)`
   }
 `;
 
-export const PageHeader = () => {
-  const isCertRoute = useRouteMatch(CERTIFICATES_ROUTE);
-  const isSettingsRoute = useRouteMatch(SETTINGS_ROUTE);
-
-  const DatePickerComponent = () =>
-    isCertRoute ? (
-      <CertRefreshBtn />
-    ) : (
-      <StyledPicker grow={false} style={{ flexBasis: 485 }}>
-        <UptimeDatePicker />
-      </StyledPicker>
-    );
-
-  const isMonRoute = useRouteMatch(MONITOR_ROUTE);
-
+export const PageHeader = ({
+  showCertificateRefreshBtn = false,
+  showDatePicker = false,
+  showMonitorTitle = false,
+  showTabs = false,
+}: Props) => {
   return (
     <>
       <SyntheticsCallout />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap responsive={false}>
         <EuiFlexItem>
-          <PageTabs />
+          {showMonitorTitle && <MonitorPageTitle />}
+          {showTabs && <PageTabs />}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
-        {!isSettingsRoute && <DatePickerComponent />}
+        {showCertificateRefreshBtn && <CertRefreshBtn />}
+        {showDatePicker && (
+          <StyledPicker grow={false} style={{ flexBasis: 485 }}>
+            <UptimeDatePicker />
+          </StyledPicker>
+        )}
       </EuiFlexGroup>
-      {isMonRoute && <EuiHorizontalRule margin="m" />}
-      {!isMonRoute && <EuiSpacer size="m" />}
+      <EuiSpacer size="m" />
     </>
   );
 };

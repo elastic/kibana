@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { config } from './index';
@@ -39,5 +40,14 @@ describe('deprecations', () => {
         ]
       `);
     });
+  });
+
+  it('logs a warning if max_workers is over limit', () => {
+    const { messages } = applyTaskManagerDeprecations({ max_workers: 1000 });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "setting \\"xpack.task_manager.max_workers\\" (1000) greater than 100 is deprecated. Values greater than 100 will not be supported starting in 8.0.",
+      ]
+    `);
   });
 });

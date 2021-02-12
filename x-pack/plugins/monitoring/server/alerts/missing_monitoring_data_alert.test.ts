@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { MissingMonitoringDataAlert } from './missing_monitoring_data_alert';
 import { ALERT_MISSING_MONITORING_DATA } from '../../common/constants';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
@@ -131,6 +133,14 @@ describe('MissingMonitoringDataAlert', () => {
             nodeId,
             nodeName,
             gapDuration,
+            itemLabel: undefined,
+            meta: {
+              clusterUuid,
+              gapDuration,
+              limit: 86400000,
+              nodeId,
+              nodeName,
+            },
             ui: {
               isFiring: true,
               message: {

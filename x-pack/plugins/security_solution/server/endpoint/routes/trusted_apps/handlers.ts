@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandler, RequestHandlerContext } from 'kibana/server';
+import type { RequestHandler } from 'kibana/server';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { ExceptionListClient } from '../../../../../lists/server';
 
@@ -19,10 +21,13 @@ import {
   createTrustedApp,
   deleteTrustedApp,
   getTrustedAppsList,
+  getTrustedAppsSummary,
   MissingTrustedAppException,
 } from './service';
 
-const exceptionListClientFromContext = (context: RequestHandlerContext): ExceptionListClient => {
+const exceptionListClientFromContext = (
+  context: SecuritySolutionRequestHandlerContext
+): ExceptionListClient => {
   const exceptionLists = context.lists?.getExceptionListClient();
 
   if (!exceptionLists) {
@@ -34,7 +39,12 @@ const exceptionListClientFromContext = (context: RequestHandlerContext): Excepti
 
 export const getTrustedAppsDeleteRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<DeleteTrustedAppsRequestParams, undefined, undefined> => {
+): RequestHandler<
+  DeleteTrustedAppsRequestParams,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
@@ -55,7 +65,12 @@ export const getTrustedAppsDeleteRouteHandler = (
 
 export const getTrustedAppsListRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, GetTrustedAppsListRequest> => {
+): RequestHandler<
+  unknown,
+  GetTrustedAppsListRequest,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
@@ -72,13 +87,40 @@ export const getTrustedAppsListRouteHandler = (
 
 export const getTrustedAppsCreateRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
+): RequestHandler<
+  unknown,
+  unknown,
+  PostTrustedAppCreateRequest,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
     try {
       return res.ok({
         body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
+      });
+    } catch (error) {
+      logger.error(error);
+      return res.internalError({ body: error });
+    }
+  };
+};
+
+export const getTrustedAppsSummaryRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
+  unknown,
+  unknown,
+  PostTrustedAppCreateRequest,
+  SecuritySolutionRequestHandlerContext
+> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      return res.ok({
+        body: await getTrustedAppsSummary(exceptionListClientFromContext(context)),
       });
     } catch (error) {
       logger.error(error);

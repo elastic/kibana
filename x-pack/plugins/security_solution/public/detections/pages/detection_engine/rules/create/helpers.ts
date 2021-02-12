@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { has, isEmpty } from 'lodash/fp';
@@ -14,7 +15,12 @@ import { transformAlertToRuleAction } from '../../../../../../common/detection_e
 import { List } from '../../../../../../common/detection_engine/schemas/types';
 import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { Type } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  Threats,
+  ThreatSubtechnique,
+  ThreatTechnique,
+  Type,
+} from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
   AboutStepRule,
@@ -27,9 +33,6 @@ import {
   ActionsStepRuleJson,
   RuleStepsFormData,
   RuleStep,
-  IMitreEnterpriseAttack,
-  IMitreAttack,
-  IMitreAttackTechnique,
 } from '../types';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -164,7 +167,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   assertUnreachable(type);
 };
 
-function trimThreatsWithNoName<T extends IMitreAttack | IMitreAttackTechnique>(
+function trimThreatsWithNoName<T extends ThreatSubtechnique | ThreatTechnique>(
   filterable: T[]
 ): T[] {
   return filterable.filter((item) => item.name !== 'none');
@@ -173,7 +176,7 @@ function trimThreatsWithNoName<T extends IMitreAttack | IMitreAttackTechnique>(
 /**
  * Filter out unfilled/empty threat, technique, and subtechnique fields based on if their name is `none`
  */
-export const filterEmptyThreats = (threats: IMitreEnterpriseAttack[]): IMitreEnterpriseAttack[] => {
+export const filterEmptyThreats = (threats: Threats): Threats => {
   return threats
     .filter((singleThreat) => singleThreat.tactic.name !== 'none')
     .map((threat) => {
@@ -230,6 +233,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         saved_id: ruleFields.queryBar?.saved_id,
         threat_index: ruleFields.threatIndex,
         threat_query: ruleFields.threatQueryBar?.query?.query as string,
+        threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
       }

@@ -1,17 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Alert, SanitizedAlert } from '../../../alerts/common';
-import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
+import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerts/common';
+import {
+  AlertParamType,
+  AlertMessageTokenType,
+  AlertSeverity,
+  AlertClusterHealthType,
+} from '../enums';
 
-export type CommonAlert = Alert | SanitizedAlert;
+export type CommonAlert = Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: Alert | SanitizedAlert;
+  rawAlert: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 }
 
 export interface CommonAlertState {
@@ -22,11 +28,13 @@ export interface CommonAlertState {
 
 export interface CommonAlertFilter {
   nodeUuid?: string;
+  shardId?: string;
 }
 
 export interface CommonAlertParamDetail {
   label: string;
   type?: AlertParamType;
+  [name: string]: unknown | undefined;
 }
 
 export interface CommonAlertParamDetails {
@@ -37,6 +45,7 @@ export interface CommonAlertParams {
   duration: string;
   threshold?: number;
   limit?: string;
+  [key: string]: unknown;
 }
 
 export interface ThreadPoolRejectionsAlertParams {
@@ -56,6 +65,8 @@ export interface AlertInstanceState {
     | AlertDiskUsageState
     | AlertThreadPoolRejectionsState
     | AlertNodeState
+    | AlertLicenseState
+    | AlertNodesChangedState
   >;
   [x: string]: unknown;
 }
@@ -70,6 +81,7 @@ export interface AlertState {
 export interface AlertNodeState extends AlertState {
   nodeId: string;
   nodeName?: string;
+  meta: any;
   [key: string]: unknown;
 }
 
@@ -92,6 +104,14 @@ export interface AlertThreadPoolRejectionsState extends AlertState {
   nodeName?: string;
 }
 
+export interface AlertLicenseState extends AlertState {
+  expiryDateMS: number;
+}
+
+export interface AlertNodesChangedState extends AlertState {
+  node: AlertClusterStatsNode;
+}
+
 export interface AlertUiState {
   isFiring: boolean;
   resolvedMS?: number;
@@ -103,6 +123,7 @@ export interface AlertUiState {
 
 export interface AlertMessage {
   text: string; // Do this. #link this is a link #link
+  code?: string;
   nextSteps?: AlertMessage[];
   tokens?: AlertMessageToken[];
 }
@@ -165,6 +186,32 @@ export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
 export interface AlertMissingData extends AlertNodeStats {
   gapDuration: number;
 }
+export interface CCRReadExceptionsStats {
+  remoteCluster: string;
+  followerIndex: string;
+  shardId: number;
+  leaderIndex: string;
+  lastReadException: { type: string; reason: string };
+  clusterUuid: string;
+  ccs: string;
+}
+
+export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
+  instanceId: string;
+  itemLabel: string;
+}
+
+export interface IndexShardSizeStats extends AlertNodeStats {
+  shardIndex: string;
+  shardSize: number;
+}
+
+export interface IndexShardSizeUIMeta extends IndexShardSizeStats {
+  shardIndex: string;
+  shardSize: number;
+  instanceId: string;
+  itemLabel: string;
+}
 
 export interface AlertData {
   nodeName?: string;
@@ -196,4 +243,37 @@ export interface LegacyAlertNodesChangedList {
   removed: { [nodeName: string]: string };
   added: { [nodeName: string]: string };
   restarted: { [nodeName: string]: string };
+}
+
+export interface AlertLicense {
+  status: string;
+  type: string;
+  expiryDateMS: number;
+  clusterUuid: string;
+  ccs?: string;
+}
+
+export interface AlertClusterStatsNodes {
+  clusterUuid: string;
+  recentNodes: AlertClusterStatsNode[];
+  priorNodes: AlertClusterStatsNode[];
+  ccs?: string;
+}
+
+export interface AlertClusterStatsNode {
+  nodeUuid: string;
+  nodeEphemeralId?: string;
+  nodeName?: string;
+}
+
+export interface AlertClusterHealth {
+  health: AlertClusterHealthType;
+  clusterUuid: string;
+  ccs?: string;
+}
+
+export interface AlertVersions {
+  clusterUuid: string;
+  ccs?: string;
+  versions: string[];
 }

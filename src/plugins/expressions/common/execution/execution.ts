@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +12,7 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
-import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
+import { RequestAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,
@@ -34,11 +23,13 @@ import {
   ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, ExpressionValue } from '../expression_types';
+import { getType, ExpressionValue, Datatable } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
+import { TablesAdapter } from '../util/tables_adapter';
+import { ExpressionsInspectorAdapter } from '../util/expressions_inspector_adapter';
 
 /**
  * AbortController is not available in Node until v15, so we
@@ -72,7 +63,8 @@ export interface ExecutionParams {
 
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
   requests: new RequestAdapter(),
-  data: new DataAdapter(),
+  tables: new TablesAdapter(),
+  expression: new ExpressionsInspectorAdapter(),
 });
 
 export class Execution<
@@ -166,6 +158,9 @@ export class Execution<
       ast,
     });
 
+    const inspectorAdapters =
+      execution.params.inspectorAdapters || createDefaultInspectorAdapters();
+
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
@@ -175,7 +170,11 @@ export class Execution<
       variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
-      inspectorAdapters: execution.params.inspectorAdapters || createDefaultInspectorAdapters(),
+      inspectorAdapters,
+      logDatatable: (name: string, datatable: Datatable) => {
+        inspectorAdapters.tables[name] = datatable;
+      },
+      isSyncColorsEnabled: () => execution.params.syncColors,
       ...(execution.params as any).extraContext,
     };
   }
@@ -211,6 +210,9 @@ export class Execution<
     this.firstResultFuture.promise
       .then(
         (result) => {
+          if (this.context.inspectorAdapters.expression) {
+            this.context.inspectorAdapters.expression.logAST(this.state.get().ast);
+          }
           this.state.transitions.setResult(result);
         },
         (error) => {

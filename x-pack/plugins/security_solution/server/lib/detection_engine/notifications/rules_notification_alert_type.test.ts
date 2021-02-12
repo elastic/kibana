@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
@@ -10,6 +11,12 @@ import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { NotificationExecutorOptions } from './types';
+import {
+  sampleDocSearchResultsNoSortIdNoVersion,
+  sampleDocSearchResultsWithSortId,
+  sampleEmptyDocSearchResults,
+} from '../signals/__mocks__/es_results';
+import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
 jest.mock('./build_signals_query');
 
 describe('rules_notification_alert_type', () => {
@@ -63,9 +70,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 0,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
 
       await alert.executor(payload);
 
@@ -75,6 +80,7 @@ describe('rules_notification_alert_type', () => {
           index: '.siem-signals',
           ruleId: 'rule-1',
           to: '1576341633400',
+          size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
         })
       );
     });
@@ -88,9 +94,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 10,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
 
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
@@ -114,9 +118,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 10,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -141,9 +143,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 10,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -165,9 +165,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 0,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleEmptyDocSearchResults());
 
       await alert.executor(payload);
 
@@ -182,9 +180,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 10,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortIdNoVersion());
 
       await alert.executor(payload);
 
@@ -192,7 +188,7 @@ describe('rules_notification_alert_type', () => {
 
       const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledWith(
-        expect.objectContaining({ signals_count: 10 })
+        expect.objectContaining({ signals_count: 100 })
       );
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',

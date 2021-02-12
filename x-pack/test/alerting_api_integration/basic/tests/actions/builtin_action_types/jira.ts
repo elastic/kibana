@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -11,26 +12,6 @@ import {
   ExternalServiceSimulator,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
-// node ../scripts/functional_test_runner.js --grep "Actions.servicenddd" --config=test/alerting_api_integration/security_and_spaces/config.ts
-
-const mapping = [
-  {
-    source: 'title',
-    target: 'summary',
-    actionType: 'nothing',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    actionType: 'nothing',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'nothing',
-  },
-];
-
 // eslint-disable-next-line import/no-default-export
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -38,21 +19,20 @@ export default function jiraTest({ getService }: FtrProviderContext) {
   const mockJira = {
     config: {
       apiUrl: 'www.jiraisinkibanaactions.com',
-      incidentConfiguration: { mapping: [...mapping] },
-      isCaseOwned: true,
     },
     secrets: {
       email: 'elastic',
       apiToken: 'changeme',
     },
     params: {
-      savedObjectId: '123',
-      title: 'a title',
-      description: 'a description',
-      labels: ['kibana'],
-      issueType: '10006',
-      priority: 'High',
-      externalId: null,
+      incident: {
+        summary: 'a title',
+        description: 'a description',
+        labels: ['kibana'],
+        issueType: '10006',
+        priority: 'High',
+        externalId: null,
+      },
       comments: [
         {
           commentId: '456',
@@ -81,8 +61,6 @@ export default function jiraTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: jiraSimulatorURL,
             projectKey: 'CK',
-            incidentConfiguration: { ...mockJira.config.incidentConfiguration },
-            isCaseOwned: true,
           },
           secrets: mockJira.secrets,
         })

@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { ReactNode, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface GenericConfirmationModalProps {
   description: ReactNode;
@@ -55,7 +56,7 @@ export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> =
           <p>
             <strong>{subheading}</strong>
           </p>
-          <p>{description}</p>
+          {description}
         </EuiText>
         <EuiSpacer />
         <EuiFormRow

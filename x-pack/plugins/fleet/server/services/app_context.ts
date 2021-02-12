@@ -1,16 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, HttpServiceSetup, Logger, KibanaRequest } from 'src/core/server';
+import { kibanaPackageJson } from '@kbn/utils';
+
+import {
+  ElasticsearchClient,
+  SavedObjectsServiceStart,
+  HttpServiceSetup,
+  Logger,
+  KibanaRequest,
+} from 'src/core/server';
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
-import packageJSON from '../../../../../package.json';
 import { SecurityPluginStart } from '../../../security/server';
 import { FleetConfigType } from '../../common';
 import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
@@ -19,19 +28,21 @@ import { CloudSetup } from '../../../cloud/server';
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private esClient: ElasticsearchClient | undefined;
   private security: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
-  private kibanaVersion: FleetAppContext['kibanaVersion'] = packageJSON.version;
-  private kibanaBranch: FleetAppContext['kibanaBranch'] = packageJSON.branch;
+  private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
+  private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
   public async start(appContext: FleetAppContext) {
+    this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
     this.security = appContext.security;
@@ -96,10 +107,18 @@ class AppContextService {
   }
 
   public getInternalUserSOClient(request: KibanaRequest) {
-    // soClient as kibana internal users, be carefull on how you use it, security is not enabled
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
       excludedWrappers: ['security'],
     });
+  }
+
+  public getInternalUserESClient() {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch start service not set.');
+    }
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return this.esClient;
   }
 
   public getIsProductionMode() {
@@ -114,10 +133,6 @@ class AppContextService {
   }
 
   public getEncryptedSavedObjectsSetup() {
-    if (!this.encryptedSavedObjectsSetup) {
-      throw new Error('encryptedSavedObjectsSetup is not set');
-    }
-
     return this.encryptedSavedObjectsSetup;
   }
 

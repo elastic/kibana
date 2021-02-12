@@ -1,19 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
 
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useShallowEqualSelector,
+  useDeepEqualSelector,
+} from '../../../../common/hooks/use_selector';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTabs } from '../../../store/timeline/model';
-import { getActiveTabSelector, getShowTimelineSelector } from './selectors';
+import {
+  getActiveTabSelector,
+  getNoteIdsSelector,
+  getNotesSelector,
+  getPinnedEventSelector,
+  getShowTimelineSelector,
+  getEventIdToNoteIdsSelector,
+} from './selectors';
 import * as i18n from './translations';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisible = false }) => ({
@@ -28,9 +39,10 @@ const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(({ $isVisibl
 const QueryTabContent = lazy(() => import('../query_tab_content'));
 const GraphTabContent = lazy(() => import('../graph_tab_content'));
 const NotesTabContent = lazy(() => import('../notes_tab_content'));
+const PinnedTabContent = lazy(() => import('../pinned_tab_content'));
 
 interface BasicTimelineTab {
-  timelineId: string;
+  timelineId: TimelineId;
   graphEventId?: string;
 }
 
@@ -57,7 +69,7 @@ NotesTab.displayName = 'NotesTab';
 
 const PinnedTab: React.FC<BasicTimelineTab> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
-    <QueryTabContent timelineId={timelineId} />
+    <PinnedTabContent timelineId={timelineId} />
   </Suspense>
 ));
 PinnedTab.displayName = 'PinnedTab';
@@ -72,13 +84,16 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(({ activeTimelineTab, tim
           return <GraphTab timelineId={timelineId} />;
         case TimelineTabs.notes:
           return <NotesTab timelineId={timelineId} />;
-        case TimelineTabs.pinned:
-          return <PinnedTab timelineId={timelineId} />;
         default:
           return null;
       }
     },
     [timelineId]
+  );
+
+  const isGraphOrNotesTabs = useMemo(
+    () => [TimelineTabs.graph, TimelineTabs.notes].includes(activeTimelineTab),
+    [activeTimelineTab]
   );
 
   /* Future developer -> why are we doing that
@@ -91,14 +106,21 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(({ activeTimelineTab, tim
       <HideShowContainer $isVisible={TimelineTabs.query === activeTimelineTab}>
         <QueryTab timelineId={timelineId} />
       </HideShowContainer>
-      <HideShowContainer $isVisible={TimelineTabs.query !== activeTimelineTab}>
-        {activeTimelineTab !== TimelineTabs.query && getTab(activeTimelineTab)}
+      <HideShowContainer $isVisible={TimelineTabs.pinned === activeTimelineTab}>
+        <PinnedTab timelineId={timelineId} />
+      </HideShowContainer>
+      <HideShowContainer $isVisible={isGraphOrNotesTabs}>
+        {isGraphOrNotesTabs && getTab(activeTimelineTab)}
       </HideShowContainer>
     </>
   );
 });
 
 ActiveTimelineTab.displayName = 'ActiveTimelineTab';
+
+const CountBadge = styled(EuiBadge)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
 
 const StyledEuiTab = styled(EuiTab)`
   > span {
@@ -120,38 +142,60 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
+  const getNumberOfPinnedEvents = useMemo(() => getPinnedEventSelector(), []);
+  const getAppNotes = useMemo(() => getNotesSelector(), []);
+  const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
+  const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
+
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
+  const numberOfPinnedEvents = useShallowEqualSelector((state) =>
+    getNumberOfPinnedEvents(state, timelineId)
+  );
+  const globalTimelineNoteIds = useDeepEqualSelector((state) =>
+    getTimelineNoteIds(state, timelineId)
+  );
+  const eventIdToNoteIds = useDeepEqualSelector((state) =>
+    getTimelinePinnedEventNotes(state, timelineId)
+  );
+  const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
+
+  const allTimelineNoteIds = useMemo(() => {
+    const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
+      (acc, v) => [...acc, ...v],
+      []
+    );
+    return [...globalTimelineNoteIds, ...eventNoteIds];
+  }, [globalTimelineNoteIds, eventIdToNoteIds]);
+
+  const numberOfNotes = useMemo(
+    () => appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length,
+    [appNotes, allTimelineNoteIds]
+  );
 
   const setQueryAsActiveTab = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
     dispatch(
       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query })
     );
   }, [dispatch, timelineId]);
 
-  const setGraphAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph })
-      ),
-    [dispatch, timelineId]
-  );
+  const setGraphAsActiveTab = useCallback(() => {
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph })
+    );
+  }, [dispatch, timelineId]);
 
   const setNotesAsActiveTab = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
     dispatch(
       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes })
     );
   }, [dispatch, timelineId]);
 
-  const setPinnedAsActiveTab = useCallback(
-    () =>
-      dispatch(
-        timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
-      ),
-    [dispatch, timelineId]
-  );
+  const setPinnedAsActiveTab = useCallback(() => {
+    dispatch(
+      timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
+    );
+  }, [dispatch, timelineId]);
 
   useEffect(() => {
     if (!graphEventId && activeTab === TimelineTabs.graph) {
@@ -179,26 +223,35 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
           disabled={!graphEventId}
           key={TimelineTabs.graph}
         >
-          {i18n.GRAPH_TAB}
+          {i18n.ANALYZER_TAB}
         </EuiTab>
-        <EuiTab
+        <StyledEuiTab
           data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
           onClick={setNotesAsActiveTab}
           isSelected={activeTab === TimelineTabs.notes}
           disabled={false}
           key={TimelineTabs.notes}
         >
-          {i18n.NOTES_TAB}
-        </EuiTab>
-        <EuiTab
+          <span>{i18n.NOTES_TAB}</span>
+          {showTimeline && numberOfNotes > 0 && (
+            <div>
+              <CountBadge>{numberOfNotes}</CountBadge>
+            </div>
+          )}
+        </StyledEuiTab>
+        <StyledEuiTab
           data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
           onClick={setPinnedAsActiveTab}
           isSelected={activeTab === TimelineTabs.pinned}
-          disabled={true}
           key={TimelineTabs.pinned}
         >
-          {i18n.PINNED_TAB}
-        </EuiTab>
+          <span>{i18n.PINNED_TAB}</span>
+          {showTimeline && numberOfPinnedEvents > 0 && (
+            <div>
+              <CountBadge>{numberOfPinnedEvents}</CountBadge>
+            </div>
+          )}
+        </StyledEuiTab>
       </EuiTabs>
       <ActiveTimelineTab activeTimelineTab={activeTab} timelineId={timelineId} />
     </>

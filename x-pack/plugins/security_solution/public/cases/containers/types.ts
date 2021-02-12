@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -11,11 +12,16 @@ import {
   CaseConnector,
   CommentRequest,
   CaseStatuses,
+  CaseAttributes,
+  CasePatchRequest,
+  CaseType,
+  AssociationType,
 } from '../../../../case/common/api';
 
 export { CaseConnector, ActionConnector } from '../../../../case/common/api';
 
 export type Comment = CommentRequest & {
+  associationType: AssociationType;
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
@@ -59,10 +65,13 @@ export interface Case {
   status: CaseStatuses;
   tags: string[];
   title: string;
+  totalAlerts: number;
   totalComment: number;
+  type: CaseType;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
+  settings: CaseAttributes['settings'];
 }
 
 export interface QueryParams {
@@ -129,4 +138,24 @@ export interface ActionLicense {
 export interface DeleteCase {
   id: string;
   title?: string;
+}
+
+export interface FieldMappings {
+  id: string;
+  title?: string;
+}
+
+export type UpdateKey = keyof Pick<
+  CasePatchRequest,
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+>;
+
+export interface UpdateByKey {
+  updateKey: UpdateKey;
+  updateValue: CasePatchRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string) => void;
+  updateCase?: (newCase: Case) => void;
+  caseData: Case;
+  onSuccess?: () => void;
+  onError?: () => void;
 }

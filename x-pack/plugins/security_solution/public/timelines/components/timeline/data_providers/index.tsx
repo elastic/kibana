@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { rgba } from 'polished';
@@ -23,6 +24,8 @@ import { Providers } from './providers';
 import { useManageTimeline } from '../../manage_timeline';
 import { timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
+
+import * as i18n from './translations';
 
 interface Props {
   timelineId: string;
@@ -96,7 +99,10 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const droppableId = useMemo(() => getDroppableId(timelineId), [timelineId]);
 
   return (
-    <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
+    <DropTargetDataProvidersContainer
+      aria-label={i18n.QUERY_AREA_ARIA_LABEL}
+      className="drop-target-data-providers-container"
+    >
       <DropTargetDataProviders
         className="drop-target-data-providers"
         data-test-subj="dataProviders"

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fs from 'fs';
@@ -43,7 +44,7 @@ import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import { MlJobsStatsResponse } from '../job_service/jobs';
+import { MlJobsStatsResponse } from '../../../common/types/job_service';
 import { JobSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';
@@ -248,6 +249,8 @@ export class DataRecognizer {
         }
       })
     );
+
+    results.sort((res1, res2) => res1.id.localeCompare(res2.id));
 
     return results;
   }
@@ -488,6 +491,7 @@ export class DataRecognizer {
           const startedDatafeed = startResults[df.id];
           if (startedDatafeed !== undefined) {
             df.started = startedDatafeed.started;
+            df.awaitingMlNodeAllocation = startedDatafeed.awaitingMlNodeAllocation;
             if (startedDatafeed.error !== undefined) {
               df.error = startedDatafeed.error;
             }
@@ -531,7 +535,7 @@ export class DataRecognizer {
       const jobInfo = await this._jobsService.jobsExist(jobIds);
 
       // Check if the value for any of the jobs is false.
-      const doJobsExist = Object.values(jobInfo).includes(false) === false;
+      const doJobsExist = Object.values(jobInfo).every((j) => j.exists === true);
       results.jobsExist = doJobsExist;
 
       if (doJobsExist === true) {
@@ -746,9 +750,20 @@ export class DataRecognizer {
       datafeeds.map(async (datafeed) => {
         try {
           await this.saveDatafeed(datafeed);
-          return { id: datafeed.id, success: true, started: false };
+          return {
+            id: datafeed.id,
+            success: true,
+            started: false,
+            awaitingMlNodeAllocation: false,
+          };
         } catch ({ body }) {
-          return { id: datafeed.id, success: false, started: false, error: body };
+          return {
+            id: datafeed.id,
+            success: false,
+            started: false,
+            awaitingMlNodeAllocation: false,
+            error: body,
+          };
         }
       })
     );
@@ -808,11 +823,18 @@ export class DataRecognizer {
           duration.end = (end as unknown) as string;
         }
 
-        await this._mlClient.startDatafeed({
+        const {
+          body: { started, node },
+        } = await this._mlClient.startDatafeed<{
+          started: boolean;
+          node: string;
+        }>({
           datafeed_id: datafeed.id,
           ...duration,
         });
-        result.started = true;
+
+        result.started = started;
+        result.awaitingMlNodeAllocation = node?.length === 0;
       } catch ({ body }) {
         result.started = false;
         result.error = body;
@@ -842,6 +864,7 @@ export class DataRecognizer {
         if (d.id === d2.id) {
           d.success = d2.success;
           d.started = d2.started;
+          d.awaitingMlNodeAllocation = d2.awaitingMlNodeAllocation;
           if (d2.error !== undefined) {
             d.error = d2.error;
           }

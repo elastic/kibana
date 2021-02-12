@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Map as MbMap, Layer as MbLayer } from 'mapbox-gl';
@@ -26,6 +27,10 @@ export function getIsTextLayer(mbLayer: MbLayer) {
   return styleNames.some((styleName) => {
     return styleName.startsWith('text-');
   });
+}
+
+export function isGlDrawLayer(mbLayerId: string) {
+  return mbLayerId.startsWith('gl-draw');
 }
 
 function doesMbLayerBelongToMapLayerAndClass(
@@ -117,6 +122,18 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
     moveMapLayer(mbMap, mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
   }
   let beneathMbLayerId = getBottomMbLayerId(mbLayers, spatialFiltersLayer, LAYER_CLASS.ANY);
+
+  // Ensure gl-draw layers are on top of all layerList layers
+  const glDrawLayer = ({
+    ownsMbLayerId: (mbLayerId: string) => {
+      return isGlDrawLayer(mbLayerId);
+    },
+  } as unknown) as ILayer;
+  moveMapLayer(mbMap, mbLayers, glDrawLayer, LAYER_CLASS.ANY, beneathMbLayerId);
+  const glDrawBottomMbLayerId = getBottomMbLayerId(mbLayers, glDrawLayer, LAYER_CLASS.ANY);
+  if (glDrawBottomMbLayerId) {
+    beneathMbLayerId = glDrawBottomMbLayerId;
+  }
 
   // Sort map layer labels
   [...layerList]

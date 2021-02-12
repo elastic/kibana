@@ -142,6 +142,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>
@@ -206,6 +207,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>
@@ -382,6 +384,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 <button
                   aria-label="Border white"
                   className="euiLink euiLink--primary"
+                  disabled={false}
                   onClick={[Function]}
                   style={
                     Object {
@@ -546,6 +549,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
+                    size="s"
                   />
                 </span>
               </div>
@@ -610,6 +614,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     aria-hidden="true"
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
+                    size="s"
                   />
                 </span>
               </div>
@@ -785,6 +790,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
               <button
                 aria-label="Border black"
                 className="euiLink euiLink--primary"
+                disabled={false}
                 onClick={[Function]}
                 style={
                   Object {
@@ -960,6 +966,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>
@@ -1024,6 +1031,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       aria-hidden="true"
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
+                      size="s"
                     />
                   </span>
                 </div>
@@ -1200,6 +1208,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 <button
                   aria-label="Border white"
                   className="euiLink euiLink--primary"
+                  disabled={false}
                   onClick={[Function]}
                   style={
                     Object {

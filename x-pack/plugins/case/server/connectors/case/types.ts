@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { TypeOf } from '@kbn/config-schema';
@@ -15,7 +16,7 @@ import {
   ConnectorSchema,
   CommentSchema,
 } from './schema';
-import { CaseResponse, CasesResponse } from '../../../common/api';
+import { CaseResponse, CasesResponse, CollectionWithSubCaseResponse } from '../../../common/api';
 
 export type CaseConfiguration = TypeOf<typeof CaseConfigurationSchema>;
 export type Connector = TypeOf<typeof ConnectorSchema>;
@@ -28,7 +29,7 @@ export type ExecutorSubActionAddCommentParams = TypeOf<
 >;
 
 export type CaseExecutorParams = TypeOf<typeof CaseExecutorParamsSchema>;
-export type CaseExecutorResponse = CaseResponse | CasesResponse;
+export type CaseExecutorResponse = CaseResponse | CasesResponse | CollectionWithSubCaseResponse;
 
 export type CaseActionType = ActionType<
   CaseConfiguration,

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -16,10 +17,24 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
       checkGroup: schema.string(),
       _debug: schema.maybe(schema.boolean()),
     }),
+    query: schema.object({
+      // provides a filter for the types of synthetic events to include
+      // when fetching a journey's data
+      syntheticEventTypes: schema.maybe(
+        schema.oneOf([schema.arrayOf(schema.string()), schema.string()])
+      ),
+    }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { checkGroup } = request.params;
+    const { syntheticEventTypes } = request.query;
     const result = await libs.requests.getJourneySteps({
+      uptimeEsClient,
+      checkGroup,
+      syntheticEventTypes,
+    });
+
+    const details = await libs.requests.getJourneyDetails({
       uptimeEsClient,
       checkGroup,
     });
@@ -27,6 +42,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
     return {
       checkGroup,
       steps: result,
+      details,
     };
   },
 });

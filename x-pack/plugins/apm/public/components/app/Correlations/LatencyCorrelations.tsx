@@ -1,30 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   ScaleType,
   Chart,
-  LineSeries,
   Axis,
-  CurveType,
   BarSeries,
   Position,
-  timeFormatter,
   Settings,
 } from '@elastic/charts';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBox,
+  EuiAccordion,
+  EuiFormRow,
+  EuiFieldNumber,
+} from '@elastic/eui';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import {
-  APIReturnType,
-  callApmApi,
-} from '../../../services/rest/createCallApmApi';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { SignificantTermsTable } from './SignificantTermsTable';
 import { ChartContainer } from '../../shared/charts/chart_container';
 
@@ -36,52 +39,67 @@ type SignificantTerm = NonNullable<
   CorrelationsApiResponse['significantTerms']
 >[0];
 
+const initialFieldNames = [
+  'user.username',
+  'user.id',
+  'host.ip',
+  'user_agent.name',
+  'kubernetes.pod.uuid',
+  'kubernetes.pod.name',
+  'url.domain',
+  'container.id',
+  'service.node.name',
+].map((label) => ({ label }));
+
 export function LatencyCorrelations() {
   const [
     selectedSignificantTerm,
     setSelectedSignificantTerm,
   ] = useState<SignificantTerm | null>(null);
 
+  const [fieldNames, setFieldNames] = useState(initialFieldNames);
+  const [durationPercentile, setDurationPercentile] = useState('50');
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionName, transactionType, start, end } = urlParams;
 
-  const { data, status } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        endpoint: 'GET /api/apm/correlations/slow_transactions',
-        params: {
-          query: {
-            serviceName,
-            transactionName,
-            transactionType,
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-            durationPercentile: '50',
-            fieldNames:
-              'user.username,user.id,host.ip,user_agent.name,kubernetes.pod.uuid,kubernetes.pod.name,url.domain,container.id,service.node.name',
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi({
+          endpoint: 'GET /api/apm/correlations/slow_transactions',
+          params: {
+            query: {
+              serviceName,
+              transactionName,
+              transactionType,
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters),
+              durationPercentile,
+              fieldNames: fieldNames.map((field) => field.label).join(','),
+            },
           },
-        },
-      });
-    }
-  }, [serviceName, start, end, transactionName, transactionType, uiFilters]);
+        });
+      }
+    },
+    [
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+      uiFilters,
+      durationPercentile,
+      fieldNames,
+    ]
+  );
 
   return (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h4>Average latency over time</h4>
-              </EuiTitle>
-              <LatencyTimeseriesChart
-                data={data}
-                status={status}
-                selectedSignificantTerm={selectedSignificantTerm}
-              />
-            </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">
                 <h4>Latency distribution</h4>
@@ -95,7 +113,41 @@ export function LatencyCorrelations() {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
+          <EuiAccordion id="accordion" buttonContent="Customize">
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1}>
+                <EuiFormRow label="Threshold">
+                  <EuiFieldNumber
+                    value={durationPercentile}
+                    onChange={(e) =>
+                      setDurationPercentile(e.currentTarget.value)
+                    }
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={4}>
+                <EuiFormRow
+                  fullWidth={true}
+                  label="Field"
+                  helpText="Fields to analyse for correlations"
+                >
+                  <EuiComboBox
+                    fullWidth={true}
+                    placeholder="Select or create options"
+                    selectedOptions={fieldNames}
+                    onChange={setFieldNames}
+                    onCreateOption={(term) => {
+                      setFieldNames((names) => [...names, { label: term }]);
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiAccordion>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <SignificantTermsTable
+            cardinalityColumnName="# of slow transactions"
             significantTerms={data?.significantTerms}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
@@ -104,20 +156,6 @@ export function LatencyCorrelations() {
       </EuiFlexGroup>
     </>
   );
-}
-
-function getTimeseriesYMax(data?: CorrelationsApiResponse) {
-  if (!data?.overall) {
-    return 0;
-  }
-
-  const yValues = [
-    ...data.overall.timeseries.map((p) => p.y ?? 0),
-    ...data.significantTerms.flatMap((term) =>
-      term.timeseries.map((p) => p.y ?? 0)
-    ),
-  ];
-  return Math.max(...yValues);
 }
 
 function getDistributionYMax(data?: CorrelationsApiResponse) {
@@ -132,65 +170,6 @@ function getDistributionYMax(data?: CorrelationsApiResponse) {
     ),
   ];
   return Math.max(...yValues);
-}
-
-function LatencyTimeseriesChart({
-  data,
-  selectedSignificantTerm,
-  status,
-}: {
-  data?: CorrelationsApiResponse;
-  selectedSignificantTerm: SignificantTerm | null;
-  status: FETCH_STATUS;
-}) {
-  const dateFormatter = timeFormatter('HH:mm:ss');
-
-  const yMax = getTimeseriesYMax(data);
-  const durationFormatter = getDurationFormatter(yMax);
-
-  return (
-    <ChartContainer height={200} hasData={!!data} status={status}>
-      <Chart>
-        <Settings showLegend legendPosition={Position.Bottom} />
-
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          showOverlappingTicks
-          tickFormat={dateFormatter}
-        />
-        <Axis
-          id="left"
-          position={Position.Left}
-          domain={{ min: 0, max: yMax }}
-          tickFormat={(d) => durationFormatter(d).formatted}
-        />
-
-        <LineSeries
-          id="Overall latency"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={data?.overall?.timeseries || []}
-          curve={CurveType.CURVE_MONOTONE_X}
-        />
-
-        {selectedSignificantTerm !== null ? (
-          <LineSeries
-            id="Latency for selected term"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'x'}
-            yAccessors={['y']}
-            color="red"
-            data={selectedSignificantTerm.timeseries}
-            curve={CurveType.CURVE_MONOTONE_X}
-          />
-        ) : null}
-      </Chart>
-    </ChartContainer>
-  );
 }
 
 function LatencyDistributionChart({

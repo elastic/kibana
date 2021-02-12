@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -53,6 +54,12 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       if (
         typeof datafeedConfig?.script_fields === 'object' &&
         datafeedConfig.script_fields.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        typeof datafeedConfig?.runtime_mappings === 'object' &&
+        datafeedConfig.runtime_mappings.hasOwnProperty(fieldName)
       ) {
         aggregatableFields.push(fieldName);
       }
@@ -133,6 +140,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       mustCriteria.push(query);
     }
 
+    const runtimeMappings: any = {};
     const aggs = fieldsToAgg.reduce(
       (obj, field) => {
         if (
@@ -140,6 +148,12 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
           datafeedConfig.script_fields.hasOwnProperty(field)
         ) {
           obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
+        } else if (
+          typeof datafeedConfig?.runtime_mappings === 'object' &&
+          datafeedConfig.runtime_mappings.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { field } };
+          runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
         } else {
           obj[field] = { cardinality: { field } };
         }
@@ -161,6 +175,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         excludes: [],
       },
       aggs,
+      ...runtimeMappings,
     };
 
     const {

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'>
+rowClickTrigger: Trigger
 ```

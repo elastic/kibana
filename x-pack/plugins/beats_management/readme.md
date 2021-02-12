@@ -7,7 +7,13 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 ### Unit tests
 
-From `~/kibana/x-pack`, run `node scripts/jest.js plugins/beats --watch`.
+Run Jest tests:
+
+Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
+```
+yarn test:jest x-pack/plugins/beats --watch
+```
 
 ### API tests
 

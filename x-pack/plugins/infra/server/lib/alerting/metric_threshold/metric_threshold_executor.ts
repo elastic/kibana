@@ -1,27 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { RecoveredActionGroup } from '../../../../../alerts/common';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
-  buildRecoveredAlertReason,
+  // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
 import { createFormatter } from '../../../../common/formatters';
-import { AlertStates } from './types';
-import { evaluateAlert } from './lib/evaluate_alert';
+import { AlertStates, Comparator } from './types';
+import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
+import {
+  MetricThresholdAlertExecutorOptions,
+  MetricThresholdAlertType,
+} from './register_metric_threshold_alert_type';
 
-export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
-  async function (options: AlertExecutorOptions) {
+export const createMetricThresholdExecutor = (
+  libs: InfraBackendLibs
+): MetricThresholdAlertType['executor'] =>
+  async function (options: MetricThresholdAlertExecutorOptions) {
     const { services, params } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
@@ -36,19 +43,21 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       sourceId || 'default'
     );
     const config = source.configuration;
-    const alertResults = await evaluateAlert(services.callCluster, params, config);
+    const alertResults = await evaluateAlert(
+      services.callCluster,
+      params as EvaluatedAlertParams,
+      config
+    );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
     const groups = Object.keys(first(alertResults)!);
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${group}`);
-      const prevState = alertInstance.getState();
-
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
         // Grab the result of the most recent bucket
         last(result[group].shouldFire)
       );
+      const shouldAlertWarn = alertResults.every((result) => last(result[group].shouldWarn));
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some((result) => last(result[group].isNoData));
@@ -60,17 +69,28 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         ? AlertStates.NO_DATA
         : shouldAlertFire
         ? AlertStates.ALERT
+        : shouldAlertWarn
+        ? AlertStates.WARNING
         : AlertStates.OK;
 
       let reason;
-      if (nextState === AlertStates.ALERT) {
+      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
         reason = alertResults
-          .map((result) => buildFiredAlertReason(formatAlertResult(result[group])))
+          .map((result) =>
+            buildFiredAlertReason(
+              formatAlertResult(result[group], nextState === AlertStates.WARNING)
+            )
+          )
           .join('\n');
-      } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
-        reason = alertResults
-          .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
-          .join('\n');
+        /*
+         * Custom recovery actions aren't yet available in the alerting framework
+         * Uncomment the code below once they've been implemented
+         * Reference: https://github.com/elastic/kibana/issues/87048
+         */
+        // } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
+        // reason = alertResults
+        //   .map((result) => buildRecoveredAlertReason(formatAlertResult(result[group])))
+        //   .join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
@@ -89,7 +109,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const firstResult = first(alertResults);
         const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
         const actionGroupId =
-          nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
+          nextState === AlertStates.OK
+            ? RecoveredActionGroup.id
+            : nextState === AlertStates.WARNING
+            ? WARNING_ACTIONS.id
+            : FIRED_ACTIONS.id;
+        const alertInstance = services.alertInstanceFactory(`${group}`);
+
         alertInstance.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
@@ -106,17 +132,20 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
       }
-
-      alertInstance.replaceState({
-        alertState: nextState,
-      });
     }
   };
 
 export const FIRED_ACTIONS = {
   id: 'metrics.threshold.fired',
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.fired', {
-    defaultMessage: 'Fired',
+    defaultMessage: 'Alert',
+  }),
+};
+
+export const WARNING_ACTIONS = {
+  id: 'metrics.threshold.warning',
+  name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
+    defaultMessage: 'Warning',
   }),
 };
 
@@ -136,9 +165,20 @@ const formatAlertResult = <AlertResult>(
     metric: string;
     currentValue: number;
     threshold: number[];
-  } & AlertResult
+    comparator: Comparator;
+    warningThreshold?: number[];
+    warningComparator?: Comparator;
+  } & AlertResult,
+  useWarningThreshold?: boolean
 ) => {
-  const { metric, currentValue, threshold } = alertResult;
+  const {
+    metric,
+    currentValue,
+    threshold,
+    comparator,
+    warningThreshold,
+    warningComparator,
+  } = alertResult;
   const noDataValue = i18n.translate(
     'xpack.infra.metrics.alerting.threshold.noDataFormattedValue',
     {
@@ -151,12 +191,17 @@ const formatAlertResult = <AlertResult>(
       currentValue: currentValue ?? noDataValue,
     };
   const formatter = createFormatter('percent');
+  const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
+  const comparatorToFormat = useWarningThreshold ? warningComparator! : comparator;
   return {
     ...alertResult,
     currentValue:
       currentValue !== null && typeof currentValue !== 'undefined'
         ? formatter(currentValue)
         : noDataValue,
-    threshold: Array.isArray(threshold) ? threshold.map((v: number) => formatter(v)) : threshold,
+    threshold: Array.isArray(thresholdToFormat)
+      ? thresholdToFormat.map((v: number) => formatter(v))
+      : thresholdToFormat,
+    comparator: comparatorToFormat,
   };
 };

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClient } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClient } from 'kibana/server';
 import * as AgentService from '../services/agents';
+import { isFleetServerSetup } from '../services/fleet_server_migration';
 export interface AgentUsage {
   total: number;
   online: number;
@@ -13,9 +15,12 @@ export interface AgentUsage {
   offline: number;
 }
 
-export const getAgentUsage = async (soClient?: SavedObjectsClient): Promise<AgentUsage> => {
+export const getAgentUsage = async (
+  soClient?: SavedObjectsClient,
+  esClient?: ElasticsearchClient
+): Promise<AgentUsage> => {
   // TODO: unsure if this case is possible at all.
-  if (!soClient) {
+  if (!soClient || !esClient || !(await isFleetServerSetup())) {
     return {
       total: 0,
       online: 0,
@@ -23,8 +28,10 @@ export const getAgentUsage = async (soClient?: SavedObjectsClient): Promise<Agen
       offline: 0,
     };
   }
+
   const { total, online, error, offline } = await AgentService.getAgentStatusForAgentPolicy(
-    soClient
+    soClient,
+    esClient
   );
   return {
     total,

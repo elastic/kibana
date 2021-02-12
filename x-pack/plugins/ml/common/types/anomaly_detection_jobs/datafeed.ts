@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IndexPatternTitle } from '../kibana';
@@ -20,6 +21,7 @@ export interface Datafeed {
   query: object;
   query_delay?: string;
   script_fields?: Record<string, any>;
+  runtime_mappings?: Record<string, any>;
   scroll_size?: number;
   delayed_data_check_config?: object;
   indices_options?: IndicesOptions;

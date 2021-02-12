@@ -1,12 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import { migratePackagePolicyToV7110 } from '../../../security_solution/common';
+import {
+  migratePackagePolicyToV7110,
+  migratePackagePolicyToV7120,
+  // @ts-expect-error
+} from './security_solution';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -28,6 +33,7 @@ import {
   migrateSettingsToV7100,
   migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
+import { migrateAgentToV7120, migrateAgentPolicyToV7120 } from './migrations/to_v7_12_0';
 
 /*
  * Saved object types and mappings
@@ -67,7 +73,6 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        shared_id: { type: 'keyword' },
         type: { type: 'keyword' },
         active: { type: 'boolean' },
         enrolled_at: { type: 'date' },
@@ -93,6 +98,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migrateAgentToV7100,
+      '7.12.0': migrateAgentToV7120,
     },
   },
   [AGENT_ACTION_SAVED_OBJECT_TYPE]: {
@@ -156,6 +162,7 @@ const getSavedObjectTypes = (
         description: { type: 'text' },
         namespace: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
         updated_at: { type: 'date' },
@@ -166,6 +173,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migrateAgentPolicyToV7100,
+      '7.12.0': migrateAgentPolicyToV7120,
     },
   },
   [ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE]: {
@@ -272,6 +280,7 @@ const getSavedObjectTypes = (
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
       '7.11.0': migratePackagePolicyToV7110,
+      '7.12.0': migratePackagePolicyToV7120,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -385,7 +394,6 @@ export function registerEncryptedSavedObjects(
     type: AGENT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['default_api_key']),
     attributesToExcludeFromAAD: new Set([
-      'shared_id',
       'type',
       'active',
       'enrolled_at',

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { KibanaRequest } from 'kibana/server';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 import { securityMock } from '../../../../plugins/security/server/mocks';
-import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   PluginStartContract as FeaturesStartContract,
   KibanaFeature,
@@ -17,6 +18,7 @@ import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { AlertsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import uuid from 'uuid';
 import { RecoveredActionGroup } from '../../common';
+import { RegistryAlertType } from '../alert_type_registry';
 
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
@@ -173,6 +175,7 @@ beforeEach(() => {
     name: 'My Alert Type',
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     recoveryActionGroup: RecoveredActionGroup,
     async executor() {},
     producer: 'myApp',
@@ -532,32 +535,38 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('getFindAuthorizationFilter', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'alerts',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
-    const mySecondAppAlertType = {
+    const mySecondAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       id: 'mySecondAppAlertType',
       name: 'mySecondAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 
@@ -619,11 +628,17 @@ describe('AlertsAuthorization', () => {
       });
       alertTypeRegistry.list.mockReturnValue(setOfAlertTypes);
 
-      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
-        esKuery.fromKueryExpression(
-          `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
-        )
-      );
+      // TODO: once issue https://github.com/elastic/kibana/issues/89473 is
+      // resolved, we can start using this code again, instead of toMatchSnapshot():
+      //
+      // expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toEqual(
+      //   esKuery.fromKueryExpression(
+      //     `((alert.attributes.alertTypeId:myAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:myOtherAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (alert.attributes.alertTypeId:mySecondAppAlertType and alert.attributes.consumer:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+      //   )
+      // );
+
+      // This code is the replacement code for above
+      expect((await alertAuthorization.getFindAuthorizationFilter()).filter).toMatchSnapshot();
 
       expect(auditLogger.alertsAuthorizationSuccess).not.toHaveBeenCalled();
     });
@@ -825,23 +840,27 @@ describe('AlertsAuthorization', () => {
   });
 
   describe('filterByAlertTypeAuthorization', () => {
-    const myOtherAppAlertType = {
+    const myOtherAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myOtherAppAlertType',
       name: 'myOtherAppAlertType',
       producer: 'myOtherApp',
+      enabledInLicense: true,
     };
-    const myAppAlertType = {
+    const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
       actionVariables: undefined,
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myAppAlertType',
       name: 'myAppAlertType',
       producer: 'myApp',
+      enabledInLicense: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType]);
 
@@ -884,7 +903,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -914,7 +935,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {
@@ -984,7 +1007,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {
@@ -1010,7 +1035,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -1075,7 +1102,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -1169,7 +1198,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {
@@ -1195,7 +1226,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myAppAlertType",
                   "producer": "myApp",
                   "recoveryActionGroup": Object {
@@ -1273,7 +1306,9 @@ describe('AlertsAuthorization', () => {
                     },
                   },
                   "defaultActionGroupId": "default",
+                  "enabledInLicense": true,
                   "id": "myOtherAppAlertType",
+                  "minimumLicenseRequired": "basic",
                   "name": "myOtherAppAlertType",
                   "producer": "myOtherApp",
                   "recoveryActionGroup": Object {

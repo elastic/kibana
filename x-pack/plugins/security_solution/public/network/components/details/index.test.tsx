@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -57,6 +58,7 @@ describe('IP Overview Component', () => {
       loading: false,
       id: 'ipOverview',
       ip: '10.10.10.10',
+      isInDetailsSidePanel: false,
       isLoadingAnomaliesData: false,
       narrowDateRange: (jest.fn() as unknown) as NarrowDateRange,
       startDate: '2019-06-15T06:00:00.000Z',
@@ -70,6 +72,20 @@ describe('IP Overview Component', () => {
       const wrapper = shallow(
         <TestProviders store={store}>
           <IpOverview {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('IpOverview')).toMatchSnapshot();
+    });
+
+    test('it renders the side panel IP overview', () => {
+      const panelViewProps = {
+        ...mockProps,
+        isInDetailsSidePanel: true,
+      };
+      const wrapper = shallow(
+        <TestProviders store={store}>
+          <IpOverview {...panelViewProps} />
         </TestProviders>
       );
 

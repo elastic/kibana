@@ -1,24 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
-import { useHistory } from 'react-router-dom';
 
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { Loading } from '../../../../../shared/loading';
 import { AppLogic } from '../../../../app_logic';
-import { Loading } from '../../../../../../applications/shared/loading';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
-import { staticSourceData } from '../../source_data';
-import { SourceLogic } from '../../source_logic';
-import { SourceDataItem } from '../../../../types';
 import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
+import { staticSourceData } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';
+import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
 import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureCustom } from './configure_custom';
@@ -28,38 +28,16 @@ import { ReAuthenticate } from './re_authenticate';
 import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
 
-enum Steps {
-  ConfigIntroStep = 'Config Intro',
-  SaveConfigStep = 'Save Config',
-  ConfigCompletedStep = 'Config Completed',
-  ConnectInstanceStep = 'Connect Instance',
-  ConfigureCustomStep = 'Configure Custom',
-  ConfigureOauthStep = 'Configure Oauth',
-  SaveCustomStep = 'Save Custom',
-  ReAuthenticateStep = 'ReAuthenticate',
-}
-
-interface AddSourceProps {
-  sourceIndex: number;
-  connect?: boolean;
-  configure?: boolean;
-  reAuthenticate?: boolean;
-}
-
-export const AddSource: React.FC<AddSourceProps> = ({
-  sourceIndex,
-  connect,
-  configure,
-  reAuthenticate,
-}) => {
-  const history = useHistory() as History;
+export const AddSource: React.FC<AddSourceProps> = (props) => {
   const {
-    getSourceConfigData,
+    initializeAddSource,
+    setAddSourceStep,
     saveSourceConfig,
     createContentSource,
     resetSourceState,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
   const {
+    addSourceCurrentStep,
     sourceConfigData: {
       name,
       categories,
@@ -69,7 +47,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
     },
     dataLoading,
     newCustomSource,
-  } = useValues(SourceLogic);
+  } = useValues(AddSourceLogic);
 
   const {
     serviceType,
@@ -79,54 +57,44 @@ export const AddSource: React.FC<AddSourceProps> = ({
     sourceDescription,
     connectStepDescription,
     addPath,
-  } = staticSourceData[sourceIndex] as SourceDataItem;
+  } = staticSourceData[props.sourceIndex] as SourceDataItem;
 
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    getSourceConfigData(serviceType);
+    initializeAddSource(props);
     return resetSourceState;
   }, []);
 
-  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
-
-  const getFirstStep = () => {
-    if (isCustom) return Steps.ConfigureCustomStep;
-    if (connect) return Steps.ConnectInstanceStep;
-    if (configure) return Steps.ConfigureOauthStep;
-    if (reAuthenticate) return Steps.ReAuthenticateStep;
-    return Steps.ConfigIntroStep;
-  };
-
-  const [currentStep, setStep] = useState(getFirstStep());
-
   if (dataLoading) return <Loading />;
 
-  const goToConfigurationIntro = () => setStep(Steps.ConfigIntroStep);
-  const goToSaveConfig = () => setStep(Steps.SaveConfigStep);
-  const setConfigCompletedStep = () => setStep(Steps.ConfigCompletedStep);
+  const goToConfigurationIntro = () => setAddSourceStep(AddSourceSteps.ConfigIntroStep);
+  const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
+  const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
 
   const goToConnectInstance = () => {
-    setStep(Steps.ConnectInstanceStep);
-    history.push(`${getSourcesPath(addPath, isOrganization)}/connect`);
+    setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
+    KibanaLogic.values.navigateToUrl(`${getSourcesPath(addPath, isOrganization)}/connect`);
   };
 
-  const saveCustomSuccess = () => setStep(Steps.SaveCustomStep);
+  const saveCustomSuccess = () => setAddSourceStep(AddSourceSteps.SaveCustomStep);
   const goToSaveCustom = () => createContentSource(CUSTOM_SERVICE_TYPE, saveCustomSuccess);
 
   const goToFormSourceCreated = (sourceName: string) => {
-    history.push(`${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}/?name=${sourceName}`);
+    KibanaLogic.values.navigateToUrl(
+      `${getSourcesPath(SOURCE_ADDED_PATH, isOrganization)}/?name=${sourceName}`
+    );
   };
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
 
   return (
     <>
-      {currentStep === Steps.ConfigIntroStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigIntroStep && (
         <ConfigurationIntro name={name} advanceStep={goToSaveConfig} header={header} />
       )}
-      {currentStep === Steps.SaveConfigStep && (
+      {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig
           name={name}
           configuration={configuration}
@@ -135,7 +103,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ConfigCompletedStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigCompletedStep && (
         <ConfigCompleted
           name={name}
           accountContextOnly={accountContextOnly}
@@ -144,7 +112,7 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ConnectInstanceStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConnectInstanceStep && (
         <ConnectInstance
           name={name}
           serviceType={serviceType}
@@ -158,17 +126,17 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ConfigureCustomStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigureCustomStep && (
         <ConfigureCustom
           helpText={configuration.helpText}
           advanceStep={goToSaveCustom}
           header={header}
         />
       )}
-      {currentStep === Steps.ConfigureOauthStep && (
+      {addSourceCurrentStep === AddSourceSteps.ConfigureOauthStep && (
         <ConfigureOauth name={name} onFormCreated={goToFormSourceCreated} header={header} />
       )}
-      {currentStep === Steps.SaveCustomStep && (
+      {addSourceCurrentStep === AddSourceSteps.SaveCustomStep && (
         <SaveCustom
           documentationUrl={configuration.documentationUrl}
           newCustomSource={newCustomSource}
@@ -176,7 +144,9 @@ export const AddSource: React.FC<AddSourceProps> = ({
           header={header}
         />
       )}
-      {currentStep === Steps.ReAuthenticateStep && <ReAuthenticate name={name} header={header} />}
+      {addSourceCurrentStep === AddSourceSteps.ReAuthenticateStep && (
+        <ReAuthenticate name={name} header={header} />
+      )}
     </>
   );
 };

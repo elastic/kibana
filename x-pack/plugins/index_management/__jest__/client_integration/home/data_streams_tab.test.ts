@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -71,7 +72,7 @@ describe('Data Streams tab', () => {
 
     test('when Fleet is enabled, links to Fleet', async () => {
       testBed = await setup({
-        plugins: { fleet: { hi: 'ok' } },
+        plugins: { isFleetEnabled: true },
       });
 
       await act(async () => {
@@ -120,11 +121,21 @@ describe('Data Streams tab', () => {
         createNonDataStreamIndex('non-data-stream-index'),
       ]);
 
-      const dataStreamForDetailPanel = createDataStreamPayload({ name: 'dataStream1' });
+      const dataStreamForDetailPanel = createDataStreamPayload({
+        name: 'dataStream1',
+        storageSize: '5b',
+        storageSizeBytes: 5,
+      });
+
       setLoadDataStreamsResponse([
         dataStreamForDetailPanel,
-        createDataStreamPayload({ name: 'dataStream2' }),
+        createDataStreamPayload({
+          name: 'dataStream2',
+          storageSize: '1kb',
+          storageSizeBytes: 1000,
+        }),
       ]);
+
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
       const indexTemplate = fixtures.getTemplate({ name: 'indexTemplate' });
@@ -181,8 +192,28 @@ describe('Data Streams tab', () => {
       // The table renders with the stats columns though.
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
+      ]);
+    });
+
+    test('sorting on stats sorts by bytes value instead of human readable value', async () => {
+      // Guards against regression of #86122.
+      const { actions, table, component } = testBed;
+
+      await act(async () => {
+        actions.clickIncludeStatsSwitch();
+      });
+      component.update();
+
+      actions.sortTableOnStorageSize();
+
+      // The table sorts by the underlying byte values in ascending order, instead of sorting by
+      // the human-readable string values.
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '5b', '1', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1kb', '1', 'Delete'],
       ]);
     });
 
@@ -439,12 +470,12 @@ describe('Data Streams tab', () => {
       testBed.component.update();
     });
 
-    test('listed in the table with Managed label', () => {
+    test('listed in the table with Fleet-managed label', () => {
       const { table } = testBed;
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
     });
@@ -454,7 +485,7 @@ describe('Data Streams tab', () => {
       let { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', `managed-data-stream${nonBreakingSpace}Managed`, 'green', '1', 'Delete'],
+        ['', `managed-data-stream${nonBreakingSpace}Fleet-managed`, 'green', '1', 'Delete'],
         ['', 'non-managed-data-stream', 'green', '1', 'Delete'],
       ]);
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -10,7 +11,8 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
-import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -29,7 +31,7 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 
-const CsmMainContainer = styled.div`
+const CsmMainContainer = euiStyled.div`
   padding: ${px(units.plus)};
   height: 100%;
 `;
@@ -69,7 +71,7 @@ export function CsmAppRoot({
   core,
   deps,
   config,
-  corePlugins: { embeddable },
+  corePlugins: { embeddable, maps },
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -79,7 +81,7 @@ export function CsmAppRoot({
 }) {
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
+  const plugins = { ...deps, maps };
   const apmPluginContextValue = {
     appMountParameters,
     config,

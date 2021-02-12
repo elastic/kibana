@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -20,7 +21,7 @@ import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
-import { RenderMode } from 'src/plugins/expressions';
+import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import isEqual from 'fast-deep-equal';
 import {
@@ -50,19 +51,25 @@ import { IndexPatternsContract } from '../../../../../../src/plugins/data/public
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
-import { LensInspectorAdapters } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
-export type LensByValueInput = {
-  attributes: LensSavedObjectAttributes;
-} & EmbeddableInput;
-
-export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
-export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
+interface LensBaseEmbeddableInput extends EmbeddableInput {
+  filters?: Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
   palette?: PaletteOutput;
   renderMode?: RenderMode;
-};
+  style?: React.CSSProperties;
+  className?: string;
+}
+
+export type LensByValueInput = {
+  attributes: LensSavedObjectAttributes;
+} & LensBaseEmbeddableInput;
+
+export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
+export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
@@ -90,9 +97,8 @@ export class Embeddable
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
-  private autoRefreshFetchSubscription: Subscription;
   private isInitialized = false;
-  private activeData: LensInspectorAdapters | undefined;
+  private activeData: Partial<DefaultInspectorAdapters> | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -120,10 +126,6 @@ export class Embeddable
     this.subscription = this.getUpdated$().subscribe(() =>
       this.onContainerStateChanged(this.input)
     );
-
-    this.autoRefreshFetchSubscription = deps.timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.reload.bind(this));
 
     const input$ = this.getInput$();
 
@@ -153,6 +155,37 @@ export class Embeddable
       )
       .subscribe((input) => {
         this.reload();
+      });
+
+    // Re-initialize the visualization if either the attributes or the saved object id changes
+    input$
+      .pipe(
+        distinctUntilChanged((a, b) =>
+          isEqual(
+            ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+            ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+          )
+        ),
+        skip(1)
+      )
+      .subscribe(async (input) => {
+        await this.initializeSavedVis(input);
+        this.reload();
+      });
+
+    // Update search context and reload on changes related to search
+    input$
+      .pipe(
+        distinctUntilChanged((a, b) =>
+          isEqual(
+            [a.filters, a.query, a.timeRange, a.searchSessionId],
+            [b.filters, b.query, b.timeRange, b.searchSessionId]
+          )
+        ),
+        skip(1)
+      )
+      .subscribe(async (input) => {
+        this.onContainerStateChanged(input);
       });
   }
 
@@ -196,9 +229,6 @@ export class Embeddable
     this.expression = expression ? toExpression(expression) : null;
     await this.initializeOutput();
     this.isInitialized = true;
-    if (this.domNode) {
-      this.render(this.domNode);
-    }
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
@@ -229,7 +259,7 @@ export class Embeddable
 
   private updateActiveData = (
     data: unknown,
-    inspectorAdapters?: LensInspectorAdapters | undefined
+    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => {
     this.activeData = inspectorAdapters;
   };
@@ -255,7 +285,10 @@ export class Embeddable
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
         renderMode={input.renderMode}
+        syncColors={input.syncColors}
         hasCompatibleActions={this.hasCompatibleActions}
+        className={input.className}
+        style={input.style}
       />,
       domNode
     );
@@ -410,6 +443,5 @@ export class Embeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 }

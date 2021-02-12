@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,7 +11,13 @@ import { mount } from 'enzyme';
 import '../../../common/mock/match_media';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { CaseComponent, CaseProps, CaseView } from '.';
-import { basicCase, basicCaseClosed, caseUserActions } from '../../containers/mock';
+import {
+  basicCase,
+  basicCaseClosed,
+  caseUserActions,
+  alertComment,
+  getAlertUserAction,
+} from '../../containers/mock';
 import { TestProviders } from '../../../common/mock';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
@@ -51,6 +58,7 @@ export const caseProps: CaseProps = {
   userCanCrud: true,
   caseData: {
     ...basicCase,
+    comments: [...basicCase.comments, alertComment],
     connector: {
       id: 'resilient-2',
       name: 'Resilient',
@@ -67,12 +75,39 @@ export const caseClosedProps: CaseProps = {
   caseData: basicCaseClosed,
 };
 
+const alertsHit = [
+  {
+    _id: 'alert-id-1',
+    _index: 'alert-index-1',
+    _source: {
+      signal: {
+        rule: {
+          id: 'rule-id-1',
+          name: 'Awesome rule',
+        },
+      },
+    },
+  },
+  {
+    _id: 'alert-id-2',
+    _index: 'alert-index-2',
+    _source: {
+      signal: {
+        rule: {
+          id: 'rule-id-2',
+          name: 'Awesome rule 2',
+        },
+      },
+    },
+  },
+];
+
 describe('CaseView ', () => {
   const updateCaseProperty = jest.fn();
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
 
   const data = caseProps.caseData;
   const defaultGetCase = {
@@ -91,7 +126,7 @@ describe('CaseView ', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions,
+    caseUserActions: [...caseUserActions, getAlertUserAction()],
     caseServices: {},
     fetchCaseUserActions,
     firstIndexPushToService: -1,
@@ -103,16 +138,20 @@ describe('CaseView ', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.resetAllMocks();
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
 
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
-    usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
-    useQueryAlertsMock.mockImplementation(() => ({
+    usePostPushToServiceMock.mockImplementation(() => ({
       isLoading: false,
-      alerts: { hits: { hists: [] } },
+      pushCaseToExternalService,
+    }));
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useQueryAlertsMock.mockImplementation(() => ({
+      loading: false,
+      data: { hits: { hits: alertsHit } },
     }));
   });
 
@@ -124,6 +163,7 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
         data.title
@@ -188,7 +228,7 @@ describe('CaseView ', () => {
     });
   });
 
-  it('should dispatch update state when status is changed', async () => {
+  it('should update status', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -204,7 +244,11 @@ describe('CaseView ', () => {
         .find('button[data-test-subj="case-view-status-dropdown-closed"]')
         .first()
         .simulate('click');
-      expect(updateCaseProperty).toHaveBeenCalled();
+
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('status');
+      expect(updateObject.updateValue).toEqual('closed');
     });
   });
 
@@ -337,7 +381,7 @@ describe('CaseView ', () => {
 
       wrapper.update();
 
-      expect(postPushToService).toHaveBeenCalled();
+      expect(pushCaseToExternalService).toHaveBeenCalled();
     });
   });
 
@@ -467,7 +511,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowITSM,
                 fields: null,
               },
             }}
@@ -515,7 +559,7 @@ describe('CaseView ', () => {
               connector: {
                 id: 'servicenow-1',
                 name: 'SN 1',
-                type: ConnectorTypes.servicenow,
+                type: ConnectorTypes.serviceNowITSM,
                 fields: null,
               },
             }}
@@ -571,11 +615,132 @@ describe('CaseView ', () => {
         type: 'x-pack/security_solution/local/timeline/CREATE_TIMELINE',
         payload: {
           columns: [],
-          expandedEvent: {},
+          expandedDetail: {},
           id: 'timeline-case',
           indexNames: [],
           show: false,
         },
+      });
+    });
+  });
+
+  it('should show loading content when loading alerts', async () => {
+    useQueryAlertsMock.mockImplementation(() => ({
+      loading: true,
+      data: { hits: { hits: [] } },
+    }));
+
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="case-view-loading-content"]').first().exists()
+      ).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="user-actions"]').first().exists()).toBeFalsy();
+    });
+  });
+
+  it('should open the alert flyout', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper
+        .find('[data-test-subj="comment-action-show-alert-alert-action-id"] button')
+        .first()
+        .simulate('click');
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        payload: {
+          panelView: 'eventDetail',
+          params: { eventId: 'alert-id-1', indexName: 'alert-index-1' },
+          timelineId: 'timeline-case',
+        },
+      });
+    });
+  });
+
+  it('should show the rule name', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(
+        wrapper
+          .find(
+            '[data-test-subj="comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
+          )
+          .first()
+          .text()
+      ).toBe('added an alert from Awesome rule');
+    });
+  });
+
+  it('should update settings', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
+
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('settings');
+      expect(updateObject.updateValue).toEqual({ syncAlerts: false });
+    });
+  });
+
+  describe('Callouts', () => {
+    it('it shows the danger callout when a connector has been deleted', async () => {
+      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent {...caseProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeTruthy();
+      });
+    });
+
+    it('it does NOT shows the danger callout when connectors are loading', async () => {
+      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: true }));
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <CaseComponent {...caseProps} />
+          </Router>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper.update();
+        expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeFalsy();
       });
     });
   });

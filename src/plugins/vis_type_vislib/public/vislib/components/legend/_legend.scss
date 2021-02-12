@@ -3,8 +3,6 @@
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
 $visLegendWidth: 150px;
-$visColorPickerWidth: $euiSizeM * 10;
-$visLegendLineHeight: $euiSize;
 
 .visLegend__toggle {
   border-radius: $euiBorderRadius;
@@ -79,22 +77,5 @@ $visLegendLineHeight: $euiSize;
 
   &.hidden {
     visibility: hidden;
-  }
-}
-
-.visLegend__valueColorPicker {
-  width: ($euiSizeL * 8); // 8 columns
-}
-
-.visLegend__valueColorPickerDot {
-  cursor: pointer;
-
-  &:hover {
-    transform: scale(1.4);
-  }
-
-  &-isSelected {
-    border: $euiSizeXS solid;
-    border-radius: 100%;
   }
 }

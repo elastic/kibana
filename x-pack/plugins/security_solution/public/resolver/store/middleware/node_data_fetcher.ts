@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
@@ -10,7 +11,6 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-import { createRange } from './../../models/time_range';
 
 /**
  * Max number of nodes to request from the server
@@ -38,7 +38,7 @@ export function NodeDataFetcher(
      * This gets the visible nodes that we haven't already requested or received data for
      */
     const newIDsToRequest: Set<string> = selectors.newIDsToRequest(state)(Number.POSITIVE_INFINITY);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     if (newIDsToRequest.size <= 0) {
       return;
@@ -60,9 +60,10 @@ export function NodeDataFetcher(
 
     let results: SafeResolverEvent[] | undefined;
     try {
+      const timeRangeFilters = selectors.timeRangeFilters(state);
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
-        timeRange: createRange(),
+        timeRange: timeRangeFilters,
         indexPatterns: indices,
         limit: nodeDataLimit,
       });

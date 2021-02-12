@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -75,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(body).to.eql({ [adJobIdSpace12]: { canDelete: false, canUntag: true } });
+      expect(body).to.eql({ [adJobIdSpace12]: { canDelete: false, canRemoveFromSpace: true } });
     });
 
     it('job in individual spaces, all spaces user can delete and untag', async () => {
@@ -87,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(body).to.eql({ [adJobIdSpace12]: { canDelete: true, canUntag: true } });
+      expect(body).to.eql({ [adJobIdSpace12]: { canDelete: true, canRemoveFromSpace: true } });
     });
 
     it('job in * space, single space user can not untag or delete', async () => {
@@ -99,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         idSpace1
       );
 
-      expect(body).to.eql({ [adJobIdStarSpace]: { canDelete: false, canUntag: false } });
+      expect(body).to.eql({ [adJobIdStarSpace]: { canDelete: false, canRemoveFromSpace: false } });
     });
 
     it('job in * space, all spaces user can delete but not untag', async () => {
@@ -111,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
         idStarSpace
       );
 
-      expect(body).to.eql({ [adJobIdStarSpace]: { canDelete: true, canUntag: false } });
+      expect(body).to.eql({ [adJobIdStarSpace]: { canDelete: true, canRemoveFromSpace: false } });
     });
   });
 };

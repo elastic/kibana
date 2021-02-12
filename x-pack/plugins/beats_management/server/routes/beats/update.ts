@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import type { BeatsManagementRouter } from '../../lib/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../src/core/server/http/router';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
@@ -14,7 +15,7 @@ import { ReturnTypeUpdate } from '../../../common/return_types';
 import { internalUser } from '../../lib/adapters/framework/adapter_types';
 import { wrapRouteWithSecurity } from '../wrap_route_with_security';
 
-export const registerBeatUpdateRoute = (router: IRouter) => {
+export const registerBeatUpdateRoute = (router: BeatsManagementRouter) => {
   // TODO: write to Kibana audit log file (include who did the verification as well) https://github.com/elastic/kibana/issues/26024
   router.put(
     {
@@ -44,7 +45,7 @@ export const registerBeatUpdateRoute = (router: IRouter) => {
         requiredRoles: ['beats_admin'],
       },
       async (context, request, response) => {
-        const beatsManagement = context.beatsManagement!;
+        const beatsManagement = context.beatsManagement;
         const accessToken = request.headers['kbn-beats-access-token'] as string;
         const { beatId } = request.params;
         const user = beatsManagement.framework.getUser(request);

@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from 'react-intl';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../..';
+import { SectionLoading } from '../../components/section_loading';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
@@ -31,6 +35,7 @@ export const ActionTypeMenu = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
 
   useEffect(() => {
@@ -43,11 +48,14 @@ export const ActionTypeMenu = ({
          *
          * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
          *  */
-        const availableActionTypes =
-          actionTypes ??
-          (await loadActionTypes({ http })).filter(
+        let availableActionTypes = actionTypes;
+        if (!availableActionTypes) {
+          setLoadingActionTypes(true);
+          availableActionTypes = (await loadActionTypes({ http })).filter(
             (actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id)
           );
+          setLoadingActionTypes(false);
+        }
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
@@ -86,7 +94,6 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
-        typeName: id.replace('.', ''),
       };
     });
 
@@ -118,7 +125,14 @@ export const ActionTypeMenu = ({
       );
     });
 
-  return (
+  return loadingActionTypes ? (
+    <SectionLoading>
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.actionsConnectorsList.loadingConnectorTypesDescription"
+        defaultMessage="Loading connector types…"
+      />
+    </SectionLoading>
+  ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
       <EuiFlexGrid gutterSize="xl" columns={3}>

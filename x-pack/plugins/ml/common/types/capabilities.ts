@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaRequest } from 'kibana/server';
 import { PLUGIN_ID } from '../constants/app';
 import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
@@ -98,12 +100,16 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      api: ['fileUpload:import', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
         all: savedObjects,
         read: savedObjects,
+      },
+      alerting: {
+        all: Object.values(ML_ALERT_TYPES),
+        read: [],
       },
     },
     user: {
@@ -115,6 +121,10 @@ export function getPluginPrivileges() {
       savedObject: {
         all: [],
         read: savedObjects,
+      },
+      alerting: {
+        all: [],
+        read: Object.values(ML_ALERT_TYPES),
       },
     },
     apmUser: {

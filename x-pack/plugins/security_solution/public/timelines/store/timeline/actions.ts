@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import actionCreatorFactory from 'typescript-fsa';
@@ -15,13 +16,15 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { SerializedFilterQuery } from '../../../common/store/types';
 
-import { KqlMode, TimelineModel, ColumnHeaderOptions, TimelineTabs } from './model';
+import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedDetail,
+  TimelineExpandedDetailType,
   TimelineTypeLiteral,
   RowRendererId,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 
@@ -35,11 +38,12 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-export interface ToggleExpandedEvent {
+export type ToggleDetailPanel = TimelineExpandedDetailType & {
+  tabType?: TimelineTabs;
   timelineId: string;
-  event?: TimelineExpandedEvent;
-}
-export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
+};
+
+export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
@@ -63,7 +67,7 @@ export interface TimelineInput {
     end: string;
   };
   excludedRowRendererIds?: RowRendererId[];
-  expandedEvent?: TimelineExpandedEvent;
+  expandedDetail?: TimelineExpandedDetail;
   filters?: Filter[];
   columns: ColumnHeaderOptions[];
   itemsPerPage?: number;
@@ -172,12 +176,6 @@ export const updateDataProviderType = actionCreator<{
   providerId: string;
 }>('UPDATE_PROVIDER_TYPE');
 
-export const updateDescription = actionCreator<{
-  id: string;
-  description: string;
-  disableAutoSave?: boolean;
-}>('UPDATE_DESCRIPTION');
-
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
 
 export const applyKqlFilterQuery = actionCreator<{
@@ -200,9 +198,11 @@ export const updateItemsPerPageOptions = actionCreator<{
   itemsPerPageOptions: number[];
 }>('UPDATE_ITEMS_PER_PAGE_OPTIONS');
 
-export const updateTitle = actionCreator<{ id: string; title: string; disableAutoSave?: boolean }>(
-  'UPDATE_TITLE'
-);
+export const updateTitleAndDescription = actionCreator<{
+  description: string;
+  id: string;
+  title: string;
+}>('UPDATE_TITLE_AND_DESCRIPTION');
 
 export const updatePageIndex = actionCreator<{ id: string; activePage: number }>(
   'UPDATE_PAGE_INDEX'

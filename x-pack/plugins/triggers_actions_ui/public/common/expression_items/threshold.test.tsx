@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test/jest';
@@ -107,5 +109,35 @@ describe('threshold expression', () => {
       .simulate('change', { target: { value: 'between' } });
     expect(onChangeSelectedThreshold).toHaveBeenCalled();
     expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
+  });
+
+  it('renders the correct number of threshold inputs', async () => {
+    const wrapper = mountWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[10]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+      />
+    );
+
+    wrapper.find('[data-test-subj="thresholdPopover"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]').exists()).toBeTruthy();
+    expect(wrapper.find('input[data-test-subj="alertThresholdInput"]').length).toEqual(1);
+
+    wrapper
+      .find('[data-test-subj="comparatorOptionsComboBox"]')
+      .last()
+      .simulate('change', { target: { value: 'between' } });
+    wrapper.update();
+    expect(wrapper.find('input[data-test-subj="alertThresholdInput"]').length).toEqual(2);
+
+    wrapper
+      .find('[data-test-subj="comparatorOptionsComboBox"]')
+      .last()
+      .simulate('change', { target: { value: '<' } });
+    wrapper.update();
+    expect(wrapper.find('input[data-test-subj="alertThresholdInput"]').length).toEqual(1);
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
@@ -16,8 +17,8 @@ import {
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
-import { formatTopSignificantTerms } from './format_top_significant_terms';
-import { getChartsForTopSigTerms } from './get_charts_for_top_sig_terms';
+import { processSignificantTermAggs } from '../process_significant_term_aggs';
+import { getLatencyDistribution } from './get_latency_distribution';
 
 export async function getCorrelationsForSlowTransactions({
   serviceName,
@@ -90,6 +91,19 @@ export async function getCorrelationsForSlowTransactions({
   };
 
   const response = await apmEventClient.search(params);
-  const topSigTerms = formatTopSignificantTerms(response.aggregations);
-  return getChartsForTopSigTerms({ setup, backgroundFilters, topSigTerms });
+
+  if (!response.aggregations) {
+    return {};
+  }
+
+  const topSigTerms = processSignificantTermAggs({
+    sigTermAggs: response.aggregations,
+    thresholdPercentage: 100 - durationPercentile,
+  });
+
+  return getLatencyDistribution({
+    setup,
+    backgroundFilters,
+    topSigTerms,
+  });
 }

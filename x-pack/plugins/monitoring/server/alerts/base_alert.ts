@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Logger, LegacyCallAPIOptions } from 'kibana/server';
@@ -13,7 +14,7 @@ import {
   AlertsClient,
   AlertServices,
 } from '../../../alerts/server';
-import { Alert, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, RawAlertInstance, SanitizedAlert } from '../../../alerts/common';
 import { ActionsClient } from '../../../actions/server';
 import {
   AlertState,
@@ -25,26 +26,16 @@ import {
   AlertEnableAction,
   CommonAlertFilter,
   CommonAlertParams,
-  LegacyAlert,
 } from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { INDEX_PATTERN_ELASTICSEARCH, INDEX_ALERTS } from '../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
-import { MonitoringLicenseService } from '../types';
 import { mbSafeQuery } from '../lib/mb_safe_query';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { parseDuration } from '../../../alerts/common/parse_duration';
 import { Globals } from '../static_globals';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
-
-interface LegacyOptions {
-  watchName: string;
-  nodeNameLabel: string;
-  changeDataValues?: Partial<AlertData>;
-}
 
 type ExecutedState =
   | {
@@ -59,8 +50,7 @@ interface AlertOptions {
   name: string;
   throttle?: string | null;
   interval?: string;
-  legacy?: LegacyOptions;
-  defaultParams?: CommonAlertParams;
+  defaultParams?: Partial<CommonAlertParams>;
   actionVariables: Array<{ name: string; description: string }>;
   fetchClustersRange?: number;
   accessorKey?: string;
@@ -89,11 +79,16 @@ export class BaseAlert {
     public rawAlert?: SanitizedAlert,
     public alertOptions: AlertOptions = defaultAlertOptions()
   ) {
-    this.alertOptions = { ...defaultAlertOptions(), ...this.alertOptions };
-    this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
+    const defaultOptions = defaultAlertOptions();
+    defaultOptions.defaultParams = {
+      ...defaultOptions.defaultParams,
+      ...this.alertOptions.defaultParams,
+    };
+    this.alertOptions = { ...defaultOptions, ...this.alertOptions };
+    this.scopedLogger = Globals.app.getLogger(alertOptions.id);
   }
 
-  public getAlertType(): AlertType {
+  public getAlertType(): AlertType<never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.alertOptions;
     return {
       id,
@@ -107,23 +102,17 @@ export class BaseAlert {
         },
       ],
       defaultActionGroupId: 'default',
-      executor: (options: AlertExecutorOptions & { state: ExecutedState }): Promise<any> =>
-        this.execute(options),
+      minimumLicenseRequired: 'basic',
+      executor: (
+        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+          state: ExecutedState;
+        }
+      ): Promise<any> => this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
       },
     };
-  }
-
-  public isEnabled(licenseService: MonitoringLicenseService) {
-    if (this.alertOptions.legacy) {
-      const watcherFeature = licenseService.getWatcherFeature();
-      if (!watcherFeature.isAvailable || !watcherFeature.isEnabled) {
-        return false;
-      }
-    }
-    return true;
   }
 
   public getId() {
@@ -134,7 +123,7 @@ export class BaseAlert {
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<Alert> {
+  ): Promise<Alert<AlertTypeParams>> {
     const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,
@@ -169,7 +158,7 @@ export class BaseAlert {
       throttle = '1d',
       interval = '1m',
     } = this.alertOptions;
-    return await alertsClient.create({
+    return await alertsClient.create<AlertTypeParams>({
       data: {
         enabled: true,
         tags: [],
@@ -237,7 +226,9 @@ export class BaseAlert {
     services,
     params,
     state,
-  }: AlertExecutorOptions & { state: ExecutedState }): Promise<any> {
+  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
+    state: ExecutedState;
+  }): Promise<any> {
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -259,10 +250,6 @@ export class BaseAlert {
       params as CommonAlertParams,
       availableCcs
     );
-    if (this.alertOptions.legacy) {
-      const data = await this.fetchLegacyData(callCluster, clusters, availableCcs);
-      return await this.processLegacyData(data, clusters, services, state);
-    }
     const data = await this.fetchData(params, callCluster, clusters, availableCcs);
     return await this.processData(data, clusters, services, state);
   }
@@ -284,7 +271,7 @@ export class BaseAlert {
       ? {
           timestamp: {
             format: 'epoch_millis',
-            gte: limit - this.alertOptions.fetchClustersRange,
+            gte: +new Date() - limit - this.alertOptions.fetchClustersRange,
           },
         }
       : undefined;
@@ -300,39 +287,10 @@ export class BaseAlert {
     throw new Error('Child classes must implement `fetchData`');
   }
 
-  protected async fetchLegacyData(
-    callCluster: CallCluster,
-    clusters: AlertCluster[],
-    availableCcs: string[]
-  ): Promise<AlertData[]> {
-    let alertIndexPattern = INDEX_ALERTS;
-    if (availableCcs) {
-      alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
-    }
-    const legacyAlerts = await fetchLegacyAlerts(
-      callCluster,
-      clusters,
-      alertIndexPattern,
-      this.alertOptions.legacy!.watchName,
-      Globals.app.config.ui.max_bucket_size
-    );
-
-    return legacyAlerts.map((legacyAlert) => {
-      return {
-        clusterUuid: legacyAlert.metadata.cluster_uuid,
-        shouldFire: !legacyAlert.resolved_timestamp,
-        severity: mapLegacySeverity(legacyAlert.metadata.severity),
-        meta: legacyAlert,
-        nodeName: this.alertOptions.legacy!.nodeNameLabel,
-        ...this.alertOptions.legacy!.changeDataValues,
-      };
-    });
-  }
-
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices,
+    services: AlertServices<AlertInstanceState, never, 'default'>,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -344,7 +302,7 @@ export class BaseAlert {
 
       const firingNodeUuids = nodes
         .filter((node) => node.shouldFire)
-        .map((node) => node.meta.nodeId)
+        .map((node) => node.meta.nodeId || node.meta.instanceId)
         .join(',');
       const instanceId = `${this.alertOptions.id}:${cluster.clusterUuid}:${firingNodeUuids}`;
       const instance = services.alertInstanceFactory(instanceId);
@@ -354,13 +312,16 @@ export class BaseAlert {
         if (!node.shouldFire) {
           continue;
         }
-        const stat = node.meta as AlertNodeState;
+        const { meta } = node;
         const nodeState = this.getDefaultAlertState(cluster, node) as AlertNodeState;
         if (key) {
-          nodeState[key] = stat[key];
+          nodeState[key] = meta[key];
         }
-        nodeState.nodeId = stat.nodeId || node.nodeId!;
-        nodeState.nodeName = stat.nodeName || node.nodeName || nodeState.nodeId;
+        nodeState.nodeId = meta.nodeId || node.nodeId! || meta.instanceId;
+        // TODO: make these functions more generic, so it's node/item agnostic
+        nodeState.nodeName = meta.itemLabel || meta.nodeName || node.nodeName || nodeState.nodeId;
+        nodeState.itemLabel = meta.itemLabel;
+        nodeState.meta = meta;
         nodeState.ui.triggeredMS = currentUTC;
         nodeState.ui.isFiring = true;
         nodeState.ui.severity = node.severity;
@@ -380,34 +341,6 @@ export class BaseAlert {
     return state;
   }
 
-  protected async processLegacyData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices,
-    state: ExecutedState
-  ) {
-    const currentUTC = +new Date();
-    for (const item of data) {
-      const instanceId = `${this.alertOptions.id}:${item.clusterUuid}`;
-      const instance = services.alertInstanceFactory(instanceId);
-      if (!item.shouldFire) {
-        instance.replaceState({ alertStates: [] });
-        continue;
-      }
-      const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
-      const alertState: AlertState = this.getDefaultAlertState(cluster!, item);
-      alertState.nodeName = item.nodeName;
-      alertState.ui.triggeredMS = currentUTC;
-      alertState.ui.isFiring = true;
-      alertState.ui.severity = item.severity;
-      alertState.ui.message = this.getUiMessage(alertState, item);
-      instance.replaceState({ alertStates: [alertState] });
-      this.executeActions(instance, alertState, item, cluster);
-    }
-    state.lastChecked = currentUTC;
-    return state;
-  }
-
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
     return {
       cluster,
@@ -420,10 +353,6 @@ export class BaseAlert {
         lastCheckedMS: 0,
       },
     };
-  }
-
-  protected getVersions(legacyAlert: LegacyAlert) {
-    return `[${legacyAlert.message.match(/(?<=Versions: \[).+?(?=\])/)}]`;
   }
 
   protected getUiMessage(

@@ -67,30 +67,32 @@ These data sets are now ready to be used for creating transforms in Kibana.
 
 ### Jest tests
 
-Run the test following jest tests from `kibana/x-pack`.
+Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
+Run the test following jest tests from `kibana/x-pack/plugins/transform.
 
 New snapshots, all plugins:   
 
 ```
-node scripts/jest
+yarn test:jest
 ```
  
 Update snapshots for the transform plugin: 
 
 ```
-node scripts/jest plugins/transform -u
+yarn test:jest -u
 ```
 
 Update snapshots for a specific directory only: 
 
 ```
-node scripts/jest x-pack/plugins/transform/public/app/sections
+yarn test:jest public/app/sections
 ```
 
 Run tests with verbose output: 
 
 ```
-node scripts/jest plugins/transform --verbose
+yarn test:jest --verbose
 ```
 
 ### Functional tests

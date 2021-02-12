@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Map as MbMap } from 'mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
@@ -18,12 +21,15 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
+  SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/util';
 import {
   AggDescriptor,
+  ESTermSourceDescriptor,
   JoinDescriptor,
   LayerDescriptor,
   MapExtent,
@@ -61,6 +67,7 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
+  isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -68,7 +75,7 @@ export interface ILayer {
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
   canShowTooltip(): boolean;
-  syncLayerWithMB(mbMap: unknown): void;
+  syncLayerWithMB(mbMap: MbMap): void;
   getLayerTypeIconName(): string;
   isDataLoaded(): boolean;
   getIndexPatternIds(): string[];
@@ -157,6 +164,14 @@ export class AbstractLayer implements ILayer {
 
     if (clonedDescriptor.joins) {
       clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
+          throw new Error(
+            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
+          );
+        }
+        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
+
+        // todo: must tie this to generic thing
         const originalJoinId = joinDescriptor.right.id!;
 
         // right.id is uuid used to track requests in inspector
@@ -165,8 +180,8 @@ export class AbstractLayer implements ILayer {
         // Update all data driven styling properties using join fields
         if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
           const metrics =
-            joinDescriptor.right.metrics && joinDescriptor.right.metrics.length
-              ? joinDescriptor.right.metrics
+            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
+              ? termSourceDescriptor.metrics
               : [{ type: AGG_TYPE.COUNT }];
           metrics.forEach((metricsDescriptor: AggDescriptor) => {
             const originalJoinKey = getJoinAggKey({
@@ -388,6 +403,11 @@ export class AbstractLayer implements ILayer {
     return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
+  isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
+  }
+
   hasErrors(): boolean {
     return _.get(this._descriptor, '__isInErrorState', false);
   }
@@ -418,7 +438,7 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
-  syncLayerWithMB(mbMap: unknown) {
+  syncLayerWithMB(mbMap: MbMap) {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 

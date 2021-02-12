@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { ToastsApi } from 'kibana/public';
 import { AlertInstancesRoute, getAlertInstanceSummary } from './alert_instances_route';
 import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
@@ -23,7 +25,7 @@ describe('alert_instance_summary_route', () => {
     expect(
       shallow(
         <AlertInstancesRoute readOnly={false} alert={alert} alertType={alertType} {...mockApis()} />
-      ).containsMatchingElement(<EuiLoadingSpinner size="l" />)
+      ).containsMatchingElement(<CenterJustifiedSpinner />)
     ).toBeTruthy();
   });
 });
@@ -151,6 +153,8 @@ function mockAlertType(overloads: Partial<AlertType> = {}): AlertType {
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: 'alerts',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
     ...overloads,
   };
 }

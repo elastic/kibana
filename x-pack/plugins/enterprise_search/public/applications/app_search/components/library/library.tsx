@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import React from 'react';
 
 import {
   EuiSpacer,
@@ -12,20 +15,20 @@ import {
   EuiPageContentBody,
   EuiPageContent,
 } from '@elastic/eui';
-import React from 'react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { Schema } from '../../../shared/types';
 import { Result } from '../result/result';
 
 export const Library: React.FC = () => {
   const props = {
+    isMetaEngine: false,
     result: {
       id: {
         raw: '1',
       },
       _meta: {
         id: '1',
-        scopedId: '1',
         score: 100,
         engine: 'my-engine',
       },
@@ -35,11 +38,17 @@ export const Library: React.FC = () => {
       description: {
         raw: 'A description',
       },
-      states: {
-        raw: ['Pennsylvania', 'Ohio'],
+      date_established: {
+        raw: '1968-10-02T05:00:00Z',
+      },
+      location: {
+        raw: '37.3,-113.05',
       },
       visitors: {
         raw: 1000,
+      },
+      states: {
+        raw: ['Pennsylvania', 'Ohio'],
       },
       size: {
         raw: 200,
@@ -48,6 +57,17 @@ export const Library: React.FC = () => {
         raw: 100,
       },
     },
+  };
+
+  const schema: Schema = {
+    title: 'text',
+    description: 'text',
+    date_established: 'date',
+    location: 'geolocation',
+    states: 'text',
+    visitors: 'number',
+    size: 'number',
+    length: 'number',
   };
 
   return (
@@ -80,6 +100,7 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
               result: {
                 id: props.result.id,
                 _meta: props.result._meta,
@@ -96,11 +117,11 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
               result: {
                 ...props.result,
                 _meta: {
                   id: '1',
-                  scopedId: '1',
                   score: 100,
                   engine: 'my-engine',
                 },
@@ -115,12 +136,12 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
               showScore: true,
               result: {
                 ...props.result,
                 _meta: {
                   id: '1',
-                  scopedId: '1',
                   score: 100,
                   engine: 'my-engine',
                 },
@@ -135,12 +156,13 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
+              isMetaEngine: true,
               showScore: true,
               result: {
                 ...props.result,
                 _meta: {
                   id: '1',
-                  scopedId: '2',
                   score: 100,
                   engine: 'my-engine',
                 },
@@ -155,6 +177,8 @@ export const Library: React.FC = () => {
           <EuiSpacer />
           <Result
             {...{
+              ...props,
+              isMetaEngine: true,
               result: {
                 ...props.result,
                 'this-description-is-a-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-really-long-key': {
@@ -163,13 +187,27 @@ export const Library: React.FC = () => {
                 },
                 _meta: {
                   id: 'my-id-is-a-really-long-id-yes-it-is',
-                  scopedId: '2',
                   score: 100,
                   engine: 'my-engine-is-a-really-long-engin-name-yes-it-is',
                 },
               },
             }}
           />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With a link</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} shouldLinkToDetailPage />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With field value type highlights</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} schemaForTypeHighlights={schema} />
           <EuiSpacer />
         </EuiPageContentBody>
       </EuiPageContent>

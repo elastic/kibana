@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const ADD_NEW_CONNECTOR_DROPDOWN_BUTTON =
@@ -28,3 +29,5 @@ export const TOASTER = '[data-test-subj="euiToastHeader"]';
 export const URL = '[data-test-subj="apiUrlFromInput"]';
 
 export const USERNAME = '[data-test-subj="connector-servicenow-username-form-input"]';
+
+export const SERVICE_NOW_MAPPING = 'code[data-test-subj="field-mapping-target"]';

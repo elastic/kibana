@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
@@ -22,6 +23,7 @@ import {
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { isSparseDataJob } from './util/general';
 
 export class SingleMetricJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -196,6 +198,7 @@ export class SingleMetricJobCreator extends JobCreator {
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
+    this._sparseData = isSparseDataJob(job, datafeed);
     const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
 
     this.removeAllDetectors();

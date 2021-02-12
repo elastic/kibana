@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { IEventLogClient } from '../../../../event_log/server';
 import { actionsClientMock } from '../../../../actions/server/mocks';
@@ -85,6 +87,7 @@ export function getBeforeSetup(
     actionGroups: [{ id: 'default', name: 'Default' }],
     recoveryActionGroup: RecoveredActionGroup,
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
   }));

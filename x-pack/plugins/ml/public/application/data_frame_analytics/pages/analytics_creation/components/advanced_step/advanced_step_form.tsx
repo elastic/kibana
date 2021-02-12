@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useMemo, useEffect, useState } from 'react';
@@ -50,18 +51,14 @@ const numClassesTypeMessage = (
   />
 );
 
-function getZeroClassesMessage(elasaticUrl: string, version: string) {
+function getZeroClassesMessage(elasticUrl: string) {
   return (
     <FormattedMessage
       id="xpack.ml.dataframe.analytics.create.zeroClassesMessage"
       defaultMessage="To evaluate the {wikiLink}, select all classes or a value greater than the total number of categories."
       values={{
         wikiLink: (
-          <EuiLink
-            href={`${elasaticUrl}guide/en/machine-learning/${version}/ml-dfanalytics-evaluate.html#ml-dfanalytics-roc`}
-            target="_blank"
-            external
-          >
+          <EuiLink href={elasticUrl} target="_blank" external>
             {i18n.translate('xpack.ml.dataframe.analytics.create.aucRocLabel', {
               defaultMessage: 'AUC ROC',
             })}
@@ -136,19 +133,23 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const classAucRocDocLink = docLinks.links.ml.classificationAucRoc;
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
   const { form, isJobCreated, estimatedModelMemoryLimit } = state;
   const {
+    alpha,
     computeFeatureInfluence,
+    downsampleFactor,
     eta,
+    etaGrowthRatePerTree,
     featureBagFraction,
     featureInfluenceThreshold,
     gamma,
     jobType,
     lambda,
     maxNumThreads,
+    maxOptimizationRoundsPerHyperparameter,
     maxTrees,
     method,
     modelMemoryLimit,
@@ -160,6 +161,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     outlierFraction,
     predictionFieldName,
     randomizeSeed,
+    softTreeDepthLimit,
+    softTreeDepthTolerance,
     useEstimatedMml,
   } = form;
 
@@ -200,7 +203,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
   useEffect(() => {
     setFetchingAdvancedParamErrors(true);
     (async function () {
-      const { success, errorMessage, expectedMemory } = await fetchExplainData(form);
+      const { success, errorMessage, errorReason, expectedMemory } = await fetchExplainData(form);
       const paramErrors: AdvancedParamErrors = {};
 
       if (success) {
@@ -215,6 +218,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
         Object.values(ANALYSIS_ADVANCED_FIELDS).forEach((param) => {
           if (errorMessage.includes(`[${param}]`)) {
             paramErrors[param] = errorMessage;
+          } else if (errorReason?.includes(`[${param}]`)) {
+            paramErrors[param] = errorReason;
           }
         });
       }
@@ -222,12 +227,16 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       setAdvancedParamErrors(paramErrors);
     })();
   }, [
+    alpha,
+    downsampleFactor,
     eta,
+    etaGrowthRatePerTree,
     featureBagFraction,
     featureInfluenceThreshold,
     gamma,
     lambda,
     maxNumThreads,
+    maxOptimizationRoundsPerHyperparameter,
     maxTrees,
     method,
     nNeighbors,
@@ -235,6 +244,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
     numTopFeatureImportanceValues,
     outlierFraction,
     randomizeSeed,
+    softTreeDepthLimit,
+    softTreeDepthTolerance,
   ]);
 
   const outlierDetectionAdvancedConfig = (
@@ -422,9 +433,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
               helpText={getTopClassesHelpText(selectedNumTopClasses)}
               isInvalid={selectedNumTopClasses === 0 || selectedNumTopClassesIsInvalid}
               error={[
-                ...(selectedNumTopClasses === 0
-                  ? [getZeroClassesMessage(ELASTIC_WEBSITE_URL, DOC_LINK_VERSION)]
-                  : []),
+                ...(selectedNumTopClasses === 0 ? [getZeroClassesMessage(classAucRocDocLink)] : []),
                 ...(selectedNumTopClassesIsInvalid ? [numClassesTypeMessage] : []),
               ]}
             >

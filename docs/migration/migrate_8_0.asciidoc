@@ -52,13 +52,33 @@ for example, `logstash-*`.
 ==== Default logging timezone is now the system's timezone
 *Details:* In prior releases the timezone used in logs defaulted to UTC.  We now use the host machine's timezone by default.
 
-*Impact:* To restore the previous behavior, in kibana.yml set `logging.timezone: UTC`.
+*Impact:* To restore the previous behavior, in kibana.yml use the pattern layout, with a date modifier:
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    console:
+      kind: console
+      layout:
+        kind: pattern
+        pattern: "%date{ISO8601_TZ}{UTC}"
+-------------------
+See https://github.com/elastic/kibana/pull/90368 for more details.
 
 [float]
 ==== Responses are never logged by default
 *Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected.
 
-*Impact:* To restore the previous behavior, in kibana.yml set `logging.events.response=*`.
+*Impact:* To restore the previous behavior, in kibana.yml enable `debug` logs for the `http.server.response` context under `logging.loggers`:
+[source,yaml]
+-------------------
+logging:
+  loggers:
+    - context: http.server.response
+      appenders: [console]
+      level: debug
+-------------------
+See https://github.com/elastic/kibana/pull/87939 for more details.
 
 [float]
 ==== `xpack.security.authProviders` is no longer valid

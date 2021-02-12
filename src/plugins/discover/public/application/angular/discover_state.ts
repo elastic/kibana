@@ -1,22 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { NotificationsStart } from 'kibana/public';
 import {
@@ -36,7 +27,9 @@ import {
   SearchSessionInfoProvider,
 } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
+import { SavedSearch } from '../../saved_searches';
 
 export interface AppState {
   /**
@@ -47,6 +40,14 @@ export interface AppState {
    * Array of applied filters
    */
   filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
+  /**
+   * Hide chart
+   */
+  hideChart?: boolean;
   /**
    * id of the used index pattern
    */
@@ -203,7 +204,7 @@ export function getState({
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
-    flushToUrl: () => stateStorage.flush(),
+    flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
   };
 }
@@ -259,15 +260,32 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
 export function createSearchSessionRestorationDataProvider(deps: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
-  getSavedSearchId: () => string | undefined;
+  getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
+  const getSavedSearchId = () => deps.getSavedSearch().id;
   return {
-    getName: async () => 'Discover',
+    getName: async () => {
+      const savedSearch = deps.getSavedSearch();
+      return (
+        (savedSearch.id && savedSearch.title) ||
+        i18n.translate('discover.discoverDefaultSearchSessionName', {
+          defaultMessage: 'Discover',
+        })
+      );
+    },
     getUrlGeneratorData: async () => {
       return {
         urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
-        initialState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: false }),
-        restoreState: createUrlGeneratorState({ ...deps, forceAbsoluteTime: true }),
+        initialState: createUrlGeneratorState({
+          ...deps,
+          getSavedSearchId,
+          shouldRestoreSearchSession: false,
+        }),
+        restoreState: createUrlGeneratorState({
+          ...deps,
+          getSavedSearchId,
+          shouldRestoreSearchSession: true,
+        }),
       };
     },
   };
@@ -277,12 +295,12 @@ function createUrlGeneratorState({
   appStateContainer,
   data,
   getSavedSearchId,
-  forceAbsoluteTime, // TODO: not implemented
+  shouldRestoreSearchSession,
 }: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
-  forceAbsoluteTime: boolean;
+  shouldRestoreSearchSession: boolean;
 }): DiscoverUrlGeneratorState {
   const appState = appStateContainer.get();
   return {
@@ -290,8 +308,10 @@ function createUrlGeneratorState({
     indexPatternId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
-    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
-    searchSessionId: data.search.session.getSessionId(),
+    timeRange: shouldRestoreSearchSession
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
+    searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     columns: appState.columns,
     sort: appState.sort,
     savedQuery: appState.savedQuery,

@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect, useReducer, useCallback } from 'react';
-import { CaseStatuses } from '../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../case/common/api';
 
 import { Case } from './types';
 import * as i18n from './translations';
@@ -70,10 +71,15 @@ export const initialData: Case = {
   status: CaseStatuses.open,
   tags: [],
   title: '',
+  totalAlerts: 0,
   totalComment: 0,
+  type: CaseType.individual,
   updatedAt: null,
   updatedBy: null,
   version: '',
+  settings: {
+    syncAlerts: true,
+  },
 };
 
 export interface UseGetCase extends CaseState {

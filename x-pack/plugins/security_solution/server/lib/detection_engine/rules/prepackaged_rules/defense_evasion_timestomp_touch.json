@@ -34,9 +34,16 @@
       },
       "technique": [
         {
-          "id": "T1099",
-          "name": "Timestomp",
-          "reference": "https://attack.mitre.org/techniques/T1099/"
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/",
+          "subtechnique": [
+            {
+              "id": "T1070.006",
+              "name": "Timestomp",
+              "reference": "https://attack.mitre.org/techniques/T1070/006/"
+            }
+          ]
         }
       ]
     }

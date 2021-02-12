@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../services';
 import { createScenario } from '../scenario';
@@ -61,6 +63,14 @@ export default function (ftrContext: FtrProviderContext) {
 
       // banner shown only when license expired not just deleted
       await testSubjects.missingOrFail('licenseExpiredBanner');
+    });
+
+    it('properly recognize an enterprise license', async () => {
+      await scenario.startEnterprise();
+      await scenario.waitForPluginToDetectLicenseUpdate();
+
+      const enterpriseLicense = await scenario.getLicense();
+      expect(enterpriseLicense.license?.type).to.be('enterprise');
     });
   });
 }

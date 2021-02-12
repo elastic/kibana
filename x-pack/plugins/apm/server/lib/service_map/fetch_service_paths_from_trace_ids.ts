@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
@@ -10,13 +13,18 @@ import {
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function fetchServicePathsFromTraceIds(
-  setup: Setup,
+  setup: Setup & SetupTimeRange,
   traceIds: string[]
 ) {
   const { apmEventClient } = setup;
+
+  // make sure there's a range so ES can skip shards
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const start = setup.start - dayInMs;
+  const end = setup.end + dayInMs;
 
   const serviceMapParams = {
     apm: {
@@ -32,6 +40,7 @@ export async function fetchServicePathsFromTraceIds(
                 [TRACE_ID]: traceIds,
               },
             },
+            { range: rangeFilter(start, end) },
           ],
         },
       },

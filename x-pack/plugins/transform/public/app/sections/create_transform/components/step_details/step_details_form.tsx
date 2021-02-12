@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiAccordion,
@@ -17,6 +19,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
@@ -50,7 +53,7 @@ import {
   transformSettingsMaxPageSearchSizeValidator,
 } from '../../../../common/validators';
 import { StepDefineExposedState } from '../step_define/common';
-import { dictionaryToArray } from '../../../../../../common/types/common';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 export interface StepDetailsExposedState {
   continuousModeDateField: string;
@@ -179,15 +182,12 @@ export const StepDetailsForm: FC<Props> = React.memo(
     useEffect(() => {
       // use an IIFE to avoid returning a Promise to useEffect.
       (async function () {
-        const { searchQuery, groupByList, aggList } = stepDefineState;
-        const pivotAggsArr = dictionaryToArray(aggList);
-        const pivotGroupByArr = dictionaryToArray(groupByList);
+        const { searchQuery, previewRequest: partialPreviewRequest } = stepDefineState;
         const pivotQuery = getPivotQuery(searchQuery);
         const previewRequest = getPreviewTransformRequestBody(
           searchItems.indexPattern.title,
           pivotQuery,
-          pivotGroupByArr,
-          pivotAggsArr
+          partialPreviewRequest
         );
 
         const transformPreview = await api.getTransformsPreview(previewRequest);
@@ -401,6 +401,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
               data-test-subj="transformDescriptionInput"
             />
           </EuiFormRow>
+
           <EuiFormRow
             label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
               defaultMessage: 'Destination index',
@@ -447,6 +448,30 @@ export const StepDetailsForm: FC<Props> = React.memo(
             />
           </EuiFormRow>
 
+          {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
+            <>
+              <EuiSpacer size={'m'} />
+              <EuiCallOut color="warning" iconType="alert" size="m">
+                <p>
+                  <FormattedMessage
+                    id="xpack.transform.stepDetailsForm.destinationIndexWarning"
+                    defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. Otherwise, the destination index is created with dynamic mappings. If the transform fails, check the messages tab on the Stack Management page for errors."
+                    values={{
+                      docsLink: (
+                        <EuiLink href={esIndicesCreateIndex} target="_blank">
+                          {i18n.translate('xpack.transform.stepDetailsForm.createIndexAPI', {
+                            defaultMessage: 'Create index API',
+                          })}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+              <EuiSpacer size={'m'} />
+            </>
+          ) : null}
+
           <EuiFormRow
             isInvalid={createIndexPattern && indexPatternTitleExists}
             error={
@@ -461,7 +486,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
             <EuiSwitch
               name="transformCreateIndexPattern"
               label={i18n.translate('xpack.transform.stepCreateForm.createIndexPatternLabel', {
-                defaultMessage: 'Create index pattern',
+                defaultMessage: 'Create Kibana index pattern',
               })}
               checked={createIndexPattern === true}
               onChange={() => setCreateIndexPattern(!createIndexPattern)}
@@ -504,7 +529,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 label={i18n.translate(
                   'xpack.transform.stepDetailsForm.continuousModeDateFieldLabel',
                   {
-                    defaultMessage: 'Date field',
+                    defaultMessage: 'Date field for continuous mode',
                   }
                 )}
                 helpText={i18n.translate(

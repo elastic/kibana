@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
@@ -605,6 +606,7 @@ export class DataVisualizer {
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
+    const runtimeMappings: any = {};
 
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
@@ -617,6 +619,11 @@ export class DataVisualizer {
         cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
         };
+      } else if (datafeedConfig?.runtime_mappings?.hasOwnProperty(field)) {
+        cardinalityField = {
+          cardinality: { field },
+        };
+        runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
       } else {
         cardinalityField = {
           cardinality: { field },
@@ -632,6 +639,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
+      ...runtimeMappings,
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -670,7 +678,10 @@ export class DataVisualizer {
           },
         });
       } else {
-        if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
+        if (
+          datafeedConfig?.script_fields?.hasOwnProperty(field) ||
+          datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
+        ) {
           const cardinality = get(
             aggregations,
             [...aggsPath, `${safeFieldName}_cardinality`, 'value'],
@@ -1179,7 +1190,8 @@ export class DataVisualizer {
     });
 
     const searchBody = {
-      _source: field,
+      fields: [field],
+      _source: false,
       query: {
         bool: {
           filter: filterCriteria,
@@ -1199,16 +1211,16 @@ export class DataVisualizer {
     if (body.hits.total.value > 0) {
       const hits = body.hits.hits;
       for (let i = 0; i < hits.length; i++) {
-        // Look in the _source for the field value.
-        // If the field is not in the _source (as will happen if the
-        // field is populated using copy_to in the index mapping),
-        // there will be no example to add.
         // Use lodash get() to support field names containing dots.
-        const example: any = get(hits[i]._source, field);
-        if (example !== undefined && stats.examples.indexOf(example) === -1) {
-          stats.examples.push(example);
-          if (stats.examples.length === maxExamples) {
-            break;
+        const doc: object[] | undefined = get(hits[i].fields, field);
+        // the results from fields query is always an array
+        if (Array.isArray(doc) && doc.length > 0) {
+          const example = doc[0];
+          if (example !== undefined && stats.examples.indexOf(example) === -1) {
+            stats.examples.push(example);
+            if (stats.examples.length === maxExamples) {
+              break;
+            }
           }
         }
       }

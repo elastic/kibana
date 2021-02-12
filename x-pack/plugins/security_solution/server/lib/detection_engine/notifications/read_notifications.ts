@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SanitizedAlert } from '../../../../../alerts/common';
+import { AlertTypeParams, SanitizedAlert } from '../../../../../alerts/common';
 import { ReadNotificationParams, isAlertType } from './types';
 import { findNotifications } from './find_notifications';
 import { INTERNAL_RULE_ALERT_ID_KEY } from '../../../../common/constants';
@@ -13,7 +14,7 @@ export const readNotifications = async ({
   alertsClient,
   id,
   ruleAlertId,
-}: ReadNotificationParams): Promise<SanitizedAlert | null> => {
+}: ReadNotificationParams): Promise<SanitizedAlert<AlertTypeParams> | null> => {
   if (id != null) {
     try {
       const notification = await alertsClient.get({ id });

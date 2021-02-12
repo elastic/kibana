@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { Duration } from 'moment';
+
 import { ListClient } from '../../../../../../lists/server';
 import {
   Type,
@@ -20,13 +23,17 @@ import {
   ItemsPerSearch,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
-import { AlertServices } from '../../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../../alerts/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -38,7 +45,7 @@ export interface CreateThreatSignalsOptions {
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
@@ -71,13 +78,14 @@ export interface CreateThreatSignalsOptions {
 
 export interface CreateThreatSignalOptions {
   threatMapping: ThreatMapping;
+  threatEnrichment: SignalsEnrichment;
   query: string;
   inputIndex: string[];
   type: Type;
   filters: PartialFilter[];
   language: LanguageOrUndefined;
   savedId: string | undefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   exceptionItems: ExceptionListItemSchema[];
   gap: Duration | null;
   previousStartedAt: Date | null;
@@ -172,14 +180,40 @@ export interface GetSortWithTieBreakerOptions {
   listItemIndex: string;
 }
 
+export interface ThreatListDoc {
+  [key: string]: unknown;
+}
+
 /**
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export interface ThreatListItem {
+export type ThreatListItem = SearchResponse<ThreatListDoc>['hits']['hits'][number];
+
+export interface ThreatIndicator {
   [key: string]: unknown;
 }
 
 export interface SortWithTieBreaker {
   [key: string]: string;
+}
+
+export interface ThreatMatchNamedQuery {
+  id: string;
+  field: string;
+  value: string;
+}
+
+export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
+
+export interface BuildThreatEnrichmentOptions {
+  buildRuleMessage: BuildRuleMessage;
+  exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
+  logger: Logger;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  threatFilters: PartialFilter[];
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatQuery: ThreatQuery;
 }

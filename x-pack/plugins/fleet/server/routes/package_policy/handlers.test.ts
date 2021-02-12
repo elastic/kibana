@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
 import { IRouter, KibanaRequest, RequestHandler, RouteConfig } from 'kibana/server';
 import { registerRoutes } from './index';
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
-import { xpackMocks } from '../../../../../mocks';
 import { appContextService } from '../../services';
-import { createAppContextStartContractMock } from '../../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { PackagePolicyServiceInterface, ExternalCallback } from '../..';
 import { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
 import { packagePolicyService } from '../../services';
@@ -25,7 +25,7 @@ jest.mock('../../services/package_policy', (): {
       compilePackagePolicyInputs: jest.fn((packageInfo, dataInputs) => Promise.resolve(dataInputs)),
       buildPackagePolicyFromPackage: jest.fn(),
       bulkCreate: jest.fn(),
-      create: jest.fn((soClient, callCluster, newData) =>
+      create: jest.fn((soClient, esClient, callCluster, newData) =>
         Promise.resolve({
           ...newData,
           inputs: newData.inputs.map((input) => ({
@@ -201,7 +201,7 @@ describe('When calling package policy', () => {
         );
         await routeHandler(context, request, response);
         expect(response.ok).toHaveBeenCalled();
-        expect(packagePolicyServiceMock.create.mock.calls[0][2]).toEqual({
+        expect(packagePolicyServiceMock.create.mock.calls[0][3]).toEqual({
           policy_id: 'a5ca00c0-b30c-11ea-9732-1bb05811278c',
           description: '',
           enabled: true,

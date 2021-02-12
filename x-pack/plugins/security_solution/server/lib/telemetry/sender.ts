@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -104,7 +105,7 @@ export class TelemetryEventsSender {
   public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
     const query = {
       expand_wildcards: 'open,hidden',
-      index: 'logs-endpoint.diagnostic.collection-*',
+      index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
       size: this.maxQueueSize,
       body: {
@@ -319,6 +320,8 @@ const allowlistEventFields: AllowlistFields = {
     Ext: {
       code_signature: true,
       malware_classification: true,
+      quarantine_result: true,
+      quarantine_message: true,
     },
   },
   host: {

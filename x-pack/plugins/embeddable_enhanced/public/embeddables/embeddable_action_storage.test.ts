@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Embeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
@@ -12,7 +13,7 @@ import {
 import { UiActionsEnhancedSerializedEvent } from '../../../ui_actions_enhanced/public';
 import { of } from '../../../../../src/plugins/kibana_utils/public';
 // use real const to make test fail in case someone accidentally changes it
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/data/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableWithDynamicActionsInput> {
   public readonly type = 'test';

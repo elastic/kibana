@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { Subject, Observable, Subscription } from 'rxjs';
-
-import { performance } from 'perf_hooks';
-
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
-import { Result, asErr, mapErr } from './lib/result_type';
+import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
@@ -24,8 +23,10 @@ import {
   asTaskRunRequestEvent,
   TaskPollingCycle,
   asTaskPollingCycleEvent,
+  TaskManagerStat,
+  asTaskManagerStatEvent,
 } from './task_events';
-import { fillPool, FillPoolResult } from './lib/fill_pool';
+import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
@@ -37,10 +38,12 @@ import {
 } from './polling';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
-import { TaskStore, OwnershipClaimingOpts, ClaimOwnershipResult } from './task_store';
+import { TaskStore } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { delayOnClaimConflicts } from './polling';
+import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
 
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
@@ -56,7 +59,8 @@ export type TaskLifecycleEvent =
   | TaskRun
   | TaskClaim
   | TaskRunRequest
-  | TaskPollingCycle;
+  | TaskPollingCycle
+  | TaskManagerStat;
 
 /**
  * The public interface into the task manager system.
@@ -65,6 +69,7 @@ export class TaskPollingLifecycle {
   private definitions: TaskTypeDictionary;
 
   private store: TaskStore;
+  private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
 
   private logger: Logger;
@@ -99,8 +104,7 @@ export class TaskPollingLifecycle {
     this.definitions = definitions;
     this.store = taskStore;
 
-    // pipe store events into the lifecycle event stream
-    this.store.events.subscribe((event) => this.events$.next(event));
+    const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: config.max_workers,
@@ -111,20 +115,50 @@ export class TaskPollingLifecycle {
       logger,
       maxWorkers$: maxWorkersConfiguration$,
     });
+    this.pool.load.subscribe(emitEvent);
+
+    this.taskClaiming = new TaskClaiming({
+      taskStore,
+      maxAttempts: config.max_attempts,
+      definitions,
+      logger: this.logger,
+      getCapacity: (taskType?: string) =>
+        taskType && this.definitions.get(taskType)?.maxConcurrency
+          ? Math.max(
+              Math.min(
+                this.pool.availableWorkers,
+                this.definitions.get(taskType)!.maxConcurrency! -
+                  this.pool.getOccupiedWorkersByType(taskType)
+              ),
+              0
+            )
+          : this.pool.availableWorkers,
+    });
+    // pipe taskClaiming events into the lifecycle event stream
+    this.taskClaiming.events.subscribe(emitEvent);
 
     const {
       max_poll_inactivity_cycles: maxPollInactivityCycles,
       poll_interval: pollInterval,
     } = config;
 
+    const pollIntervalDelay$ = delayOnClaimConflicts(
+      maxWorkersConfiguration$,
+      pollIntervalConfiguration$,
+      this.events$,
+      config.version_conflict_threshold,
+      config.monitored_stats_running_average_window
+    ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+
     // the task poller that polls for work on fixed intervals and on demand
     const poller$: Observable<
-      Result<FillPoolResult, PollingError<string>>
-    > = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
+      Result<TimedFillPoolResult, PollingError<string>>
+    > = createObservableMonitor<Result<TimedFillPoolResult, PollingError<string>>, Error>(
       () =>
-        createTaskPoller<string, FillPoolResult>({
+        createTaskPoller<string, TimedFillPoolResult>({
           logger,
           pollInterval$: pollIntervalConfiguration$,
+          pollIntervalDelay$,
           bufferCapacity: config.request_capacity,
           getCapacity: () => this.pool.availableWorkers,
           pollRequests$: this.claimRequests$,
@@ -182,6 +216,7 @@ export class TaskPollingLifecycle {
       beforeRun: this.middleware.beforeRun,
       beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
+      defaultMaxAttempts: this.taskClaiming.maxAttempts,
     });
   };
 
@@ -189,15 +224,24 @@ export class TaskPollingLifecycle {
     return !this.pollingSubscription.closed;
   }
 
-  private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
+  private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
       () =>
         claimAvailableTasks(
           tasksToClaim.splice(0, this.pool.availableWorkers),
-          this.store.claimAvailableTasks,
-          this.pool.availableWorkers,
+          this.taskClaiming,
           this.logger
+        ).pipe(
+          tap(
+            mapOk(({ timing }: ClaimOwnershipResult) => {
+              if (timing) {
+                this.emitEvent(
+                  asTaskManagerStatEvent('claimDuration', asOk(timing.stop - timing.start))
+                );
+              }
+            })
+          )
         ),
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
@@ -206,7 +250,9 @@ export class TaskPollingLifecycle {
     );
   };
 
-  private subscribeToPoller(poller$: Observable<Result<FillPoolResult, PollingError<string>>>) {
+  private subscribeToPoller(
+    poller$: Observable<Result<TimedFillPoolResult, PollingError<string>>>
+  ) {
     return poller$
       .pipe(
         tap(
@@ -221,60 +267,52 @@ export class TaskPollingLifecycle {
           })
         )
       )
-      .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
-        this.emitEvent(asTaskPollingCycleEvent<string>(event));
+      .subscribe((result: Result<TimedFillPoolResult, PollingError<string>>) => {
+        this.emitEvent(
+          map(
+            result,
+            ({ timing, ...event }) => asTaskPollingCycleEvent<string>(asOk(event), timing),
+            (event) => asTaskPollingCycleEvent<string>(asErr(event))
+          )
+        );
       });
   }
 }
 
-export async function claimAvailableTasks(
+export function claimAvailableTasks(
   claimTasksById: string[],
-  claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
-  availableWorkers: number,
+  taskClaiming: TaskClaiming,
   logger: Logger
-) {
-  if (availableWorkers > 0) {
-    performance.mark('claimAvailableTasks_start');
-
-    try {
-      const { docs, claimedTasks } = await claim({
-        size: availableWorkers,
+): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
+  return new Observable((observer) => {
+    taskClaiming
+      .claimAvailableTasksIfCapacityIsAvailable({
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
-      });
-
-      if (claimedTasks === 0) {
-        performance.mark('claimAvailableTasks.noTasks');
-      }
-      performance.mark('claimAvailableTasks_stop');
-      performance.measure(
-        'claimAvailableTasks',
-        'claimAvailableTasks_start',
-        'claimAvailableTasks_stop'
+      })
+      .subscribe(
+        (claimResult) => {
+          observer.next(claimResult);
+        },
+        (ex) => {
+          // if the `taskClaiming` stream errors out we want to catch it and see if
+          // we can identify the reason
+          // if we can - we emit an FillPoolResult error rather than erroring out the wrapping Observable
+          // returned by `claimAvailableTasks`
+          if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
+            logger.warn(
+              `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
+            );
+            observer.next(asErr(FillPoolResult.Failed));
+            observer.complete();
+          } else {
+            // as we could't identify the reason - we'll error out the wrapping Observable too
+            observer.error(ex);
+          }
+        },
+        () => {
+          observer.complete();
+        }
       );
-
-      if (docs.length !== claimedTasks) {
-        logger.warn(
-          `[Task Ownership error]: ${claimedTasks} tasks were claimed by Kibana, but ${
-            docs.length
-          } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
-        );
-      }
-      return docs;
-    } catch (ex) {
-      if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
-        logger.warn(
-          `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
-        );
-      } else {
-        throw ex;
-      }
-    }
-  } else {
-    performance.mark('claimAvailableTasks.noAvailableWorkers');
-    logger.debug(
-      `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
-    );
-  }
-  return [];
+  });
 }

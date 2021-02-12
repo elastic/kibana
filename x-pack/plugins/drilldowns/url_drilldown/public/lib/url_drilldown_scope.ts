@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /**
@@ -11,20 +12,24 @@
 
 import type { Filter, Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
-  IEmbeddable,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   isRowClickTriggerContext,
   isContextMenuTriggerContext,
   RangeSelectContext,
+  SELECT_RANGE_TRIGGER,
   ValueClickContext,
+  VALUE_CLICK_TRIGGER,
+  EmbeddableInput,
   EmbeddableOutput,
 } from '../../../../../../src/plugins/embeddable/public';
-import type { ActionContext, ActionFactoryContext } from './url_drilldown';
+import type {
+  ActionContext,
+  ActionFactoryContext,
+  EmbeddableWithQueryInput,
+} from './url_drilldown';
 import {
-  SELECT_RANGE_TRIGGER,
   RowClickContext,
-  VALUE_CLICK_TRIGGER,
   ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 
@@ -32,7 +37,7 @@ import {
  * Part of context scope extracted from an embeddable
  * Expose on the scope as: `{{context.panel.id}}`, `{{context.panel.filters.[0]}}`
  */
-interface EmbeddableUrlDrilldownContextScope {
+interface EmbeddableUrlDrilldownContextScope extends EmbeddableInput {
   /**
    * ID of the embeddable panel.
    */
@@ -59,10 +64,8 @@ interface EmbeddableUrlDrilldownContextScope {
   savedObjectId?: string;
 }
 
-export function getPanelVariables(contextScopeInput: {
-  embeddable?: IEmbeddable;
-}): EmbeddableUrlDrilldownContextScope {
-  function hasEmbeddable(val: unknown): val is { embeddable: IEmbeddable } {
+export function getPanelVariables(contextScopeInput: unknown): EmbeddableUrlDrilldownContextScope {
+  function hasEmbeddable(val: unknown): val is { embeddable: EmbeddableWithQueryInput } {
     if (val && typeof val === 'object' && 'embeddable' in val) return true;
     return false;
   }
@@ -99,7 +102,7 @@ function getIndexPatternIds(output: EmbeddableOutput): string[] {
 }
 
 export function getEmbeddableVariables(
-  embeddable: IEmbeddable
+  embeddable: EmbeddableWithQueryInput
 ): EmbeddableUrlDrilldownContextScope {
   const input = embeddable.getInput();
   const output = embeddable.getOutput();
@@ -195,10 +198,10 @@ function getEventScopeFromValueClickTriggerContext(
   });
 }
 
-function getEventScopeFromRowClickTriggerContext({
-  embeddable,
-  data,
-}: RowClickContext): RowClickTriggerEventScope {
+function getEventScopeFromRowClickTriggerContext(ctx: RowClickContext): RowClickTriggerEventScope {
+  const { data } = ctx;
+  const embeddable = ctx.embeddable as EmbeddableWithQueryInput;
+
   const { rowIndex } = data;
   const columns = data.columns || data.table.columns.map(({ id }) => id);
   const values: Primitive[] = [];

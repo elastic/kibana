@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+import { waitFor, act } from '@testing-library/react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../mock/match_media';
 import { mockIndexNames, mockIndexPattern, TestProviders } from '../../mock';
 
-import { mockEventViewerResponse } from './mock';
+import { mockEventViewerResponse, mockEventViewerResponseWithEvents } from './mock';
 import { StatefulEventsViewer } from '.';
 import { EventsViewer } from './events_viewer';
 import { defaultHeaders } from './default_headers';
@@ -30,6 +32,22 @@ jest.mock('../../../timelines/components/graph_overlay', () => ({
   GraphOverlay: jest.fn(() => <div />),
 }));
 
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useDataGridColumnSorting: jest.fn(),
+  };
+});
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -42,6 +60,9 @@ jest.mock('../../containers/sourcerer');
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
+
+const mockUseTimelineEvents: jest.Mock = useTimelineEvents as jest.Mock;
+jest.mock('../../../timelines/containers');
 
 const from = '2019-08-26T22:10:56.791Z';
 const to = '2019-08-27T22:10:56.794Z';
@@ -65,7 +86,6 @@ const eventsViewerDefaultProps = {
   deletedEventIds: [],
   docValueFields: [],
   end: to,
-  expandedEvent: {},
   filters: [],
   id: TimelineId.detectionsPage,
   indexNames: mockIndexNames,
@@ -79,12 +99,12 @@ const eventsViewerDefaultProps = {
     query: '',
     language: 'kql',
   },
-  handleCloseExpandedEvent: jest.fn(),
   start: from,
   sort: [
     {
       columnId: 'foo',
-      sortDirection: 'none' as SortDirection,
+      columnType: 'number',
+      sortDirection: 'asc' as SortDirection,
     },
   ],
   scopeId: SourcererScopeName.timeline,
@@ -97,18 +117,56 @@ describe('EventsViewer', () => {
   let testProps = {
     defaultModel: eventsDefaultModel,
     end: to,
-    id: 'test-stateful-events-viewer',
+    id: TimelineId.test,
     start: from,
     scopeId: SourcererScopeName.timeline,
   };
-
   beforeEach(() => {
-    (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
+    mockUseTimelineEvents.mockReset();
   });
   beforeAll(() => {
     mockUseSourcererScope.mockImplementation(() => defaultMocks);
   });
+
+  describe('event details', () => {
+    beforeEach(() => {
+      mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
+    });
+
+    test('call the right reduce action to show event details', async () => {
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+
+      await act(async () => {
+        wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
+      });
+
+      await waitFor(() => {
+        expect(mockDispatch).toBeCalledTimes(2);
+        expect(mockDispatch.mock.calls[1][0]).toEqual({
+          payload: {
+            panelView: 'eventDetail',
+            params: {
+              eventId: 'yb8TkHYBRgU82_bJu_rY',
+              indexName: 'auditbeat-7.10.1-2020.12.18-000001',
+            },
+            tabType: 'query',
+            timelineId: TimelineId.test,
+          },
+          type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        });
+      });
+    });
+  });
+
   describe('rendering', () => {
+    beforeEach(() => {
+      mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
+    });
+
     test('it renders the "Showing..." subtitle with the expected event count', () => {
       const wrapper = mount(
         <TestProviders>
@@ -140,70 +198,84 @@ describe('EventsViewer', () => {
 
     defaultHeaders.forEach((header) => {
       test(`it renders the ${header.id} default EventsViewer column header`, () => {
+        testProps = {
+          ...testProps,
+          // Update with a new id, to force columns back to default.
+          id: TimelineId.test2,
+        };
         const wrapper = mount(
           <TestProviders>
             <StatefulEventsViewer {...testProps} />
           </TestProviders>
         );
 
-        defaultHeaders.forEach((h) =>
+        defaultHeaders.forEach((h) => {
           expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
             true
-          )
-        );
-      });
-    });
-    describe('loading', () => {
-      beforeAll(() => {
-        mockUseSourcererScope.mockImplementation(() => ({ ...defaultMocks, loading: true }));
-      });
-      test('it does NOT render fetch index pattern is loading', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <StatefulEventsViewer {...testProps} />
-          </TestProviders>
-        );
-
-        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
-          false
-        );
-      });
-
-      test('it does NOT render when start is empty', () => {
-        testProps = {
-          ...testProps,
-          start: '',
-        };
-        const wrapper = mount(
-          <TestProviders>
-            <StatefulEventsViewer {...testProps} />
-          </TestProviders>
-        );
-
-        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
-          false
-        );
-      });
-
-      test('it does NOT render when end is empty', () => {
-        testProps = {
-          ...testProps,
-          end: '',
-        };
-        const wrapper = mount(
-          <TestProviders>
-            <StatefulEventsViewer {...testProps} />
-          </TestProviders>
-        );
-
-        expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
-          false
-        );
+          );
+        });
       });
     });
   });
 
+  describe('loading', () => {
+    beforeAll(() => {
+      mockUseSourcererScope.mockImplementation(() => ({ ...defaultMocks, loading: true }));
+    });
+    beforeEach(() => {
+      mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
+    });
+
+    test('it does NOT render fetch index pattern is loading', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+        false
+      );
+    });
+
+    test('it does NOT render when start is empty', () => {
+      testProps = {
+        ...testProps,
+        start: '',
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+        false
+      );
+    });
+
+    test('it does NOT render when end is empty', () => {
+      testProps = {
+        ...testProps,
+        end: '',
+      };
+      const wrapper = mount(
+        <TestProviders>
+          <StatefulEventsViewer {...testProps} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().exists()).toBe(
+        false
+      );
+    });
+  });
+
   describe('headerFilterGroup', () => {
+    beforeEach(() => {
+      mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
+    });
+
     test('it renders the provided headerFilterGroup', () => {
       const wrapper = mount(
         <TestProviders>
@@ -277,6 +349,10 @@ describe('EventsViewer', () => {
   });
 
   describe('utilityBar', () => {
+    beforeEach(() => {
+      mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
+    });
+
     test('it renders the provided utilityBar when Resolver is NOT showing, because graphEventId is undefined', () => {
       const wrapper = mount(
         <TestProviders>
@@ -306,6 +382,10 @@ describe('EventsViewer', () => {
   });
 
   describe('header inspect button', () => {
+    beforeEach(() => {
+      mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponse]);
+    });
+
     test('it renders the inspect button when Resolver is NOT showing, because graphEventId is undefined', () => {
       const wrapper = mount(
         <TestProviders>

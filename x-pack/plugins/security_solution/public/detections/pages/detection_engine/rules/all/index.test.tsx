@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -158,7 +159,7 @@ describe('AllRules', () => {
       />
     );
 
-    expect(wrapper.find('[title="All rules"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="allRulesTableTab-rules"]')).toHaveLength(1);
   });
 
   it('it pulls from uiSettings to determine default refresh values', async () => {
@@ -230,7 +231,7 @@ describe('AllRules', () => {
     });
   });
 
-  describe('rules tab', () => {
+  describe('tabs', () => {
     it('renders all rules tab by default', async () => {
       const wrapper = mount(
         <TestProviders>
@@ -281,6 +282,35 @@ describe('AllRules', () => {
       wrapper.update();
       expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeTruthy();
       expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
+    });
+  });
+
+  it('renders exceptions lists tab when tab clicked', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllRules
+          createPrePackagedRules={jest.fn()}
+          hasNoPermissions={false}
+          loading={false}
+          loadingCreatePrePackagedRules={false}
+          refetchPrePackagedRulesStatus={jest.fn()}
+          rulesCustomInstalled={1}
+          rulesInstalled={0}
+          rulesNotInstalled={0}
+          rulesNotUpdated={0}
+          setRefreshRulesData={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const exceptionsTab = wrapper.find('[data-test-subj="allRulesTableTab-exceptions"] button');
+      exceptionsTab.simulate('click');
+
+      wrapper.update();
+      expect(wrapper.exists('[data-test-subj="allExceptionListsPanel"]')).toBeTruthy();
+      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
+      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
     });
   });
 });

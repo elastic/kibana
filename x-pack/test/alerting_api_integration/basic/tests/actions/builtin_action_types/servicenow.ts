@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -11,26 +12,6 @@ import {
   ExternalServiceSimulator,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
-// node ../scripts/functional_test_runner.js --grep "Actions.servicenddd" --config=test/alerting_api_integration/security_and_spaces/config.ts
-
-const mapping = [
-  {
-    source: 'title',
-    target: 'description',
-    actionType: 'nothing',
-  },
-  {
-    source: 'description',
-    target: 'short_description',
-    actionType: 'nothing',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'nothing',
-  },
-];
-
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -38,21 +19,19 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      incidentConfiguration: { mapping: [...mapping] },
-      isCaseOwned: true,
     },
     secrets: {
       password: 'elastic',
       username: 'changeme',
     },
     params: {
-      savedObjectId: '123',
-      title: 'a title',
-      description: 'a description',
-      comment: 'test-alert comment',
-      severity: '1',
-      urgency: '2',
-      impact: '1',
+      incident: {
+        short_description: 'a title',
+        description: 'a description',
+        severity: '1',
+        urgency: '2',
+        impact: '1',
+      },
       comments: [
         {
           commentId: '456',
@@ -80,8 +59,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            incidentConfiguration: { ...mockServiceNow.config.incidentConfiguration },
-            isCaseOwned: true,
           },
           secrets: mockServiceNow.secrets,
         })

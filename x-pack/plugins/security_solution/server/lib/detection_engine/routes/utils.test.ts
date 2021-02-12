@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -35,7 +36,7 @@ let alertsClient: ReturnType<typeof alertsClientMock.create>;
 describe('utils', () => {
   describe('transformError', () => {
     test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
-      const boom = new Boom('some boom message');
+      const boom = new Boom.Boom('some boom message');
       const transformed = transformError(boom);
       expect(transformed).toEqual({
         message: 'An internal server error occurred',
@@ -124,7 +125,7 @@ describe('utils', () => {
 
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformBulkError('rule-1', boom);
       const expected: BulkError = {
         rule_id: 'rule-1',
@@ -252,7 +253,7 @@ describe('utils', () => {
 
   describe('transformImportError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformImportError('rule-1', boom, {
         success_count: 1,
         success: false,

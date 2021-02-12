@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
-import { px } from '../../../style/variables';
+import { useTheme } from '../../../hooks/use_theme';
 import { getSpanIcon } from './get_span_icon';
 
 interface Props {
@@ -13,7 +15,9 @@ interface Props {
 }
 
 export function SpanIcon({ type, subType }: Props) {
+  const theme = useTheme();
+  const size = theme.eui.euiIconSizes.large;
   const icon = getSpanIcon(type, subType);
 
-  return <img src={icon} height={px(24)} alt={type || subType} />;
+  return <img src={icon} height={size} width={size} alt={type || subType} />;
 }

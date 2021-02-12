@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -162,7 +163,7 @@ describe('defaultIngestErrorHandler', () => {
 
   describe('Boom', () => {
     it('500: constructor - one arg', async () => {
-      const error = new Boom('bam');
+      const error = new Boom.Boom('bam');
       const response = httpServerMock.createResponseFactory();
 
       await defaultIngestErrorHandler({ error, response });
@@ -181,7 +182,7 @@ describe('defaultIngestErrorHandler', () => {
     });
 
     it('custom: constructor - 2 args', async () => {
-      const error = new Boom('Problem doing something', {
+      const error = new Boom.Boom('Problem doing something', {
         statusCode: 456,
       });
       const response = httpServerMock.createResponseFactory();

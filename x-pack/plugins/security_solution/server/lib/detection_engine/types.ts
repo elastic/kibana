@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
   AnomalyThresholdOrUndefined,
   Description,
   NoteOrUndefined,
-  ThreatOrUndefined,
+  ThreatsOrUndefined,
   ThresholdOrUndefined,
   FalsePositives,
   From,
@@ -51,10 +52,11 @@ import {
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
+import { AlertTypeParams } from '../../../../alerts/common';
 
 export type PartialFilter = Partial<Filter>;
 
-export interface RuleTypeParams {
+export interface RuleTypeParams extends AlertTypeParams {
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -82,7 +84,7 @@ export interface RuleTypeParams {
   ruleNameOverride: RuleNameOverrideOrUndefined;
   severity: Severity;
   severityMapping: SeverityMappingOrUndefined;
-  threat: ThreatOrUndefined;
+  threat: ThreatsOrUndefined;
   threshold: ThresholdOrUndefined;
   threatFilters: PartialFilter[] | undefined;
   threatIndex: ThreatIndexOrUndefined;

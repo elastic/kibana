@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Given, When, Then } from 'cypress-cucumber-preprocessor/steps';
@@ -25,7 +26,6 @@ When(`the user inspects the opbeans-node service`, () => {
     .click({ force: true });
 });
 
-Then(`should redirect to correct path with correct params`, () => {
-  cy.url().should('contain', `/app/apm/services/opbeans-node/transactions`);
-  cy.url().should('contain', `transactionType=request`);
+Then(`should redirect to correct path`, () => {
+  cy.url().should('contain', `/app/apm/services/opbeans-node/overview`);
 });

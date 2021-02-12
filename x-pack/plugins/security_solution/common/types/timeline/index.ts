@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as runtimeTypes from 'io-ts';
@@ -13,6 +14,7 @@ import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
+import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 
@@ -146,6 +148,7 @@ const SavedFavoriteRuntimeType = runtimeTypes.partial({
 
 const SavedSortObject = runtimeTypes.partial({
   columnId: unionWithNullType(runtimeTypes.string),
+  columnType: unionWithNullType(runtimeTypes.string),
   sortDirection: unionWithNullType(runtimeTypes.string),
 });
 const SavedSortRuntimeType = runtimeTypes.union([
@@ -278,6 +281,7 @@ export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
+  test2 = 'test2',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
@@ -408,12 +412,50 @@ export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimeli
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
 
-export interface TimelineExpandedEventType {
-  eventId: string;
-  indexName: string;
+export enum TimelineTabs {
+  query = 'query',
+  graph = 'graph',
+  notes = 'notes',
+  pinned = 'pinned',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Record<any, never>;
 
-export type TimelineExpandedEvent = TimelineExpandedEventType | EmptyObject;
+export type TimelineExpandedEventType =
+  | {
+      panelView?: 'eventDetail';
+      params?: {
+        eventId: string;
+        indexName: string;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedHostType =
+  | {
+      panelView?: 'hostDetail';
+      params?: {
+        hostName: string;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedNetworkType =
+  | {
+      panelView?: 'networkDetail';
+      params?: {
+        ip: string;
+        flowTarget: FlowTarget;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedDetailType =
+  | TimelineExpandedEventType
+  | TimelineExpandedHostType
+  | TimelineExpandedNetworkType;
+
+export type TimelineExpandedDetail = {
+  [tab in TimelineTabs]?: TimelineExpandedDetailType;
+};

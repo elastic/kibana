@@ -6,8 +6,15 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -126,7 +133,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
@@ -146,8 +153,15 @@ exports[`after fetch hideWriteControls 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -218,7 +232,7 @@ exports[`after fetch hideWriteControls 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
@@ -239,8 +253,15 @@ exports[`after fetch initialFilter 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -358,7 +379,7 @@ exports[`after fetch initialFilter 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
@@ -378,8 +399,15 @@ exports[`after fetch renders all table rows 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -497,7 +525,7 @@ exports[`after fetch renders all table rows 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
@@ -517,8 +545,15 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -636,7 +671,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>
@@ -656,8 +691,15 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     Object {
       "cancel": [Function],
       "change$": [Function],
-      "flush": [Function],
       "get": [Function],
+      "kbnUrlControls": Object {
+        "cancel": [Function],
+        "flush": [Function],
+        "getPendingUrl": [Function],
+        "listen": [Function],
+        "update": [Function],
+        "updateAsync": [Function],
+      },
       "set": [Function],
     }
   }
@@ -775,7 +817,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
       restrictWidth={true}
     >
       <div
-        className="euiPage euiPage--restrictWidth-default itemListing__page"
+        className="euiPage euiPage--restrictWidth-default euiPage--paddingMedium itemListing__page"
         data-test-subj="dashboardLandingPage"
       >
         <EuiPageBody>

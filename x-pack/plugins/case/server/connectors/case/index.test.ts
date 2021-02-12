@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { omit } from 'lodash/fp';
@@ -9,20 +10,31 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../../common/api';
 import {
+  ConnectorTypes,
+  CommentType,
+  CaseStatuses,
+  CaseType,
+  AssociationType,
+  CaseResponse,
+  CasesResponse,
+  CollectionWithSubCaseResponse,
+} from '../../../common/api';
+import {
+  connectorMappingsServiceMock,
   createCaseServiceMock,
   createConfigureServiceMock,
   createUserActionServiceMock,
+  createAlertServiceMock,
 } from '../../services/mocks';
 import { CaseActionType, CaseActionTypeExecutorOptions, CaseExecutorParams } from './types';
 import { getActionType } from '.';
-import { createCaseClientMock } from '../../client/mocks';
+import { createExternalCaseClientMock } from '../../client/mocks';
 
-const mockCaseClient = createCaseClientMock();
+const mockCaseClient = createExternalCaseClientMock();
 
 jest.mock('../../client', () => ({
-  createCaseClient: () => mockCaseClient,
+  createExternalCaseClient: () => mockCaseClient,
 }));
 
 const services = actionsMock.createServices();
@@ -34,12 +46,16 @@ describe('case connector', () => {
     const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
     const caseService = createCaseServiceMock();
     const caseConfigureService = createConfigureServiceMock();
+    const connectorMappingsService = connectorMappingsServiceMock();
     const userActionService = createUserActionServiceMock();
+    const alertsService = createAlertServiceMock();
     caseActionType = getActionType({
       logger,
       caseService,
       caseConfigureService,
+      connectorMappingsService,
       userActionService,
+      alertsService,
     });
   });
 
@@ -61,6 +77,9 @@ describe('case connector', () => {
                 priority: 'High',
                 parent: null,
               },
+            },
+            settings: {
+              syncAlerts: true,
             },
           },
         };
@@ -98,6 +117,9 @@ describe('case connector', () => {
                     parent: null,
                   },
                 },
+                settings: {
+                  syncAlerts: true,
+                },
               },
             },
           },
@@ -118,6 +140,9 @@ describe('case connector', () => {
                     severityCode: '3',
                   },
                 },
+                settings: {
+                  syncAlerts: true,
+                },
               },
             },
           },
@@ -137,7 +162,12 @@ describe('case connector', () => {
                     impact: 'Medium',
                     severity: 'Medium',
                     urgency: 'Medium',
+                    category: 'software',
+                    subcategory: 'os',
                   },
+                },
+                settings: {
+                  syncAlerts: true,
                 },
               },
             },
@@ -155,6 +185,9 @@ describe('case connector', () => {
                   name: 'None',
                   type: '.none',
                   fields: null,
+                },
+                settings: {
+                  syncAlerts: true,
                 },
               },
             },
@@ -180,6 +213,9 @@ describe('case connector', () => {
                 type: '.servicenow',
                 fields: {},
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -193,7 +229,16 @@ describe('case connector', () => {
                 id: 'servicenow',
                 name: 'Servicenow',
                 type: '.servicenow',
-                fields: { impact: null, severity: null, urgency: null },
+                fields: {
+                  impact: null,
+                  severity: null,
+                  urgency: null,
+                  category: null,
+                  subcategory: null,
+                },
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           });
@@ -211,6 +256,9 @@ describe('case connector', () => {
                 name: 'None',
                 type: '.none',
                 fields: null,
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -233,6 +281,9 @@ describe('case connector', () => {
                   priority: 'High',
                   parent: null,
                 },
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -259,8 +310,13 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                   excess: null,
                 },
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -289,6 +345,9 @@ describe('case connector', () => {
                   parent: null,
                 },
               },
+              settings: {
+                syncAlerts: true,
+              },
             },
           };
 
@@ -311,6 +370,9 @@ describe('case connector', () => {
                 name: 'None',
                 type: '.none',
                 fields: {},
+              },
+              settings: {
+                syncAlerts: true,
               },
             },
           };
@@ -343,6 +405,7 @@ describe('case connector', () => {
             title: null,
             status: null,
             connector: null,
+            settings: null,
             ...(params.subActionParams as Record<string, unknown>),
           },
         });
@@ -375,6 +438,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -405,6 +469,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -424,6 +489,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                 },
               },
             },
@@ -436,6 +503,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -465,11 +533,18 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               connector: {
                 id: 'servicenow',
                 name: 'Servicenow',
                 type: '.servicenow',
-                fields: { impact: null, severity: null, urgency: null },
+                fields: {
+                  impact: null,
+                  severity: null,
+                  urgency: null,
+                  category: null,
+                  subcategory: null,
+                },
               },
             },
           });
@@ -497,6 +572,7 @@ describe('case connector', () => {
               tags: null,
               title: null,
               status: null,
+              settings: null,
               ...(params.subActionParams as Record<string, unknown>),
             },
           });
@@ -541,6 +617,8 @@ describe('case connector', () => {
                   impact: 'Medium',
                   severity: 'Medium',
                   urgency: 'Medium',
+                  category: 'software',
+                  subcategory: 'os',
                   excess: null,
                 },
               },
@@ -768,10 +846,11 @@ describe('case connector', () => {
 
     describe('create', () => {
       it('executes correctly', async () => {
-        const createReturn = {
+        const createReturn: CaseResponse = {
           id: 'mock-it',
           comments: [],
           totalComment: 0,
+          totalAlerts: 0,
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
@@ -783,12 +862,16 @@ describe('case connector', () => {
           },
           title: 'Case from case connector!!',
           tags: ['case', 'connector'],
+          type: CaseType.collection,
           description: 'Yo fields!!',
           external_service: null,
           status: CaseStatuses.open,
           updated_at: null,
           updated_by: null,
           version: 'WzksMV0=',
+          settings: {
+            syncAlerts: true,
+          },
         };
 
         mockCaseClient.create.mockReturnValue(Promise.resolve(createReturn));
@@ -810,6 +893,9 @@ describe('case connector', () => {
                 parent: null,
               },
             },
+            settings: {
+              syncAlerts: true,
+            },
           },
         };
 
@@ -825,17 +911,15 @@ describe('case connector', () => {
 
         expect(result).toEqual({ actionId, status: 'ok', data: createReturn });
         expect(mockCaseClient.create).toHaveBeenCalledWith({
-          theCase: {
-            ...params.subActionParams,
-            connector: {
-              id: 'jira',
-              name: 'Jira',
-              type: '.jira',
-              fields: {
-                issueType: '10006',
-                priority: 'High',
-                parent: null,
-              },
+          ...params.subActionParams,
+          connector: {
+            id: 'jira',
+            name: 'Jira',
+            type: '.jira',
+            fields: {
+              issueType: '10006',
+              priority: 'High',
+              parent: null,
             },
           },
         });
@@ -844,7 +928,7 @@ describe('case connector', () => {
 
     describe('update', () => {
       it('executes correctly', async () => {
-        const updateReturn = [
+        const updateReturn: CasesResponse = [
           {
             closed_at: '2019-11-25T21:54:48.952Z',
             closed_by: {
@@ -872,6 +956,8 @@ describe('case connector', () => {
             tags: ['defacement'],
             title: 'Update title',
             totalComment: 0,
+            totalAlerts: 0,
+            type: CaseType.collection,
             updated_at: '2019-11-25T21:54:48.952Z',
             updated_by: {
               email: 'd00d@awesome.com',
@@ -879,6 +965,9 @@ describe('case connector', () => {
               username: 'awesome',
             },
             version: 'WzE3LDFd',
+            settings: {
+              syncAlerts: true,
+            },
           },
         ];
 
@@ -895,6 +984,7 @@ describe('case connector', () => {
             tags: null,
             status: null,
             connector: null,
+            settings: null,
           },
         };
 
@@ -911,39 +1001,44 @@ describe('case connector', () => {
         expect(result).toEqual({ actionId, status: 'ok', data: updateReturn });
         expect(mockCaseClient.update).toHaveBeenCalledWith({
           // Null values have been striped out.
-          cases: {
-            cases: [
-              {
-                id: 'case-id',
-                version: '123',
-                title: 'Update title',
-              },
-            ],
-          },
+          cases: [
+            {
+              id: 'case-id',
+              version: '123',
+              title: 'Update title',
+            },
+          ],
         });
       });
     });
 
     describe('addComment', () => {
       it('executes correctly', async () => {
-        const commentReturn = {
+        const commentReturn: CollectionWithSubCaseResponse = {
           id: 'mock-it',
           totalComment: 0,
+          version: 'WzksMV0=',
+
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
           created_at: '2019-11-25T21:54:48.952Z',
-          created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
+          created_by: {
+            full_name: 'Awesome D00d',
+            email: 'd00d@awesome.com',
+            username: 'awesome',
+          },
           description: 'This is a brand new case of a bad meanie defacing data',
           external_service: null,
           title: 'Super Bad Security Issue',
           status: CaseStatuses.open,
           tags: ['defacement'],
+          type: CaseType.collection,
           updated_at: null,
           updated_by: null,
-          version: 'WzksMV0=',
           comments: [
             {
+              associationType: AssociationType.case,
               comment: 'a comment',
               type: CommentType.user as const,
               created_at: '2020-10-23T21:54:48.952Z',
@@ -960,6 +1055,9 @@ describe('case connector', () => {
               version: 'WzksMV0=',
             },
           ],
+          settings: {
+            syncAlerts: true,
+          },
         };
 
         mockCaseClient.addComment.mockReturnValue(Promise.resolve(commentReturn));

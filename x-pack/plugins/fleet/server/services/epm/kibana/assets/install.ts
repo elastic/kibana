@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -39,6 +40,7 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.map]: KibanaSavedObjectType.map,
   [KibanaAssetType.search]: KibanaSavedObjectType.search,
   [KibanaAssetType.visualization]: KibanaSavedObjectType.visualization,
+  [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
 };
 
 // Define how each asset type will be installed
@@ -54,6 +56,7 @@ const AssetInstallers: Record<
   [KibanaAssetType.map]: installKibanaSavedObjects,
   [KibanaAssetType.search]: installKibanaSavedObjects,
   [KibanaAssetType.visualization]: installKibanaSavedObjects,
+  [KibanaAssetType.lens]: installKibanaSavedObjects,
 };
 
 export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {

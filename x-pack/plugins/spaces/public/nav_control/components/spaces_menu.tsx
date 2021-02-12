@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './spaces_menu.scss';
@@ -15,8 +16,8 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
 import { Capabilities, ApplicationStart } from 'src/core/public';
+import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { addSpaceIdToPath, SPACE_SEARCH_COUNT_THRESHOLD, ENTER_SPACE_PATH } from '../../../common';
-import { Space } from '../../../common/model/space';
 import { ManageSpacesButton } from './manage_spaces_button';
 import { SpaceAvatar } from '../../space_avatar';
 

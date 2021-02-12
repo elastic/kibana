@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
@@ -29,6 +30,7 @@ import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
+import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 
@@ -134,6 +136,13 @@ export async function _installPackage({
     // per data stream and we should then save them
     await installILMPolicy(paths, callCluster);
 
+    const installedDataStreamIlm = await installIlmForDataStream(
+      packageInfo,
+      paths,
+      callCluster,
+      savedObjectsClient
+    );
+
     // installs versionized pipelines without removing currently installed ones
     const installedPipelines = await installPipelines(
       packageInfo,
@@ -212,6 +221,7 @@ export async function _installPackage({
     return [
       ...installedKibanaAssetsRefs,
       ...installedPipelines,
+      ...installedDataStreamIlm,
       ...installedTemplateRefs,
       ...installedTransforms,
     ];

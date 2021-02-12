@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -79,9 +69,12 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
-    legacy: { globalConfig$: of(globalConfig) },
+    legacy: {
+      globalConfig$: of(globalConfig),
+      get: () => globalConfig,
+    },
     create: jest.fn().mockReturnValue(of(config)),
-    createIfExists: jest.fn().mockReturnValue(of(config)),
+    get: jest.fn().mockReturnValue(config),
   };
 
   return mock;
@@ -203,6 +196,8 @@ function createCoreRequestHandlerContextMock() {
     savedObjects: {
       client: savedObjectsClientMock.create(),
       typeRegistry: savedObjectsTypeRegistryMock.create(),
+      exporter: savedObjectsServiceMock.createExporter(),
+      importer: savedObjectsServiceMock.createImporter(),
     },
     elasticsearch: {
       client: elasticsearchServiceMock.createScopedClusterClient(),

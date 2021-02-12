@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { UnionToIntersection, ValuesType } from 'utility-types';
 import { isEqual, pull, merge, castArray } from 'lodash';
 
 /**
  * Joins a list of records by a given key. Key can be any type of value, from
  * strings to plain objects, as long as it is present in all records. `isEqual`
- * is used for comparing keys. 
- * 
+ * is used for comparing keys.
+ *
  * UnionToIntersection is needed to get all keys of union types, see below for
  * example.
- * 
+ *
  const agentNames = [{ serviceName: '', agentName: '' }];
  const transactionRates = [{ serviceName: '', transactionsPerMinute: 1 }];
  const flattened = joinByKey(

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
@@ -103,6 +105,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       async executor() {},
       producer: 'alerts',
@@ -695,6 +698,7 @@ describe('update()', () => {
       name: 'Test',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       recoveryActionGroup: RecoveredActionGroup,
       validate: {
         params: schema.object({
@@ -1045,6 +1049,7 @@ describe('update()', () => {
         name: 'Test',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         recoveryActionGroup: RecoveredActionGroup,
         async executor() {},
         producer: 'alerts',

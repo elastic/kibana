@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { KbnClient } from '@kbn/dev-utils';
 import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import { NonEmptyEntriesArray } from '../../plugins/lists/common/schemas';
 import { getCreateExceptionListDetectionSchemaMock } from '../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import {
@@ -25,6 +28,7 @@ import {
   ExceptionListSchema,
 } from '../../plugins/lists/common';
 import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
+import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
   Status,
   SignalIds,
@@ -35,6 +39,7 @@ import {
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_RULES_URL,
+  INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
 } from '../../plugins/security_solution/common/constants';
 import { getCreateExceptionListItemMinimalSchemaMockWithoutId } from '../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
@@ -114,6 +119,25 @@ export const getRuleForSignalTesting = (
   index,
   type: 'query',
   query: '*:*',
+  from: '1900-01-01T00:00:00.000Z',
+});
+
+export const getRuleForSignalTestingWithTimestampOverride = (
+  index: string[],
+  ruleId = 'rule-1',
+  enabled = true,
+  timestampOverride = 'event.ingested'
+): QueryCreateSchema => ({
+  name: 'Signal Testing Query',
+  description: 'Tests a simple query',
+  enabled,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index,
+  type: 'query',
+  query: '*:*',
+  timestamp_override: timestampOverride,
   from: '1900-01-01T00:00:00.000Z',
 });
 
@@ -652,20 +676,27 @@ export const getWebHookAction = () => ({
   name: 'Some connector',
 });
 
-export const getRuleWithWebHookAction = (id: string, enabled = false): CreateRulesSchema => ({
-  ...getSimpleRule('rule-1', enabled),
-  throttle: 'rule',
-  actions: [
-    {
-      group: 'default',
-      id,
-      params: {
-        body: '{}',
+export const getRuleWithWebHookAction = (
+  id: string,
+  enabled = false,
+  rule?: QueryCreateSchema
+): CreateRulesSchema | UpdateRulesSchema => {
+  const finalRule = rule != null ? { ...rule, enabled } : getSimpleRule('rule-1', enabled);
+  return {
+    ...finalRule,
+    throttle: 'rule',
+    actions: [
+      {
+        group: 'default',
+        id,
+        params: {
+          body: '{}',
+        },
+        action_type_id: '.webhook',
       },
-      action_type_id: '.webhook',
-    },
-  ],
-});
+    ],
+  };
+};
 
 export const getSimpleRuleOutputWithWebHookAction = (actionId: string): Partial<RulesSchema> => ({
   ...getSimpleRuleOutput(),
@@ -810,6 +841,78 @@ export const createRule = async (
 
 /**
  * Helper to cut down on the noise in some of the tests. This checks for
+ * an expected 200 still and does not do any retries.
+ * @param supertest The supertest deps
+ * @param rule The rule to create
+ */
+export const updateRule = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  updatedRule: UpdateRulesSchema
+): Promise<FullResponseSchema> => {
+  const { body } = await supertest
+    .put(DETECTION_ENGINE_RULES_URL)
+    .set('kbn-xsrf', 'true')
+    .send(updatedRule)
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const createNewAction = async (supertest: SuperTest<supertestAsPromised.Test>) => {
+  const { body } = await supertest
+    .post('/api/actions/action')
+    .set('kbn-xsrf', 'true')
+    .send(getWebHookAction())
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const findImmutableRuleById = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleId: string
+): Promise<{
+  page: number;
+  perPage: number;
+  total: number;
+  data: FullResponseSchema[];
+}> => {
+  const { body } = await supertest
+    .get(
+      `${DETECTION_ENGINE_RULES_URL}/_find?filter=alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`
+    )
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This
+ * creates a new action and expects a 200 and does not do any retries.
+ * @param supertest The supertest deps
+ */
+export const getPrePackagedRulesStatus = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<PrePackagedRulesAndTimelinesStatusSchema> => {
+  const { body } = await supertest
+    .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(200);
+  return body;
+};
+
+/**
+ * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not try to any retries. Creates exception lists
  * @param supertest The supertest deps
  * @param rule The rule to create
@@ -862,21 +965,22 @@ export const getRule = async (
 };
 
 /**
- * Waits for the rule in find status to be succeeded before continuing
+ * Waits for the rule in find status to be 'succeeded'
+ * or the provided status, before continuing
  * @param supertest Deps
  */
-export const waitForRuleSuccess = async (
+export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  id: string
+  id: string,
+  status: 'succeeded' | 'failed' | 'partial failure' = 'succeeded'
 ): Promise<void> => {
-  // wait for Task Manager to finish executing the rule
   await waitFor(async () => {
     const { body } = await supertest
       .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
       .set('kbn-xsrf', 'true')
       .send({ ids: [id] })
       .expect(200);
-    return body[id]?.current_status?.status === 'succeeded';
+    return body[id]?.current_status?.status === status;
   }, 'waitForRuleSuccess');
 };
 
@@ -1062,4 +1166,21 @@ export const waitForIndexToPopulate = async (es: Client, index: string): Promise
     const response = await es.count<{ count: number }>({ index });
     return response.body.count > 0;
   }, `waitForIndexToPopulate: ${index}`);
+};
+
+export const deleteMigrations = async ({
+  ids,
+  kbnClient,
+}: {
+  ids: string[];
+  kbnClient: KbnClient;
+}): Promise<void> => {
+  await Promise.all(
+    ids.map((id) =>
+      kbnClient.savedObjects.delete({
+        id,
+        type: signalsMigrationType,
+      })
+    )
+  );
 };

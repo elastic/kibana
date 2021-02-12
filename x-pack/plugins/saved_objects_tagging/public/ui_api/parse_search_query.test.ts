@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsTaggingApiUi } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
@@ -36,7 +37,18 @@ describe('parseSearchQuery', () => {
 
     expect(parseSearchQuery(searchTerm)).toEqual({
       searchTerm,
-      tagReferences: undefined,
+      tagReferences: [],
+      valid: true,
+    });
+  });
+
+  it('returns the raw search term when the syntax is not valid', () => {
+    const searchTerm = 'tag:id-1 [search term]';
+
+    expect(parseSearchQuery(searchTerm)).toEqual({
+      searchTerm,
+      tagReferences: [],
+      valid: false,
     });
   });
 
@@ -46,6 +58,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: false })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      valid: true,
     });
   });
 
@@ -55,6 +68,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: true })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      valid: true,
     });
   });
 
@@ -64,6 +78,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { tagField: 'custom' })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1'), tagRef('id-2')],
+      valid: true,
     });
   });
 
@@ -73,6 +88,7 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery(searchTerm, { useName: true })).toEqual({
       searchTerm: 'my search term',
       tagReferences: [tagRef('id-1')],
+      valid: true,
     });
   });
 });

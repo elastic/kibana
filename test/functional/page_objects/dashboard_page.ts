@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -27,16 +16,21 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const renderable = getService('renderable');
   const listingTable = getService('listingTable');
+  const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   interface SaveDashboardOptions {
-    waitDialogIsClosed: boolean;
+    /**
+     * @default true
+     */
+    waitDialogIsClosed?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
@@ -118,6 +112,33 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return id;
     }
 
+    public async expectUnsavedChangesListingExists(title: string) {
+      log.debug(`Expect Unsaved Changes Listing Exists for `, title);
+      await testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
+    }
+
+    public async expectUnsavedChangesDoesNotExist(title: string) {
+      log.debug(`Expect Unsaved Changes Listing Does Not Exist for `, title);
+      await testSubjects.missingOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
+    }
+
+    public async clickUnsavedChangesContinueEditing(title: string) {
+      log.debug(`Click Unsaved Changes Continue Editing `, title);
+      await testSubjects.existOrFail(`edit-unsaved-${title.split(' ').join('-')}`);
+      await testSubjects.click(`edit-unsaved-${title.split(' ').join('-')}`);
+    }
+
+    public async clickUnsavedChangesDiscard(title: string, confirmDiscard = true) {
+      log.debug(`Click Unsaved Changes Discard for `, title);
+      await testSubjects.existOrFail(`discard-unsaved-${title.split(' ').join('-')}`);
+      await testSubjects.click(`discard-unsaved-${title.split(' ').join('-')}`);
+      if (confirmDiscard) {
+        await PageObjects.common.clickConfirmOnModal();
+      } else {
+        await PageObjects.common.clickCancelOnModal();
+      }
+    }
+
     /**
      * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
@@ -135,6 +156,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
       await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
+    }
+
+    public async expectOnDashboard(dashboardTitle: string) {
+      await retry.waitFor(
+        'last breadcrumb to have dashboard title',
+        async () => (await globalNav.getLastBreadcrumb()) === dashboardTitle
+      );
     }
 
     public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
@@ -223,8 +251,37 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('dashboardViewOnlyMode');
     }
 
-    public async clickNewDashboard() {
+    public async clickDiscardChanges() {
+      log.debug('clickDiscardChanges');
+      await testSubjects.click('dashboardDiscardChanges');
+    }
+
+    public async clickQuickSave() {
+      log.debug('clickQuickSave');
+      await testSubjects.click('dashboardQuickSaveMenuItem');
+    }
+
+    public async clickNewDashboard(continueEditing = false) {
       await listingTable.clickNewButton('createDashboardPromptButton');
+      if (await testSubjects.exists('dashboardCreateConfirm')) {
+        if (continueEditing) {
+          await testSubjects.click('dashboardCreateConfirmContinue');
+        } else {
+          await testSubjects.click('dashboardCreateConfirmStartOver');
+        }
+      }
+      // make sure the dashboard page is shown
+      await this.waitForRenderComplete();
+    }
+
+    public async clickNewDashboardExpectWarning(continueEditing = false) {
+      await listingTable.clickNewButton('createDashboardPromptButton');
+      await testSubjects.existOrFail('dashboardCreateConfirm');
+      if (continueEditing) {
+        await testSubjects.click('dashboardCreateConfirmContinue');
+      } else {
+        await testSubjects.click('dashboardCreateConfirmStartOver');
+      }
       // make sure the dashboard page is shown
       await this.waitForRenderComplete();
     }
@@ -269,6 +326,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       const isMarginsOn = await this.isMarginsOn();
       if (isMarginsOn !== 'on') {
         return await testSubjects.click('dashboardMarginsCheckbox');
+      }
+    }
+
+    public async isColorSyncOn() {
+      log.debug('isColorSyncOn');
+      await this.openOptions();
+      return await testSubjects.getAttribute('dashboardSyncColorsCheckbox', 'checked');
+    }
+
+    public async useColorSync(on = true) {
+      await this.openOptions();
+      const isColorSyncOn = await this.isColorSyncOn();
+      if (isColorSyncOn !== 'on') {
+        return await testSubjects.click('dashboardSyncColorsCheckbox');
       }
     }
 
@@ -525,6 +596,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('dashboardSaveMenuItem');
     }
 
+    public async expectMissingQuickSaveOption() {
+      await testSubjects.missingOrFail('dashboardQuickSaveMenuItem');
+    }
+    public async expectExistsQuickSaveOption() {
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
+    }
+
     public async getNotLoadedVisualizations(vizList: string[]) {
       const checkList = [];
       for (const name of vizList) {
@@ -550,6 +628,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         // if not found then this is 0 (we don't show badge with 0)
         return 0;
       }
+    }
+
+    public async getPanelChartDebugState(panelIndex: number) {
+      return await elasticChart.getChartDebugData(undefined, panelIndex);
     }
   }
 

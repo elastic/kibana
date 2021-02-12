@@ -1,8 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import {
   AreaSeries,
   Chart,
@@ -10,62 +15,83 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import React from 'react';
 import { merge } from 'lodash';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useChartTheme } from '../../../../../../observability/public';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { px } from '../../../../style/variables';
+import { px, unit } from '../../../../style/variables';
+import { useTheme } from '../../../../hooks/use_theme';
 
-interface Props {
-  color: string;
-  series?: Array<{ x: number; y: number | null }> | null;
-  width: string;
-}
+type Color =
+  | 'euiColorVis0'
+  | 'euiColorVis1'
+  | 'euiColorVis2'
+  | 'euiColorVis3'
+  | 'euiColorVis4'
+  | 'euiColorVis5'
+  | 'euiColorVis6'
+  | 'euiColorVis7'
+  | 'euiColorVis8'
+  | 'euiColorVis9';
 
-export function SparkPlot(props: Props) {
-  const { series, color, width } = props;
-  const chartTheme = useChartTheme();
+export function SparkPlot({
+  color,
+  series,
+  valueLabel,
+  compact,
+}: {
+  color: Color;
+  series?: Coordinate[] | null;
+  valueLabel: React.ReactNode;
+  compact?: boolean;
+}) {
+  const theme = useTheme();
+  const defaultChartTheme = useChartTheme();
 
-  if (!series || series.every((point) => point.y === null)) {
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="visLine" color="subdued" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            {NOT_AVAILABLE_LABEL}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const sparkplotChartTheme = merge({}, defaultChartTheme, {
+    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
+    lineSeriesStyle: {
+      point: { opacity: 0 },
+    },
+    areaSeriesStyle: {
+      point: { opacity: 0 },
+    },
+  });
+
+  const colorValue = theme.eui[color];
+
+  const chartSize = {
+    height: px(24),
+    width: compact ? px(unit * 3) : px(unit * 4),
+  };
 
   return (
-    <Chart size={{ height: px(24), width }}>
-      <Settings
-        theme={merge({}, chartTheme, {
-          lineSeriesStyle: {
-            point: { opacity: 0 },
-          },
-          areaSeriesStyle: {
-            point: { opacity: 0 },
-          },
-        })}
-        showLegend={false}
-        tooltip="none"
-      />
-      <AreaSeries
-        id="area"
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor={'x'}
-        yAccessors={['y']}
-        data={series}
-        color={color}
-        curve={CurveType.CURVE_MONOTONE_X}
-      />
-    </Chart>
+    <EuiFlexGroup gutterSize="m" responsive={false}>
+      <EuiFlexItem grow={false}>
+        {!series || series.every((point) => point.y === null) ? (
+          <EuiIcon type="visLine" color="subdued" style={chartSize} />
+        ) : (
+          <Chart size={chartSize}>
+            <Settings
+              theme={sparkplotChartTheme}
+              showLegend={false}
+              tooltip="none"
+            />
+            <AreaSeries
+              id="area"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              data={series}
+              color={colorValue}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+          </Chart>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
+        {valueLabel}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

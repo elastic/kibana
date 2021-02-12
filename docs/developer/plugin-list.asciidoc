@@ -130,11 +130,6 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |The legacyExport plugin adds support for the legacy saved objects export format.
 
 
-|{kib-repo}blob/{branch}/src/plugins/lens_oss/README.md[lensOss]
-|The lens_oss plugin registers the lens visualization on OSS.
-It is registered as disabled. The x-pack plugin should unregister this.
-
-
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual managment section into it. This plugin does not contain any individual
@@ -143,11 +138,6 @@ management section itself.
 
 |{kib-repo}blob/{branch}/src/plugins/maps_legacy/README.md[mapsLegacy]
 |Internal objects used by the Coordinate, Region, and Vega visualizations.
-
-
-|{kib-repo}blob/{branch}/src/plugins/maps_oss/README.md[mapsOss]
-|The maps_oss plugin registers the maps visualization on OSS.
-It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -160,8 +150,8 @@ It also provides a stateful version of it on the start contract.
 Content is fetched from the remote (https://feeds.elastic.co and https://feeds-staging.elastic.co in dev mode) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
 
-|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.md[presentationUtil]
-|Utilities and components used by the presentation-related plugins
+|{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
+|The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
 
 |{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
@@ -188,6 +178,10 @@ so they can properly protect the data within their clusters.
 
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |Replaces the legacy ui/share module for registering share context menus.
+
+
+|{kib-repo}blob/{branch}/src/plugins/spaces_oss/README.md[spacesOss]
+|Bridge plugin for consumption of the Spaces feature from OSS plugins.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
@@ -227,8 +221,7 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 
 
 |{kib-repo}blob/{branch}/src/plugins/usage_collection/README.md[usageCollection]
-|Usage Collection allows collecting usage data for other services to consume (telemetry and monitoring).
-To integrate with the telemetry services for usage collection of your feature, there are 2 steps:
+|The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
@@ -272,7 +265,7 @@ heatmap charts.
 
 |{kib-repo}blob/{branch}/src/plugins/vis_type_xy/README.md[visTypeXy]
 |Contains the new xy-axis chart using the elastic-charts library, which will eventually
-replace the vislib xy-axis (bar, area, line) charts.
+replace the vislib xy-axis charts including bar, area, and line.
 
 
 |{kib-repo}blob/{branch}/src/plugins/visualizations/README.md[visualizations]
@@ -308,6 +301,10 @@ which will load the visualization's editor.
 |To access an elasticsearch instance that has live data you have two options:
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
+|Allow to add a header banner that will be displayed on every page of the Kibana application
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/beats_management/readme.md[beatsManagement]
 |Notes:
 Failure to have auth enabled in Kibana will make for a broken UI. UI-based errors not yet in place
@@ -323,10 +320,6 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
 |The cloud plugin adds cloud specific features to Kibana.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/code[code]
-|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/console_extensions/README.md[consoleExtensions]
@@ -377,8 +370,8 @@ and actions.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/file_upload/README.md[fileUpload]
-|Backend and core front-end react-components for GeoJson file upload. Only supports the Maps plugin.
+|{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
+|WARNING: Missing README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
@@ -426,7 +419,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
-|Run all tests from the x-pack root directory
+|Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/license_management/README.md[licenseManagement]
@@ -465,6 +458,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability/README.md[observability]
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/osquery/README.md[osquery]
+|This plugin adds extended support to Security Solution Fleet Osquery integration
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/painless_lab/README.md[painlessLab]
@@ -560,10 +557,6 @@ in their infrastructure.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/vis_type_timeseries_enhanced/README.md[visTypeTimeseriesEnhanced]
-|The vis_type_timeseries_enhanced plugin is the x-pack counterpart to the OSS vis_type_timeseries plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/watcher/README.md[watcher]

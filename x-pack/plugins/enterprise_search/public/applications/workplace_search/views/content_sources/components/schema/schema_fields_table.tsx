@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { useActions, useValues } from 'kea';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -20,13 +19,15 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { SchemaExistingField } from '../../../../../shared/schema/schema_existing_field';
-import { SchemaLogic } from './schema_logic';
+
 import {
   SCHEMA_ERRORS_TABLE_FIELD_NAME_HEADER,
   SCHEMA_ERRORS_TABLE_DATA_TYPE_HEADER,
 } from './constants';
+import { SchemaLogic } from './schema_logic';
 
 export const SchemaFieldsTable: React.FC = () => {
   const { updateExistingFieldType } = useActions(SchemaLogic);
@@ -56,7 +57,7 @@ export const SchemaFieldsTable: React.FC = () => {
                 disabled={fieldName === 'id'}
                 key={fieldName}
                 fieldName={fieldName}
-                hideName={true}
+                hideName
                 fieldType={filteredSchemaFields[fieldName]}
                 updateExistingFieldType={updateExistingFieldType}
               />
@@ -66,7 +67,7 @@ export const SchemaFieldsTable: React.FC = () => {
       </EuiTableBody>
     </EuiTable>
   ) : (
-    <p>
+    <p data-test-subj="NoResultsMessage">
       {i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.contentSource.schema.filter.noResults.message',
         {

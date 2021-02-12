@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
@@ -19,6 +20,8 @@ export interface Phases {
   cold?: SerializedColdPhase;
   delete?: SerializedDeletePhase;
 }
+
+export type PhasesExceptDelete = keyof Omit<Phases, 'delete'>;
 
 export interface PolicyFromES {
   modified_date: string;
@@ -57,13 +60,15 @@ export interface SearchableSnapshotAction {
   force_merge_index?: boolean;
 }
 
+export interface RolloverAction {
+  max_size?: string;
+  max_age?: string;
+  max_docs?: number;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
-    rollover?: {
-      max_size?: string;
-      max_age?: string;
-      max_docs?: number;
-    };
+    rollover?: RolloverAction;
     forcemerge?: ForcemergeAction;
     readonly?: {};
     shrink?: ShrinkAction;
@@ -150,25 +155,6 @@ export interface CommonPhaseSettings {
 export interface PhaseWithMinAge {
   selectedMinimumAge: string;
   selectedMinimumAgeUnits: string;
-}
-
-/**
- * Different types of allocation markers we use in deserialized policies.
- *
- * default - use data tier based data allocation based on node roles -- this is ES best practice mode.
- * custom - use node_attrs to allocate data to specific nodes
- * none - do not move data anywhere when entering a phase
- */
-export type DataTierAllocationType = 'default' | 'custom' | 'none';
-
-export interface PhaseWithAllocationAction {
-  selectedNodeAttrs: string;
-  selectedReplicaCount: string;
-  /**
-   * A string value indicating allocation type. If unspecified we assume the user
-   * wants to use default allocation.
-   */
-  dataTierAllocationType: DataTierAllocationType;
 }
 
 export interface PhaseWithIndexPriority {

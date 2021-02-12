@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
@@ -16,7 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseAttributes } from '../../../../../case/common/api';
 import { Case, CaseConnector } from '../../containers/types';
 import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
 import { gutterTimeline } from '../../../common/lib/helpers';
@@ -43,7 +44,7 @@ import {
 } from '../configure_cases/utils';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { buildAlertsQuery, getRuleIdsFromComments } from './helpers';
-import { EventDetailsFlyout } from '../../../common/components/events_viewer/event_details_flyout';
+import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -90,6 +91,8 @@ interface Signal {
   rule: {
     id: string;
     name: string;
+    to: string;
+    from: string;
   };
 }
 
@@ -97,6 +100,7 @@ interface SignalHit {
   _id: string;
   _index: string;
   _source: {
+    '@timestamp': string;
     signal: Signal;
   };
 }
@@ -104,6 +108,7 @@ interface SignalHit {
 export type Alert = {
   _id: string;
   _index: string;
+  '@timestamp': string;
 } & Signal;
 
 export const CaseComponent = React.memo<CaseProps>(
@@ -153,6 +158,7 @@ export const CaseComponent = React.memo<CaseProps>(
             [_id]: {
               _id,
               _index,
+              '@timestamp': _source['@timestamp'],
               ..._source.signal,
             },
           }),
@@ -175,7 +181,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'title',
                 updateValue: titleUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -189,7 +195,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'connector',
                 updateValue: connector,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -203,7 +209,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'description',
                 updateValue: descriptionUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
@@ -216,7 +222,7 @@ export const CaseComponent = React.memo<CaseProps>(
               updateKey: 'tags',
               updateValue: tagsUpdate,
               updateCase: handleUpdateNewCase,
-              version: caseData.version,
+              caseData,
               onSuccess,
               onError,
             });
@@ -229,11 +235,26 @@ export const CaseComponent = React.memo<CaseProps>(
                 updateKey: 'status',
                 updateValue: statusUpdate,
                 updateCase: handleUpdateNewCase,
-                version: caseData.version,
+                caseData,
                 onSuccess,
                 onError,
               });
             }
+            break;
+          case 'settings':
+            const settingsUpdate = getTypedPayload<CaseAttributes['settings']>(value);
+            if (caseData.settings !== value) {
+              updateCaseProperty({
+                fetchCaseUserActions,
+                updateKey: 'settings',
+                updateValue: settingsUpdate,
+                updateCase: handleUpdateNewCase,
+                caseData,
+                onSuccess,
+                onError,
+              });
+            }
+            break;
           default:
             return null;
         }
@@ -275,7 +296,7 @@ export const CaseComponent = React.memo<CaseProps>(
       connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
-      isValidConnector,
+      isValidConnector: isLoadingConnectors ? true : isValidConnector,
     });
 
     const onSubmitConnector = useCallback(
@@ -347,9 +368,10 @@ export const CaseComponent = React.memo<CaseProps>(
     const showAlert = useCallback(
       (alertId: string, index: string) => {
         dispatch(
-          timelineActions.toggleExpandedEvent({
+          timelineActions.toggleDetailPanel({
+            panelView: 'eventDetail',
             timelineId: TimelineId.casePage,
-            event: {
+            params: {
               eventId: alertId,
               indexName: index,
             },
@@ -369,13 +391,12 @@ export const CaseComponent = React.memo<CaseProps>(
             id: TimelineId.casePage,
             columns: [],
             indexNames: [],
-            expandedEvent: {},
+            expandedDetail: {},
             show: false,
           })
         );
       }
     }, [dispatch]);
-
     return (
       <>
         <HeaderWrapper>
@@ -397,9 +418,9 @@ export const CaseComponent = React.memo<CaseProps>(
               currentExternalIncident={currentExternalIncident}
               caseData={caseData}
               disabled={!userCanCrud}
-              isLoading={isLoading && updateKey === 'status'}
+              isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
-              onStatusChanged={changeStatus}
+              onUpdateField={onUpdateField}
             />
           </HeaderPage>
         </HeaderWrapper>
@@ -408,7 +429,9 @@ export const CaseComponent = React.memo<CaseProps>(
             {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
-                {initLoadingData && <EuiLoadingContent lines={8} />}
+                {initLoadingData && (
+                  <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+                )}
                 {!initLoadingData && (
                   <>
                     <UserActionTree
@@ -478,9 +501,10 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
-        <EventDetailsFlyout
+        <DetailsPanel
           browserFields={browserFields}
           docValueFields={docValueFields}
+          isFlyoutView
           timelineId={TimelineId.casePage}
         />
         <SpyRoute state={spyState} pageName={SecurityPageName.case} />

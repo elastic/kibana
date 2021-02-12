@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useEffect } from 'react';
@@ -32,18 +33,24 @@ export { getAnalysisType } from '../../../../common/util/analytics_utils';
 export type IndexPattern = string;
 
 export enum ANALYSIS_ADVANCED_FIELDS {
+  ALPHA = 'alpha',
   ETA = 'eta',
+  ETA_GROWTH_RATE_PER_TREE = 'eta_growth_rate_per_tree',
+  DOWNSAMPLE_FACTOR = 'downsample_factor',
   FEATURE_BAG_FRACTION = 'feature_bag_fraction',
   FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
   GAMMA = 'gamma',
   LAMBDA = 'lambda',
   MAX_TREES = 'max_trees',
+  MAX_OPTIMIZATION_ROUNDS_PER_HYPERPARAMETER = 'max_optimization_rounds_per_hyperparameter',
   METHOD = 'method',
   N_NEIGHBORS = 'n_neighbors',
   NUM_TOP_CLASSES = 'num_top_classes',
   NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
   OUTLIER_FRACTION = 'outlier_fraction',
   RANDOMIZE_SEED = 'randomize_seed',
+  SOFT_TREE_DEPTH_LIMIT = 'soft_tree_depth_limit',
+  SOFT_TREE_DEPTH_TOLERANCE = 'soft_tree_depth_tolerance',
 }
 
 export enum OUTLIER_ANALYSIS_METHOD {

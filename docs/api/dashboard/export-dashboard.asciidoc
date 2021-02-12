@@ -18,6 +18,7 @@ experimental[] Export dashboards and corresponding saved objects.
 
 `dashboard`::
   (Required, array|string) The IDs of the dashboards that you want to export.
+  To export multiple dashboards, repeat the query parameter.
 
 [[dashboard-api-export-response-body]]
 ==== Response body

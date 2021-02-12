@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
@@ -26,7 +27,7 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
-import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
+import { OverviewWrapper } from '../../../common/components/page';
 import {
   FirstLastSeenHost,
   FirstLastSeenHostType,
@@ -34,11 +35,14 @@ import {
 
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
+import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 
 interface HostSummaryProps {
+  contextID?: string; // used to provide unique draggable context when viewing in the side panel
   data: HostItem;
   docValueFields: DocValueFields[];
   id: string;
+  isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
   indexNames: string[];
@@ -48,19 +52,15 @@ interface HostSummaryProps {
   narrowDateRange: NarrowDateRange;
 }
 
-const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
-  <EuiFlexItem key={key}>
-    <DescriptionListStyled listItems={descriptionList} />
-  </EuiFlexItem>
-);
-
 export const HostOverview = React.memo<HostSummaryProps>(
   ({
     anomaliesData,
+    contextID,
     data,
     docValueFields,
     endDate,
     id,
+    isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
     indexNames,
     loading,
@@ -76,10 +76,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
         <DefaultFieldRenderer
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
-          idPrefix="host-overview"
+          idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
         />
       ),
-      []
+      [contextID]
     );
 
     const column: DescriptionList[] = useMemo(
@@ -161,7 +161,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
               <DefaultFieldRenderer
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
-                idPrefix="host-overview"
+                idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
@@ -197,17 +197,22 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [data, firstColumn, getDefaultRenderer]
+      [contextID, data, firstColumn, getDefaultRenderer]
     );
     return (
       <>
         <InspectButtonContainer>
-          <OverviewWrapper>
-            <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
-
-            {descriptionLists.map((descriptionList, index) =>
-              getDescriptionList(descriptionList, index)
+          <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
+            {!isInDetailsSidePanel && (
+              <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
             )}
+            {descriptionLists.map((descriptionList, index) => (
+              <OverviewDescriptionList
+                descriptionList={descriptionList}
+                isInDetailsSidePanel={isInDetailsSidePanel}
+                key={index}
+              />
+            ))}
 
             {loading && (
               <Loader
@@ -223,8 +228,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
         {data.endpoint != null ? (
           <>
             <EuiHorizontalRule />
-            <OverviewWrapper>
-              <EndpointOverview data={data.endpoint} />
+            <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
+              <EndpointOverview
+                contextID={contextID}
+                data={data.endpoint}
+                isInDetailsSidePanel={isInDetailsSidePanel}
+              />
 
               {loading && (
                 <Loader

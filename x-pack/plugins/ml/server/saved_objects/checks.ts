@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -33,7 +34,7 @@ interface JobStatus {
   };
 }
 
-interface StatusResponse {
+export interface StatusResponse {
   savedObjects: {
     [type in JobType]: JobSavedObjectStatus[];
   };
@@ -180,7 +181,7 @@ export function checksFactory(
       return jobIds.reduce((results, jobId) => {
         results[jobId] = {
           canDelete: false,
-          canUntag: false,
+          canRemoveFromSpace: false,
         };
         return results;
       }, {} as DeleteJobCheckResponse);
@@ -191,7 +192,7 @@ export function checksFactory(
       return jobIds.reduce((results, jobId) => {
         results[jobId] = {
           canDelete: true,
-          canUntag: false,
+          canRemoveFromSpace: false,
         };
         return results;
       }, {} as DeleteJobCheckResponse);
@@ -208,7 +209,7 @@ export function checksFactory(
         // job saved object not found
         results[jobId] = {
           canDelete: false,
-          canUntag: false,
+          canRemoveFromSpace: false,
         };
         return results;
       }
@@ -220,7 +221,7 @@ export function checksFactory(
       if (canCreateGlobalJobs && isGlobalJob) {
         results[jobId] = {
           canDelete: true,
-          canUntag: false,
+          canRemoveFromSpace: false,
         };
         return results;
       }
@@ -229,20 +230,20 @@ export function checksFactory(
       if (isGlobalJob) {
         results[jobId] = {
           canDelete: false,
-          canUntag: false,
+          canRemoveFromSpace: false,
         };
         return results;
       }
 
       // jobs with are in individual spaces can only be untagged
       // from current space if the job is in more than 1 space
-      const canUntag = namespaces.length > 1;
+      const canRemoveFromSpace = namespaces.length > 1;
 
       // job is in individual spaces, user cannot see all of them - untag only, no delete
       if (namespaces.includes('?')) {
         results[jobId] = {
           canDelete: false,
-          canUntag,
+          canRemoveFromSpace,
         };
         return results;
       }
@@ -250,7 +251,7 @@ export function checksFactory(
       // job is individual spaces, user can see all of them - delete and option to untag
       results[jobId] = {
         canDelete: true,
-        canUntag,
+        canRemoveFromSpace,
       };
       return results;
     }, {} as DeleteJobCheckResponse);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ServiceHealthStatus } from '../../../common/service_health_status';
@@ -39,15 +40,16 @@ const javaService = {
 
 const anomalies = {
   mlJobIds: ['apm-test-1234-ml-module-name'],
-  serviceAnomalies: {
-    'opbeans-test': {
+  serviceAnomalies: [
+    {
+      serviceName: 'opbeans-test',
       transactionType: 'request',
       actualValue: 10000,
       anomalyScore: 50,
       jobId: 'apm-test-1234-ml-module-name',
       healthStatus: ServiceHealthStatus.warning,
     },
-  },
+  ],
 };
 
 describe('transformServiceMapResponses', () => {

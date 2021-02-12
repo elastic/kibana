@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '../../../../../src/core/server';
-import { ConnectorTypes, CommentType } from '../../common/api';
+import { ConnectorTypes, CommentType, CaseType, AssociationType } from '../../common/api';
 
-interface UnsanitizedCase {
+interface UnsanitizedCaseConnector {
   connector_id: string;
 }
 
-interface UnsanitizedConfigure {
+interface UnsanitizedConfigureConnector {
   connector_id: string;
   connector_name: string;
 }
 
-interface SanitizedCase {
+interface SanitizedCaseConnector {
   connector: {
     id: string;
     name: string | null;
@@ -27,7 +28,7 @@ interface SanitizedCase {
   };
 }
 
-interface SanitizedConfigure {
+interface SanitizedConfigureConnector {
   connector: {
     id: string;
     name: string | null;
@@ -42,10 +43,20 @@ interface UserActions {
   old_value: string;
 }
 
+interface SanitizedCaseSettings {
+  settings: {
+    syncAlerts: boolean;
+  };
+}
+
+interface SanitizedCaseType {
+  type: string;
+}
+
 export const caseMigrations = {
   '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedCase>
-  ): SavedObjectSanitizedDoc<SanitizedCase> => {
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
+  ): SavedObjectSanitizedDoc<SanitizedCaseConnector> => {
     const { connector_id, ...attributesWithoutConnectorId } = doc.attributes;
 
     return {
@@ -62,12 +73,38 @@ export const caseMigrations = {
       references: doc.references || [],
     };
   },
+  '7.11.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseSettings> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        settings: {
+          syncAlerts: true,
+        },
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseType> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        type: CaseType.individual,
+      },
+      references: doc.references || [],
+    };
+  },
 };
 
 export const configureMigrations = {
   '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigure>
-  ): SavedObjectSanitizedDoc<SanitizedConfigure> => {
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector>
+  ): SavedObjectSanitizedDoc<SanitizedConfigureConnector> => {
     const { connector_id, connector_name, ...restAttributes } = doc.attributes;
 
     return {
@@ -136,6 +173,10 @@ interface SanitizedComment {
   type: CommentType;
 }
 
+interface SanitizedCommentAssociationType {
+  associationType: AssociationType;
+}
+
 export const commentsMigrations = {
   '7.11.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
@@ -145,6 +186,18 @@ export const commentsMigrations = {
       attributes: {
         ...doc.attributes,
         type: CommentType.user,
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.12.0': (
+    doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
+  ): SavedObjectSanitizedDoc<SanitizedCommentAssociationType> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        associationType: AssociationType.case,
       },
       references: doc.references || [],
     };

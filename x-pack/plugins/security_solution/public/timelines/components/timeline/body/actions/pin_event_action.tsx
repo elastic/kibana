@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
-import { EventsTd, EventsTdContent } from '../../styles';
+import { EventsTdContent } from '../../styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
 import { TimelineType } from '../../../../../../common/types/timeline';
 
 interface PinEventActionProps {
+  ariaLabel?: string;
   noteIds: string[];
   onPinClicked: () => void;
   eventIsPinned: boolean;
@@ -21,6 +23,7 @@ interface PinEventActionProps {
 }
 
 const PinEventActionComponent: React.FC<PinEventActionProps> = ({
+  ariaLabel,
   noteIds,
   onPinClicked,
   eventIsPinned,
@@ -37,10 +40,11 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   );
 
   return (
-    <EventsTd key="timeline-action-pin-tool-tip">
+    <div key="timeline-action-pin-tool-tip">
       <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
         <EuiToolTip data-test-subj="timeline-action-pin-tool-tip" content={tooltipContent}>
           <Pin
+            ariaLabel={ariaLabel}
             allowUnpinning={!eventHasNotes(noteIds)}
             data-test-subj="pin-event"
             onClick={onPinClicked}
@@ -49,7 +53,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
           />
         </EuiToolTip>
       </EventsTdContent>
-    </EventsTd>
+    </div>
   );
 };
 

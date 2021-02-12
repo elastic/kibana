@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -29,6 +30,9 @@ export class DataRecognizer extends Component {
     // once the mount is complete, call the recognize endpoint to see if the index format is known to us,
     ml.recognizeIndex({ indexPatternTitle: this.indexPattern.title })
       .then((resp) => {
+        // Sort results by title prior to display
+        resp.sort((res1, res2) => res1.title.localeCompare(res2.title));
+
         const results = resp.map((r) => (
           <RecognizedResult
             key={r.id}

@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   AlertInstanceMeta,
   AlertInstanceState,
   RawAlertInstance,
   rawAlertInstance,
   AlertInstanceContext,
+  DefaultActionGroupId,
 } from '../../common';
 
 import { parseDuration } from '../lib';
 
 interface ScheduledExecutionOptions<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string = DefaultActionGroupId
 > {
-  actionGroup: string;
+  actionGroup: ActionGroupIds;
   subgroup?: string;
   context: Context;
   state: State;
@@ -25,17 +29,19 @@ interface ScheduledExecutionOptions<
 
 export type PublicAlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext
+  Context extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
-  AlertInstance<State, Context>,
+  AlertInstance<State, Context, ActionGroupIds>,
   'getState' | 'replaceState' | 'scheduleActions' | 'scheduleActionsWithSubGroup'
 >;
 
 export class AlertInstance<
   State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext
+  Context extends AlertInstanceContext = AlertInstanceContext,
+  ActionGroupIds extends string = never
 > {
-  private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context>;
+  private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: AlertInstanceMeta;
   private state: State;
 
@@ -97,14 +103,14 @@ export class AlertInstance<
 
   private scheduledActionGroupIsUnchanged(
     lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
-    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context>
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
   ) {
     return lastScheduledActions.group === scheduledExecutionOptions.actionGroup;
   }
 
   private scheduledActionSubgroupIsUnchanged(
     lastScheduledActions: NonNullable<AlertInstanceMeta['lastScheduledActions']>,
-    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context>
+    scheduledExecutionOptions: ScheduledExecutionOptions<State, Context, ActionGroupIds>
   ) {
     return lastScheduledActions.subgroup && scheduledExecutionOptions.subgroup
       ? lastScheduledActions.subgroup === scheduledExecutionOptions.subgroup
@@ -128,7 +134,7 @@ export class AlertInstance<
     return this.state;
   }
 
-  scheduleActions(actionGroup: string, context: Context = {} as Context) {
+  scheduleActions(actionGroup: ActionGroupIds, context: Context = {} as Context) {
     this.ensureHasNoScheduledActions();
     this.scheduledExecutionOptions = {
       actionGroup,
@@ -139,7 +145,7 @@ export class AlertInstance<
   }
 
   scheduleActionsWithSubGroup(
-    actionGroup: string,
+    actionGroup: ActionGroupIds,
     subgroup: string,
     context: Context = {} as Context
   ) {
@@ -164,7 +170,7 @@ export class AlertInstance<
     return this;
   }
 
-  updateLastScheduledActions(group: string, subgroup?: string) {
+  updateLastScheduledActions(group: ActionGroupIds, subgroup?: string) {
     this.meta.lastScheduledActions = { group, subgroup, date: new Date() };
   }
 

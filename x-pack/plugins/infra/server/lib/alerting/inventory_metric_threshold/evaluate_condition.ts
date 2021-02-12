@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
@@ -24,6 +26,7 @@ import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
 
 type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean[];
+  shouldWarn: boolean[];
   currentValue: number;
   isNoData: boolean[];
   isError: boolean;
@@ -37,8 +40,8 @@ export const evaluateCondition = async (
   filterQuery?: string,
   lookbackSize?: number
 ): Promise<Record<string, ConditionResult>> => {
-  const { comparator, metric, customMetric } = condition;
-  let { threshold } = condition;
+  const { comparator, warningComparator, metric, customMetric } = condition;
+  let { threshold, warningThreshold } = condition;
 
   const timerange = {
     to: Date.now(),
@@ -60,19 +63,22 @@ export const evaluateCondition = async (
   );
 
   threshold = threshold.map((n) => convertMetricValue(metric, n));
+  warningThreshold = warningThreshold?.map((n) => convertMetricValue(metric, n));
 
-  const comparisonFunction = comparatorMap[comparator];
+  const valueEvaluator = (value?: DataValue, t?: number[], c?: Comparator) => {
+    if (value === undefined || value === null || !t || !c) return [false];
+    const comparisonFunction = comparatorMap[c];
+    return Array.isArray(value)
+      ? value.map((v) => comparisonFunction(Number(v), t))
+      : [comparisonFunction(value as number, t)];
+  };
 
   const result = mapValues(currentValues, (value) => {
     if (isTooManyBucketsPreviewException(value)) throw value;
     return {
       ...condition,
-      shouldFire:
-        value !== undefined &&
-        value !== null &&
-        (Array.isArray(value)
-          ? value.map((v) => comparisonFunction(Number(v), threshold))
-          : [comparisonFunction(value as number, threshold)]),
+      shouldFire: valueEvaluator(value, threshold, comparator),
+      shouldWarn: valueEvaluator(value, warningThreshold, warningComparator),
       isNoData: Array.isArray(value) ? value.map((v) => v === null) : [value === null],
       isError: value === undefined,
       currentValue: getCurrentValue(value),
@@ -88,6 +94,7 @@ const getCurrentValue: (value: any) => number = (value) => {
   return NaN;
 };
 
+type DataValue = number | null | Array<number | string | null | undefined>;
 const getData = async (
   callCluster: AlertServices['callCluster'],
   nodeType: InventoryItemType,

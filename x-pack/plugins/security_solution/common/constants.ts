@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const APP_ID = 'securitySolution';
@@ -42,6 +43,7 @@ export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
 export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
+export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 
 export enum SecurityPageName {
   detections = 'detections',

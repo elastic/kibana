@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
@@ -52,7 +53,7 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
-import { useFetchIndex } from '../../../../common/containers/source';
+import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { PreviewQuery, Threshold } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
@@ -168,6 +169,25 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const queryBarQuery =
     formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
+    (groupAcc, [groupName, groupValue]) => {
+      return {
+        ...groupAcc,
+        [groupName]: {
+          fields: Object.entries(groupValue.fields ?? {}).reduce<
+            Record<string, Partial<BrowserField>>
+          >((fieldAcc, [fieldName, fieldValue]) => {
+            if (fieldValue.aggregatable === true) {
+              fieldAcc[fieldName] = fieldValue;
+            }
+            return fieldAcc;
+          }, {}),
+        } as Partial<BrowserField>,
+      };
+    },
+    {}
+  );
+
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
@@ -262,12 +282,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const ThresholdInputChildren = useCallback(
     ({ thresholdField, thresholdValue }) => (
       <ThresholdInput
-        browserFields={browserFields}
+        browserFields={aggregatableFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
       />
     ),
-    [browserFields]
+    [aggregatableFields]
   );
 
   const ThreatMatchInputChildren = useCallback(

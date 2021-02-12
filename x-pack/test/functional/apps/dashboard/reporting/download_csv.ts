@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { REPO_ROOT } from '@kbn/utils';
@@ -61,6 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const savedSearchPanel = await testSubjects.find('embeddablePanelHeading-EcommerceData');
       await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
+      const actionExists = await testSubjects.exists('embeddablePanelAction-downloadCsvReport');
+      if (!actionExists) {
+        await dashboardPanelActions.clickContextMenuMoreItem();
+      }
       await testSubjects.existOrFail('embeddablePanelAction-downloadCsvReport'); // wait for the full panel to display or else the test runner could click the wrong option!
       await testSubjects.click('embeddablePanelAction-downloadCsvReport');
       await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
@@ -79,6 +84,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ); // panel title is hidden
       await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
+      const actionExists = await testSubjects.exists('embeddablePanelAction-downloadCsvReport');
+      if (!actionExists) {
+        await dashboardPanelActions.clickContextMenuMoreItem();
+      }
       await testSubjects.existOrFail('embeddablePanelAction-downloadCsvReport');
       await testSubjects.click('embeddablePanelAction-downloadCsvReport');
       await testSubjects.existOrFail('csvDownloadStarted');

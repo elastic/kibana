@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, omit, merge } from 'lodash';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
-  formatTopSignificantTerms,
+  processSignificantTermAggs,
   TopSigTerm,
-} from '../get_correlations_for_slow_transactions/format_top_significant_terms';
+} from '../process_significant_term_aggs';
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
 import { rangeFilter } from '../../../../common/utils/range_filter';
@@ -61,38 +62,56 @@ export async function getCorrelationsForFailedTransactions({
 
   const params = {
     apm: { events: [ProcessorEvent.transaction] },
+    track_total_hits: true,
     body: {
       size: 0,
       query: {
-        bool: {
-          // foreground filters
-          filter: [
-            ...backgroundFilters,
-            { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
-          ],
+        bool: { filter: backgroundFilters },
+      },
+      aggs: {
+        failed_transactions: {
+          filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+
+          // significant term aggs
+          aggs: fieldNames.reduce((acc, fieldName) => {
+            return {
+              ...acc,
+              [fieldName]: {
+                significant_terms: {
+                  size: 10,
+                  field: fieldName,
+                  background_filter: { bool: { filter: backgroundFilters } },
+                },
+              },
+            };
+          }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
         },
       },
-      aggs: fieldNames.reduce((acc, fieldName) => {
-        return {
-          ...acc,
-          [fieldName]: {
-            significant_terms: {
-              size: 10,
-              field: fieldName,
-              background_filter: { bool: { filter: backgroundFilters } },
-            },
-          },
-        };
-      }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
     },
   };
 
   const response = await apmEventClient.search(params);
-  const topSigTerms = formatTopSignificantTerms(response.aggregations);
-  return getChartsForTopSigTerms({ setup, backgroundFilters, topSigTerms });
+  if (!response.aggregations) {
+    return {};
+  }
+
+  const failedTransactionCount =
+    response.aggregations?.failed_transactions.doc_count;
+  const totalTransactionCount = response.hits.total.value;
+  const avgErrorRate = (failedTransactionCount / totalTransactionCount) * 100;
+  const sigTermAggs = omit(
+    response.aggregations?.failed_transactions,
+    'doc_count'
+  );
+
+  const topSigTerms = processSignificantTermAggs({
+    sigTermAggs,
+    thresholdPercentage: avgErrorRate,
+  });
+  return getErrorRateTimeSeries({ setup, backgroundFilters, topSigTerms });
 }
 
-export async function getChartsForTopSigTerms({
+export async function getErrorRateTimeSeries({
   setup,
   backgroundFilters,
   topSigTerms,
@@ -116,8 +135,7 @@ export async function getChartsForTopSigTerms({
       extended_bounds: { min: start, max: end },
     },
     aggs: {
-      // TODO: add support for metrics
-      outcomes: getOutcomeAggregation({ searchAggregatedTransactions: false }),
+      outcomes: getOutcomeAggregation(),
     },
   };
 
@@ -129,13 +147,12 @@ export async function getChartsForTopSigTerms({
       };
       return acc;
     },
-    {} as Record<
-      string,
-      {
+    {} as {
+      [key: string]: {
         filter: AggregationOptionsByType['filter'];
         aggs: { timeseries: typeof timeseriesAgg };
-      }
-    >
+      };
+    }
   );
 
   const params = {
@@ -144,32 +161,25 @@ export async function getChartsForTopSigTerms({
     body: {
       size: 0,
       query: { bool: { filter: backgroundFilters } },
-      aggs: {
-        // overall aggs
-        timeseries: timeseriesAgg,
-
-        // per term aggs
-        ...perTermAggs,
-      },
+      aggs: merge({ timeseries: timeseriesAgg }, perTermAggs),
     },
   };
 
   const response = await apmEventClient.search(params);
-  type Agg = NonNullable<typeof response.aggregations>;
+  const { aggregations } = response;
 
-  if (!response.aggregations) {
+  if (!aggregations) {
     return {};
   }
 
   return {
     overall: {
       timeseries: getTransactionErrorRateTimeSeries(
-        response.aggregations.timeseries.buckets
+        aggregations.timeseries.buckets
       ),
     },
     significantTerms: topSigTerms.map((topSig, index) => {
-      // @ts-expect-error
-      const agg = response.aggregations[`term_${index}`] as Agg;
+      const agg = aggregations[`term_${index}`]!;
 
       return {
         ...topSig,

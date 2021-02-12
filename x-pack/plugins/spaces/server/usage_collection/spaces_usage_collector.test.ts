@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getSpacesUsageCollector, UsageData } from './spaces_usage_collector';
@@ -12,7 +13,10 @@ import { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';
 import { usageStatsServiceMock } from '../usage_stats/usage_stats_service.mock';
-import { pluginInitializerContextConfigMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  pluginInitializerContextConfigMock,
+} from 'src/core/server/mocks';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 interface SetupOpts {
@@ -74,29 +78,37 @@ function setup({
   };
 }
 
-const defaultCallClusterMock = jest.fn().mockResolvedValue({
-  hits: {
-    total: {
-      value: 2,
+const defaultEsClientSearchMock = jest.fn().mockResolvedValue({
+  body: {
+    hits: {
+      total: {
+        value: 2,
+      },
     },
-  },
-  aggregations: {
-    disabledFeatures: {
-      buckets: [
-        {
-          key: 'feature1',
-          doc_count: 1,
-        },
-      ],
+    aggregations: {
+      disabledFeatures: {
+        buckets: [
+          {
+            key: 'feature1',
+            doc_count: 1,
+          },
+        ],
+      },
     },
   },
 });
 
-const getMockFetchContext = (mockedCallCluster: jest.Mock) => {
+const getMockFetchContext = (mockedEsClient: any) => {
   return {
     ...createCollectorFetchContextMock(),
-    callCluster: mockedCallCluster,
+    esClient: mockedEsClient,
   };
+};
+
+const getMockedEsClient = (esClientMock: jest.Mock) => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.search = esClientMock;
+  return esClient;
 };
 
 describe('error handling', () => {
@@ -110,8 +122,10 @@ describe('error handling', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.search.mockRejectedValue({ status: 404 });
 
-    await collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue({ status: 404 })));
+    await collector.fetch(getMockFetchContext(esClient));
   });
 
   it('throws error for a non-404', async () => {
@@ -124,13 +138,13 @@ describe('error handling', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const statusCodes = [401, 402, 403, 500];
     for (const statusCode of statusCodes) {
       const error = { status: statusCode };
-      await expect(
-        collector.fetch(getMockFetchContext(jest.fn().mockRejectedValue(error)))
-      ).rejects.toBe(error);
+      esClient.search.mockRejectedValue(error);
+      await expect(collector.fetch(getMockFetchContext(esClient))).rejects.toBe(error);
     }
   });
 });
@@ -148,9 +162,10 @@ describe('with a basic license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+    usageData = await collector.fetch(getMockFetchContext(esClient));
 
-    expect(defaultCallClusterMock).toHaveBeenCalledWith('search', {
+    expect(defaultEsClientSearchMock).toHaveBeenCalledWith({
       body: {
         aggs: {
           disabledFeatures: {
@@ -206,7 +221,9 @@ describe('with no license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+
+    usageData = await collector.fetch(getMockFetchContext(esClient));
   });
 
   test('sets enabled to false', () => {
@@ -245,7 +262,9 @@ describe('with platinum license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    const esClient = getMockedEsClient(defaultEsClientSearchMock);
+
+    usageData = await collector.fetch(getMockFetchContext(esClient));
   });
 
   test('sets enabled to true', () => {

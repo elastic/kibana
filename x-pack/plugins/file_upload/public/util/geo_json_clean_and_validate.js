@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as jsts from 'jsts';
@@ -11,14 +12,14 @@ const geoJSONReader = new jsts.io.GeoJSONReader();
 const geoJSONWriter = new jsts.io.GeoJSONWriter();
 
 export function geoJsonCleanAndValidate(feature) {
-  const geometryReadResult = geoJSONReader.read(feature);
-
-  const cleanedGeometry = cleanGeometry(geometryReadResult);
-
-  // For now, return the feature unmodified
-  // TODO: Consider more robust UI feedback and general handling
-  // for features that fail cleaning and/or validation
-  if (!cleanedGeometry) {
+  let cleanedGeometry;
+  // Attempts to clean geometry. If this fails, don't generate errors at this
+  // point, these will be handled more accurately on write to ES with feedback
+  // given to user
+  try {
+    const geometryReadResult = geoJSONReader.read(feature);
+    cleanedGeometry = cleanGeometry(geometryReadResult);
+  } catch (e) {
     return feature;
   }
 

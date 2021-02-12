@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiCallOut } from '@elastic/eui';
@@ -19,6 +20,7 @@ import {
 
 interface Props {
   filterManager: FilterManager;
+  show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
   timelineId: string;
@@ -26,6 +28,7 @@ interface Props {
 
 const TimelineHeaderComponent: React.FC<Props> = ({
   filterManager,
+  show,
   showCallOutUnauthorizedMsg,
   status,
   timelineId,
@@ -49,7 +52,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    <DataProviders timelineId={timelineId} />
+    {show && <DataProviders timelineId={timelineId} />}
 
     <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
   </>

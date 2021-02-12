@@ -1,35 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { fileHandler } from './file_parser';
-jest.mock('./pattern_reader', () => ({}));
+import '@loaders.gl/polyfills';
 
 const cleanAndValidate = jest.fn((a) => a);
 const setFileProgress = jest.fn((a) => a);
-
-const getFileReader = () => {
-  const fileReader = {
-    abort: jest.fn(),
-  };
-  fileReader.readAsBinaryString = jest.fn((binaryString = '123') =>
-    fileReader.onloadend({ target: { readyState: FileReader.DONE, result: binaryString } })
-  );
-  return fileReader;
-};
-const getPatternReader = () => {
-  const patternReader = {
-    writeDataToPatternStream: jest.fn(),
-    abortStream: jest.fn(),
-  };
-  require('./pattern_reader').PatternReader = function () {
-    this.writeDataToPatternStream = () => patternReader.writeDataToPatternStream();
-    this.abortStream = () => patternReader.abortStream();
-  };
-  return patternReader;
-};
 
 const testJson = {
   type: 'Feature',
@@ -63,13 +43,13 @@ describe('parse file', () => {
   });
 
   it('should reject and throw error if no file provided', async () => {
-    expect(fileHandler(null)).rejects.toThrow();
+    await fileHandler({ file: null }).catch((e) => {
+      expect(e.message).toMatch('Error, no file provided');
+    });
   });
 
   it('should abort and resolve to null if file parse cancelled', async () => {
     const fileRef = getFileRef();
-    const cancelledActionFileReader = getFileReader();
-    const cancelledActionPatternReader = getPatternReader();
 
     // Cancel file parse
     const getFileParseActive = getFileParseActiveFactory(false);
@@ -79,53 +59,61 @@ describe('parse file', () => {
       setFileProgress,
       cleanAndValidate,
       getFileParseActive,
-      fileReader: cancelledActionFileReader,
     });
 
     expect(fileHandlerResult).toBeNull();
-    expect(cancelledActionFileReader.abort.mock.calls.length).toEqual(1);
-    expect(cancelledActionPatternReader.abortStream.mock.calls.length).toEqual(1);
   });
 
-  it('should abort on file reader error', () => {
+  it('should normally read single feature valid data', async () => {
     const fileRef = getFileRef();
-
-    const fileReaderWithErrorCall = getFileReader();
-    const patternReaderWithErrorCall = getPatternReader();
-
-    // Trigger on error on read
-    fileReaderWithErrorCall.readAsBinaryString = () => fileReaderWithErrorCall.onerror();
     const getFileParseActive = getFileParseActiveFactory();
-    expect(
-      fileHandler({
-        file: fileRef,
-        setFileProgress,
-        cleanAndValidate,
-        getFileParseActive,
-        fileReader: fileReaderWithErrorCall,
-      })
-    ).rejects.toThrow();
-
-    expect(fileReaderWithErrorCall.abort.mock.calls.length).toEqual(1);
-    expect(patternReaderWithErrorCall.abortStream.mock.calls.length).toEqual(1);
-  });
-
-  // Expect 2 calls, one reads file, next is 'undefined' to
-  // both fileReader and patternReader
-  it('should normally read binary and emit to patternReader for valid data', async () => {
-    const fileRef = getFileRef();
-    const fileReaderForValidFile = getFileReader();
-    const patternReaderForValidFile = getPatternReader();
-    const getFileParseActive = getFileParseActiveFactory();
-    fileHandler({
+    const { errors } = await fileHandler({
       file: fileRef,
       setFileProgress,
-      cleanAndValidate,
+      cleanAndValidate: (x) => x,
       getFileParseActive,
-      fileReader: fileReaderForValidFile,
     });
 
-    expect(fileReaderForValidFile.readAsBinaryString.mock.calls.length).toEqual(2);
-    expect(patternReaderForValidFile.writeDataToPatternStream.mock.calls.length).toEqual(2);
+    expect(setFileProgress.mock.calls.length).toEqual(1);
+    expect(errors.length).toEqual(0);
+  });
+
+  it('should normally read a valid single feature file', async () => {
+    const testSinglePointJson = {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [30, 10],
+      },
+      properties: {
+        name: 'Point island',
+      },
+    };
+
+    const fileRef = getFileRef(testSinglePointJson);
+    const getFileParseActive = getFileParseActiveFactory();
+    const { errors } = await fileHandler({
+      file: fileRef,
+      setFileProgress,
+      cleanAndValidate: (x) => x,
+      getFileParseActive,
+    });
+
+    expect(setFileProgress.mock.calls.length).toEqual(1);
+    expect(errors.length).toEqual(0);
+  });
+
+  it('should throw if no valid features', async () => {
+    const fileRef = getFileRef();
+    const getFileParseActive = getFileParseActiveFactory();
+
+    await fileHandler({
+      file: fileRef,
+      setFileProgress,
+      cleanAndValidate: () => ({ not: 'the correct content' }), // Simulate clean and validate fail
+      getFileParseActive,
+    }).catch((e) => {
+      expect(e.message).toMatch('Error, no features detected');
+    });
   });
 });
