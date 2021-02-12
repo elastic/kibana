@@ -137,10 +137,6 @@ const setup = async (opts: SetupOpts = {}) => {
 };
 
 describe('ShareToSpaceFlyout', () => {
-  // beforeAll(() => {
-  //   jest.useFakeTimers();
-  // });
-
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 
@@ -619,7 +615,7 @@ describe('ShareToSpaceFlyout', () => {
             />
             <EuiIconTip
               color="warning"
-              content="This feature is disabled in this space, it will have no effect unless the feature is enabled again."
+              content="This feature is disabled in this space."
               position="left"
               type="alert"
             />
@@ -656,7 +652,7 @@ describe('ShareToSpaceFlyout', () => {
       expect(option.append).toMatchInlineSnapshot(`
         <EuiIconTip
           color="warning"
-          content="This feature is disabled in this space, it will have no effect unless the feature is enabled again."
+          content="This feature is disabled in this space."
           position="left"
           type="alert"
         />

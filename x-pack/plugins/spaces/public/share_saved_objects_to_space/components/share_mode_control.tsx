@@ -157,7 +157,7 @@ export const ShareModeControl = (props: Props) => {
             values={{
               objectNoun,
               readAndWritePrivilegesLink: (
-                <EuiLink href={kibanaPrivilegesUrl}>
+                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.privilegeWarningLink"
                     defaultMessage="read and write privileges"

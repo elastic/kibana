@@ -139,7 +139,7 @@ export const SelectableSpacesControl = (props: Props) => {
             defaultMessage="To view hidden spaces, you need {additionalPrivilegesLink}."
             values={{
               additionalPrivilegesLink: (
-                <EuiLink href={kibanaPrivilegesUrl}>
+                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.unknownSpacesLabel.additionalPrivilegesLink"
                     defaultMessage="additional privileges"
