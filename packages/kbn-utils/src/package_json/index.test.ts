@@ -7,14 +7,14 @@
  */
 
 import path from 'path';
-import { kibanaPackageJSON } from './';
+import { kibanaPackageJson } from './';
 
 it('parses package.json', () => {
-  expect(kibanaPackageJSON.name).toEqual('kibana');
+  expect(kibanaPackageJson.name).toEqual('kibana');
 });
 
 it('includes __dirname and __filename', () => {
   const root = path.resolve(__dirname, '../../../../');
-  expect(kibanaPackageJSON.__filename).toEqual(path.resolve(root, 'package.json'));
-  expect(kibanaPackageJSON.__dirname).toEqual(root);
+  expect(kibanaPackageJson.__filename).toEqual(path.resolve(root, 'package.json'));
+  expect(kibanaPackageJson.__dirname).toEqual(root);
 });
