@@ -16,6 +16,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -155,6 +156,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
       await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
+    }
+
+    public async expectOnDashboard(dashboardTitle: string) {
+      await retry.waitFor(
+        'last breadcrumb to have dashboard title',
+        async () => (await globalNav.getLastBreadcrumb()) === dashboardTitle
+      );
     }
 
     public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
