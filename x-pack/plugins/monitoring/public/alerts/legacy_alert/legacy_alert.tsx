@@ -19,7 +19,7 @@ export function createLegacyAlertTypes(): AlertTypeModel[] {
       description: LEGACY_ALERT_DETAILS[legacyAlert].description,
       iconClass: 'bell',
       documentationUrl(docLinks) {
-        return `${docLinks.links.monitoring.alertsCluster}`;
+        return `${docLinks.links.monitoring.alertsKibanaClusterAlerts}`;
       },
       alertParamsExpression: () => (
         <Fragment>
