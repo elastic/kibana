@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
@@ -117,9 +118,21 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
       }
     }
 
+    async eraseInput(maxChars: number) {
+      const keys = [
+        ...Array(maxChars).fill(Key.ARROW_RIGHT),
+        ...Array(maxChars).fill(Key.BACK_SPACE),
+      ];
+      await browser
+        .getActions()
+        .sendKeys(...keys)
+        .perform();
+    }
+
     async fillInURLTemplate(destinationURLTemplate: string) {
       const monaco = await find.byCssSelector('.urlTemplateEditor__container .monaco-editor');
       await monaco.clickMouseButton();
+      await this.eraseInput(300);
       await browser.pressKeys(destinationURLTemplate);
     }
 
