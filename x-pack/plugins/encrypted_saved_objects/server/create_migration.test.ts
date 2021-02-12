@@ -113,7 +113,7 @@ describe('createMigration()', () => {
   });
 
   describe('migration of a single legacy type', () => {
-    it('uses the input type as the mirgation type when omitted', async () => {
+    it('uses the input type as the migration type when omitted', async () => {
       const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
       const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
 
@@ -167,15 +167,16 @@ describe('createMigration()', () => {
     });
 
     describe('uses the object `namespaces` field to populate the descriptor when the migration context indicates this type is being converted', () => {
-      const doTest = async ({
+      const doTest = ({
         objectNamespace,
         decryptDescriptorNamespace,
       }: {
         objectNamespace: string | undefined;
         decryptDescriptorNamespace: string | undefined;
       }) => {
-        const serviceWithLegacyType = encryptedSavedObjectsServiceMock.create();
-        const instantiateServiceWithLegacyType = jest.fn(() => serviceWithLegacyType);
+        const instantiateServiceWithLegacyType = jest.fn(() =>
+          encryptedSavedObjectsServiceMock.create()
+        );
 
         const migrationCreator = getCreateMigration(
           encryptionSavedObjectService,
@@ -192,7 +193,7 @@ describe('createMigration()', () => {
           firstAttr: 'first_attr',
         };
 
-        serviceWithLegacyType.decryptAttributesSync.mockReturnValueOnce(attributes);
+        encryptionSavedObjectService.decryptAttributesSync.mockReturnValueOnce(attributes);
         encryptionSavedObjectService.encryptAttributesSync.mockReturnValueOnce(attributes);
 
         noopMigration(
@@ -208,7 +209,7 @@ describe('createMigration()', () => {
           })
         );
 
-        expect(serviceWithLegacyType.decryptAttributesSync).toHaveBeenCalledWith(
+        expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
           {
             id: '123',
             type: 'known-type-1',
