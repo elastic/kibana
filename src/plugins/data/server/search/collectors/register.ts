@@ -16,9 +16,11 @@ export interface CollectedUsage {
   totalDuration: number;
 }
 
-export type ReportedUsage = Omit<CollectedUsage, 'totalDuration'> & {
-  averageDuration: number;
-};
+export interface ReportedUsage {
+  successCount: number;
+  errorCount: number;
+  averageDuration: number | null;
+}
 
 export async function registerUsageCollector(
   usageCollection: UsageCollectionSetup,
