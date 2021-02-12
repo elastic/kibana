@@ -101,6 +101,7 @@ const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
   HostPolicyResponseActionStatus.success,
   HostPolicyResponseActionStatus.failure,
   HostPolicyResponseActionStatus.warning,
+  HostPolicyResponseActionStatus.unsupported,
 ];
 
 const APPLIED_POLICIES: Array<{
@@ -1492,7 +1493,7 @@ export class EndpointDocGenerator {
               {
                 name: 'workflow',
                 message: 'Failed to apply a portion of the configuration (kernel)',
-                status: HostPolicyResponseActionStatus.success,
+                status: HostPolicyResponseActionStatus.unsupported,
               },
               {
                 name: 'download_model',
@@ -1637,6 +1638,7 @@ export class EndpointDocGenerator {
       HostPolicyResponseActionStatus.failure,
       HostPolicyResponseActionStatus.success,
       HostPolicyResponseActionStatus.warning,
+      HostPolicyResponseActionStatus.unsupported,
     ]);
   }
 

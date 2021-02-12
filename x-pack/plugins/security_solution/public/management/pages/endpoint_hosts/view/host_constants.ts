@@ -25,6 +25,7 @@ export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
   success: 'success',
   warning: 'warning',
   failure: 'danger',
+  unsupported: 'subdued',
 });
 
 export const POLICY_STATUS_TO_TEXT = Object.freeze<
@@ -38,5 +39,8 @@ export const POLICY_STATUS_TO_TEXT = Object.freeze<
   }),
   failure: i18n.translate('xpack.securitySolution.policyStatusText.failure', {
     defaultMessage: 'Failure',
+  }),
+  unsupported: i18n.translate('xpack.securitySolution.policyStatusText.unsupported', {
+    defaultMessage: 'Unsupported',
   }),
 });
