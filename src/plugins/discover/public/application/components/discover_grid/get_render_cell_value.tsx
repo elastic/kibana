@@ -55,7 +55,7 @@ export const getRenderCellValueFn = (
   if (field && field.type === '_source') {
     if (isDetails) {
       // nicely formatted JSON for the expanded view
-      return <span>{JSON.stringify(row[columnId], null, 2)}</span>;
+      return <span>{JSON.stringify(row, null, 2)}</span>;
     }
     const formatted = indexPattern.formatHit(row);
 
