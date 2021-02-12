@@ -101,7 +101,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       return tmsService;
     }
 
-    throw new Error(getErrorInfo());
+    throw new Error(getErrorInfo(emsTileLayerId));
   }
 
   async getDisplayName() {
