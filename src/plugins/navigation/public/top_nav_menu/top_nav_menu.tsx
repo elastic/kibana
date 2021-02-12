@@ -71,18 +71,16 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderBadges(): ReactElement | null {
     if (!badges || badges.length === 0) return null;
     return (
-      <span className={'kbnTopNavMenu__badgeGroup'}>
-        <EuiBadgeGroup>
-          {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
-            const { badgeText, ...badgeProps } = badge;
-            return (
-              <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
-                {badgeText}
-              </EuiBadge>
-            );
-          })}
-        </EuiBadgeGroup>
-      </span>
+      <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
+        {badges.map((badge: EuiBadgeProps & { badgeText: string }, i: number) => {
+          const { badgeText, ...badgeProps } = badge;
+          return (
+            <EuiBadge key={`nav-menu-badge-${i}`} {...badgeProps}>
+              {badgeText}
+            </EuiBadge>
+          );
+        })}
+      </EuiBadgeGroup>
     );
   }
 
