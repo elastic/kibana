@@ -191,10 +191,14 @@ export interface AggregationOptionsByType {
     format?: string;
   };
   rate: {
-    field?: string;
     unit: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
-    mode?: 'sum' | 'value_count';
-  };
+  } & (
+    | {
+        field: string;
+        mode: 'sum' | 'value_count';
+      }
+    | {}
+  );
 }
 
 type AggregationType = keyof AggregationOptionsByType;

@@ -8,7 +8,6 @@
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
-  TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
@@ -78,7 +77,7 @@ export async function getServiceTransactionGroups({
         },
       },
       aggs: {
-        total_duration: { sum: { field: TRANSACTION_DURATION } },
+        total_duration: { sum: { field } },
         transaction_groups: {
           terms: {
             field: TRANSACTION_NAME,
@@ -87,7 +86,7 @@ export async function getServiceTransactionGroups({
           },
           aggs: {
             transaction_group_total_duration: {
-              sum: { field: TRANSACTION_DURATION },
+              sum: { field },
             },
             ...getLatencyAggregation(latencyAggregationType, field),
             [EVENT_OUTCOME]: {

@@ -134,22 +134,19 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               transactionNames,
             },
           },
-          isCachable: true,
-        }).then((result) => {
-          return { [requestId]: result };
         });
       }
     },
     // only fetches statistics when requestId changes or transaction names changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, transactionNames]
+    [requestId, transactionNames],
+    { preservePreviousData: false }
   );
 
   const columns = getColumns({
     serviceName,
     latencyAggregationType,
-    transactionGroupComparisonStatistics:
-      transactionGroupComparisonStatistics?.[requestId],
+    transactionGroupComparisonStatistics,
   });
 
   const isLoading =
