@@ -112,7 +112,6 @@ export function parseElasticsearchClientConfig(
   }
 
   if (Array.isArray(config.hosts)) {
-
     esClientConfig.hosts = config.hosts.map((nodeUrl: string) => {
       const uri = url.parse(nodeUrl);
       const httpsURI = uri.protocol === 'https:';
