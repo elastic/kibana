@@ -59,7 +59,9 @@ export const useFetchLogEntriesAround = ({
 
   const fetchLogEntriesAround = useCallback(
     (cursor: LogEntryCursor, size: number) => {
-      const logEntriesBeforeSearchRequest = fetchLogEntriesBefore(cursor, Math.floor(size / 2));
+      const logEntriesBeforeSearchRequest = fetchLogEntriesBefore(cursor, {
+        size: Math.floor(size / 2),
+      });
 
       if (logEntriesBeforeSearchRequest == null) {
         return;
@@ -75,10 +77,9 @@ export const useFetchLogEntriesAround = ({
             tiebreaker: 0,
           };
 
-          const logEntriesAfterSearchRequest = fetchLogEntriesAfter(
-            cursorAfter,
-            Math.ceil(size / 2)
-          );
+          const logEntriesAfterSearchRequest = fetchLogEntriesAfter(cursorAfter, {
+            size: Math.ceil(size / 2),
+          });
 
           if (logEntriesAfterSearchRequest == null) {
             throw new Error('Failed to create request: no request args given');

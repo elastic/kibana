@@ -54,6 +54,8 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
   const [errors, setErrors] = useState<Errors>(createEmptyErrors);
   const form = useFormContext<FormInternal>();
 
+  const { getErrors: getFormErrors } = form;
+
   const addError: ContextValue['addError'] = useCallback(
     (phase, fieldPath, errorMessages) => {
       setErrors((previousErrors) => ({
@@ -70,20 +72,23 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
 
   const clearError: ContextValue['clearError'] = useCallback(
     (phase, fieldPath) => {
-      if (form.getErrors().length) {
+      if (getFormErrors().length) {
         setErrors((previousErrors) => {
           const {
             [phase]: { [fieldPath]: fieldErrorToOmit, ...restOfPhaseErrors },
+            hasErrors,
             ...otherPhases
           } = previousErrors;
 
-          const hasErrors =
+          const nextHasErrors =
             Object.keys(restOfPhaseErrors).length === 0 &&
-            Object.keys(otherPhases).some((phaseErrors) => !!Object.keys(phaseErrors).length);
+            Object.values(otherPhases).some((phaseErrors) => {
+              return !!Object.keys(phaseErrors).length;
+            });
 
           return {
             ...previousErrors,
-            hasErrors,
+            hasErrors: nextHasErrors,
             [phase]: restOfPhaseErrors,
           };
         });
@@ -91,7 +96,7 @@ export const FormErrorsProvider: FunctionComponent = ({ children }) => {
         setErrors(createEmptyErrors);
       }
     },
-    [form, setErrors]
+    [getFormErrors, setErrors]
   );
 
   return (

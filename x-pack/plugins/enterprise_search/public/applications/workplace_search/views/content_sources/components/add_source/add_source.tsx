@@ -9,16 +9,16 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { AppLogic } from '../../../../app_logic';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { Loading } from '../../../../../shared/loading';
+import { AppLogic } from '../../../../app_logic';
 import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
-import { staticSourceData } from '../../source_data';
-import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
-import { SourceDataItem } from '../../../../types';
 import { SOURCE_ADDED_PATH, getSourcesPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
+import { staticSourceData } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';
+import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
 import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureCustom } from './configure_custom';
