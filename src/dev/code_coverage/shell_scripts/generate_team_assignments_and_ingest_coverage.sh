@@ -10,7 +10,7 @@ echo "### debug COVERAGE_JOB_NAME: ${COVERAGE_JOB_NAME}"
 BUILD_ID=$2
 export BUILD_ID
 
-CI_RUN_URL = $ 3
+CI_RUN_URL=$3
 export CI_RUN_URL
 echo "### debug CI_RUN_URL: ${CI_RUN_URL}"
 
