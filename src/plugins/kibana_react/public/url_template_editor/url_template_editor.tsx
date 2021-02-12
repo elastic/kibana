@@ -136,6 +136,8 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
           minimap: {
             enabled: false,
           },
+          wordWrap: 'on',
+          wrappingIndent: 'none',
         }}
       />
     </div>
