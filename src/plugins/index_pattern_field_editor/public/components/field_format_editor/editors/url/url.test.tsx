@@ -76,38 +76,6 @@ describe('UrlFormatEditor', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should render url template help', async () => {
-    const { getByText, getByTestId } = renderWithContext(
-      <UrlFormatEditor
-        fieldType={fieldType}
-        format={format}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-
-    getByText('URL template help');
-    userEvent.click(getByText('URL template help'));
-    expect(getByTestId('urlTemplateFlyoutTestSubj')).toBeVisible();
-  });
-
-  it('should render label template help', async () => {
-    const { getByText, getByTestId } = renderWithContext(
-      <UrlFormatEditor
-        fieldType={fieldType}
-        format={format}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
-
-    getByText('Label template help');
-    userEvent.click(getByText('Label template help'));
-    expect(getByTestId('labelTemplateFlyoutTestSubj')).toBeVisible();
-  });
-
   it('should render width and height fields if image', async () => {
     const { getByLabelText } = renderWithContext(
       <UrlFormatEditor

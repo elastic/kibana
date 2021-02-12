@@ -166,14 +166,26 @@ exports[`UrlFormatEditor should render normally 1`] = `
         class="euiFormHelpText euiFormRow__text"
         id="generated-id-help"
       >
-        <button
+        <a
           class="euiLink euiLink--primary"
-          type="button"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          rel="noopener"
+          target="_blank"
         >
           <span>
             URL template help
           </span>
-        </button>
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
+        </a>
       </div>
     </div>
   </div>
@@ -217,14 +229,26 @@ exports[`UrlFormatEditor should render normally 1`] = `
         class="euiFormHelpText euiFormRow__text"
         id="generated-id-help"
       >
-        <button
+        <a
           class="euiLink euiLink--primary"
-          type="button"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/field-formatters-string.html"
+          rel="noopener"
+          target="_blank"
         >
           <span>
             Label template help
           </span>
-        </button>
+          <span
+            aria-label="External link"
+            class="euiLink__externalIcon"
+            data-euiicon-type="popout"
+          />
+          <span
+            class="euiScreenReaderOnly"
+          >
+            (opens in a new tab or window)
+          </span>
+        </a>
       </div>
     </div>
   </div>
