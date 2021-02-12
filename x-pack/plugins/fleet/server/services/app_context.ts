@@ -7,6 +7,8 @@
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { kibanaPackageJson } from '@kbn/utils';
+
 import {
   ElasticsearchClient,
   SavedObjectsServiceStart,
@@ -18,7 +20,6 @@ import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
-import packageJSON from '../../../../../package.json';
 import { SecurityPluginStart } from '../../../security/server';
 import { FleetConfigType } from '../../common';
 import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
@@ -33,8 +34,8 @@ class AppContextService {
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
-  private kibanaVersion: FleetAppContext['kibanaVersion'] = packageJSON.version;
-  private kibanaBranch: FleetAppContext['kibanaBranch'] = packageJSON.branch;
+  private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
+  private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;

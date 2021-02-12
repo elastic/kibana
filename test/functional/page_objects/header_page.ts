@@ -27,7 +27,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickVisualize(ignoreAppLeaveWarning = false) {
-      await appsMenu.clickLink('Visualize', { category: 'kibana' });
+      await appsMenu.clickLink('Visualize Library', { category: 'kibana' });
       await this.onAppLeaveWarning(ignoreAppLeaveWarning);
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('Visualize app to be loaded', async () => {

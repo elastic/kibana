@@ -94,6 +94,7 @@ describe('rules_notification_alert_type', () => {
     mlSystemProvider: jest.fn(),
     modulesProvider: jest.fn(),
     resultsServiceProvider: jest.fn(),
+    alertingServiceProvider: jest.fn(),
   };
   let payload: jest.Mocked<RuleExecutorOptions>;
   let alert: ReturnType<typeof signalRulesAlertType>;
