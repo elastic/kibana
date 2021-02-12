@@ -30,7 +30,8 @@ async function getShardCountPerNode(
   } else if (cluster.elasticsearch?.cluster?.stats?.state?.state_uuid) {
     filters.push({
       term: {
-        'elasticsearch.cluster.state.id': cluster.elasticsearch?.cluster?.stats?.state?.state_uuid,
+        'elasticsearch.cluster.stats.state.state_uuid':
+          cluster.elasticsearch?.cluster?.stats?.state?.state_uuid,
       },
     });
   }

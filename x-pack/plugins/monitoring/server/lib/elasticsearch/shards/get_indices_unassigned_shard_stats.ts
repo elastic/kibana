@@ -26,6 +26,18 @@ async function getUnassignedShardData(
   const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
   const metric = ElasticsearchMetric.getMetricFields();
 
+  const filters = [];
+  if (cluster.cluster_state?.state_uuid) {
+    filters.push({ term: { state_uuid: cluster.cluster_state?.state_uuid } });
+  } else if (cluster.elasticsearch?.cluster?.stats?.state?.state_uuid) {
+    filters.push({
+      term: {
+        'elasticsearch.cluster.stats.state.state_uuid':
+          cluster.elasticsearch?.cluster?.stats?.state?.state_uuid,
+      },
+    });
+  }
+
   const params = {
     index: esIndexPattern,
     size: 0,
@@ -33,18 +45,10 @@ async function getUnassignedShardData(
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
-        type: 'shards',
+        types: ['shard', 'shards'],
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
-        filters: [
-          {
-            term: {
-              state_uuid:
-                cluster.cluster_state?.state_uuid ??
-                cluster.elasticsearch?.cluster?.stats?.state?.state_uuid,
-            },
-          },
-        ],
+        filters,
       }),
       aggs: {
         indices: {

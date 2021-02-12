@@ -312,9 +312,10 @@ export interface ElasticsearchMetricbeatNode {
 }
 
 export interface ElasticsearchMetricbeatSource {
+  '@timestamp'?: string;
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
-    index?: {
+    index?: ElasticsearchIndexStats & {
       name?: string;
     };
     shard?: ElasticsearchLegacySource['shard'];

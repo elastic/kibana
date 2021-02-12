@@ -78,8 +78,19 @@ export function esIndexRoute(server) {
         let shardAllocation;
         if (!isAdvanced) {
           // TODO: Why so many fields needed for a single component (shard legend)?
-          const shardFilter = { term: { 'shard.index': indexUuid } };
-          const stateUuid = get(cluster, 'cluster_state.state_uuid');
+          const shardFilter = {
+            bool: {
+              should: [
+                { term: { 'shard.index': indexUuid } },
+                { term: { 'elasticsearch.index.name': indexUuid } },
+              ],
+            },
+          };
+          const stateUuid = get(
+            cluster,
+            'elasticsearch.cluster.stats.state.state_uuid',
+            get(cluster, 'cluster_state.state_uuid')
+          );
           const allocationOptions = {
             shardFilter,
             stateUuid,
