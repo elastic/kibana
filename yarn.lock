@@ -3416,6 +3416,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-utils@link:packages/kbn-apm-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/babel-code-parser@link:packages/kbn-babel-code-parser":
   version "0.0.0"
   uid ""
