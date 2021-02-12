@@ -8,8 +8,16 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { AgentAction, AgentActionSOAttributes } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
+import { agentPolicyService } from '../../services';
+import { IngestManagerError } from '../../errors';
 import { bulkCreateAgentActions, createAgentAction } from './actions';
-import { getAgents, listAllAgents, updateAgent, bulkUpdateAgents } from './crud';
+import {
+  getAgents,
+  listAllAgents,
+  updateAgent,
+  bulkUpdateAgents,
+  getAgentPolicyForAgent,
+} from './crud';
 import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 
@@ -31,6 +39,14 @@ export async function sendUpgradeAgentAction({
     version,
     source_uri: sourceUri,
   };
+
+  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
+  if (agentPolicy?.is_managed) {
+    throw new IngestManagerError(
+      `Cannot upgrade agent ${agentId} in managed policy ${agentPolicy.id}`
+    );
+  }
+
   await createAgentAction(soClient, esClient, {
     agent_id: agentId,
     created_at: now,
@@ -89,15 +105,39 @@ export async function sendUpgradeAgentsActions(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = options.force
+
+  // upgradeable if they pass the version check
+  const upgradeableAgents = options.force
     ? agents
     : agents.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
+
+  // get any policy ids from upgradable agents
+  const policyIdsToGet: string[] = upgradeableAgents
+    .filter((agent) => agent.policy_id)
+    .map((agent) => agent.policy_id!);
+
+  // get the agent policies for those ids
+  const agentPolicies = await agentPolicyService.getByIDs(soClient, policyIdsToGet, {
+    fields: ['is_managed'],
+  });
+
+  // create a Set of ids for agents in managed policies
+  const managedPolicyIds = new Set(
+    agentPolicies.filter((p) => p.is_managed === true).map((p) => p.id)
+  );
+
+  // only update agents which aren't in managed policies
+  const agentsToUpdate = upgradeableAgents.filter(
+    (agent) => agent.policy_id && !managedPolicyIds.has(agent.policy_id)
+  );
+
+  // Create upgrade action for each agent
   const now = new Date().toISOString();
   const data = {
     version: options.version,
     source_uri: options.sourceUri,
   };
-  // Create upgrade action for each agent
+
   await bulkCreateAgentActions(
     soClient,
     esClient,

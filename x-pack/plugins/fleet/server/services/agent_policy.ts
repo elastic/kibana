@@ -209,6 +209,21 @@ class AgentPolicyService {
     return agentPolicy;
   }
 
+  public async getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: { fields?: string[] } = {}
+  ): Promise<AgentPolicy[]> {
+    const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
+    const agentPolicySO = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
+
+    return agentPolicySO.saved_objects.map((so) => ({
+      id: so.id,
+      version: so.version,
+      ...so.attributes,
+    }));
+  }
+
   public async list(
     soClient: SavedObjectsClientContract,
     options: ListWithKuery & {
