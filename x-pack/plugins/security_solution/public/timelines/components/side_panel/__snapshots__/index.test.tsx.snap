@@ -287,7 +287,7 @@ Array [
           data-eui="EuiFocusTrap"
         >
           <div
-            className="euiFlyout euiFlyout--small c0"
+            className="euiFlyout euiFlyout--small euiFlyout--paddingLarge c0"
             data-test-subj="timeline:details-panel:flyout"
             role="dialog"
             tabIndex={0}
@@ -554,7 +554,7 @@ Array [
         data-eui="EuiFocusTrap"
       >
         <div
-          className="euiFlyout euiFlyout--small c0"
+          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge c0"
           data-test-subj="timeline:details-panel:flyout"
           role="dialog"
           tabIndex={0}
@@ -804,7 +804,7 @@ Array [
 }
 
 <div
-    className="euiFlyout euiFlyout--small c0"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge c0"
     data-test-subj="timeline:details-panel:flyout"
     role="dialog"
     tabIndex={0}
