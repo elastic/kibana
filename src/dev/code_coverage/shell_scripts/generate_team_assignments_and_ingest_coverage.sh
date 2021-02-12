@@ -39,11 +39,14 @@ node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsI
 
 for x in functional jest; do
   echo "### Ingesting coverage for ${x}"
-    COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
-    if [[ $x == "jest" ]]; then
-        # Need to override COVERAGE_INGESTION_KIBANA_ROOT since json file has original intake worker path
-        export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
-    be
+
+  COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
+
+  if [[ $x == "jest" ]]; then
+    # Need to override COVERAGE_INGESTION_KIBANA_ROOT since json file has original intake worker path
+    export COVERAGE_INGESTION_KIBANA_ROOT=/dev/shm/workspace/kibana
+  fi
+
   node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
 done
 
