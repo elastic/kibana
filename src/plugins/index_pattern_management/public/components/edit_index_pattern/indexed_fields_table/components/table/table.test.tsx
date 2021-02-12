@@ -25,6 +25,7 @@ const items: IndexedFieldItem[] = [
     type: 'name',
     excluded: false,
     format: '',
+    isRuntime: false,
   },
   {
     name: 'timestamp',
@@ -33,6 +34,16 @@ const items: IndexedFieldItem[] = [
     info: [],
     excluded: false,
     format: 'YYYY-MM-DD',
+    isRuntime: false,
+  },
+  {
+    name: 'runtime',
+    displayName: 'Runtime',
+    type: 'text',
+    info: [],
+    excluded: false,
+    format: '',
+    isRuntime: true,
   },
   {
     name: 'conflictingField',
@@ -41,6 +52,7 @@ const items: IndexedFieldItem[] = [
     info: [],
     excluded: false,
     format: '',
+    isRuntime: false,
   },
 ];
 
@@ -76,7 +88,7 @@ describe('Table', () => {
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
-    const tableCell = shallow(component.prop('columns')[3].render(true));
+    const tableCell = shallow(component.prop('columns')[4].render(true));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -85,7 +97,7 @@ describe('Table', () => {
       <Table indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
-    const tableCell = shallow(component.prop('columns')[3].render(false, items[2]));
+    const tableCell = shallow(component.prop('columns')[4].render(false, items[2]));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -95,6 +107,15 @@ describe('Table', () => {
     );
 
     const tableCell = shallow(component.prop('columns')[1].render('string'));
+    expect(tableCell).toMatchSnapshot();
+  });
+
+  test('should render runtime', () => {
+    const component = shallow(
+      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+    );
+
+    const tableCell = shallow(component.prop('columns')[3].render(true));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -115,7 +136,7 @@ describe('Table', () => {
     );
 
     // Click the edit button
-    component.prop('columns')[6].actions[0].onClick();
+    component.prop('columns')[7].actions[0].onClick();
     expect(editField).toBeCalled();
   });
 });

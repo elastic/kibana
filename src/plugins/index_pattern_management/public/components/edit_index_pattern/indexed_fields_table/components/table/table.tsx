@@ -15,6 +15,8 @@ import {
   EuiBasicTableColumn,
   EuiBadge,
   EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -131,6 +133,25 @@ const isExcludedAriaLabel = i18n.translate(
   }
 );
 
+const runtimeLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.runtimeLabel',
+  {
+    defaultMessage: 'Runtime',
+  }
+);
+
+const runtimeDescription = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.runtimeDescription',
+  { defaultMessage: 'These fields are created a runtime' }
+);
+
+const isRuntimeAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.isRuntimeAria',
+  {
+    defaultMessage: 'Is runtime',
+  }
+);
+
 const editLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.table.editLabel', {
   defaultMessage: 'Edit',
 });
@@ -160,11 +181,10 @@ export class Table extends PureComponent<IndexedFieldProps> {
     const { indexPattern } = this.props;
 
     return (
-      <span>
-        {field.name}
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>{field.name}</EuiFlexItem>
         {field.info && field.info.length ? (
-          <span>
-            &nbsp;
+          <EuiFlexItem grow={false}>
             <EuiIconTip
               type="questionInCircle"
               color="primary"
@@ -173,29 +193,28 @@ export class Table extends PureComponent<IndexedFieldProps> {
                 <div key={i}>{info}</div>
               ))}
             />
-          </span>
+          </EuiFlexItem>
         ) : null}
         {indexPattern.timeFieldName === name ? (
-          <span>
-            &nbsp;
+          <EuiFlexItem grow={false}>
             <EuiIconTip
               type="clock"
               color="primary"
               aria-label={primaryTimeAriaLabel}
               content={primaryTimeTooltip}
             />
-          </span>
+          </EuiFlexItem>
         ) : null}
         {field.customLabel && field.customLabel !== field.name ? (
-          <div>
+          <EuiFlexItem grow={false}>
             <EuiToolTip content={labelDescription}>
               <EuiBadge iconType="flag" iconSide="left">
                 {field.customLabel}
               </EuiBadge>
             </EuiToolTip>
-          </div>
+          </EuiFlexItem>
         ) : null}
-      </span>
+      </EuiFlexGroup>
     );
   }
 
@@ -255,6 +274,15 @@ export class Table extends PureComponent<IndexedFieldProps> {
         name: formatHeader,
         dataType: 'string',
         sortable: true,
+      },
+      {
+        field: 'isRuntime',
+        name: runtimeLabel,
+        description: runtimeDescription,
+        dataType: 'boolean',
+        sortable: true,
+        render: (value: boolean) =>
+          this.renderBooleanTemplate(value ? 'true' : '', isRuntimeAriaLabel),
       },
       {
         field: 'searchable',
