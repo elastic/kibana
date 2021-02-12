@@ -33,7 +33,7 @@ export const timelineDefaults: SubsetTimelineModel &
   eventType: 'all',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
-  expandedEvent: {},
+  expandedDetail: {},
   highlightedDropAndProviderId: '',
   historyIds: [],
   filters: [],

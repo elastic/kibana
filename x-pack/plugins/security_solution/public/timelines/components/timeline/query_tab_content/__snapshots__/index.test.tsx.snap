@@ -262,7 +262,7 @@ In other use cases the message field can be used to concatenate different values
   }
   end="2018-03-24T03:33:52.253Z"
   eventType="all"
-  expandedEvent={Object {}}
+  expandedDetail={Object {}}
   filters={Array []}
   isLive={false}
   itemsPerPage={5}
@@ -279,7 +279,7 @@ In other use cases the message field can be used to concatenate different values
   onEventClosed={[MockFunction]}
   show={true}
   showCallOutUnauthorizedMsg={false}
-  showEventDetails={false}
+  showExpandedDetails={false}
   sort={
     Array [
       Object {

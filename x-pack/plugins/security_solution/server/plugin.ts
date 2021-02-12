@@ -117,6 +117,14 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.administration}`,
 ];
 
+const caseSavedObjects = [
+  'cases',
+  'cases-comments',
+  'cases-sub-case',
+  'cases-configure',
+  'cases-user-actions',
+];
+
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -216,10 +224,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           savedObject: {
             all: [
               'alert',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
+              ...caseSavedObjects,
+              'exception-list',
+              'exception-list-agnostic',
               ...savedObjectTypes,
             ],
             read: ['config'],
@@ -240,10 +247,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             all: [],
             read: [
               'config',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
+              ...caseSavedObjects,
+              'exception-list',
+              'exception-list-agnostic',
               ...savedObjectTypes,
             ],
           },

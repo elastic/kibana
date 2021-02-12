@@ -17,7 +17,7 @@ import {
 import { SerializedFilterQuery } from '../../../common/store/types';
 import type {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedDetail,
   TimelineType,
   TimelineStatus,
   RowRendererId,
@@ -67,7 +67,8 @@ export interface TimelineModel {
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
-  expandedEvent: TimelineExpandedEvent;
+  /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
+  expandedDetail: TimelineExpandedDetail;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -147,7 +148,7 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
-    | 'expandedEvent'
+    | 'expandedDetail'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'

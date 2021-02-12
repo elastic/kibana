@@ -15,7 +15,7 @@ import { EnvironmentFilter } from '../EnvironmentFilter';
 
 const HeaderFlexGroup = euiStyled(EuiFlexGroup)`
   padding: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
-  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
 `;
 
 export function ApmHeader({ children }: { children: ReactNode }) {

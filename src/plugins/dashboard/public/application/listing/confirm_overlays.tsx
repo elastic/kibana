@@ -9,7 +9,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
@@ -48,7 +47,7 @@ export const confirmCreateWithUnsaved = (
 ) => {
   const session = overlays.openModal(
     toMountPoint(
-      <EuiModal onClose={() => session.close()}>
+      <>
         <EuiModalHeader data-test-subj="dashboardCreateConfirm">
           <EuiModalHeaderTitle>{createConfirmStrings.getCreateTitle()}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -85,7 +84,7 @@ export const confirmCreateWithUnsaved = (
             {createConfirmStrings.getContinueButtonText()}
           </EuiButton>
         </EuiModalFooter>
-      </EuiModal>
+      </>
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

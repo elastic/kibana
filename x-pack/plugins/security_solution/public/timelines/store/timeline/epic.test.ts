@@ -96,7 +96,7 @@ describe('Epic Timeline', () => {
         },
         eventIdToNoteIds: {},
         eventType: 'all',
-        expandedEvent: {},
+        expandedDetail: {},
         excludedRowRendererIds: [],
         highlightedDropAndProviderId: '',
         historyIds: [],

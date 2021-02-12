@@ -17,9 +17,11 @@
     "uiActions",
     "kibanaLegacy",
     "indexPatternManagement",
-    "discover"
+    "discover",
+    "triggersActionsUi"
   ],
   "optionalPlugins": [
+    "alerts",
     "home",
     "security",
     "spaces",

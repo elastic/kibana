@@ -12,6 +12,7 @@ import { promisify } from 'util';
 
 import { ToolingLog } from '@kbn/dev-utils';
 
+import { branch } from '../../../../../../package.json';
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
@@ -30,21 +31,26 @@ export async function runDockerGenerator(
     architecture?: string;
     context: boolean;
     image: boolean;
-    ubi: boolean;
+    ubi?: boolean;
+    ironbank?: boolean;
   }
 ) {
   // UBI var config
   const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
   const ubiVersionTag = 'ubi8';
-  const ubiImageFlavor = flags.ubi ? `-${ubiVersionTag}` : '';
+
+  let imageFlavor = '';
+  if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
+  if (flags.ironbank) imageFlavor += '-ironbank';
+  if (build.isOss()) imageFlavor += '-oss';
 
   // General docker var config
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
-  const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactPrefix = `kibana${imageFlavor}-${version}-linux`;
+  const artifactFlavor = build.isOss() ? '-oss' : '';
+  const artifactPrefix = `kibana${artifactFlavor}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
@@ -52,26 +58,27 @@ export async function runDockerGenerator(
   const dockerBuildDir = config.resolveFromRepo(
     'build',
     'kibana-docker',
-    build.isOss() ? `oss` : `default${ubiImageFlavor}`
+    build.isOss() ? `oss` : `default${imageFlavor}`
   );
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
+    `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
     imageFlavor,
     version,
+    branch,
     license,
     artifactsDir,
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
     baseOSImage,
-    ubiImageFlavor,
     dockerBuildDate,
     ubi: flags.ubi,
+    ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
   };
@@ -107,9 +114,16 @@ export async function runDockerGenerator(
   // in order to build the docker image accordingly the dockerfile defined
   // under templates/kibana_yml.template/js
   await copyAll(
-    config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources'),
+    config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
+
+  if (flags.ironbank) {
+    await copyAll(
+      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/ironbank'),
+      dockerBuildDir
+    );
+  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we
