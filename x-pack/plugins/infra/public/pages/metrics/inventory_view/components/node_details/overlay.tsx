@@ -89,11 +89,11 @@ export const NodeContextPopover = ({
         <OverlayPanel>
           <OverlayHeader>
             <EuiFlexGroup responsive={false} gutterSize="m">
-              <EuiFlexItem grow={true}>
+              <OverlayTitle grow={true}>
                 <EuiTitle size="xs">
                   <h4>{node.name}</h4>
                 </EuiTitle>
-              </EuiFlexItem>
+              </OverlayTitle>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
@@ -192,5 +192,14 @@ const OverlayPanel = euiStyled(EuiPanel).attrs({ paddingSize: 'none' })`
     bottom: 0;
     max-height: calc(100vh - 97px);
     max-width: 100%;
+  }
+`;
+
+const OverlayTitle = euiStyled(EuiFlexItem)`
+  overflow: hidden;
+  & h4 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 `;

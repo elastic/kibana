@@ -9,12 +9,11 @@
 export const TopNavIds = {
   SHARE: 'share',
   OPTIONS: 'options',
+  QUICK_SAVE: 'quickSave',
   SAVE: 'save',
   EXIT_EDIT_MODE: 'exitEditMode',
   ENTER_EDIT_MODE: 'enterEditMode',
   DISCARD_CHANGES: 'discard',
   CLONE: 'clone',
   FULL_SCREEN: 'fullScreenMode',
-  VISUALIZE: 'visualize',
-  ADD_EXISTING: 'addExisting',
 };

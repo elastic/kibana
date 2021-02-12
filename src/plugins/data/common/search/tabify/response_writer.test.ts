@@ -7,7 +7,7 @@
  */
 
 import { TabbedAggResponseWriter } from './response_writer';
-import { AggConfigs, BUCKET_TYPES } from '../aggs';
+import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { TabbedResponseWriterOptions } from './types';
 
@@ -23,7 +23,12 @@ describe('TabbedAggResponseWriter class', () => {
         field: 'geo.src',
       },
     },
-    { type: 'count' },
+    {
+      type: METRIC_TYPES.CARDINALITY,
+      params: {
+        field: 'machine.os.raw',
+      },
+    },
   ];
 
   const twoSplitsAggConfig = [
@@ -39,7 +44,12 @@ describe('TabbedAggResponseWriter class', () => {
         field: 'machine.os.raw',
       },
     },
-    { type: 'count' },
+    {
+      type: METRIC_TYPES.CARDINALITY,
+      params: {
+        field: 'machine.os.raw',
+      },
+    },
   ];
 
   const createResponseWritter = (aggs: any[] = [], opts?: Partial<TabbedResponseWriterOptions>) => {
@@ -174,19 +184,23 @@ describe('TabbedAggResponseWriter class', () => {
         });
 
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
-        expect(response.columns[1]).toHaveProperty('name', 'Count');
+        expect(response.columns[1]).toHaveProperty('name', 'Unique count of machine.os.raw');
         expect(response.columns[1]).toHaveProperty('meta', {
           index: 'logstash-*',
+          field: 'machine.os.raw',
           params: {
             id: 'number',
           },
           source: 'esaggs',
           sourceParams: {
+            appliedTimeRange: undefined,
             enabled: true,
             id: '2',
             indexPatternId: '1234',
-            params: {},
-            type: 'count',
+            params: {
+              field: 'machine.os.raw',
+            },
+            type: 'cardinality',
           },
           type: 'number',
         });
@@ -231,19 +245,23 @@ describe('TabbedAggResponseWriter class', () => {
         });
 
         expect(response.columns[1]).toHaveProperty('id', 'col-1-2');
-        expect(response.columns[1]).toHaveProperty('name', 'Count');
+        expect(response.columns[1]).toHaveProperty('name', 'Unique count of machine.os.raw');
         expect(response.columns[1]).toHaveProperty('meta', {
           index: 'logstash-*',
+          field: 'machine.os.raw',
           params: {
             id: 'number',
           },
           source: 'esaggs',
           sourceParams: {
+            appliedTimeRange: undefined,
             enabled: true,
             id: '2',
             indexPatternId: '1234',
-            params: {},
-            type: 'count',
+            params: {
+              field: 'machine.os.raw',
+            },
+            type: 'cardinality',
           },
           type: 'number',
         });
