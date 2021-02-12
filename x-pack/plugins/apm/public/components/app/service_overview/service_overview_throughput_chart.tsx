@@ -36,11 +36,16 @@ export function ServiceOverviewThroughputChart({
   const { transactionType } = useApmServiceContext();
   const { start, end, comparisonEnabled, comparisonType } = urlParams;
   const comparisonChartTheme = getComparisonChartTheme(theme);
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-  });
+  const {
+    comparisonStart = undefined,
+    comparisonEnd = undefined,
+  } = comparisonType
+    ? getTimeRangeComparison({
+        start,
+        end,
+        comparisonType,
+      })
+    : {};
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {

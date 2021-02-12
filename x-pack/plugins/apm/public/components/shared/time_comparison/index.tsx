@@ -16,7 +16,10 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { px, unit } from '../../../style/variables';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import { useBreakPoints } from '../../../hooks/use_break_points';
-import { getTimeRangeComparison } from './get_time_range_comparison';
+import {
+  getTimeRangeComparison,
+  TimeRangeComparisonType,
+} from './get_time_range_comparison';
 
 const PrependContainer = euiStyled.div`
   display: flex;
@@ -67,17 +70,17 @@ function getSelectOptions({
   const momentStart = moment(start);
   const momentEnd = moment(end);
 
-  const yesterdayOption = {
-    value: 'yesterday',
-    text: i18n.translate('xpack.apm.timeComparison.select.yesterday', {
-      defaultMessage: 'Yesterday',
+  const dayBeforeOption = {
+    value: TimeRangeComparisonType.DayBefore,
+    text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
+      defaultMessage: 'Day before',
     }),
   };
 
-  const aWeekAgoOption = {
-    value: 'week',
-    text: i18n.translate('xpack.apm.timeComparison.select.weekAgo', {
-      defaultMessage: 'A week ago',
+  const weekBeforeOption = {
+    value: TimeRangeComparisonType.WeekBefore,
+    text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
+      defaultMessage: 'Week before',
     }),
   };
 
@@ -87,22 +90,23 @@ function getSelectOptions({
     unitOfTime: 'days',
     precise: true,
   });
+
   const isRangeToNow = rangeTo === 'now';
 
   if (isRangeToNow) {
     // Less than or equals to one day
     if (dateDiff <= 1) {
-      return [yesterdayOption, aWeekAgoOption];
+      return [dayBeforeOption, weekBeforeOption];
     }
 
     // Less than or equals to one week
     if (dateDiff <= 7) {
-      return [aWeekAgoOption];
+      return [weekBeforeOption];
     }
   }
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    comparisonType: 'previousPeriod',
+    comparisonType: TimeRangeComparisonType.PeriodBefore,
     start,
     end,
   });
@@ -113,7 +117,7 @@ function getSelectOptions({
   });
 
   const prevPeriodOption = {
-    value: 'previousPeriod',
+    value: TimeRangeComparisonType.PeriodBefore,
     text: formatDate({
       dateFormat,
       previousPeriodStart: comparisonStart,

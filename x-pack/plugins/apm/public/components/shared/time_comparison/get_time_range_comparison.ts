@@ -9,6 +9,12 @@ import moment from 'moment';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
 
+export enum TimeRangeComparisonType {
+  WeekBefore = 'week',
+  DayBefore = 'day',
+  PeriodBefore = 'period',
+}
+
 export function getComparisonChartTheme(theme: EuiTheme) {
   return {
     areaSeriesStyle: {
@@ -37,38 +43,46 @@ export function getTimeRangeComparison({
   start,
   end,
 }: {
-  comparisonType?: string;
+  comparisonType: TimeRangeComparisonType;
   start?: string;
   end?: string;
 }) {
-  if (!comparisonType || !start || !end) {
+  if (!start || !end) {
     return {};
   }
 
-  const startDate = moment(start);
-  const endDate = moment(end);
+  const startMoment = moment(start);
+  const endMoment = moment(end);
 
-  const amountToSubtractPerType: Record<string, number> = {
-    yesterday: oneDayInMilliseconds,
-    week: oneWeekInMilliseconds,
-    previousPeriod: getDateDifference({
-      start: startDate,
-      end: endDate,
-      unitOfTime: 'milliseconds',
-      precise: true,
-    }),
-  };
+  const startEpoch = startMoment.valueOf();
+  const endEpoch = endMoment.valueOf();
 
-  const amountToSubtract = amountToSubtractPerType[comparisonType];
-  if (amountToSubtract === undefined) {
-    return {};
+  let diff: number;
+
+  switch (comparisonType) {
+    case TimeRangeComparisonType.DayBefore:
+      diff = oneDayInMilliseconds;
+      break;
+
+    case TimeRangeComparisonType.WeekBefore:
+      diff = oneWeekInMilliseconds;
+      break;
+
+    case TimeRangeComparisonType.PeriodBefore:
+      diff = getDateDifference({
+        start: startMoment,
+        end: endMoment,
+        unitOfTime: 'milliseconds',
+        precise: true,
+      });
+      break;
+
+    default:
+      throw new Error('Unknown comparisonType');
   }
+
   return {
-    comparisonStart: startDate
-      .subtract(amountToSubtract, 'milliseconds')
-      .toISOString(),
-    comparisonEnd: endDate
-      .subtract(amountToSubtract, 'milliseconds')
-      .toISOString(),
+    comparisonStart: new Date(startEpoch - diff).toISOString(),
+    comparisonEnd: new Date(endEpoch - diff).toISOString(),
   };
 }
