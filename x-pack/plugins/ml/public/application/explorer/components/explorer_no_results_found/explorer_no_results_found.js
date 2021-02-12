@@ -14,7 +14,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoResultsFound = ({ hasResults, hasResultsWithAnomalies }) => {
+export const ExplorerNoResultsFound = ({
+  hasResults,
+  hasResultsWithAnomalies,
+  selectedJobsRunning,
+}) => {
   const resultsHaveNoAnomalies = hasResults === true && hasResultsWithAnomalies === false;
   const noResults = hasResults === false && hasResultsWithAnomalies === false;
   return (
@@ -38,12 +42,22 @@ export const ExplorerNoResultsFound = ({ hasResults, hasResultsWithAnomalies }) 
       }
       body={
         <React.Fragment>
-          <p>
-            <FormattedMessage
-              id="xpack.ml.explorer.tryWideningTimeSelectionLabel"
-              defaultMessage="Try widening the time selection or moving further back in time"
-            />
-          </p>
+          {selectedJobsRunning && noResults && (
+            <p>
+              <FormattedMessage
+                id="xpack.ml.explorer.selectedJobsRunningLabel"
+                defaultMessage="One or more selected jobs are still running and results may not be available yet."
+              />
+            </p>
+          )}
+          {!selectedJobsRunning && (
+            <p>
+              <FormattedMessage
+                id="xpack.ml.explorer.tryWideningTimeSelectionLabel"
+                defaultMessage="Try widening the time selection or moving further back in time"
+              />
+            </p>
+          )}
         </React.Fragment>
       }
     />

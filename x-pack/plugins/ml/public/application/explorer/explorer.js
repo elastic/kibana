@@ -142,6 +142,7 @@ export class Explorer extends React.Component {
     setSelectedCells: PropTypes.func.isRequired,
     severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
+    selectedJobsRunning: PropTypes.bool.isRequired,
   };
 
   state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
@@ -223,7 +224,7 @@ export class Explorer extends React.Component {
   updateLanguage = (language) => this.setState({ language });
 
   render() {
-    const { showCharts, severity, stoppedPartitions } = this.props;
+    const { showCharts, severity, stoppedPartitions, selectedJobsRunning } = this.props;
 
     const {
       annotations,
@@ -267,6 +268,7 @@ export class Explorer extends React.Component {
           <ExplorerNoResultsFound
             hasResults={hasResults}
             hasResultsWithAnomalies={hasResultsWithAnomalies}
+            selectedJobsRunning={selectedJobsRunning}
           />
         </ExplorerPage>
       );
