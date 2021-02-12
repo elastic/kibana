@@ -52,7 +52,7 @@ export const ContextTypeUserRt = rt.type({
 export const AlertCommentRequestRt = rt.type({
   type: rt.union([rt.literal(CommentType.generatedAlert), rt.literal(CommentType.alert)]),
   alertId: rt.union([rt.array(rt.string), rt.string]),
-  index: rt.string,
+  index: rt.union([rt.array(rt.string), rt.string]),
 });
 
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);

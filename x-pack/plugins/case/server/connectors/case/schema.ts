@@ -17,17 +17,9 @@ const ContextTypeUserSchema = schema.object({
   comment: schema.string(),
 });
 
-const AlertIDSchema = schema.object(
-  {
-    _id: schema.string(),
-  },
-  { unknowns: 'ignore' }
-);
-
 const ContextTypeAlertGroupSchema = schema.object({
   type: schema.literal(CommentType.generatedAlert),
-  alerts: schema.oneOf([schema.arrayOf(AlertIDSchema), AlertIDSchema]),
-  index: schema.string(),
+  alerts: schema.string(),
 });
 
 export type ContextTypeGeneratedAlertType = typeof ContextTypeAlertGroupSchema.type;

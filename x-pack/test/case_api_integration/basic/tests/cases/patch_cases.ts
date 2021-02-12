@@ -378,8 +378,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await esArchiver.unload('auditbeat/hosts');
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/87988
-      it.skip('updates alert status when the status is updated and syncAlerts=true', async () => {
+      it('updates alert status when the status is updated and syncAlerts=true', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
 
         const { body: postedCase } = await supertest
@@ -406,6 +405,8 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
 
+        await es.indices.refresh({ index: alert._index });
+
         await supertest
           .patch(CASES_URL)
           .set('kbn-xsrf', 'true')
@@ -419,6 +420,10 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           })
           .expect(200);
+
+        // force a refresh on the index that the signal is stored in so that we can search for it and get the correct
+        // status
+        await es.indices.refresh({ index: alert._index });
 
         const { body: updatedAlert } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
@@ -479,8 +484,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedAlert.hits.hits[0]._source.signal.status).eql('open');
       });
 
-      // Failing: See https://github.com/elastic/kibana/issues/88130
-      it.skip('it updates alert status when syncAlerts is turned on', async () => {
+      it('it updates alert status when syncAlerts is turned on', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
 
         const { body: postedCase } = await supertest
@@ -536,6 +540,9 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           })
           .expect(200);
+
+        // refresh the index because syncAlerts was set to true so the alert's status should have been updated
+        await es.indices.refresh({ index: alert._index });
 
         const { body: updatedAlert } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)

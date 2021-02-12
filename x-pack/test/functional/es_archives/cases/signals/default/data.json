@@ -1,0 +1,3384 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "5f2b9ec41f8febb1c06b5d1045aeabb9874733b7617e88a370510f2fb3a41a5d",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "4ea34259-8d34-454b-b8f2-cee250344a6f",
+        "ingested": "2021-02-11T18:33:29.277215Z",
+        "kind": "signal",
+        "sequence": 0,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+          ]
+        },
+        "args": "\"C:\\mimikatz.exe\" \\axe",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "q4qc4zzrlq",
+        "executable": "C:\\mimikatz.exe",
+        "hash": {
+          "md5": "c5763677-e676-45dc-b41b-fcae29a0f42f"
+        },
+        "name": "mimikatz.exe",
+        "pid": 922
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "9-VekncBee0yiY1wob34",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "4ea34259-8d34-454b-b8f2-cee250344a6f",
+          "ingested": "2021-02-11T18:33:29.277215Z",
+          "kind": "event",
+          "sequence": 0,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068410245,
+        "parent": {
+          "depth": 0,
+          "id": "9-VekncBee0yiY1wob34",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "9-VekncBee0yiY1wob34",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "7w5g02midb",
+        "name": "uftqu6robl"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4d0f4b1533e46b66b43bdd0330d23f39f2cf42a7253153270e38d30cce9ff0c6",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "7e02179f-ccd0-4f39-a844-23438d738767",
+        "ingested": "2021-02-11T18:33:29.280297Z",
+        "kind": "signal",
+        "sequence": 28,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\powershell.exe\" \\q1r",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "05ziveqgnk",
+        "executable": "C:\\powershell.exe",
+        "hash": {
+          "md5": "040461e6-8e52-4260-b350-cefcf0781285"
+        },
+        "name": "powershell.exe",
+        "parent": {
+          "entity_id": "q4qc4zzrlq",
+          "pid": 922
+        },
+        "pid": 3834
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "E-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "7e02179f-ccd0-4f39-a844-23438d738767",
+          "ingested": "2021-02-11T18:33:29.280297Z",
+          "kind": "event",
+          "sequence": 28,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068411245,
+        "parent": {
+          "depth": 0,
+          "id": "E-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "E-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "drtdq7uh5z",
+        "name": "kkxz9hz50j"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "cae78067e65582a3b277c1ad46ba3cb29044242fe0d24bbf3fcde757fdd31d1c",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "e630242a-e779-48e8-9b04-1f1b4473ba6f",
+        "ingested": "2021-02-11T18:33:29.280501Z",
+        "kind": "signal",
+        "sequence": 30,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\mimikatz.exe\" \\osa",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "aogfwzvbgh",
+        "executable": "C:\\mimikatz.exe",
+        "hash": {
+          "md5": "9d02f147-3e9c-40a1-9316-2d4926d669a1"
+        },
+        "name": "mimikatz.exe",
+        "parent": {
+          "entity_id": "05ziveqgnk",
+          "pid": 3834
+        },
+        "pid": 2674
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "FeVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "e630242a-e779-48e8-9b04-1f1b4473ba6f",
+          "ingested": "2021-02-11T18:33:29.280501Z",
+          "kind": "event",
+          "sequence": 30,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068412245,
+        "parent": {
+          "depth": 0,
+          "id": "FeVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "FeVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "fp6wl3uyiu",
+        "name": "i9np8yf9ju"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dfbeaba23093b3ef1b06264d6b9696c59652efad8089c1c7b15e50de0ef818bd",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "4e6ed108-6c72-4d9b-b00d-9a024fbb504b",
+        "ingested": "2021-02-11T18:33:29.280704Z",
+        "kind": "signal",
+        "sequence": 32,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\lsass.exe\" \\8iq",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "64p6s0k53o",
+        "executable": "C:\\lsass.exe",
+        "hash": {
+          "md5": "20a45f31-0eb0-44a5-88b3-2b2369f4f8e1"
+        },
+        "name": "lsass.exe",
+        "parent": {
+          "entity_id": "aogfwzvbgh",
+          "pid": 2674
+        },
+        "pid": 4128
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "F-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "4e6ed108-6c72-4d9b-b00d-9a024fbb504b",
+          "ingested": "2021-02-11T18:33:29.280704Z",
+          "kind": "event",
+          "sequence": 32,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068413245,
+        "parent": {
+          "depth": 0,
+          "id": "F-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "F-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "n28y0hj222",
+        "name": "dh9sp4a5r0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "91ca19c8bbc4de25e0fa582e66c1542c5cf30ea532d2415acb36114370b845bb",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "c6ad7273-6a56-4243-bded-7a5f933d4d06",
+        "ingested": "2021-02-11T18:33:29.283435Z",
+        "kind": "signal",
+        "sequence": 60,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\notepad.exe\" \\lqo",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "f3d1yu3ysx",
+        "executable": "C:\\notepad.exe",
+        "hash": {
+          "md5": "0011841e-9301-446e-8e5b-a5a01c7f34e6"
+        },
+        "name": "notepad.exe",
+        "parent": {
+          "entity_id": "64p6s0k53o",
+          "pid": 4128
+        },
+        "pid": 3886
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "M-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "c6ad7273-6a56-4243-bded-7a5f933d4d06",
+          "ingested": "2021-02-11T18:33:29.283435Z",
+          "kind": "event",
+          "sequence": 60,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068414245,
+        "parent": {
+          "depth": 0,
+          "id": "M-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "M-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "4829i8059a",
+        "name": "21fsvzuqct"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "02f0dce0c088ee8988f9e4dd5c3549f84feb717fd95bfa95486b30be1ce0e751",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "b90af2df-7b7f-4532-aeae-c24905eca489",
+        "ingested": "2021-02-11T18:33:29.283523Z",
+        "kind": "signal",
+        "sequence": 61,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\mimikatz.exe\" \\zme",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "5t28ef41gk",
+        "executable": "C:\\mimikatz.exe",
+        "hash": {
+          "md5": "41691405-6977-4fd9-b861-3346ed2e66ec"
+        },
+        "name": "mimikatz.exe",
+        "parent": {
+          "entity_id": "f3d1yu3ysx",
+          "pid": 3886
+        },
+        "pid": 1387
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "NOVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "b90af2df-7b7f-4532-aeae-c24905eca489",
+          "ingested": "2021-02-11T18:33:29.283523Z",
+          "kind": "event",
+          "sequence": 61,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068415245,
+        "parent": {
+          "depth": 0,
+          "id": "NOVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "NOVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "56398hkr2a",
+        "name": "8b65s11640"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "029cd7d35af24d78437729b2b8b4502770a108b3893b77b62edb3a26419c42b4",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "2a416807-3ee3-4543-b945-dba561f49d4e",
+        "ingested": "2021-02-11T18:33:29.283618Z",
+        "kind": "signal",
+        "sequence": 62,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\notepad.exe\" \\vgu",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "fds58mbe0q",
+        "executable": "C:\\notepad.exe",
+        "hash": {
+          "md5": "eb0023d4-d36a-4eb1-8391-ac6d69890332"
+        },
+        "name": "notepad.exe",
+        "parent": {
+          "entity_id": "5t28ef41gk",
+          "pid": 1387
+        },
+        "pid": 4707
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "NeVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "2a416807-3ee3-4543-b945-dba561f49d4e",
+          "ingested": "2021-02-11T18:33:29.283618Z",
+          "kind": "event",
+          "sequence": 62,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068416245,
+        "parent": {
+          "depth": 0,
+          "id": "NeVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "NeVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "l6lvnkecqh",
+        "name": "xuvr89yxen"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "8f3b49dfdd865f7bfd449030628c5e9d9023d76b5cee2e16a3f665f4a2456f20",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.241Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "e0d8a709-6ada-4c59-a16d-f7a25b43fa92",
+        "ingested": "2021-02-11T18:33:29.283795Z",
+        "kind": "signal",
+        "sequence": 64,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\mimikatz.exe\" \\o54",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "ghype3es7j",
+        "executable": "C:\\mimikatz.exe",
+        "hash": {
+          "md5": "93b2a389-2a6d-4c22-9e73-d7a25c775d85"
+        },
+        "name": "mimikatz.exe",
+        "parent": {
+          "entity_id": "fds58mbe0q",
+          "pid": 4707
+        },
+        "pid": 1697
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "N-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "e0d8a709-6ada-4c59-a16d-f7a25b43fa92",
+          "ingested": "2021-02-11T18:33:29.283795Z",
+          "kind": "event",
+          "sequence": 64,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068417245,
+        "parent": {
+          "depth": 0,
+          "id": "N-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "N-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "j92tp080lj",
+        "name": "fm88a42c55"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "52dace5d09d7ba8e7b3bcd8fe7a858c9b3ef092564db5860ef375c2fae6099ca",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "4e96e421-87fc-4323-942c-c361fc913e3e",
+        "ingested": "2021-02-11T18:33:29.286424Z",
+        "kind": "signal",
+        "sequence": 92,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\iexlorer.exe\" \\ll5",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "i6w4ukcat2",
+        "executable": "C:\\iexlorer.exe",
+        "hash": {
+          "md5": "d2ef169e-5e9a-4efc-8fe0-8510bed9947c"
+        },
+        "name": "iexlorer.exe",
+        "parent": {
+          "entity_id": "ghype3es7j",
+          "pid": 1697
+        },
+        "pid": 4308
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "U-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "4e96e421-87fc-4323-942c-c361fc913e3e",
+          "ingested": "2021-02-11T18:33:29.286424Z",
+          "kind": "event",
+          "sequence": 92,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068418245,
+        "parent": {
+          "depth": 0,
+          "id": "U-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "U-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "p6q62u5scn",
+        "name": "ft5hk77441"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3fa0cba83b3a655474187774c7d08cd643b9903d4a9a0b582e690a39ea70bb16",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "8cd2c4cf-c75c-43b1-979c-f7f92e674222",
+        "ingested": "2021-02-11T18:33:29.286594Z",
+        "kind": "signal",
+        "sequence": 94,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\lsass.exe\" \\4ak",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "4g8z34fzsy",
+        "executable": "C:\\lsass.exe",
+        "hash": {
+          "md5": "b331138e-5055-4df3-b778-0669c11fa8b0"
+        },
+        "name": "lsass.exe",
+        "parent": {
+          "entity_id": "i6w4ukcat2",
+          "pid": 4308
+        },
+        "pid": 4420
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "VeVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "8cd2c4cf-c75c-43b1-979c-f7f92e674222",
+          "ingested": "2021-02-11T18:33:29.286594Z",
+          "kind": "event",
+          "sequence": 94,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068419245,
+        "parent": {
+          "depth": 0,
+          "id": "VeVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "VeVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "45icw5cdvg",
+        "name": "67mu47rnfx"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "eb0f0d9b95db8ac572e376348575f483f787302f2c1ef8513747d84c38b74c3b",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "9ed9ad24-d7db-48cc-957b-f5f29379da1d",
+        "ingested": "2021-02-11T18:33:29.286677Z",
+        "kind": "signal",
+        "sequence": 95,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "4g8z34fzsy",
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\mimikatz.exe\" \\irn",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "qbi46sv93x",
+        "executable": "C:\\mimikatz.exe",
+        "hash": {
+          "md5": "947f6c35-2f3e-4736-92d5-b6f782ed73da"
+        },
+        "name": "mimikatz.exe",
+        "parent": {
+          "entity_id": "4g8z34fzsy",
+          "pid": 4420
+        },
+        "pid": 4066
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "VuVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "9ed9ad24-d7db-48cc-957b-f5f29379da1d",
+          "ingested": "2021-02-11T18:33:29.286677Z",
+          "kind": "event",
+          "sequence": 95,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068420245,
+        "parent": {
+          "depth": 0,
+          "id": "VuVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "VuVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "yx0chrd5q7",
+        "name": "7s73dx6b1m"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4d495e7296984dc4d4f8d356e2ed8eb744f1545c18850095bd64cf6f39cbc21c",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "661bf73f-d7f3-40e5-96fe-633fc53bc98a",
+        "ingested": "2021-02-11T18:33:29.289482Z",
+        "kind": "signal",
+        "sequence": 124,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "qbi46sv93x",
+            "4g8z34fzsy",
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\mimikatz.exe\" \\gb5",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "eg8rmde286",
+        "executable": "C:\\mimikatz.exe",
+        "hash": {
+          "md5": "a6f2026f-1b3d-49f3-aa4f-f8261d49ad17"
+        },
+        "name": "mimikatz.exe",
+        "parent": {
+          "entity_id": "qbi46sv93x",
+          "pid": 2584
+        },
+        "pid": 245
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "c-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "661bf73f-d7f3-40e5-96fe-633fc53bc98a",
+          "ingested": "2021-02-11T18:33:29.289482Z",
+          "kind": "event",
+          "sequence": 124,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068423245,
+        "parent": {
+          "depth": 0,
+          "id": "c-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "c-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "zgd64vzpkh",
+        "name": "c36wfimnor"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "947bcc4f2cf816889af5c25e12d45d8eb36e3ade0b6755375d5733d51a8ab6c6",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "902f2eba-67ca-4a24-ac29-b49e1c0f6caa",
+        "ingested": "2021-02-11T18:33:29.291768Z",
+        "kind": "signal",
+        "sequence": 152,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "eg8rmde286",
+            "qbi46sv93x",
+            "4g8z34fzsy",
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\iexlorer.exe\" \\kzd",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "xa3bta0ykb",
+        "executable": "C:\\iexlorer.exe",
+        "hash": {
+          "md5": "660eadc9-44a9-4bbc-b797-85dc343290f2"
+        },
+        "name": "iexlorer.exe",
+        "parent": {
+          "entity_id": "eg8rmde286",
+          "pid": 2372
+        },
+        "pid": 2941
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "j-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "902f2eba-67ca-4a24-ac29-b49e1c0f6caa",
+          "ingested": "2021-02-11T18:33:29.291768Z",
+          "kind": "event",
+          "sequence": 152,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068424245,
+        "parent": {
+          "depth": 0,
+          "id": "j-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "j-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "kl13tctirc",
+        "name": "gdf5dsonu3"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "38e1c01bb98f6ebb59529e612a031365c71208fc4d4e2e97926383acf707a7ab",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "bdeae147-74d9-4efe-b60e-751fdf809081",
+        "ingested": "2021-02-11T18:33:29.291931Z",
+        "kind": "signal",
+        "sequence": 154,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "eg8rmde286",
+            "qbi46sv93x",
+            "4g8z34fzsy",
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\notepad.exe\" \\i0j",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "glxiw2bduy",
+        "executable": "C:\\notepad.exe",
+        "hash": {
+          "md5": "907eab2c-12c7-4a02-b371-cac9ec8e8820"
+        },
+        "name": "notepad.exe",
+        "parent": {
+          "entity_id": "eg8rmde286",
+          "pid": 861
+        },
+        "pid": 4381
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "keVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "bdeae147-74d9-4efe-b60e-751fdf809081",
+          "ingested": "2021-02-11T18:33:29.291931Z",
+          "kind": "event",
+          "sequence": 154,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068425245,
+        "parent": {
+          "depth": 0,
+          "id": "keVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "keVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "txn835eoj9",
+        "name": "k8g7s99iw8"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "1fa7a112a46085b18d1090efc7eb6e13486e0331608b10dade15149eb6018666",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "959c1e30-94b1-419a-ad0a-4ba170c1f3fd",
+        "ingested": "2021-02-11T18:33:29.294221Z",
+        "kind": "signal",
+        "sequence": 181,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "qbi46sv93x",
+            "4g8z34fzsy",
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\explorer.exe\" \\sah",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "2s4r34ebmg",
+        "executable": "C:\\explorer.exe",
+        "hash": {
+          "md5": "07871a67-1860-46d2-ba2a-44bf533e894d"
+        },
+        "name": "explorer.exe",
+        "parent": {
+          "entity_id": "qbi46sv93x",
+          "pid": 0
+        },
+        "pid": 661
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "rOVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "959c1e30-94b1-419a-ad0a-4ba170c1f3fd",
+          "ingested": "2021-02-11T18:33:29.294221Z",
+          "kind": "event",
+          "sequence": 181,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068426245,
+        "parent": {
+          "depth": 0,
+          "id": "rOVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "rOVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "3gfcvv6xl9",
+        "name": "8ta5pigufd"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "7957a0ce5507d97e282964f80f7fdcaf1041d57dc4e0d7b089dabb2a2422a932",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "83f41d80-714f-4907-941a-4e0228a35316",
+        "ingested": "2021-02-11T18:33:29.296495Z",
+        "kind": "signal",
+        "sequence": 209,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "2s4r34ebmg",
+            "qbi46sv93x",
+            "4g8z34fzsy",
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\iexlorer.exe\" \\xjf",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "ep3ghalcqf",
+        "executable": "C:\\iexlorer.exe",
+        "hash": {
+          "md5": "a1004740-1d4e-4d2f-8b4f-2220910b01ec"
+        },
+        "name": "iexlorer.exe",
+        "parent": {
+          "entity_id": "2s4r34ebmg",
+          "pid": 3482
+        },
+        "pid": 734
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "yOVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "83f41d80-714f-4907-941a-4e0228a35316",
+          "ingested": "2021-02-11T18:33:29.296495Z",
+          "kind": "event",
+          "sequence": 209,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068427245,
+        "parent": {
+          "depth": 0,
+          "id": "yOVekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "yOVekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "qdb1lwpeti",
+        "name": "7cwcghpu6o"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "e5a109263633e5ea876e0603d8a30e2f1a3a958eac2b5e14ad52cf3c331ace38",
+    "index": ".siem-signals-default-000001",
+    "source": {
+      "@timestamp": "2021-02-11T18:35:41.242Z",
+      "agent": {
+        "id": "2083a1e3-1f54-447f-8740-ab0f28e17f17",
+        "type": "endpoint",
+        "version": "6.6.6"
+      },
+      "data_stream": {
+        "dataset": "endpoint.events.process",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "event": {
+        "category": [
+          "process"
+        ],
+        "id": "49b2bc38-4521-4db4-99d9-4d46dd9ed2a1",
+        "ingested": "2021-02-11T18:33:29.298711Z",
+        "kind": "signal",
+        "sequence": 236,
+        "type": [
+          "start"
+        ]
+      },
+      "host": {
+        "architecture": "c24e1mdwtz",
+        "hostname": "Host-4dbzugdlqd",
+        "id": "b87eb510-3555-422c-b81d-b25e71ef09aa",
+        "ip": [
+          "10.231.109.119",
+          "10.187.192.245"
+        ],
+        "mac": [
+          "db-fd-5-db-ab-2d"
+        ],
+        "name": "Host-4dbzugdlqd",
+        "os": {
+          "Ext": {
+            "variant": "Windows Server"
+          },
+          "family": "windows",
+          "full": "Windows Server 2012",
+          "name": "windows 6.2",
+          "platform": "Windows",
+          "version": "6.2"
+        }
+      },
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "2s4r34ebmg",
+            "qbi46sv93x",
+            "4g8z34fzsy",
+            "i6w4ukcat2",
+            "ghype3es7j",
+            "fds58mbe0q",
+            "5t28ef41gk",
+            "f3d1yu3ysx",
+            "64p6s0k53o",
+            "aogfwzvbgh",
+            "05ziveqgnk",
+            "q4qc4zzrlq"
+          ]
+        },
+        "args": "\"C:\\iexlorer.exe\" \\5z7",
+        "code_signature": {
+          "status": "trusted",
+          "subject_name": "Microsoft"
+        },
+        "entity_id": "7q3re49f83",
+        "executable": "C:\\iexlorer.exe",
+        "hash": {
+          "md5": "13f31b1f-7b35-4965-b96f-ce0f2b2e3bed"
+        },
+        "name": "iexlorer.exe",
+        "parent": {
+          "entity_id": "2s4r34ebmg",
+          "pid": 4489
+        },
+        "pid": 4814
+      },
+      "signal": {
+        "_meta": {
+          "version": 14
+        },
+        "ancestors": [
+          {
+            "depth": 0,
+            "id": "4-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "depth": 1,
+        "original_event": {
+          "category": [
+            "process"
+          ],
+          "id": "49b2bc38-4521-4db4-99d9-4d46dd9ed2a1",
+          "ingested": "2021-02-11T18:33:29.298711Z",
+          "kind": "event",
+          "sequence": 236,
+          "type": [
+            "start"
+          ]
+        },
+        "original_time": 1613068428245,
+        "parent": {
+          "depth": 0,
+          "id": "4-VekncBee0yiY1wob74",
+          "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+          "type": "event"
+        },
+        "parents": [
+          {
+            "depth": 0,
+            "id": "4-VekncBee0yiY1wob74",
+            "index": ".ds-logs-endpoint.events.process-default-2021.02.11-000001",
+            "type": "event"
+          }
+        ],
+        "rule": {
+          "actions": [
+          ],
+          "author": [
+          ],
+          "building_block_type": null,
+          "created_at": "2021-02-11T18:35:36.546Z",
+          "created_by": "elastic",
+          "description": "process rule",
+          "enabled": true,
+          "exceptions_list": [
+          ],
+          "false_positives": [
+          ],
+          "filters": [
+          ],
+          "from": "now-360s",
+          "id": "ee726cf0-6c97-11eb-9085-77ea65662eab",
+          "immutable": false,
+          "index": [
+            "apm-*-transaction*",
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+          ],
+          "interval": "1m",
+          "language": "kuery",
+          "license": "",
+          "max_signals": 100,
+          "meta": {
+            "from": "5m",
+            "kibana_siem_app_url": "http://localhost:5601/app/security"
+          },
+          "name": "Event category process rule",
+          "note": null,
+          "output_index": ".siem-signals-default",
+          "query": "event.category:\"process\" ",
+          "references": [
+          ],
+          "risk_score": 21,
+          "risk_score_mapping": [
+          ],
+          "rule_id": "c6e0fe4b-3adf-4998-a3f3-8c29c155bbef",
+          "rule_name_override": null,
+          "saved_id": null,
+          "severity": "low",
+          "severity_mapping": [
+          ],
+          "tags": [
+          ],
+          "threat": [
+          ],
+          "throttle": null,
+          "timeline_id": null,
+          "timeline_title": null,
+          "timestamp_override": null,
+          "to": "now",
+          "type": "query",
+          "updated_at": "2021-02-11T18:35:37.248Z",
+          "updated_by": "elastic",
+          "version": 1
+        },
+        "status": "open"
+      },
+      "user": {
+        "domain": "guixcpi8iw",
+        "name": "dzia4z90kl"
+      }
+    }
+  }
+}

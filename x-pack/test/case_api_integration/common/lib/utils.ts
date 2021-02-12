@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
+import { Explanation, SearchResponse } from 'elasticsearch';
 import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/case/common/constants';
 import {
   CasesConfigureRequest,
@@ -25,6 +26,57 @@ import {
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/case/server/connectors';
+import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+
+interface Hit<T> {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number;
+  _source: T;
+  _version?: number;
+  _explanation?: Explanation;
+  fields?: any;
+  highlight?: any;
+  inner_hits?: any;
+  matched_queries?: string[];
+  sort?: string[];
+}
+
+/**
+ * Query Elasticsearch for a set of signals within a set of indices
+ */
+export const getSignalsWithES = async ({
+  es,
+  indices,
+  ids,
+}: {
+  es: Client;
+  indices: string | string[];
+  ids: string | string[];
+}): Promise<Map<string, Hit<SignalHit>>> => {
+  const signals = await es.search<SearchResponse<SignalHit>>({
+    index: indices,
+    body: {
+      size: ids.length,
+      query: {
+        bool: {
+          filter: [
+            {
+              ids: {
+                values: ids,
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+  return signals.body.hits.hits.reduce((acc, hit) => {
+    acc.set(hit._id, hit);
+    return acc;
+  }, new Map<string, Hit<SignalHit>>());
+};
 
 interface SetStatusCasesParams {
   id: string;
