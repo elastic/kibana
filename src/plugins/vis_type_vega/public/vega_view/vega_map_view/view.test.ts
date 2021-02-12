@@ -100,13 +100,18 @@ describe('vega_map_view/view', () => {
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();
-      return new VegaMapView({
+      return new VegaMapView(({
         vegaParser,
         filterManager: dataPluginStart.query.filterManager,
         timefilter: dataPluginStart.query.timefilter.timefilter,
         fireEvent: (event: any) => {},
         parentEl: document.createElement('div'),
-      } as VegaViewParams);
+        vegaStateRestorer: {
+          save: jest.fn(),
+          restore: jest.fn(),
+          clear: jest.fn(),
+        },
+      } as unknown) as VegaViewParams);
     }
 
     beforeEach(() => {
