@@ -47,6 +47,7 @@ export const createRules = async ({
   threat,
   threatFilters,
   threatIndex,
+  threatIndicatorPath,
   threatLanguage,
   concurrentSearches,
   itemsPerSearch,
@@ -102,6 +103,7 @@ export const createRules = async ({
          */
         threatFilters: threatFilters as PartialFilter[] | undefined,
         threatIndex,
+        threatIndicatorPath,
         threatQuery,
         concurrentSearches,
         itemsPerSearch,

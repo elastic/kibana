@@ -116,6 +116,7 @@ describe('rule helpers', () => {
         severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
+        threatIndicatorPath: '',
         timestampOverride: 'event.ingested',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
