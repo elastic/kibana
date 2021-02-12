@@ -229,9 +229,6 @@ export class Embeddable
     this.expression = expression ? toExpression(expression) : null;
     await this.initializeOutput();
     this.isInitialized = true;
-    if (this.domNode) {
-      this.render(this.domNode);
-    }
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {

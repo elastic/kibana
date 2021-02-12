@@ -53,6 +53,7 @@ const DEFAULT_PARSER: string = 'elasticsearch';
 export class VegaParser {
   spec: VegaSpec;
   hideWarnings: boolean;
+  restoreSignalValuesOnRefresh: boolean;
   error?: string;
   warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
@@ -137,6 +138,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
 
     this._config = this._parseConfig();
     this.hideWarnings = !!this._config.hideWarnings;
+    this._parseBool('restoreSignalValuesOnRefresh', this._config, false);
+    this.restoreSignalValuesOnRefresh = this._config.restoreSignalValuesOnRefresh;
     this.useMap = this._config.type === 'map';
     this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
     this.tooltips = this._parseTooltips();

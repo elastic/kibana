@@ -20,12 +20,12 @@ import {
   DARK_THEME,
   LIGHT_THEME,
   Fit,
+  Position,
 } from '@elastic/charts';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
-import { Position } from '@elastic/charts/dist/utils/commons';
 import styled from 'styled-components';
 import { PercentileAnnotations } from '../PageLoadDistribution/PercentileAnnotations';
 import { I18LABELS } from '../translations';
