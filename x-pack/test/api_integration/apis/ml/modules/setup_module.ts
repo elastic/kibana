@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf7_log-entry-categories-count',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '26mb',
+            modelMemoryLimit: '41mb',
           },
         ],
         searches: [] as string[],
@@ -713,8 +713,7 @@ export default ({ getService }: FtrProviderContext) => {
     return successObjects;
   }
 
-  // blocks ES snapshot promotion: https://github.com/elastic/kibana/issues/91224
-  describe.skip('module setup', function () {
+  describe('module setup', function () {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
