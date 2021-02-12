@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { withKibana } from '../../../../kibana_react/public';
-import { QueryLanguageSwitcherProps } from './language_switcher';
 import type { QueryBarTopRowProps } from './query_bar_top_row';
 import type { QueryStringInputProps } from './query_string_input';
 
@@ -28,10 +27,3 @@ export const QueryStringInput = (props: QueryStringInputProps) => (
   </React.Suspense>
 );
 export type { QueryStringInputProps };
-
-const LazyQueryLanguageSwitcher = React.lazy(() => import('./language_switcher'));
-export const QueryLanguageSwitcher = (props: QueryLanguageSwitcherProps) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyQueryLanguageSwitcher {...props} />
-  </React.Suspense>
-);

@@ -27,6 +27,8 @@ export const timelineDefaults: SubsetTimelineModel &
     eventCategoryField: 'event.category',
     tiebreakerField: 'event.sequence',
     timestampField: '@timestamp',
+    query: '',
+    size: 100,
   },
   eventType: 'all',
   eventIdToNoteIds: {},

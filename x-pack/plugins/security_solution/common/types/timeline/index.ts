@@ -103,6 +103,17 @@ const SavedFilterRuntimeType = runtimeTypes.partial({
 });
 
 /*
+ *  eqlOptionsQuery -> filterQuery Types
+ */
+const EqlOptionsRuntimeType = runtimeTypes.partial({
+  eventCategoryField: unionWithNullType(runtimeTypes.string),
+  query: unionWithNullType(runtimeTypes.string),
+  tiebreakerField: unionWithNullType(runtimeTypes.string),
+  timestampField: unionWithNullType(runtimeTypes.string),
+  size: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
+});
+
+/*
  *  kqlQuery -> filterQuery Types
  */
 const SavedKueryFilterQueryRuntimeType = runtimeTypes.partial({
@@ -242,6 +253,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
+  eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
   excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
@@ -416,6 +428,7 @@ export enum TimelineTabs {
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',
+  eql = 'eql',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

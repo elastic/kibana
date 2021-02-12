@@ -122,7 +122,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
         <FlyoutHeader timelineId={timelineId} />
       </HideShowContainer>
 
-      <TabsContent graphEventId={graphEventId} timelineId={timelineId} />
+      <TabsContent
+        graphEventId={graphEventId}
+        timelineId={timelineId}
+        timelineType={timelineType}
+      />
     </TimelineContainer>
   );
 };

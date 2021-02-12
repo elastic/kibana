@@ -19,7 +19,6 @@ import { QueryBarTimeline } from '../query_bar';
 import { EuiSuperSelect } from './super_select';
 import { options } from './helpers';
 import * as i18n from './translations';
-import { EqlQueryBarTimeline } from '../query_bar/eql';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
@@ -108,9 +107,7 @@ export const SearchOrFilter = React.memo<Props>(
       (mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode }),
       [timelineId, updateKqlMode]
     );
-    if (filterQuery != null && filterQuery.kind === 'eql') {
-      return <EqlQueryBarTimeline timelineId={timelineId} expression={filterQuery.expression} />;
-    }
+
     return (
       <>
         <SearchOrFilterContainer>

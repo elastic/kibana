@@ -36,7 +36,6 @@ export interface EqlQueryBarProps {
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
   onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
-  onSelectLanguage?: (newLanguage: string) => void;
   onValidityChange?: (arg: boolean) => void;
   onValiditingChange?: (arg: boolean) => void;
 }
@@ -48,7 +47,6 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   optionsData,
   optionsSelected,
   onOptionsChange,
-  onSelectLanguage,
   onValidityChange,
   onValiditingChange,
 }) => {
@@ -105,7 +103,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       labelAppend={field.labelAppend}
       helpText={field.helpText}
       error={message}
-      isInvalid={!isValid}
+      isInvalid={!isValid && !isValidating}
       fullWidth
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -114,7 +112,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         <TextArea
           data-test-subj="eqlQueryBarTextInput"
           fullWidth
-          isInvalid={!isValid}
+          isInvalid={!isValid && !isValidating}
           value={fieldValue}
           onChange={handleChange}
         />
@@ -124,7 +122,6 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           optionsData={optionsData}
           optionsSelected={optionsSelected}
           onOptionsChange={onOptionsChange}
-          onSelectLanguage={onSelectLanguage}
         />
       </>
     </EuiFormRow>

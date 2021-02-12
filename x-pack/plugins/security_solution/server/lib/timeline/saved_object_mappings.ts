@@ -133,6 +133,25 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
     description: {
       type: 'text',
     },
+    eqlOptions: {
+      properties: {
+        eventCategoryField: {
+          type: 'text',
+        },
+        tiebreakerField: {
+          type: 'text',
+        },
+        timestampField: {
+          type: 'text',
+        },
+        query: {
+          type: 'text',
+        },
+        size: {
+          type: 'text',
+        },
+      },
+    },
     eventType: {
       type: 'keyword',
     },

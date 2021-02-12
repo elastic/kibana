@@ -24,5 +24,7 @@ export const getEqlOptions = () =>
             label: '@timestamp',
           },
         ],
+        size: 100,
+        query: '',
       }
   );

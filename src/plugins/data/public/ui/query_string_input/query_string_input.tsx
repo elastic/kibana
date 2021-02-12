@@ -31,7 +31,7 @@ import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import { KibanaReactContextValue, toMountPoint } from '../../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
-import QueryLanguageSwitcher from './language_switcher';
+import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
@@ -56,7 +56,6 @@ export interface QueryStringInputProps {
   className?: string;
   isInvalid?: boolean;
   iconType?: string;
-  includeEqlLanguage?: boolean;
 }
 
 interface Props extends QueryStringInputProps {
@@ -703,7 +702,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
             language={this.props.query.language}
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
             onSelectLanguage={this.onSelectLanguage}
-            includeEqlLanguage={this.props.includeEqlLanguage}
           />
         )}
       </div>

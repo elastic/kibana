@@ -9,16 +9,13 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { Direction } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from './index';
-import { Sort } from '../body/sort';
-import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+import { EqlTabContentComponent, Props as EqlTabContentComponentProps } from './index';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -51,6 +48,7 @@ jest.mock('../../../../common/lib/kibana', () => {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
         },
+        docLinks: { links: { query: { eql: 'url-eql_doc' } } },
         uiSettings: {
           get: jest.fn(),
         },
@@ -64,14 +62,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 describe('Timeline', () => {
-  let props = {} as QueryTabContentComponentProps;
-  const sort: Sort[] = [
-    {
-      columnId: '@timestamp',
-      columnType: 'number',
-      sortDirection: Direction.desc,
-    },
-  ];
+  let props = {} as EqlTabContentComponentProps;
   const startDate = '2018-03-23T18:49:23.132Z';
   const endDate = '2018-03-24T03:33:52.253Z';
 
@@ -94,27 +85,20 @@ describe('Timeline', () => {
 
     props = {
       columns: defaultHeaders,
-      dataProviders: mockDataProviders,
       end: endDate,
+      eqlOptions: {},
       expandedEvent: {},
       eventType: 'all',
-      filters: [],
+      showEventDetails: false,
       timelineId: TimelineId.test,
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
-      kqlQueryExpression: '',
       onEventClosed: jest.fn(),
-      showCallOutUnauthorizedMsg: false,
-      showEventDetails: false,
-      sort,
       start: startDate,
-      status: TimelineStatus.active,
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
-      show: true,
     };
   });
 
@@ -122,17 +106,17 @@ describe('Timeline', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <EqlTabContentComponent {...props} />
         </TestProviders>
       );
 
-      expect(wrapper.find('QueryTabContentComponent')).toMatchSnapshot();
+      expect(wrapper.find('EqlTabContentComponent')).toMatchSnapshot();
     });
 
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <EqlTabContentComponent {...props} />
         </TestProviders>
       );
 
@@ -142,13 +126,44 @@ describe('Timeline', () => {
     test('it renders the timeline table', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <EqlTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
+        true
+      );
+    });
+
+    test('it renders the timeline column headers', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EqlTabContentComponent {...props} />
         </TestProviders>
       );
 
       expect(
-        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
+        wrapper
+          .find(
+            `[data-test-subj="${TimelineTabs.eql}-events-table"] [data-test-subj="column-headers"]`
+          )
+          .exists()
       ).toEqual(true);
+    });
+
+    test('it does NOT renders the timeline global sorting icon in headers', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <EqlTabContentComponent {...props} />
+        </TestProviders>
+      );
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="${TimelineTabs.eql}-events-table"] [data-test-subj="column-headers"] [data-test-subj="timeline-sorting-fields"]`
+          )
+          .exists()
+      ).toEqual(false);
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
@@ -161,56 +176,56 @@ describe('Timeline', () => {
       });
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <EqlTabContentComponent {...props} />
         </TestProviders>
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
-      ).toEqual(true);
+      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
+        true
+      );
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
     test('it does NOT render the timeline table when start is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} start={''} />
+          <EqlTabContentComponent {...props} start={''} />
         </TestProviders>
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
-      ).toEqual(true);
+      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
+        true
+      );
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
     test('it does NOT render the timeline table when end is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} end={''} />
+          <EqlTabContentComponent {...props} end={''} />
         </TestProviders>
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="${TimelineTabs.query}-events-table"]`).exists()
-      ).toEqual(true);
+      expect(wrapper.find(`[data-test-subj="${TimelineTabs.eql}-events-table"]`).exists()).toEqual(
+        true
+      );
       expect(wrapper.find('[data-test-subj="events"]').exists()).toEqual(false);
     });
 
-    test('it does NOT render the paging footer when you do NOT have any data providers', () => {
+    it('it does NOT render the timeline footer when query is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <EqlTabContentComponent {...props} />
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
+      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toEqual(false);
     });
 
-    it('it shows the timeline footer', () => {
+    it('it shows the timeline footer when query is empty', () => {
       const wrapper = mount(
         <TestProviders>
-          <QueryTabContentComponent {...props} />
+          <EqlTabContentComponent {...{ ...props, eqlOptions: { query: 'query' } }} />
         </TestProviders>
       );
 

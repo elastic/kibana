@@ -51,6 +51,7 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
             tiebreaker_field: options.tiebreakerField,
           }
         : {}),
+      size: options.size ?? 100,
       timestamp_field: options.timestampField ?? '@timestamp',
     },
   };

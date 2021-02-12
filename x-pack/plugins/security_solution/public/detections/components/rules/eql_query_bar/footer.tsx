@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 import {
   EuiButtonIcon,
   EuiComboBoxOptionOption,
   EuiComboBox,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,8 +18,10 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
+import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
 
-import { QueryLanguageSwitcher } from '../../../../../../../../src/plugins/data/public';
+import { Cancelable, debounce } from 'lodash';
 import {
   EqlOptionsData,
   EqlOptionsSelected,
@@ -36,8 +37,9 @@ export interface Props {
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
   onOptionsChange?: (field: FieldsEqlOptions, newValue: string | null) => void;
-  onSelectLanguage?: (newLanguage: string) => void;
 }
+
+type SizeVoidFunc = (newSize: string) => void;
 
 const Container = styled(EuiPanel)`
   border-radius: 0;
@@ -68,13 +70,13 @@ export const EqlQueryBarFooter: FC<Props> = ({
   isLoading,
   optionsData,
   optionsSelected,
-  onSelectLanguage,
   onOptionsChange,
 }) => {
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
-
-  const openEqlSettingsHandle = useCallback(() => setIsOpenEqlSettings(true), []);
-  const closeEqlSettingsHandle = useCallback(() => setIsOpenEqlSettings(false), []);
+  const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 100);
+  const debounceSize = useRef<Cancelable & SizeVoidFunc>();
+  const openEqlSettingsHandler = useCallback(() => setIsOpenEqlSettings(true), []);
+  const closeEqlSettingsHandler = useCallback(() => setIsOpenEqlSettings(false), []);
   const handleEventCategoryField = useCallback(
     (opt: EuiComboBoxOptionOption[]) => {
       if (onOptionsChange) {
@@ -111,6 +113,19 @@ export const EqlQueryBarFooter: FC<Props> = ({
     },
     [onOptionsChange]
   );
+  const handleSizeField = useCallback(
+    (evt) => {
+      if (onOptionsChange) {
+        setLocalSize(evt?.target?.value);
+        if (debounceSize.current?.cancel) {
+          debounceSize.current?.cancel();
+        }
+        debounceSize.current = debounce((newSize) => onOptionsChange('size', newSize), 800);
+        debounceSize.current(evt?.target?.value);
+      }
+    },
+    [onOptionsChange]
+  );
 
   const eventCategoryField = useMemo(
     () =>
@@ -143,12 +158,12 @@ export const EqlQueryBarFooter: FC<Props> = ({
           )}
           {isLoading && <Spinner data-test-subj="eql-validation-loading" size="m" />}
         </EuiFlexItem>
-        {!onSelectLanguage && (
+        {!onOptionsChange && (
           <EuiFlexItem grow={false}>
             <EqlOverviewLink />
           </EuiFlexItem>
         )}
-        {onSelectLanguage && (
+        {onOptionsChange && (
           <>
             <FlexItemWithMarginRight grow={false}>
               <EqlOverviewLink />
@@ -157,20 +172,32 @@ export const EqlQueryBarFooter: FC<Props> = ({
               <EuiPopover
                 button={
                   <EuiButtonIcon
-                    onClick={openEqlSettingsHandle}
+                    onClick={openEqlSettingsHandler}
                     iconType="controlsVertical"
                     aria-label="eql settings"
                   />
                 }
                 isOpen={openEqlSettings}
-                closePopover={closeEqlSettingsHandle}
+                closePopover={closeEqlSettingsHandler}
                 anchorPosition="downCenter"
+                ownFocus={true}
               >
-                <EuiPopoverTitle>{'EQL settings'}</EuiPopoverTitle>
+                <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
                 <div style={{ width: '300px' }}>
                   <EuiFormRow
-                    label="Event category field"
-                    helpText="Field containing the event classification, such as process, file, or network. This field is typically mapped as a field type in the keyword family"
+                    label={i18n.EQL_OPTIONS_SIZE_LABEL}
+                    helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
+                  >
+                    <EuiFieldNumber
+                      value={localSize}
+                      onChange={handleSizeField}
+                      min={1}
+                      max={10000}
+                    />
+                  </EuiFormRow>
+                  <EuiFormRow
+                    label={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
+                    helpText={i18n.EQL_OPTIONS_EVENT_CATEGORY_FIELD_HELPER}
                   >
                     <EuiComboBox
                       options={optionsData?.keywordFields}
@@ -180,17 +207,20 @@ export const EqlQueryBarFooter: FC<Props> = ({
                     />
                   </EuiFormRow>
                   <EuiFormRow
-                    label="Tiebreaker field"
-                    helpText="Field used to sort hits with the same timestamp in ascending, lexicographic order"
+                    label={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
+                    helpText={i18n.EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_HELPER}
                   >
                     <EuiComboBox
-                      options={optionsData?.allFields}
+                      options={optionsData?.nonDateFields}
                       selectedOptions={tiebreakerField}
                       singleSelection={singleSelection}
                       onChange={handleTiebreakerField}
                     />
                   </EuiFormRow>
-                  <EuiFormRow label="Timestamp field" helpText="Field containing event timestamp">
+                  <EuiFormRow
+                    label={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
+                    helpText={i18n.EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_HELPER}
+                  >
                     <EuiComboBox
                       options={optionsData?.dateFields}
                       selectedOptions={timestampField}
@@ -200,14 +230,6 @@ export const EqlQueryBarFooter: FC<Props> = ({
                   </EuiFormRow>
                 </div>
               </EuiPopover>
-            </FlexItemLeftBorder>
-
-            <FlexItemLeftBorder grow={false}>
-              <QueryLanguageSwitcher
-                language="eql"
-                includeEqlLanguage={true}
-                onSelectLanguage={onSelectLanguage}
-              />
             </FlexItemLeftBorder>
           </>
         )}

@@ -20,6 +20,7 @@ export interface TimelineEqlRequestOptions
   eventCategoryField?: string;
   tiebreakerField?: string;
   timestampField?: string;
+  size?: number;
 }
 
 export interface TimelineEqlResponse extends EqlSearchStrategyResponse<EqlSearchResponse<unknown>> {
@@ -29,16 +30,18 @@ export interface TimelineEqlResponse extends EqlSearchStrategyResponse<EqlSearch
   inspect: Maybe<Inspect>;
 }
 
-export type FieldsEqlOptions = 'eventCategoryField' | 'tiebreakerField' | 'timestampField';
-
 export interface EqlOptionsData {
   keywordFields: EuiComboBoxOptionOption[];
   dateFields: EuiComboBoxOptionOption[];
-  allFields: EuiComboBoxOptionOption[];
+  nonDateFields: EuiComboBoxOptionOption[];
 }
 
 export interface EqlOptionsSelected {
-  eventCategoryField: string | null;
-  tiebreakerField: string | null;
-  timestampField: string | null;
+  eventCategoryField?: string;
+  tiebreakerField?: string;
+  timestampField?: string;
+  query?: string;
+  size?: number;
 }
+
+export type FieldsEqlOptions = keyof EqlOptionsSelected;

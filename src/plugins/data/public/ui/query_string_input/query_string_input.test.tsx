@@ -20,7 +20,7 @@ import { render } from '@testing-library/react';
 
 import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
-import QueryLanguageSwitcher from './language_switcher';
+import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput } from './';
 import type QueryStringInputUI from './query_string_input';
 

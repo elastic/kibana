@@ -54,7 +54,6 @@ export interface SearchBarOwnProps {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
-  includeEqlLanguage?: boolean;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -381,7 +380,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
-          includeEqlLanguage={this.props.includeEqlLanguage}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}

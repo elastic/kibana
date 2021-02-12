@@ -26,7 +26,6 @@ export interface QueryBarComponentProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  includeEqlLanguage?: boolean;
   indexPattern: IIndexPattern;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
@@ -45,7 +44,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
     dateRangeFrom,
     dateRangeTo,
     hideSavedQuery = false,
-    includeEqlLanguage = false,
     indexPattern,
     isLoading = false,
     isRefreshPaused,
@@ -114,7 +112,6 @@ export const QueryBar = memo<QueryBarComponentProps>(
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        includeEqlLanguage={includeEqlLanguage}
         indexPatterns={indexPatterns}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}

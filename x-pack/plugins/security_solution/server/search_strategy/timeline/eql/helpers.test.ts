@@ -28,6 +28,7 @@ describe('Search Strategy EQL helper', () => {
           fields: [],
           filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
           id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
+          language: 'eql',
           pagination: { activePage: 0, querySize: 25 },
           sort: [
             {
@@ -63,6 +64,7 @@ describe('Search Strategy EQL helper', () => {
               },
             },
             "query": "sequence by host.name↵[any where true]↵[any where true]↵[any where true]",
+            "size": 100,
             "timestamp_field": "@timestamp",
           },
           "ignore_unavailable": true,
@@ -90,6 +92,7 @@ describe('Search Strategy EQL helper', () => {
           fields: [],
           filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
           id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
+          language: 'eql',
           pagination: { activePage: 1, querySize: 2 },
           sort: [
             {
@@ -128,6 +131,7 @@ describe('Search Strategy EQL helper', () => {
               },
             },
             "query": "sequence by host.name↵[any where true]↵[any where true]↵[any where true]",
+            "size": 100,
             "tiebreaker_field": "event.my.sequence",
             "timestamp_field": "event.ingested",
           },
@@ -158,6 +162,7 @@ describe('Search Strategy EQL helper', () => {
           fields: [],
           filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
           id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
+          language: 'eql',
           pagination: { activePage: 0, querySize: 2 },
           sort: [
             {
@@ -448,6 +453,7 @@ describe('Search Strategy EQL helper', () => {
           fields: [],
           filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
           id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
+          language: 'eql',
           pagination: { activePage: 3, querySize: 2 },
           sort: [
             {

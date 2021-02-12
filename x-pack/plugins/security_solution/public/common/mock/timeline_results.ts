@@ -2236,6 +2236,8 @@ export const defaultTimelineProps: CreateTimelineProps = {
     description: '',
     eqlOptions: {
       eventCategoryField: 'event.category',
+      query: '',
+      size: 100,
       tiebreakerField: 'event.sequence',
       timestampField: '@timestamp',
     },

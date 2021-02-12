@@ -80,7 +80,7 @@ export interface UseTimelineEventsProps {
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
-  sort: TimelineRequestSortField[];
+  sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
 }
@@ -184,7 +184,7 @@ export const useTimelineEvents = ({
         const searchSubscription$ = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
             strategy:
-              language === 'eql'
+              request.language === 'eql'
                 ? 'securitySolutionTimelineEqlSearchStrategy'
                 : 'securitySolutionTimelineSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -272,7 +272,7 @@ export const useTimelineEvents = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, id, language, notifications.toasts, pageName, refetchGrid, skip, wrappedLoadPage]
+    [data.search, id, notifications.toasts, pageName, refetchGrid, skip, wrappedLoadPage]
   );
 
   useEffect(() => {
@@ -291,6 +291,11 @@ export const useTimelineEvents = ({
         ...(prevEqlRequest?.eventCategoryField
           ? {
               eventCategoryField: prevEqlRequest?.eventCategoryField,
+            }
+          : {}),
+        ...(prevEqlRequest?.size
+          ? {
+              size: prevEqlRequest?.size,
             }
           : {}),
         ...(prevEqlRequest?.tiebreakerField
