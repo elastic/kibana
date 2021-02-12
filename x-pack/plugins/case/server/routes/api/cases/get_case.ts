@@ -20,22 +20,22 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
           case_id: schema.string(),
         }),
         query: schema.object({
-          includeComments: schema.string({ defaultValue: 'true' }),
+          includeComments: schema.boolean({ defaultValue: true }),
+          includeSubCaseComments: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
     async (context, request, response) => {
-      if (!context.case) {
-        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-      }
-
       const caseClient = context.case.getCaseClient();
-      const includeComments = JSON.parse(request.query.includeComments);
       const id = request.params.case_id;
 
       try {
         return response.ok({
-          body: await caseClient.get({ id, includeComments }),
+          body: await caseClient.get({
+            id,
+            includeComments: request.query.includeComments,
+            includeSubCaseComments: request.query.includeSubCaseComments,
+          }),
         });
       } catch (error) {
         return response.customError(wrapError(error));

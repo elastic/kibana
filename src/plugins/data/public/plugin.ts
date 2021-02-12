@@ -102,23 +102,8 @@ export class DataPublicPlugin
     });
 
     uiActions.registerTrigger(applyFilterTrigger);
-
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
-    );
-
-    uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER',
-      createSelectRangeAction(() => ({
-        uiActions: startServices().plugins.uiActions,
-      }))
-    );
-
-    uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER',
-      createValueClickAction(() => ({
-        uiActions: startServices().plugins.uiActions,
-      }))
     );
 
     inspector.registerView(
@@ -178,6 +163,20 @@ export class DataPublicPlugin
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
+
+    uiActions.addTriggerAction(
+      'SELECT_RANGE_TRIGGER',
+      createSelectRangeAction(() => ({
+        uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      'VALUE_CLICK_TRIGGER',
+      createValueClickAction(() => ({
+        uiActions,
+      }))
+    );
 
     uiActions.addTriggerAction(
       APPLY_FILTER_TRIGGER,

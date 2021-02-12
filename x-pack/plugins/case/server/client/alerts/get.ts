@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { CaseClientGetAlerts, CaseClientFactoryArguments } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
+import { AlertServiceContract } from '../../services';
 import { CaseClientGetAlertsResponse } from './types';
 
-export const get = ({ alertsService, request, context }: CaseClientFactoryArguments) => async ({
-  ids,
-}: CaseClientGetAlerts): Promise<CaseClientGetAlertsResponse> => {
-  const securitySolutionClient = context?.securitySolution?.getAppClient();
-  if (securitySolutionClient == null) {
-    throw Boom.notFound('securitySolutionClient client have not been found');
-  }
+interface GetParams {
+  alertsService: AlertServiceContract;
+  ids: string[];
+  indices: Set<string>;
+  scopedClusterClient: ElasticsearchClient;
+}
 
-  if (ids.length === 0) {
+export const get = async ({
+  alertsService,
+  ids,
+  indices,
+  scopedClusterClient,
+}: GetParams): Promise<CaseClientGetAlertsResponse> => {
+  if (ids.length === 0 || indices.size <= 0) {
     return [];
   }
 
-  const index = securitySolutionClient.getSignalsIndex();
-  const alerts = await alertsService.getAlerts({ ids, index, request });
+  const alerts = await alertsService.getAlerts({ ids, indices, scopedClusterClient });
+  if (!alerts) {
+    return [];
+  }
+
   return alerts.hits.hits.map((alert) => ({
     id: alert._id,
     index: alert._index,
