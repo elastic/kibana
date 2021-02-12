@@ -62,7 +62,7 @@ exports[`Table should render normally 1`] = `
       },
       Object {
         "dataType": "boolean",
-        "description": "These fields are created a runtime",
+        "description": "Fields that have a runtime script",
         "field": "isRuntime",
         "name": "Runtime",
         "render": [Function],
