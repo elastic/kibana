@@ -880,9 +880,9 @@ export const getThresholdAggregationParts = (
     const matches = key.match(pattern);
     if (matches != null && matches.groups?.name != null && matches.groups?.index != null) {
       return {
-        field: key,
+        field: matches.groups.name,
         index: parseInt(matches.groups.index, 10),
-        name: matches.groups.name,
+        name: key,
       };
     }
   }

@@ -61,6 +61,18 @@ export interface ThresholdResult {
   count: number;
 }
 
+export interface ThresholdSignalHistoryRecord {
+  terms: Array<{
+    field?: string;
+    value: SearchTypes;
+  }>;
+  lastSignalTimestamp: number;
+}
+
+export interface ThresholdSignalHistory {
+  [hash: string]: ThresholdSignalHistoryRecord;
+}
+
 export interface SignalSource {
   [key: string]: SearchTypes;
   // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not

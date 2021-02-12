@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import crypto from 'crypto';
+import { get, isEmpty } from 'lodash';
 
 import { Filter } from 'src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
@@ -17,7 +18,7 @@ import {
   AlertServices,
 } from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
-import { ThresholdQueryBucket } from './types';
+import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { findPreviousThresholdSignals } from './threshold_find_previous_signals';
 
@@ -59,18 +60,52 @@ export const getThresholdBucketFilters = async ({
     buildRuleMessage,
   });
 
-  // TODO: find latest timestamp from search result for each bucket
-  // and build filter below correctly.
+  const thresholdSignalHistory = searchResult.hits.hits.reduce<ThresholdSignalHistory>(
+    (acc, hit) => {
+      const terms = bucketByFields.map((field) => {
+        return {
+          field,
+          value: get(hit._source, field),
+        };
+      });
 
-  const filters = searchResult.aggregations.threshold.buckets.reduce(
-    (acc: ESFilter[], bucket: ThresholdQueryBucket): ESFilter[] => {
+      const hash = crypto
+        .createHash('sha256')
+        .update(
+          terms
+            .map((field) => {
+              return field.value;
+            })
+            .join(',')
+        )
+        .digest('hex');
+
+      const existing = acc[hash];
+      if (existing != null && hit._source) {
+        if (hit._source.original_time && hit._source.original_time > existing.lastSignalTimestamp) {
+          acc[hash].lastSignalTimestamp = hit._source.original_time as number;
+        } else {
+          acc[hash] = {
+            terms,
+            lastSignalTimestamp: hit._source.original_time as number,
+          };
+        }
+      }
+      return acc;
+    },
+    {}
+  );
+
+  // const filters = searchResult.aggregations.threshold.buckets.reduce(
+  const filters = Object.values(thresholdSignalHistory).reduce(
+    (acc: ESFilter[], bucket: ThresholdSignalHistoryRecord): ESFilter[] => {
       const filter = {
         bool: {
           filter: [
             {
               range: {
                 [timestampOverride ?? '@timestamp']: {
-                  lte: bucket.lastSignalTimestamp.value_as_string,
+                  lte: bucket.lastSignalTimestamp, // TODO: convert to string?
                 },
               },
             },
@@ -79,12 +114,15 @@ export const getThresholdBucketFilters = async ({
       } as ESFilter;
 
       if (!isEmpty(bucketByFields)) {
-        // TODO: account for array
-        (filter.bool.filter as ESFilter[]).push({
-          term: {
-            // [bucketByFields]: bucket.key,
-            [bucketByFields[0]]: bucket.key,
-          },
+        bucket.terms.forEach((term) => {
+          if (term.field != null) {
+            // TODO: is this right?
+            (filter.bool.filter as ESFilter[]).push({
+              term: {
+                [term.field]: term.value as string, // TODO: is this right?
+              },
+            });
+          }
         });
       }
 

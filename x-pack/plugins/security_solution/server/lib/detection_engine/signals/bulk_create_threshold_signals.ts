@@ -106,7 +106,7 @@ const getTransformedHits = (
   }
 
   const aggParts = results.aggregations && getThresholdAggregationParts(results.aggregations);
-  if (!aggParts.key) {
+  if (!aggParts) {
     return [];
   }
 
