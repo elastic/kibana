@@ -401,7 +401,9 @@ Vega-Lite compilation.
 [[vega-expression-functions]]
 ===== Expression functions which can update the time range and dashboard filters
 
-{kib} has extended the Vega expression language with these functions:
+{kib} has extended the Vega expression language with these functions. 
+These functions will trigger new data to be fetched, which by default will reset Vega signals. 
+To keep signal values set `restoreSignalValuesOnRefresh: true` in the Vega config.
 
 ```js
 /**
@@ -444,6 +446,8 @@ kibanaSetTimeFilter(start, end)
       hideWarnings: true
       // Vega renderer to use: `svg` or `canvas` (default)
       renderer: canvas
+      // Defaults to 'false', restores Vega signal values on refresh
+      restoreSignalValuesOnRefresh: false
     }
   }
 }
