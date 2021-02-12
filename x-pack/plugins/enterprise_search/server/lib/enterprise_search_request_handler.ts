@@ -7,6 +7,7 @@
 
 import fetch, { Response } from 'node-fetch';
 import querystring from 'querystring';
+
 import {
   RequestHandler,
   RequestHandlerContext,
@@ -14,8 +15,9 @@ import {
   KibanaResponseFactory,
   Logger,
 } from 'src/core/server';
-import { ConfigType } from '../index';
+
 import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
+import { ConfigType } from '../index';
 
 interface ConstructorDependencies {
   config: ConfigType;

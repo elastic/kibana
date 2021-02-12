@@ -359,21 +359,21 @@ export default ({ getService }: FtrProviderContext): void => {
             id: connector.id,
             name: connector.name,
             type: connector.actionTypeId,
-            fields: { urgency: null, impact: null, severity: null },
+            fields: {
+              urgency: '2',
+              impact: '2',
+              severity: '2',
+              category: 'software',
+              subcategory: 'os',
+            },
           }).connector,
         })
         .expect(200);
 
       await supertest
-        .post(`${CASES_URL}/${postedCase.id}/_push`)
+        .post(`${CASES_URL}/${postedCase.id}/connector/${connector.id}/_push`)
         .set('kbn-xsrf', 'true')
-        .send({
-          connector_id: configure.connector.id,
-          connector_name: configure.connector.name,
-          external_id: 'external_id',
-          external_title: 'external_title',
-          external_url: 'external_url',
-        })
+        .send({})
         .expect(200);
 
       const { body } = await supertest
