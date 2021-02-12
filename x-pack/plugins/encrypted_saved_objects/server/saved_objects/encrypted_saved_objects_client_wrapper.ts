@@ -15,9 +15,11 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
+  SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
@@ -247,6 +249,17 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     options: SavedObjectsRemoveReferencesToOptions = {}
   ): Promise<SavedObjectsRemoveReferencesToResponse> {
     return await this.options.baseClient.removeReferencesTo(type, id, options);
+  }
+
+  public async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    return await this.options.baseClient.openPointInTimeForType(type, options);
+  }
+
+  public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
+    return await this.options.baseClient.closePointInTime(id, options);
   }
 
   /**

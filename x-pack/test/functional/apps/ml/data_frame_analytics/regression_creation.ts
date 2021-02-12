@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.jobId}`;
         },
         dependentVariable: 'stab',
-        trainingPercent: '20',
+        trainingPercent: 20,
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
