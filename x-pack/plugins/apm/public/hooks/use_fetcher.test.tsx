@@ -33,6 +33,7 @@ describe('useFetcher', () => {
 
     it('should have loading spinner initally', async () => {
       expect(hook.result.current).toEqual({
+        requestId: '',
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
@@ -44,6 +45,7 @@ describe('useFetcher', () => {
       jest.advanceTimersByTime(100);
 
       expect(hook.result.current).toEqual({
+        requestId: '',
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
@@ -56,6 +58,7 @@ describe('useFetcher', () => {
       await hook.waitForNextUpdate();
 
       expect(hook.result.current).toEqual({
+        requestId: expect.any(String),
         data: 'response from hook',
         error: undefined,
         refetch: expect.any(Function),
@@ -82,6 +85,7 @@ describe('useFetcher', () => {
 
     it('should have loading spinner initally', async () => {
       expect(hook.result.current).toEqual({
+        requestId: '',
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
@@ -93,6 +97,7 @@ describe('useFetcher', () => {
       jest.advanceTimersByTime(100);
 
       expect(hook.result.current).toEqual({
+        requestId: '',
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
@@ -105,6 +110,7 @@ describe('useFetcher', () => {
       await hook.waitForNextUpdate();
 
       expect(hook.result.current).toEqual({
+        requestId: expect.any(String),
         data: undefined,
         error: expect.any(Error),
         refetch: expect.any(Function),
@@ -129,6 +135,7 @@ describe('useFetcher', () => {
         }
       );
       expect(hook.result.current).toEqual({
+        requestId: expect.any(String),
         data: undefined,
         error: undefined,
         refetch: expect.any(Function),
@@ -139,6 +146,7 @@ describe('useFetcher', () => {
 
       // assert: first response has loaded and should be rendered
       expect(hook.result.current).toEqual({
+        requestId: expect.any(String),
         data: 'first response',
         error: undefined,
         refetch: expect.any(Function),
@@ -158,6 +166,7 @@ describe('useFetcher', () => {
 
       // assert: while loading new data the previous data should still be rendered
       expect(hook.result.current).toEqual({
+        requestId: expect.any(String),
         data: 'first response',
         error: undefined,
         refetch: expect.any(Function),
@@ -169,6 +178,7 @@ describe('useFetcher', () => {
 
       // assert: "second response" has loaded and should be rendered
       expect(hook.result.current).toEqual({
+        requestId: expect.any(String),
         data: 'second response',
         error: undefined,
         refetch: expect.any(Function),

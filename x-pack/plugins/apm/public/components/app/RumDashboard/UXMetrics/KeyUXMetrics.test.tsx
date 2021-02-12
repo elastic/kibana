@@ -13,6 +13,7 @@ import { KeyUXMetrics } from './KeyUXMetrics';
 describe('KeyUXMetrics', () => {
   it('renders metrics with correct formats', () => {
     jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
+      requestId: 'foo',
       data: {
         noOfLongTasks: 3.0009765625,
         sumOfLongTasks: 520.4375,

@@ -14,11 +14,13 @@ import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
   let state$: BehaviorSubject<SearchSessionState>;
   let nowProvider: jest.Mocked<NowProviderInternalContract>;
+  let userHasAccessToSearchSessions = true;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
@@ -30,7 +32,18 @@ describe('Session service', () => {
         startService().then(([coreStart, ...rest]) => [
           {
             ...coreStart,
-            application: { ...coreStart.application, currentAppId$: new BehaviorSubject('app') },
+            application: {
+              ...coreStart.application,
+              currentAppId$: new BehaviorSubject('app'),
+              capabilities: {
+                ...coreStart.application.capabilities,
+                management: {
+                  kibana: {
+                    [SEARCH_SESSIONS_MANAGEMENT_ID]: userHasAccessToSearchSessions,
+                  },
+                },
+              },
+            },
           },
           ...rest,
         ]),
@@ -146,6 +159,8 @@ describe('Session service', () => {
       isRestore: true,
       sessionId,
     });
+
+    expect(sessionService.getSearchOptions(undefined)).toBeNull();
   });
   test('isCurrentSession', () => {
     expect(sessionService.isCurrentSession()).toBeFalsy();
@@ -213,5 +228,26 @@ describe('Session service', () => {
     });
     sessionService.start();
     await expect(() => sessionService.save()).rejects.toMatchInlineSnapshot(`[Error: Haha]`);
+  });
+
+  describe("user doesn't have access to search session", () => {
+    beforeAll(() => {
+      userHasAccessToSearchSessions = false;
+    });
+    afterAll(() => {
+      userHasAccessToSearchSessions = true;
+    });
+
+    test("getSearchOptions doesn't return sessionId", () => {
+      const sessionId = sessionService.start();
+      expect(sessionService.getSearchOptions(sessionId)).toBeNull();
+    });
+
+    test('save() throws', async () => {
+      sessionService.start();
+      await expect(() => sessionService.save()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"No access to search sessions"`
+      );
+    });
   });
 });

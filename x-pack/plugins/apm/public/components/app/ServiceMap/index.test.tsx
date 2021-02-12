@@ -90,6 +90,7 @@ describe('ServiceMap', () => {
     describe('with an empty response', () => {
       it('renders the empty banner', async () => {
         jest.spyOn(useFetcherModule, 'useFetcher').mockReturnValueOnce({
+          requestId: 'foo',
           data: { elements: [] },
           refetch: () => {},
           status: useFetcherModule.FETCH_STATUS.SUCCESS,

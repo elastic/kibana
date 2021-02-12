@@ -19,6 +19,7 @@ async function renderTooltipAnchor({
 }) {
   // mock api response
   jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+    requestId: 'foo',
     data: { jobs },
     status: hooks.FETCH_STATUS.SUCCESS,
     refetch: jest.fn(),

@@ -26,7 +26,7 @@ import {
 
 import { InternalApplicationStart } from '../../../application';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
-import { ChromeHelpExtension } from '../../chrome_service';
+import { ChromeHelpExtension } from '../../types';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
