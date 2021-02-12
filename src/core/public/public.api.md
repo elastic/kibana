@@ -561,7 +561,9 @@ export interface DocLinksStart {
             readonly scriptAggs: string;
             readonly painless: string;
             readonly painlessApi: string;
+            readonly painlessLangSpec: string;
             readonly painlessSyntax: string;
+            readonly painlessWalkthrough: string;
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
@@ -601,6 +603,7 @@ export interface DocLinksStart {
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
+            painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putWatch: string;
             updateTransform: string;
@@ -976,6 +979,8 @@ export interface OverlayModalOpenOptions {
     className?: string;
     // (undocumented)
     closeButtonAriaLabel?: string;
+    // (undocumented)
+    maxWidth?: boolean | number | string;
 }
 
 // @public
@@ -1204,9 +1209,13 @@ export interface SavedObjectsFindOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsPitParams" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: No member was found with name "openPointInTimeForType"
+    pit?: SavedObjectsPitParams;
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
+    searchAfter?: unknown[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;

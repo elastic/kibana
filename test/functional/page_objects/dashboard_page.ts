@@ -16,6 +16,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -157,6 +158,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
     }
 
+    public async expectOnDashboard(dashboardTitle: string) {
+      await retry.waitFor(
+        'last breadcrumb to have dashboard title',
+        async () => (await globalNav.getLastBreadcrumb()) === dashboardTitle
+      );
+    }
+
     public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
@@ -246,6 +254,11 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async clickDiscardChanges() {
       log.debug('clickDiscardChanges');
       await testSubjects.click('dashboardDiscardChanges');
+    }
+
+    public async clickQuickSave() {
+      log.debug('clickQuickSave');
+      await testSubjects.click('dashboardQuickSaveMenuItem');
     }
 
     public async clickNewDashboard(continueEditing = false) {
@@ -581,6 +594,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async expectMissingSaveOption() {
       await testSubjects.missingOrFail('dashboardSaveMenuItem');
+    }
+
+    public async expectMissingQuickSaveOption() {
+      await testSubjects.missingOrFail('dashboardQuickSaveMenuItem');
+    }
+    public async expectExistsQuickSaveOption() {
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
     }
 
     public async getNotLoadedVisualizations(vizList: string[]) {

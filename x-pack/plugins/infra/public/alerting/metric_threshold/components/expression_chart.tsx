@@ -328,7 +328,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
               defaultMessage="Last {lookback} {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel, lookback: timeSize * 20 }}
+              values={{ id: series.id, timeLabel, lookback: timeSize! * 20 }}
             />
           </EuiText>
         ) : (
@@ -336,7 +336,7 @@ export const ExpressionChart: React.FC<Props> = ({
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
               defaultMessage="Last {lookback} {timeLabel}"
-              values={{ timeLabel, lookback: timeSize * 20 }}
+              values={{ timeLabel, lookback: timeSize! * 20 }}
             />
           </EuiText>
         )}
