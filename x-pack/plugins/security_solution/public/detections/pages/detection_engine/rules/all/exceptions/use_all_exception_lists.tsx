@@ -83,6 +83,8 @@ export const useAllExceptionLists = ({
     const fetchData = async (): Promise<void> => {
       if (exceptionLists.length === 0 && isSubscribed) {
         setLoading(false);
+        setExceptions([]);
+        setExceptionsListInfo({});
         return;
       }
 

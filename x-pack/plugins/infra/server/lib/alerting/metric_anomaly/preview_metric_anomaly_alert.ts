@@ -27,6 +27,7 @@ interface PreviewMetricAnomalyAlertParams {
   alertInterval: string;
   alertThrottle: string;
   alertOnNoData: boolean;
+  alertNotifyWhen: string;
 }
 
 export const previewMetricAnomalyAlert = async ({
@@ -38,12 +39,12 @@ export const previewMetricAnomalyAlert = async ({
   lookback,
   alertInterval,
   alertThrottle,
+  alertNotifyWhen,
 }: PreviewMetricAnomalyAlertParams) => {
   const { metric, threshold, influencerFilter, nodeType } = params as MetricAnomalyParams;
 
   const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
   const throttleIntervalInSeconds = getIntervalInSeconds(alertThrottle);
-  const executionsPerThrottle = Math.floor(throttleIntervalInSeconds / alertIntervalInSeconds);
 
   const lookbackInterval = `1${lookback}`;
   const lookbackIntervalInSeconds = getIntervalInSeconds(lookbackInterval);
@@ -78,9 +79,17 @@ export const previewMetricAnomalyAlert = async ({
     let numberOfTimesFired = 0;
     let numberOfNotifications = 0;
     let throttleTracker = 0;
-    const notifyWithThrottle = () => {
-      if (throttleTracker === 0) numberOfNotifications++;
-      throttleTracker++;
+    let previousActionGroup: string | null = null;
+    const notifyWithThrottle = (actionGroup: string) => {
+      if (alertNotifyWhen === 'onActionGroupChange') {
+        if (previousActionGroup !== actionGroup) numberOfNotifications++;
+      } else if (alertNotifyWhen === 'onThrottleInterval') {
+        if (throttleTracker === 0) numberOfNotifications++;
+        throttleTracker += alertIntervalInSeconds;
+      } else {
+        numberOfNotifications++;
+      }
+      previousActionGroup = actionGroup;
     };
     // Mock each alert evaluation
     for (let i = 0; i < numberOfExecutions; i++) {
@@ -102,11 +111,14 @@ export const previewMetricAnomalyAlert = async ({
 
       if (anomaliesDetectedInBuckets) {
         numberOfTimesFired++;
-        notifyWithThrottle();
-      } else if (throttleTracker > 0) {
-        throttleTracker++;
+        notifyWithThrottle('fired');
+      } else {
+        previousActionGroup = 'recovered';
+        if (throttleTracker > 0) {
+          throttleTracker += alertIntervalInSeconds;
+        }
       }
-      if (throttleTracker === executionsPerThrottle) {
+      if (throttleTracker >= throttleIntervalInSeconds) {
         throttleTracker = 0;
       }
     }

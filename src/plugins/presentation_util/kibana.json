@@ -4,6 +4,6 @@
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["dashboard", "savedObjects"],
+  "requiredPlugins": ["savedObjects"],
   "optionalPlugins": []
 }
