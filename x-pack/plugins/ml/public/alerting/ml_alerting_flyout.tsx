@@ -79,10 +79,10 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
   unsetShowFunction,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [jobId, setJobId] = useState<JobId | undefined>();
+  const [jobIds, setJobIds] = useState<JobId[] | undefined>();
 
-  const showFlyoutCallback = useCallback((jobIdUpdate: JobId) => {
-    setJobId(jobIdUpdate);
+  const showFlyoutCallback = useCallback((jobIdsUpdate: JobId[]) => {
+    setJobIds(jobIdsUpdate);
     setIsVisible(true);
   }, []);
 
@@ -93,9 +93,9 @@ export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> =
     };
   }, []);
 
-  return isVisible && jobId ? (
+  return isVisible && jobIds ? (
     <MlAnomalyAlertFlyout
-      jobIds={[jobId]}
+      jobIds={jobIds}
       onCloseFlyout={() => setIsVisible(false)}
       onSave={() => {
         setIsVisible(false);

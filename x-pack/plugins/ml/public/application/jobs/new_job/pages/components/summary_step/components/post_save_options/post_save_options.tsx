@@ -13,8 +13,6 @@ import { JobRunner } from '../../../../../common/job_runner';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
 
-// @ts-ignore
-import { CreateWatchFlyout } from '../../../../../../jobs_list/components/create_watch_flyout/index';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { DATAFEED_STATE } from '../../../../../../../../../common/constants/states';
 import { MlAnomalyAlertFlyout } from '../../../../../../../../alerting/ml_alerting_flyout';

@@ -40,7 +40,7 @@ export class StartDatafeedModal extends Component {
       startTime: now,
       endTime: now,
       createAlert: false,
-      allowCreateWatch: false,
+      allowCreateAlert: false,
       initialSpecifiedStartTime: now,
       now,
       timeRangeValid: true,
@@ -83,20 +83,20 @@ export class StartDatafeedModal extends Component {
     this.setState({ timeRangeValid });
   };
 
-  showModal = (jobs, showCreateWatchFlyout) => {
+  showModal = (jobs, showCreateAlertFlyout) => {
     const startTime = undefined;
     const now = moment();
     const endTime = now;
     const initialSpecifiedStartTime = getLowestLatestTime(jobs);
-    const allowCreateWatch = jobs.length === 1;
+    const allowCreateAlert = jobs.length > 0;
     this.setState({
       jobs,
       isModalVisible: true,
       startTime,
       endTime,
       initialSpecifiedStartTime,
-      showCreateWatchFlyout,
-      allowCreateWatch,
+      showCreateAlertFlyout,
+      allowCreateAlert,
       createAlert: false,
       now,
     });
@@ -112,9 +112,8 @@ export class StartDatafeedModal extends Component {
       : this.state.endTime;
 
     forceStartDatafeeds(jobs, start, end, () => {
-      if (this.state.createAlert && jobs.length === 1) {
-        const jobId = jobs[0].id;
-        this.getShowCreateAlertFlyoutFunction()(jobId);
+      if (this.state.createAlert && jobs.length > 0) {
+        this.getShowCreateAlertFlyoutFunction()(jobs.map((job) => job.id));
       }
       this.refreshJobs();
     });
