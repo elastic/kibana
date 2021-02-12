@@ -151,7 +151,7 @@ def generateReports(title) {
     . src/dev/code_coverage/shell_scripts/merge_functional.sh
     . src/dev/code_coverage/shell_scripts/copy_jest_report.sh
     # zip functional combined report
-    tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional/*
+    tar -czf kibana-functional-coverage.tar.gz target/kibana-coverage/functional-combined/*
   """, title)
 }
 
