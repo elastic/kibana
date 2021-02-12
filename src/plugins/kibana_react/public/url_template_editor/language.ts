@@ -162,7 +162,7 @@ export const language: monaco.languages.IMonarchLanguage = {
             token: 'text.separator.value.query.url',
           },
           {
-            token: 'metatag.value.query.url',
+            token: 'text.value.query.url',
           },
         ],
       ],
