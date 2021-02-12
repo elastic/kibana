@@ -31,7 +31,7 @@ export async function createAnomalyDetectionJobs(
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  const mlCapabilities = await withApmSpan('get_ml_capabilites', () =>
+  const mlCapabilities = await withApmSpan('get_ml_capabilities', () =>
     ml.mlSystem.mlCapabilities()
   );
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
