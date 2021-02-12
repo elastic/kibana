@@ -5,6 +5,7 @@ import { ValidConfigOptions } from '../../../options/options';
 import { Commit } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
 import { logger, consoleLog } from '../../logger';
+import { enablePullRequestAutoMerge } from '../v4/enablePullRequestAutoMerge';
 import { fetchExistingPullRequest } from '../v4/fetchExistingPullRequest';
 import { getGithubV3ErrorMessage } from './getGithubV3ErrorMessage';
 
@@ -29,7 +30,7 @@ export async function createPullRequest({
     `Creating PR with title: "${prPayload.title}". ${prPayload.head} -> ${prPayload.base}`
   );
 
-  const { accessToken, dryRun, githubApiBaseUrlV3 } = options;
+  const { accessToken, dryRun, githubApiBaseUrlV3, autoMerge } = options;
   const spinner = ora(`Creating pull request`).start();
 
   if (dryRun) {
@@ -52,6 +53,10 @@ export async function createPullRequest({
     });
 
     const res = await octokit.pulls.create(prPayload);
+
+    if (autoMerge) {
+      await enablePullRequestAutoMerge(options);
+    }
 
     spinner.succeed();
 

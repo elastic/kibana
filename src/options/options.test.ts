@@ -111,6 +111,8 @@ describe('getOptions', () => {
       assignees: [],
       author: 'sqren',
       autoAssign: false,
+      autoMerge: false,
+      autoMergeMethod: 'merge',
       ci: false,
       dryRun: false,
       fork: true,

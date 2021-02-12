@@ -14,6 +14,8 @@ describe('getOptionsFromConfigFiles', () => {
       all: false,
       assignees: [],
       autoAssign: false,
+      autoMerge: false,
+      autoMergeMethod: 'merge',
       ci: false,
       dryRun: false,
       fork: true,

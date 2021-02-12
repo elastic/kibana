@@ -46,6 +46,18 @@ export function getOptionsFromCliArgs(
       conflicts: ['assignees'],
     })
 
+    .option('autoMerge', {
+      description: 'Enable auto-merge for created pull requests',
+      type: 'boolean',
+    })
+
+    .option('autoMergeMethod', {
+      description:
+        'Sets auto-merge method when using --auto-merge. Default: merge',
+      type: 'string',
+      choices: ['merge', 'rebase', 'squash'],
+    })
+
     .option('ci', {
       description: 'Disable interactive prompts',
       type: 'boolean',
