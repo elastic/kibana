@@ -32,11 +32,6 @@ TEAM_ASSIGN_PATH=$5
 # Build team assignments dat file
 node scripts/generate_team_assignments.js --verbose --src .github/CODEOWNERS --dest $TEAM_ASSIGN_PATH
 
-echo "### Ingesting coverage for functional"
-
-COVERAGE_SUMMARY_FILE=target/kibana-coverage/functional-combined/coverage-summary.json
-node scripts/ingest_coverage.js --verbose --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH
-
 for x in functional jest; do
   echo "### Ingesting coverage for ${x}"
 
