@@ -26,6 +26,7 @@ import {
   SetColorSchemaOptionsValue,
   ColorSchemaOptions,
   RangeOption,
+  PercentageModeOption,
 } from '../../../vis_default_editor/public';
 import { ColorMode, colorSchemas } from '../../../charts/public';
 import { MetricVisParam, VisParams } from '../types';
@@ -113,12 +114,10 @@ function MetricVisOptions({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <SwitchOption
-          label={i18n.translate('visTypeMetric.params.percentageModeLabel', {
-            defaultMessage: 'Percentage mode',
-          })}
-          paramName="percentageMode"
-          value={stateParams.metric.percentageMode}
+        <PercentageModeOption
+          data-test-subj="metricPercentageMode"
+          percentageMode={stateParams.metric.percentageMode}
+          formatPattern={stateParams.metric.percentageFormatPattern}
           setValue={setMetricValue}
         />
 

@@ -29,6 +29,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
       type: 'metric',
       metric: {
         percentageMode: false,
+        percentageFormatPattern: undefined,
         useRanges: false,
         colorSchema: ColorSchemas.GreenToRed,
         metricColorMode: ColorMode.None,

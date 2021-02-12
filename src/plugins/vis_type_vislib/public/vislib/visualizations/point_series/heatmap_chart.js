@@ -13,6 +13,8 @@ import { isColorDark } from '@elastic/eui';
 
 import { PointSeries } from './_point_series';
 import { getHeatmapColors } from '../../../../../../plugins/charts/public';
+import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const defaults = {
   color: undefined, // todo
@@ -29,8 +31,10 @@ const defaults = {
  * @param chartData {Object} Elasticsearch query results for this specific chart
  */
 export class HeatmapChart extends PointSeries {
-  constructor(handler, chartEl, chartData, seriesConfigArgs, core) {
-    super(handler, chartEl, chartData, seriesConfigArgs, core);
+  constructor(handler, chartEl, chartData, seriesConfigArgs, uiSettings) {
+    super(handler, chartEl, chartData, seriesConfigArgs, uiSettings);
+
+    this.uiSettings = uiSettings;
 
     this.seriesConfig = _.defaults(seriesConfigArgs || {}, defaults);
 
@@ -48,6 +52,7 @@ export class HeatmapChart extends PointSeries {
 
   getHeatmapLabels(cfg) {
     const percentageMode = cfg.get('percentageMode');
+    const percentageFormatPattern = cfg.get('percentageFormatPattern', this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN));
     const colorsNumber = cfg.get('colorsNumber');
     const colorsRange = cfg.get('colorsRange');
     const zAxisConfig = this.getValueAxis().axisConfig;
@@ -71,9 +76,9 @@ export class HeatmapChart extends PointSeries {
         let val = i / colorsNumber;
         let nextVal = (i + 1) / colorsNumber;
         if (percentageMode) {
-          val = Math.ceil(val * 100);
-          nextVal = Math.ceil(nextVal * 100);
-          label = `${val}% - ${nextVal}%`;
+          val = getValueForPercentageMode(val, percentageFormatPattern);
+          nextVal = getValueForPercentageMode(nextVal, percentageFormatPattern);
+          label = `${val} - ${nextVal}`;
         } else {
           val = val * (max - min) + min;
           nextVal = nextVal * (max - min) + min;

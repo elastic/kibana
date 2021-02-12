@@ -28,6 +28,7 @@ export interface Gauge extends ColorSchemaParams {
   gaugeType: GaugeType;
   labels: Labels;
   percentageMode: boolean;
+  percentageFormatPattern?: string;
   outline?: boolean;
   scale: {
     show: boolean;

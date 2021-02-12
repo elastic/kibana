@@ -3,6 +3,6 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "kibanaLegacy"],
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "kibanaLegacy", "indexPatternManagement"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor", "visTypeXy"]
 }

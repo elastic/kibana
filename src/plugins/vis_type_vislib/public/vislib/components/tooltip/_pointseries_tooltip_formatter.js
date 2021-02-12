@@ -8,12 +8,30 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { UI_SETTINGS } from '../../../../../../plugins/data/public';
+import { getValueForPercentageMode } from '../../percentage_mode_transform';
+
+function getMax(handler, config, isGauge) {
+  let max;
+  if (handler.pointSeries) {
+    const series = handler.pointSeries.getSeries();
+    const scale = series.getValueAxis().getScale();
+    max = scale.domain()[1];
+  } else {
+    max = _.last(config.get(isGauge ? 'gauge.colorsRange' : 'colorsRange', [{}])).to
+  }
+
+  return max;
+}
 
 export function pointSeriesTooltipFormatter() {
-  return function tooltipFormatter({ datum, data }) {
+  return function tooltipFormatter({ datum, data, config, handler }) {
     if (!datum) return '';
 
     const details = [];
+    const isGauge = config.get('gauge', false);
+    const isPercentageMode = config.get(isGauge ? 'gauge.percentageMode' : 'percentageMode', false);
+    const isSetColorRange = config.get('setColorRange', false);
 
     const currentSeries =
       data.series && data.series.find((serie) => serie.rawId === datum.seriesId);
@@ -30,8 +48,14 @@ export function pointSeriesTooltipFormatter() {
     }
 
     if (datum.y !== null && datum.y !== undefined) {
-      const value = datum.yScale ? datum.yScale * datum.y : datum.y;
-      addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
+      let value = datum.yScale ? datum.yScale * datum.y : datum.y;
+      if (isPercentageMode && !isSetColorRange) {
+        const percentageFormatPattern = config.get(isGauge ? 'gauge.percentageFormatPattern' : 'percentageFormatPattern', handler.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN));
+        value = getValueForPercentageMode(value / getMax(handler, config, isGauge), percentageFormatPattern);
+        addDetail(currentSeries.label, value);
+      } else {
+        addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
+      } 
     }
 
     if (datum.z !== null && datum.z !== undefined) {
