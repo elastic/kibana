@@ -3660,6 +3660,9 @@
             },
             "savedObjects": {
               "properties": {
+                "customIndex": {
+                  "type": "boolean"
+                },
                 "maxImportPayloadBytes": {
                   "type": "long"
                 },
@@ -3702,7 +3705,7 @@
                         "type": "long"
                       },
                       "alias": {
-                        "type": "text"
+                        "type": "keyword"
                       },
                       "primaryStoreSizeBytes": {
                         "type": "long"

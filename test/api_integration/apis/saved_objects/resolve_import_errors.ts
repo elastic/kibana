@@ -132,9 +132,9 @@ export default function ({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should return 400 when resolving conflicts with a file containing more than 10,000 objects', async () => {
+      it('should return 400 when resolving conflicts with a file containing more than 10,001 objects', async () => {
         const fileChunks = [];
-        for (let i = 0; i < 10001; i++) {
+        for (let i = 0; i <= 10001; i++) {
           fileChunks.push(`{"type":"visualization","id":"${i}","attributes":{},"references":[]}`);
         }
         await supertest
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: "Can't import more than 10000 objects",
+              message: "Can't import more than 10001 objects",
             });
           });
       });

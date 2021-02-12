@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanelProps } from '@elastic/eui';
-import { rgba } from 'polished';
 import { FunctionComponent } from 'react';
 import { StyledComponent } from 'styled-components';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanelProps } from '@elastic/eui';
+import { rgba } from 'polished';
+import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
 import { euiStyled, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
   height?: string;
@@ -82,6 +82,11 @@ interface WaterfallChartSidebarContainer {
   height: number;
 }
 
+export const WaterfallChartSidebarWrapper = euiStyled(EuiFlexItem)`
+  max-width: ${SIDEBAR_GROW_SIZE * 10}%;
+  z-index: ${(props) => props.theme.eui.euiZLevel5};
+`;
+
 export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSidebarContainer>`
   height: ${(props) => `${props.height}px`};
   overflow-y: hidden;
@@ -104,10 +109,10 @@ export const WaterfallChartSidebarFlexItem = euiStyled(EuiFlexItem)`
   min-width: 0;
   padding-left: ${(props) => props.theme.eui.paddingSizes.m};
   padding-right: ${(props) => props.theme.eui.paddingSizes.m};
-  z-index: ${(props) => props.theme.eui.euiZLevel4};
+  justify-content: space-around;
 `;
 
-export const SideBarItemHighlighter = euiStyled.span<{ isHighlighted: boolean }>`
+export const SideBarItemHighlighter = euiStyled(EuiFlexItem)<{ isHighlighted: boolean }>`
   opacity: ${(props) => (props.isHighlighted ? 1 : 0.4)};
   height: 100%;
 `;
