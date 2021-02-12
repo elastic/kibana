@@ -16,7 +16,6 @@ import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
 import { JobSpacesList } from '../../../../components/job_spaces_list';
-import { PLUGIN_ID } from '../../../../../../common/constants/app';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 import { EuiBasicTable, EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
@@ -25,8 +24,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-
-const EmptyFunctionComponent = ({ children }) => <>{children}</>;
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
@@ -331,38 +328,35 @@ export class JobsList extends Component {
     };
 
     const selectedJobsClass = this.props.selectedJobsCount ? 'jobs-selected' : '';
-    const ContextWrapper = spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent;
 
     return (
-      <ContextWrapper feature={PLUGIN_ID}>
-        <EuiBasicTable
-          data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
-          loading={loading === true}
-          noItemsMessage={
-            loading
-              ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
-                  defaultMessage: 'Loading jobs…',
-                })
-              : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
-                  defaultMessage: 'No jobs found',
-                })
-          }
-          itemId="id"
-          className={`jobs-list-table ${selectedJobsClass}`}
-          items={pageOfItems}
-          columns={columns}
-          pagination={pagination}
-          onChange={this.onTableChange}
-          selection={isManagementTable ? undefined : selectionControls}
-          itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-          isExpandable={true}
-          sorting={sorting}
-          hasActions={true}
-          rowProps={(item) => ({
-            'data-test-subj': `mlJobListRow row-${item.id}`,
-          })}
-        />
-      </ContextWrapper>
+      <EuiBasicTable
+        data-test-subj={loading ? 'mlJobListTable loading' : 'mlJobListTable loaded'}
+        loading={loading === true}
+        noItemsMessage={
+          loading
+            ? i18n.translate('xpack.ml.jobsList.loadingJobsLabel', {
+                defaultMessage: 'Loading jobs…',
+              })
+            : i18n.translate('xpack.ml.jobsList.noJobsFoundLabel', {
+                defaultMessage: 'No jobs found',
+              })
+        }
+        itemId="id"
+        className={`jobs-list-table ${selectedJobsClass}`}
+        items={pageOfItems}
+        columns={columns}
+        pagination={pagination}
+        onChange={this.onTableChange}
+        selection={isManagementTable ? undefined : selectionControls}
+        itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+        isExpandable={true}
+        sorting={sorting}
+        hasActions={true}
+        rowProps={(item) => ({
+          'data-test-subj': `mlJobListRow row-${item.id}`,
+        })}
+      />
     );
   }
 }

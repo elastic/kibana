@@ -6,16 +6,28 @@
  */
 
 import React, { useState, useEffect, PropsWithChildren, useMemo } from 'react';
-import { StartServicesAccessor, CoreStart } from 'src/core/public';
+import {
+  StartServicesAccessor,
+  DocLinksStart,
+  ApplicationStart,
+  NotificationsStart,
+} from 'src/core/public';
 import type { SpacesContextProps } from '../../../../../src/plugins/spaces_oss/public';
 import { createSpacesReactContext } from './context';
 import { PluginsStart } from '../plugin';
 import { SpacesManager } from '../spaces_manager';
 import { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+import { SpacesReactContext } from './types';
 
 interface InternalProps {
   spacesManager: SpacesManager;
   getStartServices: StartServicesAccessor<PluginsStart>;
+}
+
+interface Services {
+  application: ApplicationStart;
+  docLinks: DocLinksStart;
+  notifications: NotificationsStart;
 }
 
 async function getShareToSpacesData(
@@ -47,25 +59,23 @@ async function getShareToSpacesData(
 const SpacesContextWrapper = (props: PropsWithChildren<InternalProps & SpacesContextProps>) => {
   const { spacesManager, getStartServices, feature, children } = props;
 
-  const [coreStart, setCoreStart] = useState<CoreStart>();
+  const [context, setContext] = useState<SpacesReactContext<Services> | undefined>();
   const shareToSpacesDataPromise = useMemo(() => getShareToSpacesData(spacesManager, feature), [
     spacesManager,
     feature,
   ]);
 
   useEffect(() => {
-    getStartServices().then(([coreStartValue]) => {
-      setCoreStart(coreStartValue);
+    getStartServices().then(([coreStart]) => {
+      const { application, docLinks, notifications } = coreStart;
+      const services = { application, docLinks, notifications };
+      setContext(createSpacesReactContext(services, spacesManager, shareToSpacesDataPromise));
     });
-  }, [getStartServices]);
+  }, [getStartServices, shareToSpacesDataPromise, spacesManager]);
 
-  if (!coreStart) {
+  if (!context) {
     return null;
   }
-
-  const { application, docLinks, notifications } = coreStart;
-  const services = { application, docLinks, notifications };
-  const context = createSpacesReactContext(services, spacesManager, shareToSpacesDataPromise);
 
   return <context.Provider>{children}</context.Provider>;
 };

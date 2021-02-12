@@ -37,11 +37,8 @@ import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
-import { PLUGIN_ID } from '../../../../../../../common/constants/app';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
-
-const EmptyFunctionComponent: React.FC = ({ children }) => <>{children}</>;
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -265,8 +262,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     filters,
   };
 
-  const ContextWrapper = spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent;
-
   return (
     <div data-test-subj="mlAnalyticsJobList">
       {modals}
@@ -290,28 +285,26 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="mlAnalyticsTableContainer">
-        <ContextWrapper feature={PLUGIN_ID}>
-          <EuiInMemoryTable<DataFrameAnalyticsListRow>
-            allowNeutralSort={false}
-            columns={columns}
-            hasActions={false}
-            isExpandable={true}
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isSelectable={false}
-            items={analytics}
-            itemId={DataFrameAnalyticsListColumn.id}
-            loading={isLoading}
-            onTableChange={onTableChange}
-            pagination={pagination}
-            sorting={sorting}
-            search={search}
-            data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
-            rowProps={(item) => ({
-              'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
-            })}
-            error={searchError}
-          />
-        </ContextWrapper>
+        <EuiInMemoryTable<DataFrameAnalyticsListRow>
+          allowNeutralSort={false}
+          columns={columns}
+          hasActions={false}
+          isExpandable={true}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isSelectable={false}
+          items={analytics}
+          itemId={DataFrameAnalyticsListColumn.id}
+          loading={isLoading}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          sorting={sorting}
+          search={search}
+          data-test-subj={isLoading ? 'mlAnalyticsTable loading' : 'mlAnalyticsTable loaded'}
+          rowProps={(item) => ({
+            'data-test-subj': `mlAnalyticsTableRow row-${item.id}`,
+          })}
+          error={searchError}
+        />
       </div>
 
       {isSourceIndexModalVisible === true && (
