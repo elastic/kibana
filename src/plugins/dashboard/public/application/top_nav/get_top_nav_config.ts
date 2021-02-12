@@ -41,14 +41,12 @@ export function getTopNavConfig(
             getOptionsConfig(actions[TopNavIds.OPTIONS]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-            getDiscardConfig(actions[TopNavIds.DISCARD_CHANGES]),
             getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard),
           ]
         : [
             getOptionsConfig(actions[TopNavIds.OPTIONS]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-            getDiscardConfig(actions[TopNavIds.DISCARD_CHANGES]),
             getSaveConfig(actions[TopNavIds.SAVE]),
             getQuickSave(actions[TopNavIds.QUICK_SAVE]),
           ];
@@ -150,23 +148,6 @@ function getViewConfig(action: NavAction) {
       defaultMessage: 'Switch to view-only mode',
     }),
     testId: 'dashboardViewOnlyMode',
-    run: action,
-  };
-}
-
-/**
- * @returns {kbnTopNavConfig}
- */
-function getDiscardConfig(action: NavAction) {
-  return {
-    id: 'discard',
-    label: i18n.translate('dashboard.topNave.discardlButtonAriaLabel', {
-      defaultMessage: 'discard',
-    }),
-    description: i18n.translate('dashboard.topNave.discardConfigDescription', {
-      defaultMessage: 'Discard unsaved changes',
-    }),
-    testId: 'dashboardDiscardChanges',
     run: action,
   };
 }

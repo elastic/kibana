@@ -253,6 +253,10 @@ export const leaveConfirmStrings = {
     i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
       defaultMessage: 'Leave Dashboard with unsaved work?',
     }),
+  getKeepChangesText: () =>
+    i18n.translate('dashboard.appLeaveConfirmModal.keepUnsavedChangesButtonLabel', {
+      defaultMessage: 'Keep unsaved changes',
+    }),
   getDiscardTitle: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {
       defaultMessage: 'Discard changes to dashboard?',
