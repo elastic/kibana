@@ -44,8 +44,6 @@ describe('embeddable state transfer', () => {
 
   const testAppId = 'testApp';
 
-  const buildKey = (appId: string, key: string) => `${appId}-${key}`;
-
   beforeEach(() => {
     currentAppId$ = new Subject();
     currentAppId$.next(originatingApp);
@@ -86,8 +84,10 @@ describe('embeddable state transfer', () => {
   it('can send an outgoing editor state', async () => {
     await stateTransfer.navigateToEditor(destinationApp, { state: { originatingApp } });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(destinationApp, EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        originatingApp: 'superUltraTestDashboard',
+      [EMBEDDABLE_EDITOR_STATE_KEY]: {
+        [destinationApp]: {
+          originatingApp: 'superUltraTestDashboard',
+        },
       },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
@@ -104,8 +104,10 @@ describe('embeddable state transfer', () => {
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       kibanaIsNowForSports: 'extremeSportsKibana',
-      [buildKey(destinationApp, EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        originatingApp: 'superUltraTestDashboard',
+      [EMBEDDABLE_EDITOR_STATE_KEY]: {
+        [destinationApp]: {
+          originatingApp: 'superUltraTestDashboard',
+        },
       },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
@@ -125,9 +127,11 @@ describe('embeddable state transfer', () => {
       state: { type: 'coolestType', input: { savedObjectId: '150' } },
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(destinationApp, EMBEDDABLE_PACKAGE_STATE_KEY)]: {
-        type: 'coolestType',
-        input: { savedObjectId: '150' },
+      [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+        [destinationApp]: {
+          type: 'coolestType',
+          input: { savedObjectId: '150' },
+        },
       },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
@@ -144,9 +148,11 @@ describe('embeddable state transfer', () => {
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       kibanaIsNowForSports: 'extremeSportsKibana',
-      [buildKey(destinationApp, EMBEDDABLE_PACKAGE_STATE_KEY)]: {
-        type: 'coolestType',
-        input: { savedObjectId: '150' },
+      [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+        [destinationApp]: {
+          type: 'coolestType',
+          input: { savedObjectId: '150' },
+        },
       },
     });
     expect(application.navigateToApp).toHaveBeenCalledWith('superUltraVisualize', {
@@ -165,8 +171,10 @@ describe('embeddable state transfer', () => {
 
   it('can fetch an incoming editor state', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(testAppId, EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        originatingApp: 'superUltraTestDashboard',
+      [EMBEDDABLE_EDITOR_STATE_KEY]: {
+        [testAppId]: {
+          originatingApp: 'superUltraTestDashboard',
+        },
       },
     });
     const fetchedState = stateTransfer.getIncomingEditorState(testAppId);
@@ -175,14 +183,16 @@ describe('embeddable state transfer', () => {
 
   it('can fetch an incoming editor state and ignore state for other apps', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey('otherApp1', EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        originatingApp: 'whoops not me',
-      },
-      [buildKey('otherApp2', EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        originatingApp: 'otherTestDashboard',
-      },
-      [buildKey(testAppId, EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        originatingApp: 'superUltraTestDashboard',
+      [EMBEDDABLE_EDITOR_STATE_KEY]: {
+        otherApp1: {
+          originatingApp: 'whoops not me',
+        },
+        otherApp2: {
+          originatingApp: 'otherTestDashboard',
+        },
+        [testAppId]: {
+          originatingApp: 'superUltraTestDashboard',
+        },
       },
     });
     const fetchedState = stateTransfer.getIncomingEditorState(testAppId);
@@ -194,8 +204,10 @@ describe('embeddable state transfer', () => {
 
   it('incoming editor state returns undefined when state is not in the right shape', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(testAppId, EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        helloSportsKibana: 'superUltraTestDashboard',
+      [EMBEDDABLE_EDITOR_STATE_KEY]: {
+        [testAppId]: {
+          helloSportsKibana: 'superUltraTestDashboard',
+        },
       },
     });
     const fetchedState = stateTransfer.getIncomingEditorState(testAppId);
@@ -204,9 +216,11 @@ describe('embeddable state transfer', () => {
 
   it('can fetch an incoming embeddable package state', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(testAppId, EMBEDDABLE_PACKAGE_STATE_KEY)]: {
-        type: 'skisEmbeddable',
-        input: { savedObjectId: '123' },
+      [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+        [testAppId]: {
+          type: 'skisEmbeddable',
+          input: { savedObjectId: '123' },
+        },
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
@@ -215,13 +229,15 @@ describe('embeddable state transfer', () => {
 
   it('can fetch an incoming embeddable package state and ignore state for other apps', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(testAppId, EMBEDDABLE_PACKAGE_STATE_KEY)]: {
-        type: 'skisEmbeddable',
-        input: { savedObjectId: '123' },
-      },
-      [buildKey('testApp2', EMBEDDABLE_PACKAGE_STATE_KEY)]: {
-        type: 'crossCountryEmbeddable',
-        input: { savedObjectId: '456' },
+      [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+        [testAppId]: {
+          type: 'skisEmbeddable',
+          input: { savedObjectId: '123' },
+        },
+        testApp2: {
+          type: 'crossCountryEmbeddable',
+          input: { savedObjectId: '456' },
+        },
       },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
@@ -236,7 +252,11 @@ describe('embeddable state transfer', () => {
 
   it('embeddable package state returns undefined when state is not in the right shape', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(testAppId, EMBEDDABLE_PACKAGE_STATE_KEY)]: { kibanaIsFor: 'sports' },
+      [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+        [testAppId]: {
+          kibanaIsFor: 'sports',
+        },
+      },
     });
     const fetchedState = stateTransfer.getIncomingEmbeddablePackage(testAppId);
     expect(fetchedState).toBeUndefined();
@@ -244,9 +264,11 @@ describe('embeddable state transfer', () => {
 
   it('removes embeddable package key when removeAfterFetch is true', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(testAppId, EMBEDDABLE_PACKAGE_STATE_KEY)]: {
-        type: 'coolestType',
-        input: { savedObjectId: '150' },
+      [EMBEDDABLE_PACKAGE_STATE_KEY]: {
+        [testAppId]: {
+          type: 'coolestType',
+          input: { savedObjectId: '150' },
+        },
       },
       iSHouldStillbeHere: 'doing the sports thing',
     });
@@ -258,8 +280,10 @@ describe('embeddable state transfer', () => {
 
   it('removes editor state key when removeAfterFetch is true', async () => {
     store.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
-      [buildKey(testAppId, EMBEDDABLE_EDITOR_STATE_KEY)]: {
-        originatingApp: 'superCoolFootballDashboard',
+      [EMBEDDABLE_EDITOR_STATE_KEY]: {
+        [testAppId]: {
+          originatingApp: 'superCoolFootballDashboard',
+        },
       },
       iSHouldStillbeHere: 'doing the sports thing',
     });
