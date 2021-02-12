@@ -56,3 +56,5 @@ export const EXCEPTIONS_TABLE_LIST_NAME = '[data-test-subj="exceptionsTableName"
 export const EXCEPTIONS_TABLE_MODAL = '[data-test-subj="referenceErrorModal"]';
 
 export const EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
+
+export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContainer"]';
