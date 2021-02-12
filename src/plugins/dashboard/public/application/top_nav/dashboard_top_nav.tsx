@@ -321,6 +321,33 @@ export function DashboardTopNav({
     dashboardStateManager,
   ]);
 
+  const runQuickSave = useCallback(async () => {
+    const currentTitle = dashboardStateManager.getTitle();
+    const currentDescription = dashboardStateManager.getDescription();
+    const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+    let currentTags: string[] = [];
+    if (savedObjectsTagging) {
+      const dashboard = dashboardStateManager.savedDashboard;
+      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+        currentTags = dashboard.getTags();
+      }
+    }
+
+    save({}).then((response: SaveResult) => {
+      // If the save wasn't successful, put the original values back.
+      if (!(response as { id: string }).id) {
+        dashboardStateManager.setTitle(currentTitle);
+        dashboardStateManager.setDescription(currentDescription);
+        dashboardStateManager.setTimeRestore(currentTimeRestore);
+        if (savedObjectsTagging) {
+          dashboardStateManager.setTags(currentTags);
+        }
+      }
+      return response;
+    });
+  }, [save, savedObjectsTagging, dashboardStateManager]);
+
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
     const onClone = async (
@@ -356,9 +383,8 @@ export function DashboardTopNav({
       [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
       [TopNavIds.DISCARD_CHANGES]: onDiscardChanges,
       [TopNavIds.SAVE]: runSave,
+      [TopNavIds.QUICK_SAVE]: runQuickSave,
       [TopNavIds.CLONE]: runClone,
-      [TopNavIds.ADD_EXISTING]: addFromLibrary,
-      [TopNavIds.VISUALIZE]: createNew,
       [TopNavIds.OPTIONS]: (anchorElement) => {
         showOptionsPopover({
           anchorElement,
@@ -394,10 +420,9 @@ export function DashboardTopNav({
     onDiscardChanges,
     onChangeViewMode,
     savedDashboard,
-    addFromLibrary,
-    createNew,
     runClone,
     runSave,
+    runQuickSave,
     share,
   ]);
 
@@ -419,11 +444,11 @@ export function DashboardTopNav({
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showSearchBar = showQueryBar || showFilterBar;
 
-    const topNav = getTopNavConfig(
-      viewMode,
-      dashboardTopNavActions,
-      dashboardCapabilities.hideWriteControls
-    );
+    const topNav = getTopNavConfig(viewMode, dashboardTopNavActions, {
+      hideWriteControls: dashboardCapabilities.hideWriteControls,
+      isNewDashboard: !savedDashboard.id,
+      isDirty: dashboardStateManager.isDirty,
+    });
 
     return {
       appName: 'dashboard',

@@ -43,8 +43,6 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
-  onboarding: unknown;
-  sourcemap: unknown;
 }[T];
 
 type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<

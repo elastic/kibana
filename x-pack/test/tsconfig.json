@@ -41,6 +41,7 @@
     { "path": "../plugins/actions/tsconfig.json" },
     { "path": "../plugins/alerts/tsconfig.json" },
     { "path": "../plugins/apm/tsconfig.json" },
+    { "path": "../plugins/banners/tsconfig.json" },
     { "path": "../plugins/beats_management/tsconfig.json" },
     { "path": "../plugins/cloud/tsconfig.json" },
     { "path": "../plugins/code/tsconfig.json" },

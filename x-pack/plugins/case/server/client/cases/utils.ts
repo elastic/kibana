@@ -38,6 +38,7 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
+import { getAlertIds } from '../../routes/api/utils';
 
 export const getLatestPushInfo = (
   connectorId: string,
@@ -66,8 +67,9 @@ const isConnectorSupported = (connectorId: string): connectorId is FormatterConn
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
-  } else if (comment.type === CommentType.alert) {
-    return `Alert with id ${comment.alertId} added to case`;
+  } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+    const ids = getAlertIds(comment);
+    return `Alert with ids ${ids.join(', ')} added to case`;
   }
 
   return '';
@@ -306,9 +308,10 @@ export const getCommentContextFromAttributes = (
         type: CommentType.user,
         comment: attributes.comment,
       };
+    case CommentType.generatedAlert:
     case CommentType.alert:
       return {
-        type: CommentType.alert,
+        type: attributes.type,
         alertId: attributes.alertId,
         index: attributes.index,
       };
