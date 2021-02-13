@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useEffect, MouseEvent } from 'react';
+import React, { MouseEvent } from 'react';
 import styled from 'styled-components';
-import { useDispatch } from 'react-redux';
 import { Ping } from '../../../../common/runtime_types';
-import { pruneJourneyState } from '../../../state/actions/journey';
-import { clearPings } from '../../../state/actions';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';
-import { STEP_NAME_LABEL } from '../translations';
-import { ExpandRowColumn, toggleExpand } from './expand_row_col';
+import { COLLAPSE_LABEL, EXPAND_LABEL, STEP_NAME_LABEL } from '../translations';
 import { StatusBadge } from '../status_badge';
 import { StepDetailLink } from '../../common/step_detail_link';
 import { VIEW_PERFORMANCE } from '../../monitor/synthetics/translations';
 import { StepImage } from './step_image';
+import { useExpandedRow } from './use_expanded_row';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
@@ -73,46 +70,9 @@ function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
 }
 
 export const StepsList = ({ data, error, loading }: Props) => {
-  const dispatch = useDispatch();
-
   const steps = data.filter(isStepEnd);
 
-  const pruneJourneysCallback = useCallback(
-    (checkGroups: string[]) => dispatch(pruneJourneyState(checkGroups)),
-    [dispatch]
-  );
-
-  const [expandedRows, setExpandedRows] = useState<Record<string, JSX.Element>>({});
-
-  const expandedIdsToRemove = JSON.stringify(
-    Object.keys(expandedRows).filter((e) => !data.some(({ docId }) => docId === e))
-  );
-
-  useEffect(() => {
-    return () => {
-      dispatch(clearPings());
-    };
-  }, [dispatch]);
-
-  useEffect(() => {
-    const parsed = JSON.parse(expandedIdsToRemove);
-    if (parsed.length) {
-      parsed.forEach((docId: string) => {
-        delete expandedRows[docId];
-      });
-      setExpandedRows(expandedRows);
-    }
-  }, [expandedIdsToRemove, expandedRows]);
-
-  const expandedCheckGroups = data
-    .filter((p: Ping) => Object.keys(expandedRows).some((f) => p.docId === f))
-    .map(({ monitor: { check_group: cg } }) => cg);
-
-  const expandedCheckGroupsStr = JSON.stringify(expandedCheckGroups);
-
-  useEffect(() => {
-    pruneJourneysCallback(JSON.parse(expandedCheckGroupsStr));
-  }, [pruneJourneysCallback, expandedCheckGroupsStr]);
+  const { expandedRows, toggleExpand } = useExpandedRow({ steps, allPings: data });
 
   const columns: any[] = [
     {
@@ -146,19 +106,13 @@ export const StepsList = ({ data, error, loading }: Props) => {
       align: 'right',
       width: '24px',
       isExpander: true,
-      render: (item: Ping) => {
+      render: (ping: Ping) => {
         return (
-          <ExpandRowColumn
-            ping={item}
-            browserConsole={
-              data.find(
-                (step) =>
-                  step.synthetics?.type === 'journey/browserconsole' &&
-                  step.synthetics?.step?.index! === item.synthetics?.step?.index
-              )?.synthetics?.payload?.text
-            }
-            expandedRows={expandedRows}
-            setExpandedRows={setExpandedRows}
+          <EuiButtonIcon
+            data-test-subj="uptimeStepListExpandBtn"
+            onClick={() => toggleExpand({ ping })}
+            aria-label={expandedRows[ping.docId] ? COLLAPSE_LABEL : EXPAND_LABEL}
+            iconType={expandedRows[ping.docId] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
@@ -175,7 +129,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
 
         // we dont want to capture image click event
         if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'BUTTON') {
-          toggleExpand({ ping: item, expandedRows, setExpandedRows });
+          toggleExpand({ ping: item });
         }
       },
     };
@@ -195,7 +149,6 @@ export const StepsList = ({ data, error, loading }: Props) => {
         isExpandable={true}
         hasActions={true}
         items={steps}
-        itemId="docId"
         itemIdToExpandedRowMap={expandedRows}
         noItemsMessage={
           loading

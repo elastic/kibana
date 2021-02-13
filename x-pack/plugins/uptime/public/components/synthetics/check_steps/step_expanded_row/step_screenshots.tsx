@@ -15,11 +15,17 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../../../observability/public';
 import { fetchLastSuccessfulStep } from '../../../../state/api/journey';
+import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 
 const Label = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
+`;
+
+const LabelLink = euiStyled.div`
+  margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
 interface Props {
@@ -39,7 +45,7 @@ export const StepScreenshots = ({ step }: Props) => {
         stepIndex: step.synthetics?.step?.index!,
       });
     }
-  }, [step.docId]);
+  }, [step.docId, step.timestamp]);
 
   return (
     <EuiFlexGroup>
@@ -63,23 +69,27 @@ export const StepScreenshots = ({ step }: Props) => {
           screenshotExists={step.synthetics?.screenshotExists}
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
+          lazyLoad={false}
         />
         <EuiSpacer size="xs" />
         <Label>{moment(step.timestamp).format(dateFormat)}</Label>
       </EuiFlexItem>
       {!isSucceeded && lastSuccessfulStep?.monitor && (
         <EuiFlexItem>
-          <Label>
-            <FormattedMessage
-              id="xpack.uptime.synthetics.executedStep.screenshot.success"
-              defaultMessage="Screenshot from last successful check"
-            />
-          </Label>
+          <ReactRouterEuiLink to={`/journey/${lastSuccessfulStep?.monitor?.check_group}/steps`}>
+            <LabelLink>
+              <FormattedMessage
+                id="xpack.uptime.synthetics.executedStep.screenshot.success"
+                defaultMessage="Screenshot from last successful check"
+              />
+            </LabelLink>
+          </ReactRouterEuiLink>
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
             screenshotExists={true}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
             stepName={lastSuccessfulStep.synthetics?.step?.name}
+            lazyLoad={false}
           />
           <EuiSpacer size="xs" />
           <Label>{moment(lastSuccessfulStep.timestamp).format(dateFormat)}</Label>

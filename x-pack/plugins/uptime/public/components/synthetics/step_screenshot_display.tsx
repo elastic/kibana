@@ -18,6 +18,7 @@ interface StepScreenshotDisplayProps {
   checkGroup?: string;
   stepIndex?: number;
   stepName?: string;
+  lazyLoad?: boolean;
 }
 
 const IMAGE_WIDTH = 640;
@@ -40,6 +41,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   screenshotExists,
   stepIndex,
   stepName,
+  lazyLoad = true,
 }) => {
   const containerRef = useRef(null);
   const {
@@ -65,7 +67,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
   let content: JSX.Element | null = null;
   const imgSrc = basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
 
-  if (hasIntersected && screenshotExists) {
+  if ((hasIntersected || !lazyLoad) && screenshotExists) {
     content = (
       <StepImage
         allowFullScreen={true}

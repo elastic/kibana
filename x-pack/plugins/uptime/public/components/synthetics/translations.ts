@@ -10,3 +10,11 @@ import { i18n } from '@kbn/i18n';
 export const STEP_NAME_LABEL = i18n.translate('xpack.uptime.stepList.stepName', {
   defaultMessage: 'Step name',
 });
+
+export const COLLAPSE_LABEL = i18n.translate('xpack.uptime.stepList.collapseRow', {
+  defaultMessage: 'Collapse',
+});
+
+export const EXPAND_LABEL = i18n.translate('xpack.uptime.stepList.expandRow', {
+  defaultMessage: 'Expand',
+});
