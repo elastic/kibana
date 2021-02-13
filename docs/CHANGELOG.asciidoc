@@ -104,7 +104,26 @@ This section summarizes the changes in each release.
 [[release-notes-6.8.14]]
 == {kib} 6.8.14
 
-The 6.8.14 release fixes one issue. 
+The 6.8.14 release includes a security update and fixes one issue. 
+
+[float]
+[[security-update-v6.8.14]]
+=== Security update
+*Vega* visualizations are susceptible to stored and reflected XSS via a vulnerable version of the Vega library. When you create *Vega* visualizations or create a vulnerable URL that describes the visualization, an arbitrary JavaScript can execute in your browser.
+
+[float]
+[[affected-versions-v6.8.14]]
+==== Affected versions
+Affected versions include 6.8.13 and earlier.
+
+[float]
+[[solution-v6.8.14]]
+==== Solution
+Verify if you use *Vega* visualizations, then complete the following:
+
+* If you use *Vega* visualizations, upgrade to 6.8.14.
+
+* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`.
 
 [float]
 [[bug-v6.8.14]]
