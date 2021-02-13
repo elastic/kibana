@@ -6,13 +6,9 @@
  */
 
 import Boom, { isBoom, Boom as BoomType } from '@hapi/boom';
-import {
-  SavedObjectsBulkUpdateResponse,
-  SavedObjectsClientContract,
-  SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ActionResult, ActionsClient } from '../../../../actions/server';
-import { flattenCaseSavedObject, getAlertIndicesAndIDs } from '../../routes/api/utils';
+
+import { SavedObjectsBulkUpdateResponse, SavedObjectsUpdateResponse } from 'kibana/server';
+import { flattenCaseSavedObject } from '../../routes/api/utils';
 
 import {
   ActionConnector,
@@ -22,18 +18,11 @@ import {
   ExternalServiceResponse,
   ESCaseAttributes,
   CommentAttributes,
-  CaseUserActionsResponse,
-  User,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
-import { createIncident, getCommentContextFromAttributes } from './utils';
-import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-} from '../../services';
-import { CaseClientHandler } from '../client';
+import { CaseClientPush, CaseClientFactoryArguments } from '../types';
+import { createIncident, getCommentContextFromAttributes, isCommentAlertType } from './utils';
 
 const createError = (e: Error | BoomType, message: string): Error | BoomType => {
   if (isBoom(e)) {
@@ -45,40 +34,30 @@ const createError = (e: Error | BoomType, message: string): Error | BoomType => 
   return Error(message);
 };
 
-interface PushParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  caseConfigureService: CaseConfigureServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
-  user: User;
-  caseId: string;
-  connectorId: string;
-  caseClient: CaseClientHandler;
-  actionsClient: ActionsClient;
-}
-
-export const push = async ({
+export const push = ({
   savedObjectsClient,
   caseService,
   caseConfigureService,
   userActionService,
-  caseClient,
+  request,
+  response,
+}: CaseClientFactoryArguments) => async ({
   actionsClient,
-  connectorId,
+  caseClient,
   caseId,
-  user,
-}: PushParams): Promise<CaseResponse> => {
+  connectorId,
+}: CaseClientPush): Promise<CaseResponse> => {
   /* Start of push to external service */
-  let theCase: CaseResponse;
-  let connector: ActionResult;
-  let userActions: CaseUserActionsResponse;
+  let theCase;
+  let connector;
+  let userActions;
   let alerts;
   let connectorMappings;
   let externalServiceIncident;
 
   try {
     [theCase, connector, userActions] = await Promise.all([
-      caseClient.get({ id: caseId, includeComments: true, includeSubCaseComments: true }),
+      caseClient.get({ id: caseId, includeComments: true }),
       actionsClient.get({ id: connectorId }),
       caseClient.getUserActions({ caseId }),
     ]);
@@ -94,12 +73,9 @@ export const push = async ({
     );
   }
 
-  const { ids, indices } = getAlertIndicesAndIDs(theCase?.comments);
-
   try {
     alerts = await caseClient.getAlerts({
-      ids,
-      indices,
+      ids: theCase?.comments?.filter(isCommentAlertType).map((comment) => comment.alertId) ?? [],
     });
   } catch (e) {
     throw new Error(`Error getting alerts for case with id ${theCase.id}: ${e.message}`);
@@ -108,6 +84,7 @@ export const push = async ({
   try {
     connectorMappings = await caseClient.getMappings({
       actionsClient,
+      caseClient,
       connectorId: connector.id,
       connectorType: connector.actionTypeId,
     });
@@ -147,26 +124,27 @@ export const push = async ({
   /* End of push to external service */
 
   /* Start of update case with push information */
+  let user;
   let myCase;
   let myCaseConfigure;
   let comments;
 
   try {
-    [myCase, myCaseConfigure, comments] = await Promise.all([
+    [user, myCase, myCaseConfigure, comments] = await Promise.all([
+      caseService.getUser({ request, response }),
       caseService.getCase({
         client: savedObjectsClient,
-        id: caseId,
+        caseId,
       }),
       caseConfigureService.find({ client: savedObjectsClient }),
       caseService.getAllCaseComments({
         client: savedObjectsClient,
-        id: caseId,
+        caseId,
         options: {
           fields: [],
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
-        includeSubCaseComments: true,
       }),
     ]);
   } catch (e) {

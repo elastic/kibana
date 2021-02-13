@@ -10,7 +10,6 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
-  SavedObjectsFindOptions,
 } from 'src/core/server';
 
 import {
@@ -18,7 +17,6 @@ import {
   CASE_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../saved_object_types';
 
@@ -93,29 +91,16 @@ export const createMockSavedObjectsRepository = ({
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
         }
         return result[0];
-      } else if (type === CASE_SAVED_OBJECT) {
-        const result = caseSavedObject.filter((s) => s.id === id);
-        if (!result.length) {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        return result[0];
-      } else {
+      }
+
+      const result = caseSavedObject.filter((s) => s.id === id);
+      if (!result.length) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
+      return result[0];
     }),
-    find: jest.fn((findArgs: SavedObjectsFindOptions) => {
-      // References can be an array so we need to loop through it looking for the bad-guy
-      const hasReferenceIncludeBadGuy = (args: SavedObjectsFindOptions) => {
-        const references = args.hasReference;
-        if (references) {
-          return Array.isArray(references)
-            ? references.some((ref) => ref.id === 'bad-guy')
-            : references.id === 'bad-guy';
-        } else {
-          return false;
-        }
-      };
-      if (hasReferenceIncludeBadGuy(findArgs)) {
+    find: jest.fn((findArgs) => {
+      if (findArgs.hasReference && findArgs.hasReference.id === 'bad-guy') {
         throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
       }
 
@@ -153,16 +138,6 @@ export const createMockSavedObjectsRepository = ({
           per_page: 5,
           total: caseCommentSavedObject.length,
           saved_objects: caseCommentSavedObject,
-        };
-      }
-
-      // Currently not supporting sub cases in this mock library
-      if (findArgs.type === SUB_CASE_SAVED_OBJECT) {
-        return {
-          page: 1,
-          per_page: 0,
-          total: 0,
-          saved_objects: [],
         };
       }
 
@@ -231,22 +206,19 @@ export const createMockSavedObjectsRepository = ({
     }),
     update: jest.fn((type, id, attributes) => {
       if (type === CASE_COMMENT_SAVED_OBJECT) {
-        const foundComment = caseCommentSavedObject.findIndex((s: { id: string }) => s.id === id);
-        if (foundComment === -1) {
+        if (!caseCommentSavedObject.find((s) => s.id === id)) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
         }
-        const comment = caseCommentSavedObject[foundComment];
-        caseCommentSavedObject.splice(foundComment, 1, {
-          ...comment,
-          id,
-          type,
-          updated_at: '2019-11-22T22:50:55.191Z',
-          version: 'WzE3LDFd',
-          attributes: {
-            ...comment.attributes,
-            ...attributes,
+        caseCommentSavedObject = [
+          ...caseCommentSavedObject,
+          {
+            id,
+            type,
+            updated_at: '2019-11-22T22:50:55.191Z',
+            version: 'WzE3LDFd',
+            attributes,
           },
-        });
+        ];
       } else if (type === CASE_SAVED_OBJECT) {
         if (!caseSavedObject.find((s) => s.id === id)) {
           throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);

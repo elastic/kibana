@@ -23,12 +23,6 @@ import {
   AlertServiceContract,
 } from '../services';
 
-export {
-  ContextTypeGeneratedAlertType,
-  CommentSchemaType,
-  ContextTypeAlertSchemaType,
-} from './case/schema';
-
 export interface GetActionTypeParams {
   logger: Logger;
   caseService: CaseServiceSetup;

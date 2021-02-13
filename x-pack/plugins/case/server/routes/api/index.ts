@@ -30,19 +30,6 @@ import { initPatchCaseConfigure } from './cases/configure/patch_configure';
 import { initPostCaseConfigure } from './cases/configure/post_configure';
 
 import { RouteDeps } from './types';
-import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
-import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
-import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
-import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
-
-/**
- * Default page number when interacting with the saved objects API.
- */
-export const defaultPage = 1;
-/**
- * Default number of results when interacting with the saved objects API.
- */
-export const defaultPerPage = 20;
 
 export function initCaseApi(deps: RouteDeps) {
   // Cases
@@ -53,11 +40,6 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseApi(deps);
   initGetAllUserActionsApi(deps);
-  // Sub cases
-  initGetSubCaseApi(deps);
-  initPatchSubCasesApi(deps);
-  initFindSubCasesApi(deps);
-  initDeleteSubCasesApi(deps);
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);

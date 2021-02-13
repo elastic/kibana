@@ -5,16 +5,41 @@
  * 2.0.
  */
 
-import { CaseClientFactoryArguments, CaseClient } from './types';
-import { CaseClientHandler } from './client';
+import {
+  CaseClientFactoryArguments,
+  CaseClient,
+  CaseClientFactoryMethods,
+  CaseClientMethods,
+} from './types';
+import { create } from './cases/create';
+import { get } from './cases/get';
+import { update } from './cases/update';
+import { push } from './cases/push';
+import { addComment } from './comments/add';
+import { getFields } from './configure/get_fields';
+import { getMappings } from './configure/get_mappings';
+import { updateAlertsStatus } from './alerts/update_status';
+import { get as getUserActions } from './user_actions/get';
+import { get as getAlerts } from './alerts/get';
 
-export { CaseClientHandler } from './client';
 export { CaseClient } from './types';
 
-/**
- * Create a CaseClientHandler to external services (other plugins).
- */
-export const createExternalCaseClient = (clientArgs: CaseClientFactoryArguments): CaseClient => {
-  const client = new CaseClientHandler(clientArgs);
-  return client;
+export const createCaseClient = (args: CaseClientFactoryArguments): CaseClient => {
+  const methods: CaseClientFactoryMethods = {
+    create,
+    get,
+    update,
+    push,
+    addComment,
+    getAlerts,
+    getFields,
+    getMappings,
+    getUserActions,
+    updateAlertsStatus,
+  };
+
+  return (Object.keys(methods) as CaseClientMethods[]).reduce((client, method) => {
+    client[method] = methods[method](args);
+    return client;
+  }, {} as CaseClient);
 };

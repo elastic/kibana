@@ -20,21 +20,13 @@ export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionServiceSetup>;
 export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
 
 export const createCaseServiceMock = (): CaseServiceMock => ({
-  createSubCase: jest.fn(),
   deleteCase: jest.fn(),
   deleteComment: jest.fn(),
-  deleteSubCase: jest.fn(),
   findCases: jest.fn(),
-  findSubCases: jest.fn(),
-  findSubCasesByCaseId: jest.fn(),
   getAllCaseComments: jest.fn(),
-  getAllSubCaseComments: jest.fn(),
   getCase: jest.fn(),
   getCases: jest.fn(),
   getComment: jest.fn(),
-  getMostRecentSubCase: jest.fn(),
-  getSubCase: jest.fn(),
-  getSubCases: jest.fn(),
   getTags: jest.fn(),
   getReporters: jest.fn(),
   getUser: jest.fn(),
@@ -44,14 +36,6 @@ export const createCaseServiceMock = (): CaseServiceMock => ({
   patchCases: jest.fn(),
   patchComment: jest.fn(),
   patchComments: jest.fn(),
-  patchSubCase: jest.fn(),
-  patchSubCases: jest.fn(),
-  findSubCaseStatusStats: jest.fn(),
-  getCommentsByAssociation: jest.fn(),
-  getCaseCommentStats: jest.fn(),
-  findSubCasesGroupByCase: jest.fn(),
-  findCaseStatusStats: jest.fn(),
-  findCasesGroupedByID: jest.fn(),
 });
 
 export const createConfigureServiceMock = (): CaseConfigureServiceMock => ({
@@ -73,6 +57,7 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => ({
 });
 
 export const createAlertServiceMock = (): AlertServiceMock => ({
+  initialize: jest.fn(),
   updateAlertsStatus: jest.fn(),
   getAlerts: jest.fn(),
 });

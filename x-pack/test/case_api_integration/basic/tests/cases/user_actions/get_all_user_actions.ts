@@ -10,12 +10,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../plugins/case/common/constants';
 import { CommentType } from '../../../../../../plugins/case/common/api';
-import {
-  userActionPostResp,
-  defaultUser,
-  postCaseReq,
-  postCommentUserReq,
-} from '../../../../common/lib/mock';
+import { defaultUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -78,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
-      expect(JSON.parse(body[0].new_value)).to.eql(userActionPostResp);
+      expect(body[0].new_value).to.eql(JSON.stringify(postCaseReq));
     });
 
     it(`on close case, user action: 'update' should be called with actionFields: ['status']`, async () => {
@@ -152,18 +147,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['connector']);
       expect(body[1].action).to.eql('update');
-      expect(JSON.parse(body[1].old_value)).to.eql({
-        id: 'none',
-        name: 'none',
-        type: '.none',
-        fields: null,
-      });
-      expect(JSON.parse(body[1].new_value)).to.eql({
-        id: '123',
-        name: 'Connector',
-        type: '.jira',
-        fields: { issueType: 'Task', priority: 'High', parent: null },
-      });
+      expect(body[1].old_value).to.eql(`{"id":"none","name":"none","type":".none","fields":null}`);
+      expect(body[1].new_value).to.eql(
+        `{"id":"123","name":"Connector","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}}`
+      );
     });
 
     it(`on update tags, user action: 'add' and 'delete' should be called with actionFields: ['tags']`, async () => {
@@ -297,7 +284,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[1].action_field).to.eql(['comment']);
       expect(body[1].action).to.eql('create');
       expect(body[1].old_value).to.eql(null);
-      expect(JSON.parse(body[1].new_value)).to.eql(postCommentUserReq);
+      expect(body[1].new_value).to.eql(JSON.stringify(postCommentUserReq));
     });
 
     it(`on update comment, user action: 'update' should be called with actionFields: ['comments']`, async () => {
@@ -330,11 +317,13 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.length).to.eql(3);
       expect(body[2].action_field).to.eql(['comment']);
       expect(body[2].action).to.eql('update');
-      expect(JSON.parse(body[2].old_value)).to.eql(postCommentUserReq);
-      expect(JSON.parse(body[2].new_value)).to.eql({
-        comment: newComment,
-        type: CommentType.user,
-      });
+      expect(body[2].old_value).to.eql(JSON.stringify(postCommentUserReq));
+      expect(body[2].new_value).to.eql(
+        JSON.stringify({
+          comment: newComment,
+          type: CommentType.user,
+        })
+      );
     });
 
     it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {

@@ -10,13 +10,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/case/common/constants';
 import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
-import {
-  createCaseAction,
-  createSubCase,
-  deleteAllCaseItems,
-  deleteCaseAction,
-} from '../../../../common/lib/utils';
-import { CommentResponse, CommentType } from '../../../../../../plugins/case/common/api';
+import { deleteCases, deleteCasesUserActions, deleteComments } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -24,15 +18,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('get_comment', () => {
-    let actionID: string;
-    before(async () => {
-      actionID = await createCaseAction(supertest);
-    });
-    after(async () => {
-      await deleteCaseAction(supertest, actionID);
-    });
     afterEach(async () => {
-      await deleteAllCaseItems(es);
+      await deleteCases(es);
+      await deleteComments(es);
+      await deleteCasesUserActions(es);
     });
 
     it('should get a comment', async () => {
@@ -56,15 +45,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(comment).to.eql(patchedCase.comments[0]);
     });
-
-    it('should get a sub case comment', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      const { body: comment }: { body: CommentResponse } = await supertest
-        .get(`${CASES_URL}/${caseInfo.id}/comments/${caseInfo.subCase!.comments![0].id}`)
-        .expect(200);
-      expect(comment.type).to.be(CommentType.generatedAlert);
-    });
-
     it('unhappy path - 404s when comment is not there', async () => {
       await supertest
         .get(`${CASES_URL}/fake-id/comments/fake-comment`)

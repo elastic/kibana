@@ -7,20 +7,6 @@
 
 import * as rt from 'io-ts';
 
-export enum CaseStatuses {
-  open = 'open',
-  'in-progress' = 'in-progress',
-  closed = 'closed',
-}
-
-export const CaseStatusRt = rt.union([
-  rt.literal(CaseStatuses.open),
-  rt.literal(CaseStatuses['in-progress']),
-  rt.literal(CaseStatuses.closed),
-]);
-
-export const caseStatuses = Object.values(CaseStatuses);
-
 export const CasesStatusResponseRt = rt.type({
   count_open_cases: rt.number,
   count_in_progress_cases: rt.number,

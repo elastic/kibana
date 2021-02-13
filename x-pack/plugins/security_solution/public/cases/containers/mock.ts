@@ -18,8 +18,6 @@ import {
   CasesResponse,
   CasesFindResponse,
   CommentType,
-  AssociationType,
-  CaseType,
 } from '../../../../case/common/api';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { ConnectorTypes } from '../../../../case/common/api/connectors';
@@ -40,7 +38,6 @@ export const elasticUser = {
 export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -55,7 +52,6 @@ export const basicComment: Comment = {
 
 export const alertComment: Comment = {
   alertId: 'alert-id-1',
-  associationType: AssociationType.case,
   index: 'alert-index-1',
   type: CommentType.alert,
   id: 'alert-comment-id',
@@ -69,7 +65,6 @@ export const alertComment: Comment = {
 };
 
 export const basicCase: Case = {
-  type: CaseType.individual,
   closedAt: null,
   closedBy: null,
   id: basicCaseId,
@@ -88,7 +83,6 @@ export const basicCase: Case = {
   tags,
   title: 'Another horrible breach!!',
   totalComment: 1,
-  totalAlerts: 0,
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
@@ -187,7 +181,6 @@ export const elasticUserSnake = {
 };
 
 export const basicCommentSnake: CommentResponse = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,

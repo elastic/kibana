@@ -10,18 +10,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsClientContract } from 'src/core/server';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
+  CasePostRequestRt,
   throwErrors,
   excess,
   CaseResponseRt,
   CaseResponse,
-  CaseClientPostRequestRt,
-  CasePostRequest,
-  CaseType,
-  User,
 } from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
@@ -29,39 +25,22 @@ import {
   transformCaseConnectorToEsConnector,
 } from '../../routes/api/cases/helpers';
 
-import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-} from '../../services';
+import { CaseClientCreate, CaseClientFactoryArguments } from '../types';
 
-interface CreateCaseArgs {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
-  user: User;
-  savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionServiceSetup;
-  theCase: CasePostRequest;
-}
-
-export const create = async ({
+export const create = ({
   savedObjectsClient,
   caseService,
   caseConfigureService,
   userActionService,
-  user,
-  theCase,
-}: CreateCaseArgs): Promise<CaseResponse> => {
-  // default to an individual case if the type is not defined.
-  const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
+  request,
+}: CaseClientFactoryArguments) => async ({ theCase }: CaseClientCreate): Promise<CaseResponse> => {
   const query = pipe(
-    // decode with the defaulted type field
-    excess(CaseClientPostRequestRt).decode({ type, ...nonTypeCaseFields }),
+    excess(CasePostRequestRt).decode(theCase),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = user;
+  const { username, full_name, email } = await caseService.getUser({ request });
   const createdDate = new Date().toISOString();
   const myCaseConfigure = await caseConfigureService.find({ client: savedObjectsClient });
   const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);

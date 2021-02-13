@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes, CaseStatuses, CaseType, CaseClientPostRequest } from '../../../common/api';
+import { ConnectorTypes, CasePostRequest, CaseStatuses } from '../../../common/api';
 
 import {
   createMockSavedObjectsRepository,
@@ -25,11 +25,10 @@ describe('create', () => {
 
   describe('happy path', () => {
     test('it creates the case correctly', async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase = {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
-        type: CaseType.individual,
         connector: {
           id: '123',
           name: 'Jira',
@@ -39,100 +38,75 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-      };
+      } as CasePostRequest;
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
         caseConfigureSavedObject: mockCaseConfigure,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.create(postCase);
+      const res = await caseClient.client.create({ theCase: postCase });
 
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "comments": Array [],
-          "connector": Object {
-            "fields": Object {
-              "issueType": "Task",
-              "parent": null,
-              "priority": "High",
-            },
-            "id": "123",
-            "name": "Jira",
-            "type": ".jira",
-          },
-          "created_at": "2019-11-25T21:54:48.952Z",
-          "created_by": Object {
-            "email": "d00d@awesome.com",
-            "full_name": "Awesome D00d",
-            "username": "awesome",
-          },
-          "description": "This is a brand new case of a bad meanie defacing data",
-          "external_service": null,
-          "id": "mock-it",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "subCases": undefined,
-          "tags": Array [
-            "defacement",
-          ],
-          "title": "Super Bad Security Issue",
-          "totalAlerts": 0,
-          "totalComment": 0,
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-          "version": "WzksMV0=",
-        }
-      `);
+      expect(res).toEqual({
+        id: 'mock-it',
+        comments: [],
+        totalComment: 0,
+        closed_at: null,
+        closed_by: null,
+        connector: {
+          id: '123',
+          name: 'Jira',
+          type: ConnectorTypes.jira,
+          fields: { issueType: 'Task', priority: 'High', parent: null },
+        },
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        external_service: null,
+        title: 'Super Bad Security Issue',
+        status: CaseStatuses.open,
+        tags: ['defacement'],
+        updated_at: null,
+        updated_by: null,
+        version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
+      });
 
       expect(
         caseClient.services.userActionService.postUserActions.mock.calls[0][0].actions
-        // using a snapshot here so we don't have to update the text field manually each time it changes
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "attributes": Object {
-              "action": "create",
-              "action_at": "2019-11-25T21:54:48.952Z",
-              "action_by": Object {
-                "email": "d00d@awesome.com",
-                "full_name": "Awesome D00d",
-                "username": "awesome",
-              },
-              "action_field": Array [
-                "description",
-                "status",
-                "tags",
-                "title",
-                "connector",
-                "settings",
-              ],
-              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true}}",
-              "old_value": null,
+      ).toEqual([
+        {
+          attributes: {
+            action: 'create',
+            action_at: '2019-11-25T21:54:48.952Z',
+            action_by: {
+              email: 'd00d@awesome.com',
+              full_name: 'Awesome D00d',
+              username: 'awesome',
             },
-            "references": Array [
-              Object {
-                "id": "mock-it",
-                "name": "associated-cases",
-                "type": "cases",
-              },
-            ],
+            action_field: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
+            new_value:
+              '{"description":"This is a brand new case of a bad meanie defacing data","title":"Super Bad Security Issue","tags":["defacement"],"connector":{"id":"123","name":"Jira","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}},"settings":{"syncAlerts":true}}',
+            old_value: null,
           },
-        ]
-      `);
+          references: [
+            {
+              id: 'mock-it',
+              name: 'associated-cases',
+              type: 'cases',
+            },
+          ],
+        },
+      ]);
     });
 
     test('it creates the case without connector in the configuration', async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase = {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
-        type: CaseType.individual,
         connector: {
           id: 'none',
           name: 'none',
@@ -148,53 +122,36 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      const res = await caseClient.client.create(postCase);
+      const res = await caseClient.client.create({ theCase: postCase });
 
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "comments": Array [],
-          "connector": Object {
-            "fields": null,
-            "id": "none",
-            "name": "none",
-            "type": ".none",
-          },
-          "created_at": "2019-11-25T21:54:48.952Z",
-          "created_by": Object {
-            "email": "d00d@awesome.com",
-            "full_name": "Awesome D00d",
-            "username": "awesome",
-          },
-          "description": "This is a brand new case of a bad meanie defacing data",
-          "external_service": null,
-          "id": "mock-it",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "subCases": undefined,
-          "tags": Array [
-            "defacement",
-          ],
-          "title": "Super Bad Security Issue",
-          "totalAlerts": 0,
-          "totalComment": 0,
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-          "version": "WzksMV0=",
-        }
-      `);
+      expect(res).toEqual({
+        id: 'mock-it',
+        comments: [],
+        totalComment: 0,
+        closed_at: null,
+        closed_by: null,
+        connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: { full_name: 'Awesome D00d', email: 'd00d@awesome.com', username: 'awesome' },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        external_service: null,
+        title: 'Super Bad Security Issue',
+        status: CaseStatuses.open,
+        tags: ['defacement'],
+        updated_at: null,
+        updated_by: null,
+        version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
+      });
     });
 
     test('Allow user to create case without authentication', async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase = {
         description: 'This is a brand new case of a bad meanie defacing data',
         title: 'Super Bad Security Issue',
         tags: ['defacement'],
-        type: CaseType.individual,
         connector: {
           id: 'none',
           name: 'none',
@@ -213,45 +170,33 @@ describe('create', () => {
         savedObjectsClient,
         badAuth: true,
       });
-      const res = await caseClient.client.create(postCase);
+      const res = await caseClient.client.create({ theCase: postCase });
 
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "closed_at": null,
-          "closed_by": null,
-          "comments": Array [],
-          "connector": Object {
-            "fields": null,
-            "id": "none",
-            "name": "none",
-            "type": ".none",
-          },
-          "created_at": "2019-11-25T21:54:48.952Z",
-          "created_by": Object {
-            "email": null,
-            "full_name": null,
-            "username": null,
-          },
-          "description": "This is a brand new case of a bad meanie defacing data",
-          "external_service": null,
-          "id": "mock-it",
-          "settings": Object {
-            "syncAlerts": true,
-          },
-          "status": "open",
-          "subCases": undefined,
-          "tags": Array [
-            "defacement",
-          ],
-          "title": "Super Bad Security Issue",
-          "totalAlerts": 0,
-          "totalComment": 0,
-          "type": "individual",
-          "updated_at": null,
-          "updated_by": null,
-          "version": "WzksMV0=",
-        }
-      `);
+      expect(res).toEqual({
+        id: 'mock-it',
+        comments: [],
+        totalComment: 0,
+        closed_at: null,
+        closed_by: null,
+        connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: {
+          email: null,
+          full_name: null,
+          username: null,
+        },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        external_service: null,
+        title: 'Super Bad Security Issue',
+        status: CaseStatuses.open,
+        tags: ['defacement'],
+        updated_at: null,
+        updated_by: null,
+        version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
+      });
     });
   });
 
@@ -393,7 +338,6 @@ describe('create', () => {
         title: 'a title',
         description: 'This is a brand new case of a bad meanie defacing data',
         tags: ['defacement'],
-        type: CaseType.individual,
         status: CaseStatuses.closed,
         connector: {
           id: 'none',
@@ -410,7 +354,7 @@ describe('create', () => {
         caseSavedObject: mockCases,
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.create(postCase).catch((e) => {
+      caseClient.client.create({ theCase: postCase }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(400);
@@ -418,11 +362,10 @@ describe('create', () => {
     });
 
     it(`Returns an error if postNewCase throws`, async () => {
-      const postCase: CaseClientPostRequest = {
+      const postCase = {
         description: 'Throw an error',
         title: 'Super Bad Security Issue',
         tags: ['error'],
-        type: CaseType.individual,
         connector: {
           id: 'none',
           name: 'none',
@@ -438,7 +381,7 @@ describe('create', () => {
       });
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
-      caseClient.client.create(postCase).catch((e) => {
+      caseClient.client.create({ theCase: postCase }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
         expect(e.output.statusCode).toBe(400);

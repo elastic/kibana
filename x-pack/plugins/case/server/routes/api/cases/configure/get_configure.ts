@@ -40,6 +40,7 @@ export function initGetCaseConfigure({ caseConfigureService, router }: RouteDeps
           try {
             mappings = await caseClient.getMappings({
               actionsClient,
+              caseClient,
               connectorId: connector.id,
               connectorType: connector.type,
             });

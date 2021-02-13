@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
 import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
-import { CaseUserActionServiceSetup } from '../../services';
+import { CaseClientGetUserActions, CaseClientFactoryArguments } from '../types';
 
-interface GetParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionServiceSetup;
-  caseId: string;
-}
-
-export const get = async ({
+export const get = ({
   savedObjectsClient,
   userActionService,
+}: CaseClientFactoryArguments) => async ({
   caseId,
-}: GetParams): Promise<CaseUserActionsResponse> => {
+}: CaseClientGetUserActions): Promise<CaseUserActionsResponse> => {
   const userActions = await userActionService.getUserActions({
     client: savedObjectsClient,
     caseId,

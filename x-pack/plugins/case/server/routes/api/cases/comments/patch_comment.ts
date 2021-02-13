@@ -12,44 +12,12 @@ import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { CommentableCase } from '../../../../common';
-import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
+import { CommentPatchRequestRt, CaseResponseRt, throwErrors } from '../../../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
-import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
+import { escapeHatch, wrapError, flattenCaseSavedObject, decodeComment } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { CaseServiceSetup } from '../../../../services';
-
-interface CombinedCaseParams {
-  service: CaseServiceSetup;
-  client: SavedObjectsClientContract;
-  caseID: string;
-  subCaseID?: string;
-}
-
-async function getCommentableCase({ service, client, caseID, subCaseID }: CombinedCaseParams) {
-  if (subCaseID) {
-    const [caseInfo, subCase] = await Promise.all([
-      service.getCase({
-        client,
-        id: caseID,
-      }),
-      service.getSubCase({
-        client,
-        id: subCaseID,
-      }),
-    ]);
-    return new CommentableCase({ collection: caseInfo, service, subCase, soClient: client });
-  } else {
-    const caseInfo = await service.getCase({
-      client,
-      id: caseID,
-    });
-    return new CommentableCase({ collection: caseInfo, service, soClient: client });
-  }
-}
 
 export function initPatchCommentApi({
   caseConfigureService,
@@ -64,30 +32,24 @@ export function initPatchCommentApi({
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseID: schema.maybe(schema.string()),
-          })
-        ),
         body: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        const caseId = request.params.case_id;
         const query = pipe(
           CommentPatchRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
         const { id: queryCommentId, version: queryCommentVersion, ...queryRestAttributes } = query;
-        decodeCommentRequest(queryRestAttributes);
+        decodeComment(queryRestAttributes);
 
-        const commentableCase = await getCommentableCase({
-          service: caseService,
+        const myCase = await caseService.getCase({
           client,
-          caseID: request.params.case_id,
-          subCaseID: request.query?.subCaseID,
+          caseId,
         });
 
         const myComment = await caseService.getComment({
@@ -103,13 +65,9 @@ export function initPatchCommentApi({
           throw Boom.badRequest(`You cannot change the type of the comment.`);
         }
 
-        const saveObjType = request.query?.subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-
-        const caseRef = myComment.references.find((c) => c.type === saveObjType);
-        if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
-          throw Boom.notFound(
-            `This comment ${queryCommentId} does not exist in ${commentableCase.id}).`
-          );
+        const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
+        if (caseRef == null || (caseRef != null && caseRef.id !== caseId)) {
+          throw Boom.notFound(`This comment ${queryCommentId} does not exist in ${caseId}).`);
         }
 
         if (queryCommentVersion !== myComment.version) {
@@ -119,46 +77,84 @@ export function initPatchCommentApi({
         }
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request });
-        const userInfo: User = {
-          username,
-          full_name,
-          email,
-        };
-
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
-        const {
-          comment: updatedComment,
-          commentableCase: updatedCase,
-        } = await commentableCase.updateComment({
-          updateRequest: query,
-          updatedAt: updatedDate,
-          user: userInfo,
+        const [updatedComment, updatedCase] = await Promise.all([
+          caseService.patchComment({
+            client,
+            commentId: queryCommentId,
+            updatedAttributes: {
+              ...queryRestAttributes,
+              updated_at: updatedDate,
+              updated_by: { email, full_name, username },
+            },
+            version: queryCommentVersion,
+          }),
+          caseService.patchCase({
+            client,
+            caseId,
+            updatedAttributes: {
+              updated_at: updatedDate,
+              updated_by: { username, full_name, email },
+            },
+            version: myCase.version,
+          }),
+        ]);
+
+        const totalCommentsFindByCases = await caseService.getAllCaseComments({
+          client,
+          caseId,
+          options: {
+            fields: [],
+            page: 1,
+            perPage: 1,
+          },
         });
 
-        await userActionService.postUserActions({
-          client,
-          actions: [
-            buildCommentUserActionItem({
-              action: 'update',
-              actionAt: updatedDate,
-              actionBy: { username, full_name, email },
-              caseId: request.params.case_id,
-              subCaseId: request.query?.subCaseID,
-              commentId: updatedComment.id,
-              fields: ['comment'],
-              newValue: JSON.stringify(queryRestAttributes),
-              oldValue: JSON.stringify(
-                // We are interested only in ContextBasicRt attributes
-                // myComment.attribute contains also CommentAttributesBasicRt attributes
-                pick(Object.keys(queryRestAttributes), myComment.attributes)
-              ),
-            }),
-          ],
-        });
+        const [comments] = await Promise.all([
+          caseService.getAllCaseComments({
+            client,
+            caseId: request.params.case_id,
+            options: {
+              fields: [],
+              page: 1,
+              perPage: totalCommentsFindByCases.total,
+            },
+          }),
+          userActionService.postUserActions({
+            client,
+            actions: [
+              buildCommentUserActionItem({
+                action: 'update',
+                actionAt: updatedDate,
+                actionBy: { username, full_name, email },
+                caseId: request.params.case_id,
+                commentId: updatedComment.id,
+                fields: ['comment'],
+                newValue: JSON.stringify(queryRestAttributes),
+                oldValue: JSON.stringify(
+                  // We are interested only in ContextBasicRt attributes
+                  // myComment.attribute contains also CommentAttributesBasicRt attributes
+                  pick(Object.keys(queryRestAttributes), myComment.attributes)
+                ),
+              }),
+            ],
+          }),
+        ]);
 
         return response.ok({
-          body: await updatedCase.encode(),
+          body: CaseResponseRt.encode(
+            flattenCaseSavedObject({
+              savedObject: {
+                ...myCase,
+                ...updatedCase,
+                attributes: { ...myCase.attributes, ...updatedCase.attributes },
+                version: updatedCase.version ?? myCase.version,
+                references: myCase.references,
+              },
+              comments: comments.saved_objects,
+            })
+          ),
         });
       } catch (error) {
         return response.customError(wrapError(error));

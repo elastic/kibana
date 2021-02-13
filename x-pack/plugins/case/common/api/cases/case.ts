@@ -10,21 +10,22 @@ import * as rt from 'io-ts';
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
-import { CasesStatusResponseRt, CaseStatusRt } from './status';
+import { CasesStatusResponseRt } from './status';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
-import { SubCaseResponseRt } from './sub_case';
 
-export enum CaseType {
-  collection = 'collection',
-  individual = 'individual',
+export enum CaseStatuses {
+  open = 'open',
+  'in-progress' = 'in-progress',
+  closed = 'closed',
 }
 
-/**
- * Exposing the field used to define the case type so that it can be used for filtering in saved object find queries.
- */
-export const caseTypeField = 'type';
+const CaseStatusRt = rt.union([
+  rt.literal(CaseStatuses.open),
+  rt.literal(CaseStatuses['in-progress']),
+  rt.literal(CaseStatuses.closed),
+]);
 
-const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
+export const caseStatuses = Object.values(CaseStatuses);
 
 const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
@@ -35,7 +36,6 @@ const CaseBasicRt = rt.type({
   status: CaseStatusRt,
   tags: rt.array(rt.string),
   title: rt.string,
-  [caseTypeField]: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
 });
@@ -72,7 +72,7 @@ export const CaseAttributesRt = rt.intersection([
   }),
 ]);
 
-const CasePostRequestNoTypeRt = rt.type({
+export const CasePostRequestRt = rt.type({
   description: rt.string,
   tags: rt.array(rt.string),
   title: rt.string,
@@ -80,27 +80,7 @@ const CasePostRequestNoTypeRt = rt.type({
   settings: SettingsRt,
 });
 
-/**
- * This type is used for validating a create case request. It requires that the type field be defined.
- */
-export const CaseClientPostRequestRt = rt.type({
-  ...CasePostRequestNoTypeRt.props,
-  [caseTypeField]: CaseTypeRt,
-});
-
-/**
- * This type is not used for validation when decoding a request because intersection does not have props defined which
- * required for the excess function. Instead we use this as the type used by the UI. This allows the type field to be
- * optional and the server will handle setting it to a default value before validating that the request
- * has all the necessary fields. CaseClientPostRequestRt is used for validation.
- */
-export const CasePostRequestRt = rt.intersection([
-  rt.partial({ type: CaseTypeRt }),
-  CasePostRequestNoTypeRt,
-]);
-
 export const CasesFindRequestRt = rt.partial({
-  type: CaseTypeRt,
   tags: rt.union([rt.array(rt.string), rt.string]),
   status: CaseStatusRt,
   reporters: rt.union([rt.array(rt.string), rt.string]),
@@ -119,11 +99,9 @@ export const CaseResponseRt = rt.intersection([
   rt.type({
     id: rt.string,
     totalComment: rt.number,
-    totalAlerts: rt.number,
     version: rt.string,
   }),
   rt.partial({
-    subCases: rt.array(SubCaseResponseRt),
     comments: rt.array(CommentResponseRt),
   }),
 ]);
@@ -172,21 +150,13 @@ export const ExternalServiceResponseRt = rt.intersection([
 ]);
 
 export type CaseAttributes = rt.TypeOf<typeof CaseAttributesRt>;
-/**
- * This field differs from the CasePostRequest in that the post request's type field can be optional. This type requires
- * that the type field be defined. The CasePostRequest should be used in most places (the UI etc). This type is really
- * only necessary for validation.
- */
-export type CaseClientPostRequest = rt.TypeOf<typeof CaseClientPostRequestRt>;
 export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type CaseResponse = rt.TypeOf<typeof CaseResponseRt>;
 export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
-export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
-export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
 export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
 
 export type ESCaseAttributes = Omit<CaseAttributes, 'connector'> & { connector: ESCaseConnector };

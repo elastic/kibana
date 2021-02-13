@@ -11,8 +11,7 @@ import { Comment } from '../../containers/types';
 export const getRuleIdsFromComments = (comments: Comment[]) =>
   comments.reduce<string[]>((ruleIds, comment: Comment) => {
     if (comment.type === CommentType.alert) {
-      const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-      return [...ruleIds, ...ids];
+      return [...ruleIds, comment.alertId];
     }
 
     return ruleIds;

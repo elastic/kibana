@@ -7,15 +7,11 @@
 
 import { curry } from 'lodash';
 
+import { KibanaRequest, kibanaResponseFactory } from '../../../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import {
-  CasePatchRequest,
-  CasePostRequest,
-  CommentRequest,
-  CommentType,
-} from '../../../common/api';
-import { createExternalCaseClient } from '../../client';
-import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
+import { CasePatchRequest, CasePostRequest } from '../../../common/api';
+import { createCaseClient } from '../../client';
+import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
   CaseExecutorResponse,
   ExecutorSubActionAddCommentParams,
@@ -23,9 +19,9 @@ import {
   CaseActionTypeExecutorOptions,
 } from './types';
 import * as i18n from './translations';
+import type { CasesRequestHandlerContext } from '../../types';
 
-import { GetActionTypeParams, isCommentGeneratedAlert } from '..';
-import { nullUser } from '../../common';
+import { GetActionTypeParams } from '..';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -73,17 +69,18 @@ async function executor(
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
-  const { savedObjectsClient, scopedClusterClient } = services;
-  const caseClient = createExternalCaseClient({
+  const { savedObjectsClient } = services;
+  const caseClient = createCaseClient({
     savedObjectsClient,
-    scopedClusterClient,
-    // we might want the user information to be passed as part of the action request
-    user: nullUser,
+    request: {} as KibanaRequest,
+    response: kibanaResponseFactory,
     caseService,
     caseConfigureService,
     connectorMappingsService,
     userActionService,
     alertsService,
+    // TODO: When case connector is enabled we should figure out how to pass the context.
+    context: {} as CasesRequestHandlerContext,
   });
 
   if (!supportedSubActions.includes(subAction)) {
@@ -93,9 +90,7 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    data = await caseClient.create({
-      ...(subActionParams as CasePostRequest),
-    });
+    data = await caseClient.create({ theCase: subActionParams as CasePostRequest });
   }
 
   if (subAction === 'update') {
@@ -107,39 +102,16 @@ async function executor(
       {} as CasePatchRequest
     );
 
-    data = await caseClient.update({ cases: [updateParamsWithoutNullValues] });
+    data = await caseClient.update({
+      caseClient,
+      cases: { cases: [updateParamsWithoutNullValues] },
+    });
   }
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    const formattedComment = transformConnectorComment(comment);
-    data = await caseClient.addComment({ caseId, comment: formattedComment });
+    data = await caseClient.addComment({ caseClient, caseId, comment });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
 }
-
-/**
- * This converts a connector style generated alert ({_id: string} | {_id: string}[]) to the expected format of addComment.
- */
-export const transformConnectorComment = (comment: CommentSchemaType): CommentRequest => {
-  if (isCommentGeneratedAlert(comment)) {
-    const alertId: string[] = [];
-    if (Array.isArray(comment.alerts)) {
-      alertId.push(
-        ...comment.alerts.map((alert: { _id: string }) => {
-          return alert._id;
-        })
-      );
-    } else {
-      alertId.push(comment.alerts._id);
-    }
-    return {
-      type: CommentType.generatedAlert,
-      alertId,
-      index: comment.index,
-    };
-  } else {
-    return comment;
-  }
-};

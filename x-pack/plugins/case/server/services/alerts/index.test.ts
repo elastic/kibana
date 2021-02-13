@@ -6,21 +6,20 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { CaseStatuses } from '../../../common/api';
 import { AlertService, AlertServiceContract } from '.';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 describe('updateAlertsStatus', () => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const esClientMock = elasticsearchServiceMock.createClusterClient();
 
   describe('happy path', () => {
     let alertService: AlertServiceContract;
     const args = {
       ids: ['alert-id-1'],
-      indices: new Set<string>(['.siem-signals']),
+      index: '.siem-signals',
       request: {} as KibanaRequest,
       status: CaseStatuses.closed,
-      scopedClusterClient: esClient,
     };
 
     beforeEach(async () => {
@@ -29,29 +28,30 @@ describe('updateAlertsStatus', () => {
     });
 
     test('it update the status of the alert correctly', async () => {
+      alertService.initialize(esClientMock);
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toHaveBeenCalledWith({
+      expect(esClientMock.asScoped().asCurrentUser.updateByQuery).toHaveBeenCalledWith({
         body: {
           query: { ids: { values: args.ids } },
           script: { lang: 'painless', source: `ctx._source.signal.status = '${args.status}'` },
         },
         conflicts: 'abort',
         ignore_unavailable: true,
-        index: [...args.indices],
+        index: args.index,
       });
     });
 
     describe('unhappy path', () => {
-      it('ignores empty indices', async () => {
-        expect(
-          await alertService.updateAlertsStatus({
-            ids: ['alert-id-1'],
-            status: CaseStatuses.closed,
-            indices: new Set<string>(['']),
-            scopedClusterClient: esClient,
-          })
-        ).toBeUndefined();
+      test('it throws when service is already initialized', async () => {
+        alertService.initialize(esClientMock);
+        expect(() => {
+          alertService.initialize(esClientMock);
+        }).toThrow();
+      });
+
+      test('it throws when service is not initialized and try to update the status', async () => {
+        await expect(alertService.updateAlertsStatus(args)).rejects.toThrow();
       });
     });
   });

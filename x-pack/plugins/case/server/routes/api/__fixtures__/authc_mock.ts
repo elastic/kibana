@@ -7,7 +7,6 @@
 
 import { AuthenticatedUser } from '../../../../../security/server';
 import { securityMock } from '../../../../../security/server/mocks';
-import { nullUser } from '../../../common';
 
 function createAuthenticationMock({
   currentUser,
@@ -15,11 +14,7 @@ function createAuthenticationMock({
   const { authc } = securityMock.createSetup();
   authc.getCurrentUser.mockReturnValue(
     currentUser !== undefined
-      ? // if we pass in null then use the null user (has null for each field) this is the default behavior
-        // for the CaseService getUser method
-        currentUser !== null
-        ? currentUser
-        : nullUser
+      ? currentUser
       : ({
           email: 'd00d@awesome.com',
           username: 'awesome',

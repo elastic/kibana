@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { omit } from 'lodash/fp';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaRequest, kibanaResponseFactory } from '../../../../../src/core/server/http';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import {
   AlertServiceContract,
   CaseConfigureService,
@@ -14,11 +17,12 @@ import {
   ConnectorMappingsService,
 } from '../services';
 import { CaseClient } from './types';
-import { authenticationMock } from '../routes/api/__fixtures__';
-import { createExternalCaseClient } from '.';
+import { authenticationMock, createActionsClient } from '../routes/api/__fixtures__';
+import { createCaseClient } from '.';
+import type { CasesRequestHandlerContext } from '../types';
 
-export type CaseClientPluginContractMock = jest.Mocked<CaseClient>;
-export const createExternalCaseClientMock = (): CaseClientPluginContractMock => ({
+export type CaseClientMock = jest.Mocked<CaseClient>;
+export const createCaseClientMock = (): CaseClientMock => ({
   addComment: jest.fn(),
   create: jest.fn(),
   get: jest.fn(),
@@ -46,15 +50,18 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     alertsService: jest.Mocked<AlertServiceContract>;
   };
 }> => {
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  // const actionsMock = createActionsClient();
+  const actionsMock = createActionsClient();
   const log = loggingSystemMock.create().get('case');
+  const request = {} as KibanaRequest;
+  const response = kibanaResponseFactory;
 
-  const auth = badAuth ? authenticationMock.createInvalid() : authenticationMock.create();
-  const caseService = new CaseService(log, auth);
+  const caseServicePlugin = new CaseService(log);
   const caseConfigureServicePlugin = new CaseConfigureService(log);
   const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
 
+  const caseService = await caseServicePlugin.setup({
+    authentication: badAuth ? authenticationMock.createInvalid() : authenticationMock.create(),
+  });
   const caseConfigureService = await caseConfigureServicePlugin.setup();
 
   const connectorMappingsService = await connectorMappingsServicePlugin.setup();
@@ -69,15 +76,33 @@ export const createCaseClientWithMockSavedObjectsClient = async ({
     getAlerts: jest.fn(),
   };
 
-  const caseClient = createExternalCaseClient({
+  const context = {
+    core: {
+      savedObjects: {
+        client: savedObjectsClient,
+      },
+    },
+    actions: { getActionsClient: () => actionsMock },
+    case: {
+      getCaseClient: () => caseClient,
+    },
+    securitySolution: {
+      getAppClient: () => ({
+        getSignalsIndex: () => '.siem-signals',
+      }),
+    },
+  };
+
+  const caseClient = createCaseClient({
     savedObjectsClient,
-    user: auth.getCurrentUser(),
+    request,
+    response,
     caseService,
     caseConfigureService,
     connectorMappingsService,
     userActionService,
     alertsService,
-    scopedClusterClient: esClient,
+    context: (omit(omitFromContext, context) as unknown) as CasesRequestHandlerContext,
   });
   return {
     client: caseClient,

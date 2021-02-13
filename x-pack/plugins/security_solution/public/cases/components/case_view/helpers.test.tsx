@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { AssociationType, CommentType } from '../../../../../case/common/api';
+import { CommentType } from '../../../../../case/common/api';
 import { Comment } from '../../containers/types';
 
 import { getRuleIdsFromComments, buildAlertsQuery } from './helpers';
 
 const comments: Comment[] = [
   {
-    associationType: AssociationType.case,
     type: CommentType.alert,
     alertId: 'alert-id-1',
     index: 'alert-index-1',
@@ -26,7 +25,6 @@ const comments: Comment[] = [
     version: 'WzQ3LDFc',
   },
   {
-    associationType: AssociationType.case,
     type: CommentType.alert,
     alertId: 'alert-id-2',
     index: 'alert-index-2',

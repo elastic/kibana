@@ -19,11 +19,6 @@ export function initPostCommentApi({ router }: RouteDeps) {
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseID: schema.maybe(schema.string()),
-          })
-        ),
         body: escapeHatch,
       },
     },
@@ -33,12 +28,12 @@ export function initPostCommentApi({ router }: RouteDeps) {
       }
 
       const caseClient = context.case.getCaseClient();
-      const caseId = request.query?.subCaseID ?? request.params.case_id;
+      const caseId = request.params.case_id;
       const comment = request.body as CommentRequest;
 
       try {
         return response.ok({
-          body: await caseClient.addComment({ caseId, comment }),
+          body: await caseClient.addComment({ caseClient, caseId, comment }),
         });
       } catch (error) {
         return response.customError(wrapError(error));
