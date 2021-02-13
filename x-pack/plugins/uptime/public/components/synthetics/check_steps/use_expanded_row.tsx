@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { ExecutedStep } from '../executed_step';
 import { Ping } from '../../../../common/runtime_types/ping';
@@ -22,32 +23,37 @@ export const useExpandedRow = ({ steps, allPings }: HookProps) => {
 
   const { checkGroupId } = useParams<{ checkGroupId: string }>();
 
-  const getBrowserConsole = (index: number) => {
-    return allPings.find(
-      (stepF) =>
-        stepF.synthetics?.type === 'journey/browserconsole' &&
-        stepF.synthetics?.step?.index! === index
-    )?.synthetics?.payload?.text;
-  };
+  const getBrowserConsole = useCallback(
+    (index: number) => {
+      return allPings.find(
+        (stepF) =>
+          stepF.synthetics?.type === 'journey/browserconsole' &&
+          stepF.synthetics?.step?.index! === index
+      )?.synthetics?.payload?.text;
+    },
+    [allPings]
+  );
 
   useEffect(() => {
     const expandedRowsN: ExpandRowType = {};
-    for (let expandedRowKeyStr in expandedRows) {
-      const expandedRowKey = Number(expandedRowKeyStr);
+    for (const expandedRowKeyStr in expandedRows) {
+      if (expandedRows.hasOwnProperty(expandedRowKeyStr)) {
+        const expandedRowKey = Number(expandedRowKeyStr);
 
-      const step = steps.find((stepF) => stepF.synthetics?.step?.index !== expandedRowKey)!;
+        const step = steps.find((stepF) => stepF.synthetics?.step?.index !== expandedRowKey)!;
 
-      expandedRowsN[expandedRowKey] = (
-        <ExecutedStep
-          step={step}
-          browserConsole={getBrowserConsole(expandedRowKey)}
-          index={step.synthetics?.step?.index!}
-        />
-      );
+        expandedRowsN[expandedRowKey] = (
+          <ExecutedStep
+            step={step}
+            browserConsole={getBrowserConsole(expandedRowKey)}
+            index={step.synthetics?.step?.index!}
+          />
+        );
+      }
     }
 
     setExpandedRows(expandedRowsN);
-  }, [checkGroupId, allPings]);
+  }, [checkGroupId, allPings, expandedRows, steps, getBrowserConsole]);
 
   const toggleExpand = ({ ping }: { ping: Ping }) => {
     // eui table uses index from 0, synthetics uses 1
