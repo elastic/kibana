@@ -10,8 +10,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { decodeComment, getAlertIds, isGeneratedAlertContext } from '../../routes/api/utils';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import {
+  decodeCommentRequest,
+  getAlertIds,
+  isCommentRequestTypeGenAlert,
+} from '../../routes/api/utils';
 
 import {
   throwErrors,
@@ -22,9 +26,9 @@ import {
   SubCaseAttributes,
   CommentRequest,
   CollectionWithSubCaseResponse,
-  ContextTypeGeneratedAlertRt,
-  CommentRequestGeneratedAlertType,
   User,
+  CommentRequestAlertType,
+  AlertCommentRequestRt,
 } from '../../../common/api';
 import {
   buildCaseUserActionItem,
@@ -33,7 +37,7 @@ import {
 
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
 import { CommentableCase } from '../../common';
-import { CaseClientImpl } from '..';
+import { CaseClientHandler } from '..';
 
 async function getSubCase({
   caseService,
@@ -79,9 +83,9 @@ async function getSubCase({
 }
 
 interface AddCommentFromRuleArgs {
-  caseClient: CaseClientImpl;
+  caseClient: CaseClientHandler;
   caseId: string;
-  comment: CommentRequestGeneratedAlertType;
+  comment: CommentRequestAlertType;
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
@@ -96,11 +100,16 @@ const addGeneratedAlerts = async ({
   comment,
 }: AddCommentFromRuleArgs): Promise<CollectionWithSubCaseResponse> => {
   const query = pipe(
-    ContextTypeGeneratedAlertRt.decode(comment),
+    AlertCommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  decodeComment(comment);
+  decodeCommentRequest(comment);
+
+  // This function only supports adding generated alerts
+  if (comment.type !== CommentType.generatedAlert) {
+    throw Boom.internal('Attempting to add a non generated alert in the wrong context');
+  }
   const createdDate = new Date().toISOString();
 
   const caseInfo = await caseService.getCase({
@@ -150,7 +159,7 @@ const addGeneratedAlerts = async ({
     const ids = getAlertIds(query);
     await caseClient.updateAlertsStatus({
       ids,
-      status: caseInfo.attributes.status,
+      status: subCase.attributes.status,
       indices: new Set([newComment.attributes.index]),
     });
   }
@@ -215,30 +224,30 @@ async function getCombinedCase(
 }
 
 interface AddCommentArgs {
-  caseClient: CaseClientImpl;
+  caseClient: CaseClientHandler;
   caseId: string;
   comment: CommentRequest;
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   userActionService: CaseUserActionServiceSetup;
-  request: KibanaRequest;
+  user: User;
 }
 
 export const addComment = async ({
   savedObjectsClient,
   caseService,
   userActionService,
-  request,
   caseClient,
   caseId,
   comment,
+  user,
 }: AddCommentArgs): Promise<CollectionWithSubCaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
-  if (isGeneratedAlertContext(comment)) {
+  if (isCommentRequestTypeGenAlert(comment)) {
     return addGeneratedAlerts({
       caseId,
       comment,
@@ -249,13 +258,13 @@ export const addComment = async ({
     });
   }
 
-  decodeComment(comment);
+  decodeCommentRequest(comment);
   const createdDate = new Date().toISOString();
 
   const combinedCase = await getCombinedCase(caseService, savedObjectsClient, caseId);
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { username, full_name, email } = await caseService.getUser({ request });
+  const { username, full_name, email } = user;
   const userInfo: User = {
     username,
     full_name,

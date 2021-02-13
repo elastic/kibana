@@ -59,7 +59,7 @@ export function initDeleteSubCasesApi({ caseService, router, userActionService }
         await Promise.all(request.query.ids.map((id) => caseService.deleteSubCase(client, id)));
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
         await userActionService.postUserActions({

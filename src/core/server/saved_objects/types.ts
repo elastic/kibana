@@ -63,6 +63,14 @@ export interface SavedObjectsFindOptionsReference {
 }
 
 /**
+ * @public
+ */
+export interface SavedObjectsPitParams {
+  id: string;
+  keepAlive?: string;
+}
+
+/**
  *
  * @public
  */
@@ -82,6 +90,10 @@ export interface SavedObjectsFindOptions {
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
+  /**
+   * Use the sort values from the previous page to retrieve the next page of results.
+   */
+  searchAfter?: unknown[];
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.
@@ -114,6 +126,10 @@ export interface SavedObjectsFindOptions {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional ES preference value to be used for the query **/
   preference?: string;
+  /**
+   * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
+   */
+  pit?: SavedObjectsPitParams;
 }
 
 /**

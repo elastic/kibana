@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CaseClientPostRequest,
@@ -19,6 +19,7 @@ import {
   ConnectorMappingsAttributes,
   GetFieldsResponse,
   CaseUserActionsResponse,
+  User,
 } from '../../common/api';
 import {
   CaseConfigureServiceSetup,
@@ -28,16 +29,6 @@ import {
 } from '../services';
 import { ConnectorMappingsServiceSetup } from '../services/connector_mappings';
 import { CaseClientGetAlertsResponse } from './alerts/types';
-
-// TODO: Remove unused types
-
-export interface CaseClientCreate {
-  theCase: CaseClientPostRequest;
-}
-
-export interface CaseClientUpdate {
-  cases: CasesPatchRequest;
-}
 
 export interface CaseClientGet {
   id: string;
@@ -52,11 +43,6 @@ export interface CaseClientPush {
 }
 
 export interface CaseClientAddComment {
-  caseId: string;
-  comment: CommentRequest;
-}
-
-export interface CaseClientAddInternalComment {
   caseId: string;
   comment: CommentRequest;
 }
@@ -87,8 +73,7 @@ export interface CaseClientFactoryArguments {
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
   connectorMappingsService: ConnectorMappingsServiceSetup;
-  request: KibanaRequest;
-  // response: KibanaResponseFactory;
+  user: User;
   savedObjectsClient: SavedObjectsClientContract;
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;

@@ -487,6 +487,8 @@ export default ({ getService }: FtrProviderContext): void => {
               impact: null,
               severity: null,
               urgency: null,
+              category: null,
+              subcategory: null,
             },
           },
           created_by: {
@@ -847,7 +849,6 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             })
             .expect(200);
-
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,

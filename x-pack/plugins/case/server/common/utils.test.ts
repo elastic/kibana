@@ -96,7 +96,7 @@ describe('common utils', () => {
               ids: ['1'],
               comments: [
                 {
-                  alerts: [{ _id: 'a' }, { _id: 'b' }, { _id: 'c' }],
+                  alertId: ['a', 'b', 'c'],
                   index: '',
                   type: CommentType.generatedAlert,
                 },
@@ -104,7 +104,7 @@ describe('common utils', () => {
             },
           ]).saved_objects[0]
         )
-      );
+      ).toBe(3);
     });
 
     it('returns 3 alerts for a single alert comment', () => {
@@ -123,7 +123,7 @@ describe('common utils', () => {
             },
           ]).saved_objects[0]
         )
-      );
+      ).toBe(3);
     });
   });
 

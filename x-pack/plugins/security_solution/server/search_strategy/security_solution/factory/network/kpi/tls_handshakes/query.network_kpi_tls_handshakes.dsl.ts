@@ -58,6 +58,7 @@ export const buildTlsHandshakeQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: true,
     body: {
       query: {
         bool: {
@@ -65,7 +66,6 @@ export const buildTlsHandshakeQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
     },
   };
 

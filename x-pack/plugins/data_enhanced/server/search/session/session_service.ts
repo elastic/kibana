@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { debounce } from 'lodash';
 import {
   CoreSetup,
   CoreStart,
@@ -43,12 +44,24 @@ interface StartDependencies {
   taskManager: TaskManagerStartContract;
 }
 
+const DEBOUNCE_UPDATE_OR_CREATE_WAIT = 1000;
+const DEBOUNCE_UPDATE_OR_CREATE_MAX_WAIT = 5000;
+
+interface UpdateOrCreateQueueEntry {
+  deps: SearchSessionDependencies;
+  sessionId: string;
+  attributes: Partial<SearchSessionSavedObjectAttributes>;
+  resolve: () => void;
+  reject: (reason?: unknown) => void;
+}
+
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 export class SearchSessionService
   implements ISearchSessionService<SearchSessionSavedObjectAttributes> {
   private sessionConfig: SearchSessionsConfig;
+  private readonly updateOrCreateBatchQueue: UpdateOrCreateQueueEntry[] = [];
 
   constructor(private readonly logger: Logger, private readonly config: ConfigSchema) {
     this.sessionConfig = this.config.search.sessions;
@@ -76,6 +89,53 @@ export class SearchSessionService
         this.sessionConfig.trackingInterval
       );
     }
+  };
+
+  private processUpdateOrCreateBatchQueue = debounce(
+    () => {
+      const queue = [...this.updateOrCreateBatchQueue];
+      if (queue.length === 0) return;
+      this.updateOrCreateBatchQueue.length = 0;
+      const batchedSessionAttributes = queue.reduce((res, next) => {
+        if (!res[next.sessionId]) {
+          res[next.sessionId] = next.attributes;
+        } else {
+          res[next.sessionId] = {
+            ...res[next.sessionId],
+            ...next.attributes,
+            idMapping: {
+              ...res[next.sessionId].idMapping,
+              ...next.attributes.idMapping,
+            },
+          };
+        }
+        return res;
+      }, {} as { [sessionId: string]: Partial<SearchSessionSavedObjectAttributes> });
+
+      Object.keys(batchedSessionAttributes).forEach((sessionId) => {
+        const thisSession = queue.filter((s) => s.sessionId === sessionId);
+        this.updateOrCreate(thisSession[0].deps, sessionId, batchedSessionAttributes[sessionId])
+          .then(() => {
+            thisSession.forEach((s) => s.resolve());
+          })
+          .catch((e) => {
+            thisSession.forEach((s) => s.reject(e));
+          });
+      });
+    },
+    DEBOUNCE_UPDATE_OR_CREATE_WAIT,
+    { maxWait: DEBOUNCE_UPDATE_OR_CREATE_MAX_WAIT }
+  );
+  private scheduleUpdateOrCreate = (
+    deps: SearchSessionDependencies,
+    sessionId: string,
+    attributes: Partial<SearchSessionSavedObjectAttributes>
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      this.updateOrCreateBatchQueue.push({ deps, sessionId, attributes, resolve, reject });
+      // TODO: this would be better if we'd debounce per sessionId
+      this.processUpdateOrCreateBatchQueue();
+    });
   };
 
   private updateOrCreate = async (
@@ -255,7 +315,7 @@ export class SearchSessionService
       idMapping = { [requestHash]: searchInfo };
     }
 
-    await this.updateOrCreate(deps, sessionId, { idMapping });
+    await this.scheduleUpdateOrCreate(deps, sessionId, { idMapping });
   };
 
   public async getSearchIdMapping(deps: SearchSessionDependencies, sessionId: string) {

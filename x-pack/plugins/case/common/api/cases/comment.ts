@@ -44,33 +44,22 @@ export const ContextTypeUserRt = rt.type({
   type: rt.literal(CommentType.user),
 });
 
-export const ContextTypeAlertRt = rt.type({
+/**
+ * This defines the structure of how alerts (generated or user attached) are stored in saved objects documents. It also
+ * represents of an alert after it has been transformed. A generated alert will be transformed by the connector so that
+ * it matches this structure. User attached alerts do not need to be transformed.
+ */
+export const AlertCommentRequestRt = rt.type({
   type: rt.union([rt.literal(CommentType.generatedAlert), rt.literal(CommentType.alert)]),
   alertId: rt.union([rt.array(rt.string), rt.string]),
   index: rt.string,
 });
 
-const AlertIDRt = rt.type({
-  _id: rt.string,
-});
-
-export const ContextTypeGeneratedAlertRt = rt.type({
-  type: rt.literal(CommentType.generatedAlert),
-  alerts: rt.union([rt.array(AlertIDRt), AlertIDRt]),
-  index: rt.string,
-});
-
 const AttributesTypeUserRt = rt.intersection([ContextTypeUserRt, CommentAttributesBasicRt]);
-const AttributesTypeAlertsRt = rt.intersection([ContextTypeAlertRt, CommentAttributesBasicRt]);
+const AttributesTypeAlertsRt = rt.intersection([AlertCommentRequestRt, CommentAttributesBasicRt]);
 const CommentAttributesRt = rt.union([AttributesTypeUserRt, AttributesTypeAlertsRt]);
 
-const ContextBasicRt = rt.union([
-  ContextTypeUserRt,
-  ContextTypeAlertRt,
-  ContextTypeGeneratedAlertRt,
-]);
-
-export const CommentRequestRt = ContextBasicRt;
+export const CommentRequestRt = rt.union([ContextTypeUserRt, AlertCommentRequestRt]);
 
 export const CommentResponseRt = rt.intersection([
   CommentAttributesRt,
@@ -95,7 +84,7 @@ export const CommentPatchRequestRt = rt.intersection([
    * Partial updates are not allowed.
    * We want to prevent the user for changing the type without removing invalid fields.
    */
-  rt.union([ContextTypeUserRt, ContextTypeAlertRt]),
+  CommentRequestRt,
   rt.type({ id: rt.string, version: rt.string }),
 ]);
 
@@ -106,7 +95,7 @@ export const CommentPatchRequestRt = rt.intersection([
  * We ensure that partial updates of CommentContext is not going to happen inside the patch comment route.
  */
 export const CommentPatchAttributesRt = rt.intersection([
-  rt.union([rt.partial(CommentAttributesBasicRt.props), rt.partial(ContextTypeAlertRt.props)]),
+  rt.union([rt.partial(CommentAttributesBasicRt.props), rt.partial(AlertCommentRequestRt.props)]),
   rt.partial(CommentAttributesBasicRt.props),
 ]);
 
@@ -129,11 +118,4 @@ export type CommentsResponse = rt.TypeOf<typeof CommentsResponseRt>;
 export type CommentPatchRequest = rt.TypeOf<typeof CommentPatchRequestRt>;
 export type CommentPatchAttributes = rt.TypeOf<typeof CommentPatchAttributesRt>;
 export type CommentRequestUserType = rt.TypeOf<typeof ContextTypeUserRt>;
-export type CommentRequestAlertType = rt.TypeOf<typeof ContextTypeAlertRt>;
-
-/**
- * This type represents a generated alert (or alerts) from a rule. The difference between this and a user alert
- * is that this format expects the included alerts to have the structure { _id: string }. When it is saved the outer
- * object will be stripped off and the _id will be stored in the alertId field.
- */
-export type CommentRequestGeneratedAlertType = rt.TypeOf<typeof ContextTypeGeneratedAlertRt>;
+export type CommentRequestAlertType = rt.TypeOf<typeof AlertCommentRequestRt>;

@@ -404,7 +404,18 @@ describe('update', () => {
 
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
-        caseCommentSavedObject: [{ ...mockCaseComments[3] }],
+        caseCommentSavedObject: [
+          {
+            ...mockCaseComments[3],
+            references: [
+              {
+                type: 'cases',
+                name: 'associated-cases',
+                id: 'mock-id-1',
+              },
+            ],
+          },
+        ],
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
@@ -531,24 +542,50 @@ describe('update', () => {
             ...mockCases[1],
           },
         ],
-        caseCommentSavedObject: [{ ...mockCaseComments[3] }, { ...mockCaseComments[4] }],
+        caseCommentSavedObject: [
+          {
+            ...mockCaseComments[3],
+            references: [
+              {
+                type: 'cases',
+                name: 'associated-cases',
+                id: 'mock-id-1',
+              },
+            ],
+          },
+          {
+            ...mockCaseComments[4],
+            references: [
+              {
+                type: 'cases',
+                name: 'associated-cases',
+                id: 'mock-id-2',
+              },
+            ],
+          },
+        ],
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.updateAlertsStatus = jest.fn();
 
       await caseClient.client.update(patchCases);
-
+      /**
+       * the update code will put each comment into a status bucket and then make at most 1 call
+       * to ES for each status bucket
+       * Now instead of doing a call per case to get the comments, it will do a single call with all the cases
+       * and sub cases and get all the comments in one go
+       */
       expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(1, {
-        ids: ['test-id', 'test-id-2'],
+        ids: ['test-id'],
         status: 'open',
-        indices: new Set<string>(['test-index', 'test-index-2']),
+        indices: new Set<string>(['test-index']),
       });
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(2, {
-        ids: ['test-id', 'test-id-2'],
+        ids: ['test-id-2'],
         status: 'closed',
-        indices: new Set<string>(['test-index', 'test-index-2']),
+        indices: new Set<string>(['test-index-2']),
       });
     });
 

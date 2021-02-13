@@ -43,15 +43,15 @@ describe('updateAlertsStatus', () => {
     });
 
     describe('unhappy path', () => {
-      it('throws an error if no valid indices are provided', async () => {
-        expect(async () => {
+      it('ignores empty indices', async () => {
+        expect(
           await alertService.updateAlertsStatus({
             ids: ['alert-id-1'],
             status: CaseStatuses.closed,
             indices: new Set<string>(['']),
             scopedClusterClient: esClient,
-          });
-        }).rejects.toThrow();
+          })
+        ).toBeUndefined();
       });
     });
   });

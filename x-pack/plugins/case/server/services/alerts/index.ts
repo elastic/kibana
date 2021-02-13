@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import _ from 'lodash';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ElasticsearchClient } from 'kibana/server';
@@ -37,6 +39,15 @@ interface AlertsResponse {
   };
 }
 
+/**
+ * remove empty strings from the indices, I'm not sure how likely this is but in the case that
+ * the document doesn't have _index set the security_solution code sets the value to an empty string
+ * instead
+ */
+function getValidIndices(indices: Set<string>): string[] {
+  return [...indices].filter((index) => !_.isEmpty(index));
+}
+
 export class AlertService {
   constructor() {}
 
@@ -46,17 +57,12 @@ export class AlertService {
     indices,
     scopedClusterClient,
   }: UpdateAlertsStatusArgs) {
-    /**
-     * remove empty strings from the indices, I'm not sure how likely this is but in the case that
-     * the document doesn't have _index set the security_solution code sets the value to an empty string
-     * instead
-     */
-    const sanitizedIndices = [...indices].filter((index) => index !== '');
+    const sanitizedIndices = getValidIndices(indices);
     if (sanitizedIndices.length <= 0) {
-      throw new Error('No valid indices found to update the alerts status');
+      // log that we only had invalid indices
+      return;
     }
 
-    // The above check makes sure that esClient is defined.
     const result = await scopedClusterClient.updateByQuery({
       index: sanitizedIndices,
       conflicts: 'abort',
@@ -77,10 +83,14 @@ export class AlertService {
     scopedClusterClient,
     ids,
     indices,
-  }: GetAlertsArgs): Promise<AlertsResponse> {
-    // The above check makes sure that esClient is defined.
+  }: GetAlertsArgs): Promise<AlertsResponse | undefined> {
+    const index = getValidIndices(indices);
+    if (index.length <= 0) {
+      return;
+    }
+
     const result = await scopedClusterClient.search<AlertsResponse>({
-      index: [...indices].filter((index) => index !== ''),
+      index,
       body: {
         query: {
           bool: {

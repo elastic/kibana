@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import {
   CaseClientFactoryArguments,
   CaseClient,
@@ -31,31 +31,31 @@ import {
   CaseUserActionServiceSetup,
   AlertServiceContract,
 } from '../services';
-import { CasesPatchRequest, CasePostRequest } from '../../common/api';
+import { CasesPatchRequest, CasePostRequest, User } from '../../common/api';
 import { get } from './cases/get';
 import { get as getUserActions } from './user_actions/get';
 import { get as getAlerts } from './alerts/get';
 import { push } from './cases/push';
 
-// TODO: rename
-export class CaseClientImpl implements CaseClient {
+/**
+ * This class is a pass through for common case functionality (like creating, get a case).
+ */
+export class CaseClientHandler implements CaseClient {
   private readonly _scopedClusterClient: ElasticsearchClient;
   private readonly _caseConfigureService: CaseConfigureServiceSetup;
   private readonly _caseService: CaseServiceSetup;
   private readonly _connectorMappingsService: ConnectorMappingsServiceSetup;
-  private readonly request: KibanaRequest;
+  private readonly user: User;
   private readonly _savedObjectsClient: SavedObjectsClientContract;
   private readonly _userActionService: CaseUserActionServiceSetup;
   private readonly _alertsService: AlertServiceContract;
 
-  // TODO: refactor so these are created in the constructor instead of passed in
   constructor(clientArgs: CaseClientFactoryArguments) {
     this._scopedClusterClient = clientArgs.scopedClusterClient;
     this._caseConfigureService = clientArgs.caseConfigureService;
     this._caseService = clientArgs.caseService;
     this._connectorMappingsService = clientArgs.connectorMappingsService;
-    // TODO: extract this out so we just pass in the user information
-    this.request = clientArgs.request;
+    this.user = clientArgs.user;
     this._savedObjectsClient = clientArgs.savedObjectsClient;
     this._userActionService = clientArgs.userActionService;
     this._alertsService = clientArgs.alertsService;
@@ -67,7 +67,7 @@ export class CaseClientImpl implements CaseClient {
       caseService: this._caseService,
       caseConfigureService: this._caseConfigureService,
       userActionService: this._userActionService,
-      request: this.request,
+      user: this.user,
       theCase: caseInfo,
     });
   }
@@ -77,7 +77,7 @@ export class CaseClientImpl implements CaseClient {
       savedObjectsClient: this._savedObjectsClient,
       caseService: this._caseService,
       userActionService: this._userActionService,
-      request: this.request,
+      user: this.user,
       cases,
       caseClient: this,
     });
@@ -91,7 +91,7 @@ export class CaseClientImpl implements CaseClient {
       caseClient: this,
       caseId,
       comment,
-      request: this.request,
+      user: this.user,
     });
   }
 
@@ -146,7 +146,7 @@ export class CaseClientImpl implements CaseClient {
       savedObjectsClient: this._savedObjectsClient,
       caseService: this._caseService,
       userActionService: this._userActionService,
-      request: this.request,
+      user: this.user,
       caseClient: this,
       caseConfigureService: this._caseConfigureService,
     });

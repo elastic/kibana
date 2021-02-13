@@ -80,7 +80,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionType,
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
-    latencyAggregationType,
+    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     comparisonEnabled: comparisonEnabled
       ? toBoolean(comparisonEnabled)
       : undefined,

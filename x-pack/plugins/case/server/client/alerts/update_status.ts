@@ -17,7 +17,6 @@ interface UpdateAlertsStatusArgs {
   scopedClusterClient: ElasticsearchClient;
 }
 
-// TODO: remove this file
 export const updateAlertsStatus = async ({
   alertsService,
   ids,

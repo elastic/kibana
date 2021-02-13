@@ -27,6 +27,10 @@ export const get = async ({
   }
 
   const alerts = await alertsService.getAlerts({ ids, indices, scopedClusterClient });
+  if (!alerts) {
+    return [];
+  }
+
   return alerts.hits.hits.map((alert) => ({
     id: alert._id,
     index: alert._index,

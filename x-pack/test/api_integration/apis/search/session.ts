@@ -11,6 +11,9 @@ import { SearchSessionStatus } from '../../../../plugins/data_enhanced/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
+  const retry = getService('retry');
 
   describe('search session', () => {
     describe('session management', () => {
@@ -152,20 +155,23 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { id: id2 } = searchRes2.body;
 
-        const resp = await supertest
-          .get(`/internal/session/${sessionId}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
+        await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+          const resp = await supertest
+            .get(`/internal/session/${sessionId}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
 
-        const { name, touched, created, persisted, idMapping } = resp.body.attributes;
-        expect(persisted).to.be(true);
-        expect(name).to.be('My Session');
-        expect(touched).not.to.be(undefined);
-        expect(created).not.to.be(undefined);
+          const { name, touched, created, persisted, idMapping } = resp.body.attributes;
+          expect(persisted).to.be(true);
+          expect(name).to.be('My Session');
+          expect(touched).not.to.be(undefined);
+          expect(created).not.to.be(undefined);
 
-        const idMappings = Object.values(idMapping).map((value: any) => value.id);
-        expect(idMappings).to.contain(id1);
-        expect(idMappings).to.contain(id2);
+          const idMappings = Object.values(idMapping).map((value: any) => value.id);
+          expect(idMappings).to.contain(id1);
+          expect(idMappings).to.contain(id2);
+          return true;
+        });
       });
 
       it('should create and extend a session', async () => {
@@ -245,21 +251,24 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { id: id2 } = searchRes2.body;
 
-      const resp = await supertest
-        .get(`/internal/session/${sessionId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(200);
+      await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+        const resp = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
 
-      const { appId, name, touched, created, persisted, idMapping } = resp.body.attributes;
-      expect(persisted).to.be(false);
-      expect(name).to.be(undefined);
-      expect(appId).to.be(undefined);
-      expect(touched).not.to.be(undefined);
-      expect(created).not.to.be(undefined);
+        const { appId, name, touched, created, persisted, idMapping } = resp.body.attributes;
+        expect(persisted).to.be(false);
+        expect(name).to.be(undefined);
+        expect(appId).to.be(undefined);
+        expect(touched).not.to.be(undefined);
+        expect(created).not.to.be(undefined);
 
-      const idMappings = Object.values(idMapping).map((value: any) => value.id);
-      expect(idMappings).to.contain(id1);
-      expect(idMappings).to.contain(id2);
+        const idMappings = Object.values(idMapping).map((value: any) => value.id);
+        expect(idMappings).to.contain(id1);
+        expect(idMappings).to.contain(id2);
+        return true;
+      });
     });
 
     it('touched time updates when you poll on an search', async () => {
@@ -287,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { id: id1 } = searchRes1.body;
 
       // it might take the session a moment to be created
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 2500));
 
       const getSessionFirstTime = await supertest
         .get(`/internal/session/${sessionId}`)
@@ -303,6 +312,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      // it might take the session a moment to be updated
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
       const getSessionSecondTime = await supertest
         .get(`/internal/session/${sessionId}`)
         .set('kbn-xsrf', 'foo')
@@ -314,6 +326,53 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
         getSessionSecondTime.body.attributes.touched
       );
+    });
+
+    describe('search session permissions', () => {
+      before(async () => {
+        await security.role.create('data_analyst', {
+          elasticsearch: {},
+          kibana: [
+            {
+              feature: {
+                dashboard: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create('analyst', {
+          password: 'analyst-password',
+          roles: ['data_analyst'],
+          full_name: 'test user',
+        });
+      });
+      after(async () => {
+        await security.role.delete('data_analyst');
+        await security.user.delete('analyst');
+      });
+
+      it('should 403 if no app gives permissions to store search sessions', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertestWithoutAuth
+          .post(`/internal/session`)
+          .auth('analyst', 'analyst-password')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(403);
+
+        await supertestWithoutAuth
+          .get(`/internal/session/${sessionId}`)
+          .auth('analyst', 'analyst-password')
+          .set('kbn-xsrf', 'foo')
+          .expect(403);
+      });
     });
   });
 }

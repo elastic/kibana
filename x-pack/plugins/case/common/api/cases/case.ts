@@ -85,7 +85,7 @@ const CasePostRequestNoTypeRt = rt.type({
  */
 export const CaseClientPostRequestRt = rt.type({
   ...CasePostRequestNoTypeRt.props,
-  type: CaseTypeRt,
+  [caseTypeField]: CaseTypeRt,
 });
 
 /**

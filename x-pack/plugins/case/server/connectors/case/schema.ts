@@ -30,6 +30,8 @@ const ContextTypeAlertGroupSchema = schema.object({
   index: schema.string(),
 });
 
+export type ContextTypeGeneratedAlertType = typeof ContextTypeAlertGroupSchema.type;
+
 const ContextTypeAlertSchema = schema.object({
   type: schema.literal(CommentType.alert),
   // allowing either an array or a single value to preserve the previous API of attaching a single alert ID
@@ -37,11 +39,15 @@ const ContextTypeAlertSchema = schema.object({
   index: schema.string(),
 });
 
+export type ContextTypeAlertSchemaType = typeof ContextTypeAlertSchema.type;
+
 export const CommentSchema = schema.oneOf([
   ContextTypeUserSchema,
   ContextTypeAlertSchema,
   ContextTypeAlertGroupSchema,
 ]);
+
+export type CommentSchemaType = typeof CommentSchema.type;
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),
@@ -58,6 +64,8 @@ const ServiceNowFieldsSchema = schema.object({
   impact: schema.nullable(schema.string()),
   severity: schema.nullable(schema.string()),
   urgency: schema.nullable(schema.string()),
+  category: schema.nullable(schema.string()),
+  subcategory: schema.nullable(schema.string()),
 });
 
 const NoneFieldsSchema = schema.nullable(schema.object({}));

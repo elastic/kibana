@@ -336,7 +336,7 @@ export const UserActionTree = React.memo(
                   },
                 ];
                 // TODO: need to handle CommentType.generatedAlert here to
-              } else if (comment != null && comment.type !== CommentType.user) {
+              } else if (comment != null && comment.type === CommentType.alert) {
                 // TODO: clean this up
                 const alertId = Array.isArray(comment.alertId)
                   ? comment.alertId.length > 0
@@ -344,16 +344,7 @@ export const UserActionTree = React.memo(
                     : ''
                   : comment.alertId;
                 const alert = alerts[alertId];
-                return [
-                  ...comments,
-                  getAlertComment({
-                    action,
-                    alert,
-                    onShowAlertDetails,
-                    alertsCount: comment.alertId?.length,
-                    commentType: comment.type,
-                  }),
-                ];
+                return [...comments, getAlertComment({ action, alert, onShowAlertDetails })];
               }
             }
 

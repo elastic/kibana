@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import {
   createJobIdsFilters,
@@ -13,7 +14,9 @@ import {
   createResultTypeFilters,
   defaultRequestParameters,
   createAnomalyScoreFilter,
+  createInfluencerFilter,
 } from './common';
+import { InfluencerFilter } from '../common';
 import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 // TODO: Reassess validity of this against ML docs
@@ -32,13 +35,15 @@ export const createMetricsHostsAnomaliesQuery = ({
   endTime,
   sort,
   pagination,
+  influencerFilter,
 }: {
   jobIds: string[];
-  anomalyThreshold: number;
+  anomalyThreshold: ANOMALY_THRESHOLD;
   startTime: number;
   endTime: number;
   sort: Sort;
   pagination: Pagination;
+  influencerFilter?: InfluencerFilter;
 }) => {
   const { field } = sort;
   const { pageSize } = pagination;
@@ -49,6 +54,10 @@ export const createMetricsHostsAnomaliesQuery = ({
     ...createTimeRangeFilters(startTime, endTime),
     ...createResultTypeFilters(['record']),
   ];
+
+  const influencerQuery = influencerFilter
+    ? { must: createInfluencerFilter(influencerFilter) }
+    : {};
 
   const sourceFields = [
     'job_id',
@@ -77,6 +86,7 @@ export const createMetricsHostsAnomaliesQuery = ({
       query: {
         bool: {
           filter: filters,
+          ...influencerQuery,
         },
       },
       search_after: queryCursor,

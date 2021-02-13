@@ -17,7 +17,6 @@ import {
   ConnectorTypes,
   CasePostRequest,
   CollectionWithSubCaseResponse,
-  CommentRequestGeneratedAlertType,
   SubCasesFindResponse,
   CaseStatuses,
   SubCasesResponse,
@@ -25,6 +24,7 @@ import {
 } from '../../../../plugins/case/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
+import { ContextTypeGeneratedAlertType } from '../../../../plugins/case/server/connectors';
 
 interface SetStatusCasesParams {
   id: string;
@@ -79,7 +79,7 @@ export interface CreateSubCaseResp {
  */
 export const createSubCase = async (args: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
-  comment?: CommentRequestGeneratedAlertType;
+  comment?: ContextTypeGeneratedAlertType;
   caseID?: string;
   caseInfo?: CasePostRequest;
   actionID?: string;
@@ -127,7 +127,7 @@ export const createSubCaseComment = async ({
   actionID,
 }: {
   supertest: st.SuperTest<supertestAsPromised.Test>;
-  comment?: CommentRequestGeneratedAlertType;
+  comment?: ContextTypeGeneratedAlertType;
   caseID?: string;
   caseInfo?: CasePostRequest;
   forceNewSubCase?: boolean;
