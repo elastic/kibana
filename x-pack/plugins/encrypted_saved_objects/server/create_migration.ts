@@ -11,6 +11,7 @@ import {
   SavedObjectMigrationContext,
 } from 'src/core/server';
 import { EncryptedSavedObjectTypeRegistration, EncryptedSavedObjectsService } from './crypto';
+import { normalizeNamespace } from './saved_objects';
 
 type SavedObjectOptionalMigrationFn<InputAttributes, MigratedAttributes> = (
   doc: SavedObjectUnsanitizedDoc<InputAttributes> | SavedObjectUnsanitizedDoc<MigratedAttributes>,
@@ -63,11 +64,19 @@ export const getCreateMigration = (
       return encryptedDoc;
     }
 
-    const descriptor = {
-      id: encryptedDoc.id!,
-      type: encryptedDoc.type,
-      namespace: encryptedDoc.namespace,
-    };
+    // If an object has been converted right before this migration function is called, it will no longer have a `namespace` field, but it
+    // will have a `namespaces` field; in that case, the first/only element in that array should be used as the namespace in the descriptor
+    // during decryption.
+    const convertToMultiNamespaceType =
+      context.convertToMultiNamespaceTypeVersion === context.migrationVersion;
+    const decryptDescriptorNamespace = convertToMultiNamespaceType
+      ? normalizeNamespace(encryptedDoc.namespaces?.[0]) // `namespaces` contains string values, but we need to normalize this to the namespace ID representation
+      : encryptedDoc.namespace;
+
+    const { id, type } = encryptedDoc;
+    // These descriptors might have a `namespace` that is undefined. That is expected for multi-namespace and namespace-agnostic types.
+    const decryptDescriptor = { id, type, namespace: decryptDescriptorNamespace };
+    const encryptDescriptor = { id, type, namespace: encryptedDoc.namespace };
 
     // decrypt the attributes using the input type definition
     // then migrate the document
@@ -75,12 +84,14 @@ export const getCreateMigration = (
     return mapAttributes(
       migration(
         mapAttributes(encryptedDoc, (inputAttributes) =>
-          inputService.decryptAttributesSync<any>(descriptor, inputAttributes)
+          inputService.decryptAttributesSync<any>(decryptDescriptor, inputAttributes, {
+            convertToMultiNamespaceType,
+          })
         ),
         context
       ),
       (migratedAttributes) =>
-        migratedService.encryptAttributesSync<any>(descriptor, migratedAttributes)
+        migratedService.encryptAttributesSync<any>(encryptDescriptor, migratedAttributes)
     );
   };
 };

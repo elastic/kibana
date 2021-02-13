@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export {
-  SpacesContext,
-  SpacesContextValue,
-  createSpacesContext,
-  useSpacesContext,
-} from './spaces_context';
+export { getSpaceListComponent } from './space_list';

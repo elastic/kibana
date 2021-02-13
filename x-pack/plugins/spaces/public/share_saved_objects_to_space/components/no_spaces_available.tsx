@@ -26,7 +26,7 @@ export const NoSpacesAvailable = (props: Props) => {
       <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="xpack.spaces.management.shareToSpace.noAvailableSpaces.canCreateNewSpace.text"
+          id="xpack.spaces.shareToSpace.noAvailableSpaces.canCreateNewSpace.text"
           defaultMessage="You can {createANewSpaceLink} for sharing your objects."
           values={{
             createANewSpaceLink: (
@@ -35,7 +35,7 @@ export const NoSpacesAvailable = (props: Props) => {
                 href={getUrlForApp('management', { path: 'kibana/spaces/create' })}
               >
                 <FormattedMessage
-                  id="xpack.spaces.management.shareToSpace.noAvailableSpaces.canCreateNewSpace.linkText"
+                  id="xpack.spaces.shareToSpace.noAvailableSpaces.canCreateNewSpace.linkText"
                   defaultMessage="create a new space"
                 />
               </EuiLink>

@@ -312,9 +312,9 @@ function validateMigrationDefinition(
     convertToMultiNamespaceTypeVersion: string,
     type: string
   ) {
-    if (namespaceType !== 'multiple') {
+    if (namespaceType !== 'multiple' && namespaceType !== 'multiple-isolated') {
       throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected namespaceType to be 'multiple', but got '${namespaceType}'.`
+        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got '${namespaceType}'.`
       );
     } else if (!Semver.valid(convertToMultiNamespaceTypeVersion)) {
       throw new Error(
@@ -374,7 +374,7 @@ function buildActiveMigrations(
     const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
       ([version, transform]) => ({
         version,
-        transform: wrapWithTry(version, type.name, transform, log),
+        transform: wrapWithTry(version, type, transform, log),
         transformType: 'migrate',
       })
     );
@@ -655,24 +655,28 @@ function transformComparator(a: Transform, b: Transform) {
  */
 function wrapWithTry(
   version: string,
-  type: string,
+  type: SavedObjectsType,
   migrationFn: SavedObjectMigrationFn,
   log: Logger
 ) {
   return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
     try {
-      const context = { log: new MigrationLogger(log) };
+      const context = {
+        log: new MigrationLogger(log),
+        migrationVersion: version,
+        convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
+      };
       const result = migrationFn(doc, context);
 
       // A basic sanity check to help migration authors detect basic errors
       // (e.g. forgetting to return the transformed doc)
       if (!result || !result.type) {
-        throw new Error(`Invalid saved object returned from migration ${type}:${version}.`);
+        throw new Error(`Invalid saved object returned from migration ${type.name}:${version}.`);
       }
 
       return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
-      const failedTransform = `${type}:${version}`;
+      const failedTransform = `${type.name}:${version}`;
       const failedDoc = JSON.stringify(doc);
       log.warn(
         `Failed to transform document ${doc?.id}. Transform: ${failedTransform}\nDoc: ${failedDoc}`

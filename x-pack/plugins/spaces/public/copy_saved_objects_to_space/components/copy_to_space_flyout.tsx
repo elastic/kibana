@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiFlyout,
   EuiIcon,
@@ -27,18 +27,17 @@ import { ToastsStart } from 'src/core/public';
 import {
   ProcessedImportResponse,
   processImportResponse,
-  SavedObjectsManagementRecord,
 } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../../../../src/plugins/spaces_oss/common';
 import { SpacesManager } from '../../spaces_manager';
 import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { CopyToSpaceFlyoutFooter } from './copy_to_space_flyout_footer';
 import { CopyToSpaceForm } from './copy_to_space_form';
-import { CopyOptions, ImportRetry } from '../types';
+import { CopyOptions, ImportRetry, SavedObjectTarget } from '../types';
 
 interface Props {
   onClose: () => void;
-  savedObject: SavedObjectsManagementRecord;
+  savedObjectTarget: SavedObjectTarget;
   spacesManager: SpacesManager;
   toastNotifications: ToastsStart;
 }
@@ -48,7 +47,17 @@ const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
 export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
-  const { onClose, savedObject, spacesManager, toastNotifications } = props;
+  const { onClose, savedObjectTarget: object, spacesManager, toastNotifications } = props;
+  const savedObjectTarget = useMemo(
+    () => ({
+      type: object.type,
+      id: object.id,
+      namespaces: object.namespaces,
+      icon: object.icon || 'apps',
+      title: object.title || `${object.type} [id=${object.id}]`,
+    }),
+    [object]
+  );
   const [copyOptions, setCopyOptions] = useState<CopyOptions>({
     includeRelated: INCLUDE_RELATED_DEFAULT,
     createNewCopies: CREATE_NEW_COPIES_DEFAULT,
@@ -100,7 +109,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     setCopyResult({});
     try {
       const copySavedObjectsResult = await spacesManager.copySavedObjects(
-        [{ type: savedObject.type, id: savedObject.id }],
+        [{ type: savedObjectTarget.type, id: savedObjectTarget.id }],
         copyOptions.selectedSpaceIds,
         copyOptions.includeRelated,
         copyOptions.createNewCopies,
@@ -160,7 +169,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
       setConflictResolutionInProgress(true);
       try {
         await spacesManager.resolveCopySavedObjectsErrors(
-          [{ type: savedObject.type, id: savedObject.id }],
+          [{ type: savedObjectTarget.type, id: savedObjectTarget.id }],
           retries,
           copyOptions.includeRelated,
           copyOptions.createNewCopies
@@ -220,7 +229,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     if (!copyInProgress) {
       return (
         <CopyToSpaceForm
-          savedObject={savedObject}
+          savedObjectTarget={savedObjectTarget}
           spaces={spaces}
           copyOptions={copyOptions}
           onUpdate={setCopyOptions}
@@ -231,7 +240,7 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
     // Step3: Copy operation is in progress
     return (
       <ProcessingCopyToSpace
-        savedObject={savedObject}
+        savedObjectTarget={savedObjectTarget}
         copyInProgress={copyInProgress}
         conflictResolutionInProgress={conflictResolutionInProgress}
         copyResult={copyResult}
@@ -265,11 +274,11 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
       <EuiFlyoutBody>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={savedObject.meta.icon || 'apps'} />
+            <EuiIcon type={savedObjectTarget.icon} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>
-              <p>{savedObject.meta.title}</p>
+              <p>{savedObjectTarget.title}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
