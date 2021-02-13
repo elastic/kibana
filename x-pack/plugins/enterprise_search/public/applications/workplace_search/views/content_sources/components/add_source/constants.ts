@@ -338,6 +338,13 @@ export const SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE = i18n.translate(
   }
 );
 
+export const SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.documentLevelPermissions.title',
+  {
+    defaultMessage: 'Document-level permissions available with Platinum license',
+  }
+);
+
 export const SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.documentLevelPermissions.text',
   {
@@ -352,28 +359,6 @@ export const SOURCE_FEATURES_EXPLORE_BUTTON = i18n.translate(
     defaultMessage: 'Explore Platinum features',
   }
 );
-
-export const SOURCE_FEATURES_INCLUDED_FEATURES_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.sourceFeatures.included.title',
-  {
-    defaultMessage: 'Included features',
-  }
-);
-
-export const CONNECT_REMOTE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.remote.text',
-  {
-    defaultMessage: 'Remote',
-  }
-);
-
-export const CONNECT_PRIVATE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.private.text',
-  {
-    defaultMessage: 'Private',
-  }
-);
-
 export const CONNECT_WHICH_OPTION_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.connect.whichOption.link',
   {
