@@ -1,5 +1,171 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`APM API tests basic apm_8.0.0 Latency with a basic license when data is loaded time comparison returns some data 1`] = `
+Array [
+  Object {
+    "x": 1607436780000,
+    "y": 51029,
+  },
+  Object {
+    "x": 1607436820000,
+    "y": 38124,
+  },
+  Object {
+    "x": 1607436860000,
+    "y": 16327,
+  },
+  Object {
+    "x": 1607436980000,
+    "y": 35617.5,
+  },
+  Object {
+    "x": 1607436990000,
+    "y": 34599.75,
+  },
+  Object {
+    "x": 1607437100000,
+    "y": 26980,
+  },
+  Object {
+    "x": 1607437110000,
+    "y": 42808,
+  },
+  Object {
+    "x": 1607437130000,
+    "y": 22230.5,
+  },
+  Object {
+    "x": 1607437220000,
+    "y": 34973,
+  },
+  Object {
+    "x": 1607437230000,
+    "y": 19284.2,
+  },
+  Object {
+    "x": 1607437240000,
+    "y": 9280,
+  },
+  Object {
+    "x": 1607437250000,
+    "y": 42777,
+  },
+  Object {
+    "x": 1607437260000,
+    "y": 10702,
+  },
+  Object {
+    "x": 1607437340000,
+    "y": 22452,
+  },
+  Object {
+    "x": 1607437470000,
+    "y": 14495.5,
+  },
+  Object {
+    "x": 1607437480000,
+    "y": 11644.5714285714,
+  },
+  Object {
+    "x": 1607437570000,
+    "y": 17359.6666666667,
+  },
+  Object {
+    "x": 1607437590000,
+    "y": 11394.2,
+  },
+]
+`;
+
+exports[`APM API tests basic apm_8.0.0 Latency with a basic license when data is loaded time comparison returns some data 2`] = `
+Array [
+  Object {
+    "x": 1607436800000,
+    "y": 23448.25,
+  },
+  Object {
+    "x": 1607436820000,
+    "y": 25181,
+  },
+  Object {
+    "x": 1607436840000,
+    "y": 16834,
+  },
+  Object {
+    "x": 1607436910000,
+    "y": 21582,
+  },
+  Object {
+    "x": 1607437040000,
+    "y": 31800,
+  },
+  Object {
+    "x": 1607437050000,
+    "y": 21341,
+  },
+  Object {
+    "x": 1607437060000,
+    "y": 21108.5,
+  },
+  Object {
+    "x": 1607437150000,
+    "y": 12147.3333333333,
+  },
+  Object {
+    "x": 1607437160000,
+    "y": 23941.5,
+  },
+  Object {
+    "x": 1607437180000,
+    "y": 18244,
+  },
+  Object {
+    "x": 1607437240000,
+    "y": 24359.5,
+  },
+  Object {
+    "x": 1607437280000,
+    "y": 27767,
+  },
+  Object {
+    "x": 1607437290000,
+    "y": 21909.6666666667,
+  },
+  Object {
+    "x": 1607437390000,
+    "y": 31521,
+  },
+  Object {
+    "x": 1607437410000,
+    "y": 20227.5,
+  },
+  Object {
+    "x": 1607437420000,
+    "y": 18664,
+  },
+  Object {
+    "x": 1607437510000,
+    "y": 14197.5,
+  },
+  Object {
+    "x": 1607437520000,
+    "y": 19199.8571428571,
+  },
+  Object {
+    "x": 1607437540000,
+    "y": 63745.75,
+  },
+  Object {
+    "x": 1607437640000,
+    "y": 63220,
+  },
+  Object {
+    "x": 1607437660000,
+    "y": 20040,
+  },
+]
+`;
+
 exports[`APM API tests trial apm_8.0.0 Transaction latency with a trial license when data is loaded when not defined environments seleted should return the correct anomaly boundaries 1`] = `
 Array [
   Object {

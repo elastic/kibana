@@ -20,7 +20,7 @@ import {
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   getLatencyAggregation,
@@ -37,15 +37,19 @@ function searchLatency({
   setup,
   searchAggregatedTransactions,
   latencyAggregationType,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
+  start: number;
+  end: number;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
 
   const filter: ESFilter[] = [
@@ -108,13 +112,17 @@ export function getLatencyTimeseries({
   setup,
   searchAggregatedTransactions,
   latencyAggregationType,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
+  start: number;
+  end: number;
 }) {
   return withApmSpan('get_latency_charts', async () => {
     const response = await searchLatency({
@@ -124,6 +132,8 @@ export function getLatencyTimeseries({
       setup,
       searchAggregatedTransactions,
       latencyAggregationType,
+      start,
+      end,
     });
 
     if (!response.aggregations) {
