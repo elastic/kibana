@@ -51,6 +51,7 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     alertInterval,
     influencerFilter,
     sourceId,
+    spaceId,
     nodeType,
     threshold,
   } = params as MetricAnomalyParams;
@@ -67,7 +68,7 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
 
   const { data } = await evaluateCondition({
     sourceId: sourceId ?? 'default',
-    spaceId: 'default',
+    spaceId: spaceId ?? 'default',
     mlSystem,
     mlAnomalyDetectors,
     startTime,

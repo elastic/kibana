@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  IContextProvider,
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  PluginInitializerContext,
-} from 'kibana/server';
+import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -26,6 +20,7 @@ import {
   caseConnectorMappingsSavedObjectType,
   caseSavedObjectType,
   caseUserActionSavedObjectType,
+  subCaseSavedObjectType,
 } from './saved_object_types';
 import {
   CaseConfigureService,
@@ -39,7 +34,7 @@ import {
   AlertService,
   AlertServiceContract,
 } from './services';
-import { createCaseClient } from './client';
+import { CaseClientHandler, createExternalCaseClient } from './client';
 import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 
@@ -75,6 +70,7 @@ export class CasePlugin {
     core.savedObjects.registerType(caseConfigureSavedObjectType);
     core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
     core.savedObjects.registerType(caseSavedObjectType);
+    core.savedObjects.registerType(subCaseSavedObjectType);
     core.savedObjects.registerType(caseUserActionSavedObjectType);
 
     this.log.debug(
@@ -83,9 +79,10 @@ export class CasePlugin {
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    this.caseService = await new CaseService(this.log).setup({
-      authentication: plugins.security != null ? plugins.security.authc : null,
-    });
+    this.caseService = new CaseService(
+      this.log,
+      plugins.security != null ? plugins.security.authc : undefined
+    );
     this.caseConfigureService = await new CaseConfigureService(this.log).setup();
     this.connectorMappingsService = await new ConnectorMappingsService(this.log).setup();
     this.userActionService = await new CaseUserActionService(this.log).setup();
@@ -125,23 +122,21 @@ export class CasePlugin {
 
   public start(core: CoreStart) {
     this.log.debug(`Starting Case Workflow`);
-    this.alertsService!.initialize(core.elasticsearch.client);
 
     const getCaseClientWithRequestAndContext = async (
       context: CasesRequestHandlerContext,
-      request: KibanaRequest,
-      response: KibanaResponseFactory
+      request: KibanaRequest
     ) => {
-      return createCaseClient({
+      const user = await this.caseService!.getUser({ request });
+      return createExternalCaseClient({
+        scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
         savedObjectsClient: core.savedObjects.getScopedClient(request),
-        request,
-        response,
+        user,
         caseService: this.caseService!,
         caseConfigureService: this.caseConfigureService!,
         connectorMappingsService: this.connectorMappingsService!,
         userActionService: this.userActionService!,
         alertsService: this.alertsService!,
-        context,
       });
     };
 
@@ -171,18 +166,18 @@ export class CasePlugin {
   }): IContextProvider<CasesRequestHandlerContext, 'case'> => {
     return async (context, request, response) => {
       const [{ savedObjects }] = await core.getStartServices();
+      const user = await caseService.getUser({ request });
       return {
         getCaseClient: () => {
-          return createCaseClient({
+          return new CaseClientHandler({
+            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
             savedObjectsClient: savedObjects.getScopedClient(request),
             caseService,
             caseConfigureService,
             connectorMappingsService,
             userActionService,
             alertsService,
-            context,
-            request,
-            response,
+            user,
           });
         },
       };
