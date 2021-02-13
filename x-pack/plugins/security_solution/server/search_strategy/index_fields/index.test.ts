@@ -65,29 +65,6 @@ describe('Index Fields', () => {
           },
           {
             description:
-              'Deprecated - use agent.name or agent.id to identify an agent. Hostname of the agent. ',
-            name: 'agent.hostname',
-            searchable: true,
-            type: 'string',
-            aggregatable: true,
-            category: 'agent',
-            readFromDocValues: false,
-            esTypes: [],
-          },
-          {
-            description:
-              'Unique identifier of this agent (if one exists). Example: For Beats this would be beat.id.',
-            example: '8a4f500d',
-            name: 'agent.id',
-            type: 'string',
-            searchable: true,
-            aggregatable: true,
-            category: 'agent',
-            readFromDocValues: false,
-            esTypes: [],
-          },
-          {
-            description:
               'Custom name of the agent. This is a name that can be given to an agent. This can be helpful if for example two Filebeat instances are running on the same host but a human readable separation is needed on which Filebeat instance data is coming from. If no name is given, the name is often left empty.',
             example: 'foo',
             name: 'agent.name',

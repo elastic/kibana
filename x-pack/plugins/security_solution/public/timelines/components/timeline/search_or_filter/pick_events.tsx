@@ -235,7 +235,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           kibanaIndexPatterns.map(({ title, id }, i) => ({
             label: title,
             value: id,
-            key: `${indexSelected}-${id}`,
+            key: `${title}-${id}`,
           }))
         );
       }

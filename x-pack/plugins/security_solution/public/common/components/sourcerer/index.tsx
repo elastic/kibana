@@ -63,7 +63,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
-      key: `${index}-${id}`,
+      key: `${title}-${id}`,
     }))
   );
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
@@ -165,7 +165,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     const newSelectedOptions = selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
-      key: `${index}-${id}`,
+      key: `${title}-${id}`,
     }));
     setSelectedOptions((prevSelectedOptions) => {
       if (!deepEqual(newSelectedOptions, prevSelectedOptions)) {
