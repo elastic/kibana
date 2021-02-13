@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useReducer, useCallback } from 'react';
-import { CaseStatuses } from '../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../case/common/api';
 
 import { Case } from './types';
 import * as i18n from './translations';
@@ -71,7 +71,9 @@ export const initialData: Case = {
   status: CaseStatuses.open,
   tags: [],
   title: '',
+  totalAlerts: 0,
   totalComment: 0,
+  type: CaseType.individual,
   updatedAt: null,
   updatedBy: null,
   version: '',

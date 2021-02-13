@@ -134,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should not display job cards');
           await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
           await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
+          await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
         });
 
         it('should display elements on File Data Visualizer page correctly', async () => {

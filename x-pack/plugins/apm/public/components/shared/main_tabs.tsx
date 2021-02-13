@@ -15,6 +15,8 @@ import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 const StyledTabs = euiStyled(EuiTabs)`
   padding: ${({ theme }) => `${theme.eui.gutterTypes.gutterMedium}`};
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+  border-top: ${({ theme }) => theme.eui.euiBorderThin};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
 `;
 
 export function MainTabs({ children }: { children: ReactNode }) {

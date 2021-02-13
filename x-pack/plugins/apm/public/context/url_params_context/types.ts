@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { LocalUIFilterName } from '../../../common/ui_filter';
+import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 
 export type IUrlParams = {
   detailTab?: string;
@@ -29,7 +31,7 @@ export type IUrlParams = {
   pageSize?: number;
   searchTerm?: string;
   percentile?: number;
-  latencyAggregationType?: string;
+  latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
-  comparisonType?: string;
+  comparisonType?: TimeRangeComparisonType;
 } & Partial<Record<LocalUIFilterName, string>>;

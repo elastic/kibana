@@ -15,6 +15,8 @@ import {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
+  SavedObjectsClosePointInTimeOptions,
+  SavedObjectsOpenPointInTimeOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
@@ -374,6 +376,44 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.removeReferencesTo(type, id, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
+   * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
+   *
+   * @param {string|Array<string>} type
+   * @param {object} [options] - {@link SavedObjectsOpenPointInTimeOptions}
+   * @property {string} [options.keepAlive]
+   * @property {string} [options.preference]
+   * @returns {promise} - { id: string }
+   */
+  async openPointInTimeForType(
+    type: string | string[],
+    options: SavedObjectsOpenPointInTimeOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.openPointInTimeForType(type, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Closes a Point In Time (PIT) by ID. This simply proxies the request to ES
+   * via the Elasticsearch client, and is included in the Saved Objects Client
+   * as a convenience for consumers who are using `openPointInTimeForType`.
+   *
+   * @param {string} id - ID returned from `openPointInTimeForType`
+   * @param {object} [options] - {@link SavedObjectsClosePointInTimeOptions}
+   * @returns {promise} - { succeeded: boolean; num_freed: number }
+   */
+  async closePointInTime(id: string, options: SavedObjectsClosePointInTimeOptions = {}) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.closePointInTime(id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
