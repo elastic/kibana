@@ -246,14 +246,22 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return await testSubjects.exists('dashboardEditMode');
     }
 
-    public async clickCancelOutOfEditMode() {
+    public async clickCancelOutOfEditMode(accept = true) {
       log.debug('clickCancelOutOfEditMode');
       await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        await testSubjects.exists('dashboardDiscardConfirmKeep');
+        await testSubjects.click('dashboardDiscardConfirmKeep');
+      }
     }
 
-    public async clickDiscardChanges() {
+    public async clickDiscardChanges(accept = true) {
       log.debug('clickDiscardChanges');
-      await testSubjects.click('dashboardDiscardChanges');
+      await testSubjects.click('dashboardViewOnlyMode');
+      if (accept) {
+        await testSubjects.exists('dashboardDiscardConfirmDiscard');
+        await testSubjects.click('dashboardDiscardConfirmDiscard');
+      }
     }
 
     public async clickQuickSave() {

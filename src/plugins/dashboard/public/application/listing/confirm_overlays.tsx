@@ -49,23 +49,23 @@ export const confirmDiscardOrKeepUnsavedChanges = (
     const session = overlays.openModal(
       toMountPoint(
         <>
-          <EuiModalHeader data-test-subj="dashboardCreateConfirm">
-            <EuiModalHeaderTitle>{leaveConfirmStrings.getDiscardTitle()}</EuiModalHeaderTitle>
+          <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
+            <EuiModalHeaderTitle>{leaveConfirmStrings.getLeaveEditModeTitle()}</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            <EuiText>{leaveConfirmStrings.getDiscardSubtitle()}</EuiText>
+            <EuiText>{leaveConfirmStrings.getLeaveEditModeSubtitle()}</EuiText>
           </EuiModalBody>
 
           <EuiModalFooter>
             <EuiButtonEmpty
-              data-test-subj="dashboardCreateConfirmCancel"
+              data-test-subj="dashboardDiscardConfirmCancel"
               onClick={() => session.close()}
             >
               {leaveConfirmStrings.getCancelButtonText()}
             </EuiButtonEmpty>
             <EuiButtonEmpty
-              data-test-subj="dashboardCreateConfirmStartOver"
+              data-test-subj="dashboardDiscardConfirmKeep"
               onClick={() => {
                 session.close();
                 resolve('keep');
@@ -76,7 +76,7 @@ export const confirmDiscardOrKeepUnsavedChanges = (
             <EuiButton
               fill
               color="danger"
-              data-test-subj="dashboardCreateConfirmContinue"
+              data-test-subj="dashboardDiscardConfirmDiscard"
               onClick={() => {
                 session.close();
                 resolve('discard');
@@ -88,7 +88,7 @@ export const confirmDiscardOrKeepUnsavedChanges = (
         </>
       ),
       {
-        'data-test-subj': 'dashboardCreateConfirmModal',
+        'data-test-subj': 'dashboardDiscardConfirmModal',
       }
     );
   });

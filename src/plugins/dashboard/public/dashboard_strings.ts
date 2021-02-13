@@ -257,6 +257,14 @@ export const leaveConfirmStrings = {
     i18n.translate('dashboard.appLeaveConfirmModal.keepUnsavedChangesButtonLabel', {
       defaultMessage: 'Keep unsaved changes',
     }),
+  getLeaveEditModeTitle: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.leaveEditMode', {
+      defaultMessage: 'Leave edit mode with unsaved work?',
+    }),
+  getLeaveEditModeSubtitle: () =>
+    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesDescription', {
+      defaultMessage: `If you discard your changes, there's no getting them back.`,
+    }),
   getDiscardTitle: () =>
     i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {
       defaultMessage: 'Discard changes to dashboard?',
