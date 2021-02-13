@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('index pattern empty view', () => {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
+      await esArchiver.load('empty_kibana');
       await esArchiver.unload('logstash_functional');
       await esArchiver.unload('makelogs');
       await kibanaServer.uiSettings.replace({});
@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await esArchiver.unload('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
       // @ts-expect-error
       await es.transport.request({

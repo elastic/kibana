@@ -8,7 +8,7 @@
 
 import { getServices, chance } from './lib';
 
-export const docExistsSuite = (savedObjectsIndex: string) => () => {
+export function docExistsSuite() {
   async function setup(options: any = {}) {
     const { initialSettings } = options;
 
@@ -16,7 +16,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
     // delete the kibana index to ensure we start fresh
     await callCluster('deleteByQuery', {
-      index: savedObjectsIndex,
+      index: kbnServer.config.get('kibana.index'),
       body: {
         conflicts: 'proceed',
         query: { match_all: {} },
@@ -212,4 +212,4 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       });
     });
   });
-};
+}

@@ -12,11 +12,10 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
-  const esArchiver = getService('esArchiver');
 
   describe('index pattern filter', function describeIndexTests() {
     before(async function () {
-      await esArchiver.emptyKibanaIndex();
+      // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();

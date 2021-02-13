@@ -9,7 +9,6 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
-import { catchAndReturnBoomErrors } from './utils';
 
 interface RouteDependencies {
   coreUsageData: CoreUsageDataSetup;
@@ -40,7 +39,7 @@ export const registerBulkUpdateRoute = (router: IRouter, { coreUsageData }: Rout
         ),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    router.handleLegacyErrors(async (context, req, res) => {
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkUpdate({ request: req }).catch(() => {});
 

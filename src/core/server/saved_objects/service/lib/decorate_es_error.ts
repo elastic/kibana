@@ -63,12 +63,6 @@ export function decorateEsError(error: EsErrors) {
   }
 
   if (responseErrors.isNotFound(error.statusCode)) {
-    const match = error?.meta?.body?.error?.reason?.match(
-      /no such index \[(.+)\] and \[require_alias\] request flag is \[true\] and \[.+\] is not an alias/
-    );
-    if (match?.length > 0) {
-      return SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError(error, match[1]);
-    }
     return SavedObjectsErrorHelpers.createGenericNotFoundError();
   }
 

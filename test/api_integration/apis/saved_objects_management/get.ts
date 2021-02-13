@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(
         async () =>
           // just in case the kibana server has recreated it
-          await esDeleteAllIndices('.kibana*')
+          await esDeleteAllIndices('.kibana')
       );
 
       it('should return 404 for object that no longer exists', async () =>
