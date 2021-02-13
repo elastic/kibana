@@ -143,7 +143,7 @@ export type Client<
     forceCache?: boolean;
     endpoint: TEndpoint;
   } & (TRouteState[TEndpoint] extends { params: t.Any }
-      ? MaybeOptional<{ params: t.OutputOf<TRouteState[TEndpoint]['params']> }>
+      ? MaybeOptional<{ params: t.TypeOf<TRouteState[TEndpoint]['params']> }>
       : {}) &
     (TOptions extends { abortable: true } ? { signal: AbortSignal | null } : {})
 ) => Promise<

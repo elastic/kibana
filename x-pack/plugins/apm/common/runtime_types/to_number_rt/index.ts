@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 
 export const toNumberRt = new t.Type<number, unknown, unknown>(
   'ToNumber',
-  t.number.is,
+  t.any.is,
   (input, context) => {
     const number = Number(input);
     return !isNaN(number) ? t.success(number) : t.failure(input, context);

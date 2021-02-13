@@ -15,15 +15,6 @@ import { useTheme } from '../../../hooks/use_theme';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import {
-  getTimeRangeComparison,
-  getComparisonChartTheme,
-} from '../../shared/time_comparison/get_time_range_comparison';
-
-const INITIAL_STATE = {
-  currentPeriod: [],
-  previousPeriod: [],
-};
 
 export function ServiceOverviewThroughputChart({
   height,
@@ -34,20 +25,9 @@ export function ServiceOverviewThroughputChart({
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const { start, end, comparisonEnabled, comparisonType } = urlParams;
-  const comparisonChartTheme = getComparisonChartTheme(theme);
-  const {
-    comparisonStart = undefined,
-    comparisonEnd = undefined,
-  } = comparisonType
-    ? getTimeRangeComparison({
-        start,
-        end,
-        comparisonType,
-      })
-    : {};
+  const { start, end } = urlParams;
 
-  const { data = INITIAL_STATE, status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
         return callApmApi({
@@ -61,22 +41,12 @@ export function ServiceOverviewThroughputChart({
               end,
               transactionType,
               uiFilters: JSON.stringify(uiFilters),
-              comparisonStart,
-              comparisonEnd,
             },
           },
         });
       }
     },
-    [
-      serviceName,
-      start,
-      end,
-      uiFilters,
-      transactionType,
-      comparisonStart,
-      comparisonEnd,
-    ]
+    [serviceName, start, end, uiFilters, transactionType]
   );
 
   return (
@@ -93,10 +63,9 @@ export function ServiceOverviewThroughputChart({
         height={height}
         showAnnotations={false}
         fetchStatus={status}
-        customTheme={comparisonChartTheme}
         timeseries={[
           {
-            data: data.currentPeriod,
+            data: data?.throughput ?? [],
             type: 'linemark',
             color: theme.eui.euiColorVis0,
             title: i18n.translate(
@@ -104,21 +73,6 @@ export function ServiceOverviewThroughputChart({
               { defaultMessage: 'Throughput' }
             ),
           },
-          ...(comparisonEnabled
-            ? [
-                {
-                  data: data.previousPeriod,
-                  type: 'area',
-                  color: theme.eui.euiColorLightestShade,
-                  title: i18n.translate(
-                    'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
-                    {
-                      defaultMessage: 'Previous period',
-                    }
-                  ),
-                },
-              ]
-            : []),
         ]}
         yLabelFormat={asTransactionRate}
       />

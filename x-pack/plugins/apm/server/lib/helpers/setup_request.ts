@@ -6,6 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
+import moment from 'moment';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
@@ -53,19 +54,19 @@ interface SetupRequestParams {
     /**
      * Timestamp in ms since epoch
      */
-    start?: number;
+    start?: string;
 
     /**
      * Timestamp in ms since epoch
      */
-    end?: number;
+    end?: string;
     uiFilters?: string;
   };
 }
 
 type InferSetup<TParams extends SetupRequestParams> = Setup &
-  (TParams extends { query: { start: number } } ? { start: number } : {}) &
-  (TParams extends { query: { end: number } } ? { end: number } : {});
+  (TParams extends { query: { start: string } } ? { start: number } : {}) &
+  (TParams extends { query: { end: string } } ? { end: number } : {});
 
 export async function setupRequest<TParams extends SetupRequestParams>(
   context: APMRequestHandlerContext<TParams>,
@@ -114,8 +115,8 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     };
 
     return {
-      ...('start' in query ? { start: query.start } : {}),
-      ...('end' in query ? { end: query.end } : {}),
+      ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
+      ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
       ...coreSetupRequest,
     } as InferSetup<TParams>;
   });

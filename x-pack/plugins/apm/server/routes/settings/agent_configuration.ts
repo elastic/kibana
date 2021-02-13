@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { toBooleanRt } from '../../../common/runtime_types/to_boolean_rt';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -23,6 +22,7 @@ import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
+import { jsonRt } from '../../../common/runtime_types/json_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 
 // get list of configurations
@@ -103,7 +103,7 @@ export const createOrUpdateAgentConfigurationRoute = createRoute({
     tags: ['access:apm', 'access:apm_write'],
   },
   params: t.intersection([
-    t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
+    t.partial({ query: t.partial({ overwrite: jsonRt.pipe(t.boolean) }) }),
     t.type({ body: agentConfigurationIntakeRt }),
   ]),
   handler: async ({ context, request }) => {
