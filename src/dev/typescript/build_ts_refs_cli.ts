@@ -23,13 +23,18 @@ export async function runBuildRefsCli() {
     async ({ log, flags }) => {
       const outDirs = getOutputsDeep(REF_CONFIG_PATHS);
 
-      if (flags.clean) {
+      const cacheEnabled = process.env.BUILD_TS_REFS_CACHE_ENABLE === 'true' || !!flags.cache;
+      const doCapture = process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true';
+      const doClean = !!flags.clean || doCapture;
+      const doInitCache = cacheEnabled && !doClean;
+
+      if (doClean) {
         log.info('deleting', outDirs.length, 'ts output directories');
         await concurrentMap(100, outDirs, (outDir) => del(outDir));
       }
 
       let outputCache;
-      if (flags.cache) {
+      if (cacheEnabled) {
         outputCache = await RefOutputCache.create({
           log,
           outDirs,
@@ -37,17 +42,19 @@ export async function runBuildRefsCli() {
           workingDir: CACHE_WORKING_DIR,
           upstreamUrl: 'https://github.com/elastic/kibana.git',
         });
+      }
 
+      if (outputCache && doInitCache) {
         await outputCache.initCaches();
       }
 
       await buildAllTsRefs(log);
 
-      if (outputCache) {
-        if (process.env.BUILD_TS_REFS_CACHE_CAPTURE === 'true') {
-          await outputCache.captureCache(Path.resolve(REPO_ROOT, 'target/ts_refs_cache'));
-        }
+      if (outputCache && doCapture) {
+        await outputCache.captureCache(Path.resolve(REPO_ROOT, 'target/ts_refs_cache'));
+      }
 
+      if (outputCache) {
         await outputCache.cleanup();
       }
     },
@@ -55,9 +62,6 @@ export async function runBuildRefsCli() {
       description: 'Build TypeScript projects',
       flags: {
         boolean: ['clean', 'cache'],
-        default: {
-          cache: process.env.BUILD_TS_REFS_CACHE_ENABLE === 'true' ? true : false,
-        },
       },
       log: {
         defaultLevel: 'debug',
