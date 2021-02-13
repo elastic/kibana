@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "data_enhanced"],
   "requiredPlugins": ["bfetch", "data", "features", "management", "share", "taskManager"],
-  "optionalPlugins": ["kibanaUtils", "usageCollection"],
+  "optionalPlugins": ["kibanaUtils", "usageCollection", "security"],
   "server": true,
   "ui": true,
   "requiredBundles": ["kibanaUtils", "kibanaReact"]
