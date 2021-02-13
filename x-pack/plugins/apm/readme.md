@@ -118,7 +118,7 @@ _Note: Run the following commands from `kibana/`._
 ### Typescript
 
 ```
-yarn tsc --noEmit --project x-pack/plugins/apm/tsconfig.json --skipLibCheck
+yarn tsc --noEmit --project x-pack/tsconfig.json --skipLibCheck
 ```
 
 ### Prettier

@@ -7,9 +7,9 @@
 
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import {
-  getThroughputChartSelector,
-  ThroughputChartsResponse,
-} from './throughput_chart_selectors';
+  getThrouputChartSelector,
+  ThrouputChartsResponse,
+} from './throuput_chart_selectors';
 
 const theme = {
   eui: {
@@ -30,26 +30,26 @@ const throughputData = {
     { key: 'HTTP 4xx', avg: 1, dataPoints: [{ x: 1, y: 2 }] },
     { key: 'HTTP 5xx', avg: 1, dataPoints: [{ x: 1, y: 2 }] },
   ],
-} as ThroughputChartsResponse;
+} as ThrouputChartsResponse;
 
-describe('getThroughputChartSelector', () => {
+describe('getThrouputChartSelector', () => {
   it('returns default values when data is undefined', () => {
-    const throughputTimeseries = getThroughputChartSelector({ theme });
+    const throughputTimeseries = getThrouputChartSelector({ theme });
     expect(throughputTimeseries).toEqual({ throughputTimeseries: [] });
   });
 
   it('returns default values when timeseries is empty', () => {
-    const throughputTimeseries = getThroughputChartSelector({
+    const throughputTimeseries = getThrouputChartSelector({
       theme,
-      throughputChart: { throughputTimeseries: [] },
+      throuputChart: { throughputTimeseries: [] },
     });
     expect(throughputTimeseries).toEqual({ throughputTimeseries: [] });
   });
 
   it('return throughput time series', () => {
-    const throughputTimeseries = getThroughputChartSelector({
+    const throughputTimeseries = getThrouputChartSelector({
       theme,
-      throughputChart: throughputData,
+      throuputChart: throughputData,
     });
 
     expect(throughputTimeseries).toEqual({

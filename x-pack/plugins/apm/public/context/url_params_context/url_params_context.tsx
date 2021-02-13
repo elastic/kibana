@@ -25,7 +25,7 @@ import { getDateRange } from './helpers';
 import { resolveUrlParams } from './resolve_url_params';
 import { IUrlParams } from './types';
 
-export interface TimeRange {
+interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }

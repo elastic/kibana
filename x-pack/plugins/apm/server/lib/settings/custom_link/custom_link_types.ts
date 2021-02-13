@@ -6,34 +6,29 @@
  */
 
 import * as t from 'io-ts';
-
-// These should be imported, but until TypeScript 4.2 we're inlining them here.
-// All instances of "service.name", "service.environment", "transaction.name",
-// and "transaction.type" need to be changed back to using the constants.
-// See https://github.com/microsoft/TypeScript/issues/37888
-// import {
-//   SERVICE_NAME,
-//   SERVICE_ENVIRONMENT,
-//   TRANSACTION_NAME,
-//   TRANSACTION_TYPE,
-// } from '../../../../common/elasticsearch_fieldnames';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../common/elasticsearch_fieldnames';
 
 export interface CustomLinkES {
   id?: string;
   '@timestamp'?: number;
   label: string;
   url: string;
-  'service.name'?: string[];
-  'service.environment'?: string[];
-  'transaction.name'?: string[];
-  'transaction.type'?: string[];
+  [SERVICE_NAME]?: string[];
+  [SERVICE_ENVIRONMENT]?: string[];
+  [TRANSACTION_NAME]?: string[];
+  [TRANSACTION_TYPE]?: string[];
 }
 
 export const filterOptionsRt = t.partial({
-  'service.name': t.string,
-  'service.environment': t.string,
-  'transaction.name': t.string,
-  'transaction.type': t.string,
+  [SERVICE_NAME]: t.string,
+  [SERVICE_ENVIRONMENT]: t.string,
+  [TRANSACTION_NAME]: t.string,
+  [TRANSACTION_TYPE]: t.string,
 });
 
 export const payloadRt = t.intersection([

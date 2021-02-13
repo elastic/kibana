@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonEmptyProps, EuiTitle } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
-import { StyledComponent } from 'styled-components';
-import {
-  euiStyled,
-  EuiTheme,
-} from '../../../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
+import { EuiButtonEmpty, EuiTitle } from '@elastic/eui';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
-// The return type of this component needs to be specified because the inferred
-// return type depends on types that are not exported from EUI. You get a TS4023
-// error if the return type is not specified.
-const Button: StyledComponent<
-  FunctionComponent<EuiButtonEmptyProps>,
-  EuiTheme
-> = euiStyled(EuiButtonEmpty).attrs(() => ({
+const Button = euiStyled(EuiButtonEmpty).attrs(() => ({
   contentProps: {
     className: 'alignLeft',
   },

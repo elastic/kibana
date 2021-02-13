@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { SyncBadge, SyncBadgeProps } from './SyncBadge';
+import React, { ComponentProps } from 'react';
+import { SyncBadge } from './SyncBadge';
 
 export default {
   title: 'app/TransactionDetails/SyncBadge',
@@ -18,7 +18,7 @@ export default {
   },
 };
 
-export function Example({ sync }: SyncBadgeProps) {
+export function Example({ sync }: ComponentProps<typeof SyncBadge>) {
   return <SyncBadge sync={sync} />;
 }
-Example.args = { sync: true } as SyncBadgeProps;
+Example.args = { sync: true } as ComponentProps<typeof SyncBadge>;

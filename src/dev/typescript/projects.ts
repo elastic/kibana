@@ -28,6 +28,10 @@ export const PROJECTS = [
     name: 'apm/ftr_e2e',
     disableTypeCheck: true,
   }),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/scripts/tsconfig.json'), {
+    name: 'apm/scripts',
+    disableTypeCheck: true,
+  }),
 
   // NOTE: using glob.sync rather than glob-all or globby
   // because it takes less than 10 ms, while the other modules

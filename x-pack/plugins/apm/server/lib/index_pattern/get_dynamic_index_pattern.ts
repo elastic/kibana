@@ -13,7 +13,7 @@ import {
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { withApmSpan } from '../../utils/with_apm_span';
 
-export interface IndexPatternTitleAndFields {
+interface IndexPatternTitleAndFields {
   title: string;
   fields: FieldDescriptor[];
 }

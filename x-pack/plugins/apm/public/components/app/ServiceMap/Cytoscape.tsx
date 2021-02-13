@@ -27,7 +27,7 @@ export const CytoscapeContext = createContext<cytoscape.Core | undefined>(
   undefined
 );
 
-export interface CytoscapeProps {
+interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
   height: number;
