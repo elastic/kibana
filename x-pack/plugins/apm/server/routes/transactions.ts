@@ -24,8 +24,9 @@ import { getLatencyTimeseries } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 
 /**
  * Returns a list of transactions grouped by name
@@ -347,6 +348,7 @@ export const transactionChartsErrorRateRoute = createRoute({
     query: t.intersection([
       uiFiltersRt,
       rangeRt,
+      comparisonRangeRt,
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
     ]),
@@ -356,18 +358,49 @@ export const transactionChartsErrorRateRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
-    const { transactionType, transactionName } = params.query;
+    const {
+      transactionType,
+      transactionName,
+      comparisonStart,
+      comparisonEnd,
+    } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    return getErrorRate({
+    const { start, end } = setup;
+
+    const commonParams = {
       serviceName,
       transactionType,
       transactionName,
       setup,
       searchAggregatedTransactions,
-    });
+    };
+
+    const [currentPeriod, previousPeriod] = await Promise.all([
+      getErrorRate({
+        ...commonParams,
+        start,
+        end,
+      }),
+      comparisonStart && comparisonEnd
+        ? getErrorRate({
+            ...commonParams,
+            start: comparisonStart,
+            end: comparisonEnd,
+          }).then((errorRate) => ({
+            ...errorRate,
+            transactionErrorRate: offsetPreviousPeriodCoordinates({
+              currentPeriodStart: start,
+              previousPeriodStart: comparisonStart,
+              previousPeriodTimeseries: errorRate.transactionErrorRate,
+            }),
+          }))
+        : { noHits: true, transactionErrorRate: [], average: 0 },
+    ]);
+
+    return { currentPeriod, previousPeriod };
   },
 });

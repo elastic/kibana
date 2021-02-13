@@ -20,7 +20,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { Setup } from '../helpers/setup_request';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
@@ -34,19 +34,23 @@ export async function getErrorRate({
   transactionName,
   setup,
   searchAggregatedTransactions,
+  start,
+  end,
 }: {
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup & SetupTimeRange;
+  setup: Setup;
   searchAggregatedTransactions: boolean;
+  start: number;
+  end: number;
 }): Promise<{
   noHits: boolean;
   transactionErrorRate: Coordinate[];
   average: number | null;
 }> {
   return withApmSpan('get_transaction_group_error_rate', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { esFilter, apmEventClient } = setup;
 
     const transactionNamefilter = transactionName
       ? [{ term: { [TRANSACTION_NAME]: transactionName } }]

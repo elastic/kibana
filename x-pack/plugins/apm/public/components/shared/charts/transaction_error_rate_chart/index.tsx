@@ -15,6 +15,10 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChart } from '../timeseries_chart';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import {
+  getTimeRangeComparison,
+  getComparisonChartTheme,
+} from '../../time_comparison/get_time_range_comparison';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -25,6 +29,11 @@ interface Props {
   showAnnotations?: boolean;
 }
 
+const INITIAL_STATE = {
+  currentPeriod: { average: 0, noHits: true, transactionErrorRate: [] },
+  previousPeriod: { average: 0, noHits: true, transactionErrorRate: [] },
+};
+
 export function TransactionErrorRateChart({
   height,
   showAnnotations = true,
@@ -33,9 +42,26 @@ export function TransactionErrorRateChart({
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
   const { transactionType } = useApmServiceContext();
-  const { start, end, transactionName } = urlParams;
+  const {
+    start,
+    end,
+    transactionName,
+    comparisonEnabled,
+    comparisonType,
+  } = urlParams;
+  const {
+    comparisonStart = undefined,
+    comparisonEnd = undefined,
+  } = comparisonType
+    ? getTimeRangeComparison({
+        start,
+        end,
+        comparisonType,
+      })
+    : {};
+  const comparisonChartTheme = getComparisonChartTheme(theme);
 
-  const { data, status } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (transactionType && serviceName && start && end) {
         return callApmApi({
@@ -51,15 +77,24 @@ export function TransactionErrorRateChart({
               transactionType,
               transactionName,
               uiFilters: JSON.stringify(uiFilters),
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters, transactionType, transactionName]
+    [
+      serviceName,
+      start,
+      end,
+      uiFilters,
+      transactionType,
+      transactionName,
+      comparisonStart,
+      comparisonEnd,
+    ]
   );
-
-  const errorRates = data?.transactionErrorRate || [];
 
   return (
     <EuiPanel>
@@ -75,15 +110,31 @@ export function TransactionErrorRateChart({
         height={height}
         showAnnotations={showAnnotations}
         fetchStatus={status}
+        customTheme={comparisonChartTheme}
         timeseries={[
           {
-            data: errorRates,
+            data: data.currentPeriod.transactionErrorRate,
             type: 'linemark',
             color: theme.eui.euiColorVis7,
             title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
               defaultMessage: 'Error rate (avg.)',
             }),
           },
+          ...(comparisonEnabled
+            ? [
+                {
+                  data: data.previousPeriod.transactionErrorRate,
+                  type: 'area',
+                  color: theme.eui.euiColorLightestShade,
+                  title: i18n.translate(
+                    'xpack.apm.errorRate.chart.previousPeriodLabel',
+                    {
+                      defaultMessage: 'Previous period',
+                    }
+                  ),
+                },
+              ]
+            : []),
         ]}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
