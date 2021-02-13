@@ -22,58 +22,82 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NoSpacesAvailable } from './no_spaces_available';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DocumentationLinksService } from '../../lib';
 import { SpaceAvatar } from '../../space_avatar';
-import { SpaceTarget } from '../types';
+import { ShareToSpaceTarget } from '../../types';
+import { useSpaces } from '../../spaces_context';
+import { ShareOptions } from '../types';
 
 interface Props {
-  spaces: SpaceTarget[];
-  selectedSpaceIds: string[];
+  spaces: ShareToSpaceTarget[];
+  shareOptions: ShareOptions;
   onChange: (selectedSpaceIds: string[]) => void;
+  enableCreateNewSpaceLink: boolean;
+  enableSpaceAgnosticBehavior: boolean;
 }
 
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
 
 const ROW_HEIGHT = 40;
-const partiallyAuthorizedTooltip = {
-  checked: i18n.translate(
-    'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.checked',
-    { defaultMessage: 'You need additional privileges to deselect this space.' }
-  ),
-  unchecked: i18n.translate(
-    'xpack.spaces.management.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked',
-    { defaultMessage: 'You need additional privileges to select this space.' }
-  ),
-};
-const partiallyAuthorizedSpaceProps = (checked: boolean) => ({
-  append: (
-    <EuiIconTip
-      content={checked ? partiallyAuthorizedTooltip.checked : partiallyAuthorizedTooltip.unchecked}
-      position="left"
-      type="iInCircle"
-    />
-  ),
-  disabled: true,
-});
-const activeSpaceProps = {
-  append: <EuiBadge color="hollow">Current</EuiBadge>,
-  disabled: true,
-  checked: 'on' as 'on',
-};
+const APPEND_ACTIVE_SPACE = (
+  <EuiBadge color="hollow">
+    {i18n.translate('xpack.spaces.shareToSpace.currentSpaceBadge', { defaultMessage: 'Current' })}
+  </EuiBadge>
+);
+const APPEND_CANNOT_SELECT = (
+  <EuiIconTip
+    content={i18n.translate('xpack.spaces.shareToSpace.partiallyAuthorizedSpaceTooltip.unchecked', {
+      defaultMessage: 'You need additional privileges to select this space.',
+    })}
+    position="left"
+    type="iInCircle"
+  />
+);
+const APPEND_CANNOT_DESELECT = (
+  <EuiIconTip
+    content={i18n.translate('xpack.spaces.shareToSpace.partiallyAuthorizedSpaceTooltip.checked', {
+      defaultMessage: 'You need additional privileges to deselect this space.',
+    })}
+    position="left"
+    type="iInCircle"
+  />
+);
+const APPEND_FEATURE_IS_DISABLED = (
+  <EuiIconTip
+    content={i18n.translate('xpack.spaces.shareToSpace.featureIsDisabledTooltip', {
+      defaultMessage: 'This feature is disabled in this space.',
+    })}
+    position="left"
+    type="alert"
+    color="warning"
+  />
+);
 
 export const SelectableSpacesControl = (props: Props) => {
-  const { spaces, selectedSpaceIds, onChange } = props;
-  const { services } = useKibana();
+  const {
+    spaces,
+    shareOptions,
+    onChange,
+    enableCreateNewSpaceLink,
+    enableSpaceAgnosticBehavior,
+  } = props;
+  const { services } = useSpaces();
   const { application, docLinks } = services;
+  const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;
 
-  const activeSpaceId = spaces.find((space) => space.isActiveSpace)!.id;
+  const activeSpaceId =
+    !enableSpaceAgnosticBehavior && spaces.find((space) => space.isActiveSpace)!.id;
   const isGlobalControlChecked = selectedSpaceIds.includes(ALL_SPACES_ID);
   const options = spaces
-    .sort((a, b) => (a.isActiveSpace ? -1 : b.isActiveSpace ? 1 : 0))
+    .filter(
+      // filter out spaces that are not already selected and have the feature disabled in that space
+      ({ id, isFeatureDisabled }) => !isFeatureDisabled || initiallySelectedSpaceIds.includes(id)
+    )
+    .sort(createSpacesComparator(activeSpaceId))
     .map<SpaceOption>((space) => {
       const checked = selectedSpaceIds.includes(space.id);
+      const additionalProps = getAdditionalProps(space, activeSpaceId, checked);
       return {
         label: space.name,
         prepend: <SpaceAvatar space={space} size={'s'} />,
@@ -81,8 +105,7 @@ export const SelectableSpacesControl = (props: Props) => {
         ['data-space-id']: space.id,
         ['data-test-subj']: `sts-space-selector-row-${space.id}`,
         ...(isGlobalControlChecked && { disabled: true }),
-        ...(space.isPartiallyAuthorized && partiallyAuthorizedSpaceProps(checked)),
-        ...(space.isActiveSpace && activeSpaceProps),
+        ...additionalProps,
       };
     });
 
@@ -112,13 +135,13 @@ export const SelectableSpacesControl = (props: Props) => {
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           <FormattedMessage
-            id="xpack.spaces.management.shareToSpace.unknownSpacesLabel.text"
+            id="xpack.spaces.shareToSpace.unknownSpacesLabel.text"
             defaultMessage="To view hidden spaces, you need {additionalPrivilegesLink}."
             values={{
               additionalPrivilegesLink: (
-                <EuiLink href={kibanaPrivilegesUrl}>
+                <EuiLink href={kibanaPrivilegesUrl} target="_blank">
                   <FormattedMessage
-                    id="xpack.spaces.management.shareToSpace.unknownSpacesLabel.additionalPrivilegesLink"
+                    id="xpack.spaces.shareToSpace.unknownSpacesLabel.additionalPrivilegesLink"
                     defaultMessage="additional privileges"
                   />
                 </EuiLink>
@@ -130,25 +153,28 @@ export const SelectableSpacesControl = (props: Props) => {
     );
   };
   const getNoSpacesAvailable = () => {
-    if (spaces.length < 2) {
+    if (enableCreateNewSpaceLink && spaces.length < 2) {
       return <NoSpacesAvailable application={application!} />;
     }
     return null;
   };
 
+  // if space-agnostic behavior is not enabled, the active space is not selected or deselected by the user, so we have to artificially pad the count for this label
+  const selectedCountPad = enableSpaceAgnosticBehavior ? 0 : 1;
   const selectedCount =
-    selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length + 1;
+    selectedSpaceIds.filter((id) => id !== ALL_SPACES_ID && id !== UNKNOWN_SPACE).length +
+    selectedCountPad;
   const hiddenCount = selectedSpaceIds.filter((id) => id === UNKNOWN_SPACE).length;
   const selectSpacesLabel = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.selectSpacesLabel',
+    'xpack.spaces.shareToSpace.shareModeControl.selectSpacesLabel',
     { defaultMessage: 'Select spaces' }
   );
   const selectedSpacesLabel = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.selectedCountLabel',
+    'xpack.spaces.shareToSpace.shareModeControl.selectedCountLabel',
     { defaultMessage: '{selectedCount} selected', values: { selectedCount } }
   );
   const hiddenSpacesLabel = i18n.translate(
-    'xpack.spaces.management.shareToSpace.shareModeControl.hiddenCountLabel',
+    'xpack.spaces.shareToSpace.shareModeControl.hiddenCountLabel',
     { defaultMessage: '+{hiddenCount} hidden', values: { hiddenCount } }
   );
   const hiddenSpaces = hiddenCount ? <EuiText size="xs">{hiddenSpacesLabel}</EuiText> : null;
@@ -193,3 +219,55 @@ export const SelectableSpacesControl = (props: Props) => {
     </EuiFormRow>
   );
 };
+
+/**
+ * Gets additional props for the selection option.
+ */
+function getAdditionalProps(
+  space: ShareToSpaceTarget,
+  activeSpaceId: string | false,
+  checked: boolean
+) {
+  if (space.id === activeSpaceId) {
+    return {
+      append: APPEND_ACTIVE_SPACE,
+      disabled: true,
+      checked: 'on' as 'on',
+    };
+  }
+  if (space.cannotShareToSpace) {
+    return {
+      append: (
+        <>
+          {checked ? APPEND_CANNOT_DESELECT : APPEND_CANNOT_SELECT}
+          {space.isFeatureDisabled ? APPEND_FEATURE_IS_DISABLED : null}
+        </>
+      ),
+      disabled: true,
+    };
+  }
+  if (space.isFeatureDisabled) {
+    return {
+      append: APPEND_FEATURE_IS_DISABLED,
+    };
+  }
+}
+
+/**
+ * Given the active space, create a comparator to sort a ShareToSpaceTarget array so that the active space is at the beginning, and space(s) for
+ * which the current feature is disabled are all at the end.
+ */
+function createSpacesComparator(activeSpaceId: string | false) {
+  return (a: ShareToSpaceTarget, b: ShareToSpaceTarget) => {
+    if (a.id === activeSpaceId) {
+      return -1;
+    }
+    if (b.id === activeSpaceId) {
+      return 1;
+    }
+    if (a.isFeatureDisabled !== b.isFeatureDisabled) {
+      return a.isFeatureDisabled ? 1 : -1;
+    }
+    return 0;
+  };
+}
