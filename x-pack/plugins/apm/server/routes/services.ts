@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 import { uniq } from 'lodash';
-import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
-import { toNumberRt } from '../../common/runtime_types/to_number_rt';
-import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getServiceAnnotations } from '../lib/services/annotations';
-import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
-import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServices } from '../lib/services/get_services';
+import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
+import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
+import { createRoute } from './create_route';
+import { uiFiltersRt, rangeRt } from './default_api_types';
+import { getServiceAnnotations } from '../lib/services/annotations';
+import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
+import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { getServiceErrorGroups } from '../lib/services/get_service_error_groups';
+import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { toNumberRt } from '../../common/runtime_types/to_number_rt';
+import { getThroughput } from '../lib/services/get_throughput';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
-import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
-import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
-import { getThroughput } from '../lib/services/get_throughput';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
-import { createRoute } from './create_route';
-import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 import { withApmSpan } from '../utils/with_apm_span';
 
 export const servicesRoute = createRoute({
@@ -217,7 +216,7 @@ export const serviceAnnotationsCreateRoute = createRoute({
     }),
     body: t.intersection([
       t.type({
-        '@timestamp': isoToEpochRt,
+        '@timestamp': dateAsStringRt,
         service: t.intersection([
           t.type({
             version: t.string,
@@ -252,7 +251,6 @@ export const serviceAnnotationsCreateRoute = createRoute({
       annotationsClient.create({
         message: body.service.version,
         ...body,
-        '@timestamp': new Date(body['@timestamp']).toISOString(),
         annotation: {
           type: 'deployment',
         },
@@ -327,56 +325,23 @@ export const serviceThroughputRoute = createRoute({
       t.type({ transactionType: t.string }),
       uiFiltersRt,
       rangeRt,
-      comparisonRangeRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
-    const {
-      transactionType,
-      comparisonStart,
-      comparisonEnd,
-    } = context.params.query;
+    const { transactionType } = context.params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    const { start, end } = setup;
-
-    const commonProps = {
+    return getThroughput({
       searchAggregatedTransactions,
       serviceName,
       setup,
       transactionType,
-    };
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getThroughput({
-        ...commonProps,
-        start,
-        end,
-      }),
-      comparisonStart && comparisonEnd
-        ? getThroughput({
-            ...commonProps,
-            start: comparisonStart,
-            end: comparisonEnd,
-          }).then((coordinates) =>
-            offsetPreviousPeriodCoordinates({
-              currentPeriodStart: start,
-              previousPeriodStart: comparisonStart,
-              previousPeriodTimeseries: coordinates,
-            })
-          )
-        : [],
-    ]);
-
-    return {
-      currentPeriod,
-      previousPeriod,
-    };
+    });
   },
 });
 

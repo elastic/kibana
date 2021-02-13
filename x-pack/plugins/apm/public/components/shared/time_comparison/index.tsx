@@ -16,10 +16,6 @@ import { useUrlParams } from '../../../context/url_params_context/use_url_params
 import { px, unit } from '../../../style/variables';
 import * as urlHelpers from '../../shared/Links/url_helpers';
 import { useBreakPoints } from '../../../hooks/use_break_points';
-import {
-  getTimeRangeComparison,
-  TimeRangeComparisonType,
-} from './get_time_range_comparison';
 
 const PrependContainer = euiStyled.div`
   display: flex;
@@ -29,32 +25,15 @@ const PrependContainer = euiStyled.div`
   padding: 0 ${px(unit)};
 `;
 
-function getDateFormat({
-  previousPeriodStart,
-  currentPeriodEnd,
+function formatPreviousPeriodDates({
+  momentStart,
+  momentEnd,
 }: {
-  previousPeriodStart?: string;
-  currentPeriodEnd?: string;
+  momentStart: moment.Moment;
+  momentEnd: moment.Moment;
 }) {
-  const momentPreviousPeriodStart = moment(previousPeriodStart);
-  const momentCurrentPeriodEnd = moment(currentPeriodEnd);
-  const isDifferentYears =
-    momentPreviousPeriodStart.get('year') !==
-    momentCurrentPeriodEnd.get('year');
-  return isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
-}
-
-function formatDate({
-  dateFormat,
-  previousPeriodStart,
-  previousPeriodEnd,
-}: {
-  dateFormat: string;
-  previousPeriodStart?: string;
-  previousPeriodEnd?: string;
-}) {
-  const momentStart = moment(previousPeriodStart);
-  const momentEnd = moment(previousPeriodEnd);
+  const isDifferentYears = momentStart.get('year') !== momentEnd.get('year');
+  const dateFormat = isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
   return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
 }
 
@@ -70,17 +49,17 @@ function getSelectOptions({
   const momentStart = moment(start);
   const momentEnd = moment(end);
 
-  const dayBeforeOption = {
-    value: TimeRangeComparisonType.DayBefore,
-    text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
-      defaultMessage: 'Day before',
+  const yesterdayOption = {
+    value: 'yesterday',
+    text: i18n.translate('xpack.apm.timeComparison.select.yesterday', {
+      defaultMessage: 'Yesterday',
     }),
   };
 
-  const weekBeforeOption = {
-    value: TimeRangeComparisonType.WeekBefore,
-    text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
-      defaultMessage: 'Week before',
+  const aWeekAgoOption = {
+    value: 'week',
+    text: i18n.translate('xpack.apm.timeComparison.select.weekAgo', {
+      defaultMessage: 'A week ago',
     }),
   };
 
@@ -90,39 +69,23 @@ function getSelectOptions({
     unitOfTime: 'days',
     precise: true,
   });
-
   const isRangeToNow = rangeTo === 'now';
 
   if (isRangeToNow) {
     // Less than or equals to one day
     if (dateDiff <= 1) {
-      return [dayBeforeOption, weekBeforeOption];
+      return [yesterdayOption, aWeekAgoOption];
     }
 
     // Less than or equals to one week
     if (dateDiff <= 7) {
-      return [weekBeforeOption];
+      return [aWeekAgoOption];
     }
   }
 
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    comparisonType: TimeRangeComparisonType.PeriodBefore,
-    start,
-    end,
-  });
-
-  const dateFormat = getDateFormat({
-    previousPeriodStart: comparisonStart,
-    currentPeriodEnd: end,
-  });
-
   const prevPeriodOption = {
-    value: TimeRangeComparisonType.PeriodBefore,
-    text: formatDate({
-      dateFormat,
-      previousPeriodStart: comparisonStart,
-      previousPeriodEnd: comparisonEnd,
-    }),
+    value: 'previousPeriod',
+    text: formatPreviousPeriodDates({ momentStart, momentEnd }),
   };
 
   // above one week or when rangeTo is not "now"
