@@ -147,7 +147,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   >((state) => sourcererScopeSelector(state, SourcererScopeName.timeline), deepEqual);
   const [selectedOptions, setSelectedOptions] = useState<ComboOptions>(
     sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
-      key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
+      key: `${indexSelected}-${id}`,
       label: indexSelected,
       value: id,
     }))
@@ -168,7 +168,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           return [
             ...acc,
             {
-              key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
+              key: `${index}-${id}`,
               label: index,
               value: id,
             },
@@ -211,7 +211,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           ].map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
             value: id,
-            key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
+            key: `${indexSelected}-${id}`,
           }))
         );
       } else if (filter === 'raw') {
@@ -219,7 +219,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           configAsSelectable.map(({ title: indexSelected, id }, i) => ({
             label: indexSelected,
             value: id,
-            key: `${id}-${i}`,
+            key: `${indexSelected}-${id}`,
           }))
         );
       } else if (filter === 'alert') {
@@ -227,7 +227,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           {
             label: signalIndexName ?? '',
             value: SourcererPatternType.detections,
-            key: SourcererPatternType.detections,
+            key: `${signalIndexName ?? ''}-${SourcererPatternType.detections}`,
           },
         ]);
       } else if (filter === 'kibana') {
@@ -235,7 +235,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
           kibanaIndexPatterns.map(({ title, id }, i) => ({
             label: title,
             value: id,
-            key: `${id}-${i}`,
+            key: `${indexSelected}-${id}`,
           }))
         );
       }
@@ -263,7 +263,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       sourcererScope.selectedPatterns.map(({ title: indexSelected, id }, i) => ({
         label: indexSelected,
         value: id,
-        key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
+        key: `${indexSelected}-${id}`,
       }))
     );
     setFilterEventType(eventType);
@@ -336,7 +336,7 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
       ({ title: indexSelected, id }, i) => ({
         label: indexSelected,
         value: id,
-        key: id === SourcererPatternType.detections ? id : `${id}-${i}`,
+        key: `${indexSelected}-${id}`,
       })
     );
     setSelectedOptions((prevSelectedOptions) => {

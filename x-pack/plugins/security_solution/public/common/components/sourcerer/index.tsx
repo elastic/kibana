@@ -63,7 +63,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
-      key: `${id}-${i}`,
+      key: `${index}-${id}`,
     }))
   );
   const isSavingDisabled = useMemo(() => selectedOptions.length === 0, [selectedOptions]);
@@ -94,7 +94,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       configIndexPatterns.map((indexSelected, i) => ({
         label: indexSelected,
         value: SourcererPatternType.config,
-        key: `${SourcererPatternType.config}-${i}`,
+        key: `${indexSelected}-${SourcererPatternType.config}`,
       }))
     );
   }, [configIndexPatterns]);
@@ -118,7 +118,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
       [...configAsSelectable, ...kibanaIndexPatterns].reduce<ComboBoxOptions>(
         (acc, { title: index, id }, i) => {
           if (index != null) {
-            return [...acc, { label: index, value: id, key: `${id}-${i}` }];
+            return [...acc, { label: index, value: id, key: `${index}-${id}` }];
           }
           return acc;
         },
@@ -165,7 +165,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     const newSelectedOptions = selectedPatterns.map(({ title, id }, i) => ({
       label: title,
       value: id,
-      key: `${id}-${i}`,
+      key: `${index}-${id}`,
     }));
     setSelectedOptions((prevSelectedOptions) => {
       if (!deepEqual(newSelectedOptions, prevSelectedOptions)) {
