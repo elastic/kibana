@@ -12,10 +12,9 @@ import { PackageInfo, PackagePolicySOAttributes } from '../types';
 import { SavedObjectsUpdateResponse } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 import { KibanaRequest } from 'kibana/server';
-import { xpackMocks } from '../../../../mocks';
 import { ExternalCallback } from '..';
 import { appContextService } from './app_context';
-import { createAppContextStartContractMock } from '../mocks';
+import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
