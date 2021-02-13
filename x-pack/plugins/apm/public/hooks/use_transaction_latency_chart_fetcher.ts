@@ -12,7 +12,6 @@ import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
-import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 
 export function useTransactionLatencyChartsFetcher() {
