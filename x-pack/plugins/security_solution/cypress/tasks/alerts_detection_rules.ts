@@ -29,23 +29,11 @@ import {
   ASYNC_LOADING_PROGRESS,
   RULE_AUTO_REFRESH_IDLE_MODAL,
   RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
-  FIVE_ROWS,
-  SECOND_PAGE_SELECTOR,
-  FROSTED_LOADING_RULES_TABLE,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
-};
-
-export const changeToFiveRowsPerPage = () => {
-  cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
-  cy.get(FIVE_ROWS).click();
-};
-
-export const goToSecondPage = () => {
-  cy.get(SECOND_PAGE_SELECTOR).click({ force: true });
 };
 
 export const changeToThreeHundredRowsPerPage = () => {
@@ -136,11 +124,6 @@ export const waitForRuleToBeActivated = () => {
 };
 
 export const waitForRulesToBeLoaded = () => {
-  cy.get(FROSTED_LOADING_RULES_TABLE).should('exist');
-  cy.get(FROSTED_LOADING_RULES_TABLE).should('not.exist');
-};
-
-export const waitForRulesToBeAutoRefreshed = () => {
   cy.get(ASYNC_LOADING_PROGRESS).should('exist');
   cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
 };
