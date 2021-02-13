@@ -124,7 +124,7 @@ export async function sendUpgradeAgentsActions(
   // throw if any of those agent policies are managed
   for (const policy of agentPolicies) {
     if (policy.is_managed) {
-      throw new IngestManagerError(`Cannot update agent in managed policy ${policy.id}`);
+      throw new IngestManagerError(`Cannot upgrade agent in managed policy ${policy.id}`);
     }
   }
 
