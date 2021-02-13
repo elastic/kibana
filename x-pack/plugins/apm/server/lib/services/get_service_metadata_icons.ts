@@ -27,7 +27,7 @@ type ServiceMetadataIconsRaw = Pick<
   'kubernetes' | 'cloud' | 'container' | 'agent'
 >;
 
-interface ServiceMetadataIcons {
+export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
   cloudProvider?: string;
