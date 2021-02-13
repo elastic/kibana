@@ -12,38 +12,39 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiTextColor,
-  EuiBadge,
-  EuiBadgeGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
+import { DOCUMENT_PERMISSIONS_DOCS_URL, ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 import { FeatureIds, Configuration, Features } from '../../../../types';
 import { LEARN_MORE_LINK } from '../../constants';
 
 import { AddSourceLogic } from './add_source_logic';
 import {
-  CONNECT_REMOTE,
-  CONNECT_PRIVATE,
   CONNECT_WHICH_OPTION_LINK,
   CONNECT_DOC_PERMISSIONS_LABEL,
   CONNECT_DOC_PERMISSIONS_TITLE,
   CONNECT_NEEDS_PERMISSIONS,
   CONNECT_NOT_SYNCED_TITLE,
   CONNECT_NOT_SYNCED_TEXT,
+  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
+  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE,
+  SOURCE_FEATURES_EXPLORE_BUTTON,
 } from './constants';
 import { SourceFeatures } from './source_features';
 
@@ -110,6 +111,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     onSubmit();
   };
 
+  const permissionsExcluded = features?.basicOrgContextExcludedFeatures?.includes(
+    FeatureIds.DocumentLevelPermissions
+  );
+
   const credentialsFields = (
     <>
       <EuiFormRow label="Login">
@@ -147,35 +152,6 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     </>
   );
 
-  const featureBadgeGroup = () => {
-    if (isOrganization) {
-      return null;
-    }
-
-    const isRemote = features?.platinumPrivateContext.includes(FeatureIds.Remote);
-    const isPrivate = features?.platinumPrivateContext.includes(FeatureIds.Private);
-
-    if (isRemote || isPrivate) {
-      return (
-        <>
-          <EuiBadgeGroup>
-            {isRemote && <EuiBadge color="hollow">{CONNECT_REMOTE}</EuiBadge>}
-            {isPrivate && <EuiBadge color="hollow">{CONNECT_PRIVATE}</EuiBadge>}
-          </EuiBadgeGroup>
-          <EuiSpacer />
-        </>
-      );
-    }
-  };
-
-  const descriptionBlock = (
-    <EuiText grow={false}>
-      {sourceDescription && <p>{sourceDescription}</p>}
-      {connectStepDescription && <p>{connectStepDescription}</p>}
-      <EuiSpacer size="s" />
-    </EuiText>
-  );
-
   const whichDocsLink = (
     <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
       {CONNECT_WHICH_OPTION_LINK}
@@ -184,54 +160,87 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const permissionField = (
     <>
-      <EuiTitle size="xs">
-        <span>
-          <EuiTextColor color="default">{CONNECT_DOC_PERMISSIONS_TITLE}</EuiTextColor>
-        </span>
-      </EuiTitle>
+      <EuiPanel paddingSize="l">
+        <EuiTitle size="xs">
+          <h3>
+            <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          {!needsPermissions && (
+            <span>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
+                defaultMessage="Document-level permissions are not yet available for this source. {link}"
+                values={{
+                  link: (
+                    <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                      {LEARN_MORE_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </span>
+          )}
+          {needsPermissions && indexPermissionsValue && (
+            <span>
+              {CONNECT_NEEDS_PERMISSIONS}
+              <EuiSpacer size="s" />
+              {whichDocsLink}
+            </span>
+          )}
+        </EuiText>
+        <EuiSpacer size="s" />
+        {!indexPermissionsValue && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning" size="s">
+              <p>
+                {CONNECT_NOT_SYNCED_TEXT}
+                {needsPermissions && whichDocsLink}
+              </p>
+            </EuiCallOut>
+          </>
+        )}
+        <EuiSpacer />
+        <EuiSwitch
+          label={<strong>{CONNECT_DOC_PERMISSIONS_LABEL}</strong>}
+          name="index_permissions"
+          onChange={(e) => setSourceIndexPermissionsValue(e.target.checked)}
+          checked={indexPermissionsValue}
+          disabled={!needsPermissions}
+        />
+      </EuiPanel>
+      <EuiSpacer size="xl" />
+    </>
+  );
+
+  const documentLevelPermissionsCallout = (
+    <>
+      <EuiPanel paddingSize="l">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="m" type="lock" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE}</strong>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText size="xs">
+          <p>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="xs">
+          <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+            {SOURCE_FEATURES_EXPLORE_BUTTON}
+          </EuiLink>
+        </EuiText>
+      </EuiPanel>
       <EuiSpacer />
-      <EuiSwitch
-        label={<strong>{CONNECT_DOC_PERMISSIONS_LABEL}</strong>}
-        name="index_permissions"
-        onChange={(e) => setSourceIndexPermissionsValue(e.target.checked)}
-        checked={indexPermissionsValue}
-        disabled={!needsPermissions}
-      />
-      <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued">
-        {!needsPermissions && (
-          <span data-test-subj="NeedsPermissionsMessage">
-            <FormattedMessage
-              id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
-              defaultMessage="Document-level permissions are not yet available for this source. {link}"
-              values={{
-                link: (
-                  <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-                    {LEARN_MORE_LINK}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </span>
-        )}
-        {needsPermissions && indexPermissionsValue && (
-          <span>
-            {CONNECT_NEEDS_PERMISSIONS}
-            <br />
-            {whichDocsLink}
-          </span>
-        )}
-      </EuiText>
-      <EuiSpacer size="s" />
-      {!indexPermissionsValue && (
-        <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning">
-          <p>
-            {CONNECT_NOT_SYNCED_TEXT}
-            {needsPermissions && whichDocsLink}
-          </p>
-        </EuiCallOut>
-      )}
-      <EuiSpacer size="xxl" />
     </>
   );
 
@@ -240,6 +249,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       {isOrganization && hasPlatinumLicense && permissionField}
       {!hasOauthRedirect && credentialsFields}
       {needsSubdomain && subdomainField}
+      {permissionsExcluded && !hasPlatinumLicense && documentLevelPermissionsCallout}
 
       <EuiFormRow>
         <EuiButton color="primary" type="submit" fill isLoading={formLoading}>
@@ -262,14 +272,18 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
           gutterSize="xl"
           responsive={false}
         >
-          <EuiFlexItem grow={2} className="adding-a-source__connect-an-instance">
-            {header}
-            {featureBadgeGroup()}
-            {descriptionBlock}
+          <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
+            <EuiPanel paddingSize="none">
+              <EuiPanel className="euiPanel--noShadow" paddingSize="l">
+                {header}
+              </EuiPanel>
+              <EuiHorizontalRule margin="xs" />
+              <EuiPanel className="euiPanel--noShadow" paddingSize="l">
+                <SourceFeatures features={features} name={name} objTypes={objTypes} />
+              </EuiPanel>
+            </EuiPanel>
+            <EuiSpacer />
             {formFields}
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <SourceFeatures features={features} name={name} objTypes={objTypes} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </form>

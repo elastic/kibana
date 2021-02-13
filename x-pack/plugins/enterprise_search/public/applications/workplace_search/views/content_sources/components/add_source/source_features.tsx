@@ -12,7 +12,7 @@ import { useValues } from 'kea';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -22,8 +22,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { LicenseBadge } from '../../../../components/shared/license_badge';
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 import { Features, FeatureIds } from '../../../../types';
 
 import {
@@ -31,9 +29,6 @@ import {
   SOURCE_FEATURES_REMOTE_FEATURE,
   SOURCE_FEATURES_PRIVATE_FEATURE,
   SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE,
-  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
-  SOURCE_FEATURES_EXPLORE_BUTTON,
-  SOURCE_FEATURES_INCLUDED_FEATURES_TITLE,
 } from './constants';
 
 interface ConnectInstanceProps {
@@ -42,23 +37,45 @@ interface ConnectInstanceProps {
   name: string;
 }
 
+type IncludedFeatureIds = Exclude<FeatureIds, FeatureIds.DocumentLevelPermissions>;
+
 export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTypes, name }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { isOrganization } = useValues(AppLogic);
 
-  const Feature = ({ title, children }: { title: string; children: React.ReactElement }) => (
-    <>
-      <EuiSpacer />
-      <EuiText size="xs">
-        <strong>{title}</strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      {children}
-    </>
-  );
+  const Feature = ({
+    icon,
+    title,
+    children,
+  }: {
+    icon: string;
+    title: string;
+    children: React.ReactElement;
+  }) => {
+    return (
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          {icon && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="m" type={icon} />
+              </EuiFlexItem>
+            </>
+          )}
+          <EuiFlexItem>
+            <EuiText size="xs">
+              <strong>{title}</strong>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText size="xs">{children}</EuiText>
+      </>
+    );
+  };
 
   const SyncFrequencyFeature = (
-    <Feature title="Syncs every 2 hours">
+    <Feature icon="clock" title="Syncs every 2 hours">
       <EuiText size="xs">
         <p>
           <FormattedMessage
@@ -75,7 +92,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const SyncedItemsFeature = (
-    <Feature title="Synced items">
+    <Feature icon="documents" title="Synced items">
       <>
         <EuiText size="xs">
           <p>{SOURCE_FEATURES_SEARCHABLE}</p>
@@ -93,7 +110,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const SearchableContentFeature = (
-    <Feature title="Searchable content">
+    <Feature icon="search" title="Searchable content">
       <EuiText size="xs">
         <EuiText size="xs">
           <p>{SOURCE_FEATURES_SEARCHABLE}</p>
@@ -109,7 +126,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const RemoteFeature = (
-    <Feature title="Always up-to-date">
+    <Feature icon="calendar" title="Always up-to-date">
       <EuiText size="xs">
         <p>{SOURCE_FEATURES_REMOTE_FEATURE}</p>
       </EuiText>
@@ -117,7 +134,7 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const PrivateFeature = (
-    <Feature title="Always private">
+    <Feature icon="lock" title="Always private">
       <EuiText size="xs">
         <p>{SOURCE_FEATURES_PRIVATE_FEATURE}</p>
       </EuiText>
@@ -125,25 +142,14 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
   );
 
   const GlobalAccessPermissionsFeature = (
-    <Feature title="Global access permissions">
+    <Feature icon="globe" title="Global access permissions">
       <EuiText size="xs">
         <p>{SOURCE_FEATURES_GLOBAL_ACCESS_PERMISSIONS_FEATURE}</p>
       </EuiText>
     </Feature>
   );
 
-  const DocumentLevelPermissionsFeature = (
-    <Feature title="Document-level permission synchronization">
-      <EuiText size="xs">
-        <p>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE}</p>
-        <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          {SOURCE_FEATURES_EXPLORE_BUTTON}
-        </EuiLink>
-      </EuiText>
-    </Feature>
-  );
-
-  const FeaturesRouter = ({ featureId }: { featureId: FeatureIds }) =>
+  const FeaturesRouter = ({ featureId }: { featureId: IncludedFeatureIds }) =>
     ({
       [FeatureIds.SyncFrequency]: SyncFrequencyFeature,
       [FeatureIds.SearchableContent]: SearchableContentFeature,
@@ -151,10 +157,9 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
       [FeatureIds.Remote]: RemoteFeature,
       [FeatureIds.Private]: PrivateFeature,
       [FeatureIds.GlobalAccessPermissions]: GlobalAccessPermissionsFeature,
-      [FeatureIds.DocumentLevelPermissions]: DocumentLevelPermissionsFeature,
     }[featureId]);
 
-  const IncludedFeatures = () => {
+  const IncludedFeatureIds = () => {
     let includedFeatures: FeatureIds[] | undefined;
 
     if (!hasPlatinumLicense && isOrganization) {
@@ -172,55 +177,35 @@ export const SourceFeatures: React.FC<ConnectInstanceProps> = ({ features, objTy
     }
 
     return (
-      <EuiPanel hasShadow={false} paddingSize="l" className="euiPanel--outline euiPanel--noShadow">
+      <>
         <EuiTitle size="xs">
-          <h4>{SOURCE_FEATURES_INCLUDED_FEATURES_TITLE}</h4>
+          <h3>
+            <strong>Included features</strong>
+          </h3>
         </EuiTitle>
-        {includedFeatures.map((featureId, i) => (
-          <FeaturesRouter key={i} featureId={featureId} />
-        ))}
-      </EuiPanel>
-    );
-  };
-
-  const ExcludedFeatures = () => {
-    let excludedFeatures: FeatureIds[] | undefined;
-
-    if (!hasPlatinumLicense && isOrganization) {
-      excludedFeatures = features?.basicOrgContextExcludedFeatures;
-    }
-
-    if (!excludedFeatures?.length) {
-      return null;
-    }
-
-    return (
-      <EuiPanel
-        hasShadow={false}
-        paddingSize="l"
-        className="euiPanel--outlineSecondary euiPanel--noShadow"
-      >
-        <LicenseBadge />
-        {excludedFeatures.map((featureId, i) => (
-          <FeaturesRouter key={i} featureId={featureId} />
-        ))}
-      </EuiPanel>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup>
+          {includedFeatures.map((featureId, i) => (
+            <EuiFlexItem key={i}>
+              <EuiPanel className="euiPanel--inset" paddingSize="l">
+                <FeaturesRouter featureId={featureId as IncludedFeatureIds} />
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </>
     );
   };
 
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="l"
+      gutterSize="none"
       className="adding-a-source__features-list"
       responsive={false}
     >
       <EuiFlexItem>
-        <IncludedFeatures />
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <ExcludedFeatures />
+        <IncludedFeatureIds />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
