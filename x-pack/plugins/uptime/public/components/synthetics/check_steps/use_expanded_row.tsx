@@ -11,13 +11,14 @@ import { ExecutedStep } from '../executed_step';
 import { Ping } from '../../../../common/runtime_types/ping';
 
 interface HookProps {
+  loading: boolean;
   allPings: Ping[];
   steps: Ping[];
 }
 
 type ExpandRowType = Record<string, JSX.Element>;
 
-export const useExpandedRow = ({ steps, allPings }: HookProps) => {
+export const useExpandedRow = ({ loading, steps, allPings }: HookProps) => {
   const [expandedRows, setExpandedRows] = useState<ExpandRowType>({});
   // eui table uses index from 0, synthetics uses 1
 
@@ -53,7 +54,10 @@ export const useExpandedRow = ({ steps, allPings }: HookProps) => {
     }
 
     setExpandedRows(expandedRowsN);
-  }, [checkGroupId, allPings, expandedRows, steps, getBrowserConsole]);
+
+    // we only want to update when checkGroupId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkGroupId, loading]);
 
   const toggleExpand = ({ ping }: { ping: Ping }) => {
     // eui table uses index from 0, synthetics uses 1

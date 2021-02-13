@@ -72,7 +72,7 @@ function reduceStepStatus(prev: StepStatusCount, cur: Ping): StepStatusCount {
 export const StepsList = ({ data, error, loading }: Props) => {
   const steps = data.filter(isStepEnd);
 
-  const { expandedRows, toggleExpand } = useExpandedRow({ steps, allPings: data });
+  const { expandedRows, toggleExpand } = useExpandedRow({ steps, allPings: data, loading });
 
   const columns: any[] = [
     {
