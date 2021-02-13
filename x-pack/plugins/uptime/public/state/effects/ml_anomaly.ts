@@ -22,8 +22,9 @@ import {
   deleteMLJob,
   getMLCapabilities,
 } from '../api/ml_anomaly';
-import { MonitorIdParam } from '../actions/types';
+import type { MonitorIdParam, DeleteJobResults } from '../actions/types';
 import { anomalyAlertSelector, deleteAlertAction } from '../alerts/alerts';
+import type { AppState } from '../../state';
 
 export function* fetchMLJobEffect() {
   yield takeLatest(
@@ -43,20 +44,25 @@ export function* fetchMLJobEffect() {
     )
   );
 
-  yield takeLatest(String(deleteMLJobAction.get), function* (action: Action<MonitorIdParam>) {
-    try {
-      const response = yield call(deleteMLJob, action.payload);
-      yield put(deleteMLJobAction.success(response));
+  yield takeLatest(
+    String(deleteMLJobAction.get),
+    function* (action: Action<MonitorIdParam>): Generator {
+      try {
+        const response = (yield call(deleteMLJob, action.payload)) as DeleteJobResults;
+        yield put(deleteMLJobAction.success(response));
 
-      // let's delete alert as well if it's there
-      const { data: anomalyAlert } = yield select(anomalyAlertSelector);
-      if (anomalyAlert) {
-        yield put(deleteAlertAction.get({ alertId: anomalyAlert.id as string }));
+        // let's delete alert as well if it's there
+        const { data: anomalyAlert } = (yield select(
+          anomalyAlertSelector
+        )) as AppState['alerts']['anomalyAlert'];
+        if (anomalyAlert) {
+          yield put(deleteAlertAction.get({ alertId: anomalyAlert.id }));
+        }
+      } catch (err) {
+        yield put(deleteMLJobAction.fail(err));
       }
-    } catch (err) {
-      yield put(deleteMLJobAction.fail(err));
     }
-  });
+  );
 
   yield takeLatest(
     getMLCapabilitiesAction.get,

@@ -117,6 +117,7 @@ export function createTaskRunAggregator(
   runningAverageWindowSize: number
 ): AggregatedStatProvider<TaskRunStat> {
   const taskRunEventToStat = createTaskRunEventToStat(runningAverageWindowSize);
+  // @ts-expect-error
   const taskRunEvents$: Observable<
     Pick<TaskRunStat, 'drift' | 'drift_by_type' | 'execution'>
   > = taskPollingLifecycle.events.pipe(

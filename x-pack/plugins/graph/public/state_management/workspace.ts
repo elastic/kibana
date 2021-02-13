@@ -12,6 +12,7 @@ import { GraphStoreDependencies, GraphState } from '.';
 import { datasourceSelector } from './datasource';
 import { selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
+import type { ServerResultNode } from '../types';
 const actionCreator = actionCreatorFactory('x-pack/graph');
 
 export const fillWorkspace = actionCreator<void>('FILL_WORKSPACE');
@@ -28,21 +29,26 @@ export const fillWorkspaceSaga = ({
   http,
   notifications,
 }: GraphStoreDependencies) => {
-  function* fetchNodes() {
+  function* fetchNodes(): Generator {
     try {
       const workspace = getWorkspace();
       if (!workspace) {
         return;
       }
 
-      const state: GraphState = yield select();
+      const state = (yield select()) as GraphState;
       const fields = selectedFieldsSelector(state);
       const datasource = datasourceSelector(state).current;
       if (datasource.type === 'none') {
         return;
       }
 
-      const topTermNodes = yield call(fetchTopNodes, http.post, datasource.title, fields);
+      const topTermNodes = (yield call(
+        fetchTopNodes,
+        http.post,
+        datasource.title,
+        fields
+      )) as ServerResultNode[];
       workspace.mergeGraph({
         nodes: topTermNodes,
         edges: [],

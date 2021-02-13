@@ -44,7 +44,7 @@ interface ConstructorParams {
   kibanaVersion: string;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;

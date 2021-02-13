@@ -8,6 +8,8 @@
 import actionCreatorFactory, { Action } from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
+import type { IndexPattern } from '../../../../../src/plugins/data/public';
+
 import { GraphWorkspaceSavedObject, Workspace } from '../types';
 import { GraphStoreDependencies, GraphState } from '.';
 import { datasourceSelector } from './datasource';
@@ -44,7 +46,7 @@ export const loadingSaga = ({
   notifications,
   indexPatternProvider,
 }: GraphStoreDependencies) => {
-  function* deserializeWorkspace(action: Action<GraphWorkspaceSavedObject>) {
+  function* deserializeWorkspace(action: Action<GraphWorkspaceSavedObject>): Generator {
     const workspacePayload = action.payload;
     const migrationStatus = migrateLegacyIndexPatternRef(workspacePayload, indexPatterns);
     if (!migrationStatus.success) {
@@ -60,8 +62,11 @@ export const loadingSaga = ({
     }
 
     const selectedIndexPatternId = lookupIndexPatternId(workspacePayload);
-    const indexPattern = yield call(indexPatternProvider.get, selectedIndexPatternId);
-    const initialSettings = settingsSelector(yield select());
+    const indexPattern = (yield call(
+      indexPatternProvider.get,
+      selectedIndexPatternId
+    )) as IndexPattern;
+    const initialSettings = settingsSelector((yield select()) as GraphState);
 
     createWorkspace(indexPattern.title, initialSettings);
 
@@ -83,7 +88,7 @@ export const loadingSaga = ({
     yield put(
       setDatasource({
         type: 'indexpattern',
-        id: indexPattern.id,
+        id: indexPattern.id!,
         title: indexPattern.title,
       })
     );
@@ -105,22 +110,22 @@ export const loadingSaga = ({
  * It will serialize everything and save it using the saved objects client
  */
 export const savingSaga = (deps: GraphStoreDependencies) => {
-  function* persistWorkspace() {
+  function* persistWorkspace(): Generator {
     const savedWorkspace = deps.getSavedWorkspace();
-    const state: GraphState = yield select();
+    const state = (yield select()) as GraphState;
     const workspace = deps.getWorkspace();
     const selectedDatasource = datasourceSelector(state).current;
     if (!workspace || selectedDatasource.type === 'none') {
       return;
     }
 
-    const savedObjectId = yield cps(showModal, {
+    const savedObjectId = (yield cps(showModal, {
       deps,
       workspace,
       savedWorkspace,
       state,
       selectedDatasource,
-    });
+    })) as string;
     if (savedObjectId) {
       yield put(updateMetaData({ savedObjectId }));
     }

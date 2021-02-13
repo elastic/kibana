@@ -15,21 +15,23 @@ export type GetArgsType<T extends LifecycleEvent<any>> = T extends LifecycleEven
 export class LifecycleEvent<Args extends readonly any[]> {
   private readonly handlers: Array<(...args: Args) => Promise<void> | void> = [];
 
-  private readonly beforeSubj = this.options.singular
-    ? new Rx.BehaviorSubject(undefined)
-    : new Rx.Subject<void>();
-  public readonly before$ = this.beforeSubj.asObservable();
+  private readonly beforeSubj: Rx.Subject<void> | Rx.BehaviorSubject<undefined>;
+  public readonly before$: Rx.Observable<void>;
 
-  private readonly afterSubj = this.options.singular
-    ? new Rx.BehaviorSubject(undefined)
-    : new Rx.Subject<void>();
-  public readonly after$ = this.afterSubj.asObservable();
+  private readonly afterSubj: Rx.Subject<void> | Rx.BehaviorSubject<undefined>;
+  public readonly after$: Rx.Observable<void>;
 
   constructor(
     private readonly options: {
       singular?: boolean;
     } = {}
-  ) {}
+  ) {
+    this.beforeSubj = options.singular ? new Rx.BehaviorSubject(undefined) : new Rx.Subject<void>();
+    this.before$ = this.beforeSubj.asObservable();
+
+    this.afterSubj = options.singular ? new Rx.BehaviorSubject(undefined) : new Rx.Subject<void>();
+    this.after$ = this.afterSubj.asObservable();
+  }
 
   public add(fn: (...args: Args) => Promise<void> | void) {
     this.handlers.push(fn);

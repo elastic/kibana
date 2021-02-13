@@ -43,7 +43,7 @@ const TIMESTAMP_FORMAT = {
   hour: 'numeric',
   minute: 'numeric',
   second: 'numeric',
-};
+} as const;
 
 export class LogTextStreamLoadingItemView extends React.PureComponent<
   LogTextStreamLoadingItemViewProps,

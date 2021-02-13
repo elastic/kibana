@@ -6,6 +6,7 @@
  */
 
 import { createStore, applyMiddleware } from 'redux';
+import type { Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 import { rootEffect } from './effects';
@@ -15,6 +16,6 @@ export type AppState = ReturnType<typeof rootReducer>;
 
 const sagaMW = createSagaMiddleware();
 
-export const store = createStore(rootReducer, composeWithDevTools(applyMiddleware(sagaMW)));
+export const store: Store = createStore(rootReducer, composeWithDevTools(applyMiddleware(sagaMW)));
 
 sagaMW.run(rootEffect);
