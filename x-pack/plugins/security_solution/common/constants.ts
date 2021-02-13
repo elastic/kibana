@@ -42,7 +42,7 @@ export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
-export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
+export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 300000; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100;
 
 // Document path where threat indicator fields are expected. Used as

@@ -28,6 +28,7 @@ export interface RulesTableState {
   exportRuleIds: string[];
   lastUpdated: number;
   isRefreshOn: boolean;
+  refreshing: boolean;
   showIdleModal: boolean;
 }
 
@@ -44,6 +45,7 @@ export type RulesTableAction =
   | { type: 'exportRuleIds'; ids: string[] }
   | { type: 'setLastRefreshDate' }
   | { type: 'setAutoRefreshOn'; on: boolean }
+  | { type: 'setIsRefreshing'; isRefreshing: boolean }
   | { type: 'setShowIdleModal'; show: boolean }
   | { type: 'failure' };
 
@@ -140,6 +142,12 @@ export const createRulesTableReducer = (
         return {
           ...state,
           isRefreshOn: action.on,
+        };
+      }
+      case 'setIsRefreshing': {
+        return {
+          ...state,
+          refreshing: action.isRefreshing,
         };
       }
       case 'setShowIdleModal': {
