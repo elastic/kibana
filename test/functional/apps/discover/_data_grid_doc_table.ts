@@ -36,10 +36,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should show the first 12 rows by default', async function () {
+    it('should show the first 8 rows by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await dataGrid.getDocTableRows();
-      expect(rows.length).to.be(12);
+      expect(rows.length).to.be(8);
     });
 
     it('should refresh the table content when changing time window', async function () {

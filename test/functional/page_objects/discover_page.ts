@@ -140,7 +140,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await elasticChart.waitForRenderComplete();
       const el = await elasticChart.getCanvas();
 
-      await browser.getActions().move({ x: 0, y: 20, origin: el._webElement }).click().perform();
+      await browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
     }
 
     public async brushHistogram() {
@@ -193,17 +193,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getDocTableIndex(index: number) {
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
-      return result.join('');
+      return result.join(' ');
 
       // const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       // return await row.getVisibleText();
     }
 
     public async getDocTableField(index: number) {
-      const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
-      );
-      return await field.getVisibleText();
+      const row = await dataGrid.getRow({ rowIndex: index - 1 });
+      const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+      return result[1];
     }
 
     public async skipToEndOfDocTable() {
@@ -258,6 +257,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldSort(field: string) {
+      await dataGrid.clickDocSortAsc();
       return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
 
