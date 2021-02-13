@@ -34,6 +34,8 @@ export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 export const LOADING_INITIAL_PREBUILT_RULES_TABLE =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
+export const FROSTED_LOADING_RULES_TABLE = '[data-test-subj="loadingPanelAllRulesTable"]';
+
 export const ASYNC_LOADING_PROGRESS = '[data-test-subj="loadingRulesInfoProgress"]';
 
 export const NEXT_BTN = '[data-test-subj="pagination-button-next"]';
@@ -68,6 +70,12 @@ export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
 
 export const THREE_HUNDRED_ROWS = '[data-test-subj="tablePagination-300-rows"]';
 
+export const FIVE_ROWS = '[data-test-subj="tablePagination-5-rows"]';
+
 export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"]';
 
 export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';
+
+export const FIRST_PAGE_SELECTOR = '[data-test-subj="pagination-button-0"]';
+
+export const SECOND_PAGE_SELECTOR = '[data-test-subj="pagination-button-1"]';

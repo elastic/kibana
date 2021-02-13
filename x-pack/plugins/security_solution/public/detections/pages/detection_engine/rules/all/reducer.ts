@@ -25,6 +25,7 @@ export interface State {
   lastUpdated: number;
   showIdleModal: boolean;
   isRefreshOn: boolean;
+  refreshing: boolean;
 }
 
 export type Action =
@@ -41,7 +42,8 @@ export type Action =
   | { type: 'failure' }
   | { type: 'setLastRefreshDate' }
   | { type: 'setShowIdleModal'; show: boolean }
-  | { type: 'setAutoRefreshOn'; on: boolean };
+  | { type: 'setAutoRefreshOn'; on: boolean }
+  | { type: 'setIsRefreshing'; isRefreshing: boolean };
 
 export const allRulesReducer = (
   tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>
@@ -148,6 +150,12 @@ export const allRulesReducer = (
       return {
         ...state,
         isRefreshOn: action.on,
+      };
+    }
+    case 'setIsRefreshing': {
+      return {
+        ...state,
+        refreshing: action.isRefreshing,
       };
     }
     default:
