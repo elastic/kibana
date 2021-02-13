@@ -13,7 +13,6 @@ import { hasData } from '../lib/observability_overview/has_data';
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
-import { withApmSpan } from '../utils/with_apm_span';
 
 export const observabilityOverviewHasDataRoute = createRoute({
   endpoint: 'GET /api/apm/observability_overview/has_data',
@@ -37,19 +36,20 @@ export const observabilityOverviewRoute = createRoute({
       setup
     );
 
-    return withApmSpan('observability_overview', async () => {
-      const [serviceCount, transactionCoordinates] = await Promise.all([
-        getServiceCount({
-          setup,
-          searchAggregatedTransactions,
-        }),
-        getTransactionCoordinates({
-          setup,
-          bucketSize,
-          searchAggregatedTransactions,
-        }),
-      ]);
-      return { serviceCount, transactionCoordinates };
+    const serviceCountPromise = getServiceCount({
+      setup,
+      searchAggregatedTransactions,
     });
+    const transactionCoordinatesPromise = getTransactionCoordinates({
+      setup,
+      bucketSize,
+      searchAggregatedTransactions,
+    });
+
+    const [serviceCount, transactionCoordinates] = await Promise.all([
+      serviceCountPromise,
+      transactionCoordinatesPromise,
+    ]);
+    return { serviceCount, transactionCoordinates };
   },
 });

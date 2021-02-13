@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -66,147 +65,134 @@ export async function getBuckets({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  return withApmSpan(
-    'get_latency_distribution_buckets_with_samples',
-    async () => {
-      const { start, end, esFilter, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
-      const commonFilters = [
-        { term: { [SERVICE_NAME]: serviceName } },
-        { term: { [TRANSACTION_TYPE]: transactionType } },
-        { term: { [TRANSACTION_NAME]: transactionName } },
-        { range: rangeFilter(start, end) },
-        ...esFilter,
-      ];
+  const commonFilters = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
+    { term: { [TRANSACTION_NAME]: transactionName } },
+    { range: rangeFilter(start, end) },
+    ...esFilter,
+  ];
 
-      async function getSamplesForDistributionBuckets() {
-        const response = await withApmSpan(
-          'get_samples_for_latency_distribution_buckets',
-          () =>
-            apmEventClient.search({
-              apm: {
-                events: [ProcessorEvent.transaction],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      ...commonFilters,
-                      { term: { [TRANSACTION_SAMPLED]: true } },
-                    ],
-                    should: [
-                      { term: { [TRACE_ID]: traceId } },
-                      { term: { [TRANSACTION_ID]: transactionId } },
-                    ],
-                  },
-                },
-                aggs: {
-                  distribution: {
-                    histogram: getHistogramAggOptions({
-                      bucketSize,
-                      field: TRANSACTION_DURATION,
-                      distributionMax,
-                    }),
-                    aggs: {
-                      samples: {
-                        top_hits: {
-                          _source: [TRANSACTION_ID, TRACE_ID],
-                          size: 10,
-                          sort: {
-                            _score: 'desc',
-                          },
-                        },
-                      },
-                    },
+  async function getSamplesForDistributionBuckets() {
+    const response = await apmEventClient.search({
+      apm: {
+        events: [ProcessorEvent.transaction],
+      },
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...commonFilters,
+              { term: { [TRANSACTION_SAMPLED]: true } },
+            ],
+            should: [
+              { term: { [TRACE_ID]: traceId } },
+              { term: { [TRANSACTION_ID]: transactionId } },
+            ],
+          },
+        },
+        aggs: {
+          distribution: {
+            histogram: getHistogramAggOptions({
+              bucketSize,
+              field: TRANSACTION_DURATION,
+              distributionMax,
+            }),
+            aggs: {
+              samples: {
+                top_hits: {
+                  _source: [TRANSACTION_ID, TRACE_ID],
+                  size: 10,
+                  sort: {
+                    _score: 'desc',
                   },
                 },
               },
-            })
-        );
+            },
+          },
+        },
+      },
+    });
 
-        return (
-          response.aggregations?.distribution.buckets.map((bucket) => {
-            return {
-              key: bucket.key,
-              samples: bucket.samples.hits.hits.map((hit) => ({
-                traceId: hit._source.trace.id,
-                transactionId: hit._source.transaction.id,
-              })),
-            };
-          }) ?? []
-        );
-      }
+    return (
+      response.aggregations?.distribution.buckets.map((bucket) => {
+        return {
+          key: bucket.key,
+          samples: bucket.samples.hits.hits.map((hit) => ({
+            traceId: hit._source.trace.id,
+            transactionId: hit._source.transaction.id,
+          })),
+        };
+      }) ?? []
+    );
+  }
 
-      async function getDistributionBuckets() {
-        const response = await withApmSpan(
-          'get_latency_distribution_buckets',
-          () =>
-            apmEventClient.search({
-              apm: {
-                events: [
-                  getProcessorEventForAggregatedTransactions(
-                    searchAggregatedTransactions
-                  ),
-                ],
-              },
-              body: {
-                query: {
-                  bool: {
-                    filter: [
-                      ...commonFilters,
-                      ...getDocumentTypeFilterForAggregatedTransactions(
-                        searchAggregatedTransactions
-                      ),
-                    ],
-                  },
-                },
-                aggs: {
-                  distribution: {
-                    histogram: getHistogramAggOptions({
-                      field: getTransactionDurationFieldForAggregatedTransactions(
-                        searchAggregatedTransactions
-                      ),
-                      bucketSize,
-                      distributionMax,
-                    }),
-                  },
-                },
-              },
-            })
-        );
+  async function getDistributionBuckets() {
+    const response = await apmEventClient.search({
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+        ],
+      },
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...commonFilters,
+              ...getDocumentTypeFilterForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+            ],
+          },
+        },
+        aggs: {
+          distribution: {
+            histogram: getHistogramAggOptions({
+              field: getTransactionDurationFieldForAggregatedTransactions(
+                searchAggregatedTransactions
+              ),
+              bucketSize,
+              distributionMax,
+            }),
+          },
+        },
+      },
+    });
 
-        return (
-          response.aggregations?.distribution.buckets.map((bucket) => {
-            return {
-              key: bucket.key,
-              count: bucket.doc_count,
-            };
-          }) ?? []
-        );
-      }
+    return (
+      response.aggregations?.distribution.buckets.map((bucket) => {
+        return {
+          key: bucket.key,
+          count: bucket.doc_count,
+        };
+      }) ?? []
+    );
+  }
 
-      const [
-        samplesForDistributionBuckets,
-        distributionBuckets,
-      ] = await Promise.all([
-        getSamplesForDistributionBuckets(),
-        getDistributionBuckets(),
-      ]);
+  const [
+    samplesForDistributionBuckets,
+    distributionBuckets,
+  ] = await Promise.all([
+    getSamplesForDistributionBuckets(),
+    getDistributionBuckets(),
+  ]);
 
-      const buckets = joinByKey(
-        [...samplesForDistributionBuckets, ...distributionBuckets],
-        'key'
-      ).map((bucket) => ({
-        ...bucket,
-        samples: bucket.samples ?? [],
-        count: bucket.count ?? 0,
-      }));
+  const buckets = joinByKey(
+    [...samplesForDistributionBuckets, ...distributionBuckets],
+    'key'
+  ).map((bucket) => ({
+    ...bucket,
+    samples: bucket.samples ?? [],
+    count: bucket.count ?? 0,
+  }));
 
-      return {
-        noHits: buckets.length === 0,
-        bucketSize,
-        buckets,
-      };
-    }
-  );
+  return {
+    noHits: buckets.length === 0,
+    bucketSize,
+    buckets,
+  };
 }

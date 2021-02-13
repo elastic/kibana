@@ -7,7 +7,6 @@
 
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../helpers/setup_request';
 
 export type ESResponse = Exclude<
@@ -15,7 +14,7 @@ export type ESResponse = Exclude<
   undefined
 >;
 
-export function anomalySeriesFetcher({
+export async function anomalySeriesFetcher({
   serviceName,
   transactionType,
   intervalString,
@@ -30,65 +29,63 @@ export function anomalySeriesFetcher({
   start: number;
   end: number;
 }) {
-  return withApmSpan('get_latency_anomaly_data', async () => {
-    const params = {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { result_type: ['model_plot', 'record'] } },
-              { term: { partition_field_value: serviceName } },
-              { term: { by_field_value: transactionType } },
-              {
-                range: {
-                  timestamp: {
-                    gte: start,
-                    lte: end,
-                    format: 'epoch_millis',
-                  },
+  const params = {
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { result_type: ['model_plot', 'record'] } },
+            { term: { partition_field_value: serviceName } },
+            { term: { by_field_value: transactionType } },
+            {
+              range: {
+                timestamp: {
+                  gte: start,
+                  lte: end,
+                  format: 'epoch_millis',
                 },
               },
-            ],
-          },
-        },
-        aggs: {
-          job_id: {
-            terms: {
-              field: 'job_id',
             },
-            aggs: {
-              ml_avg_response_times: {
-                date_histogram: {
-                  field: 'timestamp',
-                  fixed_interval: intervalString,
-                  extended_bounds: { min: start, max: end },
-                },
-                aggs: {
-                  anomaly_score: {
-                    top_metrics: {
-                      metrics: [
-                        { field: 'record_score' },
-                        { field: 'timestamp' },
-                        { field: 'bucket_span' },
-                      ] as const,
-                      sort: {
-                        record_score: 'desc' as const,
-                      },
+          ],
+        },
+      },
+      aggs: {
+        job_id: {
+          terms: {
+            field: 'job_id',
+          },
+          aggs: {
+            ml_avg_response_times: {
+              date_histogram: {
+                field: 'timestamp',
+                fixed_interval: intervalString,
+                extended_bounds: { min: start, max: end },
+              },
+              aggs: {
+                anomaly_score: {
+                  top_metrics: {
+                    metrics: [
+                      { field: 'record_score' },
+                      { field: 'timestamp' },
+                      { field: 'bucket_span' },
+                    ] as const,
+                    sort: {
+                      record_score: 'desc' as const,
                     },
                   },
-                  lower: { min: { field: 'model_lower' } },
-                  upper: { max: { field: 'model_upper' } },
                 },
+                lower: { min: { field: 'model_lower' } },
+                upper: { max: { field: 'model_upper' } },
               },
             },
           },
         },
       },
-    };
+    },
+  };
 
-    return (ml.mlSystem.mlAnomalySearch(params, []) as unknown) as Promise<
-      ESSearchResponse<unknown, typeof params>
-    >;
-  });
+  return (ml.mlSystem.mlAnomalySearch(params, []) as unknown) as Promise<
+    ESSearchResponse<unknown, typeof params>
+  >;
 }

@@ -27,7 +27,6 @@ import {
   getOutcomeAggregation,
   getTransactionErrorRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getCorrelationsForFailedTransactions({
   serviceName,
@@ -42,76 +41,74 @@ export async function getCorrelationsForFailedTransactions({
   fieldNames: string[];
   setup: Setup & SetupTimeRange;
 }) {
-  return withApmSpan('get_correlations_for_failed_transactions', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
-    const backgroundFilters: ESFilter[] = [
-      ...esFilter,
-      { range: rangeFilter(start, end) },
-    ];
+  const backgroundFilters: ESFilter[] = [
+    ...esFilter,
+    { range: rangeFilter(start, end) },
+  ];
 
-    if (serviceName) {
-      backgroundFilters.push({ term: { [SERVICE_NAME]: serviceName } });
-    }
+  if (serviceName) {
+    backgroundFilters.push({ term: { [SERVICE_NAME]: serviceName } });
+  }
 
-    if (transactionType) {
-      backgroundFilters.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-    }
+  if (transactionType) {
+    backgroundFilters.push({ term: { [TRANSACTION_TYPE]: transactionType } });
+  }
 
-    if (transactionName) {
-      backgroundFilters.push({ term: { [TRANSACTION_NAME]: transactionName } });
-    }
+  if (transactionName) {
+    backgroundFilters.push({ term: { [TRANSACTION_NAME]: transactionName } });
+  }
 
-    const params = {
-      apm: { events: [ProcessorEvent.transaction] },
-      track_total_hits: true,
-      body: {
-        size: 0,
-        query: {
-          bool: { filter: backgroundFilters },
-        },
-        aggs: {
-          failed_transactions: {
-            filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
+  const params = {
+    apm: { events: [ProcessorEvent.transaction] },
+    track_total_hits: true,
+    body: {
+      size: 0,
+      query: {
+        bool: { filter: backgroundFilters },
+      },
+      aggs: {
+        failed_transactions: {
+          filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
 
-            // significant term aggs
-            aggs: fieldNames.reduce((acc, fieldName) => {
-              return {
-                ...acc,
-                [fieldName]: {
-                  significant_terms: {
-                    size: 10,
-                    field: fieldName,
-                    background_filter: { bool: { filter: backgroundFilters } },
-                  },
+          // significant term aggs
+          aggs: fieldNames.reduce((acc, fieldName) => {
+            return {
+              ...acc,
+              [fieldName]: {
+                significant_terms: {
+                  size: 10,
+                  field: fieldName,
+                  background_filter: { bool: { filter: backgroundFilters } },
                 },
-              };
-            }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
-          },
+              },
+            };
+          }, {} as Record<string, { significant_terms: AggregationOptionsByType['significant_terms'] }>),
         },
       },
-    };
+    },
+  };
 
-    const response = await apmEventClient.search(params);
-    if (!response.aggregations) {
-      return {};
-    }
+  const response = await apmEventClient.search(params);
+  if (!response.aggregations) {
+    return {};
+  }
 
-    const failedTransactionCount =
-      response.aggregations?.failed_transactions.doc_count;
-    const totalTransactionCount = response.hits.total.value;
-    const avgErrorRate = (failedTransactionCount / totalTransactionCount) * 100;
-    const sigTermAggs = omit(
-      response.aggregations?.failed_transactions,
-      'doc_count'
-    );
+  const failedTransactionCount =
+    response.aggregations?.failed_transactions.doc_count;
+  const totalTransactionCount = response.hits.total.value;
+  const avgErrorRate = (failedTransactionCount / totalTransactionCount) * 100;
+  const sigTermAggs = omit(
+    response.aggregations?.failed_transactions,
+    'doc_count'
+  );
 
-    const topSigTerms = processSignificantTermAggs({
-      sigTermAggs,
-      thresholdPercentage: avgErrorRate,
-    });
-    return getErrorRateTimeSeries({ setup, backgroundFilters, topSigTerms });
+  const topSigTerms = processSignificantTermAggs({
+    sigTermAggs,
+    thresholdPercentage: avgErrorRate,
   });
+  return getErrorRateTimeSeries({ setup, backgroundFilters, topSigTerms });
 }
 
 export async function getErrorRateTimeSeries({
@@ -123,73 +120,71 @@ export async function getErrorRateTimeSeries({
   backgroundFilters: ESFilter[];
   topSigTerms: TopSigTerm[];
 }) {
-  return withApmSpan('get_error_rate_timeseries', async () => {
-    const { start, end, apmEventClient } = setup;
-    const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
+  const { start, end, apmEventClient } = setup;
+  const { intervalString } = getBucketSize({ start, end, numBuckets: 30 });
 
-    if (isEmpty(topSigTerms)) {
-      return {};
+  if (isEmpty(topSigTerms)) {
+    return {};
+  }
+
+  const timeseriesAgg = {
+    date_histogram: {
+      field: '@timestamp',
+      fixed_interval: intervalString,
+      min_doc_count: 0,
+      extended_bounds: { min: start, max: end },
+    },
+    aggs: {
+      outcomes: getOutcomeAggregation(),
+    },
+  };
+
+  const perTermAggs = topSigTerms.reduce(
+    (acc, term, index) => {
+      acc[`term_${index}`] = {
+        filter: { term: { [term.fieldName]: term.fieldValue } },
+        aggs: { timeseries: timeseriesAgg },
+      };
+      return acc;
+    },
+    {} as {
+      [key: string]: {
+        filter: AggregationOptionsByType['filter'];
+        aggs: { timeseries: typeof timeseriesAgg };
+      };
     }
+  );
 
-    const timeseriesAgg = {
-      date_histogram: {
-        field: '@timestamp',
-        fixed_interval: intervalString,
-        min_doc_count: 0,
-        extended_bounds: { min: start, max: end },
-      },
-      aggs: {
-        outcomes: getOutcomeAggregation(),
-      },
-    };
+  const params = {
+    // TODO: add support for metrics
+    apm: { events: [ProcessorEvent.transaction] },
+    body: {
+      size: 0,
+      query: { bool: { filter: backgroundFilters } },
+      aggs: merge({ timeseries: timeseriesAgg }, perTermAggs),
+    },
+  };
 
-    const perTermAggs = topSigTerms.reduce(
-      (acc, term, index) => {
-        acc[`term_${index}`] = {
-          filter: { term: { [term.fieldName]: term.fieldValue } },
-          aggs: { timeseries: timeseriesAgg },
-        };
-        return acc;
-      },
-      {} as {
-        [key: string]: {
-          filter: AggregationOptionsByType['filter'];
-          aggs: { timeseries: typeof timeseriesAgg };
-        };
-      }
-    );
+  const response = await apmEventClient.search(params);
+  const { aggregations } = response;
 
-    const params = {
-      // TODO: add support for metrics
-      apm: { events: [ProcessorEvent.transaction] },
-      body: {
-        size: 0,
-        query: { bool: { filter: backgroundFilters } },
-        aggs: merge({ timeseries: timeseriesAgg }, perTermAggs),
-      },
-    };
+  if (!aggregations) {
+    return {};
+  }
 
-    const response = await apmEventClient.search(params);
-    const { aggregations } = response;
+  return {
+    overall: {
+      timeseries: getTransactionErrorRateTimeSeries(
+        aggregations.timeseries.buckets
+      ),
+    },
+    significantTerms: topSigTerms.map((topSig, index) => {
+      const agg = aggregations[`term_${index}`]!;
 
-    if (!aggregations) {
-      return {};
-    }
-
-    return {
-      overall: {
-        timeseries: getTransactionErrorRateTimeSeries(
-          aggregations.timeseries.buckets
-        ),
-      },
-      significantTerms: topSigTerms.map((topSig, index) => {
-        const agg = aggregations[`term_${index}`]!;
-
-        return {
-          ...topSig,
-          timeseries: getTransactionErrorRateTimeSeries(agg.timeseries.buckets),
-        };
-      }),
-    };
-  });
+      return {
+        ...topSig,
+        timeseries: getTransactionErrorRateTimeSeries(agg.timeseries.buckets),
+      };
+    }),
+  };
 }

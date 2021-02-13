@@ -10,7 +10,6 @@ import { getBuckets } from './get_buckets';
 import { getDistributionMax } from './get_distribution_max';
 import { roundToNearestFiveOrTen } from '../../helpers/round_to_nearest_five_or_ten';
 import { MINIMUM_BUCKET_SIZE, BUCKET_TARGET_COUNT } from '../constants';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 function getBucketSize(max: number) {
   const bucketSize = max / BUCKET_TARGET_COUNT;
@@ -36,37 +35,35 @@ export async function getTransactionDistribution({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  return withApmSpan('get_transaction_latency_distribution', async () => {
-    const distributionMax = await getDistributionMax({
-      serviceName,
-      transactionName,
-      transactionType,
-      setup,
-      searchAggregatedTransactions,
-    });
-
-    if (distributionMax == null) {
-      return { noHits: true, buckets: [], bucketSize: 0 };
-    }
-
-    const bucketSize = getBucketSize(distributionMax);
-
-    const { buckets, noHits } = await getBuckets({
-      serviceName,
-      transactionName,
-      transactionType,
-      transactionId,
-      traceId,
-      distributionMax,
-      bucketSize,
-      setup,
-      searchAggregatedTransactions,
-    });
-
-    return {
-      noHits,
-      buckets,
-      bucketSize,
-    };
+  const distributionMax = await getDistributionMax({
+    serviceName,
+    transactionName,
+    transactionType,
+    setup,
+    searchAggregatedTransactions,
   });
+
+  if (distributionMax == null) {
+    return { noHits: true, buckets: [], bucketSize: 0 };
+  }
+
+  const bucketSize = getBucketSize(distributionMax);
+
+  const { buckets, noHits } = await getBuckets({
+    serviceName,
+    transactionName,
+    transactionType,
+    transactionId,
+    traceId,
+    distributionMax,
+    bucketSize,
+    setup,
+    searchAggregatedTransactions,
+  });
+
+  return {
+    noHits,
+    buckets,
+    bucketSize,
+  };
 }

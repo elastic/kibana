@@ -20,14 +20,13 @@ import {
 } from '../../../lib/helpers/aggregated_transactions';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { getThroughputBuckets } from './transform';
 
 export type ThroughputChartsResponse = PromiseReturnType<
   typeof searchThroughput
 >;
 
-function searchThroughput({
+async function searchThroughput({
   serviceName,
   transactionType,
   transactionName,
@@ -103,24 +102,22 @@ export async function getThroughputCharts({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  return withApmSpan('get_transaction_throughput_series', async () => {
-    const { bucketSize, intervalString } = getBucketSize(setup);
+  const { bucketSize, intervalString } = getBucketSize(setup);
 
-    const response = await searchThroughput({
-      serviceName,
-      transactionType,
-      transactionName,
-      setup,
-      searchAggregatedTransactions,
-      intervalString,
-    });
-
-    return {
-      throughputTimeseries: getThroughputBuckets({
-        throughputResultBuckets: response.aggregations?.throughput.buckets,
-        bucketSize,
-        setupTimeRange: setup,
-      }),
-    };
+  const response = await searchThroughput({
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+    intervalString,
   });
+
+  return {
+    throughputTimeseries: getThroughputBuckets({
+      throughputResultBuckets: response.aggregations?.throughput.buckets,
+      bucketSize,
+      setupTimeRange: setup,
+    }),
+  };
 }

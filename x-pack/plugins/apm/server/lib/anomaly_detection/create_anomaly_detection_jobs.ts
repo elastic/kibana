@@ -18,7 +18,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
-import { withApmSpan } from '../../utils/with_apm_span';
 
 export async function createAnomalyDetectionJobs(
   setup: Setup,
@@ -31,36 +30,32 @@ export async function createAnomalyDetectionJobs(
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  const mlCapabilities = await withApmSpan('get_ml_capabilities', () =>
-    ml.mlSystem.mlCapabilities()
-  );
+  const mlCapabilities = await ml.mlSystem.mlCapabilities();
   if (!mlCapabilities.mlFeatureEnabledInSpace) {
     throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
   }
 
-  return withApmSpan('create_anomaly_detection_jobs', async () => {
-    logger.info(
-      `Creating ML anomaly detection jobs for environments: [${environments}].`
+  logger.info(
+    `Creating ML anomaly detection jobs for environments: [${environments}].`
+  );
+
+  const indexPatternName = indices['apm_oss.transactionIndices'];
+  const responses = await Promise.all(
+    environments.map((environment) =>
+      createAnomalyDetectionJob({ ml, environment, indexPatternName })
+    )
+  );
+  const jobResponses = responses.flatMap((response) => response.jobs);
+  const failedJobs = jobResponses.filter(({ success }) => !success);
+
+  if (failedJobs.length > 0) {
+    const errors = failedJobs.map(({ id, error }) => ({ id, error }));
+    throw new Error(
+      `An error occurred while creating ML jobs: ${JSON.stringify(errors)}`
     );
+  }
 
-    const indexPatternName = indices['apm_oss.transactionIndices'];
-    const responses = await Promise.all(
-      environments.map((environment) =>
-        createAnomalyDetectionJob({ ml, environment, indexPatternName })
-      )
-    );
-    const jobResponses = responses.flatMap((response) => response.jobs);
-    const failedJobs = jobResponses.filter(({ success }) => !success);
-
-    if (failedJobs.length > 0) {
-      const errors = failedJobs.map(({ id, error }) => ({ id, error }));
-      throw new Error(
-        `An error occurred while creating ML jobs: ${JSON.stringify(errors)}`
-      );
-    }
-
-    return jobResponses;
-  });
+  return jobResponses;
 }
 
 async function createAnomalyDetectionJob({
@@ -72,36 +67,34 @@ async function createAnomalyDetectionJob({
   environment: string;
   indexPatternName: string;
 }) {
-  return withApmSpan('create_anomaly_detection_job', async () => {
-    const randomToken = uuid().substr(-4);
+  const randomToken = uuid().substr(-4);
 
-    return ml.modules.setup({
-      moduleId: ML_MODULE_ID_APM_TRANSACTION,
-      prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
-      groups: [APM_ML_JOB_GROUP],
-      indexPatternName,
-      applyToAllSpaces: true,
-      query: {
-        bool: {
-          filter: [
-            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-            { exists: { field: TRANSACTION_DURATION } },
-            ...getEnvironmentUiFilterES(environment),
-          ],
-        },
+  return ml.modules.setup({
+    moduleId: ML_MODULE_ID_APM_TRANSACTION,
+    prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
+    groups: [APM_ML_JOB_GROUP],
+    indexPatternName,
+    applyToAllSpaces: true,
+    query: {
+      bool: {
+        filter: [
+          { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+          { exists: { field: TRANSACTION_DURATION } },
+          ...getEnvironmentUiFilterES(environment),
+        ],
       },
-      startDatafeed: true,
-      jobOverrides: [
-        {
-          custom_settings: {
-            job_tags: {
-              environment,
-              // identifies this as an APM ML job & facilitates future migrations
-              apm_ml_version: 2,
-            },
+    },
+    startDatafeed: true,
+    jobOverrides: [
+      {
+        custom_settings: {
+          job_tags: {
+            environment,
+            // identifies this as an APM ML job & facilitates future migrations
+            apm_ml_version: 2,
           },
         },
-      ],
-    });
+      },
+    ],
   });
 }

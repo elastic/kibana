@@ -15,9 +15,8 @@ import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
-export function getStoredAnnotations({
+export async function getStoredAnnotations({
   setup,
   serviceName,
   environment,
@@ -32,58 +31,56 @@ export function getStoredAnnotations({
   annotationsClient: ScopedAnnotationsClient;
   logger: Logger;
 }): Promise<Annotation[]> {
-  return withApmSpan('get_stored_annotations', async () => {
-    const body = {
-      size: 50,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: rangeFilter(setup.start, setup.end),
-            },
-            { term: { 'annotation.type': 'deployment' } },
-            { term: { tags: 'apm' } },
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...getEnvironmentUiFilterES(environment),
-          ],
-        },
+  const body = {
+    size: 50,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: rangeFilter(setup.start, setup.end),
+          },
+          { term: { 'annotation.type': 'deployment' } },
+          { term: { tags: 'apm' } },
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...getEnvironmentUiFilterES(environment),
+        ],
       },
-    };
+    },
+  };
 
-    try {
-      const response: ESSearchResponse<
-        ESAnnotation,
-        { body: typeof body }
-      > = await unwrapEsResponse(
-        client.search<any>({
-          index: annotationsClient.index,
-          body,
-        })
-      );
+  try {
+    const response: ESSearchResponse<
+      ESAnnotation,
+      { body: typeof body }
+    > = await unwrapEsResponse(
+      client.search<any>({
+        index: annotationsClient.index,
+        body,
+      })
+    );
 
-      return response.hits.hits.map((hit) => {
-        return {
-          type: AnnotationType.VERSION,
-          id: hit._id,
-          '@timestamp': new Date(hit._source['@timestamp']).getTime(),
-          text: hit._source.message,
-        };
-      });
-    } catch (error) {
-      // index is only created when an annotation has been indexed,
-      // so we should handle this error gracefully
-      if (error.body?.error?.type === 'index_not_found_exception') {
-        return [];
-      }
-
-      if (error.body?.error?.type === 'security_exception') {
-        logger.warn(
-          `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`
-        );
-        return [];
-      }
-
-      throw error;
+    return response.hits.hits.map((hit) => {
+      return {
+        type: AnnotationType.VERSION,
+        id: hit._id,
+        '@timestamp': new Date(hit._source['@timestamp']).getTime(),
+        text: hit._source.message,
+      };
+    });
+  } catch (error) {
+    // index is only created when an annotation has been indexed,
+    // so we should handle this error gracefully
+    if (error.body?.error?.type === 'index_not_found_exception') {
+      return [];
     }
-  });
+
+    if (error.body?.error?.type === 'security_exception') {
+      logger.warn(
+        `Unable to get stored annotations due to a security exception. Please make sure that the user has 'indices:data/read/search' permissions for ${annotationsClient.index}`
+      );
+      return [];
+    }
+
+    throw error;
+  }
 }

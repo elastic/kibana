@@ -19,7 +19,6 @@ import {
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { calculateThroughput } from '../helpers/calculate_throughput';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { withApmSpan } from '../../utils/with_apm_span';
 
 interface Options {
   searchAggregatedTransactions: boolean;
@@ -87,10 +86,8 @@ async function fetcher({
   return apmEventClient.search(params);
 }
 
-export function getThroughput(options: Options) {
-  return withApmSpan('get_throughput_for_service', async () => {
-    return {
-      throughput: transform(options, await fetcher(options)),
-    };
-  });
+export async function getThroughput(options: Options) {
+  return {
+    throughput: transform(options, await fetcher(options)),
+  };
 }

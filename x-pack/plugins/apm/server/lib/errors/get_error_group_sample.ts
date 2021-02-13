@@ -12,11 +12,10 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
-export function getErrorGroupSample({
+export async function getErrorGroupSample({
   serviceName,
   groupId,
   setup,
@@ -25,47 +24,45 @@ export function getErrorGroupSample({
   groupId: string;
   setup: Setup & SetupTimeRange;
 }) {
-  return withApmSpan('get_error_group_sample', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+  const { start, end, esFilter, apmEventClient } = setup;
 
-    const params = {
-      apm: {
-        events: [ProcessorEvent.error as const],
-      },
-      body: {
-        size: 1,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [ERROR_GROUP_ID]: groupId } },
-              { range: rangeFilter(start, end) },
-              ...esFilter,
-            ],
-            should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
-          },
+  const params = {
+    apm: {
+      events: [ProcessorEvent.error as const],
+    },
+    body: {
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [ERROR_GROUP_ID]: groupId } },
+            { range: rangeFilter(start, end) },
+            ...esFilter,
+          ],
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
         },
-        sort: [
-          { _score: 'desc' }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
-          { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
-        ],
       },
-    };
+      sort: [
+        { _score: 'desc' }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
+        { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
+      ],
+    },
+  };
 
-    const resp = await apmEventClient.search(params);
-    const error = resp.hits.hits[0]?._source;
-    const transactionId = error?.transaction?.id;
-    const traceId = error?.trace?.id;
+  const resp = await apmEventClient.search(params);
+  const error = resp.hits.hits[0]?._source;
+  const transactionId = error?.transaction?.id;
+  const traceId = error?.trace?.id;
 
-    let transaction;
-    if (transactionId && traceId) {
-      transaction = await getTransaction({ transactionId, traceId, setup });
-    }
+  let transaction;
+  if (transactionId && traceId) {
+    transaction = await getTransaction({ transactionId, traceId, setup });
+  }
 
-    return {
-      transaction,
-      error,
-      occurrencesCount: resp.hits.total.value,
-    };
-  });
+  return {
+    transaction,
+    error,
+    occurrencesCount: resp.hits.total.value,
+  };
 }

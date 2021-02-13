@@ -8,7 +8,6 @@
 import { Logger } from '@kbn/logging';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getServicesProjection } from '../../../projections/services';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
@@ -25,34 +24,32 @@ export async function getServicesItems({
   searchAggregatedTransactions: boolean;
   logger: Logger;
 }) {
-  return withApmSpan('get_services_items', async () => {
-    const params = {
-      projection: getServicesProjection({
-        setup,
-        searchAggregatedTransactions,
-      }),
+  const params = {
+    projection: getServicesProjection({
       setup,
       searchAggregatedTransactions,
-    };
+    }),
+    setup,
+    searchAggregatedTransactions,
+  };
 
-    const [transactionStats, healthStatuses] = await Promise.all([
-      getServiceTransactionStats(params),
-      getHealthStatuses(params, setup.uiFilters.environment).catch((err) => {
-        logger.error(err);
-        return [];
-      }),
-    ]);
+  const [transactionStats, healthStatuses] = await Promise.all([
+    getServiceTransactionStats(params),
+    getHealthStatuses(params, setup.uiFilters.environment).catch((err) => {
+      logger.error(err);
+      return [];
+    }),
+  ]);
 
-    const apmServices = transactionStats.map(({ serviceName }) => serviceName);
+  const apmServices = transactionStats.map(({ serviceName }) => serviceName);
 
-    // make sure to exclude health statuses from services
-    // that are not found in APM data
-    const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
-      apmServices.includes(serviceName)
-    );
+  // make sure to exclude health statuses from services
+  // that are not found in APM data
+  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+    apmServices.includes(serviceName)
+  );
 
-    const allMetrics = [...transactionStats, ...matchedHealthStatuses];
+  const allMetrics = [...transactionStats, ...matchedHealthStatuses];
 
-    return joinByKey(allMetrics, 'serviceName');
-  });
+  return joinByKey(allMetrics, 'serviceName');
 }

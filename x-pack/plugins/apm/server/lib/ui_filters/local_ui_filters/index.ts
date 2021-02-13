@@ -13,13 +13,12 @@ import { getLocalFilterQuery } from './get_local_filter_query';
 import { Setup } from '../../helpers/setup_request';
 import { localUIFilters } from './config';
 import { LocalUIFilterName } from '../../../../common/ui_filter';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export type LocalUIFiltersAPIResponse = PromiseReturnType<
   typeof getLocalUIFilters
 >;
 
-export function getLocalUIFilters({
+export async function getLocalUIFilters({
   setup,
   projection,
   uiFilters,
@@ -30,45 +29,41 @@ export function getLocalUIFilters({
   uiFilters: UIFilters;
   localFilterNames: LocalUIFilterName[];
 }) {
-  return withApmSpan('get_ui_filter_options', () => {
-    const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-    const projectionWithoutAggs = cloneDeep(projection);
+  const projectionWithoutAggs = cloneDeep(projection);
 
-    delete projectionWithoutAggs.body.aggs;
+  delete projectionWithoutAggs.body.aggs;
 
-    return Promise.all(
-      localFilterNames.map(async (name) =>
-        withApmSpan('get_ui_filter_options_for_field', async () => {
-          const query = getLocalFilterQuery({
-            uiFilters,
-            projection,
-            localUIFilterName: name,
-          });
+  return Promise.all(
+    localFilterNames.map(async (name) => {
+      const query = getLocalFilterQuery({
+        uiFilters,
+        projection,
+        localUIFilterName: name,
+      });
 
-          const response = await apmEventClient.search(query);
+      const response = await apmEventClient.search(query);
 
-          const filter = localUIFilters[name];
+      const filter = localUIFilters[name];
 
-          const buckets = response?.aggregations?.by_terms?.buckets ?? [];
+      const buckets = response?.aggregations?.by_terms?.buckets ?? [];
 
-          return {
-            ...filter,
-            options: orderBy(
-              buckets.map((bucket) => {
-                return {
-                  name: bucket.key as string,
-                  count: bucket.bucket_count
-                    ? bucket.bucket_count.value
-                    : bucket.doc_count,
-                };
-              }),
-              'count',
-              'desc'
-            ),
-          };
-        })
-      )
-    );
-  });
+      return {
+        ...filter,
+        options: orderBy(
+          buckets.map((bucket) => {
+            return {
+              name: bucket.key as string,
+              count: bucket.bucket_count
+                ? bucket.bucket_count.value
+                : bucket.doc_count,
+            };
+          }),
+          'count',
+          'desc'
+        ),
+      };
+    })
+  );
 }

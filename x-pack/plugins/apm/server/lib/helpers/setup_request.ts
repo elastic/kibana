@@ -27,7 +27,6 @@ import {
   APMInternalClient,
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
-import { withApmSpan } from '../../utils/with_apm_span';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -72,54 +71,50 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   context: APMRequestHandlerContext<TParams>,
   request: KibanaRequest
 ): Promise<InferSetup<TParams>> {
-  return withApmSpan('setup_request', async () => {
-    const { config, logger } = context;
-    const { query } = context.params;
+  const { config, logger } = context;
+  const { query } = context.params;
 
-    const [indices, includeFrozen] = await Promise.all([
-      getApmIndices({
-        savedObjectsClient: context.core.savedObjects.client,
-        config,
-      }),
-      withApmSpan('get_ui_settings', () =>
-        context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
-      ),
-    ]);
-
-    const uiFilters = decodeUiFilters(logger, query.uiFilters);
-
-    const coreSetupRequest = {
-      indices,
-      apmEventClient: createApmEventClient({
-        esClient: context.core.elasticsearch.client.asCurrentUser,
-        debug: context.params.query._debug,
-        request,
-        indices,
-        options: { includeFrozen },
-      }),
-      internalClient: createInternalESClient({
-        context,
-        request,
-      }),
-      ml:
-        context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
-          ? getMlSetup(
-              context.plugins.ml,
-              context.core.savedObjects.client,
-              request
-            )
-          : undefined,
+  const [indices, includeFrozen] = await Promise.all([
+    getApmIndices({
+      savedObjectsClient: context.core.savedObjects.client,
       config,
-      uiFilters,
-      esFilter: getEsFilter(uiFilters),
-    };
+    }),
+    context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+  ]);
 
-    return {
-      ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
-      ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
-      ...coreSetupRequest,
-    } as InferSetup<TParams>;
-  });
+  const uiFilters = decodeUiFilters(logger, query.uiFilters);
+
+  const coreSetupRequest = {
+    indices,
+    apmEventClient: createApmEventClient({
+      esClient: context.core.elasticsearch.client.asCurrentUser,
+      debug: context.params.query._debug,
+      request,
+      indices,
+      options: { includeFrozen },
+    }),
+    internalClient: createInternalESClient({
+      context,
+      request,
+    }),
+    ml:
+      context.plugins.ml && isActivePlatinumLicense(context.licensing.license)
+        ? getMlSetup(
+            context.plugins.ml,
+            context.core.savedObjects.client,
+            request
+          )
+        : undefined,
+    config,
+    uiFilters,
+    esFilter: getEsFilter(uiFilters),
+  };
+
+  return {
+    ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
+    ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
+    ...coreSetupRequest,
+  } as InferSetup<TParams>;
 }
 
 function getMlSetup(

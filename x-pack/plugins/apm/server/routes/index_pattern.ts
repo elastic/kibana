@@ -16,10 +16,8 @@ export const staticIndexPatternRoute = createRoute((core) => ({
   endpoint: 'POST /api/apm/index_pattern/static',
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
-    const [setup, savedObjectsClient] = await Promise.all([
-      setupRequest(context, request),
-      getInternalSavedObjectsClient(core),
-    ]);
+    const setup = await setupRequest(context, request);
+    const savedObjectsClient = await getInternalSavedObjectsClient(core);
 
     await createStaticIndexPattern(setup, context, savedObjectsClient);
 

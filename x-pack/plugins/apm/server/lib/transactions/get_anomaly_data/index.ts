@@ -15,7 +15,6 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { anomalySeriesFetcher } from './fetcher';
 import { getMLJobIds } from '../../service_map/get_service_anomalies';
 import { ANOMALY_THRESHOLD } from '../../../../../ml/common';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getAnomalySeries({
   serviceName,
@@ -60,77 +59,74 @@ export async function getAnomalySeries({
     return undefined;
   }
 
-  return withApmSpan('get_latency_anomaly_series', async () => {
-    const { intervalString } = getBucketSize({ start, end });
+  const { intervalString } = getBucketSize({ start, end });
 
-    // move the start back with one bucket size, to ensure to get anomaly data in the beginning
-    // this is required because ML has a minimum bucket size (default is 900s) so if our buckets
-    // are smaller, we might have several null buckets in the beginning
-    const mlStart = start - 900 * 1000;
+  // move the start back with one bucket size, to ensure to get anomaly data in the beginning
+  // this is required because ML has a minimum bucket size (default is 900s) so if our buckets
+  // are smaller, we might have several null buckets in the beginning
+  const mlStart = start - 900 * 1000;
 
-    const [anomaliesResponse, jobIds] = await Promise.all([
-      anomalySeriesFetcher({
-        serviceName,
-        transactionType,
-        intervalString,
-        ml,
-        start: mlStart,
-        end,
-      }),
-      getMLJobIds(ml.anomalyDetectors, environment),
-    ]);
+  const [anomaliesResponse, jobIds] = await Promise.all([
+    anomalySeriesFetcher({
+      serviceName,
+      transactionType,
+      intervalString,
+      ml,
+      start: mlStart,
+      end,
+    }),
+    getMLJobIds(ml.anomalyDetectors, environment),
+  ]);
 
-    const scoreSeriesCollection = anomaliesResponse?.aggregations?.job_id.buckets
-      .filter((bucket) => jobIds.includes(bucket.key as string))
-      .map((bucket) => {
-        const dateBuckets = bucket.ml_avg_response_times.buckets;
+  const scoreSeriesCollection = anomaliesResponse?.aggregations?.job_id.buckets
+    .filter((bucket) => jobIds.includes(bucket.key as string))
+    .map((bucket) => {
+      const dateBuckets = bucket.ml_avg_response_times.buckets;
 
-        return {
-          jobId: bucket.key as string,
-          anomalyScore: compact(
-            dateBuckets.map((dateBucket) => {
-              const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
-              const score = metrics?.record_score;
+      return {
+        jobId: bucket.key as string,
+        anomalyScore: compact(
+          dateBuckets.map((dateBucket) => {
+            const metrics = maybe(dateBucket.anomaly_score.top[0])?.metrics;
+            const score = metrics?.record_score;
 
-              if (
-                !metrics ||
-                !isFiniteNumber(score) ||
-                score < ANOMALY_THRESHOLD.CRITICAL
-              ) {
-                return null;
-              }
+            if (
+              !metrics ||
+              !isFiniteNumber(score) ||
+              score < ANOMALY_THRESHOLD.CRITICAL
+            ) {
+              return null;
+            }
 
-              const anomalyStart = Date.parse(metrics.timestamp as string);
-              const anomalyEnd =
-                anomalyStart + (metrics.bucket_span as number) * 1000;
+            const anomalyStart = Date.parse(metrics.timestamp as string);
+            const anomalyEnd =
+              anomalyStart + (metrics.bucket_span as number) * 1000;
 
-              return {
-                x0: anomalyStart,
-                x: anomalyEnd,
-                y: score,
-              };
-            })
-          ),
-          anomalyBoundaries: dateBuckets
-            .filter(
-              (dateBucket) =>
-                dateBucket.lower.value !== null &&
-                dateBucket.upper.value !== null
-            )
-            .map((dateBucket) => ({
-              x: dateBucket.key,
-              y0: dateBucket.lower.value as number,
-              y: dateBucket.upper.value as number,
-            })),
-        };
-      });
+            return {
+              x0: anomalyStart,
+              x: anomalyEnd,
+              y: score,
+            };
+          })
+        ),
+        anomalyBoundaries: dateBuckets
+          .filter(
+            (dateBucket) =>
+              dateBucket.lower.value !== null && dateBucket.upper.value !== null
+          )
+          .map((dateBucket) => ({
+            x: dateBucket.key,
+            y0: dateBucket.lower.value as number,
+            y: dateBucket.upper.value as number,
+          })),
+      };
+    });
 
-    if ((scoreSeriesCollection?.length ?? 0) > 1) {
-      logger.warn(
-        `More than one ML job was found for ${serviceName} for environment ${environment}. Only showing results from ${scoreSeriesCollection?.[0].jobId}`
-      );
-    }
+  if ((scoreSeriesCollection?.length ?? 0) > 1) {
+    logger.warn(
+      `More than one ML job was found for ${serviceName} for environment ${environment}. Only showing results from ${scoreSeriesCollection?.[0].jobId}`
+    );
+  }
 
-    return scoreSeriesCollection?.[0];
-  });
+  return scoreSeriesCollection?.[0];
 }

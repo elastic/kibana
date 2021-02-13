@@ -17,7 +17,6 @@ import {
 import { joinByKey } from '../../../common/utils/join_by_key';
 import { getTransactionGroupsProjection } from '../../projections/transaction_groups';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { withApmSpan } from '../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getAverages,
@@ -96,121 +95,115 @@ function getItemsWithRelativeImpact(
   return itemsWithRelativeImpact;
 }
 
-export function transactionGroupsFetcher(
+export async function transactionGroupsFetcher(
   options: Options,
   setup: TransactionGroupSetup,
   bucketSize: number
 ) {
-  const spanName =
-    options.type === 'top_traces' ? 'get_top_traces' : 'get_top_transactions';
+  const projection = getTransactionGroupsProjection({
+    setup,
+    options,
+  });
 
-  return withApmSpan(spanName, async () => {
-    const projection = getTransactionGroupsProjection({
-      setup,
-      options,
-    });
+  const isTopTraces = options.type === 'top_traces';
 
-    const isTopTraces = options.type === 'top_traces';
+  // @ts-expect-error
+  delete projection.body.aggs;
 
-    // @ts-expect-error
-    delete projection.body.aggs;
+  // traces overview is hardcoded to 10000
+  // transactions overview: 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
+  const expectedBucketSize = isTopTraces ? 10000 : bucketSize;
+  const size = isTopTraces ? 10000 : expectedBucketSize + 1;
 
-    // traces overview is hardcoded to 10000
-    // transactions overview: 1 extra bucket is added to check whether the total number of buckets exceed the specified bucket size.
-    const expectedBucketSize = isTopTraces ? 10000 : bucketSize;
-    const size = isTopTraces ? 10000 : expectedBucketSize + 1;
-
-    const request = mergeProjection(projection, {
-      body: {
-        size: 0,
-        aggs: {
-          transaction_groups: {
-            ...(isTopTraces
-              ? {
-                  composite: {
-                    sources: [
-                      { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
-                      {
-                        [TRANSACTION_NAME]: {
-                          terms: { field: TRANSACTION_NAME },
-                        },
+  const request = mergeProjection(projection, {
+    body: {
+      size: 0,
+      aggs: {
+        transaction_groups: {
+          ...(isTopTraces
+            ? {
+                composite: {
+                  sources: [
+                    { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+                    {
+                      [TRANSACTION_NAME]: {
+                        terms: { field: TRANSACTION_NAME },
                       },
-                    ],
-                    size,
-                  },
-                }
-              : {
-                  terms: {
-                    field: TRANSACTION_NAME,
-                    size,
-                  },
-                }),
-          },
+                    },
+                  ],
+                  size,
+                },
+              }
+            : {
+                terms: {
+                  field: TRANSACTION_NAME,
+                  size,
+                },
+              }),
         },
       },
-    });
-
-    const params = {
-      request,
-      setup,
-      searchAggregatedTransactions: options.searchAggregatedTransactions,
-    };
-
-    const [counts, averages, sums, percentiles] = await Promise.all([
-      getCounts(params),
-      getAverages(params),
-      getSums(params),
-      !isTopTraces ? getPercentiles(params) : Promise.resolve(undefined),
-    ]);
-
-    const stats = [
-      ...averages,
-      ...counts,
-      ...sums,
-      ...(percentiles ? percentiles : []),
-    ];
-
-    const items = joinByKey(stats, 'key');
-
-    const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items);
-
-    const defaultServiceName =
-      options.type === 'top_transactions' ? options.serviceName : undefined;
-
-    const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
-      (item) => {
-        let transactionName: string;
-        let serviceName: string;
-
-        if (typeof item.key === 'string') {
-          transactionName = item.key;
-          serviceName = defaultServiceName!;
-        } else {
-          transactionName = item.key[TRANSACTION_NAME];
-          serviceName = item.key[SERVICE_NAME];
-        }
-
-        return {
-          ...item,
-          transactionName,
-          serviceName,
-        };
-      }
-    );
-
-    return {
-      items: take(
-        // sort by impact by default so most impactful services are not cut off
-        sortBy(itemsWithKeys, 'impact').reverse(),
-        bucketSize
-      ),
-      // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
-      // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
-      isAggregationAccurate:
-        expectedBucketSize >= itemsWithRelativeImpact.length,
-      bucketSize,
-    };
+    },
   });
+
+  const params = {
+    request,
+    setup,
+    searchAggregatedTransactions: options.searchAggregatedTransactions,
+  };
+
+  const [counts, averages, sums, percentiles] = await Promise.all([
+    getCounts(params),
+    getAverages(params),
+    getSums(params),
+    !isTopTraces ? getPercentiles(params) : Promise.resolve(undefined),
+  ]);
+
+  const stats = [
+    ...averages,
+    ...counts,
+    ...sums,
+    ...(percentiles ? percentiles : []),
+  ];
+
+  const items = joinByKey(stats, 'key');
+
+  const itemsWithRelativeImpact = getItemsWithRelativeImpact(setup, items);
+
+  const defaultServiceName =
+    options.type === 'top_transactions' ? options.serviceName : undefined;
+
+  const itemsWithKeys: TransactionGroup[] = itemsWithRelativeImpact.map(
+    (item) => {
+      let transactionName: string;
+      let serviceName: string;
+
+      if (typeof item.key === 'string') {
+        transactionName = item.key;
+        serviceName = defaultServiceName!;
+      } else {
+        transactionName = item.key[TRANSACTION_NAME];
+        serviceName = item.key[SERVICE_NAME];
+      }
+
+      return {
+        ...item,
+        transactionName,
+        serviceName,
+      };
+    }
+  );
+
+  return {
+    items: take(
+      // sort by impact by default so most impactful services are not cut off
+      sortBy(itemsWithKeys, 'impact').reverse(),
+      bucketSize
+    ),
+    // The aggregation is considered accurate if the configured bucket size is larger or equal to the number of buckets returned
+    // the actual number of buckets retrieved are `bucketsize + 1` to detect whether it's above the limit
+    isAggregationAccurate: expectedBucketSize >= itemsWithRelativeImpact.length,
+    bucketSize,
+  };
 }
 
 export interface TransactionGroup {

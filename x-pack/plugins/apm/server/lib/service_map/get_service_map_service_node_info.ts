@@ -20,7 +20,6 @@ import {
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { rangeFilter } from '../../../common/utils/range_filter';
-import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -50,48 +49,46 @@ interface TaskParameters {
   setup: Setup;
 }
 
-export function getServiceMapServiceNodeInfo({
+export async function getServiceMapServiceNodeInfo({
   serviceName,
   setup,
   searchAggregatedTransactions,
 }: Options & { serviceName: string }) {
-  return withApmSpan('get_service_map_node_stats', async () => {
-    const { start, end, uiFilters } = setup;
+  const { start, end, uiFilters } = setup;
 
-    const filter: ESFilter[] = [
-      { range: rangeFilter(start, end) },
-      { term: { [SERVICE_NAME]: serviceName } },
-      ...getEnvironmentUiFilterES(uiFilters.environment),
-    ];
+  const filter: ESFilter[] = [
+    { range: rangeFilter(start, end) },
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...getEnvironmentUiFilterES(uiFilters.environment),
+  ];
 
-    const minutes = Math.abs((end - start) / (1000 * 60));
-    const taskParams = {
-      environment: uiFilters.environment,
-      filter,
-      searchAggregatedTransactions,
-      minutes,
-      serviceName,
-      setup,
-    };
+  const minutes = Math.abs((end - start) / (1000 * 60));
+  const taskParams = {
+    environment: uiFilters.environment,
+    filter,
+    searchAggregatedTransactions,
+    minutes,
+    serviceName,
+    setup,
+  };
 
-    const [
-      errorStats,
-      transactionStats,
-      cpuStats,
-      memoryStats,
-    ] = await Promise.all([
-      getErrorStats(taskParams),
-      getTransactionStats(taskParams),
-      getCpuStats(taskParams),
-      getMemoryStats(taskParams),
-    ]);
-    return {
-      ...errorStats,
-      transactionStats,
-      ...cpuStats,
-      ...memoryStats,
-    };
-  });
+  const [
+    errorStats,
+    transactionStats,
+    cpuStats,
+    memoryStats,
+  ] = await Promise.all([
+    getErrorStats(taskParams),
+    getTransactionStats(taskParams),
+    getCpuStats(taskParams),
+    getMemoryStats(taskParams),
+  ]);
+  return {
+    ...errorStats,
+    transactionStats,
+    ...cpuStats,
+    ...memoryStats,
+  };
 }
 
 async function getErrorStats({
@@ -105,22 +102,20 @@ async function getErrorStats({
   environment?: string;
   searchAggregatedTransactions: boolean;
 }) {
-  return withApmSpan('get_error_rate_for_service_map_node', async () => {
-    const setupWithBlankUiFilters = {
-      ...setup,
-      uiFilters: { environment },
-      esFilter: getEnvironmentUiFilterES(environment),
-    };
-    const { noHits, average } = await getErrorRate({
-      setup: setupWithBlankUiFilters,
-      serviceName,
-      searchAggregatedTransactions,
-    });
-    return { avgErrorRate: noHits ? null : average };
+  const setupWithBlankUiFilters = {
+    ...setup,
+    uiFilters: { environment },
+    esFilter: getEnvironmentUiFilterES(environment),
+  };
+  const { noHits, average } = await getErrorRate({
+    setup: setupWithBlankUiFilters,
+    serviceName,
+    searchAggregatedTransactions,
   });
+  return { avgErrorRate: noHits ? null : average };
 }
 
-function getTransactionStats({
+async function getTransactionStats({
   setup,
   filter,
   minutes,
@@ -129,67 +124,95 @@ function getTransactionStats({
   avgTransactionDuration: number | null;
   avgRequestsPerMinute: number | null;
 }> {
-  return withApmSpan('get_transaction_stats_for_service_map_node', async () => {
-    const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
-    const params = {
-      apm: {
-        events: [
-          getProcessorEventForAggregatedTransactions(
-            searchAggregatedTransactions
-          ),
-        ],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...filter,
-              ...getDocumentTypeFilterForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
-              {
-                terms: {
-                  [TRANSACTION_TYPE]: [
-                    TRANSACTION_REQUEST,
-                    TRANSACTION_PAGE_LOAD,
-                  ],
-                },
+  const params = {
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...filter,
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
+            {
+              terms: {
+                [TRANSACTION_TYPE]: [
+                  TRANSACTION_REQUEST,
+                  TRANSACTION_PAGE_LOAD,
+                ],
               },
-            ],
-          },
-        },
-        track_total_hits: true,
-        aggs: {
-          duration: {
-            avg: {
-              field: getTransactionDurationFieldForAggregatedTransactions(
-                searchAggregatedTransactions
-              ),
             },
+          ],
+        },
+      },
+      track_total_hits: true,
+      aggs: {
+        duration: {
+          avg: {
+            field: getTransactionDurationFieldForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
           },
         },
       },
-    };
-    const response = await apmEventClient.search(params);
+    },
+  };
+  const response = await apmEventClient.search(params);
 
-    const totalRequests = response.hits.total.value;
+  const totalRequests = response.hits.total.value;
 
-    return {
-      avgTransactionDuration: response.aggregations?.duration.value ?? null,
-      avgRequestsPerMinute: totalRequests > 0 ? totalRequests / minutes : null,
-    };
-  });
+  return {
+    avgTransactionDuration: response.aggregations?.duration.value ?? null,
+    avgRequestsPerMinute: totalRequests > 0 ? totalRequests / minutes : null,
+  };
 }
 
-function getCpuStats({
+async function getCpuStats({
   setup,
   filter,
 }: TaskParameters): Promise<{ avgCpuUsage: number | null }> {
-  return withApmSpan('get_avg_cpu_usage_for_service_map_node', async () => {
-    const { apmEventClient } = setup;
+  const { apmEventClient } = setup;
 
+  const response = await apmEventClient.search({
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [...filter, { exists: { field: METRIC_SYSTEM_CPU_PERCENT } }],
+        },
+      },
+      aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
+    },
+  });
+
+  return { avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null };
+}
+
+async function getMemoryStats({
+  setup,
+  filter,
+}: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
+  const { apmEventClient } = setup;
+
+  const getAvgMemoryUsage = async ({
+    additionalFilters,
+    script,
+  }: {
+    additionalFilters: ESFilter[];
+    script: typeof percentCgroupMemoryUsedScript;
+  }) => {
     const response = await apmEventClient.search({
       apm: {
         events: [ProcessorEvent.metric],
@@ -198,72 +221,34 @@ function getCpuStats({
         size: 0,
         query: {
           bool: {
-            filter: [
-              ...filter,
-              { exists: { field: METRIC_SYSTEM_CPU_PERCENT } },
-            ],
+            filter: [...filter, ...additionalFilters],
           },
         },
-        aggs: { avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } } },
+        aggs: {
+          avgMemoryUsage: { avg: { script } },
+        },
       },
     });
 
-    return { avgCpuUsage: response.aggregations?.avgCpuUsage.value ?? null };
+    return response.aggregations?.avgMemoryUsage.value ?? null;
+  };
+
+  let avgMemoryUsage = await getAvgMemoryUsage({
+    additionalFilters: [
+      { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+    ],
+    script: percentCgroupMemoryUsedScript,
   });
-}
 
-function getMemoryStats({
-  setup,
-  filter,
-}: TaskParameters): Promise<{ avgMemoryUsage: number | null }> {
-  return withApmSpan('get_memory_stats_for_service_map_node', async () => {
-    const { apmEventClient } = setup;
-
-    const getAvgMemoryUsage = ({
-      additionalFilters,
-      script,
-    }: {
-      additionalFilters: ESFilter[];
-      script: typeof percentCgroupMemoryUsedScript;
-    }) => {
-      return withApmSpan('get_avg_memory_for_service_map_node', async () => {
-        const response = await apmEventClient.search({
-          apm: {
-            events: [ProcessorEvent.metric],
-          },
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: [...filter, ...additionalFilters],
-              },
-            },
-            aggs: {
-              avgMemoryUsage: { avg: { script } },
-            },
-          },
-        });
-        return response.aggregations?.avgMemoryUsage.value ?? null;
-      });
-    };
-
-    let avgMemoryUsage = await getAvgMemoryUsage({
+  if (!avgMemoryUsage) {
+    avgMemoryUsage = await getAvgMemoryUsage({
       additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+        { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+        { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
       ],
-      script: percentCgroupMemoryUsedScript,
+      script: percentSystemMemoryUsedScript,
     });
+  }
 
-    if (!avgMemoryUsage) {
-      avgMemoryUsage = await getAvgMemoryUsage({
-        additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-        ],
-        script: percentSystemMemoryUsedScript,
-      });
-    }
-
-    return { avgMemoryUsage };
-  });
+  return { avgMemoryUsage };
 }
