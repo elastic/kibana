@@ -33,7 +33,7 @@ type ServiceMetadataDetailsRaw = Pick<
   'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
 >;
 
-interface ServiceMetadataDetails {
+export interface ServiceMetadataDetails {
   service?: {
     versions?: string[];
     runtime?: {

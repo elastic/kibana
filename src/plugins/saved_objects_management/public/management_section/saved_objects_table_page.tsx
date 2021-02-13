@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import type { SpacesAvailableStartContract } from '../../../spaces_oss/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
@@ -22,10 +23,13 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
+const EmptyFunctionComponent: React.FC = ({ children }) => <>{children}</>;
+
 const SavedObjectsTablePage = ({
   coreStart,
   dataStart,
   taggingApi,
+  spacesApi,
   allowedTypes,
   serviceRegistry,
   actionRegistry,
@@ -35,6 +39,7 @@ const SavedObjectsTablePage = ({
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
   taggingApi?: SavedObjectsTaggingApi;
+  spacesApi?: SpacesAvailableStartContract;
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   actionRegistry: SavedObjectsManagementActionServiceStart;
@@ -65,35 +70,42 @@ const SavedObjectsTablePage = ({
     ]);
   }, [setBreadcrumbs]);
 
+  const ContextWrapper = useMemo(
+    () => spacesApi?.ui.components.SpacesContext || EmptyFunctionComponent,
+    [spacesApi]
+  );
+
   return (
-    <SavedObjectsTable
-      initialQuery={initialQuery}
-      allowedTypes={allowedTypes}
-      serviceRegistry={serviceRegistry}
-      actionRegistry={actionRegistry}
-      columnRegistry={columnRegistry}
-      taggingApi={taggingApi}
-      savedObjectsClient={coreStart.savedObjects.client}
-      indexPatterns={dataStart.indexPatterns}
-      search={dataStart.search}
-      http={coreStart.http}
-      overlays={coreStart.overlays}
-      notifications={coreStart.notifications}
-      applications={coreStart.application}
-      perPageConfig={itemsPerPage}
-      goInspectObject={(savedObject) => {
-        const { editUrl } = savedObject.meta;
-        if (editUrl) {
-          return coreStart.application.navigateToUrl(
-            coreStart.http.basePath.prepend(`/app${editUrl}`)
-          );
-        }
-      }}
-      canGoInApp={(savedObject) => {
-        const { inAppUrl } = savedObject.meta;
-        return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
-      }}
-    />
+    <ContextWrapper>
+      <SavedObjectsTable
+        initialQuery={initialQuery}
+        allowedTypes={allowedTypes}
+        serviceRegistry={serviceRegistry}
+        actionRegistry={actionRegistry}
+        columnRegistry={columnRegistry}
+        taggingApi={taggingApi}
+        savedObjectsClient={coreStart.savedObjects.client}
+        indexPatterns={dataStart.indexPatterns}
+        search={dataStart.search}
+        http={coreStart.http}
+        overlays={coreStart.overlays}
+        notifications={coreStart.notifications}
+        applications={coreStart.application}
+        perPageConfig={itemsPerPage}
+        goInspectObject={(savedObject) => {
+          const { editUrl } = savedObject.meta;
+          if (editUrl) {
+            return coreStart.application.navigateToUrl(
+              coreStart.http.basePath.prepend(`/app${editUrl}`)
+            );
+          }
+        }}
+        canGoInApp={(savedObject) => {
+          const { inAppUrl } = savedObject.meta;
+          return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
+        }}
+      />
+    </ContextWrapper>
   );
 };
 // eslint-disable-next-line import/no-default-export

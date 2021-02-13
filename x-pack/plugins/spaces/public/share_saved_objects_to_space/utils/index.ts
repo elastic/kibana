@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { JobSpacesFlyout } from './jobs_spaces_flyout';
+export { createRedirectLegacyUrl } from './redirect_legacy_url';

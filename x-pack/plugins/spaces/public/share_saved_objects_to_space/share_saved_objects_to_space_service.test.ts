@@ -7,19 +7,16 @@
 
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 // import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
-import { spacesManagerMock } from '../spaces_manager/mocks';
 import { ShareSavedObjectsToSpaceService } from '.';
-import { coreMock, notificationServiceMock } from 'src/core/public/mocks';
 import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/saved_objects_management/public/mocks';
+import { uiApiMock } from '../ui_api/mocks';
 
 describe('ShareSavedObjectsToSpaceService', () => {
   describe('#setup', () => {
     it('registers the ShareToSpaceSavedObjectsManagement Action and Column', () => {
       const deps = {
-        spacesManager: spacesManagerMock.create(),
-        notificationsSetup: notificationServiceMock.createSetupContract(),
         savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
-        getStartServices: coreMock.createSetup().getStartServices,
+        spacesApiUi: uiApiMock.create(),
       };
 
       const service = new ShareSavedObjectsToSpaceService();

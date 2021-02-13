@@ -39,7 +39,6 @@
     "dashboard",
     "savedObjects",
     "home",
-    "spaces",
     "maps"
   ],
   "extraPublicDirs": [
