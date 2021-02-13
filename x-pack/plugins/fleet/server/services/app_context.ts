@@ -7,7 +7,7 @@
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { kibanaPackageJSON } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/utils';
 
 import {
   ElasticsearchClient,
@@ -34,8 +34,8 @@ class AppContextService {
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
-  private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJSON.version;
-  private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJSON.branch;
+  private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
+  private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;

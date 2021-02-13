@@ -25,6 +25,12 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_kibana_space', () => ({
+  useActiveKibanaSpace: () => ({
+    space: { id: 'default' },
+  }),
+}));
+
 jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
   useInfraMLCapabilities: () => ({
     isLoading: false,

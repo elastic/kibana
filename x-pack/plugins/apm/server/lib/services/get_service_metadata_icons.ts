@@ -20,13 +20,14 @@ import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 type ServiceMetadataIconsRaw = Pick<
   TransactionRaw,
   'kubernetes' | 'cloud' | 'container' | 'agent'
 >;
 
-interface ServiceMetadataIcons {
+export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
   cloudProvider?: string;
@@ -40,7 +41,7 @@ export const should = [
   { exists: { field: AGENT_NAME } },
 ];
 
-export async function getServiceMetadataIcons({
+export function getServiceMetadataIcons({
   serviceName,
   setup,
   searchAggregatedTransactions,
@@ -49,53 +50,55 @@ export async function getServiceMetadataIcons({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }): Promise<ServiceMetadataIcons> {
-  const { start, end, apmEventClient } = setup;
+  return withApmSpan('get_service_metadata_icons', async () => {
+    const { start, end, apmEventClient } = setup;
 
-  const filter = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
-  ];
+    const filter = [
+      { term: { [SERVICE_NAME]: serviceName } },
+      { range: rangeFilter(start, end) },
+    ];
 
-  const params = {
-    apm: {
-      events: [
-        getProcessorEventForAggregatedTransactions(
-          searchAggregatedTransactions
-        ),
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ],
-    },
-    body: {
-      size: 1,
-      _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],
-      query: { bool: { filter, should } },
-    },
-  };
-
-  const response = await apmEventClient.search(params);
-
-  if (response.hits.total.value === 0) {
-    return {
-      agentName: undefined,
-      containerType: undefined,
-      cloudProvider: undefined,
+    const params = {
+      apm: {
+        events: [
+          getProcessorEventForAggregatedTransactions(
+            searchAggregatedTransactions
+          ),
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
+      },
+      body: {
+        size: 1,
+        _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],
+        query: { bool: { filter, should } },
+      },
     };
-  }
 
-  const { kubernetes, cloud, container, agent } = response.hits.hits[0]
-    ._source as ServiceMetadataIconsRaw;
+    const response = await apmEventClient.search(params);
 
-  let containerType: ContainerType;
-  if (!!kubernetes) {
-    containerType = 'Kubernetes';
-  } else if (!!container) {
-    containerType = 'Docker';
-  }
+    if (response.hits.total.value === 0) {
+      return {
+        agentName: undefined,
+        containerType: undefined,
+        cloudProvider: undefined,
+      };
+    }
 
-  return {
-    agentName: agent?.name,
-    containerType,
-    cloudProvider: cloud?.provider,
-  };
+    const { kubernetes, cloud, container, agent } = response.hits.hits[0]
+      ._source as ServiceMetadataIconsRaw;
+
+    let containerType: ContainerType;
+    if (!!kubernetes) {
+      containerType = 'Kubernetes';
+    } else if (!!container) {
+      containerType = 'Docker';
+    }
+
+    return {
+      agentName: agent?.name,
+      containerType,
+      cloudProvider: cloud?.provider,
+    };
+  });
 }
