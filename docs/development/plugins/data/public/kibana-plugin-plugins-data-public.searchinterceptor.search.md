@@ -9,7 +9,9 @@ Searches using the given `search` method. Overrides the `AbortSignal` with one t
 <b>Signature:</b>
 
 ```typescript
-search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
+search(request: IKibanaSearchRequest, options?: ISearchOptions, metadata?: {
+        indexPattern: IndexPattern;
+    }): Observable<IKibanaSearchResponse>;
 ```
 
 ## Parameters
@@ -18,6 +20,7 @@ search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKib
 |  --- | --- | --- |
 |  request | <code>IKibanaSearchRequest</code> |  |
 |  options | <code>ISearchOptions</code> |  |
+|  metadata | <code>{</code><br/><code>        indexPattern: IndexPattern;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 
