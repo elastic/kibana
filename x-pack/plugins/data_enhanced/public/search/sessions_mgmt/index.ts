@@ -56,7 +56,7 @@ export function registerSearchSessionsMgmt(
   services.management.sections.section.kibana.registerApp({
     id: APP.id,
     title: APP.getI18nName(),
-    order: 2,
+    order: 1.75,
     mount: async (params) => {
       const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
       const mgmtApp = new MgmtApp(coreSetup, config, params, services);

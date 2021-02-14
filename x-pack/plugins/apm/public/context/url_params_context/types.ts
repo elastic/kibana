@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { LocalUIFilterName } from '../../../common/ui_filter';
 
 export type IUrlParams = {
@@ -29,7 +30,7 @@ export type IUrlParams = {
   pageSize?: number;
   searchTerm?: string;
   percentile?: number;
-  latencyAggregationType?: string;
+  latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
   comparisonType?: string;
 } & Partial<Record<LocalUIFilterName, string>>;
