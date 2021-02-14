@@ -159,14 +159,17 @@ export const ResultsLinks: FC<Props> = ({
   }, [duration]);
 
   useEffect(() => {
+    // Update the global time range from known timeFieldName if stats is available
     if (
       fieldStats &&
       typeof fieldStats === 'object' &&
       timeFieldName !== undefined &&
-      fieldStats.hasOwnProperty(timeFieldName)
+      fieldStats.hasOwnProperty(timeFieldName) &&
+      fieldStats[timeFieldName].earliest !== undefined &&
+      fieldStats[timeFieldName].latest !== undefined
     ) {
       setGlobalState({
-        time: { from: fieldStats[timeFieldName].earliest, to: fieldStats[timeFieldName].latest },
+        time: { from: fieldStats[timeFieldName].earliest!, to: fieldStats[timeFieldName].latest! },
       });
     }
   }, [timeFieldName, fieldStats]);
