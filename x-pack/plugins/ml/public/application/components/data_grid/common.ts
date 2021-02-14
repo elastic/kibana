@@ -46,7 +46,7 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { RuntimeMappings } from '../../../../common/types/fields';
-import { isRecord } from '../../../../common/util/record_utils';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 
@@ -101,14 +101,14 @@ export const getRuntimeFieldsMapping = (
   const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
   let combinedRuntimeMappings: RuntimeMappings = {};
 
-  if (isRecord(ipRuntimeMappings)) {
+  if (isPopulatedObject(ipRuntimeMappings)) {
     indexPatternFields.forEach((ipField) => {
       if (ipRuntimeMappings.hasOwnProperty(ipField)) {
         combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
       }
     });
   }
-  if (isRecord(clonedRuntimeMappings)) {
+  if (isPopulatedObject(clonedRuntimeMappings)) {
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...clonedRuntimeMappings };
   }
   return Object.keys(combinedRuntimeMappings).length > 0

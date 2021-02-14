@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const isRecord = <T = Record<string, any>>(arg: any): arg is T => {
+export const isPopulatedObject = <T = Record<string, any>>(arg: any): arg is T => {
   return typeof arg === 'object' && arg !== null && Object.keys(arg).length > 0;
 };

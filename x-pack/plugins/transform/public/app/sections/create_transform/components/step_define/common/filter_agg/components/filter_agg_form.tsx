@@ -16,7 +16,7 @@ import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
 import type { RuntimeMappings } from '../../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import { isRecord } from '../../../../../../../common/utils/record_utils';
+import { isPopulatedObject } from '../../../../../../../common/utils/object_utils';
 
 /**
  * Resolves supported filters for provided field.
@@ -31,7 +31,7 @@ export function getSupportedFilterAggs(
   if (indexPatternField !== undefined) {
     return [...commonFilterAggs, ...filterAggsFieldSupport[indexPatternField.type]];
   }
-  if (isRecord(runtimeMappings) && runtimeMappings.hasOwnProperty(fieldName)) {
+  if (isPopulatedObject(runtimeMappings) && runtimeMappings.hasOwnProperty(fieldName)) {
     const runtimeField = runtimeMappings[fieldName];
     return [
       ...commonFilterAggs,

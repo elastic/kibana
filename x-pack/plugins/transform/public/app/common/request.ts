@@ -20,7 +20,7 @@ import type {
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
-import { isRecord } from './utils/record_utils';
+import { isPopulatedObject } from './utils/object_utils';
 import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export interface SimpleQuery {
@@ -66,7 +66,7 @@ export function getCombinedRuntimeMappings(
   let combinedRuntimeMappings = {};
 
   // Use runtime field mappings defined inline from API
-  if (isRecord(runtimeMappings)) {
+  if (isPopulatedObject(runtimeMappings)) {
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
 
@@ -76,7 +76,7 @@ export function getCombinedRuntimeMappings(
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
   }
 
-  if (isRecord(combinedRuntimeMappings)) {
+  if (isPopulatedObject(combinedRuntimeMappings)) {
     return combinedRuntimeMappings;
   }
   return undefined;
@@ -94,7 +94,7 @@ export function getPreviewTransformRequestBody(
     source: {
       index,
       ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
-      ...(isRecord(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
     ...(partialRequest ?? {}),
   };

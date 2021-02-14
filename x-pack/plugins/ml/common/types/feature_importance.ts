@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRecord } from '../../common/util/record_utils';
+import { isPopulatedObject } from '../util/object_utils';
 
 export type FeatureImportanceClassName = string | number | boolean;
 
@@ -89,7 +89,7 @@ export function isClassificationFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is ClassificationFeatureImportanceBaseline {
   return (
-    isRecord(baselineData) &&
+    isPopulatedObject(baselineData) &&
     baselineData.hasOwnProperty('classes') &&
     Array.isArray(baselineData.classes)
   );
@@ -98,5 +98,5 @@ export function isClassificationFeatureImportanceBaseline(
 export function isRegressionFeatureImportanceBaseline(
   baselineData: any
 ): baselineData is RegressionFeatureImportanceBaseline {
-  return isRecord(baselineData) && baselineData.hasOwnProperty('baseline');
+  return isPopulatedObject(baselineData) && baselineData.hasOwnProperty('baseline');
 }

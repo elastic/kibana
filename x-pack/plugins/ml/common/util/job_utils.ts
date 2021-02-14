@@ -28,7 +28,7 @@ import {
   getDatafeedAggregations,
 } from './datafeed_utils';
 import { findAggField } from './validation_utils';
-import { isRecord } from '../../common/util/record_utils';
+import { isPopulatedObject } from './object_utils';
 
 export interface ValidationResults {
   valid: boolean;
@@ -52,9 +52,9 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
 }
 
 export function hasRuntimeMappings(job: CombinedJob): boolean {
-  const hasDatafeed = isRecord(job.datafeed_config);
+  const hasDatafeed = isPopulatedObject(job.datafeed_config);
   if (hasDatafeed) {
-    return isRecord(job.datafeed_config.runtime_mappings);
+    return isPopulatedObject(job.datafeed_config.runtime_mappings);
   }
   return false;
 }
@@ -120,7 +120,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    const hasDatafeed = isRecord(job.datafeed_config);
+    const hasDatafeed = isPopulatedObject(job.datafeed_config);
     if (hasDatafeed) {
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);

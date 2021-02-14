@@ -21,7 +21,7 @@ import { CombinedJob } from '../../../../../../../../common/types/anomaly_detect
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { mlJobService } from '../../../../../../services/job_service';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_utils';
-import { isRecord } from '../../../../../../../../common/util/record_utils';
+import { isPopulatedObject } from '../../../../../../../../common/util/object_utils';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
@@ -65,7 +65,7 @@ export const DatafeedPreview: FC<{
         const resp = await mlJobService.searchPreview(combinedJob);
         let data = resp.hits.hits;
         // the first item under aggregations can be any name
-        if (isRecord(resp.aggregations)) {
+        if (isPopulatedObject(resp.aggregations)) {
           const accessor = Object.keys(resp.aggregations)[0];
           data = resp.aggregations[accessor].buckets.slice(0, ML_DATA_PREVIEW_COUNT);
         }

@@ -47,7 +47,7 @@ import {
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
 import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
-import { isRecord } from '../../../../common/utils/record_utils';
+import { isPopulatedObject } from '../../../../common/utils/object_utils';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -201,7 +201,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
           {
             title: indexPatternName,
             timeFieldName,
-            ...(isRecord(runtimeMappings) ? { runtimeFieldMap: runtimeMappings } : {}),
+            ...(isPopulatedObject(runtimeMappings) ? { runtimeFieldMap: runtimeMappings } : {}),
           },
           false,
           true
