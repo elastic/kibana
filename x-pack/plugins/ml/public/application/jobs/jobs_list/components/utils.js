@@ -380,7 +380,7 @@ export function checkForAutoStartDatafeed() {
     mlJobService.tempJobCloningObjects.datafeed = undefined;
     mlJobService.tempJobCloningObjects.createdBy = undefined;
 
-    const hasDatafeed = isPopulatedObject(mlJobService.tempJobCloningObjects.datafeed);
+    const hasDatafeed = isPopulatedObject(datafeed);
     const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
     return {
       id: job.job_id,

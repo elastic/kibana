@@ -57,7 +57,6 @@ export const settingsSchema = schema.object({
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
 });
 
-// ['keyword', 'long', 'double', 'date', 'ip', 'boolean']
 export const runtimeMappingsSchema = schema.maybe(
   schema.recordOf(
     schema.string(),
