@@ -35,6 +35,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
   const [discoverLink, setDiscoverLink] = useState('');
   const {
     services: {
+      application: { capabilities },
       share: {
         urlGenerators: { getUrlGenerator },
       },
@@ -66,6 +67,11 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
 
     const indexPatternId = indexPattern.id;
     const getDiscoverUrl = async (): Promise<void> => {
+      const isDiscoverAvailable = capabilities.discover?.show ?? false;
+      if (!isDiscoverAvailable) {
+        return;
+      }
+
       const state: DiscoverUrlGeneratorState = {
         indexPatternId,
       };
