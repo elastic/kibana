@@ -8,13 +8,15 @@
 
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { IndexPattern } from '..';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 >(
   request: SearchStrategyRequest,
-  options?: ISearchOptions
+  options?: ISearchOptions,
+  metadata?: { indexPattern: IndexPattern }
 ) => Observable<SearchStrategyResponse>;
 
 export type ISearchCancelGeneric = (id: string, options?: ISearchOptions) => Promise<void>;

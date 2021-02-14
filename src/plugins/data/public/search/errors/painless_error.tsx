@@ -14,11 +14,14 @@ import { ApplicationStart } from 'kibana/public';
 import { IEsError, isEsError } from './types';
 import { EsError } from './es_error';
 import { getRootCause } from './utils';
+import { IndexPattern } from '../..';
 
 export class PainlessError extends EsError {
   painlessStack?: string;
-  constructor(err: IEsError) {
+  indexPattern?: IndexPattern;
+  constructor(err: IEsError, indexPattern?: IndexPattern) {
     super(err);
+    this.indexPattern = indexPattern;
   }
 
   public getErrorMessage(application: ApplicationStart) {
@@ -38,7 +41,7 @@ export class PainlessError extends EsError {
     // fallback, show ES stacktrace
     const painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
 
-    const indexPatternId = this?.attributes?.index_pattern?.id;
+    const indexPatternId = this?.indexPattern?.id;
     return (
       <>
         <EuiText size="s" data-test-subj="painlessScript">
@@ -46,7 +49,7 @@ export class PainlessError extends EsError {
             defaultMessage:
               'Error executing runtime field or scripted field on index pattern {indexPatternName}',
             values: {
-              indexPatternName: this?.attributes?.index_pattern?.title,
+              indexPatternName: this?.indexPattern?.title,
             },
           })}
         </EuiText>

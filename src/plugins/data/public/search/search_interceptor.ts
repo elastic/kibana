@@ -13,7 +13,12 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { IKibanaSearchRequest, IKibanaSearchResponse, ISearchOptions } from '../../common';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+  IndexPattern,
+} from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
   SearchTimeoutError,
@@ -94,7 +99,8 @@ export class SearchInterceptor {
   protected handleSearchError(
     e: KibanaServerError | AbortError,
     timeoutSignal: AbortSignal,
-    options?: ISearchOptions
+    options?: ISearchOptions,
+    indexPattern?: IndexPattern
   ): Error {
     if (timeoutSignal.aborted || e.message === 'Request timed out') {
       // Handle a client or a server side timeout
@@ -109,7 +115,7 @@ export class SearchInterceptor {
       return e;
     } else if (isEsError(e)) {
       if (isPainlessError(e)) {
-        return new PainlessError(e);
+        return new PainlessError(e, indexPattern);
       } else {
         return new EsError(e);
       }
@@ -230,7 +236,8 @@ export class SearchInterceptor {
    */
   public search(
     request: IKibanaSearchRequest,
-    options?: ISearchOptions
+    options?: ISearchOptions,
+    metadata?: { indexPattern: IndexPattern }
   ): Observable<IKibanaSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
@@ -244,7 +251,9 @@ export class SearchInterceptor {
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
       return from(this.runSearch(request, { ...options, abortSignal: combinedSignal })).pipe(
         catchError((e: Error | AbortError) => {
-          return throwError(this.handleSearchError(e, timeoutSignal, options));
+          return throwError(
+            this.handleSearchError(e, timeoutSignal, options, metadata?.indexPattern)
+          );
         }),
         finalize(() => {
           this.pendingCount$.next(this.pendingCount$.getValue() - 1);
