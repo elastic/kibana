@@ -142,7 +142,6 @@ describe('buildBulkBody', () => {
         threshold_result: {
           terms: [
             {
-              field: '',
               value: 'abcd',
             },
           ],

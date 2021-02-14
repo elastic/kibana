@@ -91,7 +91,6 @@ const getTransformedHits = (
             value: ruleId,
           },
         ],
-        // TODO: cardinality?
         count: totalResults,
       },
     };

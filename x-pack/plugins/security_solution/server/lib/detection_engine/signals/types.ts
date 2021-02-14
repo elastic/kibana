@@ -93,8 +93,9 @@ export interface SignalSource {
     };
     // signal.depth doesn't exist on pre-7.10 signals
     depth?: number;
+    original_time?: number;
+    threshold_result?: ThresholdResult;
   };
-  threshold_result?: ThresholdResult;
 }
 
 export interface BulkItem {

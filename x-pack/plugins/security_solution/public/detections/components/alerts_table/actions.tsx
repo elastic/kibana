@@ -131,34 +131,40 @@ export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
   nonEcsData: TimelineNonEcsData[]
 ): DataProvider[] => {
-  const aggregationField = ecsData.signal?.rule?.threshold?.field!;
-  const aggregationValue =
-    get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
-  const dataProviderValue = Array.isArray(aggregationValue)
-    ? aggregationValue[0]
-    : aggregationValue;
+  const threshold = ecsData.signal?.rule?.threshold;
+  const aggField = Array.isArray(threshold) ? threshold[0].field : [];
+  const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
 
-  if (!dataProviderValue) {
-    return [];
-  }
+  return aggregationFields.reduce<DataProvider[]>((acc, aggregationField) => {
+    const aggregationValue =
+      get(aggregationField, ecsData) ?? find(['field', aggregationField], nonEcsData)?.value;
+    const dataProviderValue = Array.isArray(aggregationValue)
+      ? aggregationValue[0]
+      : aggregationValue;
 
-  const aggregationFieldId = aggregationField.replace('.', '-');
+    if (!dataProviderValue) {
+      return acc;
+    }
 
-  return [
-    {
-      and: [],
-      id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
-      name: aggregationField,
-      enabled: true,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field: aggregationField,
-        value: dataProviderValue,
-        operator: ':',
+    const aggregationFieldId = aggregationField.replace('.', '-');
+
+    return [
+      ...acc,
+      {
+        and: [],
+        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-${aggregationFieldId}-${dataProviderValue}`,
+        name: aggregationField,
+        enabled: true,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: aggregationField,
+          value: dataProviderValue,
+          operator: ':',
+        },
       },
-    },
-  ];
+    ];
+  }, []);
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
