@@ -29,6 +29,8 @@ import {
   ASYNC_LOADING_PROGRESS,
   RULE_AUTO_REFRESH_IDLE_MODAL,
   RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
+  FIVE_ROWS,
+  SECOND_PAGE_SELECTOR,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -151,4 +153,13 @@ export const resetAllRulesIdleModalTimeout = () => {
   cy.tick(2000000);
   cy.window().trigger('mousemove', { force: true });
   cy.tick(700000);
+};
+
+export const changeToFiveRowsPerPage = () => {
+  cy.get(PAGINATION_POPOVER_BTN).click({ force: true });
+  cy.get(FIVE_ROWS).click();
+};
+
+export const goToSecondPage = () => {
+  cy.get(SECOND_PAGE_SELECTOR).last().click({ force: true });
 };
