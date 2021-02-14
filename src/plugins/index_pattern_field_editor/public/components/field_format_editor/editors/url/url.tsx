@@ -22,9 +22,6 @@ import { DefaultFormatEditor, FormatEditorProps } from '../default';
 
 import { FormatEditorSamples } from '../../samples';
 
-import { LabelTemplateFlyout } from './label_template_flyout';
-
-import { UrlTemplateFlyout } from './url_template_flyout';
 import { context as contextType } from '../../../../../../kibana_react/public';
 
 interface OnChangeParam {
@@ -106,32 +103,6 @@ export class UrlFormatEditor extends DefaultFormatEditor<
     this.onChange(params);
   };
 
-  showUrlTemplateHelp = () => {
-    this.setState({
-      showLabelTemplateHelp: false,
-      showUrlTemplateHelp: true,
-    });
-  };
-
-  hideUrlTemplateHelp = () => {
-    this.setState({
-      showUrlTemplateHelp: false,
-    });
-  };
-
-  showLabelTemplateHelp = () => {
-    this.setState({
-      showLabelTemplateHelp: true,
-      showUrlTemplateHelp: false,
-    });
-  };
-
-  hideLabelTemplateHelp = () => {
-    this.setState({
-      showLabelTemplateHelp: false,
-    });
-  };
-
   renderWidthHeightParameters = () => {
     const width = this.sanitizeNumericValue(this.props.formatParams.width);
     const height = this.sanitizeNumericValue(this.props.formatParams.height);
@@ -176,14 +147,6 @@ export class UrlFormatEditor extends DefaultFormatEditor<
 
     return (
       <Fragment>
-        <LabelTemplateFlyout
-          isVisible={this.state.showLabelTemplateHelp}
-          onClose={this.hideLabelTemplateHelp}
-        />
-        <UrlTemplateFlyout
-          isVisible={this.state.showUrlTemplateHelp}
-          onClose={this.hideUrlTemplateHelp}
-        />
         <EuiFormRow
           label={
             <FormattedMessage id="indexPatternFieldEditor.url.typeLabel" defaultMessage="Type" />
@@ -240,7 +203,10 @@ export class UrlFormatEditor extends DefaultFormatEditor<
             />
           }
           helpText={
-            <EuiLink onClick={this.showUrlTemplateHelp}>
+            <EuiLink
+              target="_blank"
+              href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
+            >
               <FormattedMessage
                 id="indexPatternFieldEditor.url.template.helpLinkText"
                 defaultMessage="URL template help"
@@ -267,7 +233,10 @@ export class UrlFormatEditor extends DefaultFormatEditor<
             />
           }
           helpText={
-            <EuiLink onClick={this.showLabelTemplateHelp}>
+            <EuiLink
+              target="_blank"
+              href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
+            >
               <FormattedMessage
                 id="indexPatternFieldEditor.url.labelTemplateHelpText"
                 defaultMessage="Label template help"

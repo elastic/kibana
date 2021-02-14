@@ -9,7 +9,7 @@ This editor can be used to
 
 ## How to use
 
-You fist need to add in your kibana.json the "`indexPatternFieldEditor`" plugin as a required dependency of your plugin.
+You first need to add in your kibana.json the "`indexPatternFieldEditor`" plugin as a required dependency of your plugin.
 
 You will then receive in the start contract of the indexPatternFieldEditor plugin the following API:
 
