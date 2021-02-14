@@ -150,6 +150,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                   </EuiText>
                   <EuiSpacer size="s" />
                   <EuiButton
+                    style={{ width: 'fit-content' }}
                     size="s"
                     fill
                     onClick={applyChanges}
