@@ -69,7 +69,10 @@ export function getPivotDropdownOptions(
 
   const ignoreFieldNames = ['_id', '_index', '_type'];
   const indexPatternFields = indexPattern.fields
-    .filter((field) => field.aggregatable === true && !ignoreFieldNames.includes(field.name))
+    .filter(
+      (field) =>
+        field.aggregatable === true && !ignoreFieldNames.includes(field.name) && !field.runtimeField
+    )
     .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
   // Support for runtime_mappings that are defined by queries
