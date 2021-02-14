@@ -22,32 +22,48 @@ export class PainlessError extends EsError {
   }
 
   public getErrorMessage(application: ApplicationStart) {
-    function onClick() {
+    function onClick(indexPatternId?: string) {
       application.navigateToApp('management', {
-        path: `/kibana/indexPatterns`,
+        path: `/kibana/indexPatterns${indexPatternId ? `/patterns/${indexPatternId}` : ''}`,
       });
     }
 
     const rootCause = getRootCause(this.err);
+    const scriptFromStackTrace = rootCause?.script_stack
+      ? rootCause?.script_stack?.slice(-2).join('\n')
+      : undefined;
+    // if the error has been properly processed it will highlight where it occurred.
+    const hasScript = rootCause?.script_stack?.slice(-1)[0]?.indexOf('HERE') || -1 >= 0;
+    const humanReadableError = rootCause?.caused_by?.reason;
+    // fallback, show ES stacktrace
     const painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
 
+    const indexPatternId = this?.attributes?.index_pattern?.id;
     return (
       <>
-        <EuiText data-test-subj="painlessScript">
+        <EuiText size="s" data-test-subj="painlessScript">
           {i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
-            defaultMessage: "Error executing Painless script: '{script}'",
-            values: { script: rootCause?.script },
+            defaultMessage:
+              'Error executing runtime field or scripted field on index pattern {indexPatternName}',
+            values: {
+              indexPatternName: this?.attributes?.index_pattern?.title,
+            },
           })}
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="s" />
-        {painlessStack ? (
+        {scriptFromStackTrace || painlessStack ? (
           <EuiCodeBlock data-test-subj="painlessStackTrace" isCopyable={true} paddingSize="s">
-            {painlessStack}
+            {hasScript ? scriptFromStackTrace : painlessStack}
           </EuiCodeBlock>
         ) : null}
+        {humanReadableError ? (
+          <EuiText data-test-subj="painlessHumanReadableError">{humanReadableError}</EuiText>
+        ) : null}
+        <EuiSpacer size="s" />
+        <EuiSpacer size="s" />
         <EuiText textAlign="right">
-          <EuiButton color="danger" onClick={onClick} size="s">
+          <EuiButton color="danger" onClick={() => onClick(indexPatternId)} size="s">
             <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />
           </EuiButton>
         </EuiText>
