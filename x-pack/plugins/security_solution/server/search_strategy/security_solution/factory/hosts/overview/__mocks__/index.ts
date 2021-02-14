@@ -127,6 +127,7 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             aggregations: {
               auditd_count: { filter: { term: { 'event.module': 'auditd' } } },
@@ -299,7 +300,6 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,
@@ -339,6 +339,7 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignoreUnavailable: true,
+  track_total_hits: false,
   body: {
     aggregations: {
       auditd_count: { filter: { term: { 'event.module': 'auditd' } } },
@@ -511,6 +512,5 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: false,
   },
 };

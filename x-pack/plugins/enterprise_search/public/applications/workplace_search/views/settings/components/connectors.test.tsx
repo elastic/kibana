@@ -8,10 +8,10 @@
 import '../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../../__mocks__';
-
 import { configuredSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { Loading } from '../../../../shared/loading';

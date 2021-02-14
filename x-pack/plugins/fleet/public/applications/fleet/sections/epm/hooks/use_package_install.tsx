@@ -90,9 +90,8 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         if (fromUpdate) {
-          const settingsPath = getPath('integration_details', {
+          const settingsPath = getPath('integration_details_settings', {
             pkgkey: `${name}-${version}`,
-            panel: 'settings',
           });
           history.push(settingsPath);
         }

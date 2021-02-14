@@ -48,6 +48,14 @@ export function mlNodesAvailable() {
   return mlNodeCount !== 0 || lazyMlNodeCount !== 0;
 }
 
+export function currentMlNodesAvailable() {
+  return mlNodeCount !== 0;
+}
+
+export function lazyMlNodesAvailable() {
+  return lazyMlNodeCount !== 0;
+}
+
 export function permissionToViewMlNodeCount() {
   return userHasPermissionToViewMlNodeCount;
 }

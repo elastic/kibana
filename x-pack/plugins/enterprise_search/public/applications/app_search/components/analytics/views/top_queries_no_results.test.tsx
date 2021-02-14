@@ -8,9 +8,11 @@
 import { setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { AnalyticsTable } from '../components';
+
 import { TopQueriesNoResults } from './';
 
 describe('TopQueriesNoResults', () => {

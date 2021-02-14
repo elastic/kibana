@@ -22,10 +22,18 @@ export function shipCiStatsCli() {
         throw createFlagError('expected --metrics to be a string');
       }
 
+      const maybeFail = (message: string) => {
+        const error = createFailError(message);
+        if (process.env.IGNORE_SHIP_CI_STATS_ERROR === 'true') {
+          error.exitCode = 0;
+        }
+        return error;
+      };
+
       const reporter = CiStatsReporter.fromEnv(log);
 
       if (!reporter.isEnabled()) {
-        throw createFailError('unable to initilize the CI Stats reporter');
+        throw maybeFail('unable to initilize the CI Stats reporter');
       }
 
       for (const path of metricPaths) {
@@ -35,7 +43,7 @@ export function shipCiStatsCli() {
         if (await reporter.metrics(JSON.parse(json))) {
           log.success('shipped metrics from', path);
         } else {
-          throw createFailError('failed to ship metrics');
+          throw maybeFail('failed to ship metrics');
         }
       }
     },

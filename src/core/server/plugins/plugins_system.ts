@@ -105,11 +105,18 @@ export class PluginsSystem {
             `Plugin ${pluginName} is using asynchronous setup lifecycle. Asynchronous plugins support will be removed in a later version.`
           );
         }
-        contract = await withTimeout({
+        const contractMaybe = await withTimeout<any>({
           promise: contractOrPromise,
-          timeout: 10 * Sec,
-          errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+          timeoutMs: 10 * Sec,
         });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
       } else {
         contract = contractOrPromise;
       }
@@ -154,11 +161,18 @@ export class PluginsSystem {
             `Plugin ${pluginName} is using asynchronous start lifecycle. Asynchronous plugins support will be removed in a later version.`
           );
         }
-        contract = await withTimeout({
+        const contractMaybe = await withTimeout({
           promise: contractOrPromise,
-          timeout: 10 * Sec,
-          errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+          timeoutMs: 10 * Sec,
         });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
       } else {
         contract = contractOrPromise;
       }
@@ -181,7 +195,15 @@ export class PluginsSystem {
       const pluginName = this.satupPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
-      await this.plugins.get(pluginName)!.stop();
+
+      const resultMaybe = await withTimeout({
+        promise: this.plugins.get(pluginName)!.stop(),
+        timeoutMs: 30 * Sec,
+      });
+
+      if (resultMaybe?.timedout) {
+        this.log.warn(`"${pluginName}" plugin didn't stop in 30sec., move on to the next.`);
+      }
     }
   }
 

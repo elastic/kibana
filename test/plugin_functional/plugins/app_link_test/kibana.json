@@ -1,5 +1,5 @@
 {
-  "id": "app_link_test",
+  "id": "appLinkTest",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "server": false,

@@ -17,6 +17,7 @@ jest.mock('../../app_logic', () => ({
 import { nextTick } from '@kbn/test/jest';
 
 import { AppLogic } from '../../app_logic';
+
 import { ApiTokenTypes } from './constants';
 
 import { CredentialsLogic } from './credentials_logic';
