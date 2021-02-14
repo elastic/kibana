@@ -31,7 +31,8 @@ export interface SearchSessionIndicatorProps {
   onCancel?: () => void;
   viewSearchSessionsLink?: string;
   onSaveResults?: () => void;
-
+  managementDisabled?: boolean;
+  managementDisabledReasonText?: string;
   saveDisabled?: boolean;
   saveDisabledReasonText?: string;
 
@@ -78,17 +79,22 @@ const ContinueInBackgroundButton = ({
 const ViewAllSearchSessionsButton = ({
   viewSearchSessionsLink = 'management/kibana/search_sessions',
   buttonProps = {},
+  managementDisabled,
+  managementDisabledReasonText,
 }: ActionButtonProps) => (
-  <EuiButtonEmpty
-    href={viewSearchSessionsLink}
-    data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
-    {...buttonProps}
-  >
-    <FormattedMessage
-      id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
-      defaultMessage="Manage sessions"
-    />
-  </EuiButtonEmpty>
+  <EuiToolTip content={managementDisabledReasonText}>
+    <EuiButtonEmpty
+      href={viewSearchSessionsLink}
+      data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
+      isDisabled={managementDisabled}
+      {...buttonProps}
+    >
+      <FormattedMessage
+        id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
+        defaultMessage="Manage sessions"
+      />
+    </EuiButtonEmpty>
+  </EuiToolTip>
 );
 
 const SaveButton = ({

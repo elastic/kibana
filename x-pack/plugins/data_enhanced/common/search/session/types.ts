@@ -57,6 +57,12 @@ export interface SearchSessionSavedObjectAttributes {
    * This value is true if the session was actively stored by the user. If it is false, the session may be purged by the system.
    */
   persisted: boolean;
+  /**
+   * The realm type/name & username uniquely identifies the user who created this search session
+   */
+  realmType?: string;
+  realmName?: string;
+  username?: string;
 }
 
 export interface SearchSessionRequestInfo {
