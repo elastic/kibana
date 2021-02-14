@@ -32,6 +32,7 @@ const initialState: State = {
   lastUpdated: 0,
   showIdleModal: false,
   isRefreshOn: false,
+  refreshing: false,
 };
 
 describe('allRulesReducer', () => {

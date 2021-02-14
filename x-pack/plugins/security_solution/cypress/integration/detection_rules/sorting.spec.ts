@@ -12,6 +12,9 @@ import {
   SECOND_RULE,
   RULE_AUTO_REFRESH_IDLE_MODAL,
   FOURTH_RULE,
+  RULES_TABLE,
+  FIRST_PAGE_SELECTOR,
+  SECOND_PAGE_SELECTOR,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -21,9 +24,11 @@ import {
 } from '../../tasks/alerts';
 import {
   activateRule,
+  changeToFiveRowsPerPage,
   checkAllRulesIdleModal,
   checkAutoRefresh,
   dismissAllRulesIdleModal,
+  goToSecondPage,
   resetAllRulesIdleModalTimeout,
   sortByActivatedRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
@@ -86,6 +91,41 @@ describe('Alerts detection rules', () => {
             cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
           });
       });
+  });
+
+  it('Pagination updates page number and results', () => {
+    createCustomRule({ ...newRule, name: 'Test a rule' }, '5');
+    createCustomRule({ ...newRule, name: 'Not same as first rule' }, '6');
+
+    goToManageAlertsDetectionRules();
+    changeToFiveRowsPerPage();
+
+    cy.get(RULES_TABLE)
+      .find(FIRST_PAGE_SELECTOR)
+      .should('have.class', 'euiPaginationButton-isActive');
+
+    cy.get(RULES_TABLE)
+      .find(RULE_NAME)
+      .first()
+      .invoke('text')
+      .then((ruleNameFirstPage) => {
+        goToSecondPage();
+        cy.wait(1500);
+        cy.get(RULES_TABLE)
+          .find(RULE_NAME)
+          .first()
+          .invoke('text')
+          .should((ruleNameSecondPage) => {
+            expect(ruleNameFirstPage).not.to.eq(ruleNameSecondPage);
+          });
+      });
+
+    cy.get(RULES_TABLE)
+      .find(FIRST_PAGE_SELECTOR)
+      .should('not.have.class', 'euiPaginationButton-isActive');
+    cy.get(RULES_TABLE)
+      .find(SECOND_PAGE_SELECTOR)
+      .should('have.class', 'euiPaginationButton-isActive');
   });
 
   // FIXME: UI hangs on loading
