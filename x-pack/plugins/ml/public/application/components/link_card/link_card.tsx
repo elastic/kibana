@@ -31,7 +31,7 @@ interface Props {
 
 // Component for rendering a card which links to the Create Job page, displaying an
 // icon, card title, description and link.
-export const CreateJobLinkCard: FC<Props> = ({
+export const LinkCard: FC<Props> = ({
   icon,
   iconAreaLabel,
   title,

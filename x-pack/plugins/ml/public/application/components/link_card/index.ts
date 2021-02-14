@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CreateJobLinkCard } from './create_job_link_card';
+export { LinkCard } from './link_card';
