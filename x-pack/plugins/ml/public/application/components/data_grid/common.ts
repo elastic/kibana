@@ -40,12 +40,13 @@ import {
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getNestedProperty, isRecord } from '../../util/object_utils';
+import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { RuntimeMappings } from '../../../../common/types/fields';
+import { isRecord } from '../../../../common/util/record_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 
