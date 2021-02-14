@@ -456,18 +456,29 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
-      {unsupportedRuntimeFields && unsupportedRuntimeFields.length > 0 && (
+      {Array.isArray(unsupportedRuntimeFields) && unsupportedRuntimeFields.length > 0 && (
         <>
           <EuiCallOut size="s" color="warning">
             <FormattedMessage
-              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFields"
-              defaultMessage="The runtime fields {unsupportedRuntimeFields} are not supported for analysis."
+              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFieldsCallout"
+              defaultMessage="The runtime {runtimeFieldsCount, plural, one {field} other {fields}} {unsupportedRuntimeFields} {extraCountMsg} are not supported for analysis."
               values={{
+                runtimeFieldsCount: unsupportedRuntimeFields.length,
+                extraCountMsg:
+                  unsupportedRuntimeFields.length - 5 > 0 ? (
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.create.extraUnsupportedRuntimeFieldsMsg"
+                      defaultMessage="and {count} more"
+                      values={{
+                        count: unsupportedRuntimeFields.length - 5,
+                      }}
+                    />
+                  ) : (
+                    ''
+                  ),
                 unsupportedRuntimeFields:
                   unsupportedRuntimeFields.length > 5
-                    ? `${unsupportedRuntimeFields.slice(0, 5).join(', ')} ... (and ${
-                        unsupportedRuntimeFields.length
-                      } more)`
+                    ? unsupportedRuntimeFields.slice(0, 5).join(', ')
                     : unsupportedRuntimeFields.join(', '),
               }}
             />
