@@ -27,6 +27,7 @@ describe('PATCH comment', () => {
   });
 
   it(`Patch a comment`, async () => {
+    const commentID = 'mock-comment-1';
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
       method: 'patch',
@@ -36,7 +37,7 @@ describe('PATCH comment', () => {
       body: {
         type: CommentType.user,
         comment: 'Update my comment',
-        id: 'mock-comment-1',
+        id: commentID,
         version: 'WzEsMV0=',
       },
     });
@@ -50,12 +51,14 @@ describe('PATCH comment', () => {
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.comments[response.payload.comments.length - 1].comment).toEqual(
-      'Update my comment'
+    const updatedComment = response.payload.comments.find(
+      (comment: { id: string }) => comment.id === commentID
     );
+    expect(updatedComment.comment).toEqual('Update my comment');
   });
 
   it(`Patch an alert`, async () => {
+    const commentID = 'mock-comment-4';
     const request = httpServerMock.createKibanaRequest({
       path: CASE_COMMENTS_URL,
       method: 'patch',
@@ -66,7 +69,7 @@ describe('PATCH comment', () => {
         type: CommentType.alert,
         alertId: 'new-id',
         index: 'test-index',
-        id: 'mock-comment-4',
+        id: commentID,
         version: 'WzYsMV0=',
       },
     });
@@ -80,9 +83,10 @@ describe('PATCH comment', () => {
 
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload.comments[response.payload.comments.length - 1].alertId).toEqual(
-      'new-id'
+    const updatedComment = response.payload.comments.find(
+      (comment: { id: string }) => comment.id === commentID
     );
+    expect(updatedComment.alertId).toEqual('new-id');
   });
 
   it(`it throws when missing attributes: type user`, async () => {
