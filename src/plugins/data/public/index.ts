@@ -381,6 +381,7 @@ export {
   TimeoutErrorMode,
   PainlessError,
   noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
 } from './search';
 
 export type {
