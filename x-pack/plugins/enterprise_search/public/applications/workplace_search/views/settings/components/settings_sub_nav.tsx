@@ -7,10 +7,8 @@
 
 import React from 'react';
 
-import { NAV } from '../../../constants';
-
 import { SideNavLink } from '../../../../shared/layout';
-
+import { NAV } from '../../../constants';
 import {
   ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,

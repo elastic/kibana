@@ -16,7 +16,7 @@ export const i18nTexts = {
       'xpack.indexLifecycleMgmt.rollover.rolloverOffsetsPhaseTimingDescription',
       {
         defaultMessage:
-          'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
+          'How long it takes to reach the rollover criteria in the hot phase can vary.',
       }
     ),
     searchableSnapshotInHotPhase: {
@@ -195,7 +195,7 @@ export const i18nTexts = {
     descriptions: {
       hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescription', {
         defaultMessage:
-          'This phase is required. You are actively querying and writing to your index. For faster updates, you can roll over the index when it gets too big or too old.',
+          'You actively store and query data in the hot phase. All policies have a hot phase.',
       }),
       warm: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescription', {
         defaultMessage:

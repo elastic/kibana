@@ -15,6 +15,7 @@ import type { ConfigSchema } from '../../../config';
 import type { DataEnhancedStartDependencies } from '../../plugin';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../../../../../../src/plugins/data/public';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
@@ -38,7 +39,7 @@ export interface AppDependencies {
 }
 
 export const APP = {
-  id: 'search_sessions',
+  id: SEARCH_SESSIONS_MANAGEMENT_ID,
   getI18nName: (): string =>
     i18n.translate('xpack.data.mgmt.searchSessions.appTitle', {
       defaultMessage: 'Search Sessions',
@@ -55,7 +56,7 @@ export function registerSearchSessionsMgmt(
   services.management.sections.section.kibana.registerApp({
     id: APP.id,
     title: APP.getI18nName(),
-    order: 2,
+    order: 1.75,
     mount: async (params) => {
       const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
       const mgmtApp = new MgmtApp(coreSetup, config, params, services);

@@ -6,10 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { useValues, useActions } from 'kea';
 
-import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { LogRetentionLogic, LogRetentionMessage, LogRetentionOptions } from '../';
 
