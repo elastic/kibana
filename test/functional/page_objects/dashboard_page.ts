@@ -250,8 +250,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       log.debug('clickCancelOutOfEditMode');
       await testSubjects.click('dashboardViewOnlyMode');
       if (accept) {
-        await testSubjects.exists('dashboardDiscardConfirmKeep');
-        await testSubjects.click('dashboardDiscardConfirmKeep');
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmKeep');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmKeep');
+        }
       }
     }
 
@@ -259,8 +261,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       log.debug('clickDiscardChanges');
       await testSubjects.click('dashboardViewOnlyMode');
       if (accept) {
-        await testSubjects.exists('dashboardDiscardConfirmDiscard');
-        await testSubjects.click('dashboardDiscardConfirmDiscard');
+        const confirmation = await testSubjects.exists('dashboardDiscardConfirmDiscard');
+        if (confirmation) {
+          await testSubjects.click('dashboardDiscardConfirmDiscard');
+        }
       }
     }
 

@@ -262,7 +262,7 @@ export const leaveConfirmStrings = {
       defaultMessage: 'Leave edit mode with unsaved work?',
     }),
   getLeaveEditModeSubtitle: () =>
-    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesDescription', {
+    i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesOptionalDescription', {
       defaultMessage: `If you discard your changes, there's no getting them back.`,
     }),
   getDiscardTitle: () =>
