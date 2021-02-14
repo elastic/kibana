@@ -97,6 +97,10 @@ describe('ServiceNowSIR Fields', () => {
         text: 'Criminal activity/investigation',
       },
       { value: 'Denial of Service', text: 'Denial of Service' },
+      {
+        text: 'Software',
+        value: 'software',
+      },
     ]);
   });
 
@@ -176,7 +180,7 @@ describe('ServiceNowSIR Fields', () => {
       })
     );
 
-    const testers = ['priority', 'category', 'subcategory'];
+    const testers = ['priority', 'subcategory'];
     testers.forEach((subj) =>
       test(`${subj.toUpperCase()}`, async () => {
         await waitFor(() => {
@@ -194,5 +198,24 @@ describe('ServiceNowSIR Fields', () => {
         });
       })
     );
+
+    test('it should set subcategory to null when changing category', async () => {
+      const select = wrapper.find(EuiSelect).filter(`[data-test-subj="categorySelect"]`)!;
+      select.prop('onChange')!({
+        target: {
+          value: 'network',
+        },
+      } as React.ChangeEvent<HTMLSelectElement>);
+
+      wrapper.update();
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith({
+          ...fields,
+          subcategory: null,
+          category: 'network',
+        });
+      });
+    });
   });
 });

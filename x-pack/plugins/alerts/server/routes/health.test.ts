@@ -47,8 +47,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
 
     const [config] = router.get.mock.calls[0];
@@ -60,8 +59,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -85,12 +83,11 @@ describe('healthRoute', () => {
     `);
   });
 
-  it('evaluates whether Encrypted Saved Objects is using an ephemeral encryption key', async () => {
+  it('evaluates whether Encrypted Saved Objects is missing encryption key', async () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = true;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: false });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -129,8 +126,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -169,8 +165,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -209,8 +204,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -249,8 +243,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
@@ -291,8 +284,7 @@ describe('healthRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const licenseState = licenseStateMock.create();
-    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
-    encryptedSavedObjects.usingEphemeralEncryptionKey = false;
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
     healthRoute(router, licenseState, encryptedSavedObjects);
     const [, handler] = router.get.mock.calls[0];
 
