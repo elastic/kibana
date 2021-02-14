@@ -40,11 +40,12 @@ import {
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
-import { getNestedProperty } from '../../util/object_utils';
+import { getNestedProperty, isRecord } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeMappings } from '../../../../common/types/fields';
 
 export const INIT_MAX_COLUMNS = 10;
 
@@ -91,22 +92,22 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
  * @param clonedRuntimeMappings
  */
 export const getRuntimeFieldsMapping = (
-  indexPatternFields: string[],
-  indexPattern: IndexPattern,
-  clonedRuntimeMappings?: { [key: string]: RuntimeField }
+  indexPatternFields: string[] | undefined,
+  indexPattern: IndexPattern | undefined,
+  clonedRuntimeMappings?: RuntimeMappings
 ) => {
   if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
   const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
-  let combinedRuntimeMappings: { [ipField: string]: any } = {};
+  let combinedRuntimeMappings: RuntimeMappings = {};
 
-  if (typeof ipRuntimeMappings === 'object' && Object.keys(ipRuntimeMappings).length > 0) {
+  if (isRecord(ipRuntimeMappings)) {
     indexPatternFields.forEach((ipField) => {
       if (ipRuntimeMappings.hasOwnProperty(ipField)) {
         combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
       }
     });
   }
-  if (typeof clonedRuntimeMappings === 'object') {
+  if (isRecord(clonedRuntimeMappings)) {
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...clonedRuntimeMappings };
   }
   return Object.keys(combinedRuntimeMappings).length > 0

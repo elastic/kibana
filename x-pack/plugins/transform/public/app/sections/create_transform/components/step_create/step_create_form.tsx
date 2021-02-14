@@ -46,6 +46,8 @@ import {
   PutTransformsLatestRequestSchema,
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
+import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import { isRecord } from '../../../../common/utils/record_utils';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -189,14 +191,17 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const createKibanaIndexPattern = async () => {
       setLoading(true);
       const indexPatternName = transformConfig.dest.index;
-      const runtimeMappings = transformConfig.source.runtime_mappings;
+      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
+        string,
+        RuntimeField
+      >;
 
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
             title: indexPatternName,
             timeFieldName,
-            ...(typeof runtimeMappings === 'object' ? { runtimeFieldMap: runtimeMappings } : {}),
+            ...(isRecord(runtimeMappings) ? { runtimeFieldMap: runtimeMappings } : {}),
           },
           false,
           true

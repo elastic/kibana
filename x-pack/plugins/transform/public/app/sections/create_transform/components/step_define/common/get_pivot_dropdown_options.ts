@@ -26,6 +26,7 @@ import {
 import { getDefaultAggregationConfig } from './get_default_aggregation_config';
 import { getDefaultGroupByConfig } from './get_default_group_by_config';
 import type { Field, StepDefineExposedState } from './types';
+import { isRecord } from '../../../../../common/utils/record_utils';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
@@ -73,7 +74,7 @@ export function getPivotDropdownOptions(
 
   // Support for runtime_mappings that are defined by queries
   let runtimeFields: Field[] = [];
-  if (typeof runtimeMappings === 'object') {
+  if (isRecord(runtimeMappings)) {
     runtimeFields = Object.keys(runtimeMappings).map((fieldName) => {
       const field = runtimeMappings[fieldName];
       return { name: fieldName, type: getKibanaFieldTypeFromEsType(field.type) };
