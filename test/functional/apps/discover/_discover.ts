@@ -291,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('_score');
-        await PageObjects.discover.clickFieldSort('_score');
+        await PageObjects.discover.clickFieldSort('_score', 'Sort Low-High');
         const currentUrlWithScore = await browser.getCurrentUrl();
         expect(currentUrlWithScore).to.contain('_score');
         await PageObjects.discover.clickFieldListItemAdd('_score');
@@ -302,7 +302,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.clickFieldListItemAdd('referer');
-        await PageObjects.discover.clickFieldSort('referer');
+        await PageObjects.discover.clickFieldSort('referer', 'Sort A-Z');
         expect(await PageObjects.discover.getDocHeader()).to.have.string('Referer custom');
         expect(await PageObjects.discover.getAllFieldNames()).to.contain('Referer custom');
         const url = await browser.getCurrentUrl();

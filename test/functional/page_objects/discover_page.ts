@@ -261,8 +261,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.click(`field-${field}`);
     }
 
-    public async clickFieldSort(field: string) {
-      return await dataGrid.clickDocSortAsc(field);
+    public async clickFieldSort(field: string, text = 'Sort New-Old') {
+      await dataGrid.clickDocSortAsc(field, text);
       // return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
 

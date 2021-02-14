@@ -183,22 +183,22 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
-    public async clickDocSortAsc(field?: string) {
+    public async clickDocSortAsc(field?: string, sortText = 'Sort New-Old') {
       if (field) {
-        await testSubjects.click(`dataGridHeaderCellActionButton-${field}`);
-        return await find.clickByButtonText('Sort New-Old');
+        await testSubjects.click(`dataGridHeaderCell-${field}`);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
       }
-      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      return await find.clickByButtonText('Sort New-Old');
+      await find.clickByButtonText(sortText);
     }
 
-    public async clickDocSortDesc(field?: string) {
+    public async clickDocSortDesc(field?: string, sortText = 'Sort Old-New') {
       if (field) {
-        await testSubjects.click(`dataGridHeaderCellActionButton-${field}`);
-        return await find.clickByButtonText('Sort Old-New');
+        await testSubjects.click(`dataGridHeaderCell-${field}`);
+      } else {
+        await find.clickByCssSelector('.euiDataGridHeaderCell__button');
       }
-      await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      return await find.clickByButtonText('Sort Old-New');
+      await find.clickByButtonText(sortText);
     }
     public async getDetailsRow(): Promise<WebElementWrapper> {
       const detailRows = await this.getDetailsRows();
