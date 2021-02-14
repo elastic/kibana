@@ -52,6 +52,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
 import { registerMlAlerts } from './alerting/register_ml_alerts';
+import { FileUploadPluginStart } from '../../file_upload/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -63,6 +64,7 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   lens?: LensPublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  fileUpload: FileUploadPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -189,6 +191,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
+      fileUpload: deps.fileUpload,
     });
     registerMlAlerts(deps.triggersActionsUi.alertTypeRegistry);
     return {

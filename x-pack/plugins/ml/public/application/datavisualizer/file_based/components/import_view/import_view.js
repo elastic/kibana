@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { importerFactory } from './importer';
+import { getFileUpload } from '../../../../util/dependency_cache';
 import { ResultsLinks } from '../results_links';
 import { FilebeatConfigFlyout } from '../filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -222,7 +222,11 @@ export class ImportView extends Component {
                 }
 
                 if (success) {
-                  const importer = importerFactory(format, results, indexCreationSettings);
+                  const importer = await getFileUpload().importerFactory(format, {
+                    excludeLinesPattern: results.exclude_lines_pattern,
+                    multilineStartPattern: results.multiline_start_pattern,
+                    importConfig: indexCreationSettings,
+                  });
                   if (importer !== undefined) {
                     const readResp = importer.read(data, this.setReadProgress);
                     success = readResp.success;

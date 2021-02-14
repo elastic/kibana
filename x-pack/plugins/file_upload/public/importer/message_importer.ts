@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import { Importer, ImportConfig, CreateDocsResponse } from './importer';
-import { FindFileStructureResponse } from '../../../../../../../common/types/file_datavisualizer';
-import { Doc } from '../../../../../../../../file_upload/common';
+import { Importer } from './importer';
+import { Doc } from '../../common';
+import { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {
   private _excludeLinesRegex: RegExp | null;
   private _multilineStartRegex: RegExp | null;
 
-  constructor(results: FindFileStructureResponse, settings: ImportConfig) {
-    super(settings);
+  constructor(options: ImportFactoryOptions) {
+    super(options.importConfig);
 
     this._excludeLinesRegex =
-      results.exclude_lines_pattern === undefined
-        ? null
-        : new RegExp(results.exclude_lines_pattern);
+      options.excludeLinesPattern === undefined ? null : new RegExp(options.excludeLinesPattern);
     this._multilineStartRegex =
-      results.multiline_start_pattern === undefined
+      options.multilineStartPattern === undefined
         ? null
-        : new RegExp(results.multiline_start_pattern);
+        : new RegExp(options.multilineStartPattern);
   }
 
   // split the text into an array of lines by looking for newlines.

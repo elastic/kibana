@@ -7,14 +7,9 @@
 
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
-import { ImportConfig } from './importer';
-import { FindFileStructureResponse } from '../../../../../../../common/types/file_datavisualizer';
+import { ImportFactoryOptions } from './types';
 
-export function importerFactory(
-  format: string,
-  results: FindFileStructureResponse,
-  settings: ImportConfig
-) {
+export function importerFactory(format: string, options: ImportFactoryOptions) {
   switch (format) {
     // delimited and semi-structured text are both handled by splitting the
     // file into messages, then sending these to ES for further processing
@@ -22,9 +17,9 @@ export function importerFactory(
     // field (like Filebeat does)
     case 'delimited':
     case 'semi_structured_text':
-      return new MessageImporter(results, settings);
+      return new MessageImporter(options);
     case 'ndjson':
-      return new NdjsonImporter(results, settings);
+      return new NdjsonImporter(options);
     default:
       return;
   }

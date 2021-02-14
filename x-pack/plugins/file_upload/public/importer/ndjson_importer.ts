@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Importer, ImportConfig, CreateDocsResponse } from './importer';
-import { FindFileStructureResponse } from '../../../../../../../common/types/file_datavisualizer';
+import { Importer } from './importer';
+import { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class NdjsonImporter extends Importer {
-  constructor(results: FindFileStructureResponse, settings: ImportConfig) {
-    super(settings);
+  constructor(options: ImportFactoryOptions) {
+    super(options.importConfig);
   }
 
   protected _createDocs(json: string): CreateDocsResponse {

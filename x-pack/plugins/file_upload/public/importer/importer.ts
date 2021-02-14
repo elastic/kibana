@@ -8,7 +8,7 @@
 import { chunk } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { ml } from '../../../../../services/ml_api_service';
+import { getHttp } from '../kibana_services';
 import {
   ImportDoc,
   ImportFailure,
@@ -16,34 +16,16 @@ import {
   Mappings,
   Settings,
   IngestPipeline,
-} from '../../../../../../../../file_upload/common';
+  MB,
+} from '../../common';
+import { CreateDocsResponse, IImporter, ImportConfig, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
 const MAX_CHUNK_CHAR_COUNT = 1000000;
 const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
 
-export interface ImportConfig {
-  settings: Settings;
-  mappings: Mappings;
-  pipeline: IngestPipeline;
-}
-
-export interface ImportResults {
-  success: boolean;
-  failures?: any[];
-  docCount?: number;
-  error?: any;
-}
-
-export interface CreateDocsResponse {
-  success: boolean;
-  remainder: number;
-  docs: ImportDoc[];
-  error?: any;
-}
-
-export abstract class Importer {
+export abstract class Importer implements IImporter {
   private _settings: Settings;
   private _mappings: Mappings;
   private _pipeline: IngestPipeline;
@@ -58,7 +40,7 @@ export abstract class Importer {
 
   public read(data: ArrayBuffer) {
     const decoder = new TextDecoder();
-    const size = STRING_CHUNKS_MB * Math.pow(2, 20);
+    const size = STRING_CHUNKS_MB * MB;
 
     // chop the data up into 100MB chunks for processing.
     // if the chop produces a partial line at the end, a character "remainder" count
@@ -98,7 +80,7 @@ export abstract class Importer {
           }
         : {};
 
-    const createIndexResp = await ml.fileDatavisualizer.import({
+    const createIndexResp = await callImportRoute({
       id: undefined,
       index,
       data: [],
@@ -139,15 +121,6 @@ export abstract class Importer {
     let error;
 
     for (let i = 0; i < chunks.length; i++) {
-      const aggs = {
-        id,
-        index,
-        data: chunks[i],
-        settings: {},
-        mappings: {},
-        ingestPipeline,
-      };
-
       let retries = IMPORT_RETRIES;
       let resp: ImportResponse = {
         success: false,
@@ -160,7 +133,14 @@ export abstract class Importer {
 
       while (resp.success === false && retries > 0) {
         try {
-          resp = await ml.fileDatavisualizer.import(aggs);
+          resp = await callImportRoute({
+            id,
+            index,
+            data: chunks[i],
+            settings: {},
+            mappings: {},
+            ingestPipeline,
+          });
 
           if (retries < IMPORT_RETRIES) {
             // eslint-disable-next-line no-console
@@ -263,4 +243,39 @@ function createDocumentChunks(docArray: ImportDoc[]) {
     }
   }
   return chunks;
+}
+
+function callImportRoute({
+  id,
+  index,
+  data,
+  settings,
+  mappings,
+  ingestPipeline,
+}: {
+  id: string | undefined;
+  index: string;
+  data: ImportDoc[];
+  settings: Settings | unknown;
+  mappings: Mappings | unknown;
+  ingestPipeline: {
+    id?: string;
+    pipeline?: IngestPipeline;
+  };
+}) {
+  const query = id !== undefined ? { id } : {};
+  const body = JSON.stringify({
+    index,
+    data,
+    settings,
+    mappings,
+    ingestPipeline,
+  });
+
+  return getHttp().fetch<ImportResponse>({
+    path: `/api/file_upload/import`,
+    method: 'POST',
+    query,
+    body,
+  });
 }

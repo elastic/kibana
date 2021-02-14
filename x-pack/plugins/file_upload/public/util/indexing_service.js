@@ -6,7 +6,7 @@
  */
 
 import { http as httpService } from './http_service';
-import { indexPatternService, savedObjectsClient } from '../kibana_services';
+import { getIndexPatternService, getSavedObjectsClient } from '../kibana_services';
 import { getGeoJsonIndexingDetails } from './geo_processing';
 import { sizeLimitedChunking } from './size_limited_chunking';
 import { i18n } from '@kbn/i18n';
@@ -187,7 +187,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
 
 export async function createIndexPattern(indexPatternName) {
   try {
-    const indexPattern = await indexPatternService.createAndSave(
+    const indexPattern = await getIndexPatternService().createAndSave(
       {
         title: indexPatternName,
       },
@@ -215,7 +215,7 @@ export const getExistingIndexNames = async () => {
 };
 
 export const getExistingIndexPatternNames = async () => {
-  const indexPatterns = await savedObjectsClient
+  const indexPatterns = await getSavedObjectsClient()
     .find({
       type: 'index-pattern',
       fields: ['id', 'title', 'type', 'fields'],
