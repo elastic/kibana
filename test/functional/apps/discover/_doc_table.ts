@@ -159,7 +159,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.discover.clickFieldListItemAdd(column);
             await PageObjects.header.waitUntilLoadingHasFinished();
             // test the header now
-            expect(await PageObjects.discover.getDocHeader()).to.have.string(column);
+            const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
+            const docHeaderText = await docHeader.getVisibleText();
+            expect(docHeaderText).to.have.string(column);
           }
         });
 

@@ -262,7 +262,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldSort(field: string) {
-      return await dataGrid.clickDocSortAsc();
+      return await dataGrid.clickDocSortAsc(field);
       // return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
 
