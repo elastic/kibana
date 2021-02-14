@@ -314,7 +314,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <AdvancedRuntimeMappingsSettings {...stepDefineForm.runtimeMappingsEditor} />
+            <AdvancedRuntimeMappingsSettings {...stepDefineForm} />
             <EuiSpacer size="s" />
 
             <DataGrid {...indexPreviewProps} />

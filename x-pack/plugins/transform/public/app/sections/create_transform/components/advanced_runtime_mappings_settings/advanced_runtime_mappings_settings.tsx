@@ -21,6 +21,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { StepDefineFormHook } from '../step_define';
 import { AdvancedRuntimeMappingsEditor } from '../advanced_runtime_mappings_editor/advanced_runtime_mappings_editor';
 import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mappings_editor_switch';
+import {
+  isPivotGroupByConfigWithUiSupport,
+  PivotAggsConfigWithUiSupport,
+} from '../../../../common';
+import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by';
 
 const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
@@ -30,18 +35,51 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
   }
 );
 
-export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook['runtimeMappingsEditor']> = (
-  props
-) => {
+export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) => {
   const {
     actions: { applyRuntimeMappingsEditorChanges },
     state: {
       runtimeMappings,
+      advancedRuntimeMappingsConfig,
       isRuntimeMappingsEditorApplyButtonEnabled,
       isRuntimeMappingsEditorEnabled,
     },
-  } = props;
+  } = props.runtimeMappingsEditor;
+  const {
+    actions: { deleteAggregation, deleteGroupBy },
+    state: { groupByList, aggList },
+  } = props.pivotConfig;
 
+  const applyChanges = () => {
+    const nextConfig = JSON.parse(advancedRuntimeMappingsConfig);
+    const previousConfig = runtimeMappings;
+
+    applyRuntimeMappingsEditorChanges();
+
+    // If the user updates the name of the runtime mapping fields
+    // delete any groupBy or aggregation associated with the deleted field
+    Object.keys(groupByList).forEach((groupByKey) => {
+      const groupBy = groupByList[groupByKey];
+      if (
+        isPivotGroupByConfigWithUiSupport(groupBy) &&
+        previousConfig?.hasOwnProperty(groupBy.field) &&
+        !nextConfig.hasOwnProperty(groupBy.field)
+      ) {
+        deleteGroupBy(groupByKey);
+      }
+    });
+    Object.keys(aggList).forEach((aggName) => {
+      const agg = aggList[aggName] as PivotAggsConfigWithUiSupport;
+      if (
+        isPivotAggConfigWithUiSupport(agg) &&
+        agg.field !== undefined &&
+        previousConfig?.hasOwnProperty(agg.field) &&
+        !nextConfig.hasOwnProperty(agg.field)
+      ) {
+        deleteAggregation(aggName);
+      }
+    });
+  };
   return (
     <>
       <EuiSpacer size="s" />
@@ -72,7 +110,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook['runtimeMapp
             {isRuntimeMappingsEditorEnabled && (
               <>
                 <EuiSpacer size="s" />
-                <AdvancedRuntimeMappingsEditor {...props} />
+                <AdvancedRuntimeMappingsEditor {...props.runtimeMappingsEditor} />
               </>
             )}
           </EuiFlexItem>
@@ -82,7 +120,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook['runtimeMapp
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
-                    <AdvancedRuntimeMappingsEditorSwitch {...props} />
+                    <AdvancedRuntimeMappingsEditorSwitch {...props.runtimeMappingsEditor} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiCopy beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS} textToCopy={''}>
@@ -115,7 +153,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook['runtimeMapp
                     style={{ width: 'fit-content' }}
                     size="s"
                     fill
-                    onClick={applyRuntimeMappingsEditorChanges}
+                    onClick={applyChanges}
                     disabled={!isRuntimeMappingsEditorApplyButtonEnabled}
                   >
                     {i18n.translate(

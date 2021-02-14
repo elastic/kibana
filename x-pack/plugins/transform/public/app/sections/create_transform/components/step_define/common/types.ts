@@ -9,7 +9,11 @@ import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
-import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import {
+  PivotAggsConfigDict,
+  PivotGroupByConfigDict,
+  PivotGroupByConfigWithUiSupportDict,
+} from '../../../../../common';
 import { SavedSearchQuery } from '../../../../../hooks/use_search_items';
 
 import { QUERY_LANGUAGE } from './constants';
@@ -37,7 +41,7 @@ export interface RuntimeMappings {
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
-  groupByList: PivotGroupByConfigDict;
+  groupByList: PivotGroupByConfigDict | PivotGroupByConfigWithUiSupportDict;
   latestConfig: LatestFunctionConfigUI;
   isAdvancedPivotEditorEnabled: boolean;
   isAdvancedSourceEditorEnabled: boolean;
