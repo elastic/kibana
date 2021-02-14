@@ -250,7 +250,13 @@ export const DiscoverGrid = ({
         isDarkMode: services.uiSettings.get('theme:darkMode'),
       }}
     >
-      <span data-test-subj="discoverDocTable" data-render-complete="true">
+      <span
+        data-test-subj="discoverDocTable"
+        data-render-complete="true"
+        data-shared-item=""
+        data-title={searchTitle}
+        data-description={searchDescription}
+      >
         <EuiDataGridMemoized
           aria-describedby={randomId}
           aria-labelledby={ariaLabelledBy}

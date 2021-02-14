@@ -29,8 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('verify the large string book present', async function () {
       const ExpectedDoc =
-        '_id:1 _type: - _index:testlargestring _score:0' +
-        ' mybook:Project Gutenberg EBook of Hamlet, by William Shakespeare' +
+        '_id1_type - _indextestlargestring_score0' +
+        ' mybookProject Gutenberg EBook of Hamlet, by William Shakespeare' +
         ' This eBook is for the use of anyone anywhere in the United States' +
         ' and most other parts of the world at no cost and with almost no restrictions whatsoever.' +
         ' You may copy it, give it away or re-use it under the terms of the' +

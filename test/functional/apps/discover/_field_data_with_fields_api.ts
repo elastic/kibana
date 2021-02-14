@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
+  const find = getService('find');
 
   describe('discover tab with new fields API', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -43,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
+        await PageObjects.discover.clickFieldListItemAdd('extension');
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be.greaterThan(0);
         expect(marks.indexOf('php')).to.be(0);
@@ -87,14 +89,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('doc view should sort ascending', async function () {
           const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
-          await PageObjects.discover.clickDocSortDown();
+          await find.clickByCssSelector('.fa-sort-down');
 
           // we don't technically need this sleep here because the tryForTime will retry and the
           // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
           // case and it can be avoided with just a few seconds sleep.
           await PageObjects.common.sleep(2000);
           await retry.try(async function tryingForTime() {
-            const rowData = await PageObjects.discover.getDocTableIndex(1);
+            const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(1)`);
+            const rowData = await row.getVisibleText();
 
             expect(rowData.startsWith(expectedTimeStamp)).to.be.ok();
           });

@@ -17,12 +17,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
   describe('doc link in discover', function contextSize() {
-    beforeEach(async function () {
+    before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+        'discover:searchFieldsFromSource': true,
+      });
+    });
+    after(async () => {
+      await kibanaServer.uiSettings.replace({});
+    });
+
+    beforeEach(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
@@ -45,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // no longer relevant as null field won't be returned in the Fields API response
-    xit('add filter should create an exists filter if value is null (#7189)', async function () {
+    it('add filter should create an exists filter if value is null (#7189)', async function () {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // Filter special document
       await filterBar.addFilter('agent', 'is', 'Missing/Fields');

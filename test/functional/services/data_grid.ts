@@ -183,14 +183,22 @@ export function DataGridProvider({ getService, getPageObjects }: FtrProviderCont
       return await detailsRow.findAllByTestSubject('~docTableRowAction');
     }
 
-    public async clickDocSortAsc() {
+    public async clickDocSortAsc(field?: string) {
+      if (field) {
+        await testSubjects.click(`dataGridHeaderCellActionButton-${field}`);
+        return await find.clickByButtonText('Sort New-Old');
+      }
       await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort New-Old');
+      return await find.clickByButtonText('Sort New-Old');
     }
 
-    public async clickDocSortDesc() {
+    public async clickDocSortDesc(field?: string) {
+      if (field) {
+        await testSubjects.click(`dataGridHeaderCellActionButton-${field}`);
+        return await find.clickByButtonText('Sort Old-New');
+      }
       await find.clickByCssSelector('.euiDataGridHeaderCell__button');
-      await find.clickByButtonText('Sort Old-New');
+      return await find.clickByButtonText('Sort Old-New');
     }
     public async getDetailsRow(): Promise<WebElementWrapper> {
       const detailRows = await this.getDetailsRows();

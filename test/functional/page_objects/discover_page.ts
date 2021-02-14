@@ -180,8 +180,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async getDocHeader() {
-      const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
-      return await docHeader.getVisibleText();
+      const docHeader = await dataGrid.getHeaders();
+      return docHeader.join();
+      // const docHeader = await find.byCssSelector('thead > tr:nth-child(1)');
+      // return await docHeader.getVisibleText();
     }
 
     public async getDocTableRows() {
@@ -193,7 +195,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getDocTableIndex(index: number) {
       const row = await dataGrid.getRow({ rowIndex: index - 1 });
       const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
-      return result.join(' ');
+      // Remove first control column
+      return result.slice(1).join(' ');
 
       // const row = await find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
       // return await row.getVisibleText();
@@ -219,11 +222,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickDocSortDown() {
-      await find.clickByCssSelector('.fa-sort-down');
+      await dataGrid.clickDocSortAsc();
+      // await find.clickByCssSelector('.fa-sort-down');
     }
 
     public async clickDocSortUp() {
-      await find.clickByCssSelector('.fa-sort-up');
+      await dataGrid.clickDocSortDesc();
+      // await find.clickByCssSelector('.fa-sort-up');
     }
 
     public async getMarks() {
@@ -257,8 +262,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async clickFieldSort(field: string) {
-      await dataGrid.clickDocSortAsc();
-      return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
+      return await dataGrid.clickDocSortAsc();
+      // return await testSubjects.click(`docTableHeaderFieldSort_${field}`);
     }
 
     public async clickFieldListItemToggle(field: string) {
