@@ -21,7 +21,6 @@ import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
 import { isPopulatedObject } from './utils/object_utils';
-import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export interface SimpleQuery {
   query_string: {
@@ -86,7 +85,7 @@ export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
   partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
-  runtimeMappings?: Record<string, RuntimeField>
+  runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ): PostTransformsPreviewRequestSchema {
   const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 

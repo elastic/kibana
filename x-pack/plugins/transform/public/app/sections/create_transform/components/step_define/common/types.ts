@@ -23,7 +23,6 @@ import {
   PivotConfigDefinition,
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
-import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 
 export interface ErrorMessage {
   query: string;
@@ -35,9 +34,20 @@ export interface Field {
   type: KBN_FIELD_TYPES;
 }
 
-export interface RuntimeMappings {
-  [key: string]: RuntimeField;
+// Replace this with import once #88995 is merged
+const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
+export interface RuntimeField {
+  type: RuntimeType;
+  script:
+    | string
+    | {
+        source: string;
+      };
 }
+
+export type RuntimeMappings = Record<string, RuntimeField>;
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
