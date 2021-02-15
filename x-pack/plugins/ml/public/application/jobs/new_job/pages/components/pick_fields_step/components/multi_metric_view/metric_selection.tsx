@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { MultiMetricJobCreator } from '../../../../../common/job_creator';
@@ -34,7 +34,10 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   const jobCreator = jc as MultiMetricJobCreator;
 
-  const [fields] = useState(sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]));
+  const fields = useMemo(
+    () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    []
+  );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs

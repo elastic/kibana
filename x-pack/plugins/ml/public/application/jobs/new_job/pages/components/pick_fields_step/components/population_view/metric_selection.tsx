@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState, useReducer } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useReducer, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -37,7 +37,10 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const [fields] = useState(sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]));
+  const fields = useMemo(
+    () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    []
+  );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
   const [aggFieldPairList, setAggFieldPairList] = useState<AggFieldPair[]>(
     jobCreator.aggFieldPairs

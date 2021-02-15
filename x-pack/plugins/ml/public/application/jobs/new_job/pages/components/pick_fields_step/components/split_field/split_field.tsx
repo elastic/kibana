@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 
 import { SplitFieldSelect } from './split_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
@@ -26,11 +26,11 @@ export const SplitFieldSelector: FC = () => {
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator;
   const canClearSelection = isMultiMetricJobCreator(jc);
 
-  const [runtimeCategoryFields] = useState(filterCategoryFields(jobCreator.runtimeFields));
-  const [categoryFields] = useState([
-    ...newJobCapsService.categoryFields,
-    ...runtimeCategoryFields,
-  ]);
+  const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
+  const categoryFields = useMemo(
+    () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
+    []
+  );
   const [splitField, setSplitField] = useState(jobCreator.splitField);
 
   useEffect(() => {

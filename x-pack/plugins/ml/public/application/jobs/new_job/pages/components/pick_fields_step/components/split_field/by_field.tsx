@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { SplitFieldSelect } from './split_field_select';
@@ -25,11 +25,11 @@ export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 
-  const [runtimeCategoryFields] = useState(filterCategoryFields(jobCreator.runtimeFields));
-  const [allCategoryFields] = useState([
-    ...newJobCapsService.categoryFields,
-    ...runtimeCategoryFields,
-  ]);
+  const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
+  const allCategoryFields = useMemo(
+    () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
+    []
+  );
 
   const [byField, setByField] = useState(jobCreator.getByField(detectorIndex));
   const categoryFields = useFilteredCategoryFields(

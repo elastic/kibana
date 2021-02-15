@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { SingleMetricJobCreator } from '../../../../../common/job_creator';
 import { LineChartData } from '../../../../../common/chart_loader';
@@ -33,7 +33,10 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
   } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
 
-  const [fields] = useState(sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]));
+  const fields = useMemo(
+    () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    []
+  );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>(
     jobCreator.aggFieldPair !== null ? [{ label: createLabel(jobCreator.aggFieldPair) }] : []
   );
