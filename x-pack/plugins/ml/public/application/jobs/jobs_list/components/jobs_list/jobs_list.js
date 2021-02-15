@@ -116,8 +116,8 @@ export class JobsList extends Component {
       onSelectionChange: this.props.selectJobChange,
     };
     // Adding 'width' props to columns for use in the Kibana management jobs list table
-    // The version of the table used in ML > Job Managment depends on many EUI class overrides that set the width explicitly.
-    // The ML > Job Managment table won't change as the overwritten class styles take precedence, though these values may need to
+    // The version of the table used in ML > Job Management depends on many EUI class overrides that set the width explicitly.
+    // The ML > Job Management table won't change as the overwritten class styles take precedence, though these values may need to
     // be updated if we move to always using props for width.
     const columns = [
       {

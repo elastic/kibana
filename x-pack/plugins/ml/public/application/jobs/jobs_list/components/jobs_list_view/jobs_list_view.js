@@ -477,6 +477,7 @@ export class JobsListView extends Component {
                   allJobIds={jobIds}
                   showStartDatafeedModal={this.showStartDatafeedModal}
                   showDeleteJobModal={this.showDeleteJobModal}
+                  showCreateAlertFlyout={this.showCreateAlertFlyout}
                   refreshJobs={() => this.refreshJobSummaryList(true)}
                 />
                 <JobFilterBar
