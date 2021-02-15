@@ -59,6 +59,7 @@ interface Props {
   anomalyTimeseries?: ReturnType<
     typeof getLatencyChartSelector
   >['anomalyTimeseries'];
+  customTheme?: Record<string, unknown>;
 }
 
 export function TimeseriesChart({
@@ -72,13 +73,14 @@ export function TimeseriesChart({
   showAnnotations = true,
   yDomain,
   anomalyTimeseries,
+  customTheme = {},
 }: Props) {
   const history = useHistory();
   const { annotations } = useAnnotationsContext();
-  const chartTheme = useChartTheme();
   const { setPointerEvent, chartRef } = useChartPointerEventContext();
   const { urlParams } = useUrlParams();
   const theme = useTheme();
+  const chartTheme = useChartTheme();
 
   const { start, end } = urlParams;
 
@@ -103,6 +105,7 @@ export function TimeseriesChart({
             areaSeriesStyle: {
               line: { visible: false },
             },
+            ...customTheme,
           }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
