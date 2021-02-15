@@ -209,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
                     score: 0,
                     type: 'visualization',
                     updated_at: '2017-09-21T18:51:23.794Z',
-                    version: 'WzIyLDJd',
+                    version: 'WzYsMV0=',
                   },
                 ],
               });
