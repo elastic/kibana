@@ -112,7 +112,7 @@ function getSearchJsonFromConfig(
   splitFieldValue: string | null,
   runtimeMappings: RuntimeMappings | undefined
 ): object {
-  const json: any = {
+  const json = {
     index: indexPatternTitle,
     size: 0,
     track_total_hits: true,
@@ -132,6 +132,7 @@ function getSearchJsonFromConfig(
           aggs: {},
         },
       },
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
   };
 
@@ -178,10 +179,6 @@ function getSearchJsonFromConfig(
   });
 
   json.body.aggs.times.aggs = aggs;
-
-  if (runtimeMappings !== undefined) {
-    json.body.runtime_mappings = runtimeMappings;
-  }
 
   return json;
 }
