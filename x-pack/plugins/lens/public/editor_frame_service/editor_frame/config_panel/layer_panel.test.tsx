@@ -682,7 +682,7 @@ describe('LayerPanel', () => {
       const mockVis = {
         ...mockVisualization,
         removeDimension: jest.fn(),
-        setDimension: jest.fn(),
+        setDimension: jest.fn(() => 'modifiedState'),
       };
       mockVis.getConfiguration.mockReturnValue({
         groups: [
@@ -725,7 +725,9 @@ describe('LayerPanel', () => {
           />
         </ChildDragDropProvider>
       );
-      component.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
+      act(() => {
+        component.find(DragDrop).at(3).prop('onDrop')!(draggingOperation, 'replace_compatible');
+      });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           dropType: 'replace_compatible',
@@ -742,9 +744,10 @@ describe('LayerPanel', () => {
         expect.objectContaining({
           columnId: 'a',
           layerId: 'first',
+          prevState: 'modifiedState',
         })
       );
-      expect(updateVisualization).toHaveBeenCalled();
+      expect(updateVisualization).toHaveBeenCalledTimes(1);
     });
   });
 });
