@@ -167,7 +167,8 @@ export const ScriptField = React.memo(({ existingConcreteFields, links, syntaxEr
               <CodeEditor
                 languageId={PainlessLang.ID}
                 suggestionProvider={suggestionProvider}
-                width="100%"
+                // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
+                width="99%"
                 height="300px"
                 value={value}
                 onChange={setValue}
