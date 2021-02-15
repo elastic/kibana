@@ -187,15 +187,9 @@ export class ImportView extends Component {
                   errors.push(`${parseError} ${error.message}`);
                 }
 
-                const indexCreationSettings = {
-                  settings,
-                  mappings,
-                };
-
                 try {
                   if (createPipeline) {
                     pipeline = JSON.parse(pipelineString);
-                    indexCreationSettings.pipeline = pipeline;
                   }
                 } catch (error) {
                   success = false;
@@ -225,7 +219,6 @@ export class ImportView extends Component {
                   const importer = await getFileUpload().importerFactory(format, {
                     excludeLinesPattern: results.exclude_lines_pattern,
                     multilineStartPattern: results.multiline_start_pattern,
-                    importConfig: indexCreationSettings,
                   });
                   if (importer !== undefined) {
                     const readResp = importer.read(data, this.setReadProgress);
@@ -241,7 +234,12 @@ export class ImportView extends Component {
                     }
 
                     if (success) {
-                      const initializeImportResp = await importer.initializeImport(index);
+                      const initializeImportResp = await importer.initializeImport(
+                        index,
+                        settings,
+                        mappings,
+                        pipeline
+                      );
 
                       const indexCreated = initializeImportResp.index !== undefined;
                       this.setState({

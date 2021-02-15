@@ -9,8 +9,8 @@ import { Importer } from './importer';
 import { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class NdjsonImporter extends Importer {
-  constructor(options: ImportFactoryOptions) {
-    super(options.importConfig);
+  constructor() {
+    super();
   }
 
   protected _createDocs(json: string): CreateDocsResponse {

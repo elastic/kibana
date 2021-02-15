@@ -15,6 +15,7 @@ import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
 import { JsonImportProgress } from './json_import_progress';
 import _ from 'lodash';
+import { GeoJsonImporter } from '../importer/geojson_importer';
 
 const INDEXING_STAGE = {
   INDEXING_STARTED: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingStarted', {
@@ -63,6 +64,7 @@ export class JsonUploadAndParse extends Component {
     currentIndexingStage: INDEXING_STAGE.INDEXING_STARTED,
     indexDataResp: '',
     indexPatternResp: '',
+    geojsonImporter: new GeoJsonImporter(),
   };
 
   componentDidMount() {
@@ -264,7 +266,6 @@ export class JsonUploadAndParse extends Component {
       indexTypes,
       showImportProgress,
     } = this.state;
-    const { onFileUpload, transformDetails } = this.props;
 
     return (
       <EuiForm>
@@ -282,15 +283,13 @@ export class JsonUploadAndParse extends Component {
         ) : (
           <Fragment>
             <JsonIndexFilePicker
-              {...{
-                onFileUpload,
-                fileRef,
-                setIndexName: (indexName) => this.setState({ indexName }),
-                setFileRef: (fileRef) => this.setState({ fileRef }),
-                setParsedFile: (parsedFile) => this.setState({ parsedFile }),
-                transformDetails,
-                resetFileAndIndexSettings: this._resetFileAndIndexSettings,
-              }}
+              onFileUpload={this.props.onFileUpload}
+              fileRef={fileRef}
+              setIndexName={(indexName) => this.setState({ indexName })}
+              setFileRef={(fileRef) => this.setState({ fileRef })}
+              setParsedFile={(parsedFile) => this.setState({ parsedFile })}
+              resetFileAndIndexSettings={this._resetFileAndIndexSettings}
+              geojsonImporter={this.state.geojsonImporter}
             />
             <IndexSettings
               disabled={!fileRef}

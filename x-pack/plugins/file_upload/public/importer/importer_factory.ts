@@ -19,7 +19,7 @@ export function importerFactory(format: string, options: ImportFactoryOptions) {
     case 'semi_structured_text':
       return new MessageImporter(options);
     case 'ndjson':
-      return new NdjsonImporter(options);
+      return new NdjsonImporter();
     default:
       return;
   }

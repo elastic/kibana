@@ -32,7 +32,7 @@ const getFileRef = (geoJsonObj = testJson) => {
   return new File([fileContent], 'test.json', { type: 'text/json' });
 };
 
-const getFileParseActiveFactory = (boolActive = true) => {
+const isFileParseActiveFactory = (boolActive = true) => {
   return jest.fn(() => boolActive);
 };
 
@@ -52,13 +52,13 @@ describe('parse file', () => {
     const fileRef = getFileRef();
 
     // Cancel file parse
-    const getFileParseActive = getFileParseActiveFactory(false);
+    const isFileParseActive = isFileParseActiveFactory(false);
 
     const fileHandlerResult = await fileHandler({
       file: fileRef,
       setFileProgress,
       cleanAndValidate,
-      getFileParseActive,
+      isFileParseActive,
     });
 
     expect(fileHandlerResult).toBeNull();
@@ -66,12 +66,12 @@ describe('parse file', () => {
 
   it('should normally read single feature valid data', async () => {
     const fileRef = getFileRef();
-    const getFileParseActive = getFileParseActiveFactory();
+    const isFileParseActive = isFileParseActiveFactory();
     const { errors } = await fileHandler({
       file: fileRef,
       setFileProgress,
       cleanAndValidate: (x) => x,
-      getFileParseActive,
+      isFileParseActive,
     });
 
     expect(setFileProgress.mock.calls.length).toEqual(1);
@@ -91,12 +91,12 @@ describe('parse file', () => {
     };
 
     const fileRef = getFileRef(testSinglePointJson);
-    const getFileParseActive = getFileParseActiveFactory();
+    const isFileParseActive = isFileParseActiveFactory();
     const { errors } = await fileHandler({
       file: fileRef,
       setFileProgress,
       cleanAndValidate: (x) => x,
-      getFileParseActive,
+      isFileParseActive,
     });
 
     expect(setFileProgress.mock.calls.length).toEqual(1);
@@ -105,13 +105,13 @@ describe('parse file', () => {
 
   it('should throw if no valid features', async () => {
     const fileRef = getFileRef();
-    const getFileParseActive = getFileParseActiveFactory();
+    const isFileParseActive = isFileParseActiveFactory();
 
     await fileHandler({
       file: fileRef,
       setFileProgress,
       cleanAndValidate: () => ({ not: 'the correct content' }), // Simulate clean and validate fail
-      getFileParseActive,
+      isFileParseActive,
     }).catch((e) => {
       expect(e.message).toMatch('Error, no features detected');
     });

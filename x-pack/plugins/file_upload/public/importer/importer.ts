@@ -26,17 +26,7 @@ const IMPORT_RETRIES = 5;
 const STRING_CHUNKS_MB = 100;
 
 export abstract class Importer implements IImporter {
-  private _settings: Settings;
-  private _mappings: Mappings;
-  private _pipeline: IngestPipeline;
-
   protected _docArray: ImportDoc[] = [];
-
-  constructor({ settings, mappings, pipeline }: ImportConfig) {
-    this._settings = settings;
-    this._mappings = mappings;
-    this._pipeline = pipeline;
-  }
 
   public read(data: ArrayBuffer) {
     const decoder = new TextDecoder();
@@ -64,10 +54,12 @@ export abstract class Importer implements IImporter {
 
   protected abstract _createDocs(t: string): CreateDocsResponse;
 
-  public async initializeImport(index: string) {
-    const settings = this._settings;
-    const mappings = this._mappings;
-    const pipeline = this._pipeline;
+  public async initializeImport(
+    index: string,
+    settings: Settings,
+    mappings: Mappings,
+    pipeline: IngestPipeline
+  ) {
     updatePipelineTimezone(pipeline);
 
     // if no pipeline has been supplied,

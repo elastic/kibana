@@ -14,7 +14,7 @@ export class MessageImporter extends Importer {
   private _multilineStartRegex: RegExp | null;
 
   constructor(options: ImportFactoryOptions) {
-    super(options.importConfig);
+    super();
 
     this._excludeLinesRegex =
       options.excludeLinesPattern === undefined ? null : new RegExp(options.excludeLinesPattern);
