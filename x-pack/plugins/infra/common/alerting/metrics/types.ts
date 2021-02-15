@@ -51,6 +51,7 @@ export interface MetricAnomalyParams {
   metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
   alertInterval?: string;
   sourceId?: string;
+  spaceId?: string;
   threshold: Exclude<ANOMALY_THRESHOLD, ANOMALY_THRESHOLD.LOW>;
   influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
 }
@@ -75,6 +76,7 @@ const baseAlertRequestParamsRT = rt.intersection([
     alertInterval: rt.string,
     alertThrottle: rt.string,
     alertOnNoData: rt.boolean,
+    alertNotifyWhen: rt.string,
   }),
 ]);
 
@@ -111,6 +113,7 @@ const metricAnomalyAlertPreviewRequestParamsRT = rt.intersection([
     metric: metricAnomalyMetricRT,
     threshold: rt.number,
     alertType: rt.literal(METRIC_ANOMALY_ALERT_TYPE_ID),
+    spaceId: rt.string,
   }),
   rt.partial({
     influencerFilter: metricAnomalyInfluencerFilterRT,
