@@ -104,7 +104,7 @@ describe('PieComponent', function () {
   it('calls filter callback', () => {
     const component = shallow(<PieComponent {...wrapperProps} />);
     component.find(Settings).first().prop('onElementClick')!([
-      [[{ groupByRollup: 6, value: 6 }], {} as SeriesIdentifier],
+      [[{ groupByRollup: 6, value: 6, depth: 1, path: [], sortIndex: 1 }], {} as SeriesIdentifier],
     ]);
     expect(wrapperProps.fireEvent).toHaveBeenCalled();
   });

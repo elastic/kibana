@@ -18,6 +18,9 @@ describe('getFilterClickData', () => {
       {
         groupByRollup: 'Logstash Airways',
         value: 729,
+        depth: 1,
+        path: [],
+        sortIndex: 1,
       },
     ];
     const data = getFilterClickData(clickedLayers, bucketColumns, visData);
@@ -32,6 +35,9 @@ describe('getFilterClickData', () => {
       {
         groupByRollup: 'ES-Air',
         value: 572,
+        depth: 1,
+        path: [],
+        sortIndex: 1,
       },
     ];
     const data = getFilterClickData(clickedLayers, bucketColumns, visData);
