@@ -701,3 +701,58 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     }),
   },
 ];
+
+export const createPhpAgentInstructions = (apmServerUrl = '', secretToken = '') => [
+  {
+    title: i18n.translate('apmOss.tutorial.phpClient.download.title', {
+      defaultMessage: 'Download the APM agent',
+    }),
+    textPre: i18n.translate('apmOss.tutorial.phpClient.download.textPre', {
+      defaultMessage:
+        '[NameOfPackage]({linkToPackage}) package. \
+        Text in same paragraph. \n\n \
+        Text after linebreaks.',
+      values: {
+        linkToPackage: 'https://example.com',
+      },
+    }),
+  },
+  {
+    title: i18n.translate('apmOss.tutorial.phpClient.configureApplication.title', {
+      defaultMessage: 'Add the agent to the application',
+    }),
+    textPre: i18n.translate('apmOss.tutorial.phpClient.configureApplication.textPre', {
+      defaultMessage: 'Explain how to configure the agent',
+    }),
+    commands: `public class Startup
+{curlyOpen}
+  public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+  {curlyOpen}
+    app.UseAllElasticApm(Configuration);
+    //…rest of the method
+  {curlyClose}
+  //…rest of the class
+{curlyClose}`.split('\n'),
+    textPost: i18n.translate('apmOss.tutorial.phpClient.configureApplication.textPost', {
+      defaultMessage: 'Text after application configuration',
+    }),
+  },
+  {
+    title: i18n.translate('apmOss.tutorial.phpClient.configureAgent.title', {
+      defaultMessage: 'Sample appsettings.json file:',
+    }),
+    commands: `{curlyOpen}
+    "ElasticApm": {curlyOpen}
+    "SecretToken": "${secretToken}",
+    "ServerUrls": "${
+      apmServerUrl || 'http://localhost:8200'
+    }", //Set custom APM Server URL (default: http://localhost:8200)
+    "ServiceName": "MyApp", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
+    "Environment": "production", // Set the service environment
+  {curlyClose}
+{curlyClose}`.split('\n'),
+    textPost: i18n.translate('apmOss.tutorial.phpClient.configureAgent.textPost', {
+      defaultMessage: 'Text after agent configuration',
+    }),
+  },
+];
