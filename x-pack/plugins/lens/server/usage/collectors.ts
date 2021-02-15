@@ -50,7 +50,7 @@ export function registerLensUsageCollector(
           suggestion_events_90_days: suggestions.last90,
         };
       } catch (err) {
-        return emptyUsageCollecction;
+        return emptyUsageCollection;
       }
     },
     isReady: async () => {
