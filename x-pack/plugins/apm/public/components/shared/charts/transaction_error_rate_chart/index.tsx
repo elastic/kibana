@@ -49,16 +49,12 @@ export function TransactionErrorRateChart({
     comparisonEnabled,
     comparisonType,
   } = urlParams;
-  const {
-    comparisonStart = undefined,
-    comparisonEnd = undefined,
-  } = comparisonType
-    ? getTimeRangeComparison({
-        start,
-        end,
-        comparisonType,
-      })
-    : {};
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
   const comparisonChartTheme = getComparisonChartTheme(theme);
 
   const { data = INITIAL_STATE, status } = useFetcher(

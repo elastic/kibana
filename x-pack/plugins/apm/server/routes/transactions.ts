@@ -23,8 +23,7 @@ import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getLatencyTimeseries } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 import { getTransactionGroupList } from '../lib/transaction_groups';
-import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
-import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
+import { getErrorRatePeriods } from '../lib/transaction_groups/get_error_rate';
 import { createRoute } from './create_route';
 import { comparisonRangeRt, rangeRt, uiFiltersRt } from './default_api_types';
 
@@ -369,38 +368,14 @@ export const transactionChartsErrorRateRoute = createRoute({
       setup
     );
 
-    const { start, end } = setup;
-
-    const commonParams = {
+    return await getErrorRatePeriods({
       serviceName,
       transactionType,
       transactionName,
       setup,
       searchAggregatedTransactions,
-    };
-
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      getErrorRate({
-        ...commonParams,
-        start,
-        end,
-      }),
-      comparisonStart && comparisonEnd
-        ? getErrorRate({
-            ...commonParams,
-            start: comparisonStart,
-            end: comparisonEnd,
-          }).then((errorRate) => ({
-            ...errorRate,
-            transactionErrorRate: offsetPreviousPeriodCoordinates({
-              currentPeriodStart: start,
-              previousPeriodStart: comparisonStart,
-              previousPeriodTimeseries: errorRate.transactionErrorRate,
-            }),
-          }))
-        : { noHits: true, transactionErrorRate: [], average: 0 },
-    ]);
-
-    return { currentPeriod, previousPeriod };
+      comparisonStart,
+      comparisonEnd,
+    });
   },
 });

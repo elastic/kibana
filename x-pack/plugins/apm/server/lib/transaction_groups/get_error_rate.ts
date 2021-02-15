@@ -20,13 +20,14 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
   getTransactionErrorRateTimeSeries,
 } from '../helpers/transaction_error_rate';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { offsetPreviousPeriodCoordinates } from '../../utils/offset_previous_period_coordinate';
 
 export async function getErrorRate({
   serviceName,
@@ -123,4 +124,60 @@ export async function getErrorRate({
 
     return { noHits, transactionErrorRate, average };
   });
+}
+
+export async function getErrorRatePeriods({
+  serviceName,
+  transactionType,
+  transactionName,
+  setup,
+  searchAggregatedTransactions,
+  comparisonStart,
+  comparisonEnd,
+}: {
+  serviceName: string;
+  transactionType?: string;
+  transactionName?: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+  comparisonStart?: number;
+  comparisonEnd?: number;
+}) {
+  const { start, end } = setup;
+  const commonParams = {
+    serviceName,
+    transactionType,
+    transactionName,
+    setup,
+    searchAggregatedTransactions,
+  };
+
+  const currentPeriodPromise = getErrorRate({
+    ...commonParams,
+    start,
+    end,
+  });
+
+  const previousPeriodPromise =
+    comparisonStart && comparisonEnd
+      ? getErrorRate({
+          ...commonParams,
+          start: comparisonStart,
+          end: comparisonEnd,
+        }).then((errorRate) => ({
+          ...errorRate,
+          transactionErrorRate: offsetPreviousPeriodCoordinates({
+            currentPeriodStart: start,
+            previousPeriodStart: comparisonStart,
+            previousPeriodTimeseries: errorRate.transactionErrorRate,
+          }),
+        }))
+      : { noHits: true, transactionErrorRate: [], average: 0 };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    currentPeriodPromise,
+    previousPeriodPromise,
+  ]);
+
+  return { currentPeriod, previousPeriod };
 }
