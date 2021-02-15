@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { debounce, distinctUntilChanged, map, mapTo, switchMap, tap } from 'rxjs/operators';
 import { merge, of, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -14,8 +14,8 @@ import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_ses
 import {
   ISessionService,
   SearchSessionState,
-  SearchUsageCollector,
   TimefilterContract,
+  SearchUsageCollector,
 } from '../../../../../../../src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApplicationStart } from '../../../../../../../src/core/public';
@@ -60,7 +60,7 @@ export const createConnectedSearchSessionIndicator = ({
     ),
     distinctUntilChanged(),
     tap((value) => {
-      if (value) usageCollector?.trackSessionIndicatorTourDisabled();
+      if (value) usageCollector?.trackSessionIndicatorSaveDisabled();
     })
   );
 
@@ -163,6 +163,12 @@ export const createConnectedSearchSessionIndicator = ({
     const onViewSearchSessions = useCallback(() => {
       usageCollector?.trackViewSessionsList();
     }, []);
+
+    useEffect(() => {
+      if (state === SearchSessionState.Restored) {
+        usageCollector?.trackSessionIsRestored();
+      }
+    }, [state]);
 
     if (!sessionService.isSessionStorageReady()) return null;
     return (

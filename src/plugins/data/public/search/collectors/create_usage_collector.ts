@@ -38,9 +38,9 @@ export const createUsageCollector = (
       METRIC_TYPE.LOADED,
       SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_RESTORED
     ),
-    trackSessionIndicatorTourDisabled: getCollector(
+    trackSessionIndicatorSaveDisabled: getCollector(
       METRIC_TYPE.LOADED,
-      SEARCH_EVENT_TYPE.SESSION_INDICATOR_TOUR_DISABLED
+      SEARCH_EVENT_TYPE.SESSION_INDICATOR_SAVE_DISABLED
     ),
     trackSessionSentToBackground: getCollector(
       METRIC_TYPE.CLICK,

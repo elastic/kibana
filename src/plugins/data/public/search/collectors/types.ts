@@ -25,7 +25,7 @@ export enum SEARCH_EVENT_TYPE {
   /**
    * The session indicator was disabled because of a completion timeout
    */
-  SESSION_INDICATOR_TOUR_DISABLED = 'sessionIndicatorTourDisabled',
+  SESSION_INDICATOR_SAVE_DISABLED = 'sessionIndicatorSaveDisabled',
   /**
    * The user clicked to continue a session in the background (prior to results completing)
    */
@@ -75,7 +75,7 @@ export interface SearchUsageCollector {
   trackQueryTimedOut: () => Promise<void>;
   trackSessionIndicatorTourLoading: () => Promise<void>;
   trackSessionIndicatorTourRestored: () => Promise<void>;
-  trackSessionIndicatorTourDisabled: () => Promise<void>;
+  trackSessionIndicatorSaveDisabled: () => Promise<void>;
   trackSessionSentToBackground: () => Promise<void>;
   trackSessionSavedResults: () => Promise<void>;
   trackSessionViewRestored: () => Promise<void>;
