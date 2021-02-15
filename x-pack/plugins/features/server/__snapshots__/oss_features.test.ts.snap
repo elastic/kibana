@@ -59,7 +59,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -196,7 +198,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "discover",
         "kibana",
@@ -553,7 +557,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "dashboards",
         "kibana",
@@ -690,7 +696,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "api": Array [],
+      "api": Array [
+        "store_search_session",
+      ],
       "app": Array [
         "discover",
         "kibana",
