@@ -56,12 +56,13 @@ export function DocViewTable({
 
   const toggleColumn = useCallback(
     (field: string) => {
-      if (onRemoveColumn && onAddColumn && Array.isArray(columns)) {
-        if (columns.includes(field)) {
-          onRemoveColumn(field);
-        } else {
-          onAddColumn(field);
-        }
+      if (!onRemoveColumn || !onAddColumn || !columns) {
+        return;
+      }
+      if (columns.includes(field)) {
+        onRemoveColumn(field);
+      } else {
+        onAddColumn(field);
       }
     },
     [onRemoveColumn, onAddColumn, columns]
@@ -113,7 +114,7 @@ export function DocViewTable({
                   displayUnderscoreWarning={displayUnderscoreWarning}
                   isCollapsed={isCollapsed}
                   isCollapsible={isCollapsible}
-                  isColumnActive={Array.isArray(columns) && columns.includes(field)}
+                  isColumnActive={!!columns?.includes(field)}
                   onFilter={filter}
                   onToggleCollapse={() => toggleValueCollapse(field)}
                   onToggleColumn={() => toggleColumn(field)}
