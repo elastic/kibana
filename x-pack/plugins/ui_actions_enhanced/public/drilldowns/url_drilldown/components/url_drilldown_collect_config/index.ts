@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { UrlDrilldownCollectConfig } from './url_drilldown_collect_config';
+export { UrlDrilldownCollectConfig, UrlDrilldownCollectConfigProps } from './lazy';
