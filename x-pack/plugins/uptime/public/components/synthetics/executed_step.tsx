@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeBlockAccordion } from './code_block_accordion';
@@ -18,6 +18,7 @@ const CODE_BLOCK_OVERFLOW_HEIGHT = 360;
 interface ExecutedStepProps {
   step: Ping;
   index: number;
+  loading: boolean;
   browserConsole?: string;
 }
 
@@ -33,60 +34,83 @@ const Message = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.paddingSizes.m};
 `;
 
-export const ExecutedStep: FC<ExecutedStepProps> = ({ step, index, browserConsole = '' }) => {
+const ExpandedRow = euiStyled.div`
+  padding: '8px';
+  max-width: 1000px;
+  width: 100%;
+`;
+
+export const ExecutedStep: FC<ExecutedStepProps> = ({
+  loading,
+  step,
+  index,
+  browserConsole = '',
+}) => {
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
   return (
-    <div style={{ padding: '8px', maxWidth: 1000 }}>
-      <EuiSpacer size="s" />
-      {step.synthetics?.error?.message && (
-        <EuiText>
-          <Label>
-            {i18n.translate('xpack.uptime.synthetics.executedStep.errorHeading', {
-              defaultMessage: 'Error message',
+    <ExpandedRow>
+      {loading ? (
+        <EuiLoadingSpinner size="l" />
+      ) : (
+        <>
+          <EuiSpacer size="s" />
+          {step.synthetics?.error?.message && (
+            <EuiText>
+              <Label>
+                {i18n.translate('xpack.uptime.synthetics.executedStep.errorHeading', {
+                  defaultMessage: 'Error message',
+                })}
+              </Label>
+              <Message>{step.synthetics?.error?.message}</Message>
+            </EuiText>
+          )}
+          <EuiSpacer />
+          <CodeBlockAccordion
+            id={step.synthetics?.step?.name + String(index)}
+            buttonContent={i18n.translate(
+              'xpack.uptime.synthetics.executedStep.scriptHeading.label',
+              {
+                defaultMessage: 'Script executed at this step',
+              }
+            )}
+            overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+            language="javascript"
+            initialIsOpen={!isSucceeded}
+          >
+            {step.synthetics?.payload?.source}
+          </CodeBlockAccordion>{' '}
+          <EuiSpacer />
+          <CodeBlockAccordion
+            id={step.synthetics?.step?.name + String(index)}
+            buttonContent={i18n.translate(
+              'xpack.uptime.synthetics.executedStep.consoleOutput.label',
+              {
+                defaultMessage: 'Console output',
+              }
+            )}
+            overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+            language="javascript"
+            initialIsOpen={!isSucceeded}
+          >
+            {browserConsole}
+          </CodeBlockAccordion>
+          <EuiSpacer />
+          <StepScreenshots step={step} />
+          <EuiSpacer />
+          <CodeBlockAccordion
+            id={`${step.synthetics?.step?.name}_stack`}
+            buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.stackTrace', {
+              defaultMessage: 'Stack trace',
             })}
-          </Label>
-          <Message>{step.synthetics?.error?.message}</Message>
-        </EuiText>
+            language="html"
+            overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
+            initialIsOpen={!isSucceeded}
+          >
+            {step.synthetics?.error?.stack}
+          </CodeBlockAccordion>
+        </>
       )}
-      <EuiSpacer />
-      <CodeBlockAccordion
-        id={step.synthetics?.step?.name + String(index)}
-        buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.scriptHeading.label', {
-          defaultMessage: 'Script executed at this step',
-        })}
-        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-        language="javascript"
-        initialIsOpen={!isSucceeded}
-      >
-        {step.synthetics?.payload?.source}
-      </CodeBlockAccordion>{' '}
-      <EuiSpacer />
-      <CodeBlockAccordion
-        id={step.synthetics?.step?.name + String(index)}
-        buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.consoleOutput.label', {
-          defaultMessage: 'Console output',
-        })}
-        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-        language="javascript"
-        initialIsOpen={!isSucceeded}
-      >
-        {browserConsole}
-      </CodeBlockAccordion>
-      <EuiSpacer />
-      <StepScreenshots step={step} />
-      <EuiSpacer />
-      <CodeBlockAccordion
-        id={`${step.synthetics?.step?.name}_stack`}
-        buttonContent={i18n.translate('xpack.uptime.synthetics.executedStep.stackTrace', {
-          defaultMessage: 'Stack trace',
-        })}
-        language="html"
-        overflowHeight={CODE_BLOCK_OVERFLOW_HEIGHT}
-        initialIsOpen={!isSucceeded}
-      >
-        {step.synthetics?.error?.stack}
-      </CodeBlockAccordion>
-    </div>
+    </ExpandedRow>
   );
 };

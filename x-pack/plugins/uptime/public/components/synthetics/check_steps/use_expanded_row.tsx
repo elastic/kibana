@@ -48,6 +48,7 @@ export const useExpandedRow = ({ loading, steps, allPings }: HookProps) => {
             step={step}
             browserConsole={getBrowserConsole(expandedRowKey)}
             index={step.synthetics?.step?.index!}
+            loading={loading}
           />
         );
       }
@@ -76,6 +77,7 @@ export const useExpandedRow = ({ loading, steps, allPings }: HookProps) => {
             step={ping}
             browserConsole={getBrowserConsole(stepIndex)}
             index={ping.synthetics?.step?.index!}
+            loading={loading}
           />
         ),
       });
