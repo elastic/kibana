@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
@@ -51,9 +52,10 @@ function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
 
 interface Props {
   jobCreationDisabled: boolean;
+  setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
+export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
   const {
     services: { notifications },
   } = useMlKibana();
@@ -84,10 +86,14 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const loadJobs = async () => {
     setIsLoading(true);
 
+    let lazyJobCount = 0;
     try {
       const jobsResult: MlSummaryJobs = await ml.jobs.jobsSummary([]);
       const jobsSummaryList = jobsResult.map((job: MlSummaryJob) => {
         job.latestTimestampSortValue = job.latestTimestampMs || 0;
+        if (job.awaitingNodeAssignment) {
+          lazyJobCount++;
+        }
         return job;
       });
       const { groups: jobsGroups, count } = getGroupsFromJobs(jobsSummaryList);
@@ -100,6 +106,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
       setGroups(jobsGroups);
       setJobsList(jobsWithTimerange);
       loadMaxAnomalyScores(jobsGroups);
+      setLazyJobCount(lazyJobCount);
     } catch (e) {
       setErrorMessage(e.message !== undefined ? e.message : JSON.stringify(e));
       setIsLoading(false);

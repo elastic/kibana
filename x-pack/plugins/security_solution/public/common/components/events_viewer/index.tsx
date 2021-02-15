@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useEffect } from 'react';
@@ -11,6 +12,7 @@ import styled from 'styled-components';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
@@ -33,7 +35,7 @@ const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
 export interface OwnProps {
   defaultModel: SubsetTimelineModel;
   end: string;
-  id: string;
+  id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
   headerFilterGroup?: React.ReactNode;

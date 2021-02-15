@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -183,6 +184,9 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
 
+  const areLabelsInvalid =
+    errors.labels != null && errors.labels.length > 0 && incident.labels !== undefined;
+
   return (
     <Fragment>
       <>
@@ -300,6 +304,8 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                         defaultMessage: 'Labels',
                       }
                     )}
+                    error={errors.labels as string[]}
+                    isInvalid={areLabelsInvalid}
                   >
                     <EuiComboBox
                       noSuggestions
@@ -327,6 +333,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                       }}
                       isClearable={true}
                       data-test-subj="labelsComboBox"
+                      isInvalid={areLabelsInvalid}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

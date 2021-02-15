@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectReference } from 'kibana/public';
@@ -10,6 +11,7 @@ import {
   Datasource,
   DatasourcePublicAPI,
   FramePublicAPI,
+  InitializationOptions,
   Visualization,
   VisualizationDimensionGroupConfig,
 } from '../../types';
@@ -21,14 +23,20 @@ export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
   references?: SavedObjectReference[],
-  initialContext?: VisualizeFieldContext
+  initialContext?: VisualizeFieldContext,
+  options?: InitializationOptions
 ) {
   const states: Record<string, { isLoading: boolean; state: unknown }> = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {
         return datasource
-          .initialize(datasourceStates[datasourceId].state || undefined, references, initialContext)
+          .initialize(
+            datasourceStates[datasourceId].state || undefined,
+            references,
+            initialContext,
+            options
+          )
           .then((datasourceState) => {
             states[datasourceId] = { isLoading: false, state: datasourceState };
           });
@@ -82,7 +90,9 @@ export async function persistedStateToExpression(
         { isLoading: false, state },
       ])
     ),
-    references
+    references,
+    undefined,
+    { isFullEditor: false }
   );
 
   const datasourceLayers = createDatasourceLayers(datasources, datasourceStates);

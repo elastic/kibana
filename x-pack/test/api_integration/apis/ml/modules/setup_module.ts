@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -771,6 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
             const expectedRspDatafeeds = sortBy(
               testData.expected.jobs.map((job) => {
                 return {
+                  awaitingMlNodeAllocation: false,
                   id: `datafeed-${job.jobId}`,
                   success: true,
                   started: testData.requestBody.startDatafeed,

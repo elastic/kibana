@@ -4,11 +4,20 @@
 
 ## EmbeddableStateTransfer.clearEditorState() method
 
+Clears the [editor state](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.md) from the sessionStorage for the provided app id
+
 <b>Signature:</b>
 
 ```typescript
-clearEditorState(): void;
+clearEditorState(appId: string): void;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  appId | <code>string</code> | The app to fetch incomingEditorState for |
+
 <b>Returns:</b>
 
 `void`
