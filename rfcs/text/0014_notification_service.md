@@ -81,8 +81,7 @@ There is currently no way to unambiguously identify the user. WIP [#82725](https
 - `expire_at?: number` - Unix timestamp in UTC timezone when notification will be removed from the system. 
 - `isPinned?: boolean` - a flag to pin a notification at top of the list of notifications. Used by a source to draw a user's attention to a notification.
 - `source_type: string` - source type. the same as source domain name: `cloud`, `alerting`.
-- `source_subtype: string` - source-specific type (`cloud.insufficient_funds`, `alerting.something`)
-- `group_id?: string` - identifier to associate several notifications in the UI
+- `group_id?: string` - identifier to associate several notifications in the UI. Notifications are rendered in form of an event timeline in UI.
 - `content: NotificationContent` - see below.
 
 *NotificationContent* interface (see [UI component](https://github.com/elastic/eui/issues/4257))
