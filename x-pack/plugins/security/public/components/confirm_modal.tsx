@@ -28,13 +28,11 @@ export interface ConfirmModalProps extends Omit<EuiModalProps, 'onClose' | 'init
   isDisabled?: EuiButtonProps['isDisabled'];
   onCancel(): void;
   onConfirm(): void;
-  ownFocus?: boolean;
 }
 
 /**
  * Component that renders a confirmation modal similar to `EuiConfirmModal`, except that
- * it adds `isLoading` prop, which renders a loading spinner and disables action buttons,
- * and `ownFocus` prop to render overlay mask.
+ * it adds `isLoading` prop, which renders a loading spinner and disables action buttons.
  */
 export const ConfirmModal: FunctionComponent<ConfirmModalProps> = ({
   children,
@@ -44,7 +42,6 @@ export const ConfirmModal: FunctionComponent<ConfirmModalProps> = ({
   isDisabled,
   onCancel,
   onConfirm,
-  ownFocus = true,
   title,
   ...rest
 }) => (
