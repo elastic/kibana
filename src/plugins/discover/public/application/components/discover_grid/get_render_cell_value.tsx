@@ -60,11 +60,14 @@ export const getRenderCellValueFn = (
     const formatted = indexPattern.formatHit(row);
 
     return (
-      <EuiDescriptionList type="inline" compressed>
+      <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
         {Object.keys(formatted).map((key) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription dangerouslySetInnerHTML={{ __html: formatted[key] }} />
+            <EuiDescriptionListDescription
+              dangerouslySetInnerHTML={{ __html: formatted[key] }}
+              className="dscDiscoverGrid__descriptionListDescription"
+            />
           </Fragment>
         ))}
       </EuiDescriptionList>
