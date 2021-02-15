@@ -29,10 +29,8 @@ export function getEsQuerySearchAfter(
     const afterTimeRecIdx = type === 'successors' && documents.length ? documents.length - 1 : 0;
     const afterTimeDoc = documents[afterTimeRecIdx];
     let afterTimeValue = afterTimeDoc.sort[0];
-    if (nanoSeconds) {
-      afterTimeValue = useNewFieldsApi
-        ? afterTimeDoc.fields[timeFieldName][0]
-        : afterTimeDoc._source[timeFieldName];
+    if (nanoSeconds && !useNewFieldsApi) {
+      afterTimeValue = afterTimeDoc._source[timeFieldName];
     }
     return [afterTimeValue, afterTimeDoc.sort[1]];
   }
@@ -40,10 +38,8 @@ export function getEsQuerySearchAfter(
   // ES search_after also works when number is provided as string
   const searchAfter = new Array(2) as EsQuerySearchAfter;
   searchAfter[0] = anchor.sort[0];
-  if (nanoSeconds) {
-    searchAfter[0] = useNewFieldsApi
-      ? anchor.fields[timeFieldName][0]
-      : anchor._source[timeFieldName];
+  if (nanoSeconds && !useNewFieldsApi) {
+    searchAfter[0] = anchor._source[timeFieldName];
   }
   searchAfter[1] = anchor.sort[1];
   return searchAfter;

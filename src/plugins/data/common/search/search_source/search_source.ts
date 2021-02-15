@@ -545,6 +545,54 @@ export class SearchSource {
       }));
   }
 
+  private getDateFields(index: IndexPattern | undefined, bodyFields: SearchFieldValue[]) {
+    const dateFields = [...bodyFields];
+    if (!index) {
+      return dateFields;
+    }
+    const { fields } = index;
+    fields.forEach((fld: IndexPatternField) => {
+      const { esTypes } = fld;
+      if (esTypes?.includes('date_nanos')) {
+        dateFields.push({ field: fld.name, format: 'strict_date_optional_time_nanos' });
+      } else if (esTypes?.includes('date')) {
+        dateFields.push({ field: fld.name, format: 'strict_date_optional_time' });
+      }
+    });
+    return dateFields;
+  }
+
+  private getFieldFromDocValueFieldsOrIndexPattern(
+    docValuesIndex: Record<string, object>,
+    fld: SearchFieldValue,
+    index?: IndexPattern
+  ) {
+    if (typeof fld === 'string') {
+      return fld;
+    }
+    const fieldName = this.getFieldName(fld);
+    const field = {
+      ...docValuesIndex[fieldName],
+      ...fld,
+    };
+    if (!index) {
+      return field;
+    }
+    const { fields } = index;
+    const dateFields = fields.getByType('date');
+    const dateField = dateFields.find((indexPatternField) => indexPatternField.name === fieldName);
+    if (!dateField) {
+      return field;
+    }
+    const { esTypes } = dateField;
+    if (esTypes?.includes('date_nanos')) {
+      field.format = 'strict_date_optional_time_nanos';
+    } else if (esTypes?.includes('date')) {
+      field.format = 'strict_date_optional_time';
+    }
+    return field;
+  }
+
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
@@ -594,9 +642,9 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
-      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
-        this.getFieldName(field)
-      );
+      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) => {
+        return this.getFieldName(field);
+      });
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
       if (!uniqFieldNames.includes('*')) {
@@ -654,6 +702,7 @@ export class SearchSource {
         // if items that are in the docvalueFields are provided, we should
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+        body.fields = this.getDateFields(index, body.fields);
         body.fields = this.getFieldsWithoutSourceFilters(index, body.fields).map(
           (fld: SearchFieldValue) => {
             const fieldName = this.getFieldName(fld);
@@ -662,10 +711,7 @@ export class SearchSource {
               // or merge the user-provided field with the one in docvalues
               return typeof fld === 'string'
                 ? docvaluesIndex[fld]
-                : {
-                    ...docvaluesIndex[fieldName],
-                    ...fld,
-                  };
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvalueFields, fld, index);
             }
             return fld;
           }
