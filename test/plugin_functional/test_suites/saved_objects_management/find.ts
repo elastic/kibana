@@ -46,7 +46,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                   },
                   references: [],
                   updated_at: '2021-02-11T18:51:23.794Z',
-                  version: 'WzIsMl0=',
+                  version: 'WzAsMV0=',
+                  coreMigrationVersion: '8.0.0',
                   namespaces: ['default'],
                   score: 0,
                   meta: {
