@@ -12,6 +12,8 @@ import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
+import { SerializableState } from 'src/plugins/expressions/common';
+import { isSerializedAutoInterval } from '../utils/get_number_histogram_interval';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
@@ -228,6 +230,27 @@ describe('Histogram Agg', () => {
         });
 
         expect(params.interval).toBeNaN();
+      });
+
+      test('will serialize the auto interval along with the actually chosen interval and deserialize correctly', () => {
+        const aggConfigs = getAggConfigs({
+          interval: 'auto',
+          field: {
+            name: 'field',
+          },
+        });
+        (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
+        const serializedAgg = aggConfigs.aggs[0].serialize();
+        const serializedIntervalParam = (serializedAgg.params as SerializableState).interval;
+        expect(isSerializedAutoInterval(serializedIntervalParam as string | number)).toBe(true);
+        const freshHistogramAggConfig = getAggConfigs({
+          interval: 100,
+          field: {
+            name: 'field',
+          },
+        }).aggs[0];
+        freshHistogramAggConfig.setParams(serializedAgg.params);
+        expect(freshHistogramAggConfig.getParam('interval')).toEqual('auto');
       });
 
       describe('interval scaling', () => {
