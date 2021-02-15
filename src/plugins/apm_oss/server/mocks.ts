@@ -21,6 +21,7 @@ const defaultConfig = {
   sourcemapIndices: apmStar,
   spanIndices: apmStar,
   transactionIndices: apmStar,
+  fleetMode: false,
 };
 
 export const apmOSSPluginSetupMock = {

@@ -18,7 +18,7 @@ import { isTab } from '../../../common/components/accessibility/helpers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineType, TimelineId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
@@ -35,7 +35,7 @@ const TimelineTemplateBadge = styled.div`
 `;
 
 export interface Props {
-  timelineId: string;
+  timelineId: TimelineId;
 }
 
 const TimelineSavingProgressComponent: React.FC<Props> = ({ timelineId }) => {
@@ -69,9 +69,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
           id: timelineId,
           columns: defaultHeaders,
           indexNames: selectedPatterns,
-          expandedEvent: {
-            [TimelineTabs.query]: activeTimeline.getExpandedEvent(),
-          },
+          expandedDetail: activeTimeline.getExpandedDetail(),
           show: false,
         })
       );
