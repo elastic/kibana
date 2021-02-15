@@ -30,6 +30,8 @@ export function initPlugin(router: IRouter, path: string) {
           severity: schema.string({ defaultValue: '1' }),
           urgency: schema.string({ defaultValue: '1' }),
           impact: schema.string({ defaultValue: '1' }),
+          category: schema.maybe(schema.string()),
+          subcategory: schema.maybe(schema.string()),
         }),
       },
     },
